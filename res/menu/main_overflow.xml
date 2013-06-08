@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <item
+    android:id="@+id/refresh"
+    android:title="refresh"
+    android:icon="@drawable/ic_action_refresh"
+    android:showAsAction="always"
+	/>
+	
+	<item
+    android:id="@+id/manage"
+    android:title="Manage"
+    android:showAsAction="never"
+	/>
+	
+	<item
+    android:id="@+id/settings"
+    android:title="Settings"
+    android:showAsAction="never"
+	/>
+    
+</menu>
