@@ -21,6 +21,17 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import android.os.Environment;
+import android.content.Context;
+import java.io.File;
+import java.net.URL;
+import android.os.AsyncTask;
+import java.net.URLConnection;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.BufferedInputStream;
+import java.io.FileOutputStream;
+
 public class main_view extends FragmentActivity
 {
     private DrawerLayout mDrawerLayout;
@@ -51,6 +62,9 @@ public class main_view extends FragmentActivity
         };
         
         mDrawerLayout.setDrawerListener(mDrawerToggle);
+        
+        //getActionBar().setTitle(Integer.toString(result));
+        
     }
     
     public class SectionsPagerAdapter extends FragmentPagerAdapter
@@ -96,7 +110,7 @@ public class main_view extends FragmentActivity
 
     }
 
-    public static class DummySectionFragment extends Fragment
+    public class DummySectionFragment extends Fragment
     {
         public static final String ARG_SECTION_NUMBER = "section_number";
 
@@ -108,7 +122,8 @@ public class main_view extends FragmentActivity
                 Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main_dummy, container, false);
             TextView dummyTextView = (TextView) rootView.findViewById(R.id.section_label);
-            dummyTextView.setText(Integer.toString(getArguments().getInt(ARG_SECTION_NUMBER)));
+            DownloadFile downloadFile = new DownloadFile();
+			downloadFile.execute("http://textfiles.com/internet/archie.man", "poo.txt");
             return rootView;
         }
     }
@@ -127,4 +142,40 @@ public class main_view extends FragmentActivity
 		getActionBar().setTitle("hi");
 		return true;
 	}
+	
+	private class DownloadFile extends AsyncTask<String, Integer, String>
+	{
+		@Override
+		protected String doInBackground(String... sUrl) {
+			try {
+				URL url = new URL(sUrl[0]);
+				URLConnection connection = url.openConnection();
+				connection.connect();
+
+				InputStream input = new BufferedInputStream(url.openStream());
+				OutputStream output = new FileOutputStream(get_filepath(sUrl[1]));
+
+				byte data[] = new byte[1024];
+				int count;
+				while ((count = input.read(data)) != -1)
+					output.write(data, 0, count);
+
+				output.flush();
+				output.close();
+				input.close();
+			} 
+			catch (Exception e) {
+			}
+			return null;
+		}
+	}
+	
+	public String get_filepath(String filename)
+	{
+		return this.getExternalFilesDir(null).getAbsolutePath() + "/" + filename;
+	}
+	
+	private void add_new_feed(String feed_url, String feed_group){
+	}
 }
+
