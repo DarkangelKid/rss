@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.ArrayAdapter;
 
 import android.os.Environment;
 import android.content.Context;
@@ -31,21 +32,28 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
 
 public class main_view extends FragmentActivity
 {
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private View.OnClickListener refreshListener;
+    private String[] mPlanetTitles;
+    private ListView mDrawerList;
     SectionsPagerAdapter page_adapter;
     ViewPager view_pager;
-    
     
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.pager);
+        
+        mPlanetTitles = getResources().getStringArray(R.array.planets_array);
+        mDrawerList = (ListView) findViewById(R.id.left_drawer);
+        mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, mPlanetTitles));
         
         page_adapter = new SectionsPagerAdapter(getSupportFragmentManager());
         view_pager = (ViewPager) findViewById(R.id.pager);
@@ -63,7 +71,7 @@ public class main_view extends FragmentActivity
         
         mDrawerLayout.setDrawerListener(mDrawerToggle);
         
-        //getActionBar().setTitle(Integer.toString(result));
+        //add_new_feed("Poop inc", "http://poopymagee.com/blah.rss", "poop group");
         
     }
     
@@ -122,13 +130,11 @@ public class main_view extends FragmentActivity
                 Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main_dummy, container, false);
             TextView dummyTextView = (TextView) rootView.findViewById(R.id.section_label);
-            DownloadFile downloadFile = new DownloadFile();
-			downloadFile.execute("http://textfiles.com/internet/archie.man", "poo.txt");
+            //DownloadFile downloadFile = new DownloadFile();
+			//downloadFile.execute("http://textfiles.com/internet/archie.man", "poo.txt");
             return rootView;
         }
     }
-
-
     
     public boolean onCreateOptionsMenu(Menu menu)
     {
@@ -146,25 +152,31 @@ public class main_view extends FragmentActivity
 	private class DownloadFile extends AsyncTask<String, Integer, String>
 	{
 		@Override
-		protected String doInBackground(String... sUrl) {
-			try {
-				URL url = new URL(sUrl[0]);
-				URLConnection connection = url.openConnection();
-				connection.connect();
+		protected String doInBackground(String... sUrl)
+		{
+			if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) 
+			{
+				try 
+				{
+					URL url = new URL(sUrl[0]);
+					URLConnection connection = url.openConnection();
+					connection.connect();
 
-				InputStream input = new BufferedInputStream(url.openStream());
-				OutputStream output = new FileOutputStream(get_filepath(sUrl[1]));
+					InputStream input = new BufferedInputStream(url.openStream());
+					OutputStream output = new FileOutputStream(get_filepath(sUrl[1]));
 
-				byte data[] = new byte[1024];
-				int count;
-				while ((count = input.read(data)) != -1)
-					output.write(data, 0, count);
+					byte data[] = new byte[1024];
+					int count;
+					while ((count = input.read(data)) != -1)
+						output.write(data, 0, count);
 
-				output.flush();
-				output.close();
-				input.close();
-			} 
-			catch (Exception e) {
+					output.flush();
+					output.close();
+					input.close();
+				} 
+				catch (Exception e) 
+				{
+				}
 			}
 			return null;
 		}
@@ -175,7 +187,20 @@ public class main_view extends FragmentActivity
 		return this.getExternalFilesDir(null).getAbsolutePath() + "/" + filename;
 	}
 	
-	private void add_new_feed(String feed_url, String feed_group){
+	private void add_new_feed(String feed_name, String feed_url, String feed_group){
+		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) 
+		{
+			try  
+			{
+				FileWriter fs = new FileWriter(get_filepath(feed_group + ".txt"), true);
+				BufferedWriter out = new BufferedWriter(fs);
+				out.write("\n" + feed_name + "\n" + feed_url);
+				out.close();
+			}
+			catch (Exception e)
+			{
+			}
+		}
 	}
 }
 
