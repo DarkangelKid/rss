@@ -3,12 +3,17 @@
 			  android:layout_width="wrap_content"
 			  android:layout_height="wrap_content" >
 
+	<ImageView
+			android:id="@+id/image"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"/>
+
 	<TextView
 			android:id="@+id/label"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:text="@+id/label"
-			android:textSize="40px" >
-	</TextView>
-
+			android:textSize="40px" />
+	
+	
 </LinearLayout> 

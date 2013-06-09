@@ -1,5 +1,8 @@
 package yay.poloure.simplerss;
 
+import yay.poloure.simplerss.card_adapter;
+import android.content.Context;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -165,10 +168,14 @@ public class main_view extends FragmentActivity
 					"Linthneux", "OS/2sith"};
 			}
 
-			setListAdapter(new ArrayAdapter<String>(getActivity(), R.layout.card_layout, R.id.label, values));
+			setListAdapter(new card_adapter(get_context(), values));
 		}
 	}
 
+	public Context get_context()
+	{
+			return this;
+	}	
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
 		MenuInflater menu_inflater = getMenuInflater();
