@@ -38,7 +38,10 @@ import java.io.OutputStream;
 import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.FileReader;
 import java.io.BufferedWriter;
+import java.io.BufferedReader;
+
 
 public class main_view extends FragmentActivity
 {
@@ -83,9 +86,6 @@ public class main_view extends FragmentActivity
 		mDrawerLayout.setDrawerListener(drawer_toggle);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		getActionBar().setHomeButtonEnabled(true);
-
-		//add_new_feed("Poop inc", "http://poopymagee.com/blah.rss", "poop group");
-
 	}
 
 	@Override
@@ -229,19 +229,71 @@ public class main_view extends FragmentActivity
 		return this.getExternalFilesDir(null).getAbsolutePath() + "/" + filename;
 	}
 
-	private void add_new_feed(String feed_name, String feed_url, String feed_group){
+	private void append_string_to_file(String file_name, String string)
+	{
 		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
 		{
 			try
 			{
-				FileWriter fs = new FileWriter(get_filepath(feed_group + ".txt"), true);
-				BufferedWriter out = new BufferedWriter(fs);
-				out.write("\n" + feed_name + "\n" + feed_url);
+				BufferedWriter out = new BufferedWriter(new FileWriter(get_filepath(file_name), true));
+				out.write(string);
 				out.close();
 			}
 			catch (Exception e)
 			{
 			}
+		}
+	}
+
+	private void remove_string_from_file(String file_name, String string)
+	{
+		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
+		{
+			try
+			{
+				String line;
+
+				File in = new File(get_filepath(file_name));
+				File out = new File(get_filepath(file_name) + ".temp");
+
+				BufferedReader reader = new BufferedReader(new FileReader(in));
+				BufferedWriter writer = new BufferedWriter(new FileWriter(out));
+
+				while((line = reader.readLine()) != null)
+				{
+					if(!(line.trim().equals(string)))
+						writer.write(line + "\n");
+				}
+
+				out.renameTo(in);
+				reader.close();
+				writer.close();
+			}
+			catch (Exception e)
+			{
+			}
+		}
+	}
+
+	private void add_feed(String feed_name, String feed_url, String feed_group){
+		append_string_to_file(feed_group + ".txt", "\n" + feed_name + "; " + feed_url + "; " + feed_group);
+		append_string_to_file("all_feeds.txt", "\n" + feed_name + "; " + feed_url + "; " + feed_group);
+	}
+	
+	private void delete_feed(String feed_name, String feed_url, String feed_group){
+		remove_string_from_file(feed_group + ".txt", "\n" + feed_name + "; " + feed_url + "; " + feed_group);
+		remove_string_from_file("all_feeds.txt", "\n" + feed_name + "; " + feed_url + "; " + feed_group);
+	}
+
+	private void add__group(String group_name){
+		append_string_to_file("group_list.txt", "\n" + group_name);
+	}
+
+	private void delete_group(String group_name){
+		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())){
+			remove_string_from_file("group_list.txt", group_name);
+			File file = new File(get_filepath(group_name + ".txt"));
+			file.delete();
 		}
 	}
 }
