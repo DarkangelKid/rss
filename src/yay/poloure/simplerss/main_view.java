@@ -1,14 +1,14 @@
 package yay.poloure.simplerss;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.*;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.ArrayAdapter;
@@ -54,7 +55,7 @@ public class main_view extends FragmentActivity
         mPlanetTitles = getResources().getStringArray(R.array.planets_array);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
         mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, mPlanetTitles));
-        
+
         page_adapter = new SectionsPagerAdapter(getSupportFragmentManager());
         view_pager = (ViewPager) findViewById(R.id.pager);
         view_pager.setAdapter(page_adapter);
@@ -74,7 +75,7 @@ public class main_view extends FragmentActivity
         //add_new_feed("Poop inc", "http://poopymagee.com/blah.rss", "poop group");
         
     }
-    
+
     public class SectionsPagerAdapter extends FragmentPagerAdapter
     {
 
@@ -118,21 +119,24 @@ public class main_view extends FragmentActivity
 
     }
 
-    public class DummySectionFragment extends Fragment
+
+    public class DummySectionFragment extends ListFragment
     {
         public static final String ARG_SECTION_NUMBER = "section_number";
 
-        public DummySectionFragment() {
+        public DummySectionFragment()
+        {
         }
 
         @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main_dummy, container, false);
-            TextView dummyTextView = (TextView) rootView.findViewById(R.id.section_label);
-            //DownloadFile downloadFile = new DownloadFile();
-			//downloadFile.execute("http://textfiles.com/internet/archie.man", "poo.txt");
-            return rootView;
+        public void onActivityCreated(Bundle savedInstanceState)
+        {
+            super.onActivityCreated(savedInstanceState);
+            String[] values = new String[] { "Android", "iPhone", "WindowsMobile",
+                    "Blackberry", "WebOS", "Ubuntu", "Windows7", "Max OS X",
+                    "Linux", "OS/2" };
+
+            setListAdapter(new ArrayAdapter<String>(getActivity(), R.layout.card_layout, R.id.label, values));
         }
     }
     

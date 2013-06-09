@@ -8,9 +8,9 @@
     android:paddingBottom="16dp"
     tools:context=".main_view$DummySectionFragment">
 
-    <TextView
-        android:id="@+id/section_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+	<ListView
+			android:id="@+id/card_list"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content" />
 
 </RelativeLayout>
