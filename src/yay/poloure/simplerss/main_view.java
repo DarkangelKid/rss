@@ -22,6 +22,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.ArrayAdapter;
+import android.content.res.Configuration;
 
 import android.os.Environment;
 import android.content.Context;
@@ -38,129 +39,159 @@ import java.io.BufferedWriter;
 
 public class main_view extends FragmentActivity
 {
-    private DrawerLayout mDrawerLayout;
-    private ActionBarDrawerToggle mDrawerToggle;
-    private View.OnClickListener refreshListener;
-    private String[] mPlanetTitles;
-    private ListView mDrawerList;
-    SectionsPagerAdapter page_adapter;
-    ViewPager view_pager;
-    
+	private DrawerLayout mDrawerLayout;
+	/// Actionbar Toggle to open navigation drawer.
+	private ActionBarDrawerToggle drawer_toggle;
+	private View.OnClickListener refreshListener;
+	private String[] mPlanetTitles;
+	private ListView mDrawerList;
+	SectionsPagerAdapter page_adapter;
+	ViewPager view_pager;
+
+	@Override
+	public void onCreate(Bundle savedInstanceState)
+	{
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.pager);
+
+		mPlanetTitles = getResources().getStringArray(R.array.planets_array);
+		mDrawerList = (ListView) findViewById(R.id.left_drawer);
+		mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, mPlanetTitles));
+
+		page_adapter = new SectionsPagerAdapter(getSupportFragmentManager());
+		view_pager = (ViewPager) findViewById(R.id.pager);
+		view_pager.setAdapter(page_adapter);
+
+		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+		drawer_toggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
+		{
+			/** Called when a drawer has settled in a completely closed state. */
+			public void onDrawerClosed(View view) {
+				getActionBar().setTitle("Simple RSS");
+			}
+
+			/** Called when a drawer has settled in a completely open state. */
+			public void onDrawerOpened(View drawerView) {
+				getActionBar().setTitle("Navigation");
+			}
+		};
+
+		mDrawerLayout.setDrawerListener(drawer_toggle);
+		getActionBar().setDisplayHomeAsUpEnabled(true);
+		getActionBar().setHomeButtonEnabled(true);
+
+		//add_new_feed("Poop inc", "http://poopymagee.com/blah.rss", "poop group");
+
+	}
+
+	@Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        drawer_toggle.syncState();
+    }
+
     @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.pager);
-        
-        mPlanetTitles = getResources().getStringArray(R.array.planets_array);
-        mDrawerList = (ListView) findViewById(R.id.left_drawer);
-        mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, mPlanetTitles));
-
-        page_adapter = new SectionsPagerAdapter(getSupportFragmentManager());
-        view_pager = (ViewPager) findViewById(R.id.pager);
-        view_pager.setAdapter(page_adapter);
-       
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
-
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
-
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
-        {
-        };
-        
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
-        
-        //add_new_feed("Poop inc", "http://poopymagee.com/blah.rss", "poop group");
-        
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        drawer_toggle.onConfigurationChanged(newConfig);
     }
 
-    public class SectionsPagerAdapter extends FragmentPagerAdapter
-    {
+	public class SectionsPagerAdapter extends FragmentPagerAdapter
+	{
 
-        public SectionsPagerAdapter(FragmentManager fm)
-        {
-            super(fm);
-        }
+		public SectionsPagerAdapter(FragmentManager fm)
+		{
+			super(fm);
+		}
 
-        @Override
-        public Fragment getItem(int position)
-        {
-            Fragment fragment = new DummySectionFragment();
-            Bundle args = new Bundle();
-            args.putInt(DummySectionFragment.ARG_SECTION_NUMBER, position + 1);
-            fragment.setArguments(args);
-            return fragment;
-        }
-        
-        @Override
-        public int getCount()
-        {
-            // Show 3 total pages.
-            return 3;
-        }
+		@Override
+		public Fragment getItem(int position)
+		{
+			Fragment fragment = new DummySectionFragment();
+			Bundle args = new Bundle();
+			args.putInt(DummySectionFragment.ARG_SECTION_NUMBER, position + 1);
+			fragment.setArguments(args);
+			return fragment;
+		}
 
-        @Override
-        public CharSequence getPageTitle(int position)
-        {
-            Locale l = Locale.getDefault();
-            switch (position)
-            {
-                case 0:
-                    return "PAGE 1";
-                case 1:
-                    return "PAGE 2";
-                case 2:
-                    return "PAGE 3";
-            }
-            return null;
-        }
+		@Override
+		public int getCount()
+		{
+			// Show 3 total pages.
+			return 3;
+		}
 
-    }
+		@Override
+		public CharSequence getPageTitle(int position)
+		{
+			Locale l = Locale.getDefault();
+			switch (position)
+			{
+				case 0:
+					return "PAGE 1";
+				case 1:
+					return "PAGE 2";
+				case 2:
+					return "PAGE 3";
+			}
+			return null;
+		}
+
+	}
 
 
-    public class DummySectionFragment extends ListFragment
-    {
-        public static final String ARG_SECTION_NUMBER = "section_number";
+	public class DummySectionFragment extends ListFragment
+	{
+		public static final String ARG_SECTION_NUMBER = "section_number";
 
-        public DummySectionFragment()
-        {
-        }
+		public DummySectionFragment()
+		{
+		}
 
-        @Override
-        public void onActivityCreated(Bundle savedInstanceState)
-        {
-            super.onActivityCreated(savedInstanceState);
-            String[] values = new String[] { "Android", "iPhone", "WindowsMobile",
-                    "Blackberry", "WebOS", "Ubuntu", "Windows7", "Max OS X",
-                    "Linux", "OS/2" };
+		@Override
+		public void onActivityCreated(Bundle savedInstanceState)
+		{
+			super.onActivityCreated(savedInstanceState);
+			String[] values;
+			if(getArguments().getInt(ARG_SECTION_NUMBER) == 1)
+			{
+			values = new String[] { "Android", "iPhone", "WindowsMobile",
+					"Blackberry", "WebOS", "Ubuntu", "Windows7", "Max OS X",
+					"Linux", "OS/2" };
+			}
+			else{
+			values = new String[] {	"enen", "Blneackberry", "WenebOS", "Ubuhthntu", "Windnsthows7", "Max SHIT X",
+					"Linthneux", "OS/2sith"};
+			}
 
-            setListAdapter(new ArrayAdapter<String>(getActivity(), R.layout.card_layout, R.id.label, values));
-        }
-    }
-    
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
-        MenuInflater menu_inflater = getMenuInflater();
-        menu_inflater.inflate(R.menu.main_overflow, menu);
-        return true;
-    }
-    
-    public boolean onOptionsItemSelected (MenuItem item)
-    {
-		getActionBar().setTitle("hi");
+			setListAdapter(new ArrayAdapter<String>(getActivity(), R.layout.card_layout, R.id.label, values));
+		}
+	}
+
+	public boolean onCreateOptionsMenu(Menu menu)
+	{
+		MenuInflater menu_inflater = getMenuInflater();
+		menu_inflater.inflate(R.menu.main_overflow, menu);
 		return true;
 	}
-	
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (drawer_toggle.onOptionsItemSelected(item)) {
+          return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+    
 	private class DownloadFile extends AsyncTask<String, Integer, String>
 	{
 		@Override
 		protected String doInBackground(String... sUrl)
 		{
-			if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) 
+			if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
 			{
-				try 
+				try
 				{
 					URL url = new URL(sUrl[0]);
 					URLConnection connection = url.openConnection();
@@ -177,24 +208,24 @@ public class main_view extends FragmentActivity
 					output.flush();
 					output.close();
 					input.close();
-				} 
-				catch (Exception e) 
+				}
+				catch (Exception e)
 				{
 				}
 			}
 			return null;
 		}
 	}
-	
+
 	public String get_filepath(String filename)
 	{
 		return this.getExternalFilesDir(null).getAbsolutePath() + "/" + filename;
 	}
-	
+
 	private void add_new_feed(String feed_name, String feed_url, String feed_group){
-		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) 
+		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
 		{
-			try  
+			try
 			{
 				FileWriter fs = new FileWriter(get_filepath(feed_group + ".txt"), true);
 				BufferedWriter out = new BufferedWriter(fs);
