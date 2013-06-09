@@ -283,7 +283,7 @@ public class main_view extends FragmentActivity
 	}
 
 	private void delete_group(String group_name){
-		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
+		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())){
 			remove_string_from_file("group_list.txt", group_name);
 			File file = new File(get_filepath(group_name + ".txt"));
 			file.delete();
