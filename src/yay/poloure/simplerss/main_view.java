@@ -83,9 +83,6 @@ public class main_view extends FragmentActivity
 		mDrawerLayout.setDrawerListener(drawer_toggle);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		getActionBar().setHomeButtonEnabled(true);
-
-		//add_new_feed("Poop inc", "http://poopymagee.com/blah.rss", "poop group");
-
 	}
 
 	@Override
@@ -271,13 +268,26 @@ public class main_view extends FragmentActivity
 		}
 	}
 
-	private void add_new_feed(String feed_name, String feed_url, String feed_group){
+	private void add_feed(String feed_name, String feed_url, String feed_group){
 		append_string_to_file(feed_group + ".txt", "\n" + feed_name + "; " + feed_url + "; " + feed_group);
 		append_string_to_file("all_feeds.txt", "\n" + feed_name + "; " + feed_url + "; " + feed_group);
 	}
+	
+	private void delete_feed(String feed_name, String feed_url, String feed_group){
+		remove_string_from_file(feed_group + ".txt", "\n" + feed_name + "; " + feed_url + "; " + feed_group);
+		remove_string_from_file("all_feeds.txt", "\n" + feed_name + "; " + feed_url + "; " + feed_group);
+	}
 
-	private void add_new_group(String group_name){
+	private void add__group(String group_name){
 		append_string_to_file("group_list.txt", "\n" + group_name);
+	}
+
+	private void delete_group(String group_name){
+		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
+			remove_string_from_file("group_list.txt", group_name);
+			File file = new File(get_filepath(group_name + ".txt"));
+			file.delete();
+		}
 	}
 }
 
