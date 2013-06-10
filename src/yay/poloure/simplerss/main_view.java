@@ -3,32 +3,22 @@ package yay.poloure.simplerss;
 import yay.poloure.simplerss.card_adapter;
 import android.content.Context;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 
-import android.app.Activity;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.*;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
-import android.view.LayoutInflater;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.ArrayAdapter;
 import android.content.res.Configuration;
 
 import android.os.Environment;
-import android.content.Context;
 import java.io.File;
 import java.net.URL;
 import android.os.AsyncTask;
