@@ -17,7 +17,8 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.content.res.Configuration;
-
+import android.view.LayoutInflater;
+import android.view.ViewGroup;
 import android.os.Environment;
 import java.io.File;
 import java.net.URL;
@@ -159,6 +160,13 @@ public class main_view extends FragmentActivity
 			}
 
 			setListAdapter(new card_adapter(get_context(), values));
+		}
+
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState)
+		{
+			View view = inflater.inflate(R.layout.fragment_main_dummy, container, false);
+			return view;
 		}
 	}
 

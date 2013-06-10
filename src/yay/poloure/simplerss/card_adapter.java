@@ -20,13 +20,12 @@ public class card_adapter extends ArrayAdapter<String> {
 
   @Override
   public View getView(int position, View convertView, ViewGroup parent) {
-    LayoutInflater inflater = (LayoutInflater) context
-        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     View card_view = inflater.inflate(R.layout.card_layout, parent, false);
     TextView textView = (TextView) card_view.findViewById(R.id.label);
     ImageView imageView = (ImageView) card_view.findViewById(R.id.image);
     textView.setText(values[position]);
-    // Change the icon for Windows and iPhone
+    
     String s = values[position];
     if (s == "Android") {
       imageView.setImageResource(R.drawable.no);
