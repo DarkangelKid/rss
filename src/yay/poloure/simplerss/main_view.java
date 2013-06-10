@@ -211,13 +211,13 @@ public class main_view extends FragmentActivity
 		return super.onOptionsItemSelected(item);
 	}
 
-	/*private PopupWindow add_window;
+	private PopupWindow add_window;
 
 	private void initiate_add_window()
 	{
 		try
 		{
-			LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			LayoutInflater inflater = (LayoutInflater) main_view.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			View layout = inflater.inflate(R.layout.add_popup,(ViewGroup) findViewById(R.id.popup_element));
 			add_window = new PopupWindow(layout, 350, 350, true);
 			add_window.showAtLocation(layout, Gravity.CENTER, 0, 0);
@@ -237,7 +237,7 @@ public class main_view extends FragmentActivity
 		{
 			add_window.dismiss();
 		}
-	};*/
+	};
 
 	private void download_file(String url, String file_name)
 	{
