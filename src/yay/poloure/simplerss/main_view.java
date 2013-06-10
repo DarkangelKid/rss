@@ -78,9 +78,9 @@ public class main_view extends FragmentActivity
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		getActionBar().setHomeButtonEnabled(true);
 
-		download_file("http://www.textfiles.com/hacking/CABLE/cablefrq.txt", "archie.man");
-		String[] archie_lines = read_file_to_array("archie.man");
-		getActionBar().setTitle(archie_lines[30]);
+		//download_file("http://www.textfiles.com/hacking/CABLE/cablefrq.txt", "archie.man");
+		//String[] archie_lines = read_file_to_array("archie.man");
+		//getActionBar().setTitle(archie_lines[30]);
 	}
 
 	@Override

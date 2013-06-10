@@ -40,6 +40,6 @@
 			android:src="@drawable/bottom_edge"
 			android:layout_alignParentBottom="true"
 			android:layout_toLeftOf="@+id/bottom_right_shadow"
-			android:scaleType="FitXY"/>
+			android:scaleType="fitXY"/>
 			
 </RelativeLayout> 
