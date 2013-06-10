@@ -13,12 +13,19 @@ import android.support.v4.widget.DrawerLayout;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuInflater;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.content.res.Configuration;
-import android.view.LayoutInflater;
-import android.view.ViewGroup;
+
+import android.widget.PopupWindow;
+
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.view.Gravity;
+
 import android.os.Environment;
 import java.io.File;
 import java.net.URL;
@@ -42,6 +49,9 @@ public class main_view extends FragmentActivity
 	private View.OnClickListener refreshListener;
 	private String[] mPlanetTitles;
 	private ListView mDrawerList;
+
+	//private Button btnClosePopup;
+	
 	SectionsPagerAdapter page_adapter;
 	ViewPager view_pager;
 
@@ -178,6 +188,7 @@ public class main_view extends FragmentActivity
 	{
 			return this;
 	}	
+
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
 		MenuInflater menu_inflater = getMenuInflater();
@@ -190,8 +201,38 @@ public class main_view extends FragmentActivity
 		if (drawer_toggle.onOptionsItemSelected(item)) {
 			return true;
 		}
+
+		//initiate_add_window();
 		return super.onOptionsItemSelected(item);
 	}
+
+	/*private PopupWindow add_window;
+
+	private void initiate_add_window()
+	{
+		try
+		{
+			LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			View layout = inflater.inflate(R.layout.add_popup,(ViewGroup) findViewById(R.id.popup_element));
+			add_window = new PopupWindow(layout, 350, 350, true);
+			add_window.showAtLocation(layout, Gravity.CENTER, 0, 0);
+
+			btnClosePopup = (Button) layout.findViewById(R.id.btn_close_popup);
+			btnClosePopup.setOnClickListener(cancel_button_click_listener);
+
+		}
+		catch (Exception e)
+		{
+		}
+	}
+
+	private OnClickListener cancel_button_click_listener = new OnClickListener()
+	{
+		public void onClick(View v)
+		{
+			add_window.dismiss();
+		}
+	};*/
 
 	private void download_file(String url, String file_name)
 	{
@@ -283,21 +324,25 @@ public class main_view extends FragmentActivity
 		}
 	}
 
-	private void add_feed(String feed_name, String feed_url, String feed_group){
+	private void add_feed(String feed_name, String feed_url, String feed_group)
+	{
 		append_string_to_file(feed_group + ".txt", "\n" + feed_name + "; " + feed_url + "; " + feed_group);
 		append_string_to_file("all_feeds.txt", "\n" + feed_name + "; " + feed_url + "; " + feed_group);
 	}
-	
-	private void delete_feed(String feed_name, String feed_url, String feed_group){
+
+	private void delete_feed(String feed_name, String feed_url, String feed_group)
+	{
 		remove_string_from_file(feed_group + ".txt", "\n" + feed_name + "; " + feed_url + "; " + feed_group);
 		remove_string_from_file("all_feeds.txt", "\n" + feed_name + "; " + feed_url + "; " + feed_group);
 	}
 
-	private void add__group(String group_name){
+	private void add__group(String group_name)
+	{
 		append_string_to_file("group_list.txt", "\n" + group_name);
 	}
 
-	private void delete_group(String group_name){
+	private void delete_group(String group_name)
+	{
 		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())){
 			remove_string_from_file("group_list.txt", group_name);
 			File file = new File(get_filepath(group_name + ".txt"));
@@ -305,7 +350,8 @@ public class main_view extends FragmentActivity
 		}
 	}
 
-	private String[] read_file_to_array(String file_name){
+	private String[] read_file_to_array(String file_name)
+	{
 		String[] line_values;
 		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
 		{
