@@ -13,7 +13,7 @@
 			android:background="#ffffff"
 			android:layout_marginRight="16dp"
 			android:layout_marginLeft="16dp"
-			android:divider="#e5e5e5"
-			android:dividerHeight="16dp"
+			android:divider="@null"
+			android:dividerHeight="0dp"
 			android:drawSelectorOnTop="false"/>
 </LinearLayout>

@@ -9,7 +9,9 @@ import android.os.Bundle;
 import android.support.v4.app.*;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v4.view.PagerTabStrip;
 import android.support.v4.widget.DrawerLayout;
+import android.graphics.Color;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuInflater;
@@ -68,6 +70,9 @@ public class main_view extends FragmentActivity
 		page_adapter = new SectionsPagerAdapter(getSupportFragmentManager());
 		view_pager = (ViewPager) findViewById(R.id.pager);
 		view_pager.setAdapter(page_adapter);
+		PagerTabStrip pagerTabStrip = (PagerTabStrip) findViewById(R.id.pager_title_strip);
+		pagerTabStrip.setDrawFullUnderline(true);
+		pagerTabStrip.setTabIndicatorColor(Color.argb(0, 51, 181, 229));
 
 		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
@@ -137,11 +142,11 @@ public class main_view extends FragmentActivity
 			switch (position)
 			{
 				case 0:
-					return "PAGE 1";
+					return "ALL";
 				case 1:
-					return "PAGE 2";
+					return "TECHNOLOGY";
 				case 2:
-					return "PAGE 3";
+					return "ANDROID";
 			}
 			return null;
 		}
