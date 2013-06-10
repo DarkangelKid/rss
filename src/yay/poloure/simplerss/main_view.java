@@ -387,5 +387,32 @@ public class main_view extends FragmentActivity
 		
 		return line_values;
 	}
+
+	private void parse_local_xml(String file_name)
+	{
+		SAXParserFactory spf = SAXParserFactory.newInstance();
+		try
+		{
+			SAXParser sp = spf.newSAXParser();
+			sp.parse(get_filepath(file_name), this);
+		}
+		catch (exception e)
+		{
+		}
+	}
+
+	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+		tempVal = "";
+		append_string_to_file("startElement.txt", "START: " + uri + "; " + localName + "; " + qName + "\n")
+	}
+
+
+	public void characters(char[] ch, int start, int length) throws SAXException {
+		tempVal = new String(ch,start,length);
+	}
+
+	public void endElement(String uri, String localName, String qName) throws SAXException {
+		append_string_to_file("startElement.txt", "END: " + uri + "; " + localName + "; " + qName + "\n")
+	}
 }
 
