@@ -77,6 +77,10 @@ public class main_view extends FragmentActivity
 		mDrawerLayout.setDrawerListener(drawer_toggle);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		getActionBar().setHomeButtonEnabled(true);
+
+		download_file("http://www.textfiles.com/hacking/CABLE/cablefrq.txt", "archie.man");
+		String[] archie_lines = read_file_to_array("archie.man");
+		getActionBar().setTitle(archie_lines[30]);
 	}
 
 	@Override
@@ -181,14 +185,20 @@ public class main_view extends FragmentActivity
 		return true;
 	}
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (drawer_toggle.onOptionsItemSelected(item)) {
-          return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-    
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (drawer_toggle.onOptionsItemSelected(item)) {
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
+	private void download_file(String url, String file_name)
+	{
+		DownloadFile downloadFile = new DownloadFile();
+		downloadFile.execute(url, file_name);
+	}
+
 	private class DownloadFile extends AsyncTask<String, Integer, String>
 	{
 		@Override
@@ -293,6 +303,43 @@ public class main_view extends FragmentActivity
 			File file = new File(get_filepath(group_name + ".txt"));
 			file.delete();
 		}
+	}
+
+	private String[] read_file_to_array(String file_name){
+		String[] line_values;
+		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
+		{
+			try
+			{
+				String line;
+				int number_of_lines = 0, i = 0;
+				File in = new File(get_filepath(file_name));
+
+				BufferedReader reader = new BufferedReader(new FileReader(in));
+
+				while((line = reader.readLine()) != null)
+					number_of_lines++;
+
+				reader.close();
+				reader = new BufferedReader(new FileReader(in));
+				
+				line_values = new String[number_of_lines];
+				
+				while((line = reader.readLine()) != null)
+				{
+					line_values[i] = line;
+					i++;
+				}
+			}
+			catch (Exception e)
+			{
+				line_values = new String[0];
+			}
+		}
+		else
+			line_values = new String[0];
+		
+		return line_values;
 	}
 }
 
