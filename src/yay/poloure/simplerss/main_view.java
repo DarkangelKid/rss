@@ -101,6 +101,8 @@ public class main_view extends FragmentActivity
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		getActionBar().setHomeButtonEnabled(true);
 
+		download_file("http://www.gamingonlinux.com/article_rss.php", "poop.xml");
+
 		//download_file("http://www.textfiles.com/hacking/CABLE/cablefrq.txt", "archie.man");
 		//String[] archie_lines = read_file_to_array("archie.man");
 		//getActionBar().setTitle(archie_lines[30]);
@@ -221,6 +223,12 @@ public class main_view extends FragmentActivity
 			show_add_dialog();
 			return true;
 		}
+		else if(item.getTitle().equals("refresh"))
+		{
+			parsered papa = new parsered(get_filepath("poop.xml"));
+			return true;
+		}
+
 		return super.onOptionsItemSelected(item);
 	}
 
