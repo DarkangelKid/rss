@@ -1,7 +1,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
-	android:orientation="vertical">
+	android:orientation="vertical"
+	android:windowSoftInputMode="stateVisible">
 
 	<TextView 
 		android:id="@+id/title_text"
@@ -20,7 +21,7 @@
 		android:layout_height="wrap_content"
 		android:layout_width="match_parent"
 		android:layout_marginLeft="16dip"
-		android:layout_marginRight="20dip"
+		android:layout_marginRight="16dip"
 		android:scrollHorizontally="true"
 		android:autoText="true"
 		android:capitalize="words"
@@ -47,7 +48,6 @@
 		android:layout_width="match_parent"
 		android:layout_marginLeft="16dip"
 		android:layout_marginRight="16dip"
-		android:layout_marginBottom="4dip"
 		android:scrollHorizontally="true"
 		android:autoText="false"
 		android:capitalize="none"
@@ -56,4 +56,25 @@
 		android:inputType="textUri"
 		android:textSize="18sp"
 		android:textColor="#ffffff"/>
+
+	<TextView
+		android:id="@+id/group_title"
+		android:layout_height="wrap_content"
+		android:layout_width="wrap_content"
+		android:layout_marginLeft="10dip"
+		android:layout_marginRight="10dip"
+		android:layout_marginTop="8dip"
+		android:text="Group"
+		android:gravity="left"
+		android:textSize="14sp"
+		android:textColor="#cdcdcd"/>
+
+	<Spinner
+		android:id="@+id/group_spinner"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginLeft="16dip"
+		android:layout_marginRight="16dip"
+		android:layout_marginBottom="4dip"/>
+    
 </LinearLayout>
