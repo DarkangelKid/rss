@@ -13,13 +13,15 @@ public class parsered extends DefaultHandler
 {
 	public String file;
 	public String mode;
-	public String title_mode = "nocheck";
-
-	String[] content_titles = read_csv_to_array("title", "content");
+	public boolean check_existing = false;
+	public boolean skip = false;
+	
+	String[] content_titles;
 	
 	public parsered(String file_path)
 	{
 		this.file = file_path;
+		content_titles = read_csv_to_array("title", "content");
 		parse_local_xml(file_path);
 	}
 	
@@ -44,16 +46,17 @@ public class parsered extends DefaultHandler
 				mode = "item_mode";
 			else if(qName.equals("channel"))
 				mode = "channel_mode";
-			
-			if(qName.equals("title"))
-				title_mode = "check";
 
-			else
-			{
-				if((mode.equals("item_mode"))&&(!(qName.equals("item"))))
-					to_file(this.file + ".content.txt", qName + "|");
-				else if((mode.equals("channel_mode"))&&(!(qName.equals("channel")))&&(!(qName.equals("description")))&&(!(qName.equals("atom:link"))))
-					to_file(this.file + ".title.txt", qName + "|");
+			if(check_existing == false){
+				if((qName == "title")&&(mode.equals("item_mode")))
+					check_existing = true;
+				else
+				{
+					if((mode.equals("item_mode"))&&(!(qName.equals("item")))&&(!qName.equals("title")))
+						to_file(this.file + ".content.txt", qName + "|");
+					else if((mode.equals("channel_mode"))&&(!(qName.equals("channel")))&&(!(qName.equals("description")))&&(!(qName.equals("atom:link"))))
+						to_file(this.file + ".title.txt", qName + "|");
+				}
 			}
 		}
 		catch(Exception e){}
@@ -61,22 +64,26 @@ public class parsered extends DefaultHandler
 
 	@Override
 	public void endElement(String uri, String localName, String qName) throws SAXException {
-		try{
-			if((title_mode.equals("nocheck"))||(qName.equals("item")))
+		try
+		{
+			if(qName.equals("item"))
 			{
-				if(qName.equals("item"))
+				mode = "empty_mode";
+				if(check_existing == true)
 				{
-					mode = "empty_mode";
-					title_mode = "nocheck";
-					to_file(this.file + ".content.txt", "\n");
-					/// Reload the content_titles to new one if there was a new item added.
+					check_existing = false;
+					skip = false;
+				}
+				else
+				{
 					content_titles = read_csv_to_array("title", "content");
+					to_file(this.file + ".content.txt", "\n");
 				}
-				else if(qName.equals("lastBuildDate"))
-				{
-					mode = "empty_mode";
-					to_file(this.file + ".title.txt", "\n");
-				}
+			}
+			else if(qName.equals("lastBuildDate"))
+			{
+				mode = "empty_mode";
+				to_file(this.file + ".title.txt", "\n");
 			}
 		}
 		catch(Exception e){}
@@ -84,13 +91,13 @@ public class parsered extends DefaultHandler
 
 	@Override
 	public void characters(char[] ac, int i, int j) throws SAXException {
-		String tmpValue = new String(ac, i, j);
+		String content_string = new String(ac, i, j);
 		boolean empty = true;
-		if(tmpValue.length()>0)
+		if(content_string.length()>0)
 		{
-			for(int k=0; i<tmpValue.length()-1; i++)
+			for(int k=0; i<content_string.length()-1; i++)
 			{
-				if((tmpValue.charAt(k) != ' ')&&(tmpValue.charAt(k) != '\t')){
+				if((content_string.charAt(k) != ' ')&&(content_string.charAt(k) != '\t')){
 					empty = false;
 					break;
 				}
@@ -98,27 +105,32 @@ public class parsered extends DefaultHandler
 		}
 		if(empty == false)
 		{
-			try{
-				if(title_mode.equals("check"))
+			try
+			{
+				if((check_existing == true)&&(skip == false))
 				{
+					boolean match = false;
 					for(int l = 0; l < content_titles.length; l++)
 					{
-						if(content_titles[l] == tmpValue){
-						}
-						else{
-							title_mode = "nocheck";
-							if((mode.equals("item_mode")))
-								to_file(this.file + ".content.txt", "title|");
+						if(content_titles[l].equals(content_string))
+						{
+							match = true;
+							break;
 						}
 					}
-					/// If new set to nocheck
+					if(match == false)
+					{
+						check_existing = false;
+						to_file(this.file + ".content.txt", "title|");
+					}
+					skip = true;
 				}
-				if(title_mode.equals("nocheck"))
+				if(check_existing == false)
 				{
 					if(mode.equals("item_mode"))
-						to_file(this.file + ".content.txt", tmpValue + "|");
+						to_file(this.file + ".content.txt", content_string + "|");
 					if(mode.equals("channel_mode"))
-						to_file(this.file + ".title.txt", tmpValue + "|");
+						to_file(this.file + ".title.txt", content_string + "|");
 				}
 			}
 			catch(Exception e){
