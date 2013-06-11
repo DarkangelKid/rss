@@ -3,9 +3,10 @@ package yay.poloure.simplerss;
 import yay.poloure.simplerss.card_adapter;
 import yay.poloure.simplerss.parsered;
 import android.content.Context;
+import android.content.DialogInterface;
+
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import java.util.Locale;
 
 import android.os.Bundle;
@@ -25,13 +26,17 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView; //not permanent
+import android.widget.Toast;
 import android.content.res.Configuration;
 
 import android.widget.PopupWindow;
 
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Spinner;
 import android.view.Gravity;
+
 
 import android.os.Environment;
 import java.io.File;
@@ -228,30 +233,67 @@ public class main_view extends FragmentActivity
 	{
 		LayoutInflater inflater = LayoutInflater.from(this);
 		final View add_rss_dialog = inflater.inflate(R.layout.add_rss_dialog, null);
-		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this, 2);
-			alertDialogBuilder
+
+		String[] array_spinner = new String[] {"Mercury", "Venus", "Earth", "Mars", "Asteroid Belt", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto", "Kuiper Belt", "Oort CLoud"};
+		Spinner group_spinner = (Spinner) add_rss_dialog.findViewById(R.id.group_spinner);
+		ArrayAdapter adapter = new ArrayAdapter(this, R.layout.group_spinner_text, array_spinner);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		group_spinner.setAdapter(adapter);
+		
+		final AlertDialog alertDialog = new AlertDialog.Builder(this, 2)
 				.setTitle("Add Feed")
 				.setView(add_rss_dialog)
 				.setCancelable(true)
 				.setPositiveButton
 				("Add",new DialogInterface.OnClickListener()
 					{
+						@Override
 						public void onClick(DialogInterface dialog,int id)
 						{
-							dialog.cancel();
 						}
 					}
 				)
 				.setNegativeButton
 				("Cancel",new DialogInterface.OnClickListener()
 					{
+						@Override
 						public void onClick(DialogInterface dialog,int id)
 						{
-							dialog.cancel();
 						}
 					}
-				);
-		AlertDialog alertDialog = alertDialogBuilder.create();
+				)
+				.create();
+		alertDialog.setOnShowListener(new DialogInterface.OnShowListener()
+		{
+			@Override
+			public void onShow(DialogInterface dialog)
+			{
+				Button b = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+				b.setOnClickListener(new View.OnClickListener()
+				{
+					@Override
+					public void onClick(View view)
+					{
+						///Another function for checking the downloaded file will generate a boolean.
+							Boolean rss = false;
+							if(rss == false)
+							{
+								Context context = getApplicationContext();
+								CharSequence message = "Invalid RSS Address";
+								int duration = Toast.LENGTH_SHORT;
+								Toast message_toast = Toast.makeText(context, message, duration);
+								message_toast.show();
+							}
+							else
+							{
+								///A function will add this rss title and url to								
+								alertDialog.dismiss();
+							}
+						
+					}
+				});
+			}
+		});
 		alertDialog.show();
 	}
 
