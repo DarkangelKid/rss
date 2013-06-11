@@ -1,0 +1,59 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="vertical">
+
+	<TextView 
+		android:id="@+id/title_text"
+		android:layout_height="wrap_content"
+		android:layout_width="wrap_content"
+		android:layout_marginLeft="10dip"
+		android:layout_marginRight="10dip"
+		android:layout_marginTop="8dip"
+		android:text="Feed Name"
+		android:gravity="left"
+		android:textSize="14sp"
+		android:textColor="#cdcdcd" />
+			
+	<EditText
+		android:id="@+id/username_edit"
+		android:layout_height="wrap_content"
+		android:layout_width="match_parent"
+		android:layout_marginLeft="16dip"
+		android:layout_marginRight="20dip"
+		android:scrollHorizontally="true"
+		android:autoText="true"
+		android:capitalize="words"
+		android:gravity="fill_horizontal"
+		android:hint="optional"
+		android:textSize="18sp"
+		android:textColor="#ffffff" />
+
+	<TextView
+		android:id="@+id/password_view"
+		android:layout_height="wrap_content"
+		android:layout_width="wrap_content"
+		android:layout_marginLeft="10dip"
+		android:layout_marginRight="10dip"
+		android:layout_marginTop="8dip"
+		android:text="Feed URL"
+		android:gravity="left"
+		android:textSize="14sp"
+		android:textColor="#cdcdcd"/>
+			
+	<EditText
+		android:id="@+id/password_edit"
+		android:layout_height="wrap_content"
+		android:layout_width="match_parent"
+		android:layout_marginLeft="16dip"
+		android:layout_marginRight="16dip"
+		android:layout_marginBottom="4dip"
+		android:scrollHorizontally="true"
+		android:autoText="false"
+		android:capitalize="none"
+		android:gravity="fill_horizontal"
+		android:hint="http://example.com/rss"
+		android:inputType="textUri"
+		android:textSize="18sp"
+		android:textColor="#ffffff"/>
+</LinearLayout>

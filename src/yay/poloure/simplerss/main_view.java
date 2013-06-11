@@ -3,6 +3,8 @@ package yay.poloure.simplerss;
 import yay.poloure.simplerss.card_adapter;
 import android.content.Context;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import java.util.Locale;
 
 import android.os.Bundle;
@@ -20,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView; //not permanent
 import android.content.res.Configuration;
 
 import android.widget.PopupWindow;
@@ -52,7 +55,7 @@ public class main_view extends FragmentActivity
 	private String[] mPlanetTitles;
 	private ListView mDrawerList;
 
-	//private Button btnClosePopup;
+	private Button btnClosePopup;
 	
 	SectionsPagerAdapter page_adapter;
 	ViewPager view_pager;
@@ -202,42 +205,75 @@ public class main_view extends FragmentActivity
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		if (drawer_toggle.onOptionsItemSelected(item)) {
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
+		if(drawer_toggle.onOptionsItemSelected(item))
+		{
 			return true;
 		}
-
-		//initiate_add_window();
+		else if(item.getTitle().equals("add"))
+		{
+			show_add_dialog();
+			return true;
+		}
 		return super.onOptionsItemSelected(item);
 	}
 
-	private PopupWindow add_window;
-
-	private void initiate_add_window()
+	public void show_add_dialog()
 	{
-		try
-		{
-			LayoutInflater inflater = (LayoutInflater) main_view.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			View layout = inflater.inflate(R.layout.add_popup,(ViewGroup) findViewById(R.id.popup_element));
-			add_window = new PopupWindow(layout, 350, 350, true);
-			add_window.showAtLocation(layout, Gravity.CENTER, 0, 0);
-
-			btnClosePopup = (Button) layout.findViewById(R.id.btn_close_popup);
-			btnClosePopup.setOnClickListener(cancel_button_click_listener);
-
-		}
-		catch (Exception e)
-		{
-		}
+		/*AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+			alertDialogBuilder
+				.setTitle("Add Feed")
+				.setMessage("Click yes!")
+				.setCancelable(true)
+				.setPositiveButton
+				("Yes",new DialogInterface.OnClickListener()
+					{
+						public void onClick(DialogInterface dialog,int id)
+						{
+							dialog.cancel();
+						}
+					}
+				)
+				.setNegativeButton
+				("No",new DialogInterface.OnClickListener()
+					{
+						public void onClick(DialogInterface dialog,int id)
+						{
+							dialog.cancel();
+						}
+					}
+				);
+		AlertDialog alertDialog = alertDialogBuilder.create();
+		alertDialog.show();*/
+		LayoutInflater inflater = LayoutInflater.from(this);
+		final View add_rss_dialog = inflater.inflate(R.layout.add_rss_dialog, null);
+		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this, 2);
+			alertDialogBuilder
+				.setTitle("Add Feed")
+				.setView(add_rss_dialog)
+				.setCancelable(true)
+				.setPositiveButton
+				("Add",new DialogInterface.OnClickListener()
+					{
+						public void onClick(DialogInterface dialog,int id)
+						{
+							dialog.cancel();
+						}
+					}
+				)
+				.setNegativeButton
+				("Cancel",new DialogInterface.OnClickListener()
+					{
+						public void onClick(DialogInterface dialog,int id)
+						{
+							dialog.cancel();
+						}
+					}
+				);
+		AlertDialog alertDialog = alertDialogBuilder.create();
+		alertDialog.show();
 	}
-
-	private OnClickListener cancel_button_click_listener = new OnClickListener()
-	{
-		public void onClick(View v)
-		{
-			add_window.dismiss();
-		}
-	};
 
 	private void download_file(String url, String file_name)
 	{
@@ -393,7 +429,7 @@ public class main_view extends FragmentActivity
 		return line_values;
 	}
 
-	private void parse_local_xml(String file_name)
+	/*private void parse_local_xml(String file_name)
 	{
 		SAXParserFactory spf = SAXParserFactory.newInstance();
 		try
@@ -418,6 +454,6 @@ public class main_view extends FragmentActivity
 
 	public void endElement(String uri, String localName, String qName) throws SAXException {
 		append_string_to_file("startElement.txt", "END: " + uri + "; " + localName + "; " + qName + "\n")
-	}
+	}*/
 }
 
