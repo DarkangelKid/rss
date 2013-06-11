@@ -43,7 +43,7 @@
 		android:textColor="#cdcdcd"/>
 			
 	<EditText
-		android:id="@+id/password_edit"
+		android:id="@+id/URL_edit"
 		android:layout_height="wrap_content"
 		android:layout_width="match_parent"
 		android:layout_marginLeft="16dip"

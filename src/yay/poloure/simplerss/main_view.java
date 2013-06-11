@@ -47,11 +47,13 @@ import java.net.URLConnection;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.BufferedInputStream;
+import java.io.InputStreamReader;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.FileReader;
 import java.io.BufferedWriter;
 import java.io.BufferedReader;
+import java.lang.Thread;
 
 
 public class main_view extends FragmentActivity
@@ -282,27 +284,67 @@ public class main_view extends FragmentActivity
 					@Override
 					public void onClick(View view)
 					{
-						///Another function for checking the downloaded file will generate a boolean.
-							Boolean rss = false;
-							if(rss == false)
+						Boolean rss = false;
+						EditText URL_edit = (EditText) add_rss_dialog.findViewById(R.id.URL_edit);
+						String URL_check = URL_edit.getText().toString();
+						File in = new File(get_filepath("URLcheck.txt"));
+						in.delete();
+						download_file(URL_check, "URLcheck.txt");
+						File wait = new File(get_filepath("URLcheck.txt"));
+						int j = 0;
+						while((wait.exists() == false)&&(j<120))
+						{
+							try
 							{
-								Context context = getApplicationContext();
-								CharSequence message = "Invalid RSS Address";
-								int duration = Toast.LENGTH_SHORT;
-								Toast message_toast = Toast.makeText(context, message, duration);
-								message_toast.show();
+								Thread.sleep(10);
 							}
-							else
+							catch(Exception e)
 							{
-								///A function will add this rss title and url to								
-								alertDialog.dismiss();
 							}
-						
+							j++;
+						}
+						if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
+						{
+							try
+							{
+								BufferedReader reader = new BufferedReader(new FileReader(in));
+								try{
+									reader.readLine();
+									if((reader.readLine().contains("rss")) == true)
+										rss = true;
+								}
+								catch(Exception e)
+								{
+									rss = false;
+								}
+							}
+							catch(Exception e)
+							{
+								rss = false;
+							}
+							in.delete();
+						}
+						if(rss == false)
+						{
+							toast_message("Invalid RSS URL", 0);
+						}
+						else
+						{
+							///A function will add this rss title and url to								
+							alertDialog.dismiss();
+						}
 					}
 				});
 			}
 		});
 		alertDialog.show();
+	}
+
+	public void toast_message(String message, int zero_or_one)
+	{
+		Context context = getApplicationContext();
+		Toast message_toast = Toast.makeText(context, message, zero_or_one);
+		message_toast.show();
 	}
 
 	private void download_file(String url, String file_name)
