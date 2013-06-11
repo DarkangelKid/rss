@@ -1,6 +1,7 @@
 package yay.poloure.simplerss;
 
 import yay.poloure.simplerss.card_adapter;
+import yay.poloure.simplerss.parsered;
 import android.content.Context;
 
 import android.app.AlertDialog;
@@ -13,6 +14,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.PagerTabStrip;
 import android.support.v4.widget.DrawerLayout;
+
 import android.graphics.Color;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,6 +36,7 @@ import android.view.Gravity;
 import android.os.Environment;
 import java.io.File;
 import java.net.URL;
+
 import android.os.AsyncTask;
 import java.net.URLConnection;
 import java.io.InputStream;
@@ -65,6 +68,8 @@ public class main_view extends FragmentActivity
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.pager);
+
+		getActionBar().setIcon(R.drawable.rss_icon);
 
 		mPlanetTitles = getResources().getStringArray(R.array.planets_array);
 		mDrawerList = (ListView) findViewById(R.id.left_drawer);
@@ -221,31 +226,6 @@ public class main_view extends FragmentActivity
 
 	public void show_add_dialog()
 	{
-		/*AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-			alertDialogBuilder
-				.setTitle("Add Feed")
-				.setMessage("Click yes!")
-				.setCancelable(true)
-				.setPositiveButton
-				("Yes",new DialogInterface.OnClickListener()
-					{
-						public void onClick(DialogInterface dialog,int id)
-						{
-							dialog.cancel();
-						}
-					}
-				)
-				.setNegativeButton
-				("No",new DialogInterface.OnClickListener()
-					{
-						public void onClick(DialogInterface dialog,int id)
-						{
-							dialog.cancel();
-						}
-					}
-				);
-		AlertDialog alertDialog = alertDialogBuilder.create();
-		alertDialog.show();*/
 		LayoutInflater inflater = LayoutInflater.from(this);
 		final View add_rss_dialog = inflater.inflate(R.layout.add_rss_dialog, null);
 		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this, 2);
@@ -314,12 +294,12 @@ public class main_view extends FragmentActivity
 		}
 	}
 
-	public String get_filepath(String filename)
+	private String get_filepath(String filename)
 	{
 		return this.getExternalFilesDir(null).getAbsolutePath() + "/" + filename;
 	}
 
-	private void append_string_to_file(String file_name, String string)
+	public void append_string_to_file(String file_name, String string)
 	{
 		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
 		{
@@ -428,32 +408,5 @@ public class main_view extends FragmentActivity
 		
 		return line_values;
 	}
-
-	/*private void parse_local_xml(String file_name)
-	{
-		SAXParserFactory spf = SAXParserFactory.newInstance();
-		try
-		{
-			SAXParser sp = spf.newSAXParser();
-			sp.parse(get_filepath(file_name), this);
-		}
-		catch (exception e)
-		{
-		}
-	}
-
-	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-		tempVal = "";
-		append_string_to_file("startElement.txt", "START: " + uri + "; " + localName + "; " + qName + "\n")
-	}
-
-
-	public void characters(char[] ch, int start, int length) throws SAXException {
-		tempVal = new String(ch,start,length);
-	}
-
-	public void endElement(String uri, String localName, String qName) throws SAXException {
-		append_string_to_file("startElement.txt", "END: " + uri + "; " + localName + "; " + qName + "\n")
-	}*/
 }
 
