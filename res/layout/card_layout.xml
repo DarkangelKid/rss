@@ -1,27 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
 			android:layout_width="match_parent"
-			android:layout_height="match_parent">
+			android:layout_height="match_parent"
+			android:background="#ffffff">
 
-	<TextView
+	<!--<TextView
 			android:id="@+id/divider_text"
 			android:layout_width="match_parent"
 			android:layout_height="14dp"
 			android:background="#e5e5e5"
 			android:text="@null"
 			android:textSize="6px" 
-			android:layout_alignParentTop="true"/>
+			android:layout_alignParentTop="true"/>-->
 
 	<TextView
-			android:id="@+id/label"
+			android:id="@+id/title"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_marginRight="8dp"
 			android:layout_marginLeft="8dp"
 			android:layout_marginTop="4dp"
-			android:text="@+id/label"
-			android:textSize="35px" 
-			android:layout_below="@+id/divider_text"/>
+			android:text="@+id/title"
+			android:textSize="35px"
+			android:layout_alignParentTop="true"/>
+			<!--android:layout_below="@+id/divider_text"/>-->
 
 	<TextView
 			android:id="@+id/time"
@@ -29,10 +31,10 @@
 			android:layout_height="wrap_content"
 			android:layout_marginRight="8dp"
 			android:layout_marginLeft="8dp"
-			android:text="12:12"
+			android:text="@+id/time"
 			android:textSize="20px"
 			android:layout_alignParentLeft="true"
-			android:layout_below="@+id/label"/>
+			android:layout_below="@+id/title"/>
 
 	<ImageView
 			android:id="@+id/image"
@@ -53,7 +55,7 @@
 			android:layout_height="wrap_content"
 			android:layout_marginRight="8dp"
 			android:layout_marginLeft="8dp"
-			android:text="If this RRS client worked properly, this is where the description would go. But it clearly is not finished."
+			android:text="@+id/description"
 			android:textSize="30px"
 			android:layout_below="@+id/time"
 			android:layout_toRightOf="@+id/image"/>
