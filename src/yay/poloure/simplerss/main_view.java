@@ -227,6 +227,7 @@ public class main_view extends FragmentActivity
 		}
 		else if(item.getTitle().equals("add"))
 		{
+			
 			show_add_dialog();
 			return true;
 		}
@@ -244,7 +245,22 @@ public class main_view extends FragmentActivity
 		LayoutInflater inflater = LayoutInflater.from(this);
 		final View add_rss_dialog = inflater.inflate(R.layout.add_rss_dialog, null);
 
-		String[] array_spinner = new String[] {"Mercury", "Venus", "Earth", "Mars", "Asteroid Belt", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto", "Kuiper Belt", "Oort CLoud"};
+		
+		String[] array_spinner = read_file_to_array("group_list.txt");
+		boolean all_exists = false;
+		for(int i=0; i<array_spinner.length; i++)
+		{
+			if(array_spinner[i].equals("All"))
+			{
+				all_exists = true;
+				break;
+			}
+		}
+		if(all_exists == false)
+			add_group("All");
+
+		array_spinner = read_file_to_array("group_list.txt");
+
 		Spinner group_spinner = (Spinner) add_rss_dialog.findViewById(R.id.group_spinner);
 		ArrayAdapter adapter = new ArrayAdapter(this, R.layout.group_spinner_text, array_spinner);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -289,7 +305,7 @@ public class main_view extends FragmentActivity
 						String URL_check = URL_edit.getText().toString();
 						File in = new File(get_filepath("URLcheck.txt"));
 						in.delete();
-						download_file(URL_check, "URLcheck.txt");
+						download_file(URL_check, "URLcheck.txt", "check_mode");
 						File wait = new File(get_filepath("URLcheck.txt"));
 						int j = 0;
 						while((wait.exists() == false)&&(j<120))
@@ -330,6 +346,7 @@ public class main_view extends FragmentActivity
 						}
 						else
 						{
+							add_feed(((EditText) add_rss_dialog.findViewById(R.id.name_edit)).getText().toString(), URL_check, "Add");
 							///A function will add this rss title and url to								
 							alertDialog.dismiss();
 						}
@@ -347,10 +364,10 @@ public class main_view extends FragmentActivity
 		message_toast.show();
 	}
 
-	private void download_file(String url, String file_name)
+	private void download_file(String url, String file_name, String check)
 	{
 		DownloadFile downloadFile = new DownloadFile();
-		downloadFile.execute(url, file_name);
+		downloadFile.execute(url, file_name, check);
 	}
 
 	private class DownloadFile extends AsyncTask<String, Integer, String>
@@ -369,10 +386,20 @@ public class main_view extends FragmentActivity
 					InputStream input = new BufferedInputStream(url.openStream());
 					OutputStream output = new FileOutputStream(get_filepath(sUrl[1]));
 
-					byte data[] = new byte[1024];
-					int count;
-					while ((count = input.read(data)) != -1)
+					if(sUrl[2].equals("check_mode"))
+					{
+						byte data[] = new byte[256];
+						int count;
+						count = input.read(data);
 						output.write(data, 0, count);
+					}
+					else
+					{
+						byte data[] = new byte[1024];
+						int count;
+						while ((count = input.read(data)) != -1)
+							output.write(data, 0, count);
+					}
 
 					output.flush();
 					output.close();
@@ -439,19 +466,19 @@ public class main_view extends FragmentActivity
 
 	private void add_feed(String feed_name, String feed_url, String feed_group)
 	{
-		append_string_to_file(feed_group + ".txt", "\n" + feed_name + "; " + feed_url + "; " + feed_group);
-		append_string_to_file("all_feeds.txt", "\n" + feed_name + "; " + feed_url + "; " + feed_group);
+		append_string_to_file(feed_group + ".txt", feed_name + "|" + feed_url + "|" + feed_group + "\n");
+		append_string_to_file("all_feeds.txt", feed_name + "|" + feed_url + "|" + feed_group + "\n");
 	}
 
 	private void delete_feed(String feed_name, String feed_url, String feed_group)
 	{
-		remove_string_from_file(feed_group + ".txt", "\n" + feed_name + "; " + feed_url + "; " + feed_group);
-		remove_string_from_file("all_feeds.txt", "\n" + feed_name + "; " + feed_url + "; " + feed_group);
+		remove_string_from_file(feed_group + ".txt", feed_name + "|" + feed_url + "|" + feed_group + "\n");
+		remove_string_from_file("all_feeds.txt", feed_name + "|" + feed_url + "|" + feed_group + "\n");
 	}
 
-	private void add__group(String group_name)
+	private void add_group(String group_name)
 	{
-		append_string_to_file("group_list.txt", "\n" + group_name);
+		append_string_to_file("group_list.txt", "\n" + group_name + "\n");
 	}
 
 	private void delete_group(String group_name)
