@@ -73,10 +73,10 @@ public class main_view extends FragmentActivity
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
+		getActionBar().setIcon(R.drawable.rss_icon);
+		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.pager);
-
-		getActionBar().setIcon(R.drawable.rss_icon);
 
 		mPlanetTitles = getResources().getStringArray(R.array.planets_array);
 		mDrawerList = (ListView) findViewById(R.id.left_drawer);
