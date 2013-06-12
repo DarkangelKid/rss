@@ -57,33 +57,46 @@
 			android:textSize="30px"
 			android:layout_below="@+id/time"
 			android:layout_toRightOf="@+id/image"/>
-			
 
 	<ImageView
-			android:id="@+id/bottom_left_shadow"
+			android:id="@+id/white_left_shadow"
 			android:layout_width="3px"
-			android:layout_height="8px"
-			android:layout_marginTop="8dp"
-			android:src="@drawable/bottom_corner_left"
+			android:layout_height="4px"
+			android:src="@drawable/left_white"
+			android:layout_alignParentLeft="true"
+			android:layout_above="@+id/grey_left_shadow"/>
+
+	<ImageView
+			android:id="@+id/grey_left_shadow"
+			android:layout_width="3px"
+			android:layout_height="4px"
+			android:src="@drawable/left_grey"
 			android:layout_alignParentLeft="true"
 			android:layout_alignParentBottom="true"/>
 
 	<ImageView
-			android:id="@+id/bottom_right_shadow"
+			android:id="@+id/white_right_shadow"
 			android:layout_width="3px"
-			android:layout_height="8px"
-			android:src="@drawable/bottom_corner_right"
+			android:layout_height="4px"
+			android:src="@drawable/right_white"
+			android:layout_alignParentRight="true"
+			android:layout_above="@+id/grey_right_shadow"/>
+			
+	<ImageView
+			android:id="@+id/grey_right_shadow"
+			android:layout_width="3px"
+			android:layout_height="4px"
+			android:src="@drawable/right_grey"
 			android:layout_alignParentRight="true"
 			android:layout_alignParentBottom="true"/>
-
 
 	<ImageView
 			android:id="@+id/bottom_centre_shadow"
 			android:layout_width="fill_parent"
-			android:layout_height="8px"
-			android:src="@drawable/bottom_edge"
-			android:layout_toLeftOf="@+id/bottom_right_shadow"
-			android:layout_toRightOf="@+id/bottom_left_shadow"
+			android:layout_height="4px"
+			android:src="@drawable/bottom_grey"
+			android:layout_toLeftOf="@+id/grey_right_shadow"
+			android:layout_toRightOf="@+id/grey_left_shadow"
 			android:layout_alignParentBottom="true"
 			android:scaleType="fitXY"/>
 
