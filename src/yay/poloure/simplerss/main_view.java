@@ -73,10 +73,10 @@ public class main_view extends FragmentActivity
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
+		getActionBar().setIcon(R.drawable.rss_icon);
+		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.pager);
-
-		getActionBar().setIcon(R.drawable.rss_icon);
 
 		mPlanetTitles = getResources().getStringArray(R.array.planets_array);
 		mDrawerList = (ListView) findViewById(R.id.left_drawer);
@@ -108,7 +108,7 @@ public class main_view extends FragmentActivity
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		getActionBar().setHomeButtonEnabled(true);
 
-		download_file("http://www.gamingonlinux.com/article_rss.php", "poop.xml");
+		//download_file("http://www.gamingonlinux.com/article_rss.php", "poop.xml");
 
 		//download_file("http://www.textfiles.com/hacking/CABLE/cablefrq.txt", "archie.man");
 		//String[] archie_lines = read_file_to_array("archie.man");
