@@ -10,7 +10,12 @@ import android.app.AlertDialog;
 import java.util.Locale;
 
 import android.os.Bundle;
-import android.support.v4.app.*;
+import android.support.v4.app.ListFragment;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.PagerTabStrip;
@@ -66,9 +71,6 @@ public class main_view extends FragmentActivity
 	private ListView mDrawerList;
 
 	private Button btnClosePopup;
-	
-	SectionsPagerAdapter page_adapter;
-	ViewPager view_pager;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -82,9 +84,11 @@ public class main_view extends FragmentActivity
 		mDrawerList = (ListView) findViewById(R.id.left_drawer);
 		mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, mPlanetTitles));
 
-		page_adapter = new SectionsPagerAdapter(getSupportFragmentManager());
-		view_pager = (ViewPager) findViewById(R.id.pager);
-		view_pager.setAdapter(page_adapter);
+		MyFragmentPagerAdapter page_adapter = new MyFragmentPagerAdapter(getSupportFragmentManager());
+
+		ViewPager viewPager = (ViewPager) findViewById(R.id.pager);
+        viewPager.setAdapter(page_adapter);
+		
 		PagerTabStrip pagerTabStrip = (PagerTabStrip) findViewById(R.id.pager_title_strip);
 		pagerTabStrip.setDrawFullUnderline(true);
 		pagerTabStrip.setTabIndicatorColor(Color.argb(0, 51, 181, 229));
@@ -107,109 +111,82 @@ public class main_view extends FragmentActivity
 		mDrawerLayout.setDrawerListener(drawer_toggle);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		getActionBar().setHomeButtonEnabled(true);
-
-		//download_file("http://www.gamingonlinux.com/article_rss.php", "poop.xml");
-
-		//download_file("http://www.textfiles.com/hacking/CABLE/cablefrq.txt", "archie.man");
-		//String[] archie_lines = read_file_to_array("archie.man");
-		//getActionBar().setTitle(archie_lines[30]);
 	}
 
 	@Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-        drawer_toggle.syncState();
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        drawer_toggle.onConfigurationChanged(newConfig);
-    }
-
-	public class SectionsPagerAdapter extends FragmentPagerAdapter
-	{
-
-		public SectionsPagerAdapter(FragmentManager fm)
-		{
-			super(fm);
-		}
-
-		@Override
-		public Fragment getItem(int position)
-		{
-			Fragment fragment = new DummySectionFragment();
-			Bundle args = new Bundle();
-			args.putInt(DummySectionFragment.ARG_SECTION_NUMBER, position + 1);
-			fragment.setArguments(args);
-			return fragment;
-		}
-
-		@Override
-		public int getCount()
-		{
-			// Show 3 total pages.
-			return 3;
-		}
-
-		@Override
-		public CharSequence getPageTitle(int position)
-		{
-			Locale l = Locale.getDefault();
-			switch (position)
-			{
-				case 0:
-					return "ALL";
-				case 1:
-					return "TECHNOLOGY";
-				case 2:
-					return "ANDROID";
-			}
-			return null;
-		}
-
+	protected void onPostCreate(Bundle savedInstanceState) {
+		super.onPostCreate(savedInstanceState);
+		drawer_toggle.syncState();
 	}
 
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		drawer_toggle.onConfigurationChanged(newConfig);
+	}
 
-	public class DummySectionFragment extends ListFragment
+	public static class MyFragmentPagerAdapter extends FragmentPagerAdapter
 	{
-		public static final String ARG_SECTION_NUMBER = "section_number";
+		final int PAGE_COUNT = 3;
+ 
+		public MyFragmentPagerAdapter(FragmentManager fm){
+			super(fm);
+		}
+ 
+		@Override
+		public int getCount(){
+			return PAGE_COUNT;
+		}
 
-		public DummySectionFragment()
+ 		@Override
+		public Fragment getItem(int position){
+			return ArrayListFragment.newInstance(position);
+		}
+
+		 @Override
+		public String getPageTitle(int position){
+			if(position == 0)
+				return "All";
+			else if(position == 1)
+				return "Technology";
+			else
+				return "Android";
+		}
+		
+	}
+
+	public static class ArrayListFragment extends ListFragment
+	{		
+		static ArrayListFragment newInstance(int num)
 		{
+			ArrayListFragment f = new ArrayListFragment();
+			Bundle args = new Bundle();
+			args.putInt("num", num);
+			f.setArguments(args);
+			return f;
 		}
 
 		@Override
 		public void onActivityCreated(Bundle savedInstanceState)
 		{
 			super.onActivityCreated(savedInstanceState);
-			String[] values;
-			if(getArguments().getInt(ARG_SECTION_NUMBER) == 1)
-			{
-			values = new String[] { "Android", "iPhone", "WindowsMobile",
+			String[] values = new String[] { "Android", "iPhone", "WindowsMobile",
 					"Blackberry", "WebOS", "Ubuntu", "Windows7", "Max OS X",
 					"Linux", "OS/2" };
-			}
-			else{
-			values = new String[] {	"enen", "Blneackberry", "WenebOS", "Ubuhthntu", "Windnsthows7", "Max SHIT X",
-					"Linthneux", "OS/2sith"};
-			}
-
-			setListAdapter(new card_adapter(get_context(), values));
+			setListAdapter(new card_adapter(getActivity(), values));
+		}
+ 
+		@Override
+		public void onCreate(Bundle savedInstanceState){
+			super.onCreate(savedInstanceState);
 		}
 
 		@Override
-		public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState)
-		{
-			View view = inflater.inflate(R.layout.fragment_main_dummy, container, false);
-			return view;
+		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle SavedInstanceState){
+				View view = inflater.inflate(R.layout.fragment_main_dummy, container, false);
+				return view;
 		}
 	}
-
-	public Context get_context()
-	{
-			return this;
-	}	
 
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
@@ -233,7 +210,37 @@ public class main_view extends FragmentActivity
 		}
 		else if(item.getTitle().equals("refresh"))
 		{
-			parsered papa = new parsered(get_filepath("poop.xml"));
+			String file_path = get_filepath("all_feeds.txt");
+			String[] feeds_array = read_feeds_to_array(0, file_path);
+			String[] url_array = read_feeds_to_array(1, file_path);
+			String feed_path = get_filepath(feeds_array[0] + ".store");
+			download_file(url_array[0], feeds_array[0] + ".store", "nocheck");
+
+			File wait = new File(feed_path);
+			int j = 0;
+			while((wait.exists() == false)&&(j<100))
+			{
+				try
+				{
+					Thread.sleep(50);
+				}
+				catch(Exception e)
+				{
+				}
+				j++;
+			}
+			
+			parsered papa = new parsered(feed_path);
+
+			wait.delete();
+			
+			String[] values = read_csv_to_array("title", feed_path + ".content.txt");
+			toast_message(values[0], 1);
+
+			/*FragmentManager fragmentManager = this.getSupportFragmentManager();
+			ListFragment fragment = (ListFragment) fragmentManager.findFragmentByTag("first");
+
+			fragment.setListAdapter(new card_adapter(get_context(), values));*/
 			return true;
 		}
 
@@ -526,6 +533,84 @@ public class main_view extends FragmentActivity
 			line_values = new String[0];
 		
 		return line_values;
+	}
+
+	private String[] read_feeds_to_array(int index, String file_path)
+	{
+		String[] content_values;
+		try
+		{
+			String line;
+			int number_of_lines = 0, i = 0;
+			File in = new File(file_path);
+
+			BufferedReader reader = new BufferedReader(new FileReader(in));
+
+			while((line = reader.readLine()) != null)
+				number_of_lines++;
+
+			reader.close();
+			reader = new BufferedReader(new FileReader(in));
+
+			content_values = new String[number_of_lines];
+
+			while((line = reader.readLine()) != null)
+			{
+				if(index == 0)
+				{
+					content_values[i] = line.substring(0, line.indexOf('|', 0));
+					i++;
+				}
+				if(index == 1)
+				{
+					int bar_index = line.indexOf('|', 0);
+					line = line.substring(bar_index + 1, line.indexOf('|', bar_index + 1));
+					content_values[i] = line;
+					i++;
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			content_values = new String[0];
+		}
+
+		return content_values;
+	}
+
+	private String[] read_csv_to_array(String content_type, String feed_path)
+	{
+		String[] content_values;
+		try
+		{
+			String line;
+			int number_of_lines = 0, i = 0;
+			File in = new File(feed_path);
+
+			BufferedReader reader = new BufferedReader(new FileReader(in));
+
+			while((line = reader.readLine()) != null)
+				number_of_lines++;
+
+			reader.close();
+			reader = new BufferedReader(new FileReader(in));
+
+			content_values = new String[number_of_lines];
+
+			while((line = reader.readLine()) != null)
+			{
+				int content_start = line.indexOf(content_type) + content_type.length() + 1;
+				line = line.substring(content_start, line.indexOf('|', content_start));
+				content_values[i] = line;
+				i++;
+			}
+		}
+		catch (Exception e)
+		{
+			content_values = new String[0];
+		}
+
+		return content_values;
 	}
 }
 
