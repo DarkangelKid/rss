@@ -17,7 +17,7 @@
 		android:textColor="#cdcdcd" />
 			
 	<EditText
-		android:id="@+id/username_edit"
+		android:id="@+id/name_edit"
 		android:layout_height="wrap_content"
 		android:layout_width="match_parent"
 		android:layout_marginLeft="16dip"
