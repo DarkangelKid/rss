@@ -3,7 +3,7 @@
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
 	android:background="#e5e5e5"
-	tools:context=".main_view$DummySectionFragment">
+	tools:context=".main_view$ArrayListFragment">
 
 	<ListView
 			android:id="@id/android:list"
