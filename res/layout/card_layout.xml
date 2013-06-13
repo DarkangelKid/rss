@@ -21,9 +21,8 @@
 			android:layout_marginLeft="8dp"
 			android:layout_marginTop="4dp"
 			android:text="@+id/title"
-			android:textSize="34px"
+			android:textSize="18sp"
 			android:layout_alignParentTop="true"/>
-			<!--android:layout_below="@+id/divider_text"/>-->
 
 	<TextView
 			android:id="@+id/time"
@@ -32,7 +31,7 @@
 			android:layout_marginRight="8dp"
 			android:layout_marginLeft="8dp"
 			android:text="@+id/time"
-			android:textSize="20px"
+			android:textSize="12sp"
 			android:layout_alignParentLeft="true"
 			android:layout_below="@+id/title"/>
 
@@ -56,9 +55,8 @@
 			android:layout_marginRight="8dp"
 			android:layout_marginLeft="8dp"
 			android:layout_marginTop="4dp"
-			android:layout_marginBottom="8dp"
 			android:text="@+id/description"
-			android:textSize="26px"
+			android:textSize="14sp"
 			android:layout_below="@+id/time"
 			android:layout_toRightOf="@+id/image"/>
 
@@ -101,6 +99,7 @@
 			android:src="@drawable/bottom_grey"
 			android:layout_toLeftOf="@+id/grey_right_shadow"
 			android:layout_toRightOf="@+id/grey_left_shadow"
+			android:layout_marginTop="8dp"
 			android:layout_alignParentBottom="true"
 			android:scaleType="fitXY"/>
 

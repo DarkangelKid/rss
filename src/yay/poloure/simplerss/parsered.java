@@ -1,8 +1,10 @@
 package yay.poloure.simplerss;
 
-import javax.xml.parsers.*;
-import org.xml.sax.*;
-import org.xml.sax.helpers.*;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import org.xml.sax.helpers.DefaultHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.Attributes;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.BufferedReader;
@@ -42,13 +44,13 @@ public class parsered extends DefaultHandler
 
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-		if((qName.equals("title"))&&(inside_item == false))
+		if((qName.equals("title"))&&(!inside_item))
 			set_title_mode = true;
 		else if(qName.equals("item"))
 			inside_item = true;
-		else if((qName.equals("title"))&&(inside_item == true))
+		else if((qName.equals("title"))&&(inside_item))
 			run_duplicate_test = true;
-		else if((inside_item == true)&&(duplicate == false))
+		else if((inside_item == true)&&(!duplicate))
 			to_file(this.file + ".content.txt", qName + "|");
 	}
 
@@ -56,7 +58,7 @@ public class parsered extends DefaultHandler
 	public void endElement(String uri, String localName, String qName) throws SAXException {
 		if(qName.equals("item"))
 		{
-			if(duplicate == false)
+			if(!duplicate)
 				to_file(this.file + ".content.txt", "\n");
 			inside_item = false;
 			duplicate = false;
@@ -67,7 +69,7 @@ public class parsered extends DefaultHandler
 	public void characters(char[] ac, int i, int j) throws SAXException {
 		String content_string = new String(ac, i, j);
 		boolean empty = true;
-		if(set_title_mode == true)
+		if(set_title_mode)
 		{
 			try
 			{
@@ -87,9 +89,9 @@ public class parsered extends DefaultHandler
 				}
 			}
 		}
-		if(empty == false)
+		if(!empty)
 		{
-			if(run_duplicate_test == true)
+			if(run_duplicate_test)
 			{
 				for(int l=0; l<content_titles.length; l++)
 				{
@@ -99,11 +101,11 @@ public class parsered extends DefaultHandler
 						break;
 					}
 				}
-				if(duplicate == false)
+				if(!duplicate)
 					to_file(this.file + ".content.txt", "title|");
 				run_duplicate_test = false;
 			}
-			if((inside_item == true)&&(duplicate == false))
+			if((inside_item)&&(!duplicate))
 				to_file(this.file + ".content.txt", content_string + "|");
 		}
 	}
