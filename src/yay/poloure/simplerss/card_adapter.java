@@ -38,7 +38,7 @@ public class card_adapter extends BaseAdapter
 					break;
 				}
 			}
-			if(exists == false)
+			if(!exists)
 			{
 				content_titles.add(new_titles.get(j));
 				content_des.add(new_des.get(j));

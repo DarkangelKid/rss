@@ -1,24 +1,25 @@
 package yay.poloure.simplerss;
 
-import yay.poloure.simplerss.card_adapter;
-import yay.poloure.simplerss.parsered;
 import android.content.Context;
 import android.content.DialogInterface;
 
-
 import android.app.AlertDialog;
-import java.util.Locale;
 import java.util.List;
 import java.util.ArrayList;
 
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
+
+import android.app.Activity;
+
+import android.app.ListFragment;
+import android.app.Fragment;
+import android.app.FragmentManager;
+/*import android.support.v4.app.ListFragment;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentManager;*/
 import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.GravityCompat;
+//import android.support.v4.app.FragmentActivity;
+import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.PagerTabStrip;
 import android.support.v4.widget.DrawerLayout;
@@ -32,19 +33,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView; //not permanent
 import android.widget.Toast;
 import android.content.res.Configuration;
 
-import android.widget.PopupWindow;
-
-import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.BaseAdapter;
 import android.widget.Spinner;
-import android.view.Gravity;
-
 
 import android.os.Environment;
 import java.io.File;
@@ -55,7 +50,6 @@ import java.net.URLConnection;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.BufferedInputStream;
-import java.io.InputStreamReader;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.FileReader;
@@ -64,15 +58,14 @@ import java.io.BufferedReader;
 import java.lang.Thread;
 
 
-public class main_view extends FragmentActivity
+public class main_view extends Activity
 {
 	private DrawerLayout mDrawerLayout;
-	/// Actionbar Toggle to open navigation drawer.
-	private ActionBarDrawerToggle drawer_toggle;
 	private View.OnClickListener refreshListener;
 	private String[] mPlanetTitles;
 	
 	private ListView mDrawerList;
+	private ActionBarDrawerToggle drawer_toggle;
 
 	private Button btnClosePopup;
 
@@ -88,7 +81,7 @@ public class main_view extends FragmentActivity
 		mDrawerList = (ListView) findViewById(R.id.left_drawer);
 		mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, mPlanetTitles));
 
-		MyFragmentPagerAdapter page_adapter = new MyFragmentPagerAdapter(getSupportFragmentManager());
+		MyFragmentPagerAdapter page_adapter = new MyFragmentPagerAdapter(getFragmentManager());
 
 		ViewPager viewPager = (ViewPager) findViewById(R.id.pager);
         viewPager.setAdapter(page_adapter);
@@ -98,15 +91,13 @@ public class main_view extends FragmentActivity
 		pagerTabStrip.setTabIndicatorColor(Color.argb(0, 51, 181, 229));
 
 		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, 8388611);
 		drawer_toggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
 		{
-			/** Called when a drawer has settled in a completely closed state. */
 			public void onDrawerClosed(View view) {
 				getActionBar().setTitle("Simple RSS");
 			}
 
-			/** Called when a drawer has settled in a completely open state. */
 			public void onDrawerOpened(View drawerView) {
 				getActionBar().setTitle("Navigation");
 			}
@@ -201,12 +192,9 @@ public class main_view extends FragmentActivity
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
 		if(drawer_toggle.onOptionsItemSelected(item))
-		{
 			return true;
-		}
 		else if(item.getTitle().equals("add"))
 		{
-			
 			show_add_dialog();
 			return true;
 		}
@@ -221,6 +209,7 @@ public class main_view extends FragmentActivity
 			List<String> one = new ArrayList();
 			List<String> two = new ArrayList();
 			List<String> three = new ArrayList();
+			boolean result;
 
 			for(int k=0; k<feeds_array.length; k++)
 			{
@@ -229,7 +218,7 @@ public class main_view extends FragmentActivity
 
 				wait = new File(feed_path);
 				int j = 0;
-				while((wait.exists() == false)&&(j<100))
+				while((!wait.exists())&&(j<100))
 				{
 					try
 					{
@@ -243,7 +232,7 @@ public class main_view extends FragmentActivity
 				
 				parsered papa = new parsered(feed_path);
 
-				wait.delete();
+				result = wait.delete();
 				
 				String[] titles = read_csv_to_array("title", feed_path + ".content.txt");
 				String[] links = read_csv_to_array("link", feed_path + ".content.txt");
@@ -285,7 +274,7 @@ public class main_view extends FragmentActivity
 				break;
 			}
 		}
-		if(all_exists == false)
+		if(!all_exists)
 			add_group("All");
 
 		array_spinner = read_file_to_array("group_list.txt");
@@ -337,7 +326,7 @@ public class main_view extends FragmentActivity
 						download_file(URL_check, "URLcheck.txt", "check_mode");
 						File wait = new File(get_filepath("URLcheck.txt"));
 						int j = 0;
-						while((wait.exists() == false)&&(j<120))
+						while((!wait.exists())&&(j<120))
 						{
 							try
 							{
@@ -355,7 +344,7 @@ public class main_view extends FragmentActivity
 								BufferedReader reader = new BufferedReader(new FileReader(in));
 								try{
 									reader.readLine();
-									if((reader.readLine().contains("rss")) == true)
+									if(reader.readLine().contains("rss"))
 										rss = true;
 								}
 								catch(Exception e)
@@ -369,7 +358,7 @@ public class main_view extends FragmentActivity
 							}
 							in.delete();
 						}
-						if(rss == false)
+						if(rss!= null && !rss)
 						{
 							toast_message("Invalid RSS URL", 0);
 						}
@@ -483,7 +472,7 @@ public class main_view extends FragmentActivity
 						writer.write(line + "\n");
 				}
 
-				out.renameTo(in);
+				Boolean rte = out.renameTo(in);
 				reader.close();
 				writer.close();
 			}
