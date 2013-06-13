@@ -89,6 +89,7 @@ public class main_view extends Activity
 		
 		navigation_list = (ListView) findViewById(R.id.left_drawer);
 		navigation_list.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, nav_final));
+		navigation_list.setOnItemClickListener(new DrawerItemClickListener());
 
 		ViewPager viewPager = (ViewPager) findViewById(R.id.pager);
         viewPager.setAdapter(page_adapter);
@@ -151,9 +152,9 @@ public class main_view extends Activity
 					.commit();
 
 		// Highlight the selected item, update the title, and close the drawer
-		mDrawerList.setItemChecked(position, true);
-		setTitle(mPlanetTitles[position]);
-		mDrawerLayout.closeDrawer(mDrawerList);
+		navigation_list.setItemChecked(position, true);
+		setTitle("Preferences");
+		mDrawerLayout.closeDrawer(navigation_list);
 	}
 
 	@Override
