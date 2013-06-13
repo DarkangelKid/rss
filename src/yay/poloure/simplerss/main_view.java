@@ -8,6 +8,8 @@ import android.content.DialogInterface;
 
 import android.app.AlertDialog;
 import java.util.Locale;
+import java.util.List;
+import java.util.ArrayList;
 
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
@@ -39,6 +41,7 @@ import android.widget.PopupWindow;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.BaseAdapter;
 import android.widget.Spinner;
 import android.view.Gravity;
 
@@ -68,6 +71,7 @@ public class main_view extends FragmentActivity
 	private ActionBarDrawerToggle drawer_toggle;
 	private View.OnClickListener refreshListener;
 	private String[] mPlanetTitles;
+	
 	private ListView mDrawerList;
 
 	private Button btnClosePopup;
@@ -143,7 +147,7 @@ public class main_view extends FragmentActivity
 			return ArrayListFragment.newInstance(position);
 		}
 
-		 @Override
+		@Override
 		public String getPageTitle(int position){
 			if(position == 0)
 				return "All";
@@ -156,7 +160,8 @@ public class main_view extends FragmentActivity
 	}
 
 	public static class ArrayListFragment extends ListFragment
-	{		
+	{
+
 		static ArrayListFragment newInstance(int num)
 		{
 			ArrayListFragment f = new ArrayListFragment();
@@ -170,43 +175,12 @@ public class main_view extends FragmentActivity
 		public void onActivityCreated(Bundle savedInstanceState)
 		{
 			super.onActivityCreated(savedInstanceState);
-			String[] title;
-			String[] description;
-			String[] time;
-			if(getArguments().getInt(ARG_SECTION_NUMBER) == 1)
-			{
-			title = new String[] { "Android", "iPhone", "WindowsMobile",
-					"Blackberry", "WebOS", "Ubuntu", "Windows7", "Max OS X",
-					"Linux", "OS/2" };
-			description = new String[] {"This is in section 1.", "This is in section 1.", "This is in section 1.",
-					"This is in section 1.", "This is in section 1.", "This is in section 1.", "This is in section 1."
-					, "This is in section 1.", "This is in section 1.", "This is in section 1."};
-			time = new String[] {"12:12", "12:12", "12:12", "12:12", "12:12", "12:12", "12:12", "12:12",
-					"12:12", "12:12"};
-			}
-			else{
-			title = new String[] {	"enen", "Blneackberry", "WenebOS", "Ubuhthntu", "Windnsthows7", "Max SHIT X",
-					"Linthneux", "OS/2sith"};
-			description = new String[] {"This is not in section 1.", "This is not in section 1.", "This is not in section 1.",
-					"This is not in section 1.", "This is not in section 1.", "This is not in section 1.", "This is not in section 1."
-					, "This is not in section 1.", "This is not in section 1.", "This is not in section 1."};
-			time = new String[] {"12:12", "12:12", "12:12", "12:12", "12:12", "12:12", "12:12", "12:12",
-					"12:12", "12:12"};
-			}
-			String[] content = new String[title.length*3];
-			for (int i = 0; i < title.length; i++)
-			{
-				content[3*i] = title[i];
-				content[(3*i)+1] = time[i];
-				content[(3*i)+2] = description[i];
-			}
-
-			setListAdapter(new card_adapter(get_context(), content));
 		}
 
 		@Override
 		public void onCreate(Bundle savedInstanceState){
 			super.onCreate(savedInstanceState);
+			setListAdapter(new card_adapter(getActivity()));
 		}
 
 		@Override
@@ -241,37 +215,57 @@ public class main_view extends FragmentActivity
 			String file_path = get_filepath("all_feeds.txt");
 			String[] feeds_array = read_feeds_to_array(0, file_path);
 			String[] url_array = read_feeds_to_array(1, file_path);
-			String feed_path = get_filepath(feeds_array[0] + ".store");
-			download_file(url_array[0], feeds_array[0] + ".store", "nocheck");
 
-			File wait = new File(feed_path);
-			int j = 0;
-			while((wait.exists() == false)&&(j<100))
+			File wait;
+			String feed_path;
+			List<String> one = new ArrayList();
+			List<String> two = new ArrayList();
+			List<String> three = new ArrayList();
+
+			for(int k=0; k<feeds_array.length; k++)
 			{
-				try
+				feed_path = get_filepath(feeds_array[k] + ".store");
+				download_file(url_array[k], feeds_array[k] + ".store", "nocheck");
+
+				wait = new File(feed_path);
+				int j = 0;
+				while((wait.exists() == false)&&(j<100))
 				{
-					Thread.sleep(50);
+					try
+					{
+						Thread.sleep(50);
+					}
+					catch(Exception e)
+					{
+					}
+					j++;
 				}
-				catch(Exception e)
+				
+				parsered papa = new parsered(feed_path);
+
+				wait.delete();
+				
+				String[] titles = read_csv_to_array("title", feed_path + ".content.txt");
+				String[] links = read_csv_to_array("link", feed_path + ".content.txt");
+				String[] descriptions = read_csv_to_array("description", feed_path + ".content.txt");
+
+				for(int i=0; i<titles.length; i++)
 				{
+					one.add(titles[i]);
+					try{
+						two.add(descriptions[i]);
+					}
+					catch(Exception e){}
+					three.add(links[i]);
 				}
-				j++;
 			}
-			
-			parsered papa = new parsered(feed_path);
 
-			wait.delete();
-			
-			String[] values = read_csv_to_array("title", feed_path + ".content.txt");
-			toast_message(values[0], 1);
-
-			/*FragmentManager fragmentManager = this.getSupportFragmentManager();
-			ListFragment fragment = (ListFragment) fragmentManager.findFragmentByTag("first");
-
-			fragment.setListAdapter(new card_adapter(get_context(), values));*/
+			card_adapter.add_list(one, two, three);
+			((BaseAdapter) ((ListView) findViewById(android.R.id.list)).getAdapter()).notifyDataSetChanged();
+							
 			return true;
 		}
-
+		
 		return super.onOptionsItemSelected(item);
 	}
 
