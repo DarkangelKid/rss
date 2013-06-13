@@ -131,15 +131,21 @@ public class main_view extends FragmentActivity
 
 	public static class MyFragmentPagerAdapter extends FragmentPagerAdapter
 	{
-		final int PAGE_COUNT = 3;
- 
-		public MyFragmentPagerAdapter(FragmentManager fm){
+		private static List<String> group_list = new ArrayList();
+
+		public MyFragmentPagerAdapter(FragmentManager fm)
+		{
+			///add function for reading groups from file
 			super(fm);
+			group_list = new ArrayList();
+			group_list.add("All");
+			group_list.add("Android");
+			group_list.add("Technology");
 		}
  
 		@Override
 		public int getCount(){
-			return PAGE_COUNT;
+			return group_list.size();
 		}
 
  		@Override
@@ -149,12 +155,12 @@ public class main_view extends FragmentActivity
 
 		@Override
 		public String getPageTitle(int position){
-			if(position == 0)
-				return "All";
-			else if(position == 1)
-				return "Technology";
-			else
-				return "Android";
+			for(int i = 0; i < group_list.size(); i++)
+			{
+				if(position == i)
+					return group_list.get(position);
+			}
+			return "";
 		}
 		
 	}
