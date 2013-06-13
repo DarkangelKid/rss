@@ -61,26 +61,34 @@ public class main_view extends Activity
 {
 	private DrawerLayout mDrawerLayout;
 	private View.OnClickListener refreshListener;
-	private String[] mPlanetTitles;
 	
-	private ListView mDrawerList;
+	private ListView navigation_list;
 	private ActionBarDrawerToggle drawer_toggle;
 
 	private Button btnClosePopup;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
-	{
-		getActionBar().setIcon(R.drawable.rss_icon);
-		
+	{		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.pager);
 
-		mPlanetTitles = getResources().getStringArray(R.array.planets_array);
-		mDrawerList = (ListView) findViewById(R.id.left_drawer);
-		mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, mPlanetTitles));
-
+		getActionBar().setIcon(R.drawable.rss_icon);
 		MyFragmentPagerAdapter page_adapter = new MyFragmentPagerAdapter(getFragmentManager());
+
+		String[] nav_items = new String[]{"Manage", "Settings"};
+		String[] feeds_array = read_file_to_array("group_list.txt");		
+		String[] nav_final = new String[feeds_array.length + nav_items.length];
+		for(int i=0; i<nav_items.length; i++){
+			nav_final[i] = nav_items[i];
+		}
+		for(int i=nav_items.length; i<nav_final.length; i++){
+			nav_final[i] = feeds_array[i - nav_items.length];
+			page_adapter.add_page(feeds_array[i - nav_items.length]);
+		}
+		
+		navigation_list = (ListView) findViewById(R.id.left_drawer);
+		navigation_list.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, nav_final));
 
 		ViewPager viewPager = (ViewPager) findViewById(R.id.pager);
         viewPager.setAdapter(page_adapter);
@@ -175,9 +183,10 @@ public class main_view extends Activity
 			///add function for reading groups from file
 			super(fm);
 			group_list = new ArrayList();
-			group_list.add("All");
-			group_list.add("Android");
-			group_list.add("Technology");
+		}
+
+		private static void add_page(String title){
+			group_list.add(title);
 		}
  
 		@Override
@@ -199,12 +208,12 @@ public class main_view extends Activity
 			}
 			return "";
 		}
-		
 	}
 
 	public static class ArrayListFragment extends ListFragment
 	{
-
+		int mNum;
+		
 		static ArrayListFragment newInstance(int num)
 		{
 			ArrayListFragment f = new ArrayListFragment();
@@ -218,21 +227,24 @@ public class main_view extends Activity
 		public void onActivityCreated(Bundle savedInstanceState)
 		{
 			super.onActivityCreated(savedInstanceState);
+			if(mNum == 0)
+				setListAdapter(new card_adapter(getActivity()));
 		}
 
 		@Override
 		public void onCreate(Bundle savedInstanceState){
 			super.onCreate(savedInstanceState);
-			setListAdapter(new card_adapter(getActivity()));
+			mNum = getArguments() != null ? getArguments().getInt("num") : 1;
 		}
 
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle SavedInstanceState){
-				View view = inflater.inflate(R.layout.fragment_main_dummy, container, false);
-				return view;
+			View view = inflater.inflate(R.layout.fragment_main_dummy, container, false);
+			return view;
 		}
 	}
 
+	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
 		MenuInflater menu_inflater = getMenuInflater();
@@ -310,7 +322,7 @@ public class main_view extends Activity
 		return super.onOptionsItemSelected(item);
 	}
 
-	public void show_add_dialog()
+	private void show_add_dialog()
 	{
 		LayoutInflater inflater = LayoutInflater.from(this);
 		final View add_rss_dialog = inflater.inflate(R.layout.add_rss_dialog, null);
@@ -427,7 +439,7 @@ public class main_view extends Activity
 		alertDialog.show();
 	}
 
-	public void toast_message(String message, int zero_or_one)
+	private void toast_message(String message, int zero_or_one)
 	{
 		Context context = getApplicationContext();
 		Toast message_toast = Toast.makeText(context, message, zero_or_one);
@@ -548,7 +560,7 @@ public class main_view extends Activity
 
 	private void add_group(String group_name)
 	{
-		append_string_to_file("group_list.txt", "\n" + group_name + "\n");
+		append_string_to_file("group_list.txt", group_name + "\n");
 	}
 
 	private void delete_group(String group_name)
@@ -676,4 +688,3 @@ public class main_view extends Activity
 		return content_values;
 	}
 }
-
