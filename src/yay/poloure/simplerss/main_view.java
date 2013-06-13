@@ -173,8 +173,7 @@ public class main_view extends FragmentActivity
 			String[] title;
 			String[] description;
 			String[] time;
-			if(getArguments().getInt(ARG_SECTION_NUMBER) == 1)
-			{
+			
 			title = new String[] { "Android", "iPhone", "WindowsMobile",
 					"Blackberry", "WebOS", "Ubuntu", "Windows7", "Max OS X",
 					"Linux", "OS/2" };
@@ -183,16 +182,6 @@ public class main_view extends FragmentActivity
 					, "This is in section 1.", "This is in section 1.", "This is in section 1."};
 			time = new String[] {"12:12", "12:12", "12:12", "12:12", "12:12", "12:12", "12:12", "12:12",
 					"12:12", "12:12"};
-			}
-			else{
-			title = new String[] {	"enen", "Blneackberry", "WenebOS", "Ubuhthntu", "Windnsthows7", "Max SHIT X",
-					"Linthneux", "OS/2sith"};
-			description = new String[] {"This is not in section 1.", "This is not in section 1.", "This is not in section 1.",
-					"This is not in section 1.", "This is not in section 1.", "This is not in section 1.", "This is not in section 1."
-					, "This is not in section 1.", "This is not in section 1.", "This is not in section 1."};
-			time = new String[] {"12:12", "12:12", "12:12", "12:12", "12:12", "12:12", "12:12", "12:12",
-					"12:12", "12:12"};
-			}
 			String[] content = new String[title.length*3];
 			for (int i = 0; i < title.length; i++)
 			{
@@ -201,7 +190,7 @@ public class main_view extends FragmentActivity
 				content[(3*i)+2] = description[i];
 			}
 
-			setListAdapter(new card_adapter(get_context(), content));
+			setListAdapter(new card_adapter(getActivity(), content));
 		}
 
 		@Override
@@ -264,10 +253,10 @@ public class main_view extends FragmentActivity
 			
 			String[] values = read_csv_to_array("title", feed_path + ".content.txt");
 			toast_message(values[0], 1);
-
+			String[] add_array = new String[] {"dicks", "cocks", "wangs"}
 			/*FragmentManager fragmentManager = this.getSupportFragmentManager();
 			ListFragment fragment = (ListFragment) fragmentManager.findFragmentByTag("first");
-
+			
 			fragment.setListAdapter(new card_adapter(get_context(), values));*/
 			return true;
 		}
