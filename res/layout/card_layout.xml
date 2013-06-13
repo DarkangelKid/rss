@@ -21,7 +21,7 @@
 			android:layout_marginLeft="8dp"
 			android:layout_marginTop="4dp"
 			android:text="@+id/title"
-			android:textSize="35px"
+			android:textSize="34px"
 			android:layout_alignParentTop="true"/>
 			<!--android:layout_below="@+id/divider_text"/>-->
 
@@ -55,8 +55,10 @@
 			android:layout_height="wrap_content"
 			android:layout_marginRight="8dp"
 			android:layout_marginLeft="8dp"
+			android:layout_marginTop="4dp"
+			android:layout_marginBottom="8dp"
 			android:text="@+id/description"
-			android:textSize="30px"
+			android:textSize="26px"
 			android:layout_below="@+id/time"
 			android:layout_toRightOf="@+id/image"/>
 

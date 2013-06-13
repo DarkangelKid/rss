@@ -84,7 +84,6 @@ public class parsered extends DefaultHandler
 			{
 				if((content_string.charAt(k) != ' ')&&(content_string.charAt(k) != '\t')){
 					empty = false;
-					break;
 				}
 			}
 		}
@@ -138,7 +137,6 @@ public class parsered extends DefaultHandler
 
 			content_values = new String[number_of_lines];
 
-			/// Get the stuff
 			while((line = reader.readLine()) != null)
 			{
 				int content_start = line.indexOf(content_type) + content_type.length() + 1;
