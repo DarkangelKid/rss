@@ -383,8 +383,8 @@ public class main_view extends Activity
 					public void onClick(View view)
 					{
 						Boolean rss = false;
-						EditText URL_edit = (EditText) add_rss_dialog.findViewById(R.id.URL_edit);
-						String URL_check = URL_edit.getText().toString();
+						String URL_check = ((EditText) add_rss_dialog.findViewById(R.id.URL_edit)).getText().toString();
+						String feed_name = ((EditText) add_rss_dialog.findViewById(R.id.name_edit)).getText().toString();
 						File in = new File(get_filepath("URLcheck.txt"));
 						in.delete();
 						download_file(URL_check, "URLcheck.txt", "check_mode");
@@ -406,10 +406,11 @@ public class main_view extends Activity
 							try
 							{
 								BufferedReader reader = new BufferedReader(new FileReader(in));
-								try{
+								try
+								{
 									reader.readLine();
 									if(reader.readLine().contains("rss"))
-										rss = true;
+									rss = true;
 								}
 								catch(Exception e)
 								{
@@ -420,7 +421,6 @@ public class main_view extends Activity
 							{
 								rss = false;
 							}
-							in.delete();
 						}
 						if(rss!= null && !rss)
 						{
@@ -428,10 +428,21 @@ public class main_view extends Activity
 						}
 						else
 						{
-							add_feed(((EditText) add_rss_dialog.findViewById(R.id.name_edit)).getText().toString(), URL_check, "Add");
-							///A function will add this rss title and url to								
+							/// Put duplication name checking in here.
+							if(feed_name.equals(""))
+							{
+								parsered papa = new parsered(get_filepath("URLcheck.txt"));
+								String[] title = read_file_to_array("URLcheck.txt.title.txt");
+								feed_name = title[0];
+								File temp = new File(get_filepath("URLcheck.txt.content.txt"));
+								temp.delete();
+								temp = new File(get_filepath("URLcheck.txt.title.txt"));
+								temp.delete();
+							}
+							add_feed(feed_name, URL_check, "Add");
 							alertDialog.dismiss();
 						}
+						in.delete();
 					}
 				});
 			}
