@@ -1,5 +1,7 @@
 package yay.poloure.simplerss;
 
+import android.preference.PreferenceFragment;
+
 import android.content.Context;
 import android.content.DialogInterface;
 
@@ -30,6 +32,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
+import android.widget.AdapterView;
 import android.content.res.Configuration;
 
 import android.widget.Button;
@@ -114,6 +117,53 @@ public class main_view extends Activity
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
 		drawer_toggle.onConfigurationChanged(newConfig);
+	}
+
+	private class DrawerItemClickListener implements ListView.OnItemClickListener
+	{
+		@Override
+		public void onItemClick(AdapterView parent, View view, int position, long id)
+		{
+			selectItem(position);
+		}
+	}
+
+	/** Swaps fragments in the main content view */
+	private void selectItem(int position) {
+		// Create a new fragment and specify the planet to show based on position
+		Fragment fragment = new PrefsFragment();
+		Bundle args = new Bundle();
+		args.putInt("ARG_PLANET_NUMBER", position);
+		fragment.setArguments(args);
+
+		// Insert the fragment by replacing any existing fragment
+		FragmentManager fragmentManager = getFragmentManager();
+		fragmentManager.beginTransaction()
+					.replace(R.id.content_frame, fragment)
+					.commit();
+
+		// Highlight the selected item, update the title, and close the drawer
+		mDrawerList.setItemChecked(position, true);
+		setTitle(mPlanetTitles[position]);
+		mDrawerLayout.closeDrawer(mDrawerList);
+	}
+
+	@Override
+	public void setTitle(CharSequence title) {
+		getActionBar().setTitle(title);
+	}
+
+	public static class PrefsFragment extends PreferenceFragment
+	{
+
+		@Override
+		public void onCreate(Bundle savedInstanceState)
+		{
+        super.onCreate(savedInstanceState);
+
+        // Load the preferences from an XML resource
+        addPreferencesFromResource(R.layout.preferences);
+		}
 	}
 
 	public static class MyFragmentPagerAdapter extends FragmentPagerAdapter
