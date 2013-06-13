@@ -14,17 +14,5 @@
     android:icon="@drawable/ic_action_refresh"
     android:showAsAction="ifRoom"
 	/>
-	
-	<item
-    android:id="@+id/manage"
-    android:title="Manage"
-    android:showAsAction="never"
-	/>
-	
-	<item
-    android:id="@+id/settings"
-    android:title="Settings"
-    android:showAsAction="never"
-	/>
     
 </menu>

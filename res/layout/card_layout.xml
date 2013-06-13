@@ -32,6 +32,7 @@
 			android:layout_marginLeft="8dp"
 			android:text="@+id/time"
 			android:textSize="12sp"
+			android:textColor="#808080"
 			android:layout_alignParentLeft="true"
 			android:layout_below="@+id/title"/>
 
@@ -55,8 +56,10 @@
 			android:layout_marginRight="8dp"
 			android:layout_marginLeft="8dp"
 			android:layout_marginTop="4dp"
+			android:layout_marginBottom="8dp"
 			android:text="@+id/description"
 			android:textSize="14sp"
+			android:textColor="#4d4d4d"
 			android:layout_below="@+id/time"
 			android:layout_toRightOf="@+id/image"/>
 
