@@ -262,7 +262,7 @@ public class main_view extends FragmentActivity
 
 			card_adapter.add_list(one, two, three);
 			((BaseAdapter) ((ListView) findViewById(android.R.id.list)).getAdapter()).notifyDataSetChanged();
-							
+
 			return true;
 		}
 		
