@@ -79,9 +79,9 @@ public class main_view extends Activity
 		String[] nav_items = new String[]{"Manage", "Settings"};
 		String[] feeds_array = read_file_to_array("group_list.txt");		
 		String[] nav_final = new String[feeds_array.length + nav_items.length];
-		for(int i=0; i<nav_items.length; i++){
+		for(int i=0; i<nav_items.length; i++)
 			nav_final[i] = nav_items[i];
-		}
+			
 		for(int i=nav_items.length; i<nav_final.length; i++){
 			nav_final[i] = feeds_array[i - nav_items.length];
 			page_adapter.add_page(feeds_array[i - nav_items.length]);
@@ -306,6 +306,8 @@ public class main_view extends Activity
 				
 				String[] titles = read_csv_to_array("title", feed_path + ".content.txt");
 				String[] links = read_csv_to_array("link", feed_path + ".content.txt");
+				if(links[0].length()<10)
+					links = read_csv_to_array("id", feed_path + ".content.txt");
 				String[] descriptions = read_csv_to_array("description", feed_path + ".content.txt");
 
 				for(int i=0; i<titles.length; i++)
@@ -315,7 +317,10 @@ public class main_view extends Activity
 						two.add(descriptions[i]);
 					}
 					catch(Exception e){}
-					three.add(links[i]);
+					try{
+						three.add(links[i]);
+					}
+					catch(Exception e){}
 				}
 			}
 
@@ -415,8 +420,11 @@ public class main_view extends Activity
 								try
 								{
 									reader.readLine();
-									if(reader.readLine().contains("rss"))
-									rss = true;
+									String line = reader.readLine();
+									if(line.contains("rss"))
+										rss = true;
+									else if(line.contains("Atom"))
+										rss = true;
 								}
 								catch(Exception e)
 								{
@@ -673,6 +681,7 @@ public class main_view extends Activity
 	private String[] read_csv_to_array(String content_type, String feed_path)
 	{
 		String[] content_values;
+		content_type = content_type + "|";
 		try
 		{
 			String line;
@@ -691,7 +700,7 @@ public class main_view extends Activity
 
 			while((line = reader.readLine()) != null)
 			{
-				int content_start = line.indexOf(content_type) + content_type.length() + 1;
+				int content_start = line.indexOf(content_type) + content_type.length();
 				line = line.substring(content_start, line.indexOf('|', content_start));
 				content_values[i] = line;
 				i++;
