@@ -423,7 +423,7 @@ public class main_view extends Activity
 									String line = reader.readLine();
 									if(line.contains("rss"))
 										rss = true;
-									else if(line.contains("Atom"))
+									else if((line.contains("Atom"))||(line.contains("atom")))
 										rss = true;
 								}
 								catch(Exception e)
@@ -695,8 +695,9 @@ public class main_view extends Activity
 
 			reader.close();
 			reader = new BufferedReader(new FileReader(in));
+			reader.readLine();
 
-			content_values = new String[number_of_lines];
+			content_values = new String[number_of_lines - 1];
 
 			while((line = reader.readLine()) != null)
 			{
