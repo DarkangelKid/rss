@@ -138,13 +138,18 @@ public class main_view extends Activity
 	}
 
 	/** Swaps fragments in the main content view */
-	private void selectItem(int position)
+	private boolean selectItem(int position)
 	{
-		Fragment fragment = new PrefsFragment();
+		Fragment fragment;
+		if(position == 1)
+			fragment = new PrefsFragment();
+		else if(position == 0)
+			fragment = new manage_fragment();
+		else
+			return false;
 		Bundle args = new Bundle();
 		args.putInt("Position", position);
 		fragment.setArguments(args);
-		
 		FragmentManager fragmentManager = getFragmentManager();
 		fragmentManager.beginTransaction()
 					.addToBackStack(null)
@@ -154,6 +159,7 @@ public class main_view extends Activity
 		navigation_list.setItemChecked(position, true);
 		getActionBar().setTitle("Preferences");
 		mDrawerLayout.closeDrawer(navigation_list);
+		return true;
 	}
 
 	public static class PrefsFragment extends PreferenceFragment
@@ -165,6 +171,42 @@ public class main_view extends Activity
 			super.onCreate(savedInstanceState);
 			addPreferencesFromResource(R.layout.preferences);
 		}
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+		{
+			View view = super.onCreateView(inflater, container, savedInstanceState);
+			view.setBackgroundColor(getResources().getColor(R.color.white));
+			return view;
+		}
+	}
+
+	public class manage_fragment extends Fragment
+	{
+
+		@Override
+		public void onCreate(Bundle savedInstanceState)
+		{
+			super.onCreate(savedInstanceState);
+		}
+
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+		{
+			return inflater.inflate(R.layout.manage_fragment, container, false);
+		}
+
+		@Override
+		public void onResume()
+		{
+			super.onResume();
+		}
+
+		@Override
+		public void onPause()
+		{
+			super.onPause();
+		}
+
 	}
 
 	/*public class SetPreferenceActivity extends Activity
