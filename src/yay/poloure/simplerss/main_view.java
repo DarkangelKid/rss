@@ -138,28 +138,22 @@ public class main_view extends Activity
 	}
 
 	/** Swaps fragments in the main content view */
-	private void selectItem(int position) {
-		// Create a new fragment and specify the planet to show based on position
+	private void selectItem(int position)
+	{
 		Fragment fragment = new PrefsFragment();
 		Bundle args = new Bundle();
-		args.putInt("ARG_PLANET_NUMBER", position);
+		args.putInt("Position", position);
 		fragment.setArguments(args);
-
-		// Insert the fragment by replacing any existing fragment
+		
 		FragmentManager fragmentManager = getFragmentManager();
 		fragmentManager.beginTransaction()
+					.addToBackStack(null)
 					.replace(R.id.content_frame, fragment)
 					.commit();
 
-		// Highlight the selected item, update the title, and close the drawer
 		navigation_list.setItemChecked(position, true);
-		setTitle("Preferences");
+		getActionBar().setTitle("Preferences");
 		mDrawerLayout.closeDrawer(navigation_list);
-	}
-
-	@Override
-	public void setTitle(CharSequence title) {
-		getActionBar().setTitle(title);
 	}
 
 	public static class PrefsFragment extends PreferenceFragment
@@ -168,12 +162,23 @@ public class main_view extends Activity
 		@Override
 		public void onCreate(Bundle savedInstanceState)
 		{
-        super.onCreate(savedInstanceState);
-
-        // Load the preferences from an XML resource
-        addPreferencesFromResource(R.layout.preferences);
+			super.onCreate(savedInstanceState);
+			addPreferencesFromResource(R.layout.preferences);
 		}
 	}
+
+	/*public class SetPreferenceActivity extends Activity
+	{
+		@Override
+		protected void onCreate(Bundle savedInstanceState)
+		{
+			super.onCreate(savedInstanceState);
+			getFragmentManager()
+						.beginTransaction()
+						.replace(android.R.id.content,new PrefsFragment())
+						.commit();
+		}
+	}*/
 
 	public static class MyFragmentPagerAdapter extends FragmentPagerAdapter
 	{
