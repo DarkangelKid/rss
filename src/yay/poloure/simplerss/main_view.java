@@ -79,16 +79,11 @@ public class main_view extends Activity
 		getActionBar().setIcon(R.drawable.rss_icon);
 		MyFragmentPagerAdapter page_adapter = new MyFragmentPagerAdapter(getFragmentManager());
 
-		String[] nav_items = new String[]{"Feeds", "Manage", "Settings"};
 		String[] feeds_array = read_file_to_array("group_list.txt");		
+		String[] nav_items = new String[]{"Feeds", "Manage", "Settings"};
 		String[] nav_final = new String[feeds_array.length + nav_items.length];
-		for(int i=0; i<nav_items.length; i++)
-			nav_final[i] = nav_items[i];
-			
-		for(int i=nav_items.length; i<nav_final.length; i++){
-			nav_final[i] = feeds_array[i - nav_items.length];
-			page_adapter.add_page(feeds_array[i - nav_items.length]);
-		}
+		System.arraycopy(nav_items, 0, nav_final, 0, nav_items.length);
+		System.arraycopy(feeds_array, 0, nav_final, nav_items.length, feeds_array.length);
 		
 		navigation_list = (ListView) findViewById(R.id.left_drawer);
 		navigation_list.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, nav_final));
@@ -161,7 +156,7 @@ public class main_view extends Activity
 			{
 				getFragmentManager()
 						.beginTransaction()
-						.detach((Fragment)getFragmentManager().findFragmentByTag(mTitle.toString()))
+						.detach(getFragmentManager().findFragmentByTag(mTitle.toString()))
 						.commit();
 				setTitle(MainTitle);
 				mDrawerLayout.closeDrawer(navigation_list);
@@ -275,6 +270,7 @@ public class main_view extends Activity
 	public static class ArrayListFragment extends ListFragment
 	{
 		int mNum;
+		private static List<card_adapter> adapters = new ArrayList();
 		
 		static ArrayListFragment newInstance(int num)
 		{
@@ -291,6 +287,7 @@ public class main_view extends Activity
 			super.onActivityCreated(savedInstanceState);
 			if(mNum == 0)
 				setListAdapter(new card_adapter(getActivity()));
+			//setListAdapter(new card_adapter(getActivity()));
 		}
 
 		@Override
@@ -399,7 +396,6 @@ public class main_view extends Activity
 						File in = new File(get_filepath("URLcheck.txt"));
 						in.delete();
 						download_file(URL_check, "URLcheck.txt");
-						File wait = new File(get_filepath("URLcheck.txt"));
 						if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
 						{
 							try
@@ -433,7 +429,7 @@ public class main_view extends Activity
 							/// Put duplication name checking in here.
 							if(feed_name.equals(""))
 							{
-								parsered boo = new parsered(get_filepath("URLcheck.txt"));
+								new parsered(get_filepath("URLcheck.txt"));
 								String[] title = read_file_to_array("URLcheck.txt.title.txt");
 								feed_name = title[0];
 								File temp = new File(get_filepath("URLcheck.txt.content.txt"));
@@ -526,7 +522,7 @@ public class main_view extends Activity
 						writer.write(line + "\n");
 				}
 
-				Boolean rte = out.renameTo(in);
+				out.renameTo(in);
 				reader.close();
 				writer.close();
 			}
@@ -575,7 +571,7 @@ public class main_view extends Activity
 
 				BufferedReader reader = new BufferedReader(new FileReader(in));
 
-				while((line = reader.readLine()) != null)
+				while(reader.readLine() != null)
 					number_of_lines++;
 
 				reader.close();
@@ -611,7 +607,7 @@ public class main_view extends Activity
 
 			BufferedReader reader = new BufferedReader(new FileReader(in));
 
-			while((line = reader.readLine()) != null)
+			while(reader.readLine() != null)
 				number_of_lines++;
 
 			reader.close();
@@ -655,7 +651,7 @@ public class main_view extends Activity
 
 			BufferedReader reader = new BufferedReader(new FileReader(in));
 
-			while((line = reader.readLine()) != null)
+			while(reader.readLine() != null)
 				number_of_lines++;
 
 			reader.close();
@@ -699,7 +695,7 @@ public class main_view extends Activity
 				wait = new File(feed_path);
 				download_file(url_array[k], feeds_array[k] + ".store.txt");
 				
-				parsered boom = new parsered(feed_path);
+				new parsered(feed_path);
 
 				wait.delete();
 				

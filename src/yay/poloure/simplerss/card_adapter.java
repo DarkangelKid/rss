@@ -20,7 +20,8 @@ public class card_adapter extends BaseAdapter
 
 	private final Context context;
 
-	public card_adapter(Context context) {
+	public card_adapter(Context context)
+	{
 		this.context = context;
 		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
@@ -49,17 +50,17 @@ public class card_adapter extends BaseAdapter
 	}
 
 	@Override
-	public int getCount() {
+	public int getCount(){
 		return content_titles.size();
 	}
 
-    @Override
-    public long getItemId(int position) {
-        return position;
-    }
+	@Override
+	public long getItemId(int position){
+		return position;
+	}
 
-    @Override
-    public String getItem(int position){
+	@Override
+	public String getItem(int position){
 		return "hey";
 	}
 
@@ -77,9 +78,8 @@ public class card_adapter extends BaseAdapter
 				holder.image_view = (ImageView) convertView.findViewById(R.id.image);
 				convertView.setTag(holder);
 			}
-			else{
+			else
 				holder = (ViewHolder) convertView.getTag();
-			}
 
 			holder.title_view.setText(content_titles.get(position));
 			holder.time_view.setText(content_times.get(position));
