@@ -67,6 +67,9 @@ public class main_view extends Activity
 
 	private Button btnClosePopup;
 
+	private CharSequence mTitle;
+	private CharSequence MainTitle;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{		
@@ -76,7 +79,7 @@ public class main_view extends Activity
 		getActionBar().setIcon(R.drawable.rss_icon);
 		MyFragmentPagerAdapter page_adapter = new MyFragmentPagerAdapter(getFragmentManager());
 
-		String[] nav_items = new String[]{"Manage", "Settings"};
+		String[] nav_items = new String[]{"Feeds", "Manage", "Settings"};
 		String[] feeds_array = read_file_to_array("group_list.txt");		
 		String[] nav_final = new String[feeds_array.length + nav_items.length];
 		for(int i=0; i<nav_items.length; i++)
@@ -98,15 +101,16 @@ public class main_view extends Activity
 		pagerTabStrip.setDrawFullUnderline(true);
 		pagerTabStrip.setTabIndicatorColor(Color.argb(0, 51, 181, 229));
 
+		mTitle = MainTitle = getTitle();
 		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, 8388611);
 		drawer_toggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
 		{
-			public void onDrawerClosed(View view) {
-				getActionBar().setTitle("Simple RSS");
+			public void onDrawerClosed(View view){
+				getActionBar().setTitle(mTitle);
 			}
 
-			public void onDrawerOpened(View drawerView) {
+			public void onDrawerOpened(View drawerView){
 				getActionBar().setTitle("Navigation");
 			}
 		};
@@ -140,11 +144,30 @@ public class main_view extends Activity
 	/** Swaps fragments in the main content view */
 	private boolean selectItem(int position)
 	{
+		String[] titles = new String[] {"Feeds", "Manage", "Settings"};
 		Fragment fragment;
-		if(position == 1)
+		if(position == 2)
 			fragment = new PrefsFragment();
-		else if(position == 0)
+		else if(position == 1)
 			fragment = new manage_fragment();
+		else if(position == 0)
+		{
+			if((mTitle.equals(MainTitle)))
+			{
+				mDrawerLayout.closeDrawer(navigation_list);
+				return false;
+			}
+			else
+			{
+				getFragmentManager()
+						.beginTransaction()
+						.detach((Fragment)getFragmentManager().findFragmentByTag(mTitle.toString()))
+						.commit();
+				setTitle(MainTitle);
+				mDrawerLayout.closeDrawer(navigation_list);
+				return true;
+			}
+		}
 		else
 			return false;
 		Bundle args = new Bundle();
@@ -152,15 +175,19 @@ public class main_view extends Activity
 		fragment.setArguments(args);
 		FragmentManager fragmentManager = getFragmentManager();
 		fragmentManager.beginTransaction()
-					.addToBackStack(null)
-					.replace(R.id.content_frame, fragment)
+					.replace(R.id.content_frame, fragment, titles[position])
 					.commit();
-
 		navigation_list.setItemChecked(position, true);
-		getActionBar().setTitle("Preferences");
+		setTitle(titles[position]);
 		mDrawerLayout.closeDrawer(navigation_list);
 		return true;
 	}
+
+	@Override
+    public void setTitle(CharSequence title) {
+        mTitle = title;
+        getActionBar().setTitle(mTitle);
+    }
 
 	public static class PrefsFragment extends PreferenceFragment
 	{
@@ -208,19 +235,6 @@ public class main_view extends Activity
 		}
 
 	}
-
-	/*public class SetPreferenceActivity extends Activity
-	{
-		@Override
-		protected void onCreate(Bundle savedInstanceState)
-		{
-			super.onCreate(savedInstanceState);
-			getFragmentManager()
-						.beginTransaction()
-						.replace(android.R.id.content,new PrefsFragment())
-						.commit();
-		}
-	}*/
 
 	public static class MyFragmentPagerAdapter extends FragmentPagerAdapter
 	{
