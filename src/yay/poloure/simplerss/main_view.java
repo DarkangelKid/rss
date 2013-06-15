@@ -312,63 +312,7 @@ public class main_view extends Activity
 		}
 		else if(item.getTitle().equals("refresh"))
 		{
-			String file_path = get_filepath("all_feeds.txt");
-			String[] feeds_array = read_feeds_to_array(0, file_path);
-			String[] url_array = read_feeds_to_array(1, file_path);
-
-			File wait;
-			String feed_path;
-			List<String> one = new ArrayList();
-			List<String> two = new ArrayList();
-			List<String> three = new ArrayList();
-			boolean result;
-
-			for(int k=0; k<feeds_array.length; k++)
-			{
-				feed_path = get_filepath(feeds_array[k] + ".store");
-				download_file(url_array[k], feeds_array[k] + ".store", "nocheck");
-
-				wait = new File(feed_path);
-				int j = 0;
-				while((!wait.exists())&&(j<100))
-				{
-					try
-					{
-						Thread.sleep(50);
-					}
-					catch(Exception e)
-					{
-					}
-					j++;
-				}
-				
-				parsered papa = new parsered(feed_path);
-
-				result = wait.delete();
-				
-				String[] titles = read_csv_to_array("title", feed_path + ".content.txt");
-				String[] links = read_csv_to_array("link", feed_path + ".content.txt");
-				if(links[0].length()<10)
-					links = read_csv_to_array("id", feed_path + ".content.txt");
-				String[] descriptions = read_csv_to_array("description", feed_path + ".content.txt");
-
-				for(int i=0; i<titles.length; i++)
-				{
-					one.add(titles[i]);
-					try{
-						two.add(descriptions[i]);
-					}
-					catch(Exception e){}
-					try{
-						three.add(links[i]);
-					}
-					catch(Exception e){}
-				}
-			}
-
-			card_adapter.add_list(one, two, three);
-			((BaseAdapter) ((ListView) findViewById(android.R.id.list)).getAdapter()).notifyDataSetChanged();
-
+			new refresh_feeds().execute();
 			return true;
 		}
 		
@@ -440,20 +384,8 @@ public class main_view extends Activity
 						String feed_name = ((EditText) add_rss_dialog.findViewById(R.id.name_edit)).getText().toString();
 						File in = new File(get_filepath("URLcheck.txt"));
 						in.delete();
-						download_file(URL_check, "URLcheck.txt", "check_mode");
+						download_file(URL_check, "URLcheck.txt");
 						File wait = new File(get_filepath("URLcheck.txt"));
-						int j = 0;
-						while((!wait.exists())&&(j<120))
-						{
-							try
-							{
-								Thread.sleep(10);
-							}
-							catch(Exception e)
-							{
-							}
-							j++;
-						}
 						if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
 						{
 							try
@@ -487,7 +419,7 @@ public class main_view extends Activity
 							/// Put duplication name checking in here.
 							if(feed_name.equals(""))
 							{
-								parsered papa = new parsered(get_filepath("URLcheck.txt"));
+								parsered boo = new parsered(get_filepath("URLcheck.txt"));
 								String[] title = read_file_to_array("URLcheck.txt.title.txt");
 								feed_name = title[0];
 								File temp = new File(get_filepath("URLcheck.txt.content.txt"));
@@ -513,52 +445,29 @@ public class main_view extends Activity
 		message_toast.show();
 	}
 
-	private void download_file(String url, String file_name, String check)
+	private void download_file(String urler, String file_name)
 	{
-		DownloadFile downloadFile = new DownloadFile();
-		downloadFile.execute(url, file_name, check);
-	}
-
-	private class DownloadFile extends AsyncTask<String, Integer, String>
-	{
-		@Override
-		protected String doInBackground(String... sUrl)
+		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
 		{
-			if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
+			try
 			{
-				try
-				{
-					URL url = new URL(sUrl[0]);
-					URLConnection connection = url.openConnection();
-					connection.connect();
+				URL url = new URL(urler);
+				url.openConnection().connect();
 
-					InputStream input = new BufferedInputStream(url.openStream());
-					OutputStream output = new FileOutputStream(get_filepath(sUrl[1]));
+				InputStream input = new BufferedInputStream(url.openStream());
+				OutputStream output = new FileOutputStream(get_filepath(file_name));
 
-					if(sUrl[2].equals("check_mode"))
-					{
-						byte data[] = new byte[256];
-						int count;
-						count = input.read(data);
-						output.write(data, 0, count);
-					}
-					else
-					{
-						byte data[] = new byte[1024];
-						int count;
-						while ((count = input.read(data)) != -1)
-							output.write(data, 0, count);
-					}
+				byte data[] = new byte[2048];
+				int count;
+				while ((count = input.read(data)) != -1)
+					output.write(data, 0, count);
 
-					output.flush();
-					output.close();
-					input.close();
-				}
-				catch (Exception e)
-				{
-				}
+				output.close();
+				input.close();
 			}
-			return null;
+			catch (Exception e)
+			{
+			}
 		}
 	}
 
@@ -567,7 +476,7 @@ public class main_view extends Activity
 		return this.getExternalFilesDir(null).getAbsolutePath() + "/" + filename;
 	}
 
-	public void append_string_to_file(String file_name, String string)
+	private void append_string_to_file(String file_name, String string)
 	{
 		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
 		{
@@ -755,5 +664,57 @@ public class main_view extends Activity
 		}
 
 		return content_values;
+	}
+
+	private class refresh_feeds extends AsyncTask<Void, Void, Long> {
+
+		protected Long doInBackground(Void... ton)
+		{
+			String file_path = get_filepath("all_feeds.txt");
+			String[] feeds_array = read_feeds_to_array(0, file_path);
+			String[] url_array = read_feeds_to_array(1, file_path);
+			File wait;
+			String feed_path;
+			List<String> one = new ArrayList();
+			List<String> two = new ArrayList();
+			List<String> three = new ArrayList();
+
+			for(int k=0; k<feeds_array.length; k++)
+			{
+				feed_path = get_filepath(feeds_array[k] + ".store.txt");
+				wait = new File(feed_path);
+				download_file(url_array[k], feeds_array[k] + ".store.txt");
+				
+				parsered boom = new parsered(feed_path);
+
+				wait.delete();
+				
+				String[] titles = read_csv_to_array("title", feed_path + ".content.txt");
+				String[] links = read_csv_to_array("link", feed_path + ".content.txt");
+				if(links[0].length()<10)
+					links = read_csv_to_array("id", feed_path + ".content.txt");
+				String[] descriptions = read_csv_to_array("description", feed_path + ".content.txt");
+
+				for(int i=0; i<titles.length; i++)
+				{
+					one.add(titles[i]);
+					try{
+						two.add(descriptions[i]);
+					}
+					catch(Exception e){}
+					try{
+						three.add(links[i]);
+					}
+					catch(Exception e){}
+				}
+			}
+			card_adapter.add_list(one, two, three);
+			long lo = 1;
+			return lo;
+		}
+
+		protected void onPostExecute(Long result) {
+			((BaseAdapter) ((ListView) findViewById(android.R.id.list)).getAdapter()).notifyDataSetChanged();
+		}
 	}
 }
