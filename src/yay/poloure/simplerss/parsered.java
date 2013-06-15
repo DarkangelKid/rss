@@ -22,7 +22,6 @@ public class parsered
 		{
 			final String[] start = new String[]{"<name>", "<id>", "<link>",  "<description>", "<title>", "<content type=\"html\">", "<content>", "<icon>"};
 			final String[] end = new String[]{"</name>", "</id>", "</link>", "</description>", "</title>", "</content>", "</content>", "</icon>"};
-			final String[] new_line = new String[]{"<entry", "<item"};
 			String[] of_types = new String[]{"<name>", "<id>", "<link>",  "<description>", "<title>", "<content type=\"html\">", "<content>", "<icon>",
 				"</name>", "</id>", "</link>", "</description>", "</title>", "</content>", "</content>", "</icon>", "<entry", "<item"}; 
 				
@@ -110,7 +109,6 @@ public class parsered
 				count++;
 			}
 			buffer[count] = current[0];
-			count = 0;
 			tag = (new String(buffer)).trim();
 			for(int i=0; i<types.length; i++)
 			{
