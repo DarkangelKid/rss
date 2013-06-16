@@ -398,8 +398,10 @@ public class main_view extends Activity
 					{
 						String new_group = ((EditText) add_rss_dialog.findViewById(R.id.group_edit)).getText().toString().trim().toLowerCase();
 						boolean found = false;
+						boolean new_group_mode = false;
 						if(new_group.length()>0)
 						{
+							new_group_mode = true;
 							for(int i = 0; i < current_groups.length; i++)
 							{
 								if((current_groups[i].toLowerCase()).equals(new_group))
@@ -475,16 +477,15 @@ public class main_view extends Activity
 							toast_message("Invalid RSS URL", 0);
 						else
 						{
-							add_group(new_group);
+							if((!found)&&(new_group_mode))
+								add_group(new_group);
 							/// Put duplication name checking in here.
 							if(feed_name.equals(""))
 							{
 								new parsered(get_filepath("URLcheck.txt"));
-								String[] title = read_file_to_array("URLcheck.txt.title.txt");
+								String[] title = read_csv_to_array("title", get_filepath("URLcheck.txt.title.txt"));
 								feed_name = title[0];
 								File temp = new File(get_filepath("URLcheck.txt.content.txt"));
-								temp.delete();
-								temp = new File(get_filepath("URLcheck.txt.title.txt"));
 								temp.delete();
 							}
 							add_feed(feed_name, URL_check, new_group);
