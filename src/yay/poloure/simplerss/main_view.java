@@ -872,7 +872,6 @@ public class main_view extends Activity
 				}
 				if(titles.size()>0)
 				{
-					append_string_to_file("dump.txt", "Setting data to adapters.\n");
 					((card_adapter)((ArrayListFragment) getFragmentManager()
 						.findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + Integer.toString(i)))
 						.getListAdapter())
@@ -954,7 +953,6 @@ public class main_view extends Activity
 		append_string_to_file(file_name, feeds_old[0] + "\n");
 		for(int i=0; i<feeds_old.length - 1; i++)
 		{
-			append_string_to_file("dump.txt", is_duplicate[i] + "\n");
 			if(is_duplicate[i] == 0)
 				append_string_to_file(file_name, feeds_old[i+1] + "\n");
 		}
