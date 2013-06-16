@@ -154,44 +154,63 @@ public class main_view extends Activity
 	/** Swaps fragments in the main content view */
 	private boolean selectItem(int position)
 	{
-		String[] titles = new String[] {"Feeds", "Manage", "Settings"};
-		Fragment fragment;
-		if(position == 2)
-			fragment = new PrefsFragment();
-		else if(position == 1)
-			fragment = new manage_fragment();
-		else if(position == 0)
+		if(position < 3)
 		{
-			if((mTitle.equals(MainTitle)))
+			String[] titles = new String[] {"Feeds", "Manage", "Settings"};
+			Fragment fragment;
+			if(position == 2)
+				fragment = new PrefsFragment();
+			else if(position == 1)
+				fragment = new manage_fragment();
+			else if(position == 0)
 			{
-				mDrawerLayout.closeDrawer(navigation_list);
-				return false;
+				if((mTitle.equals(MainTitle)))
+				{
+					mDrawerLayout.closeDrawer(navigation_list);
+					((ViewPager)findViewById(R.id.pager)).setCurrentItem(0);
+					return false;
+				}
+				else
+				{
+					getFragmentManager()
+							.beginTransaction()
+							.detach(getFragmentManager().findFragmentByTag(mTitle.toString()))
+							.commit();
+					setTitle(MainTitle);
+					mDrawerLayout.closeDrawer(navigation_list);
+					return true;
+				}
 			}
 			else
+				return false;
+			Bundle args = new Bundle();
+			args.putInt("Position", position);
+			fragment.setArguments(args);
+			FragmentManager fragmentManager = getFragmentManager();
+			fragmentManager.beginTransaction()
+						//.setCustomAnimations(17432576, 17432577)
+						.replace(R.id.content_frame, fragment, titles[position])
+						.commit();
+			navigation_list.setItemChecked(position, true);
+			setTitle(titles[position]);
+			mDrawerLayout.closeDrawer(navigation_list);
+			return true;
+		}
+		else
+		{
+			if(!(mTitle.equals(MainTitle)))
 			{
 				getFragmentManager()
 						.beginTransaction()
 						.detach(getFragmentManager().findFragmentByTag(mTitle.toString()))
 						.commit();
 				setTitle(MainTitle);
-				mDrawerLayout.closeDrawer(navigation_list);
-				return true;
 			}
+			mDrawerLayout.closeDrawer(navigation_list);
+			int page = position - 3;
+			((ViewPager)findViewById(R.id.pager)).setCurrentItem(page);
+			return true;
 		}
-		else
-			return false;
-		Bundle args = new Bundle();
-		args.putInt("Position", position);
-		fragment.setArguments(args);
-		FragmentManager fragmentManager = getFragmentManager();
-		fragmentManager.beginTransaction()
-					//.setCustomAnimations(17432576, 17432577)
-					.replace(R.id.content_frame, fragment, titles[position])
-					.commit();
-		navigation_list.setItemChecked(position, true);
-		setTitle(titles[position]);
-		mDrawerLayout.closeDrawer(navigation_list);
-		return true;
 	}
 
 	@Override
