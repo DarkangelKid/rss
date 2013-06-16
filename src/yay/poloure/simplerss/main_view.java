@@ -88,10 +88,10 @@ public class main_view extends Activity
 		setContentView(R.layout.pager);
 
 		check_for_no_groups();
-
+		
 		getActionBar().setIcon(R.drawable.rss_icon);
 		page_adapter = new MyFragmentPagerAdapter(getFragmentManager());
-
+	
 		current_groups = read_file_to_array("group_list.txt");		
 		String[] nav_items = new String[]{"Feeds", "Manage", "Settings"};
 		String[] nav_final = new String[current_groups.length + nav_items.length];
@@ -167,7 +167,6 @@ public class main_view extends Activity
 				if((mTitle.equals(MainTitle)))
 				{
 					mDrawerLayout.closeDrawer(navigation_list);
-					((ViewPager)findViewById(R.id.pager)).setCurrentItem(0);
 					return false;
 				}
 				else
@@ -543,6 +542,7 @@ public class main_view extends Activity
 				ReadableByteChannel rbc = Channels.newChannel(website.openStream());
 				FileOutputStream fos = new FileOutputStream(get_filepath(file_name));
 				fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+				
 			}
 			catch (Exception e)
 			{
@@ -679,6 +679,7 @@ public class main_view extends Activity
 	{
 		/// Check to see if the last character is a \n, if not, make it.
 		append_string_to_file("group_list.txt", group_name + "\n");
+
 		update_groups();
 	}
 
@@ -848,6 +849,7 @@ public class main_view extends Activity
 				for(int k=0; k<feeds_array.length; k++)
 				{
 					feed_path = get_filepath(feeds_array[k] + ".store.txt");
+
 					wait = new File(feed_path);
 					download_file(url_array[k], feeds_array[k] + ".store.txt");
 					String[] len = read_file_to_array(feeds_array[k] + ".store.txt.content.txt");
@@ -917,11 +919,11 @@ public class main_view extends Activity
 			}
 		}
 
-
 		String[] titles = read_csv_to_array("title", file_path);
 		int[] is_duplicate = new int[titles.length];
 		boolean found = false;
 		int index = 0;
+
 		for(int k=0; k<titles.length - 1; k++)
 		{
 			if(is_duplicate[k] == 0)
@@ -941,7 +943,9 @@ public class main_view extends Activity
 			found = false;
 			index = 0;
 		}
+
 		String[] feeds_old = read_file_to_array(file_name);
+
 		temp.delete();
 		append_string_to_file(file_name, feeds_old[0] + "\n");
 		for(int i=0; i<feeds_old.length - 1; i++)
