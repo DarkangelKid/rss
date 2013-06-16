@@ -399,16 +399,31 @@ public class main_view extends Activity
 					@Override
 					public void onClick(View view)
 					{
-						String new_group = ((EditText) add_rss_dialog.findViewById(R.id.group_edit)).getText().toString().trim();
-						String[] groups = read_file_to_array("group_list.txt");
-						boolean found = false;
-						for(int i = 0; i < groups.length; i++)
+						String new_group = ((EditText) add_rss_dialog.findViewById(R.id.group_edit)).getText().toString().trim().toLowerCase();
+						if(new_group.length()>0)
 						{
-							if(groups[i].equals(new_group))
-								found = true;
+							String[] groups = read_file_to_array("group_list.txt");
+							boolean found = false;
+							for(int i = 0; i < groups.length; i++)
+							{
+								if((groups[i].toLowerCase()).equals(new_group))
+									found = true;
+							}
+
+							String[] words = new_group.split("\\s");
+							new_group = "";
+
+							for(int i = 0; i < words.length; i++)
+							{
+								char cap = Character.toUpperCase(words[i].charAt(0));
+								new_group +=  " " + cap + words[i].substring(1, words[i].length());
+							}
+							
+							if(!found)
+								add_group(new_group);
 						}
-						if(!found)
-							add_group(new_group);
+						else
+							new_group = ((Spinner) add_rss_dialog.findViewById(R.id.group_spinner)).getSelectedItem().toString();
 
 						Boolean rss = false;
 						String URL_check = ((EditText) add_rss_dialog.findViewById(R.id.URL_edit)).getText().toString().trim();
@@ -448,9 +463,7 @@ public class main_view extends Activity
 							}
 						}
 						if(rss!= null && !rss)
-						{
 							toast_message("Invalid RSS URL", 0);
-						}
 						else
 						{
 							/// Put duplication name checking in here.
@@ -464,7 +477,7 @@ public class main_view extends Activity
 								temp = new File(get_filepath("URLcheck.txt.title.txt"));
 								temp.delete();
 							}
-							add_feed(feed_name, URL_check, "All");
+							add_feed(feed_name, URL_check, new_group);
 							alertDialog.dismiss();
 						}
 						in.delete();
