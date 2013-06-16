@@ -76,6 +76,8 @@ public class main_view extends Activity
 	private CharSequence MainTitle;
 
 	private static int download_finished;
+	private MyFragmentPagerAdapter page_adapter;
+	private ViewPager viewPager;
 
 	private static String[] current_groups;
 
@@ -88,7 +90,7 @@ public class main_view extends Activity
 		check_for_no_groups();
 
 		getActionBar().setIcon(R.drawable.rss_icon);
-		MyFragmentPagerAdapter page_adapter = new MyFragmentPagerAdapter(getFragmentManager());
+		page_adapter = new MyFragmentPagerAdapter(getFragmentManager());
 
 		current_groups = read_file_to_array("group_list.txt");		
 		String[] nav_items = new String[]{"Feeds", "Manage", "Settings"};
@@ -96,15 +98,14 @@ public class main_view extends Activity
 		System.arraycopy(nav_items, 0, nav_final, 0, nav_items.length);
 		System.arraycopy(current_groups, 0, nav_final, nav_items.length, current_groups.length);
 
-		for(int i=0; i<current_groups.length; i++)
-			page_adapter.add_page(current_groups[i]);
-
 		navigation_list = (ListView) findViewById(R.id.left_drawer);
 		navigation_list.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, nav_final));
 		navigation_list.setOnItemClickListener(new DrawerItemClickListener());
 
-		ViewPager viewPager = (ViewPager) findViewById(R.id.pager);
-        viewPager.setAdapter(page_adapter);
+		viewPager = (ViewPager) findViewById(R.id.pager);
+		viewPager.setAdapter(page_adapter);
+
+		viewPager.setOffscreenPageLimit(128);
 		
 		PagerTabStrip pagerTabStrip = (PagerTabStrip) findViewById(R.id.pager_title_strip);
 		pagerTabStrip.setDrawFullUnderline(true);
@@ -248,23 +249,13 @@ public class main_view extends Activity
 
 	public static class MyFragmentPagerAdapter extends FragmentPagerAdapter
 	{
-		private static List<String> group_list = new ArrayList();
-
 		public MyFragmentPagerAdapter(FragmentManager fm){
 			super(fm);
-		}
-
-		private static void clear_page_list(){
-			group_list = new ArrayList();
-		}
-
-		private static void add_page(String title){
-			group_list.add(title);
 		}
  
 		@Override
 		public int getCount(){
-			return group_list.size();
+			return current_groups.length;
 		}
 
  		@Override
@@ -274,10 +265,10 @@ public class main_view extends Activity
 
 		@Override
 		public String getPageTitle(int position){
-			for(int i = 0; i < group_list.size(); i++)
+			for(int i = 0; i < current_groups.length; i++)
 			{
 				if(position == i)
-					return group_list.get(position);
+					return current_groups[position];
 			}
 			return "";
 		}
@@ -286,7 +277,6 @@ public class main_view extends Activity
 	public static class ArrayListFragment extends ListFragment
 	{
 		private static int mNum;
-		private static List<ArrayListFragment> list_list = new ArrayList();
 		
 		static ArrayListFragment newInstance(int num)
 		{
@@ -294,23 +284,13 @@ public class main_view extends Activity
 			Bundle args = new Bundle();
 			args.putInt("num", num);
 			f.setArguments(args);
-			list_list.add(f);
 			return f;
 		}
-
-		private static void clear_fragment_list(){
-			list_list = new ArrayList();
-		}
-
+		
 		@Override
 		public void onActivityCreated(Bundle savedInstanceState)
 		{
 			super.onActivityCreated(savedInstanceState);
-		}
-
-		private static card_adapter get_adapter_at(int pos)
-		{
-			return (card_adapter) list_list.get(pos).getListView().getAdapter();
 		}
 
 		@Override
@@ -672,8 +652,7 @@ public class main_view extends Activity
 	private void update_groups()
 	{
 		current_groups = read_file_to_array("group_list.txt");
-		MyFragmentPagerAdapter.add_page(current_groups[current_groups.length - 1]);
-		((ViewPager) findViewById(R.id.pager)).getAdapter().notifyDataSetChanged();
+		viewPager.getAdapter().notifyDataSetChanged();
 		
 	}
 
@@ -858,7 +837,7 @@ public class main_view extends Activity
 				{
 					if(current_groups[i].equals(group_array[k]))
 					{
-						ArrayListFragment.get_adapter_at(i).add_list(Arrays.asList(titles), Arrays.asList(descriptions), Arrays.asList(links));
+						((card_adapter)((ArrayListFragment) getFragmentManager().findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + Integer.toString(i))).getListAdapter()).add_list(Arrays.asList(titles), Arrays.asList(descriptions), Arrays.asList(links));
 						publishProgress(i);
 						break;
 					}
@@ -870,10 +849,13 @@ public class main_view extends Activity
 
 		protected void onProgressUpdate(Integer... progress)
 		{
-			ArrayListFragment.get_adapter_at(progress[0]).notifyDataSetChanged();
+			((card_adapter)((ArrayListFragment) getFragmentManager().findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + Integer.toString(progress[0]))).getListAdapter()).notifyDataSetChanged();
 		}
 
-		protected void onPostExecute(Long tun) {
+		protected void onPostExecute(Long tun)
+		{
+			if(viewPager.getOffscreenPageLimit() > 1)
+				viewPager.setOffscreenPageLimit(1);
 			set_refresh(false);
 		}
 	}
