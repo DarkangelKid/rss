@@ -12,10 +12,13 @@ import java.util.ArrayList;
 
 public class card_adapter extends BaseAdapter
 {
+	private static List<String> all_content_titles = new ArrayList();
+	private static List<String> all_content_des = new ArrayList();
+	private static List<String> all_content_links = new ArrayList();
 
 	private List<String> content_titles = new ArrayList();
 	private List<String> content_des = new ArrayList();
-	private List<String> content_times = new ArrayList();
+	private List<String> content_links = new ArrayList();
 	LayoutInflater inflater;
 
 	private final Context context;
@@ -26,19 +29,27 @@ public class card_adapter extends BaseAdapter
 		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 
-	public void add_list(List<String> new_titles, List<String> new_des, List<String> new_times)
+	public void add_list(List<String> new_titles, List<String> new_des, List<String> new_links)
 	{
 		content_titles = new_titles;
 		content_des = new_des;
-		content_times = new_times;
-		/*
-		content_titles.add(0,"");
-		content_des.add(0,"");
-		content_times.add(0,"");
-		
-		content_titles.add("");
-		content_des.add("");
-		content_times.add("");*/
+		content_links = new_links;
+	}
+	
+	public void add_static_list(List<String> new_titless, List<String> new_dess, List<String> new_linkss)
+	{
+		all_content_titles.addAll(new_titless);
+		all_content_des.addAll(new_dess);
+		all_content_links.addAll(new_linkss);
+		content_titles = all_content_titles;
+		content_des = all_content_des;
+		content_links = all_content_links;
+	}
+
+	public void clear_static_list(){
+		all_content_titles = new ArrayList();
+		all_content_des = new ArrayList();
+		all_content_links = new ArrayList();
 	}
 
 	@Override
@@ -82,7 +93,7 @@ public class card_adapter extends BaseAdapter
 				holder = (ViewHolder) convertView.getTag();
 
 			holder.title_view.setText(content_titles.get(position));
-			holder.time_view.setText(content_times.get(position));
+			holder.time_view.setText(content_links.get(position));
 			holder.description_view.setText(content_des.get(position));
 			//holder.image_view.setImageResource(R.drawable.ok);
 			

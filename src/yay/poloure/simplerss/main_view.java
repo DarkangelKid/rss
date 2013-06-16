@@ -501,11 +501,19 @@ public class main_view extends Activity
 							/// Put duplication name checking in here.
 							if(feed_name.equals(""))
 							{
-								new parsered(get_filepath("URLcheck.txt"));
-								String[] title = read_csv_to_array("title", get_filepath("URLcheck.txt.title.txt"));
-								feed_name = title[0];
-								File temp = new File(get_filepath("URLcheck.txt.content.txt"));
-								temp.delete();
+								try{
+									String file_path = get_filepath("URLcheck.txt");
+									File temp = new File(file_path + ".content.txt");
+									new parsered(file_path);
+									String line = (new BufferedReader(new FileReader(temp))).readLine();
+									int content_start = line.indexOf("title|") + 6;
+									feed_name = line.substring(content_start, line.indexOf('|', content_start));
+									temp.delete();
+									(new File(file_path)).delete();
+								}
+								catch(Exception e){
+									toast_message("Failed to get title.", 1);
+								}
 							}
 							add_feed(feed_name, URL_check, new_group);
 							alertDialog.dismiss();
@@ -829,39 +837,53 @@ public class main_view extends Activity
 		}
 		protected Long doInBackground(Void... ton)
 		{
-			String file_path = get_filepath("all_feeds.txt");
-			String[] feeds_array = read_feeds_to_array(0, file_path);
-			String[] url_array = read_feeds_to_array(1, file_path);
-			String[] group_array = read_feeds_to_array(2, file_path);
-			File wait;
-			String feed_path;
-
-			for(int k=0; k<feeds_array.length; k++)
+			((card_adapter)((ArrayListFragment) getFragmentManager()
+					.findFragmentByTag("android:switcher:" + viewPager.getId() + ":0"))
+					.getListAdapter())
+					.clear_static_list();
+					
+			for(int i=0; i<current_groups.length; i++)
 			{
-				feed_path = get_filepath(feeds_array[k] + ".store.txt");
-				wait = new File(feed_path);
-				download_file(url_array[k], feeds_array[k] + ".store.txt");
-				String[] len = read_file_to_array(feeds_array[k] + ".store.txt.content.txt");
-				
-				new parsered(feed_path);
-				wait.delete();
-				remove_duplicates(feeds_array[k] + ".store.txt.content.txt", len.length);
-				
-				String[] titles = read_csv_to_array("title", feed_path + ".content.txt");
-				String[] links = read_csv_to_array("link", feed_path + ".content.txt");
-				if(links[0].length()<10)
-					links = read_csv_to_array("id", feed_path + ".content.txt");
-				String[] descriptions = read_csv_to_array("description", feed_path + ".content.txt");
+				String[] feeds_array = read_feeds_to_array(0, get_filepath(current_groups[i] + ".txt"));
+				String[] url_array = read_feeds_to_array(1, get_filepath(current_groups[i] + ".txt"));
+				File wait;
+				String feed_path;
 
-				for(int i=0; i<current_groups.length; i++)
+				List<String> titles = new ArrayList();
+				List<String> descriptions = new ArrayList();
+				List<String> links = new ArrayList();
+
+
+				for(int k=0; k<feeds_array.length; k++)
 				{
-					if(current_groups[i].equals(group_array[k]))
-					{
-						((card_adapter)((ArrayListFragment) getFragmentManager().findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + Integer.toString(i))).getListAdapter()).add_list(Arrays.asList(titles), Arrays.asList(descriptions), Arrays.asList(links));
-						publishProgress(i);
-						break;
-					}
+					feed_path = get_filepath(feeds_array[k] + ".store.txt");
+					wait = new File(feed_path);
+					download_file(url_array[k], feeds_array[k] + ".store.txt");
+					String[] len = read_file_to_array(feeds_array[k] + ".store.txt.content.txt");
+
+					new parsered(feed_path);
+					wait.delete();
+					remove_duplicates(feeds_array[k] + ".store.txt.content.txt", len.length);
+
+					/// Order by time here.
+					titles.addAll(Arrays.asList(read_csv_to_array("title", feed_path + ".content.txt")));
+					descriptions.addAll(Arrays.asList(read_csv_to_array("description", feed_path + ".content.txt")));
+					String[] link = read_csv_to_array("link", feed_path + ".content.txt");
+					if(link[0].length()<10)
+						link = read_csv_to_array("id", feed_path + ".content.txt");
+					links.addAll(Arrays.asList(link));
 				}
+				((card_adapter)((ArrayListFragment) getFragmentManager()
+					.findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + Integer.toString(i)))
+					.getListAdapter())
+					.add_list(titles, descriptions, links);
+
+				((card_adapter)((ArrayListFragment) getFragmentManager()
+					.findFragmentByTag("android:switcher:" + viewPager.getId() + ":0"))
+					.getListAdapter())
+					.add_static_list(titles, descriptions, links);
+
+				publishProgress(i);
 			}
 			long lo = 1;
 			return lo;
@@ -869,7 +891,14 @@ public class main_view extends Activity
 
 		protected void onProgressUpdate(Integer... progress)
 		{
-			((card_adapter)((ArrayListFragment) getFragmentManager().findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + Integer.toString(progress[0]))).getListAdapter()).notifyDataSetChanged();
+			((card_adapter)((ArrayListFragment) getFragmentManager()
+				.findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + Integer.toString(progress[0])))
+				.getListAdapter())
+				.notifyDataSetChanged();
+			((card_adapter)((ArrayListFragment) getFragmentManager()
+				.findFragmentByTag("android:switcher:" + viewPager.getId() + ":0"))
+				.getListAdapter())
+				.notifyDataSetChanged();
 		}
 
 		protected void onPostExecute(Long tun)
