@@ -303,7 +303,6 @@ public class main_view extends Activity
 		public void onActivityCreated(Bundle savedInstanceState)
 		{
 			super.onActivityCreated(savedInstanceState);
-			setListAdapter(new card_adapter(getActivity()));
 		}
 
 		private static card_adapter get_adapter_at(int pos)
@@ -314,20 +313,12 @@ public class main_view extends Activity
 		@Override
 		public void onCreate(Bundle savedInstanceState){
 			super.onCreate(savedInstanceState);
+			setListAdapter(new card_adapter(getActivity()));
 			mNum = getArguments() != null ? getArguments().getInt("num") : 1;
 		}
 
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle SavedInstanceState){
-			//LinearLayout lay = new LinearLayout(getActivity());
-			/*try{
-				list_list.set(mNum, new ListView(getActivity()));
-			}
-			catch(IndexOutOfBoundsException e){
-				list_list.add(new ListView(getActivity()));
-			}*/
-			//lay.addView(list_list.get(mNum));
-			//container.addView(view_new);
 			View view = inflater.inflate(R.layout.fragment_main_dummy, container, false);
 			return view;
 		}
