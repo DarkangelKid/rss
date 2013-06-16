@@ -87,12 +87,13 @@ public class main_view extends Activity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.pager);
 
-		check_for_no_groups();
-		
+		current_groups = read_file_to_array("group_list.txt");
+		if(current_groups.length == 0)
+			append_string_to_file("group_list.txt", "All\n");
+
 		getActionBar().setIcon(R.drawable.rss_icon);
 		page_adapter = new MyFragmentPagerAdapter(getFragmentManager());
-	
-		current_groups = read_file_to_array("group_list.txt");		
+
 		String[] nav_items = new String[]{"Feeds", "Manage", "Settings"};
 		String[] nav_final = new String[current_groups.length + nav_items.length];
 		System.arraycopy(nav_items, 0, nav_final, 0, nav_items.length);
@@ -104,9 +105,10 @@ public class main_view extends Activity
 
 		viewPager = (ViewPager) findViewById(R.id.pager);
 		viewPager.setAdapter(page_adapter);
-
 		viewPager.setOffscreenPageLimit(128);
-		
+
+		update_groups();
+
 		PagerTabStrip pagerTabStrip = (PagerTabStrip) findViewById(R.id.pager_title_strip);
 		pagerTabStrip.setDrawFullUnderline(true);
 		pagerTabStrip.setTabIndicatorColor(Color.argb(0, 51, 181, 229));
@@ -539,13 +541,15 @@ public class main_view extends Activity
 			try
 			{
 				URL website = new URL(urler);
+				
 				ReadableByteChannel rbc = Channels.newChannel(website.openStream());
 				FileOutputStream fos = new FileOutputStream(get_filepath(file_name));
-				fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
 				
+				fos.getChannel().transferFrom(rbc, 0, 1 << 24);
 			}
 			catch (Exception e)
 			{
+				append_string_to_file("dump.txt", "error\n");
 			}
 		}
 	}
@@ -830,7 +834,7 @@ public class main_view extends Activity
 		protected Long doInBackground(Void... ton)
 		{
 			((card_adapter)((ArrayListFragment) getFragmentManager()
-					.findFragmentByTag("android:switcher:" + viewPager.getId() + ":0"))
+					.findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + Integer.toString(0)))
 					.getListAdapter())
 					.clear_static_list();
 					
@@ -845,18 +849,18 @@ public class main_view extends Activity
 				List<String> descriptions = new ArrayList();
 				List<String> links = new ArrayList();
 
-
 				for(int k=0; k<feeds_array.length; k++)
 				{
 					feed_path = get_filepath(feeds_array[k] + ".store.txt");
 
 					wait = new File(feed_path);
 					download_file(url_array[k], feeds_array[k] + ".store.txt");
-					String[] len = read_file_to_array(feeds_array[k] + ".store.txt.content.txt");
 
 					new parsered(feed_path);
 					wait.delete();
-					remove_duplicates(feeds_array[k] + ".store.txt.content.txt", len.length);
+					int length_before = read_file_to_array(feeds_array[k] + ".store.txt.content.txt").length;
+					if(length_before > 1)
+						remove_duplicates(feeds_array[k] + ".store.txt.content.txt", length_before);
 
 					/// Order by time here.
 					titles.addAll(Arrays.asList(read_csv_to_array("title", feed_path + ".content.txt")));
@@ -866,17 +870,21 @@ public class main_view extends Activity
 						link = read_csv_to_array("id", feed_path + ".content.txt");
 					links.addAll(Arrays.asList(link));
 				}
-				((card_adapter)((ArrayListFragment) getFragmentManager()
-					.findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + Integer.toString(i)))
-					.getListAdapter())
-					.add_list(titles, descriptions, links);
+				if(titles.size()>0)
+				{
+					append_string_to_file("dump.txt", "Setting data to adapters.\n");
+					((card_adapter)((ArrayListFragment) getFragmentManager()
+						.findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + Integer.toString(i)))
+						.getListAdapter())
+						.add_list(titles, descriptions, links);
 
-				((card_adapter)((ArrayListFragment) getFragmentManager()
-					.findFragmentByTag("android:switcher:" + viewPager.getId() + ":0"))
-					.getListAdapter())
-					.add_static_list(titles, descriptions, links);
+					((card_adapter)((ArrayListFragment) getFragmentManager()
+						.findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + Integer.toString(0)))
+						.getListAdapter())
+						.add_static_list(titles, descriptions, links);
 
-				publishProgress(i);
+					publishProgress(i);
+				}
 			}
 			long lo = 1;
 			return lo;
@@ -889,7 +897,7 @@ public class main_view extends Activity
 				.getListAdapter())
 				.notifyDataSetChanged();
 			((card_adapter)((ArrayListFragment) getFragmentManager()
-				.findFragmentByTag("android:switcher:" + viewPager.getId() + ":0"))
+				.findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + Integer.toString(0)))
 				.getListAdapter())
 				.notifyDataSetChanged();
 		}
@@ -908,15 +916,12 @@ public class main_view extends Activity
 		String file_path = get_filepath(file_name);
 		File temp = new File(file_path);
 
-		if(length_before > 0)
+		String[] title_remove = read_file_to_array(file_name);
+		temp.delete();
+		for(int i=0; i<title_remove.length ; i++)
 		{
-			String[] title_remove = read_file_to_array(file_name);
-			temp.delete();
-			for(int i=0; i<title_remove.length ; i++)
-			{
-				if(i != length_before)
-					append_string_to_file(file_name, title_remove[i] + "\n");
-			}
+			if(i != length_before)
+				append_string_to_file(file_name, title_remove[i] + "\n");
 		}
 
 		String[] titles = read_csv_to_array("title", file_path);
@@ -945,11 +950,11 @@ public class main_view extends Activity
 		}
 
 		String[] feeds_old = read_file_to_array(file_name);
-
 		temp.delete();
 		append_string_to_file(file_name, feeds_old[0] + "\n");
 		for(int i=0; i<feeds_old.length - 1; i++)
 		{
+			append_string_to_file("dump.txt", is_duplicate[i] + "\n");
 			if(is_duplicate[i] == 0)
 				append_string_to_file(file_name, feeds_old[i+1] + "\n");
 		}
