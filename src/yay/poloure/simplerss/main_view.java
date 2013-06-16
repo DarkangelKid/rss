@@ -181,6 +181,7 @@ public class main_view extends Activity
 		fragment.setArguments(args);
 		FragmentManager fragmentManager = getFragmentManager();
 		fragmentManager.beginTransaction()
+					//.setCustomAnimations(17432576, 17432577)
 					.replace(R.id.content_frame, fragment, titles[position])
 					.commit();
 		navigation_list.setItemChecked(position, true);
