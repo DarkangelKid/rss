@@ -14,6 +14,7 @@ import java.util.Arrays;
 import android.os.Bundle;
 
 import android.app.Activity;
+import org.apache.commons.io.FileUtils;
 
 import android.app.ListFragment;
 import android.app.Fragment;
@@ -542,10 +543,11 @@ public class main_view extends Activity
 			{
 				URL website = new URL(urler);
 				
-				ReadableByteChannel rbc = Channels.newChannel(website.openStream());
+				/*ReadableByteChannel rbc = Channels.newChannel(website.openStream());
 				FileOutputStream fos = new FileOutputStream(get_filepath(file_name));
 				
-				fos.getChannel().transferFrom(rbc, 0, 1 << 24);
+				fos.getChannel().transferFrom(rbc, 0, 1 << 24);*/
+				FileUtils.copyURLToFile(website, new File(get_filepath(file_name)));
 			}
 			catch (Exception e)
 			{
