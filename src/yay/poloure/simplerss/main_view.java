@@ -539,19 +539,10 @@ public class main_view extends Activity
 		{
 			try
 			{
-				URL url = new URL(urler);
-				url.openConnection().connect();
-
-				InputStream input = new BufferedInputStream(url.openStream());
-				OutputStream output = new FileOutputStream(get_filepath(file_name));
-
-				byte data[] = new byte[2048];
-				int count;
-				while ((count = input.read(data)) != -1)
-					output.write(data, 0, count);
-
-				output.close();
-				input.close();
+				URL website = new URL(urler);
+				ReadableByteChannel rbc = Channels.newChannel(website.openStream());
+				FileOutputStream fos = new FileOutputStream(get_filepath(file_name));
+				fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
 			}
 			catch (Exception e)
 			{
