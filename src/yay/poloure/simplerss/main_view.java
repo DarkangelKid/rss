@@ -413,10 +413,19 @@ public class main_view extends Activity
 							String[] words = new_group.split("\\s");
 							new_group = "";
 
-							for(int i = 0; i < words.length; i++)
+							if(words.length == 1)
 							{
-								char cap = Character.toUpperCase(words[i].charAt(0));
-								new_group +=  " " + cap + words[i].substring(1, words[i].length());
+								char cap = Character.toUpperCase(words[0].charAt(0));
+								new_group +=  cap + words[i].substring(1, words[0].length());
+							}
+							else
+							{
+								for(int i = 0; i < words.length - 1; i++)
+								{
+									char cap = Character.toUpperCase(words[i].charAt(0));
+									new_group +=  cap + words[i].substring(1, words[i].length()) + " ";
+								}
+								new_group +=  cap + words[i].substring(1, words[i].length());
 							}
 							
 							if(!found)
