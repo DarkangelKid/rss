@@ -76,6 +76,9 @@ public class main_view extends Activity
 
 	private static int download_finished;
 
+	private static String[] current_groups;
+	private static boolean not_refreshing = true;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{		
@@ -87,14 +90,14 @@ public class main_view extends Activity
 		getActionBar().setIcon(R.drawable.rss_icon);
 		MyFragmentPagerAdapter page_adapter = new MyFragmentPagerAdapter(getFragmentManager());
 
-		String[] feeds_array = read_file_to_array("group_list.txt");		
+		current_groups = read_file_to_array("group_list.txt");		
 		String[] nav_items = new String[]{"Feeds", "Manage", "Settings"};
-		String[] nav_final = new String[feeds_array.length + nav_items.length];
+		String[] nav_final = new String[current_groups.length + nav_items.length];
 		System.arraycopy(nav_items, 0, nav_final, 0, nav_items.length);
-		System.arraycopy(feeds_array, 0, nav_final, nav_items.length, feeds_array.length);
+		System.arraycopy(current_groups, 0, nav_final, nav_items.length, current_groups.length);
 
-		for(int i=0; i<feeds_array.length; i++)
-			page_adapter.add_page(feeds_array[i]);
+		for(int i=0; i<current_groups.length; i++)
+			page_adapter.add_page(current_groups[i]);
 
 		navigation_list = (ListView) findViewById(R.id.left_drawer);
 		navigation_list.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, nav_final));
@@ -247,10 +250,11 @@ public class main_view extends Activity
 	{
 		private static List<String> group_list = new ArrayList();
 
-		public MyFragmentPagerAdapter(FragmentManager fm)
-		{
-			///add function for reading groups from file
+		public MyFragmentPagerAdapter(FragmentManager fm){
 			super(fm);
+		}
+
+		private static void clear_page_list(){
 			group_list = new ArrayList();
 		}
 
@@ -290,13 +294,12 @@ public class main_view extends Activity
 			Bundle args = new Bundle();
 			args.putInt("num", num);
 			f.setArguments(args);
-			try{
-				list_list.set(num, f);
-			}
-			catch(IndexOutOfBoundsException e){
-				list_list.add(f);
-			}
+			list_list.add(f);
 			return f;
+		}
+
+		private static void clear_fragment_list(){
+			list_list = new ArrayList();
 		}
 
 		@Override
@@ -344,7 +347,11 @@ public class main_view extends Activity
 		}
 		else if(item.getTitle().equals("refresh"))
 		{
-			new refresh_feeds().execute();
+			if(not_refreshing == true)
+			{
+				not_refreshing = false;
+				new refresh_feeds().execute();
+			}
 			return true;
 		}
 		
@@ -358,10 +365,8 @@ public class main_view extends Activity
 		
 		check_for_no_groups();
 
-		String[] array_spinner = read_file_to_array("group_list.txt");
-
 		Spinner group_spinner = (Spinner) add_rss_dialog.findViewById(R.id.group_spinner);
-		ArrayAdapter adapter = new ArrayAdapter(this, R.layout.group_spinner_text, array_spinner);
+		ArrayAdapter adapter = new ArrayAdapter(this, R.layout.group_spinner_text, current_groups);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		group_spinner.setAdapter(adapter);
 		
@@ -400,13 +405,12 @@ public class main_view extends Activity
 					public void onClick(View view)
 					{
 						String new_group = ((EditText) add_rss_dialog.findViewById(R.id.group_edit)).getText().toString().trim().toLowerCase();
+						boolean found = false;
 						if(new_group.length()>0)
 						{
-							String[] groups = read_file_to_array("group_list.txt");
-							boolean found = false;
-							for(int i = 0; i < groups.length; i++)
+							for(int i = 0; i < current_groups.length; i++)
 							{
-								if((groups[i].toLowerCase()).equals(new_group))
+								if((current_groups[i].toLowerCase()).equals(new_group))
 									found = true;
 							}
 
@@ -428,9 +432,6 @@ public class main_view extends Activity
 								char cap = Character.toUpperCase(words[words.length - 1].charAt(0));
 								new_group +=  cap + words[words.length - 1].substring(1, words[words.length - 1].length());
 							}
-							
-							if(!found)
-								add_group(new_group);
 						}
 						else
 							new_group = ((Spinner) add_rss_dialog.findViewById(R.id.group_spinner)).getSelectedItem().toString();
@@ -455,12 +456,18 @@ public class main_view extends Activity
 								BufferedReader reader = new BufferedReader(new FileReader(in));
 								try
 								{
-									reader.readLine();
-									String line = reader.readLine();
-									if(line.contains("rss"))
-										rss = true;
-									else if((line.contains("Atom"))||(line.contains("atom")))
-										rss = true;
+									for(int i=0; i<3; i++)
+									{
+										String line = reader.readLine();
+										if(line.contains("rss")){
+											rss = true;
+											break;
+										}
+										else if((line.contains("Atom"))||(line.contains("atom"))){
+											rss = true;
+											break;
+										}
+									}
 								}
 								catch(Exception e)
 								{
@@ -476,6 +483,7 @@ public class main_view extends Activity
 							toast_message("Invalid RSS URL", 0);
 						else
 						{
+							add_group(new_group);
 							/// Put duplication name checking in here.
 							if(feed_name.equals(""))
 							{
@@ -638,6 +646,7 @@ public class main_view extends Activity
 
 	private void add_feed(String feed_name, String feed_url, String feed_group)
 	{
+		/// Check to see if the last character is a \n, if not, make it.
 		append_string_to_file(feed_group + ".txt", feed_name + "|" + feed_url + "|" + feed_group + "\n");
 		append_string_to_file("all_feeds.txt", feed_name + "|" + feed_url + "|" + feed_group + "\n");
 	}
@@ -648,9 +657,17 @@ public class main_view extends Activity
 		remove_string_from_file("all_feeds.txt", feed_name + "|" + feed_url + "|" + feed_group + "\n");
 	}
 
+	private void update_groups()
+	{
+		current_groups = read_file_to_array("group_list.txt");
+		MyFragmentPagerAdapter.add_page(current_groups[current_groups.length - 1]);
+	}
+
 	private void add_group(String group_name)
 	{
+		/// Check to see if the last character is a \n, if not, make it.
 		append_string_to_file("group_list.txt", group_name + "\n");
+		update_groups();
 	}
 
 	private void delete_group(String group_name)
@@ -659,6 +676,7 @@ public class main_view extends Activity
 			remove_string_from_file("group_list.txt", group_name);
 			File file = new File(get_filepath(group_name + ".txt"));
 			file.delete();
+			update_groups();
 		}
 		else
 			toast_message("External storage is not mounted", 1);
@@ -799,7 +817,6 @@ public class main_view extends Activity
 			String[] feeds_array = read_feeds_to_array(0, file_path);
 			String[] url_array = read_feeds_to_array(1, file_path);
 			String[] group_array = read_feeds_to_array(2, file_path);
-			String[] group_order = read_file_to_array("group_list.txt");
 			File wait;
 			String feed_path;
 
@@ -819,10 +836,9 @@ public class main_view extends Activity
 					links = read_csv_to_array("id", feed_path + ".content.txt");
 				String[] descriptions = read_csv_to_array("description", feed_path + ".content.txt");
 
-				//check group of feed and pass it to the adapter
-				for(int i=0; i<group_order.length; i++)
+				for(int i=0; i<current_groups.length; i++)
 				{
-					if(group_order[i].equals(group_array[k]))
+					if(current_groups[i].equals(group_array[k]))
 					{
 						ArrayListFragment.get_adapter_at(i).add_list(Arrays.asList(titles), Arrays.asList(descriptions), Arrays.asList(links));
 						publishProgress(i);
@@ -839,7 +855,8 @@ public class main_view extends Activity
 			ArrayListFragment.get_adapter_at(progress[0]).notifyDataSetChanged();
 		}
 
-		protected void onPostExecute(Long result) {
+		protected void onPostExecute(Long... tun) {
+			not_refreshing = true;
 		}
 	}
 }
