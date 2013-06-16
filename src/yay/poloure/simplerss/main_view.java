@@ -68,6 +68,7 @@ public class main_view extends Activity
 	
 	private ListView navigation_list;
 	private ActionBarDrawerToggle drawer_toggle;
+	private Menu optionsMenu;
 
 	private Button btnClosePopup;
 
@@ -77,7 +78,6 @@ public class main_view extends Activity
 	private static int download_finished;
 
 	private static String[] current_groups;
-	private static boolean not_refreshing = true;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -341,6 +341,7 @@ public class main_view extends Activity
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
+		this.optionsMenu = menu;
 		MenuInflater menu_inflater = getMenuInflater();
 		menu_inflater.inflate(R.menu.main_overflow, menu);
 		return true;
@@ -358,15 +359,26 @@ public class main_view extends Activity
 		}
 		else if(item.getTitle().equals("refresh"))
 		{
-			if(not_refreshing == true)
-			{
-				not_refreshing = false;
-				new refresh_feeds().execute();
-			}
+			new refresh_feeds().execute();
 			return true;
 		}
 		
 		return super.onOptionsItemSelected(item);
+	}
+
+	public void set_refresh(final boolean refreshing)
+	{
+		if(optionsMenu != null)
+		{
+			final MenuItem refreshItem = optionsMenu.findItem(R.id.refresh);
+			if(refreshItem != null)
+			{
+				if (refreshing)
+					refreshItem.setActionView(R.layout.progress_circle);
+				else
+					refreshItem.setActionView(null);
+			}
+		}
 	}
 
 	private void show_add_dialog()
@@ -672,6 +684,8 @@ public class main_view extends Activity
 	{
 		current_groups = read_file_to_array("group_list.txt");
 		MyFragmentPagerAdapter.add_page(current_groups[current_groups.length - 1]);
+		((ViewPager) findViewById(R.id.pager)).getAdapter().notifyDataSetChanged();
+		
 	}
 
 	private void add_group(String group_name)
@@ -822,6 +836,9 @@ public class main_view extends Activity
 
 	private class refresh_feeds extends AsyncTask<Void, Integer, Long> {
 
+		protected void onPreExecute(){
+			set_refresh(true);
+		}
 		protected Long doInBackground(Void... ton)
 		{
 			String file_path = get_filepath("all_feeds.txt");
@@ -836,10 +853,11 @@ public class main_view extends Activity
 				feed_path = get_filepath(feeds_array[k] + ".store.txt");
 				wait = new File(feed_path);
 				download_file(url_array[k], feeds_array[k] + ".store.txt");
+				String[] len = read_file_to_array(feeds_array[k] + ".store.txt.content.txt");
 				
 				new parsered(feed_path);
-
 				wait.delete();
+				remove_duplicates(feeds_array[k] + ".store.txt.content.txt", len.length);
 				
 				String[] titles = read_csv_to_array("title", feed_path + ".content.txt");
 				String[] links = read_csv_to_array("link", feed_path + ".content.txt");
@@ -853,8 +871,8 @@ public class main_view extends Activity
 					{
 						ArrayListFragment.get_adapter_at(i).add_list(Arrays.asList(titles), Arrays.asList(descriptions), Arrays.asList(links));
 						publishProgress(i);
+						break;
 					}
-
 				}
 			}
 			long lo = 1;
@@ -866,8 +884,59 @@ public class main_view extends Activity
 			ArrayListFragment.get_adapter_at(progress[0]).notifyDataSetChanged();
 		}
 
-		protected void onPostExecute(Long... tun) {
-			not_refreshing = true;
+		protected void onPostExecute(Long tun) {
+			set_refresh(false);
+		}
+	}
+
+	private void remove_duplicates(String file_name, int length_before)
+	{
+		/// Remove the duplicate title
+		String file_path = get_filepath(file_name);
+		File temp = new File(file_path);
+
+		if(length_before > 0)
+		{
+			String[] title_remove = read_file_to_array(file_name);
+			temp.delete();
+			for(int i=0; i<title_remove.length ; i++)
+			{
+				if(i != length_before)
+					append_string_to_file(file_name, title_remove[i] + "\n");
+			}
+		}
+
+
+		String[] titles = read_csv_to_array("title", file_path);
+		int[] is_duplicate = new int[titles.length];
+		boolean found = false;
+		int index = 0;
+		for(int k=0; k<titles.length - 1; k++)
+		{
+			if(is_duplicate[k] == 0)
+			{
+				for(int i=k + 1; i<titles.length; i++)
+				{
+					if(titles[k].equals(titles[i]))
+					{
+						found = true;
+						index = i;
+						break;
+					}
+				}
+			}
+			if(found)
+				is_duplicate[index] = 1;
+			found = false;
+			index = 0;
+		}
+		String[] feeds_old = read_file_to_array(file_name);
+		temp.delete();
+		append_string_to_file(file_name, feeds_old[0] + "\n");
+		for(int i=0; i<feeds_old.length - 1; i++)
+		{
+			if(is_duplicate[i] == 0)
+				append_string_to_file(file_name, feeds_old[i+1] + "\n");
 		}
 	}
 }
