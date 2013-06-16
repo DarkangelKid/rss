@@ -416,7 +416,7 @@ public class main_view extends Activity
 							if(words.length == 1)
 							{
 								char cap = Character.toUpperCase(words[0].charAt(0));
-								new_group +=  cap + words[i].substring(1, words[0].length());
+								new_group +=  cap + words[0].substring(1, words[0].length());
 							}
 							else
 							{
@@ -425,7 +425,8 @@ public class main_view extends Activity
 									char cap = Character.toUpperCase(words[i].charAt(0));
 									new_group +=  cap + words[i].substring(1, words[i].length()) + " ";
 								}
-								new_group +=  cap + words[i].substring(1, words[i].length());
+								char cap = Character.toUpperCase(words[words.length - 1].charAt(0));
+								new_group +=  cap + words[words.length - 1].substring(1, words[words.length - 1].length());
 							}
 							
 							if(!found)
