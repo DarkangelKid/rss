@@ -9,6 +9,7 @@ import android.app.AlertDialog;
 import java.util.List;
 import java.util.ArrayList;
 import java.nio.channels.*;
+import java.util.Arrays;
 
 import android.os.Bundle;
 
@@ -30,6 +31,8 @@ import android.view.MenuInflater;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListAdapter;
+import android.widget.LinearLayout;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -278,8 +281,8 @@ public class main_view extends Activity
 
 	public static class ArrayListFragment extends ListFragment
 	{
-		int mNum;
-		private static List<card_adapter> adapters = new ArrayList();
+		private static int mNum;
+		private static List<ArrayListFragment> list_list = new ArrayList();
 		
 		static ArrayListFragment newInstance(int num)
 		{
@@ -287,6 +290,12 @@ public class main_view extends Activity
 			Bundle args = new Bundle();
 			args.putInt("num", num);
 			f.setArguments(args);
+			try{
+				list_list.set(num, f);
+			}
+			catch(IndexOutOfBoundsException e){
+				list_list.add(f);
+			}
 			return f;
 		}
 
@@ -294,19 +303,17 @@ public class main_view extends Activity
 		public void onActivityCreated(Bundle savedInstanceState)
 		{
 			super.onActivityCreated(savedInstanceState);
-			/*try{
-				adapters.set(mNum, new card_adapter(getActivity()));
-			}
-			catch(IndexOutOfBoundsException e){
-				adapters.add(new card_adapter(getActivity()));
-			}*/
-			//setListAdapter(adapters.get(mNum));
-			setListAdapter(new card_adapter(getActivity()));
+		}
+
+		private static card_adapter get_adapter_at(int pos)
+		{
+			return (card_adapter) list_list.get(pos).getListView().getAdapter();
 		}
 
 		@Override
 		public void onCreate(Bundle savedInstanceState){
 			super.onCreate(savedInstanceState);
+			setListAdapter(new card_adapter(getActivity()));
 			mNum = getArguments() != null ? getArguments().getInt("num") : 1;
 		}
 
@@ -457,7 +464,7 @@ public class main_view extends Activity
 								temp = new File(get_filepath("URLcheck.txt.title.txt"));
 								temp.delete();
 							}
-							add_feed(feed_name, URL_check, "Add");
+							add_feed(feed_name, URL_check, "All");
 							alertDialog.dismiss();
 						}
 						in.delete();
@@ -566,7 +573,6 @@ public class main_view extends Activity
 			try
 			{
 				String line;
-
 				File in = new File(get_filepath(file_name));
 				File out = new File(get_filepath(file_name) + ".temp");
 
@@ -701,10 +707,17 @@ public class main_view extends Activity
 					content_values[i] = line.substring(0, line.indexOf('|', 0));
 					i++;
 				}
-				if(index == 1)
+				else if(index == 1)
 				{
 					int bar_index = line.indexOf('|', 0);
 					line = line.substring(bar_index + 1, line.indexOf('|', bar_index + 1));
+					content_values[i] = line;
+					i++;
+				}
+				else if(index == 2)
+				{
+					int bar_index = line.indexOf('|', line.indexOf('|') + 1);
+					line = line.substring(bar_index + 1, line.length());
 					content_values[i] = line;
 					i++;
 				}
@@ -755,18 +768,17 @@ public class main_view extends Activity
 		return content_values;
 	}
 
-	private class refresh_feeds extends AsyncTask<Void, Void, Long> {
+	private class refresh_feeds extends AsyncTask<Void, Integer, Long> {
 
 		protected Long doInBackground(Void... ton)
 		{
 			String file_path = get_filepath("all_feeds.txt");
 			String[] feeds_array = read_feeds_to_array(0, file_path);
 			String[] url_array = read_feeds_to_array(1, file_path);
+			String[] group_array = read_feeds_to_array(2, file_path);
+			String[] group_order = read_file_to_array("group_list.txt");
 			File wait;
 			String feed_path;
-			List<String> one = new ArrayList();
-			List<String> two = new ArrayList();
-			List<String> three = new ArrayList();
 
 			for(int k=0; k<feeds_array.length; k++)
 			{
@@ -784,26 +796,27 @@ public class main_view extends Activity
 					links = read_csv_to_array("id", feed_path + ".content.txt");
 				String[] descriptions = read_csv_to_array("description", feed_path + ".content.txt");
 
-				for(int i=0; i<titles.length; i++)
+				//check group of feed and pass it to the adapter
+				for(int i=0; i<group_order.length; i++)
 				{
-					one.add(titles[i]);
-					try{
-						two.add(descriptions[i]);
+					if(group_order[i].equals(group_array[k]))
+					{
+						ArrayListFragment.get_adapter_at(i).add_list(Arrays.asList(titles), Arrays.asList(descriptions), Arrays.asList(links));
+						publishProgress(i);
 					}
-					catch(Exception e){}
-					try{
-						three.add(links[i]);
-					}
-					catch(Exception e){}
+
 				}
 			}
-			card_adapter.add_list(one, two, three);
 			long lo = 1;
 			return lo;
 		}
 
+		protected void onProgressUpdate(Integer... progress)
+		{
+			ArrayListFragment.get_adapter_at(progress[0]).notifyDataSetChanged();
+		}
+
 		protected void onPostExecute(Long result) {
-			((BaseAdapter) ((ListView) findViewById(android.R.id.list)).getAdapter()).notifyDataSetChanged();
 		}
 	}
 }
