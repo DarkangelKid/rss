@@ -197,6 +197,14 @@ public class main_view extends Activity
 		}
 		else
 		{
+			if(!(mTitle.equals(MainTitle)))
+			{
+				getFragmentManager()
+						.beginTransaction()
+						.detach(getFragmentManager().findFragmentByTag(mTitle.toString()))
+						.commit();
+				setTitle(MainTitle);
+			}
 			mDrawerLayout.closeDrawer(navigation_list);
 			int page = position - 3;
 			((ViewPager)findViewById(R.id.pager)).setCurrentItem(page);
