@@ -399,6 +399,17 @@ public class main_view extends Activity
 					@Override
 					public void onClick(View view)
 					{
+						String new_group = ((EditText) add_rss_dialog.findViewById(R.id.group_edit)).getText().toString().trim();
+						String[] groups = read_file_to_array("group_list.txt");
+						boolean found = false;
+						for(int i = 0; i < groups.length; i++)
+						{
+							if(groups[i].equals(new_group))
+								found = true;
+						}
+						if(!found)
+							add_group(new_group);
+
 						Boolean rss = false;
 						String URL_check = ((EditText) add_rss_dialog.findViewById(R.id.URL_edit)).getText().toString().trim();
 						String feed_name = ((EditText) add_rss_dialog.findViewById(R.id.name_edit)).getText().toString().trim();
