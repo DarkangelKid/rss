@@ -13,9 +13,9 @@ import java.util.ArrayList;
 public class card_adapter extends BaseAdapter
 {
 
-	private static List<String> content_titles = new ArrayList();
-	private static List<String> content_des = new ArrayList();
-	private static List<String> content_times = new ArrayList();
+	private List<String> content_titles = new ArrayList();
+	private List<String> content_des = new ArrayList();
+	private List<String> content_times = new ArrayList();
 	LayoutInflater inflater;
 
 	private final Context context;
@@ -26,27 +26,11 @@ public class card_adapter extends BaseAdapter
 		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 
-	public static void add_list(List<String> new_titles, List<String> new_des, List<String> new_times)
+	public void add_list(List<String> new_titles, List<String> new_des, List<String> new_times)
 	{
-		boolean exists = false;
-		for(int j=0; j<new_titles.size(); j++)
-		{
-			for(int i=0; i<content_titles.size(); i++)
-			{
-				if(content_titles.get(i).equals(new_titles.get(j)))
-				{
-					exists = true;
-					break;
-				}
-			}
-			if(!exists)
-			{
-				content_titles.add(new_titles.get(j));
-				content_des.add(new_des.get(j));
-				content_times.add(new_times.get(j));
-			}
-			exists = false;
-		}
+		content_titles = new_titles;
+		content_des = new_des;
+		content_times = new_times;
 	}
 
 	@Override
@@ -75,7 +59,7 @@ public class card_adapter extends BaseAdapter
 				holder.title_view = (TextView) convertView.findViewById(R.id.title);
 				holder.time_view = (TextView) convertView.findViewById(R.id.time);
 				holder.description_view = (TextView) convertView.findViewById(R.id.description);
-				holder.image_view = (ImageView) convertView.findViewById(R.id.image);
+				//holder.image_view = (ImageView) convertView.findViewById(R.id.image);
 				convertView.setTag(holder);
 			}
 			else
@@ -84,7 +68,7 @@ public class card_adapter extends BaseAdapter
 			holder.title_view.setText(content_titles.get(position));
 			holder.time_view.setText(content_times.get(position));
 			holder.description_view.setText(content_des.get(position));
-			holder.image_view.setImageResource(R.drawable.ok);
+			//holder.image_view.setImageResource(R.drawable.ok);
 			
 			return convertView;
 	}
