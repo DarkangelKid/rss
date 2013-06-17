@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.graphics.drawable.Drawable;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -15,10 +16,13 @@ public class card_adapter extends BaseAdapter
 	private static List<String> all_content_titles = new ArrayList();
 	private static List<String> all_content_des = new ArrayList();
 	private static List<String> all_content_links = new ArrayList();
+	//private static List<Drawable> all_content_icons = new ArrayList();
 
 	private List<String> content_titles = new ArrayList();
 	private List<String> content_des = new ArrayList();
 	private List<String> content_links = new ArrayList();
+	//private List<Drawable> content_icons = new ArrayList();
+
 	LayoutInflater inflater;
 
 	private final Context context;
@@ -29,27 +33,32 @@ public class card_adapter extends BaseAdapter
 		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 
-	public void add_list(List<String> new_titles, List<String> new_des, List<String> new_links)
+	public void add_list(List<String> new_titles, List<String> new_des, List<String> new_links/*, List<Drawable> new_icons*/)
 	{
 		content_titles = new_titles;
 		content_des = new_des;
 		content_links = new_links;
+		//content_icons = new_icons;
 	}
 	
-	public void add_static_list(List<String> new_titless, List<String> new_dess, List<String> new_linkss)
+	public void add_static_list(List<String> new_titless, List<String> new_dess, List<String> new_linkss/*, List<Drawable> new_iconss*/)
 	{
 		all_content_titles.addAll(new_titless);
 		all_content_des.addAll(new_dess);
 		all_content_links.addAll(new_linkss);
+		//if(new_linkss.size() == new_iconss.size())
+			//all_content_icons.addAll(new_iconss);
 		content_titles = all_content_titles;
 		content_des = all_content_des;
 		content_links = all_content_links;
+		//content_icons = all_content_icons;
 	}
 
 	public void clear_static_list(){
 		all_content_titles = new ArrayList();
 		all_content_des = new ArrayList();
 		all_content_links = new ArrayList();
+		//all_content_icons = new ArrayList();
 	}
 
 	@Override
@@ -95,7 +104,10 @@ public class card_adapter extends BaseAdapter
 			holder.title_view.setText(content_titles.get(position));
 			holder.time_view.setText(content_links.get(position));
 			holder.description_view.setText(content_des.get(position));
-			//holder.image_view.setImageResource(R.drawable.ok);
+			/*try{
+				holder.image_view.setImageDrawable(content_icons.get(position));
+			}
+			catch(Exception e){}*/
 			
 			return convertView;
 		//}
@@ -106,6 +118,6 @@ public class card_adapter extends BaseAdapter
 		TextView title_view;
 		TextView time_view;
 		TextView description_view;
-		ImageView image_view;
+		//ImageView image_view;
 	}
 } 
