@@ -26,6 +26,7 @@ import android.support.v4.view.PagerTabStrip;
 import android.support.v4.widget.DrawerLayout;
 
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuInflater;
@@ -88,6 +89,9 @@ public class main_view extends Activity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.pager);
 
+		File dump = new File(get_filepath("dump.txt"));
+		dump.delete();
+
 		current_groups = read_file_to_array("group_list.txt");
 		if(current_groups.length == 0)
 			append_string_to_file("group_list.txt", "All\n");
@@ -148,8 +152,7 @@ public class main_view extends Activity
 	private class DrawerItemClickListener implements ListView.OnItemClickListener
 	{
 		@Override
-		public void onItemClick(AdapterView parent, View view, int position, long id)
-		{
+		public void onItemClick(AdapterView parent, View view, int position, long id){
 			selectItem(position);
 		}
 	}
@@ -318,7 +321,10 @@ public class main_view extends Activity
 		@Override
 		public void onCreate(Bundle savedInstanceState){
 			super.onCreate(savedInstanceState);
-			setListAdapter(new card_adapter(getActivity()));
+			/*View ve = new View(getActivity());
+			getListView().addFooterView(ve);
+			getListView().addHeaderView(ve);
+			setListAdapter(new card_adapter(getActivity()));*/
 			mNum = getArguments() != null ? getArguments().getInt("num") : 1;
 		}
 
@@ -835,10 +841,7 @@ public class main_view extends Activity
 		}
 		protected Long doInBackground(Void... ton)
 		{
-			((card_adapter)((ArrayListFragment) getFragmentManager()
-					.findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + Integer.toString(0)))
-					.getListAdapter())
-					.clear_static_list();
+			get_card_adapter(0).clear_static_list();
 					
 			for(int i=0; i<current_groups.length; i++)
 			{
@@ -850,40 +853,44 @@ public class main_view extends Activity
 				List<String> titles = new ArrayList();
 				List<String> descriptions = new ArrayList();
 				List<String> links = new ArrayList();
+				List<Drawable> icons = new ArrayList();
 
 				for(int k=0; k<feeds_array.length; k++)
 				{
-					feed_path = get_filepath(feeds_array[k] + ".store.txt");
-					wait = new File(feed_path);
-					download_file(url_array[k], feeds_array[k] + ".store.txt");
-
-					new parsered(feed_path);
-					wait.delete();
-					int length_before = read_file_to_array(feeds_array[k] + ".store.txt.content.txt").length;
-					if(length_before > 1)
-						remove_duplicates(feeds_array[k] + ".store.txt.content.txt", length_before);
+					update_feed(feeds_array[k]);
 
 					/// Order by time here.
-					titles.addAll(Arrays.asList(read_csv_to_array("title", feed_path + ".content.txt")));
+					feed_path = get_filepath(feeds_array[k] + ".store.txt");
+					String[] new_titles = read_csv_to_array("title", feed_path + ".content.txt");
+					titles.addAll(Arrays.asList(new_titles));
 					descriptions.addAll(Arrays.asList(read_csv_to_array("description", feed_path + ".content.txt")));
 					String[] link = read_csv_to_array("link", feed_path + ".content.txt");
 					if(link[0].length()<10)
 						link = read_csv_to_array("id", feed_path + ".content.txt");
 					links.addAll(Arrays.asList(link));
+
+					/// Get feed icon
+					/*try{
+						String line = (new BufferedReader(new FileReader(new File(feed_path + ".content.txt")))).readLine();
+						int content_start = line.indexOf("icon|") + 5;
+						String icon_url = line.substring(content_start, line.indexOf('|', content_start));
+						content_start = line.indexOf("title|") + 6;
+						String icon_name = line.substring(content_start, line.indexOf('|', content_start)) + ".png";					
+
+						download_file(icon_url, icon_name);
+
+						Drawable feed_icon = Drawable.createFromPath(get_filepath(icon_name));
+						for(int l=0; l<new_titles.length; l++)
+							icons.add(feed_icon);
+					}
+					catch(Exception e)
+					{
+					}*/
 				}
 				if(titles.size()>0)
 				{
-					append_string_to_file("dump.txt", "Setting data to adapters.\n");
-					((card_adapter)((ArrayListFragment) getFragmentManager()
-						.findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + Integer.toString(i)))
-						.getListAdapter())
-						.add_list(titles, descriptions, links);
-
-					((card_adapter)((ArrayListFragment) getFragmentManager()
-						.findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + Integer.toString(0)))
-						.getListAdapter())
-						.add_static_list(titles, descriptions, links);
-
+					get_card_adapter(i).add_list(titles, descriptions, links);
+					get_card_adapter(0).add_static_list(titles, descriptions, links);
 					publishProgress(i);
 				}
 			}
@@ -893,14 +900,8 @@ public class main_view extends Activity
 
 		protected void onProgressUpdate(Integer... progress)
 		{
-			((card_adapter)((ArrayListFragment) getFragmentManager()
-				.findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + Integer.toString(progress[0])))
-				.getListAdapter())
-				.notifyDataSetChanged();
-			((card_adapter)((ArrayListFragment) getFragmentManager()
-				.findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + Integer.toString(0)))
-				.getListAdapter())
-				.notifyDataSetChanged();
+			get_card_adapter(progress[0]).notifyDataSetChanged();
+			get_card_adapter(0).notifyDataSetChanged();
 		}
 
 		protected void onPostExecute(Long tun)
@@ -909,6 +910,42 @@ public class main_view extends Activity
 				viewPager.setOffscreenPageLimit(1);
 			set_refresh(false);
 		}
+	}
+
+	private card_adapter get_card_adapter(int page_index)
+	{
+		return ((card_adapter)((ArrayListFragment) getFragmentManager()
+						.findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + Integer.toString(page_index)))
+						.getListAdapter());
+	}
+
+	private void update_feed(String feed_name)
+	{
+		String line = "";
+		boolean found = false;
+		try{
+			BufferedReader read = (new BufferedReader(new FileReader(new File(get_filepath("all_feeds.txt")))));
+			while(!(line.contains(feed_name))){
+				line = read.readLine();
+				found = true;
+			}
+			if(found)
+			{
+				int content_start = line.indexOf(feed_name + "|") + feed_name.length() + 1;
+				String feed_url = line.substring(content_start, line.indexOf('|', content_start));
+
+				int length_before = read_file_to_array(feed_name + ".store.txt.content.txt").length;
+				
+				download_file(feed_url, feed_name + ".store.txt");
+				String feed_path = get_filepath(feed_name + ".store.txt");
+				new parsered(feed_path);
+				(new File(feed_path)).delete();
+				
+				if(length_before > 1)
+					remove_duplicates(feed_name + ".store.txt.content.txt", length_before);
+			}
+		}
+		catch(Exception e){}
 	}
 
 	private void remove_duplicates(String file_name, int length_before)
@@ -958,5 +995,10 @@ public class main_view extends Activity
 			if(is_duplicate[i] == 0)
 				append_string_to_file(file_name, feeds_old[i+1] + "\n");
 		}
+	}
+
+	private void log(String text)
+	{
+		append_string_to_file(get_filepath("dump.txt", text + "\n");
 	}
 }
