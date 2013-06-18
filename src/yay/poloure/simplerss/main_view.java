@@ -35,6 +35,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListAdapter;
 import android.widget.LinearLayout;
+import android.widget.FrameLayout;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -74,30 +76,56 @@ public class main_view extends Activity
 
 	private Button btnClosePopup;
 
-	private CharSequence mTitle;
+	private String mTitle;
 	private CharSequence MainTitle;
 
 	private static int download_finished;
-	private MyFragmentPagerAdapter page_adapter;
+	private viewpager_adapter page_adapter;
 	private ViewPager viewPager;
 
 	private static String[] current_groups;
+	private static final int CONTENT_VIEW_ID = 10101010;
+
+	private Fragment man, pref, feed;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{		
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.pager);
+		getActionBar().setTitle("Feeds");
+		FrameLayout frame = new FrameLayout(this);
+		frame.setId(CONTENT_VIEW_ID);
+		setContentView(frame, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
-		File dump = new File(get_filepath("dump.txt"));
-		dump.delete();
+		//File dump = new File(get_filepath("dump.txt"));
+		//dump.delete();
 
 		current_groups = read_file_to_array("group_list.txt");
 		if(current_groups.length == 0)
 			append_string_to_file("group_list.txt", "All\n");
 
 		getActionBar().setIcon(R.drawable.rss_icon);
-		page_adapter = new MyFragmentPagerAdapter(getFragmentManager());
+		if (savedInstanceState == null)
+		{
+			getFragmentManager().beginTransaction()
+						.add(CONTENT_VIEW_ID, new top_fragment())
+						.commit();
+			feed = new the_feed_fragment();
+			pref = new PrefsFragment();
+			man = new manage_fragment();
+			getFragmentManager().beginTransaction()
+				.add(R.id.content_frame, feed, "Feeds")
+				.add(R.id.content_frame, pref, "Settings")
+				.add(R.id.content_frame, man, "Manage")
+				.hide(man)
+				.hide(pref)
+				.commit();
+		}
+	}
+
+	@Override
+	protected void onPostCreate(Bundle savedInstanceState) {
+		super.onPostCreate(savedInstanceState);
 
 		String[] nav_items = new String[]{"Feeds", "Manage", "Settings"};
 		String[] nav_final = new String[current_groups.length + nav_items.length];
@@ -108,17 +136,20 @@ public class main_view extends Activity
 		navigation_list.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, nav_final));
 		navigation_list.setOnItemClickListener(new DrawerItemClickListener());
 
+		page_adapter = new viewpager_adapter(getFragmentManager());
+
 		viewPager = (ViewPager) findViewById(R.id.pager);
 		viewPager.setAdapter(page_adapter);
 		viewPager.setOffscreenPageLimit(128);
 
 		update_groups();
-		
+
+		/// Set PagerTabStrip
 		PagerTabStrip pagerTabStrip = (PagerTabStrip) findViewById(R.id.pager_title_strip);
 		pagerTabStrip.setDrawFullUnderline(true);
 		pagerTabStrip.setTabIndicatorColor(Color.argb(0, 51, 181, 229));
 
-		mTitle = MainTitle = getTitle();
+		mTitle = "Feeds";
 		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, 8388611);
 		drawer_toggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
@@ -135,11 +166,7 @@ public class main_view extends Activity
 		mDrawerLayout.setDrawerListener(drawer_toggle);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		getActionBar().setHomeButtonEnabled(true);
-	}
-
-	@Override
-	protected void onPostCreate(Bundle savedInstanceState) {
-		super.onPostCreate(savedInstanceState);
+		
 		drawer_toggle.syncState();
 	}
 
@@ -157,73 +184,77 @@ public class main_view extends Activity
 		}
 	}
 
-	/** Swaps fragments in the main content view */
 	private boolean selectItem(int position)
 	{
 		if(position < 3)
 		{
-			String[] titles = new String[] {"Feeds", "Manage", "Settings"};
 			Fragment fragment;
 			if(position == 2)
-				fragment = new PrefsFragment();
+				switch_page("Settings", position);
 			else if(position == 1)
-				fragment = new manage_fragment();
-			else if(position == 0)
-			{
-				if((mTitle.equals(MainTitle)))
-				{
-					mDrawerLayout.closeDrawer(navigation_list);
-					((ViewPager)findViewById(R.id.pager)).setCurrentItem(0);
-					return false;
-				}
-				else
-				{
-					getFragmentManager()
-							.beginTransaction()
-							.detach(getFragmentManager().findFragmentByTag(mTitle.toString()))
-							.commit();
-					setTitle(MainTitle);
-					mDrawerLayout.closeDrawer(navigation_list);
-					return true;
-				}
-			}
+				switch_page("Manage", position);
 			else
-				return false;
-			Bundle args = new Bundle();
-			args.putInt("Position", position);
-			fragment.setArguments(args);
-			FragmentManager fragmentManager = getFragmentManager();
-			fragmentManager.beginTransaction()
-						//.setCustomAnimations(17432576, 17432577)
-						.replace(R.id.content_frame, fragment, titles[position])
-						.commit();
-			navigation_list.setItemChecked(position, true);
-			setTitle(titles[position]);
-			mDrawerLayout.closeDrawer(navigation_list);
-			return true;
+				switch_page("Feeds", position);
 		}
 		else
 		{
-			if(!(mTitle.equals(MainTitle)))
-			{
-				getFragmentManager()
-						.beginTransaction()
-						.detach(getFragmentManager().findFragmentByTag(mTitle.toString()))
-						.commit();
-				setTitle(MainTitle);
-			}
-			mDrawerLayout.closeDrawer(navigation_list);
+			switch_page("Feeds", position);
 			int page = position - 3;
-			((ViewPager)findViewById(R.id.pager)).setCurrentItem(page);
-			return true;
+			viewPager.setCurrentItem(page);
+		}
+		return true;
+	}
+
+	private void switch_page(String page_title, int position)
+	{
+		if(!mTitle.equals(page_title))
+		{
+			getFragmentManager().beginTransaction()
+						.setTransition(4099)
+						.hide(getFragmentManager().findFragmentByTag(mTitle))
+						.show(getFragmentManager().findFragmentByTag(page_title))
+						.commit();
+			
+			navigation_list.setItemChecked(position, true);
+			if(position < 3){
+				set_title(page_title);
+			}
+			else
+				set_title("Feeds");
+		}
+		mDrawerLayout.closeDrawer(navigation_list);
+		mTitle = page_title;
+	}
+
+	private void set_title(String title)
+	{
+		mTitle = title;
+		getActionBar().setTitle(title);
+	}
+
+	public class top_fragment extends Fragment
+	{
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+		{
+			return inflater.inflate(R.layout.pager, container, false);
 		}
 	}
 
-	@Override
-    public void setTitle(CharSequence title) {
-        mTitle = title;
-        getActionBar().setTitle(mTitle);
-    }
+	public class the_feed_fragment extends Fragment
+	{
+		@Override
+		public void onCreate(Bundle savedInstanceState){
+			super.onCreate(savedInstanceState);
+			setRetainInstance(true);
+		}
+		
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+		{
+			return inflater.inflate(R.layout.feed_fragment, container, false);
+		}
+	}
 
 	public static class PrefsFragment extends PreferenceFragment
 	{
@@ -245,7 +276,6 @@ public class main_view extends Activity
 
 	public class manage_fragment extends Fragment
 	{
-
 		@Override
 		public void onCreate(Bundle savedInstanceState)
 		{
@@ -258,23 +288,11 @@ public class main_view extends Activity
 			return inflater.inflate(R.layout.manage_fragment, container, false);
 		}
 
-		@Override
-		public void onResume()
-		{
-			super.onResume();
-		}
-
-		@Override
-		public void onPause()
-		{
-			super.onPause();
-		}
-
 	}
 
-	public static class MyFragmentPagerAdapter extends FragmentPagerAdapter
+	public static class viewpager_adapter extends FragmentPagerAdapter
 	{
-		public MyFragmentPagerAdapter(FragmentManager fm){
+		public viewpager_adapter(FragmentManager fm){
 			super(fm);
 		}
  
@@ -285,7 +303,7 @@ public class main_view extends Activity
 
  		@Override
 		public Fragment getItem(int position){
-			return ArrayListFragment.newInstance(position);
+			return card_fragment.newInstance(position);
 		}
 
 		@Override
@@ -299,13 +317,13 @@ public class main_view extends Activity
 		}
 	}
 
-	public static class ArrayListFragment extends ListFragment
+	public static class card_fragment extends ListFragment
 	{
 		private static int mNum;
 		
-		static ArrayListFragment newInstance(int num)
+		static card_fragment newInstance(int num)
 		{
-			ArrayListFragment f = new ArrayListFragment();
+			card_fragment f = new card_fragment();
 			Bundle args = new Bundle();
 			args.putInt("num", num);
 			f.setArguments(args);
@@ -313,18 +331,14 @@ public class main_view extends Activity
 		}
 		
 		@Override
-		public void onActivityCreated(Bundle savedInstanceState)
-		{
+		public void onActivityCreated(Bundle savedInstanceState){
 			super.onActivityCreated(savedInstanceState);
 		}
 
 		@Override
 		public void onCreate(Bundle savedInstanceState){
 			super.onCreate(savedInstanceState);
-			/*View ve = new View(getActivity());
-			getListView().addFooterView(ve);
-			getListView().addHeaderView(ve);
-			setListAdapter(new card_adapter(getActivity()));*/
+			setListAdapter(new card_adapter(getActivity()));
 			mNum = getArguments() != null ? getArguments().getInt("num") : 1;
 		}
 
@@ -598,8 +612,7 @@ public class main_view extends Activity
 		}
 	}
 
-	private String get_filepath(String filename)
-	{
+	private String get_filepath(String filename){
 		return this.getExternalFilesDir(null).getAbsolutePath() + "/" + filename;
 	}
 
@@ -842,50 +855,44 @@ public class main_view extends Activity
 		protected Long doInBackground(Void... ton)
 		{
 			get_card_adapter(0).clear_static_list();
-					
+
 			for(int i=0; i<current_groups.length; i++)
 			{
 				String[] feeds_array = read_feeds_to_array(0, get_filepath(current_groups[i] + ".txt"));
-				String[] url_array = read_feeds_to_array(1, get_filepath(current_groups[i] + ".txt"));
-				File wait;
-				String feed_path;
 
-				List<String> titles = new ArrayList();
-				List<String> descriptions = new ArrayList();
-				List<String> links = new ArrayList();
+				List<String> titles = new ArrayList(), descriptions = new ArrayList(), links = new ArrayList();
 				List<Drawable> icons = new ArrayList();
 
 				for(int k=0; k<feeds_array.length; k++)
 				{
-					update_feed(feeds_array[k]);
-
-					/// Order by time here.
-					feed_path = get_filepath(feeds_array[k] + ".store.txt");
-					String[] new_titles = read_csv_to_array("title", feed_path + ".content.txt");
-					titles.addAll(Arrays.asList(new_titles));
-					descriptions.addAll(Arrays.asList(read_csv_to_array("description", feed_path + ".content.txt")));
-					String[] link = read_csv_to_array("link", feed_path + ".content.txt");
-					if(link[0].length()<10)
-						link = read_csv_to_array("id", feed_path + ".content.txt");
-					links.addAll(Arrays.asList(link));
-
-					/// Get feed icon
-					/*try{
-						String line = (new BufferedReader(new FileReader(new File(feed_path + ".content.txt")))).readLine();
-						int content_start = line.indexOf("icon|") + 5;
-						String icon_url = line.substring(content_start, line.indexOf('|', content_start));
-						content_start = line.indexOf("title|") + 6;
-						String icon_name = line.substring(content_start, line.indexOf('|', content_start)) + ".png";					
-
-						download_file(icon_url, icon_name);
-
-						Drawable feed_icon = Drawable.createFromPath(get_filepath(icon_name));
-						for(int l=0; l<new_titles.length; l++)
-							icons.add(feed_icon);
-					}
-					catch(Exception e)
+					if(update_feed(feeds_array[k]))
 					{
-					}*/
+						String feed_path = get_filepath(feeds_array[k] + ".store.txt");
+						String[] new_titles = read_csv_to_array("title", feed_path + ".content.txt");
+						titles.addAll(Arrays.asList(new_titles));
+						descriptions.addAll(Arrays.asList(read_csv_to_array("description", feed_path + ".content.txt")));
+						String[] link = read_csv_to_array("link", feed_path + ".content.txt");
+						if(link[0].length()<10)
+							link = read_csv_to_array("id", feed_path + ".content.txt");
+						links.addAll(Arrays.asList(link));
+
+						/*try{
+							String line = (new BufferedReader(new FileReader(new File(feed_path + ".content.txt")))).readLine();
+							int content_start = line.indexOf("icon|") + 5;
+							String icon_url = line.substring(content_start, line.indexOf('|', content_start));
+							content_start = line.indexOf("title|") + 6;
+							String icon_name = line.substring(content_start, line.indexOf('|', content_start)) + ".png";					
+
+							download_file(icon_url, icon_name);
+
+							Drawable feed_icon = Drawable.createFromPath(get_filepath(icon_name));
+							for(int l=0; l<new_titles.length; l++)
+								icons.add(feed_icon);
+						}
+						catch(Exception e)
+						{
+						}*/
+					}
 				}
 				if(titles.size()>0)
 				{
@@ -914,12 +921,12 @@ public class main_view extends Activity
 
 	private card_adapter get_card_adapter(int page_index)
 	{
-		return ((card_adapter)((ArrayListFragment) getFragmentManager()
+		return ((card_adapter)((card_fragment) getFragmentManager()
 						.findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + Integer.toString(page_index)))
 						.getListAdapter());
 	}
 
-	private void update_feed(String feed_name)
+	private boolean update_feed(String feed_name)
 	{
 		String line = "";
 		boolean found = false;
@@ -944,8 +951,11 @@ public class main_view extends Activity
 				if(length_before > 1)
 					remove_duplicates(feed_name + ".store.txt.content.txt", length_before);
 			}
+			return true;
 		}
-		catch(Exception e){}
+		catch(Exception e){
+			return false;
+		}
 	}
 
 	private void remove_duplicates(String file_name, int length_before)
@@ -986,12 +996,10 @@ public class main_view extends Activity
 			index = 0;
 		}
 		String[] feeds_old = read_file_to_array(file_name);
-		append_string_to_file("dump.txt", "Size of feeds_old = " + feeds_old.length + "\n");
 		temp.delete();
 		append_string_to_file(file_name, feeds_old[0] + "\n");
 		for(int i=0; i<feeds_old.length - 1; i++)
 		{
-			append_string_to_file("dump.txt", is_duplicate[i] + "\n");
 			if(is_duplicate[i] == 0)
 				append_string_to_file(file_name, feeds_old[i+1] + "\n");
 		}
@@ -999,6 +1007,6 @@ public class main_view extends Activity
 
 	private void log(String text)
 	{
-		append_string_to_file(get_filepath("dump.txt", text + "\n");
+		append_string_to_file("dump.txt", text + "\n");
 	}
 }
