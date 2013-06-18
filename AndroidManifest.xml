@@ -9,13 +9,13 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="17" />
     <application
-			android:label="Simple RSS"
+			android:label="Feeds"
 			android:icon="@drawable/ic_launcher"
 			android:theme="@style/Brownie.Net"
 			android:hardwareAccelerated="true">
         <activity
         android:name="main_view"
-        android:label="Simple RSS">
+        android:label="Feeds">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
