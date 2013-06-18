@@ -97,8 +97,8 @@ public class main_view extends Activity
 		frame.setId(CONTENT_VIEW_ID);
 		setContentView(frame, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
-		//File dump = new File(get_filepath("dump.txt"));
-		//dump.delete();
+		File dump = new File(get_filepath("dump.txt"));
+		dump.delete();
 
 		current_groups = read_file_to_array("group_list.txt");
 		if(current_groups.length == 0)
@@ -124,8 +124,11 @@ public class main_view extends Activity
 	}
 
 	@Override
-	protected void onPostCreate(Bundle savedInstanceState) {
+	protected void onPostCreate(Bundle savedInstanceState)
+	{
+		log("before");
 		super.onPostCreate(savedInstanceState);
+		log("after");
 
 		String[] nav_items = new String[]{"Feeds", "Manage", "Settings"};
 		String[] nav_final = new String[current_groups.length + nav_items.length];
@@ -280,13 +283,13 @@ public class main_view extends Activity
 		{
 			super.onCreate(savedInstanceState);
 			
-			final ListView manage_list = (ListView) findViewById(R.id.manage_list);
+			/*final ListView manage_list = (ListView) findViewById(R.id.manage_list);
 			String[] group_manage_list = current_groups;
 			append_string_to_file("dump.txt", group_manage_list[0]+"\n");
 			ArrayAdapter<String> manage_adapter = new ArrayAdapter<String>(getActivity(), R.layout.manage_list_item, R.id.group_item, group_manage_list);
 			append_string_to_file("dump.txt", "create new adapter\n");
 			manage_list.setAdapter(manage_adapter);
-			append_string_to_file("dump.txt", "done creating\n");
+			append_string_to_file("dump.txt", "done creating\n");*/
 		}
 
 		@Override
