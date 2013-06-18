@@ -144,7 +144,6 @@ public class main_view extends Activity
 
 		update_groups();
 
-		/// Set PagerTabStrip
 		PagerTabStrip pagerTabStrip = (PagerTabStrip) findViewById(R.id.pager_title_strip);
 		pagerTabStrip.setDrawFullUnderline(true);
 		pagerTabStrip.setTabIndicatorColor(Color.argb(0, 51, 181, 229));
@@ -280,6 +279,14 @@ public class main_view extends Activity
 		public void onCreate(Bundle savedInstanceState)
 		{
 			super.onCreate(savedInstanceState);
+			
+			final ListView manage_list = (ListView) findViewById(R.id.manage_list);
+			String[] group_manage_list = current_groups;
+			append_string_to_file("dump.txt", group_manage_list[0]+"\n");
+			ArrayAdapter<String> manage_adapter = new ArrayAdapter<String>(getActivity(), R.layout.manage_list_item, R.id.group_item, group_manage_list);
+			append_string_to_file("dump.txt", "create new adapter\n");
+			manage_list.setAdapter(manage_adapter);
+			append_string_to_file("dump.txt", "done creating\n");
 		}
 
 		@Override
@@ -289,6 +296,49 @@ public class main_view extends Activity
 		}
 
 	}
+	//shit start
+	/*findViewById(R.id.bottomright).setOnDragListener(new MyDragListener());
+	 
+	class MyDragListener implements OnDragListener
+	{
+		Drawable enterShape = getResources().getDrawable(R.drawable.shape_droptarget);
+		Drawable normalShape = getResources().getDrawable(R.drawable.shape);
+		
+		@Override
+		public boolean onDrag(View v, DragEvent event)
+		{
+			int action = event.getAction();
+			switch (event.getAction())
+			{
+				case DragEvent.ACTION_DRAG_STARTED:
+					break;
+					
+				case DragEvent.ACTION_DRAG_ENTERED:
+					v.setBackgroundDrawable(enterShape);
+					break;
+					
+				case DragEvent.ACTION_DRAG_EXITED:        
+					v.setBackgroundDrawable(normalShape);
+					break;
+					
+				case DragEvent.ACTION_DROP:
+					  View view = (View) event.getLocalState();
+					  ViewGroup owner = (ViewGroup) view.getParent();
+					  owner.removeView(view);
+					  LinearLayout container = (LinearLayout) v;
+					  container.addView(view);
+					  view.setVisibility(View.VISIBLE);
+					  break;
+					  
+				case DragEvent.ACTION_DRAG_ENDED:
+					  v.setBackgroundDrawable(normalShape);
+					  default:
+					  break;
+			}
+			return true;
+		}
+	}*/
+	//shit end
 
 	public static class viewpager_adapter extends FragmentPagerAdapter
 	{
@@ -705,6 +755,7 @@ public class main_view extends Activity
 	{
 		/// Check to see if the last character is a \n, if not, make it.
 		append_string_to_file("group_list.txt", group_name + "\n");
+
 		update_groups();
 	}
 
@@ -976,6 +1027,7 @@ public class main_view extends Activity
 		int[] is_duplicate = new int[titles.length];
 		boolean found = false;
 		int index = 0;
+
 		for(int k=0; k<titles.length - 1; k++)
 		{
 			if(is_duplicate[k] == 0)
@@ -995,6 +1047,7 @@ public class main_view extends Activity
 			found = false;
 			index = 0;
 		}
+
 		String[] feeds_old = read_file_to_array(file_name);
 		temp.delete();
 		append_string_to_file(file_name, feeds_old[0] + "\n");
