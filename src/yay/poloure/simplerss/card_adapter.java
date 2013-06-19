@@ -9,6 +9,7 @@ import android.graphics.drawable.Drawable;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.view.ViewGroup.LayoutParams;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -80,19 +81,41 @@ public class card_adapter extends BaseAdapter
 			else
 				holder = (ViewHolder) convertView.getTag();
 
+			String d = content_des.get(position).replaceAll("<([^;]*)>", "");
 			holder.title_view.setText(content_titles.get(position));
 			holder.time_view.setText(content_links.get(position));
-			if((content_des.get(position).length()>1))
+			if((d.length()>1))
 			{
 				try{
 					content_images.get(position).getIntrinsicHeight();
 					holder.description_view.setPadding((int) ((8 * main_view.get_pixel_density() + 0.5f)), 0, 0, 0);
+					ViewGroup.LayoutParams iv = holder.image_view.getLayoutParams();
+					iv.height = LayoutParams.WRAP_CONTENT;
+					iv.width = LayoutParams.WRAP_CONTENT;
+					holder.image_view.setLayoutParams(iv);
+				}
+				catch(Exception e){
+					ViewGroup.LayoutParams iv = holder.image_view.getLayoutParams();
+					iv.height = 0;
+					iv.width = 0;
+					holder.image_view.setLayoutParams(iv);
+				}
+			}
+			else
+			{
+				try{
+					content_images.get(position).getIntrinsicHeight();
+					ViewGroup.LayoutParams iv = holder.image_view.getLayoutParams();
+					iv.height = LayoutParams.MATCH_PARENT;
+					iv.width = LayoutParams.MATCH_PARENT;
+					holder.image_view.setLayoutParams(iv);
+					holder.description_view.setPadding(0, 0, 0, 0);
 				}
 				catch(Exception e){
 				}
 			}
 			holder.image_view.setImageDrawable(content_images.get(position));
-			holder.description_view.setText(content_des.get(position).replaceAll("<([^;]*)>", ""));
+			holder.description_view.setText(d);
 			
 			return convertView;
 	}
