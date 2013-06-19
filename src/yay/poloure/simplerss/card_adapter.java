@@ -1,6 +1,7 @@
 package yay.poloure.simplerss;
 
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +9,7 @@ import android.graphics.drawable.Drawable;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.view.ViewGroup.LayoutParams;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -16,7 +18,7 @@ public class card_adapter extends BaseAdapter
 	private List<String> content_titles = new ArrayList();
 	private List<String> content_des = new ArrayList();
 	private List<String> content_links = new ArrayList();
-	//private List<Drawable> content_icons = new ArrayList();
+	private List<Drawable> content_images = new ArrayList();
 
 	LayoutInflater inflater;
 
@@ -28,19 +30,19 @@ public class card_adapter extends BaseAdapter
 		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 
-	public void add_list(String new_title, String new_des, String new_link/*, Drawable new_icons*/)
+	public void add_list(String new_title, String new_des, String new_link, Drawable new_image)
 	{
 		content_titles.add(new_title);
 		content_des.add(new_des);
 		content_links.add(new_link);
-		//content_icons.add(new_icon);
+		content_images.add(new_image);
 	}
 
 	public void clear_list(){
 		content_titles = new ArrayList();
 		content_des = new ArrayList();
 		content_links = new ArrayList();
-		//content_icons = new ArrayList();
+		content_images = new ArrayList();
 	}
 
 	public List<String> return_titles(){
@@ -73,19 +75,47 @@ public class card_adapter extends BaseAdapter
 				holder.title_view = (TextView) convertView.findViewById(R.id.title);
 				holder.time_view = (TextView) convertView.findViewById(R.id.time);
 				holder.description_view = (TextView) convertView.findViewById(R.id.description);
-				//holder.image_view = (ImageView) convertView.findViewById(R.id.image);
+				holder.image_view = (ImageView) convertView.findViewById(R.id.image);
 				convertView.setTag(holder);
 			}
 			else
 				holder = (ViewHolder) convertView.getTag();
 
+			String d = content_des.get(position).replaceAll("<([^;]*)>", "");
 			holder.title_view.setText(content_titles.get(position));
 			holder.time_view.setText(content_links.get(position));
-			holder.description_view.setText(content_des.get(position));
-			/*try{
-				holder.image_view.setImageDrawable(content_icons.get(position));
+			if((d.length()>1))
+			{
+				try{
+					content_images.get(position).getIntrinsicHeight();
+					holder.description_view.setPadding((int) ((8 * main_view.get_pixel_density() + 0.5f)), 0, 0, 0);
+					ViewGroup.LayoutParams iv = holder.image_view.getLayoutParams();
+					iv.height = LayoutParams.WRAP_CONTENT;
+					iv.width = LayoutParams.WRAP_CONTENT;
+					holder.image_view.setLayoutParams(iv);
+				}
+				catch(Exception e){
+					ViewGroup.LayoutParams iv = holder.image_view.getLayoutParams();
+					iv.height = 0;
+					iv.width = 0;
+					holder.image_view.setLayoutParams(iv);
+				}
 			}
-			catch(Exception e){}*/
+			else
+			{
+				try{
+					content_images.get(position).getIntrinsicHeight();
+					ViewGroup.LayoutParams iv = holder.image_view.getLayoutParams();
+					iv.height = LayoutParams.MATCH_PARENT;
+					iv.width = LayoutParams.MATCH_PARENT;
+					holder.image_view.setLayoutParams(iv);
+					holder.description_view.setPadding(0, 0, 0, 0);
+				}
+				catch(Exception e){
+				}
+			}
+			holder.image_view.setImageDrawable(content_images.get(position));
+			holder.description_view.setText(d);
 			
 			return convertView;
 	}
@@ -95,6 +125,6 @@ public class card_adapter extends BaseAdapter
 		TextView title_view;
 		TextView time_view;
 		TextView description_view;
-		//ImageView image_view;
+		ImageView image_view;
 	}
 } 
