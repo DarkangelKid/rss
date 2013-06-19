@@ -8,13 +8,13 @@ import android.content.DialogInterface;
 import android.app.AlertDialog;
 import java.util.List;
 import java.util.ArrayList;
-import java.nio.channels.*;
 import java.util.Arrays;
 
 import android.os.Bundle;
+import java.io.StringWriter;
+import java.io.PrintWriter;
 
 import android.app.Activity;
-import org.apache.commons.io.FileUtils;
 
 import android.app.ListFragment;
 import android.app.Fragment;
@@ -85,6 +85,7 @@ public class main_view extends Activity
 
 	private static String[] current_groups;
 	private static final int CONTENT_VIEW_ID = 10101010;
+	private String[] nav_items, nav_final;
 
 	private Fragment man, pref, feed;
 
@@ -131,13 +132,14 @@ public class main_view extends Activity
 		super.onPostCreate(savedInstanceState);
 		log("after");
 
-		String[] nav_items = new String[]{"Feeds", "Manage", "Settings"};
-		String[] nav_final = new String[current_groups.length + nav_items.length];
+		nav_items = new String[]{"Feeds", "Manage", "Settings"};
+		nav_final = new String[current_groups.length + nav_items.length];
 		System.arraycopy(nav_items, 0, nav_final, 0, nav_items.length);
 		System.arraycopy(current_groups, 0, nav_final, nav_items.length, current_groups.length);
 
 		navigation_list = (ListView) findViewById(R.id.left_drawer);
-		navigation_list.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, nav_final));
+		ArrayAdapter<String> nav_adapter = new ArrayAdapter<String>(this, R.layout.drawer_list_item, nav_final);
+		navigation_list.setAdapter(nav_adapter);
 		navigation_list.setOnItemClickListener(new DrawerItemClickListener());
 
 		page_adapter = new viewpager_adapter(getFragmentManager());
@@ -612,23 +614,35 @@ public class main_view extends Activity
 
 	private void download_file(String urler, String file_name)
 	{
-		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
-		{
-			try
+			if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
 			{
-				URL website = new URL(urler);
-				
-				/*ReadableByteChannel rbc = Channels.newChannel(website.openStream());
-				FileOutputStream fos = new FileOutputStream(get_filepath(file_name));
-				
-				fos.getChannel().transferFrom(rbc, 0, 1 << 24);*/
-				FileUtils.copyURLToFile(website, new File(get_filepath(file_name)));
+				try
+				{
+					BufferedInputStream in = null;
+					FileOutputStream fout = null;
+					try
+					{
+						in = new BufferedInputStream(new URL(urler).openStream());
+						fout = new FileOutputStream(get_filepath(file_name));
+
+						byte data[] = new byte[1024];
+						int count;
+						while ((count = in.read(data, 0, 1024)) != -1)
+						{
+							fout.write(data, 0, count);
+						}
+					}
+					finally
+					{
+						if (in != null)
+							in.close();
+						if (fout != null)
+							fout.close();
+					}
+				}
+				catch(Exception e){
+				}
 			}
-			catch (Exception e)
-			{
-				append_string_to_file("dump.txt", "error\n");
-			}
-		}
 	}
 
 	private class adownload_file extends AsyncTask<String, Void, Long>
@@ -637,24 +651,30 @@ public class main_view extends Activity
 		{
 			if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
 			{
-				try
-				{
-					URL url = new URL(ton[0]);
-					url.openConnection().connect();
+				try{
+					BufferedInputStream in = null;
+					FileOutputStream fout = null;
+					try
+					{
+						in = new BufferedInputStream(new URL(ton[0]).openStream());
+						fout = new FileOutputStream(get_filepath(ton[1]));
 
-					InputStream input = new BufferedInputStream(url.openStream());
-					OutputStream output = new FileOutputStream(get_filepath(ton[1]));
-
-					byte data[] = new byte[1024];
-					int count;
-					while ((count = input.read(data)) != -1)
-						output.write(data, 0, count);
-
-					output.close();
-					input.close();
+						byte data[] = new byte[1024];
+						int count;
+						while ((count = in.read(data, 0, 1024)) != -1)
+						{
+							fout.write(data, 0, count);
+						}
+					}
+					finally
+					{
+						if (in != null)
+							in.close();
+						if (fout != null)
+							fout.close();
+					}
 				}
-				catch (Exception e)
-				{
+				catch(Exception e){
 				}
 			}
 			download_finished = 1;
@@ -751,8 +771,17 @@ public class main_view extends Activity
 	private void update_groups()
 	{
 		current_groups = read_file_to_array("group_list.txt");
-		viewPager.getAdapter().notifyDataSetChanged();
-		
+		if((current_groups.length+3)>nav_final.length)
+		{
+			String[] nav_finaler = new String[nav_final.length + 1];
+			for(int i=0; i<nav_final.length; i++)
+				nav_finaler[i] = nav_final[i];
+			nav_finaler[nav_finaler.length - 1] = current_groups[current_groups.length - 1];
+			nav_final = nav_finaler;
+			ArrayAdapter<String> nav_adapter = new ArrayAdapter<String>(this, R.layout.drawer_list_item, nav_final);
+			navigation_list.setAdapter(nav_adapter);
+			viewPager.getAdapter().notifyDataSetChanged();
+		}
 	}
 
 	private void add_group(String group_name)
@@ -909,27 +938,21 @@ public class main_view extends Activity
 		}
 		protected Long doInBackground(Void... ton)
 		{
-			get_card_adapter(0).clear_static_list();
-
 			for(int i=0; i<current_groups.length; i++)
 			{
 				String[] feeds_array = read_feeds_to_array(0, get_filepath(current_groups[i] + ".txt"));
-
-				List<String> titles = new ArrayList(), descriptions = new ArrayList(), links = new ArrayList();
-				List<Drawable> icons = new ArrayList();
+				String[] titles, descriptions, links;
 
 				for(int k=0; k<feeds_array.length; k++)
 				{
 					if(update_feed(feeds_array[k]))
 					{
 						String feed_path = get_filepath(feeds_array[k] + ".store.txt");
-						String[] new_titles = read_csv_to_array("title", feed_path + ".content.txt");
-						titles.addAll(Arrays.asList(new_titles));
-						descriptions.addAll(Arrays.asList(read_csv_to_array("description", feed_path + ".content.txt")));
-						String[] link = read_csv_to_array("link", feed_path + ".content.txt");
-						if(link[0].length()<10)
-							link = read_csv_to_array("id", feed_path + ".content.txt");
-						links.addAll(Arrays.asList(link));
+						titles = 			read_csv_to_array("title", feed_path + ".content.txt");
+						descriptions = 		read_csv_to_array("description", feed_path + ".content.txt");
+						links = 			read_csv_to_array("link", feed_path + ".content.txt");
+						if(links[0].length()<10)
+							links = 		read_csv_to_array("id", feed_path + ".content.txt");
 
 						/*try{
 							String line = (new BufferedReader(new FileReader(new File(feed_path + ".content.txt")))).readLine();
@@ -947,13 +970,33 @@ public class main_view extends Activity
 						catch(Exception e)
 						{
 						}*/
+
+						//smoothScrollToPosition(int position)
+						if(titles.length>0)
+						{
+							card_adapter ith = get_card_adapter(i);
+							List<String> ith_list = ith.return_titles();
+
+							for(int j=0; j<titles.length; j++)
+							{
+								if(ith_list.size()>0)
+								{
+									if(!ith_list.contains(titles[j]))
+									{
+										ith					.add_list(titles[j], descriptions[j], links[j]);
+										get_card_adapter(0)	.add_list(titles[j], descriptions[j], links[j]);
+										publishProgress(i);
+									}
+								}
+								else
+								{
+									ith					.add_list(titles[j], descriptions[j], links[j]);
+									get_card_adapter(0)	.add_list(titles[j], descriptions[j], links[j]);
+									publishProgress(i);
+								}
+							}
+						}
 					}
-				}
-				if(titles.size()>0)
-				{
-					get_card_adapter(i).add_list(titles, descriptions, links);
-					get_card_adapter(0).add_static_list(titles, descriptions, links);
-					publishProgress(i);
 				}
 			}
 			long lo = 1;

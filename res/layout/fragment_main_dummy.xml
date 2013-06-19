@@ -7,9 +7,10 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:scrollbars="none"
-			android:layout_marginRight="14dp"
-			android:layout_marginLeft="14dp"
 			android:divider="#00000000"
 			android:dividerHeight="12dp"
-			android:drawSelectorOnTop="true"/>
+			android:drawSelectorOnTop="true"
+			android:padding="12dip"
+			android:clipToPadding="false"
+			android:stackFromBottom="true"/>
 </LinearLayout>

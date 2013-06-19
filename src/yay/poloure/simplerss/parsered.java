@@ -60,7 +60,16 @@ public class parsered
 									reader.read(current, 0, 1);
 									count++;
 								}
-								String cont = (new String(buf)).trim().replace("\r","").replace("\n","").replace("&lt;", "<").replace("&gt;", ">").replaceAll("\\<.*?\\>", "");
+								String cont = (new String(buf)).trim()
+									.replace("\r"," ")
+									.replace("\n","")
+									.replace("&lt;", "<")
+									.replace("&gt;", ">")
+									.replaceAll("\\<.*?\\>", "")
+									.replace("&quot;", "\"")
+									.replace("&amp;", "&")
+									.replace("mdash;", "—")
+									.trim();
 								to_file(file_name + ".content.txt", cont, true);
 								
 								buf = new char[1024];

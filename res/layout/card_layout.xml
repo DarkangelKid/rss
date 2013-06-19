@@ -4,15 +4,6 @@
 			android:layout_height="match_parent"
 			android:background="#ffffff">
 
-	<!--<TextView
-			android:id="@+id/divider_text"
-			android:layout_width="match_parent"
-			android:layout_height="14dp"
-			android:background="#e5e5e5"
-			android:text="@null"
-			android:textSize="6px" 
-			android:layout_alignParentTop="true"/>-->
-
 	<TextView
 			android:id="@+id/title"
 			android:layout_width="match_parent"
@@ -22,7 +13,9 @@
 			android:layout_marginTop="4dp"
 			android:text="@+id/title"
 			android:textSize="18sp"
-			android:layout_alignParentTop="true"/>
+			android:layout_alignParentTop="true"
+			android:maxLines="2"
+			android:ellipsize="end"/>
 
 	<TextView
 			android:id="@+id/time"
@@ -34,7 +27,9 @@
 			android:textSize="12sp"
 			android:textColor="#808080"
 			android:layout_alignParentLeft="true"
-			android:layout_below="@+id/title"/>
+			android:layout_below="@+id/title"
+			android:maxLines="1"
+			android:ellipsize="end"/>
 
 	<ImageView
 			android:id="@+id/image"
@@ -43,7 +38,6 @@
 			android:maxWidth="96dp"
 			android:adjustViewBounds="true"
 			android:gravity="bottom"
-			android:layout_marginLeft="8dp"
 			android:layout_marginTop="8dp"
 			android:paddingBottom="8dp"
 			android:layout_alignParentLeft="true"
@@ -61,7 +55,9 @@
 			android:textSize="14sp"
 			android:textColor="#4d4d4d"
 			android:layout_below="@+id/time"
-			android:layout_toRightOf="@+id/image"/>
+			android:layout_toRightOf="@+id/image"
+			android:maxLines="8"
+			android:ellipsize="end"/>
 
 	<ImageView
 			android:id="@+id/white_left_shadow"
@@ -69,7 +65,15 @@
 			android:layout_height="4px"
 			android:src="@drawable/left_white"
 			android:layout_alignParentLeft="true"
-			android:layout_above="@+id/grey_left_shadow"/>
+			android:layout_below="@+id/description"/>
+
+	<ImageView
+			android:id="@+id/white_right_shadow"
+			android:layout_width="3px"
+			android:layout_height="4px"
+			android:src="@drawable/right_white"
+			android:layout_alignParentRight="true"
+			android:layout_below="@+id/description"/>
 
 	<ImageView
 			android:id="@+id/grey_left_shadow"
@@ -78,14 +82,6 @@
 			android:src="@drawable/left_grey"
 			android:layout_alignParentLeft="true"
 			android:layout_alignParentBottom="true"/>
-
-	<ImageView
-			android:id="@+id/white_right_shadow"
-			android:layout_width="3px"
-			android:layout_height="4px"
-			android:src="@drawable/right_white"
-			android:layout_alignParentRight="true"
-			android:layout_above="@+id/grey_right_shadow"/>
 
 	<ImageView
 			android:id="@+id/grey_right_shadow"
