@@ -4,6 +4,7 @@ import android.preference.PreferenceFragment;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.ClipData;
 
 import android.app.AlertDialog;
 import java.util.List;
@@ -31,8 +32,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuInflater;
 import android.view.LayoutInflater;
+import android.view.DragEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.MotionEvent;
+import android.view.View.OnDragListener;
+import android.view.View.DragShadowBuilder;
+import android.view.View.OnTouchListener;
 import android.widget.ListAdapter;
 import android.widget.LinearLayout;
 import android.widget.FrameLayout;
@@ -41,6 +47,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.content.res.Configuration;
 
 import android.widget.Button;
@@ -63,6 +70,7 @@ import java.io.FileReader;
 import java.io.BufferedWriter;
 import java.io.BufferedReader;
 import java.lang.Thread;
+
 
 
 public class main_view extends Activity
@@ -282,7 +290,8 @@ public class main_view extends Activity
 	public class manager_fragment extends Fragment
 	{
 		private ListView manage_list;
-		private ArrayAdapter<String> manage_adapter;
+		//private ArrayAdapter<String> manage_adapter;
+		private group_adapter manage_adapter;
 
 		@Override
 		public void onCreate(Bundle savedInstanceState)
@@ -295,15 +304,21 @@ public class main_view extends Activity
 		{
 			View view = inflater.inflate(R.layout.manage_fragment, container, false);
 			manage_list = (ListView) view.findViewById(R.id.group_listview);
-			manage_adapter = new ArrayAdapter<String>(getActivity(), R.layout.manage_list_item, R.id.group_item, current_groups);
+			manage_adapter = new group_adapter(getActivity());
+			for(int i = 0; i < current_groups.length; i++)
+				manage_adapter.add_list(current_groups[i]);
 			manage_list.setAdapter(manage_adapter);
 			manage_adapter.notifyDataSetChanged();
+			/*manage_adapter = new ArrayAdapter<String>(getActivity(), R.layout.manage_list_item, R.id.group_item, current_groups);
+			manage_list.setAdapter(manage_adapter);
+			manage_adapter.notifyDataSetChanged();*/
 			return view;
 		}
 
 	}
+	
 	//shit start
-	/*findViewById(R.id.bottomright).setOnDragListener(new MyDragListener());
+	//findViewById(R.id.bottomright).setOnDragListener(new MyDragListener());
 	 
 	class MyDragListener implements OnDragListener
 	{
@@ -343,7 +358,7 @@ public class main_view extends Activity
 			}
 			return true;
 		}
-	}*/
+	}
 	//shit end
 
 	public static class viewpager_adapter extends FragmentPagerAdapter
