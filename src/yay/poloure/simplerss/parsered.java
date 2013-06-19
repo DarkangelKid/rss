@@ -36,7 +36,7 @@ public class parsered
 			while(reader.read() != -1)
 			{
 				reader.reset();
-				String buf_string = get_next_tag(reader, of_types);
+				String buf_string = get_next_tag(reader, of_types, file_name);
 				if((buf_string.contains("<entry"))||(buf_string.contains("<item")))
 					to_file(file_name + ".content.txt", "\n", true);
 				else
@@ -64,8 +64,12 @@ public class parsered
 									.replace("\r"," ")
 									.replace("\n","")
 									.replace("&lt;", "<")
-									.replace("&gt;", ">")
-									.replaceAll("\\<.*?\\>", "")
+									.replace("&gt;", ">");
+									
+								if(cont.contains("img src="))
+									to_file(file_name + ".content.dump.txt", cont.substring(cont.indexOf("src=\"") + 5, cont.indexOf("\"", cont.indexOf("src=\"") + 6)) + "\n", false);
+
+									cont = cont.replaceAll("\\<.*?\\>", "")
 									.replace("&quot;", "\"")
 									.replace("&amp;", "&")
 									.replace("mdash;", "—")
@@ -87,6 +91,20 @@ public class parsered
 									to_file(file_name + ".content.txt", end_tag, true);
 							}
 							to_file(file_name + ".content.txt", "|", true);
+							if(end_tag.equals("</description>"))
+							{
+								File im = new File(file_name + ".content.dump.txt");
+								try
+								{
+									BufferedReader image = new BufferedReader(new FileReader(im));
+									String image_url = image.readLine();
+									if(image_url.length()>3)
+										to_file(file_name + ".content.txt" , "image|" + image_url + "|", true);
+								}
+								catch(Exception e){
+								}
+								im.delete();
+							}
 							break;
 						}
 					}
@@ -94,12 +112,11 @@ public class parsered
 				reader.mark(2);
 			}
 		}
-		catch(Exception e)
-		{
+		catch(Exception e){
 		}
 	}
 
-	private String get_next_tag(BufferedReader reader, String[] types) throws Exception
+	private String get_next_tag(BufferedReader reader, String[] types, String file_name) throws Exception
 	{
 		boolean found = false;
 		String tag = "";
@@ -119,6 +136,12 @@ public class parsered
 			}
 			buffer[count] = current[0];
 			tag = (new String(buffer)).trim();
+			
+			//to_file(file_name + ".dump.txt", tag + "\n", true);
+			if(tag.contains("img src="))
+			{
+				to_file(file_name + ".content.dump.txt", tag.substring(tag.indexOf("src=\"") + 5, tag.indexOf("\"", tag.indexOf("src=\"") + 6)) + "\n", false);
+			}
 			for(int i=0; i<types.length; i++)
 			{
 				if(tag.contains(types[i]))

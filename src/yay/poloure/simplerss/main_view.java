@@ -3,16 +3,13 @@ package yay.poloure.simplerss;
 import android.preference.PreferenceFragment;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.DialogInterface;
 
 import android.app.AlertDialog;
 import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 import android.os.Bundle;
-import java.io.StringWriter;
-import java.io.PrintWriter;
 
 import android.app.Activity;
 
@@ -33,7 +30,6 @@ import android.view.MenuInflater;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListAdapter;
 import android.widget.LinearLayout;
 import android.widget.FrameLayout;
 import android.view.ViewGroup.LayoutParams;
@@ -45,7 +41,6 @@ import android.content.res.Configuration;
 
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.BaseAdapter;
 import android.widget.Spinner;
 
 import android.os.Environment;
@@ -53,9 +48,6 @@ import java.io.File;
 import java.net.URL;
 
 import android.os.AsyncTask;
-import java.net.URLConnection;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -78,6 +70,7 @@ public class main_view extends Activity
 
 	private String mTitle;
 	private CharSequence MainTitle;
+	public static float density;
 
 	private static int download_finished;
 	private viewpager_adapter page_adapter;
@@ -121,7 +114,6 @@ public class main_view extends Activity
 				.hide(man)
 				.hide(pref)
 				.commit();
-					log("done creatin' shit");
 		}
 	}
 
@@ -173,6 +165,8 @@ public class main_view extends Activity
 		getActionBar().setHomeButtonEnabled(true);
 		
 		drawer_toggle.syncState();
+
+		density = getResources().getDisplayMetrics().density;
 	}
 
 	@Override
@@ -208,6 +202,10 @@ public class main_view extends Activity
 			viewPager.setCurrentItem(page);
 		}
 		return true;
+	}
+
+	public static float get_pixel_density(){
+		return density;
 	}
 
 	private void switch_page(String page_title, int position)
@@ -931,6 +929,46 @@ public class main_view extends Activity
 		return content_values;
 	}
 
+	private String[] read_images_to_array(String content_type, String feed_path)
+	{
+		String[] content_values;
+		content_type = content_type + "|";
+		try
+		{
+			String line;
+			int number_of_lines = 0, i = 0;
+			File in = new File(feed_path);
+
+			BufferedReader reader = new BufferedReader(new FileReader(in));
+
+			while(reader.readLine() != null)
+				number_of_lines++;
+
+			reader.close();
+			reader = new BufferedReader(new FileReader(in));
+			reader.readLine();
+
+			content_values = new String[number_of_lines - 1];
+
+			while((line = reader.readLine()) != null)
+			{
+				int content_start = line.indexOf(content_type) + content_type.length();
+				line = line.substring(content_start, line.indexOf('|', content_start));
+				if(line.length()>5)
+					content_values[i] = line;
+				else
+					content_values[i] = "null";
+				i++;
+			}
+		}
+		catch (Exception e)
+		{
+			content_values = new String[0];
+		}
+
+		return content_values;
+	}
+
 	private class refresh_feeds extends AsyncTask<Void, Integer, Long> {
 
 		protected void onPreExecute(){
@@ -941,35 +979,45 @@ public class main_view extends Activity
 			for(int i=0; i<current_groups.length; i++)
 			{
 				String[] feeds_array = read_feeds_to_array(0, get_filepath(current_groups[i] + ".txt"));
-				String[] titles, descriptions, links;
+				String[] titles, descriptions, links, images;
+				Drawable[] imgs;
 
 				for(int k=0; k<feeds_array.length; k++)
 				{
 					if(update_feed(feeds_array[k]))
 					{
-						String feed_path = get_filepath(feeds_array[k] + ".store.txt");
-						titles = 			read_csv_to_array("title", feed_path + ".content.txt");
-						descriptions = 		read_csv_to_array("description", feed_path + ".content.txt");
-						links = 			read_csv_to_array("link", feed_path + ".content.txt");
+						String content_path = get_filepath(feeds_array[k] + ".store.txt") + ".content.txt";
+						titles = 			read_csv_to_array("title", content_path);
+						images = 			read_images_to_array("image", content_path);
+						descriptions = 		read_csv_to_array("description", content_path);
+						links = 			read_csv_to_array("link", content_path);
 						if(links[0].length()<10)
-							links = 		read_csv_to_array("id", feed_path + ".content.txt");
+							links = 		read_csv_to_array("id", content_path);
+						imgs = new Drawable[titles.length];
 
-						/*try{
-							String line = (new BufferedReader(new FileReader(new File(feed_path + ".content.txt")))).readLine();
-							int content_start = line.indexOf("icon|") + 5;
-							String icon_url = line.substring(content_start, line.indexOf('|', content_start));
-							content_start = line.indexOf("title|") + 6;
-							String icon_name = line.substring(content_start, line.indexOf('|', content_start)) + ".png";					
-
-							download_file(icon_url, icon_name);
-
-							Drawable feed_icon = Drawable.createFromPath(get_filepath(icon_name));
-							for(int l=0; l<new_titles.length; l++)
-								icons.add(feed_icon);
+						try{
+							for(int m=0; m<titles.length; m++)
+							{
+								if(!images[m].equals("null"))
+								{
+									try{
+										String icon_name = images[m].substring(images[m].lastIndexOf("/"), images[m].length());
+										log("Downloading: " + images[m] + "\n with name: " + icon_name);
+										String image_path = get_filepath(icon_name);
+										if(!((new File(image_path)).exists()))
+											download_file(images[m], icon_name);
+										imgs[m]= Drawable.createFromPath(get_filepath(icon_name));
+									}
+									catch(Exception e){
+									}
+								}
+								else
+									imgs[m] = null;
+							}
 						}
 						catch(Exception e)
 						{
-						}*/
+						}
 
 						//smoothScrollToPosition(int position)
 						if(titles.length>0)
@@ -983,15 +1031,15 @@ public class main_view extends Activity
 								{
 									if(!ith_list.contains(titles[j]))
 									{
-										ith					.add_list(titles[j], descriptions[j], links[j]);
-										get_card_adapter(0)	.add_list(titles[j], descriptions[j], links[j]);
+										ith					.add_list(titles[j], descriptions[j], links[j], imgs[j]);
+										get_card_adapter(0)	.add_list(titles[j], descriptions[j], links[j], imgs[j]);
 										publishProgress(i);
 									}
 								}
 								else
 								{
-									ith					.add_list(titles[j], descriptions[j], links[j]);
-									get_card_adapter(0)	.add_list(titles[j], descriptions[j], links[j]);
+									ith					.add_list(titles[j], descriptions[j], links[j], imgs[j]);
+									get_card_adapter(0)	.add_list(titles[j], descriptions[j], links[j], imgs[j]);
 									publishProgress(i);
 								}
 							}
