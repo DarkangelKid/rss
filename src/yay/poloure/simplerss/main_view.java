@@ -112,7 +112,7 @@ public class main_view extends Activity
 						.commit();
 			feed = new the_feed_fragment();
 			pref = new PrefsFragment();
-			man = new manage_fragment();
+			man = new manager_fragment();
 			getFragmentManager().beginTransaction()
 				.add(R.id.content_frame, feed, "Feeds")
 				.add(R.id.content_frame, pref, "Settings")
@@ -120,6 +120,7 @@ public class main_view extends Activity
 				.hide(man)
 				.hide(pref)
 				.commit();
+					log("done creatin' shit");
 		}
 	}
 
@@ -276,26 +277,26 @@ public class main_view extends Activity
 		}
 	}
 
-	public class manage_fragment extends Fragment
+	public class manager_fragment extends Fragment
 	{
+		private ListView manage_list;
+		private ArrayAdapter<String> manage_adapter;
+
 		@Override
 		public void onCreate(Bundle savedInstanceState)
 		{
 			super.onCreate(savedInstanceState);
-			
-			/*final ListView manage_list = (ListView) findViewById(R.id.manage_list);
-			String[] group_manage_list = current_groups;
-			append_string_to_file("dump.txt", group_manage_list[0]+"\n");
-			ArrayAdapter<String> manage_adapter = new ArrayAdapter<String>(getActivity(), R.layout.manage_list_item, R.id.group_item, group_manage_list);
-			append_string_to_file("dump.txt", "create new adapter\n");
-			manage_list.setAdapter(manage_adapter);
-			append_string_to_file("dump.txt", "done creating\n");*/
 		}
 
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
-			return inflater.inflate(R.layout.manage_fragment, container, false);
+			View view = inflater.inflate(R.layout.manage_fragment, container, false);
+			manage_list = (ListView) view.findViewById(R.id.group_listview);
+			manage_adapter = new ArrayAdapter<String>(getActivity(), R.layout.manage_list_item, R.id.group_item, current_groups);
+			manage_list.setAdapter(manage_adapter);
+			manage_adapter.notifyDataSetChanged();
+			return view;
 		}
 
 	}

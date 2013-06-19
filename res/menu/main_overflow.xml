@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item
-    android:id="@+id/add_feed"
-    android:title="add"
-    android:icon="@drawable/add"
-    android:showAsAction="ifRoom"
-	/>
-	
-    <item
-    android:id="@+id/refresh"
-    android:title="refresh"
-    android:icon="@drawable/ic_action_refresh"
-    android:showAsAction="ifRoom"
-	/>
-    
+	<item
+			android:id="@+id/add_feed"
+			android:title="add"
+			android:icon="@drawable/add"
+			android:showAsAction="ifRoom"/>
+
+	<item
+			android:id="@+id/refresh"
+			android:title="refresh"
+			android:icon="@drawable/ic_action_refresh"
+			android:showAsAction="ifRoom"/>
+
 </menu>
