@@ -79,14 +79,6 @@ public class card_adapter extends BaseAdapter
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
-		/*if((position == 0))
-		{
-			 View fake_card = (inflater.inflate(R.layout.dummy_card_layout, parent, false));
-			 ((TextView)fake_card.findViewById(R.id.divider_text)).setText("cocks");
-			 return fake_card;
-		}
-		else
-		{*/
 			ViewHolder holder;
 			if(convertView == null)
 			{
@@ -110,7 +102,6 @@ public class card_adapter extends BaseAdapter
 			catch(Exception e){}*/
 			
 			return convertView;
-		//}
 	}
 
 	static class ViewHolder

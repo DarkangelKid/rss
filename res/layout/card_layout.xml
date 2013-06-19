@@ -4,15 +4,6 @@
 			android:layout_height="match_parent"
 			android:background="#ffffff">
 
-	<!--<TextView
-			android:id="@+id/divider_text"
-			android:layout_width="match_parent"
-			android:layout_height="14dp"
-			android:background="#e5e5e5"
-			android:text="@null"
-			android:textSize="6px" 
-			android:layout_alignParentTop="true"/>-->
-
 	<TextView
 			android:id="@+id/title"
 			android:layout_width="match_parent"

@@ -8,13 +8,13 @@ import android.content.DialogInterface;
 import android.app.AlertDialog;
 import java.util.List;
 import java.util.ArrayList;
-import java.nio.channels.*;
 import java.util.Arrays;
 
 import android.os.Bundle;
+import java.io.StringWriter;
+import java.io.PrintWriter;
 
 import android.app.Activity;
-import org.apache.commons.io.FileUtils;
 
 import android.app.ListFragment;
 import android.app.Fragment;
@@ -611,23 +611,35 @@ public class main_view extends Activity
 
 	private void download_file(String urler, String file_name)
 	{
-		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
-		{
-			try
+			if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
 			{
-				URL website = new URL(urler);
-				
-				/*ReadableByteChannel rbc = Channels.newChannel(website.openStream());
-				FileOutputStream fos = new FileOutputStream(get_filepath(file_name));
-				
-				fos.getChannel().transferFrom(rbc, 0, 1 << 24);*/
-				FileUtils.copyURLToFile(website, new File(get_filepath(file_name)));
+				try
+				{
+					BufferedInputStream in = null;
+					FileOutputStream fout = null;
+					try
+					{
+						in = new BufferedInputStream(new URL(urler).openStream());
+						fout = new FileOutputStream(get_filepath(file_name));
+
+						byte data[] = new byte[1024];
+						int count;
+						while ((count = in.read(data, 0, 1024)) != -1)
+						{
+							fout.write(data, 0, count);
+						}
+					}
+					finally
+					{
+						if (in != null)
+							in.close();
+						if (fout != null)
+							fout.close();
+					}
+				}
+				catch(Exception e){
+				}
 			}
-			catch (Exception e)
-			{
-				append_string_to_file("dump.txt", "error\n");
-			}
-		}
 	}
 
 	private class adownload_file extends AsyncTask<String, Void, Long>
@@ -636,24 +648,30 @@ public class main_view extends Activity
 		{
 			if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
 			{
-				try
-				{
-					URL url = new URL(ton[0]);
-					url.openConnection().connect();
+				try{
+					BufferedInputStream in = null;
+					FileOutputStream fout = null;
+					try
+					{
+						in = new BufferedInputStream(new URL(ton[0]).openStream());
+						fout = new FileOutputStream(get_filepath(ton[1]));
 
-					InputStream input = new BufferedInputStream(url.openStream());
-					OutputStream output = new FileOutputStream(get_filepath(ton[1]));
-
-					byte data[] = new byte[1024];
-					int count;
-					while ((count = input.read(data)) != -1)
-						output.write(data, 0, count);
-
-					output.close();
-					input.close();
+						byte data[] = new byte[1024];
+						int count;
+						while ((count = in.read(data, 0, 1024)) != -1)
+						{
+							fout.write(data, 0, count);
+						}
+					}
+					finally
+					{
+						if (in != null)
+							in.close();
+						if (fout != null)
+							fout.close();
+					}
 				}
-				catch (Exception e)
-				{
+				catch(Exception e){
 				}
 			}
 			download_finished = 1;
