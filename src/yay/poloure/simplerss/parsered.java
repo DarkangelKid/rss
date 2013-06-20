@@ -23,7 +23,7 @@ public class parsered
 			final String[] start = new String[]{"<name>", "<id>", "<link>",  "<description>", "<title>", "<content type=\"html\">", "<content>", "<icon>"};
 			final String[] end = new String[]{"</name>", "</id>", "</link>", "</description>", "</title>", "</content>", "</content>", "</icon>"};
 			String[] of_types = new String[]{"<name>", "<id>", "<link>",  "<description>", "<title>", "<content type=\"html\">", "<content>", "<icon>",
-				"</name>", "</id>", "</link>", "</description>", "</title>", "</content>", "</content>", "</icon>", "<entry", "<item"}; 
+				"</name>", "</id>", "</link>", "</description>", "</title>", "</content>", "</content>", "</icon>", "<entry", "<item", "</entry", "</item"}; 
 				
 			File in = new File(file_name);
 			BufferedReader reader = new BufferedReader(new FileReader(in));
@@ -39,6 +39,8 @@ public class parsered
 				String buf_string = get_next_tag(reader, of_types, file_name);
 				if((buf_string.contains("<entry"))||(buf_string.contains("<item")))
 					to_file(file_name + ".content.txt", "\n", true);
+				else if((buf_string.contains("</entry"))||(buf_string.contains("</item")))
+					check_for_image(file_name);
 				else
 				{
 					for(int i=0; i<start.length; i++)
@@ -91,20 +93,6 @@ public class parsered
 									to_file(file_name + ".content.txt", end_tag, true);
 							}
 							to_file(file_name + ".content.txt", "|", true);
-							if(end_tag.equals("</description>"))
-							{
-								File im = new File(file_name + ".content.dump.txt");
-								try
-								{
-									BufferedReader image = new BufferedReader(new FileReader(im));
-									String image_url = image.readLine();
-									if(image_url.length()>3)
-										to_file(file_name + ".content.txt" , "image|" + image_url + "|", true);
-								}
-								catch(Exception e){
-								}
-								im.delete();
-							}
 							break;
 						}
 					}
@@ -114,6 +102,21 @@ public class parsered
 		}
 		catch(Exception e){
 		}
+	}
+
+	private void check_for_image(String file_name)
+	{
+		File im = new File(file_name + ".content.dump.txt");
+		try
+		{
+			BufferedReader image = new BufferedReader(new FileReader(im));
+			String image_url = image.readLine();
+			if(image_url.length()>6)
+				to_file(file_name + ".content.txt" , "image|" + image_url + "|", true);
+		}
+		catch(Exception e){
+		}
+		im.delete();
 	}
 
 	private String get_next_tag(BufferedReader reader, String[] types, String file_name) throws Exception
@@ -137,11 +140,9 @@ public class parsered
 			buffer[count] = current[0];
 			tag = (new String(buffer)).trim();
 			
-			//to_file(file_name + ".dump.txt", tag + "\n", true);
 			if(tag.contains("img src="))
-			{
 				to_file(file_name + ".content.dump.txt", tag.substring(tag.indexOf("src=\"") + 5, tag.indexOf("\"", tag.indexOf("src=\"") + 6)) + "\n", false);
-			}
+
 			for(int i=0; i<types.length; i++)
 			{
 				if(tag.contains(types[i]))

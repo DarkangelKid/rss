@@ -15,6 +15,8 @@ import android.os.Bundle;
 import android.app.Activity;
 
 import android.app.ListFragment;
+import android.view.Display;
+import android.graphics.Point;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -24,7 +26,7 @@ import android.support.v4.view.PagerTabStrip;
 import android.support.v4.widget.DrawerLayout;
 
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
+import android.graphics.drawable.BitmapDrawable;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuInflater;
@@ -62,8 +64,15 @@ import java.io.FileReader;
 import java.io.BufferedWriter;
 import java.io.BufferedReader;
 import java.lang.Thread;
-
-
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.io.StringWriter;
+import java.io.PrintWriter;
+import android.graphics.BitmapFactory;
+import android.graphics.Bitmap;
 
 public class main_view extends Activity
 {
@@ -79,10 +88,12 @@ public class main_view extends Activity
 	private String mTitle;
 	private CharSequence MainTitle;
 	public static float density;
+	public int width;
 
 	private static int download_finished;
 	private viewpager_adapter page_adapter;
 	private ViewPager viewPager;
+	public static Resources res;
 
 	private static String[] current_groups;
 	private static final int CONTENT_VIEW_ID = 10101010;
@@ -173,8 +184,12 @@ public class main_view extends Activity
 		getActionBar().setHomeButtonEnabled(true);
 		
 		drawer_toggle.syncState();
-
 		density = getResources().getDisplayMetrics().density;
+		res = getResources();
+	}
+
+	public static Resources get_resources(){
+		return res;
 	}
 
 	@Override
@@ -318,7 +333,7 @@ public class main_view extends Activity
 	//shit start
 	//findViewById(R.id.bottomright).setOnDragListener(new MyDragListener());
 	 
-	class MyDragListener implements OnDragListener
+	/*class MyDragListener implements OnDragListener
 	{
 		Drawable enterShape = getResources().getDrawable(R.drawable.shape_droptarget);
 		Drawable normalShape = getResources().getDrawable(R.drawable.shape);
@@ -356,7 +371,7 @@ public class main_view extends Activity
 			}
 			return true;
 		}
-	}
+	}*/
 	//shit end
 
 	public static class viewpager_adapter extends FragmentPagerAdapter
@@ -944,44 +959,33 @@ public class main_view extends Activity
 		return content_values;
 	}
 
-	private String[] read_images_to_array(String content_type, String feed_path)
+	private String[] read_images_to_array(String feed_path)
 	{
-		String[] content_values;
-		content_type = content_type + "|";
+		ArrayList<String> content_values = new ArrayList<String>();
 		try
 		{
 			String line;
-			int number_of_lines = 0, i = 0;
+			int i = 0;
 			File in = new File(feed_path);
-
 			BufferedReader reader = new BufferedReader(new FileReader(in));
-
-			while(reader.readLine() != null)
-				number_of_lines++;
-
-			reader.close();
-			reader = new BufferedReader(new FileReader(in));
 			reader.readLine();
-
-			content_values = new String[number_of_lines - 1];
 
 			while((line = reader.readLine()) != null)
 			{
-				int content_start = line.indexOf(content_type) + content_type.length();
+				int content_start = line.indexOf("image|") + 6;
 				line = line.substring(content_start, line.indexOf('|', content_start));
 				if(line.length()>5)
-					content_values[i] = line;
+					content_values.add(line);
 				else
-					content_values[i] = "null";
+					content_values.add("null");
 				i++;
 			}
 		}
 		catch (Exception e)
 		{
-			content_values = new String[0];
 		}
 
-		return content_values;
+		return content_values.toArray(new String[0]);
 	}
 
 	private class refresh_feeds extends AsyncTask<Void, Integer, Long> {
@@ -990,12 +994,11 @@ public class main_view extends Activity
 			set_refresh(true);
 		}
 		protected Long doInBackground(Void... ton)
-		{
+		{			
 			for(int i=0; i<current_groups.length; i++)
 			{
 				String[] feeds_array = read_feeds_to_array(0, get_filepath(current_groups[i] + ".txt"));
 				String[] titles, descriptions, links, images;
-				Drawable[] imgs;
 
 				for(int k=0; k<feeds_array.length; k++)
 				{
@@ -1003,35 +1006,37 @@ public class main_view extends Activity
 					{
 						String content_path = get_filepath(feeds_array[k] + ".store.txt") + ".content.txt";
 						titles = 			read_csv_to_array("title", content_path);
-						images = 			read_images_to_array("image", content_path);
+						images = 			read_images_to_array(content_path);
 						descriptions = 		read_csv_to_array("description", content_path);
 						links = 			read_csv_to_array("link", content_path);
 						if(links[0].length()<10)
 							links = 		read_csv_to_array("id", content_path);
-						imgs = new Drawable[titles.length];
+						ArrayList<String> image_set = new ArrayList<String>();
+						ArrayList<Integer> image_heights = new ArrayList<Integer>();
+						ArrayList<Integer> image_widths = new ArrayList<Integer>();
 
-						try{
-							for(int m=0; m<titles.length; m++)
-							{
-								if(!images[m].equals("null"))
-								{
-									try{
-										String icon_name = images[m].substring(images[m].lastIndexOf("/"), images[m].length());
-										log("Downloading: " + images[m] + "\n with name: " + icon_name);
-										String image_path = get_filepath(icon_name);
-										if(!((new File(image_path)).exists()))
-											download_file(images[m], icon_name);
-										imgs[m]= Drawable.createFromPath(get_filepath(icon_name));
-									}
-									catch(Exception e){
-									}
-								}
-								else
-									imgs[m] = null;
-							}
-						}
-						catch(Exception e)
+						for(int m=0; m<titles.length; m++)
 						{
+							if(!images[m].equals("null"))
+							{
+								String icon_name = images[m].substring(images[m].lastIndexOf("/") + 1, images[m].length());
+								String image_path = get_filepath(icon_name);
+								if(!((new File(image_path)).exists()))
+								{
+									download_file(images[m], icon_name);
+									compress_file(image_path);
+								}
+								image_set.add(image_path);
+								Integer[] dim = get_dim(image_path);
+								image_heights.add(dim[1]);
+								image_widths.add(dim[0]);
+							}
+							else
+							{
+								image_set.add("");
+								image_heights.add(0);
+								image_widths.add(0);
+							}
 						}
 
 						//smoothScrollToPosition(int position)
@@ -1046,15 +1051,15 @@ public class main_view extends Activity
 								{
 									if(!ith_list.contains(titles[j]))
 									{
-										ith					.add_list(titles[j], descriptions[j], links[j], imgs[j]);
-										get_card_adapter(0)	.add_list(titles[j], descriptions[j], links[j], imgs[j]);
+										ith					.add_list(titles[j], descriptions[j], links[j], image_set.get(j), image_heights.get(j), image_widths.get(j));
+										get_card_adapter(0)	.add_list(titles[j], descriptions[j], links[j], image_set.get(j), image_heights.get(j), image_widths.get(j));
 										publishProgress(i);
 									}
 								}
 								else
 								{
-									ith					.add_list(titles[j], descriptions[j], links[j], imgs[j]);
-									get_card_adapter(0)	.add_list(titles[j], descriptions[j], links[j], imgs[j]);
+									ith					.add_list(titles[j], descriptions[j], links[j], image_set.get(j), image_heights.get(j), image_widths.get(j));
+									get_card_adapter(0)	.add_list(titles[j], descriptions[j], links[j], image_set.get(j), image_heights.get(j), image_widths.get(j));
 									publishProgress(i);
 								}
 							}
@@ -1089,9 +1094,9 @@ public class main_view extends Activity
 
 	private boolean update_feed(String feed_name)
 	{
-		String line = "";
 		boolean found = false;
 		try{
+			String line = "";
 			BufferedReader read = (new BufferedReader(new FileReader(new File(get_filepath("all_feeds.txt")))));
 			while(!(line.contains(feed_name))){
 				line = read.readLine();
@@ -1101,75 +1106,91 @@ public class main_view extends Activity
 			{
 				int content_start = line.indexOf(feed_name + "|") + feed_name.length() + 1;
 				String feed_url = line.substring(content_start, line.indexOf('|', content_start));
+				String content_name = feed_name + ".store.txt.content.txt";
+				String store_name = feed_name + ".store.txt";
+				String store_path = get_filepath(store_name);
+				
+				download_file(feed_url, store_name);
+				new parsered(store_path);
+				(new File(store_path)).delete();
 
-				int length_before = read_file_to_array(feed_name + ".store.txt.content.txt").length;
-				
-				download_file(feed_url, feed_name + ".store.txt");
-				String feed_path = get_filepath(feed_name + ".store.txt");
-				new parsered(feed_path);
-				(new File(feed_path)).delete();
-				
-				if(length_before > 1)
-					remove_duplicates(feed_name + ".store.txt.content.txt", length_before);
+				remove_duplicates(content_name);
+				return true;
 			}
-			return true;
+			else
+				return false;
 		}
 		catch(Exception e){
+			StringWriter sw = new StringWriter();
+			PrintWriter pw = new PrintWriter(sw);
+			e.printStackTrace(pw);
+			append_string_to_file("updater.dump.txt", sw.toString());	
 			return false;
 		}
 	}
 
-	private void remove_duplicates(String file_name, int length_before)
+	private void remove_duplicates(String content_name)
 	{
-		/// Remove the duplicate title
-		String file_path = get_filepath(file_name);
-		File temp = new File(file_path);
+		String content_path = get_filepath(content_name);
+		File temp = new File(content_path);
 
-		String[] title_remove = read_file_to_array(file_name);
+		String[] feeds = read_file_to_array(content_name);
+		Set<String> set = new LinkedHashSet<String>(Arrays.asList(feeds));
 		temp.delete();
-		for(int i=0; i<title_remove.length ; i++)
-		{
-			if(i != length_before)
-				append_string_to_file(file_name, title_remove[i] + "\n");
-		}
-
-		String[] titles = read_csv_to_array("title", file_path);
-		int[] is_duplicate = new int[titles.length];
-		boolean found = false;
-		int index = 0;
-
-		for(int k=0; k<titles.length - 1; k++)
-		{
-			if(is_duplicate[k] == 0)
-			{
-				for(int i=k + 1; i<titles.length; i++)
-				{
-					if(titles[k].equals(titles[i]))
-					{
-						found = true;
-						index = i;
-						break;
-					}
-				}
-			}
-			if(found)
-				is_duplicate[index] = 1;
-			found = false;
-			index = 0;
-		}
-
-		String[] feeds_old = read_file_to_array(file_name);
-		temp.delete();
-		append_string_to_file(file_name, feeds_old[0] + "\n");
-		for(int i=0; i<feeds_old.length - 1; i++)
-		{
-			if(is_duplicate[i] == 0)
-				append_string_to_file(file_name, feeds_old[i+1] + "\n");
-		}
+		feeds = set.toArray(new String[0]);
+		for(int i=0; i<feeds.length; i++)
+			append_string_to_file(content_name, feeds[i] + "\n");
 	}
 
 	private void log(String text)
 	{
 		append_string_to_file("dump.txt", text + "\n");
+	}
+
+	public void compress_file(String file_path) {
+		BitmapFactory.Options o = new BitmapFactory.Options();
+		o.inJustDecodeBounds = true;
+		BitmapFactory.decodeFile(file_path, o);
+
+		if(width < 10)
+		{
+			Display display = getWindowManager().getDefaultDisplay();
+			Point size = new Point();
+			display.getSize(size);
+			width = (int) Math.round(((float)size.x)*0.90);
+		}
+
+		int width_tmp = o.outWidth;
+		int insample;
+
+		if(width_tmp > width)
+		{
+			insample =  Math.round((float) width_tmp / (float) width);
+		}
+		else
+			insample = 1;
+			
+		BitmapFactory.Options o2 = new BitmapFactory.Options();
+		o2.inSampleSize = insample;
+		Bitmap bitmap = BitmapFactory.decodeFile(file_path, o2);
+
+		try
+		{
+			FileOutputStream out = new FileOutputStream(file_path + ".small.png");
+			bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
+		}
+		catch (Exception e){
+		}
+	}
+
+	private Integer[] get_dim(final String image_path)
+	{
+		Integer[] size = new Integer[2];
+		BitmapFactory.Options o = new BitmapFactory.Options();
+		o.inSampleSize = 1;
+		Bitmap bitmap = BitmapFactory.decodeFile(image_path, o);
+		size[0] = o.outWidth;
+		size[1] = o.outHeight;
+		return size;
 	}
 }
