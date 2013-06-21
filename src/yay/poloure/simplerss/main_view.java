@@ -160,10 +160,13 @@ public class main_view extends Activity
 		viewPager.setOffscreenPageLimit(128);
 
 		update_groups();
+		log("Starting refresh_feeds");
+		new refresh_feeds().execute(true);
 
 		PagerTabStrip pagerTabStrip = (PagerTabStrip) findViewById(R.id.pager_title_strip);
 		pagerTabStrip.setDrawFullUnderline(true);
 		pagerTabStrip.setTabIndicatorColor(Color.argb(0, 51, 181, 229));
+		log("PagerTab stuff done.");
 
 		mTitle = "Feeds";
 		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -454,7 +457,7 @@ public class main_view extends Activity
 		}
 		else if(item.getTitle().equals("refresh"))
 		{
-			new refresh_feeds().execute();
+			new refresh_feeds().execute(false);
 			return true;
 		}
 		
@@ -924,47 +927,10 @@ public class main_view extends Activity
 
 	private String[] read_csv_to_array(String content_type, String feed_path)
 	{
-		String[] content_values;
-		content_type = content_type + "|";
-		try
-		{
-			String line;
-			int number_of_lines = 0, i = 0;
-			File in = new File(feed_path);
-
-			BufferedReader reader = new BufferedReader(new FileReader(in));
-
-			while(reader.readLine() != null)
-				number_of_lines++;
-
-			reader.close();
-			reader = new BufferedReader(new FileReader(in));
-			reader.readLine();
-
-			content_values = new String[number_of_lines - 1];
-
-			while((line = reader.readLine()) != null)
-			{
-				int content_start = line.indexOf(content_type) + content_type.length();
-				line = line.substring(content_start, line.indexOf('|', content_start));
-				content_values[i] = line;
-				i++;
-			}
-		}
-		catch (Exception e)
-		{
-			content_values = new String[0];
-		}
-
-		return content_values;
-	}
-
-	private String[] read_images_to_array(String feed_path)
-	{
 		ArrayList<String> content_values = new ArrayList<String>();
-		try
-		{
-			String line;
+		try{
+			content_type = content_type + "|";
+			String line = "";
 			int i = 0;
 			File in = new File(feed_path);
 			BufferedReader reader = new BufferedReader(new FileReader(in));
@@ -972,116 +938,148 @@ public class main_view extends Activity
 
 			while((line = reader.readLine()) != null)
 			{
-				int content_start = line.indexOf("image|") + 6;
+				int content_start = line.indexOf(content_type) + content_type.length();
 				line = line.substring(content_start, line.indexOf('|', content_start));
-				if(line.length()>5)
+				if(line.length()>1)
 					content_values.add(line);
 				else
-					content_values.add("null");
+					content_values.add("");
 				i++;
 			}
 		}
-		catch (Exception e)
-		{
+		catch(Exception e){
 		}
-
 		return content_values.toArray(new String[0]);
 	}
 
-	private class refresh_feeds extends AsyncTask<Void, Integer, Long> {
+	private class refresh_feeds extends AsyncTask<Boolean, Integer, Long> {
 
+		@Override
 		protected void onPreExecute(){
 			set_refresh(true);
 		}
-		protected Long doInBackground(Void... ton)
+
+		@Override
+		protected Long doInBackground(Boolean... ton)
 		{			
 			for(int i=0; i<current_groups.length; i++)
 			{
+				log("i = " + i);
 				String[] feeds_array = read_feeds_to_array(0, get_filepath(current_groups[i] + ".txt"));
+				log("feeds_array.length = " + feeds_array.length);
 				String[] titles, descriptions, links, images;
 
 				for(int k=0; k<feeds_array.length; k++)
 				{
-					if(update_feed(feeds_array[k]))
+					log("k = " + k);
+					boolean success = false;
+					if(ton[0])
+						success = true;
+					else
+						success = update_feed(feeds_array[k]);
+					if(success)
 					{
 						String content_path = get_filepath(feeds_array[k] + ".store.txt") + ".content.txt";
+						log("content_path = " + content_path);
 						titles = 			read_csv_to_array("title", content_path);
-						images = 			read_images_to_array(content_path);
-						descriptions = 		read_csv_to_array("description", content_path);
-						links = 			read_csv_to_array("link", content_path);
-						if(links[0].length()<10)
-							links = 		read_csv_to_array("id", content_path);
-						ArrayList<String> image_set = new ArrayList<String>();
-						ArrayList<Integer> image_heights = new ArrayList<Integer>();
-						ArrayList<Integer> image_widths = new ArrayList<Integer>();
-
-						for(int m=0; m<titles.length; m++)
-						{
-							if(!images[m].equals("null"))
-							{
-								String icon_name = images[m].substring(images[m].lastIndexOf("/") + 1, images[m].length());
-								String image_path = get_filepath(icon_name);
-								if(!((new File(image_path)).exists()))
-								{
-									download_file(images[m], icon_name);
-									compress_file(image_path);
-								}
-								image_set.add(image_path);
-								Integer[] dim = get_dim(image_path);
-								image_heights.add(dim[1]);
-								image_widths.add(dim[0]);
-							}
-							else
-							{
-								image_set.add("");
-								image_heights.add(0);
-								image_widths.add(0);
-							}
-						}
-
-						//smoothScrollToPosition(int position)
 						if(titles.length>0)
 						{
-							card_adapter ith = get_card_adapter(i);
-							List<String> ith_list = ith.return_titles();
+							log("titles.length = " + titles.length);
+							images = 			read_csv_to_array("image", content_path);
+							log("images.length = " + images.length);
+							descriptions = 		read_csv_to_array("description", content_path);
+							log("descriptions.length = " + descriptions.length);
+							links = 			read_csv_to_array("link", content_path);
+							log("links.length = " + links.length);
+							if(links[0].length()<10)
+								links = 		read_csv_to_array("id", content_path);
+								
+							ArrayList<String> image_set = new ArrayList<String>();
+							log("image_set.size() = " + image_set.size());
+							ArrayList<Integer> image_heights = new ArrayList<Integer>();
+							log("image_heights.size() = " + image_heights.size());
+							ArrayList<Integer> image_widths = new ArrayList<Integer>();
+							log("image_widths.size() = " + image_widths.size());
 
-							for(int j=0; j<titles.length; j++)
+							for(int m=0; m<titles.length; m++)
 							{
-								if(ith_list.size()>0)
+								log("m = " + m);
+								if(!images[m].equals(""))
 								{
-									if(!ith_list.contains(titles[j]))
+									log("images[" + m + "] is non-zero");
+									String icon_name = images[m].substring(images[m].lastIndexOf("/") + 1, images[m].length());
+									String image_path = get_filepath(icon_name);
+									log("image_path = " + image_path);
+									if(!((new File(image_path)).exists()))
+									{
+										log("Image was not found on device. Downloading.");
+										download_file(images[m], icon_name);
+										log("image downloaded.");
+										compress_file(image_path);
+										log("Image_compressed.");
+									}
+									else
+										log("images was found on device. Using local data.");
+									image_set.add(image_path);
+									log("Added image_path to adapter.");
+									Integer[] dim = get_dim(image_path);
+									log("Got image dimensions for image.");
+									image_heights.add(dim[1]);
+									log("image_height = " + dim[1]);
+									image_widths.add(dim[0]);
+									log("image_width = " + dim[0]);
+								}
+								else
+								{
+									log("images[" + m + "] is zero");
+									image_set.add("");
+									image_heights.add(0);
+									image_widths.add(0);
+								}
+								log("Finished " + m + " iteration.");
+							}
+							log("Left m loop.");
+
+							//smoothScrollToPosition(int position)
+							card_adapter ith = get_card_adapter(i);
+							List<String> ith_list = ith.return_links();
+								for(int j=0; j<links.length; j++)
+								{
+									if((!ith_list.contains(links[j]))||(ith_list.size() == 0))
 									{
 										ith					.add_list(titles[j], descriptions[j], links[j], image_set.get(j), image_heights.get(j), image_widths.get(j));
 										get_card_adapter(0)	.add_list(titles[j], descriptions[j], links[j], image_set.get(j), image_heights.get(j), image_widths.get(j));
 										publishProgress(i);
 									}
 								}
-								else
-								{
-									ith					.add_list(titles[j], descriptions[j], links[j], image_set.get(j), image_heights.get(j), image_widths.get(j));
-									get_card_adapter(0)	.add_list(titles[j], descriptions[j], links[j], image_set.get(j), image_heights.get(j), image_widths.get(j));
-									publishProgress(i);
-								}
-							}
 						}
 					}
 				}
+				log("Left k loop.");
 			}
+			log("Left i loop.");
 			long lo = 1;
 			return lo;
 		}
 
+		@Override
 		protected void onProgressUpdate(Integer... progress)
 		{
 			get_card_adapter(progress[0]).notifyDataSetChanged();
 			get_card_adapter(0).notifyDataSetChanged();
 		}
 
+		@Override
 		protected void onPostExecute(Long tun)
 		{
-			if(viewPager.getOffscreenPageLimit() > 1)
+			log("Started onPostExecute");
+			if(viewPager.getOffscreenPageLimit() > 1){
+				log("OffscreenPageLimit > 1");
 				viewPager.setOffscreenPageLimit(1);
+				log("Set OffscreenPageLimit to 1");
+			}
 			set_refresh(false);
+			log("Set set_refresh to false");
 		}
 	}
 
@@ -1147,7 +1145,8 @@ public class main_view extends Activity
 		append_string_to_file("dump.txt", text + "\n");
 	}
 
-	public void compress_file(String file_path) {
+	public void compress_file(String file_path)
+	{
 		BitmapFactory.Options o = new BitmapFactory.Options();
 		o.inJustDecodeBounds = true;
 		BitmapFactory.decodeFile(file_path, o);
@@ -1157,7 +1156,7 @@ public class main_view extends Activity
 			Display display = getWindowManager().getDefaultDisplay();
 			Point size = new Point();
 			display.getSize(size);
-			width = (int) Math.round(((float)size.x)*0.90);
+			width = (int) Math.round(((float)size.x)*0.70);
 		}
 
 		int width_tmp = o.outWidth;

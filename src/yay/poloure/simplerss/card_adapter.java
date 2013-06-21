@@ -67,8 +67,8 @@ public class card_adapter extends BaseAdapter
 		content_width = new ArrayList();
 	}
 
-	public List<String> return_titles(){
-		return content_titles;
+	public List<String> return_links(){
+		return content_links;
 	}
 
 	@Override
@@ -109,7 +109,7 @@ public class card_adapter extends BaseAdapter
 			String des = content_des.get(position);
 
 			boolean image_exists = false;
-			if(content_images.get(position).length() > 6)
+			if((content_width.get(position)>0)&&(content_height.get(position)>0))
 				image_exists = true;
 				
 			if(image_exists)
@@ -147,7 +147,7 @@ public class card_adapter extends BaseAdapter
 			StringWriter sw = new StringWriter();
 			PrintWriter pw = new PrintWriter(sw);
 			e.printStackTrace(pw);
-			append_string_to_filer("adapter.dump.txt", sw.toString());
+			append_string_to_filer(content_images.get(0) + ".hhhhhhhhhhhhhhhhhhhhhhh.txt", sw.toString());
 		}	
 			return convertView;
 	}
@@ -170,12 +170,11 @@ public class card_adapter extends BaseAdapter
 
 	public void loadBitmap(int position, ImageView image_view, int height, int width)
 	{
-		if (cancelPotentialWork(position, image_view))
+		if(cancelPotentialWork(position, image_view))
 		{
 			final display_image task = new display_image(image_view);
-			Bitmap.Config conf = Bitmap.Config.ARGB_8888;
-			Bitmap bmp = Bitmap.createBitmap(width, height, conf);
-			final AsyncDrawable asyncDrawable = new AsyncDrawable(main_view.get_resources(), bmp, task);
+			Bitmap.Config conf = Bitmap.Config.ALPHA_8;
+			final AsyncDrawable asyncDrawable = new AsyncDrawable(main_view.get_resources(), Bitmap.createBitmap(width, height, conf), task);
 			image_view.setImageDrawable(asyncDrawable);
 			task.execute(position);
 		}
@@ -184,7 +183,8 @@ public class card_adapter extends BaseAdapter
 	public static boolean cancelPotentialWork(int position, ImageView image_view) {
 		final display_image worker_task = get_task(image_view);
 
-		if (worker_task != null) {
+		if (worker_task != null)
+		{
 			final int check = worker_task.position;
 			if (check != position)
 				worker_task.cancel(true);
@@ -245,7 +245,7 @@ public class card_adapter extends BaseAdapter
 			 if(isCancelled())
 				image = null;
 				
-			if (image_view_reference != null && image != null)
+			if(image_view_reference != null && image != null)
 			{
 				final ImageView image_view = image_view_reference.get();
 				final display_image worker_task = get_task(image_view);
@@ -257,7 +257,7 @@ public class card_adapter extends BaseAdapter
 						new BitmapDrawable(main_view.get_resources(), image)
 					});
 					image_view.setImageDrawable(td);
-					td.startTransition(250);
+					td.startTransition(230);
 				}
 			}
 		}
