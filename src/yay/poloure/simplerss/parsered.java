@@ -6,13 +6,9 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.File;
 
-public class parsered
+class parsered
 {
-	public String file;
-	
-	public parsered(String file_path)
-	{
-		this.file = file_path;
+	public parsered(String file_path){
 		parse_local_xml(file_path);
 	}
 	

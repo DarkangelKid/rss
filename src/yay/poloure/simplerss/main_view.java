@@ -67,20 +67,18 @@ import android.graphics.Bitmap;
 public class main_view extends Activity
 {
 	private DrawerLayout mDrawerLayout;
-	private View.OnClickListener refreshListener;
-	
+
 	private ListView navigation_list;
 	private ActionBarDrawerToggle drawer_toggle;
 	private Menu optionsMenu;
 
 	private String mTitle;
-	public static float density;
-	public int width;
+	private static float density;
+	private int width;
 
 	private static int download_finished;
-	private viewpager_adapter page_adapter;
 	private ViewPager viewPager;
-	public static Resources res;
+	private static Resources res;
 
 	private static String[] current_groups;
 	private static final int CONTENT_VIEW_ID = 10101010;
@@ -110,9 +108,9 @@ public class main_view extends Activity
 			getFragmentManager().beginTransaction()
 						.add(CONTENT_VIEW_ID, new top_fragment())
 						.commit();
-			feed = new the_feed_fragment();
-			pref = new PrefsFragment();
-			man = new manager_fragment();
+			Fragment feed = new the_feed_fragment();
+			Fragment pref = new PrefsFragment();
+			Fragment man = new manager_fragment();
 			getFragmentManager().beginTransaction()
 				.add(R.id.content_frame, feed, "Feeds")
 				.add(R.id.content_frame, pref, "Settings")
@@ -130,7 +128,7 @@ public class main_view extends Activity
 		super.onPostCreate(savedInstanceState);
 		log("after");
 
-		nav_items = new String[]{"Feeds", "Manage", "Settings"};
+		String[] nav_items = new String[]{"Feeds", "Manage", "Settings"};
 		nav_final = new String[current_groups.length + nav_items.length];
 		System.arraycopy(nav_items, 0, nav_final, 0, nav_items.length);
 		System.arraycopy(current_groups, 0, nav_final, nav_items.length, current_groups.length);
@@ -140,14 +138,14 @@ public class main_view extends Activity
 		navigation_list.setAdapter(nav_adapter);
 		navigation_list.setOnItemClickListener(new DrawerItemClickListener());
 
-		page_adapter = new viewpager_adapter(getFragmentManager());
+		viewpager_adapter page_adapter = new viewpager_adapter(getFragmentManager());
 
 		viewPager = (ViewPager) findViewById(R.id.pager);
 		viewPager.setAdapter(page_adapter);
 		viewPager.setOffscreenPageLimit(128);
 
 		update_groups();
-		log("Starting refresh_feeds");
+		set_refresh(true);
 		new refresh_feeds().execute(true);
 
 		PagerTabStrip pagerTabStrip = (PagerTabStrip) findViewById(R.id.pager_title_strip);
@@ -196,7 +194,7 @@ public class main_view extends Activity
 		}
 	}
 
-	private boolean selectItem(int position)
+	private void selectItem(int position)
 	{
 		if(position == 2)
 			switch_page("Settings", position);
@@ -210,7 +208,6 @@ public class main_view extends Activity
 			int page = position - 3;
 			viewPager.setCurrentItem(page);
 		}
-		return true;
 	}
 
 	public static float get_pixel_density(){
@@ -244,7 +241,7 @@ public class main_view extends Activity
 		getActionBar().setTitle(title);
 	}
 
-	public class top_fragment extends Fragment
+	private class top_fragment extends Fragment
 	{
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -253,7 +250,7 @@ public class main_view extends Activity
 		}
 	}
 
-	public class the_feed_fragment extends Fragment
+	private class the_feed_fragment extends Fragment
 	{
 		@Override
 		public void onCreate(Bundle savedInstanceState){
@@ -268,7 +265,7 @@ public class main_view extends Activity
 		}
 	}
 
-	public static class PrefsFragment extends PreferenceFragment
+	private static class PrefsFragment extends PreferenceFragment
 	{
 
 		@Override
@@ -291,12 +288,6 @@ public class main_view extends Activity
 		private ListView manage_list;
 		//private ArrayAdapter<String> manage_adapter;
 		private group_adapter manage_adapter;
-
-		@Override
-		public void onCreate(Bundle savedInstanceState)
-		{
-			super.onCreate(savedInstanceState);
-		}
 
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -397,11 +388,6 @@ public class main_view extends Activity
 			f.setArguments(args);
 			return f;
 		}
-		
-		@Override
-		public void onActivityCreated(Bundle savedInstanceState){
-			super.onActivityCreated(savedInstanceState);
-		}
 
 		@Override
 		public void onCreate(Bundle savedInstanceState){
@@ -443,7 +429,7 @@ public class main_view extends Activity
 		return super.onOptionsItemSelected(item);
 	}
 
-	public void set_refresh(final boolean refreshing)
+	void set_refresh(final boolean refreshing)
 	{
 		if(optionsMenu != null)
 		{
@@ -510,9 +496,9 @@ public class main_view extends Activity
 						if(new_group.length()>0)
 						{
 							new_group_mode = true;
-							for(int i = 0; i < current_groups.length; i++)
+							for(String group : current_groups)
 							{
-								if((current_groups[i].toLowerCase()).equals(new_group))
+								if((group.toLowerCase()).equals(new_group))
 									found = true;
 							}
 
@@ -757,15 +743,8 @@ public class main_view extends Activity
 
 	private void add_feed(String feed_name, String feed_url, String feed_group)
 	{
-		/// Check to see if the last character is a \n, if not, make it.
 		append_string_to_file(feed_group + ".txt", feed_name + "|" + feed_url + "|" + feed_group + "\n");
 		append_string_to_file("all_feeds.txt", feed_name + "|" + feed_url + "|" + feed_group + "\n");
-	}
-
-	private void delete_feed(String feed_name, String feed_url, String feed_group)
-	{
-		remove_string_from_file(feed_group + ".txt", feed_name + "|" + feed_url + "|" + feed_group + "\n");
-		remove_string_from_file("all_feeds.txt", feed_name + "|" + feed_url + "|" + feed_group + "\n");
 	}
 
 	private void update_groups()
@@ -774,8 +753,7 @@ public class main_view extends Activity
 		if((current_groups.length+3)>nav_final.length)
 		{
 			String[] nav_finaler = new String[nav_final.length + 1];
-			for(int i=0; i<nav_final.length; i++)
-				nav_finaler[i] = nav_final[i];
+			System.arraycopy(nav_final, 0, nav_finaler, 0, nav_final.length);
 			nav_finaler[nav_finaler.length - 1] = current_groups[current_groups.length - 1];
 			nav_final = nav_finaler;
 			ArrayAdapter<String> nav_adapter = new ArrayAdapter<String>(this, R.layout.drawer_list_item, nav_final);
@@ -786,9 +764,7 @@ public class main_view extends Activity
 
 	private void add_group(String group_name)
 	{
-		/// Check to see if the last character is a \n, if not, make it.
 		append_string_to_file("group_list.txt", group_name + "\n");
-
 		update_groups();
 	}
 
@@ -832,7 +808,7 @@ public class main_view extends Activity
 		return line_values;
 	}
 
-	private String[] read_feeds_to_array(int index, String file_path)
+	private String[] read_feeds_to_array(String file_path)
 	{
 		String[] content_values;
 		try
@@ -853,25 +829,8 @@ public class main_view extends Activity
 
 			while((line = reader.readLine()) != null)
 			{
-				if(index == 0)
-				{
-					content_values[i] = line.substring(0, line.indexOf('|', 0));
-					i++;
-				}
-				else if(index == 1)
-				{
-					int bar_index = line.indexOf('|', 0);
-					line = line.substring(bar_index + 1, line.indexOf('|', bar_index + 1));
-					content_values[i] = line;
-					i++;
-				}
-				else if(index == 2)
-				{
-					int bar_index = line.indexOf('|', line.indexOf('|') + 1);
-					line = line.substring(bar_index + 1, line.length());
-					content_values[i] = line;
-					i++;
-				}
+				content_values[i] = line.substring(0, line.indexOf('|', 0));
+				i++;
 			}
 		}
 		catch (Exception e)
@@ -919,19 +878,19 @@ public class main_view extends Activity
 		{			
 			for(int i=1; i<current_groups.length; i++)
 			{
-				String[] feeds_array = read_feeds_to_array(0, get_filepath(current_groups[i] + ".txt"));
+				String[] feeds_array = read_feeds_to_array(get_filepath(current_groups[i] + ".txt"));
 				String[] titles, descriptions, links, images;
 
-				for(int k=0; k<feeds_array.length; k++)
+				for(String feed : feeds_array)
 				{
 					boolean success;
 					if(ton[0])
 						success = true;
 					else
-						success = update_feed(feeds_array[k]);
+						success = update_feed(feed);
 					if(success)
 					{
-						String content_path = get_filepath(feeds_array[k] + ".store.txt") + ".content.txt";
+						String content_path = get_filepath(feed + ".store.txt") + ".content.txt";
 						titles = 			read_csv_to_array("title", content_path);
 						if(titles.length>0)
 						{
@@ -980,8 +939,7 @@ public class main_view extends Activity
 					}
 				}
 			}
-			long lo = 1;
-			return lo;
+			return 1L;
 		}
 
 		@Override
@@ -1056,7 +1014,7 @@ public class main_view extends Activity
 		String[] feeds = read_file_to_array(content_name);
 		Set<String> set = new LinkedHashSet<String>(Arrays.asList(feeds));
 		temp.delete();
-		feeds = set.toArray(new String[0]);
+		feeds = set.toArray(new String[set.size()]);
 		for(String feed : feeds)
 			append_string_to_file(content_name, feed + "\n");
 	}
@@ -1066,7 +1024,7 @@ public class main_view extends Activity
 		append_string_to_file("dump.txt", text + "\n");
 	}
 
-	public void compress_file(String file_path)
+	void compress_file(String file_path)
 	{
 		BitmapFactory.Options o = new BitmapFactory.Options();
 		o.inJustDecodeBounds = true;

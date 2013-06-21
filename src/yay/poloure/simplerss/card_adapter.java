@@ -32,15 +32,12 @@ public class card_adapter extends BaseAdapter
 	private List<String> content_images = new ArrayList<String>();
 	private List<Integer> content_height = new ArrayList<Integer>();
 	private List<Integer> content_width = new ArrayList<Integer>();
+	
+	private final LayoutInflater inflater;
 
-	LayoutInflater inflater;
-
-	private final Context context;
 	private static int eight = 0;
 
-	public card_adapter(Context context)
-	{
-		this.context = context;
+	public card_adapter(Context context){
 		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 
@@ -56,16 +53,7 @@ public class card_adapter extends BaseAdapter
 			eight = (int) ((8 * main_view.get_pixel_density() + 0.5f));
 
 	}
-
-	public void clear_list(){
-		content_titles = new ArrayList<String>();
-		content_des = new ArrayList<String>();
-		content_links = new ArrayList<String>();
-		content_images = new ArrayList<String>();
-		content_height = new ArrayList<Integer>();
-		content_width = new ArrayList<Integer>();
-	}
-
+	
 	public List<String> return_links(){
 		return content_links;
 	}
@@ -151,14 +139,14 @@ public class card_adapter extends BaseAdapter
 		ImageView image_view;
 	}
 
-	public static Bitmap decodeFile(String filePath)
+	private static Bitmap decodeFile(String filePath)
 	{
 		BitmapFactory.Options o = new BitmapFactory.Options();
 		o.inSampleSize = 1;
 		return BitmapFactory.decodeFile(filePath, o);
 	}
 
-	public void loadBitmap(int position, ImageView image_view, int height, int width)
+	void loadBitmap(int position, ImageView image_view, int height, int width)
 	{
 		if(cancelPotentialWork(position, image_view))
 		{
@@ -170,7 +158,7 @@ public class card_adapter extends BaseAdapter
 		}
 	}
 
-	public static boolean cancelPotentialWork(int position, ImageView image_view) {
+	private static boolean cancelPotentialWork(int position, ImageView image_view) {
 		final display_image worker_task = get_task(image_view);
 
 		if (worker_task != null)
@@ -250,15 +238,5 @@ public class card_adapter extends BaseAdapter
 				}
 			}
 		}
-	}
-
-	private void append_string_to_filer(String file_namer, String string)
-	{
-		try{
-			BufferedWriter out = new BufferedWriter(new FileWriter(file_namer, false));
-			out.write(string);
-			out.close();
-		}
-		catch(Exception e){}
 	}
 } 
