@@ -1,7 +1,6 @@
 package yay.poloure.simplerss;
 
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,7 +63,7 @@ public class card_adapter extends BaseAdapter
 		content_links = new ArrayList<String>();
 		content_images = new ArrayList<String>();
 		content_height = new ArrayList<Integer>();
-		content_width = new ArrayList(Integer>();
+		content_width = new ArrayList<Integer>();
 	}
 
 	public List<String> return_links(){
@@ -89,67 +88,59 @@ public class card_adapter extends BaseAdapter
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
-			ViewHolder holder;
-			if(convertView == null)
+		ViewHolder holder;
+		if(convertView == null)
+		{
+			convertView = inflater.inflate(R.layout.card_layout, parent, false);
+			holder = new ViewHolder();
+			holder.title_view = (TextView) convertView.findViewById(R.id.title);
+			holder.time_view = (TextView) convertView.findViewById(R.id.time);
+			holder.description_view = (TextView) convertView.findViewById(R.id.description);
+			holder.image_view = (ImageView) convertView.findViewById(R.id.image);
+			convertView.setTag(holder);
+		}
+		else
+			holder = (ViewHolder) convertView.getTag();
+
+		holder.title_view.setText(content_titles.get(position));
+		holder.time_view.setText(content_links.get(position));
+		String des = content_des.get(position);
+
+		boolean image_exists = false;
+		if((content_width.get(position)>0)&&(content_height.get(position)>0))
+			image_exists = true;
+
+		if(image_exists)
+			loadBitmap(position, holder.image_view, content_height.get(position), content_width.get(position));
+
+		if(des.length() > 1)
+		{
+			if(image_exists)
 			{
-				convertView = inflater.inflate(R.layout.card_layout, parent, false);
-				holder = new ViewHolder();
-				holder.title_view = (TextView) convertView.findViewById(R.id.title);
-				holder.time_view = (TextView) convertView.findViewById(R.id.time);
-				holder.description_view = (TextView) convertView.findViewById(R.id.description);
-				holder.image_view = (ImageView) convertView.findViewById(R.id.image);
-				convertView.setTag(holder);
+				holder.description_view.setPadding(eight, 0, 0, 0);
+				ViewGroup.LayoutParams iv = holder.image_view.getLayoutParams();
+				iv.height = LayoutParams.WRAP_CONTENT;
+				iv.width = LayoutParams.WRAP_CONTENT;
+				holder.image_view.setLayoutParams(iv);
 			}
 			else
-				holder = (ViewHolder) convertView.getTag();
-
-		try{
-			holder.title_view.setText(content_titles.get(position));
-			holder.time_view.setText(content_links.get(position));
-			String des = content_des.get(position);
-
-			boolean image_exists = false;
-			if((content_width.get(position)>0)&&(content_height.get(position)>0))
-				image_exists = true;
-				
-			if(image_exists)
-				loadBitmap(position, holder.image_view, content_height.get(position), content_width.get(position));
-
-			if(des.length() > 1)
 			{
-				if(image_exists)
-				{
-					holder.description_view.setPadding(eight, 0, 0, 0);
-					ViewGroup.LayoutParams iv = holder.image_view.getLayoutParams();
-					iv.height = LayoutParams.WRAP_CONTENT;
-					iv.width = LayoutParams.WRAP_CONTENT;
-					holder.image_view.setLayoutParams(iv);
-				}
-				else
-				{
-					ViewGroup.LayoutParams iv = holder.image_view.getLayoutParams();
-					iv.height = 0;
-					iv.width = 0;
-					holder.image_view.setLayoutParams(iv);
-				}
+				ViewGroup.LayoutParams iv = holder.image_view.getLayoutParams();
+				iv.height = 0;
+				iv.width = 0;
+				holder.image_view.setLayoutParams(iv);
 			}
-			else if(image_exists)
-			{
-					ViewGroup.LayoutParams iv = holder.image_view.getLayoutParams();
-					iv.height = LayoutParams.MATCH_PARENT;
-					iv.width = LayoutParams.MATCH_PARENT;
-					holder.image_view.setLayoutParams(iv);
-					holder.description_view.setPadding(0, 0, 0, 0);
-			}
-			holder.description_view.setText(des);
 		}
-		catch(Exception e){
-			StringWriter sw = new StringWriter();
-			PrintWriter pw = new PrintWriter(sw);
-			e.printStackTrace(pw);
-			append_string_to_filer(content_images.get(0) + ".hhhhhhhhhhhhhhhhhhhhhhh.txt", sw.toString());
-		}	
-			return convertView;
+		else if(image_exists)
+		{
+				ViewGroup.LayoutParams iv = holder.image_view.getLayoutParams();
+				iv.height = LayoutParams.MATCH_PARENT;
+				iv.width = LayoutParams.MATCH_PARENT;
+				holder.image_view.setLayoutParams(iv);
+				holder.description_view.setPadding(0, 0, 0, 0);
+		}
+		holder.description_view.setText(des);
+		return convertView;
 	}
 
 	static class ViewHolder

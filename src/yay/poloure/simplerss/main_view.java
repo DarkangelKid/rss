@@ -5,7 +5,6 @@ import android.preference.PreferenceFragment;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.DialogInterface;
-import android.content.ClipData;
 
 import android.app.AlertDialog;
 import java.util.List;
@@ -26,26 +25,18 @@ import android.support.v4.view.PagerTabStrip;
 import android.support.v4.widget.DrawerLayout;
 
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuInflater;
 import android.view.LayoutInflater;
-import android.view.DragEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.MotionEvent;
-import android.view.View.OnDragListener;
-import android.view.View.DragShadowBuilder;
-import android.view.View.OnTouchListener;
-import android.widget.LinearLayout;
 import android.widget.FrameLayout;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.AdapterView;
-import android.widget.ImageView;
 import android.content.res.Configuration;
 
 import android.widget.Button;
@@ -916,7 +907,7 @@ public class main_view extends Activity
 		return content_values.toArray(new String[content_values.size()]);
 	}
 
-	private class refresh_feeds extends AsyncTask<Boolean, Integer, Long> {
+	private class refresh_feeds extends AsyncTask<Boolean, Object, Long> {
 
 		@Override
 		protected void onPreExecute(){
@@ -926,16 +917,13 @@ public class main_view extends Activity
 		@Override
 		protected Long doInBackground(Boolean... ton)
 		{			
-			for(int i=0; i<current_groups.length; i++)
+			for(int i=1; i<current_groups.length; i++)
 			{
-				log("i = " + i);
 				String[] feeds_array = read_feeds_to_array(0, get_filepath(current_groups[i] + ".txt"));
-				log("feeds_array.length = " + feeds_array.length);
 				String[] titles, descriptions, links, images;
 
 				for(int k=0; k<feeds_array.length; k++)
 				{
-					log("k = " + k);
 					boolean success;
 					if(ton[0])
 						success = true;
@@ -944,105 +932,75 @@ public class main_view extends Activity
 					if(success)
 					{
 						String content_path = get_filepath(feeds_array[k] + ".store.txt") + ".content.txt";
-						log("content_path = " + content_path);
 						titles = 			read_csv_to_array("title", content_path);
 						if(titles.length>0)
 						{
-							log("titles.length = " + titles.length);
 							images = 			read_csv_to_array("image", content_path);
-							log("images.length = " + images.length);
 							descriptions = 		read_csv_to_array("description", content_path);
-							log("descriptions.length = " + descriptions.length);
 							links = 			read_csv_to_array("link", content_path);
-							log("links.length = " + links.length);
 							if(links[0].length()<10)
 								links = 		read_csv_to_array("id", content_path);
 								
 							ArrayList<String> image_set = new ArrayList<String>();
-							log("image_set.size() = " + image_set.size());
 							ArrayList<Integer> image_heights = new ArrayList<Integer>();
-							log("image_heights.size() = " + image_heights.size());
 							ArrayList<Integer> image_widths = new ArrayList<Integer>();
-							log("image_widths.size() = " + image_widths.size());
 
 							for(int m=0; m<titles.length; m++)
 							{
-								log("m = " + m);
 								if(!images[m].equals(""))
 								{
-									log("images[" + m + "] is non-zero");
 									String icon_name = images[m].substring(images[m].lastIndexOf("/") + 1, images[m].length());
 									String image_path = get_filepath(icon_name);
-									log("image_path = " + image_path);
 									if(!((new File(image_path)).exists()))
 									{
-										log("Image was not found on device. Downloading.");
 										download_file(images[m], icon_name);
-										log("image downloaded.");
 										compress_file(image_path);
-										log("Image_compressed.");
 									}
-									else
-										log("images was found on device. Using local data.");
 									image_set.add(image_path);
-									log("Added image_path to adapter.");
 									Integer[] dim = get_dim(image_path);
-									log("Got image dimensions for image.");
 									image_heights.add(dim[1]);
-									log("image_height = " + dim[1]);
 									image_widths.add(dim[0]);
-									log("image_width = " + dim[0]);
 								}
 								else
 								{
-									log("images[" + m + "] is zero");
 									image_set.add("");
 									image_heights.add(0);
 									image_widths.add(0);
 								}
-								log("Finished " + m + " iteration.");
 							}
-							log("Left m loop.");
 
 							//smoothScrollToPosition(int position)
-							card_adapter ith = get_card_adapter(i);
-							List<String> ith_list = ith.return_links();
+							List<String> ith_list = get_card_adapter(i).return_links();
 								for(int j=0; j<links.length; j++)
 								{
 									if((!ith_list.contains(links[j]))||(ith_list.size() == 0))
-									{
-										ith					.add_list(titles[j], descriptions[j], links[j], image_set.get(j), image_heights.get(j), image_widths.get(j));
-										publishProgress(i);
-										get_card_adapter(0)	.add_list(titles[j], descriptions[j], links[j], image_set.get(j), image_heights.get(j), image_widths.get(j));
-										publishProgress(0);
-									}
+										publishProgress(i, titles[j], descriptions[j], links[j], image_set.get(j), image_heights.get(j), image_widths.get(j));
 								}
 						}
 					}
 				}
-				log("Left k loop.");
 			}
-			log("Left i loop.");
 			long lo = 1;
 			return lo;
 		}
 
 		@Override
-		protected void onProgressUpdate(Integer... progress){
-			get_card_adapter(progress[0]).notifyDataSetChanged();
+		protected void onProgressUpdate(Object... progress){
+			card_adapter ith = get_card_adapter((Integer) progress[0]);
+			ith.add_list((String) progress[1], (String) progress[2], (String) progress[3], (String) progress[4], (Integer) progress[5], (Integer) progress[6]); 
+			ith.notifyDataSetChanged();
+			ith = get_card_adapter(0);
+			ith.add_list((String) progress[1], (String) progress[2], (String) progress[3], (String) progress[4], (Integer) progress[5], (Integer) progress[6]); 
+			ith.notifyDataSetChanged();
 		}
 
 		@Override
 		protected void onPostExecute(Long tun)
 		{
-			log("Started onPostExecute");
 			if(viewPager.getOffscreenPageLimit() > 1){
-				log("OffscreenPageLimit > 1");
 				viewPager.setOffscreenPageLimit(1);
-				log("Set OffscreenPageLimit to 1");
 			}
 			set_refresh(false);
-			log("Set set_refresh to false");
 		}
 	}
 
