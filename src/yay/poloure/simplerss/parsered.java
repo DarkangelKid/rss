@@ -143,9 +143,9 @@ public class parsered
 			if(tag.contains("img src="))
 				to_file(file_name + ".content.dump.txt", tag.substring(tag.indexOf("src=\"") + 5, tag.indexOf("\"", tag.indexOf("src=\"") + 6)) + "\n", false);
 
-			for(int i=0; i<types.length; i++)
+			for(String type : types)
 			{
-				if(tag.contains(types[i]))
+				if(tag.contains(type))
 					found = true;
 			}
 		}

@@ -67,7 +67,6 @@ import java.lang.Thread;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
-import java.util.Iterator;
 import java.util.Set;
 import java.io.StringWriter;
 import java.io.PrintWriter;
@@ -83,10 +82,7 @@ public class main_view extends Activity
 	private ActionBarDrawerToggle drawer_toggle;
 	private Menu optionsMenu;
 
-	private Button btnClosePopup;
-
 	private String mTitle;
-	private CharSequence MainTitle;
 	public static float density;
 	public int width;
 
@@ -211,16 +207,12 @@ public class main_view extends Activity
 
 	private boolean selectItem(int position)
 	{
-		if(position < 3)
-		{
-			Fragment fragment;
-			if(position == 2)
-				switch_page("Settings", position);
-			else if(position == 1)
-				switch_page("Manage", position);
-			else
-				switch_page("Feeds", position);
-		}
+		if(position == 2)
+			switch_page("Settings", position);
+		else if(position == 1)
+			switch_page("Manage", position);
+		else if(position == 0)
+			switch_page("Feeds", position);
 		else
 		{
 			switch_page("Feeds", position);
@@ -321,8 +313,8 @@ public class main_view extends Activity
 			View view = inflater.inflate(R.layout.manage_fragment, container, false);
 			manage_list = (ListView) view.findViewById(R.id.group_listview);
 			manage_adapter = new group_adapter(getActivity());
-			for(int i = 0; i < current_groups.length; i++)
-				manage_adapter.add_list(current_groups[i]);
+			for(String group : current_groups)
+				manage_adapter.add_list(group);
 			manage_list.setAdapter(manage_adapter);
 			manage_adapter.notifyDataSetChanged();
 			/*manage_adapter = new ArrayAdapter<String>(getActivity(), R.layout.manage_list_item, R.id.group_item, current_groups);
@@ -405,9 +397,7 @@ public class main_view extends Activity
 	}
 
 	public static class card_fragment extends ListFragment
-	{
-		private static int mNum;
-		
+	{		
 		static card_fragment newInstance(int num)
 		{
 			card_fragment f = new card_fragment();
@@ -426,13 +416,11 @@ public class main_view extends Activity
 		public void onCreate(Bundle savedInstanceState){
 			super.onCreate(savedInstanceState);
 			setListAdapter(new card_adapter(getActivity()));
-			mNum = getArguments() != null ? getArguments().getInt("num") : 1;
 		}
 
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle SavedInstanceState){
-			View view = inflater.inflate(R.layout.fragment_main_dummy, container, false);
-			return view;
+			return inflater.inflate(R.layout.fragment_main_dummy, container, false);
 		}
 	}
 
@@ -709,8 +697,7 @@ public class main_view extends Activity
 				}
 			}
 			download_finished = 1;
-			long lo = 1;
-			return lo;
+			return 1L;
 		}
 
 		protected void onPostExecute(Long result) {
@@ -772,17 +759,8 @@ public class main_view extends Activity
 
 	private void check_for_no_groups()
 	{
-		String[] groups = read_file_to_array("group_list.txt");
-		boolean all_exists = false;
-		for(int i=0; i<groups.length; i++)
-		{
-			if(groups[i].equals("All"))
-			{
-				all_exists = true;
-				break;
-			}
-		}
-		if(!all_exists)
+		List<String> groups = Arrays.asList(read_file_to_array("group_list.txt"));
+		if(!groups.contains("All"))
 			add_group("All");
 	}
 
@@ -821,18 +799,6 @@ public class main_view extends Activity
 		append_string_to_file("group_list.txt", group_name + "\n");
 
 		update_groups();
-	}
-
-	private void delete_group(String group_name)
-	{
-		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())){
-			remove_string_from_file("group_list.txt", group_name);
-			File file = new File(get_filepath(group_name + ".txt"));
-			file.delete();
-			update_groups();
-		}
-		else
-			toast_message("External storage is not mounted", 1);
 	}
 
 	private String[] read_file_to_array(String file_name)
@@ -930,8 +896,7 @@ public class main_view extends Activity
 		ArrayList<String> content_values = new ArrayList<String>();
 		try{
 			content_type = content_type + "|";
-			String line = "";
-			int i = 0;
+			String line;
 			File in = new File(feed_path);
 			BufferedReader reader = new BufferedReader(new FileReader(in));
 			reader.readLine();
@@ -944,12 +909,11 @@ public class main_view extends Activity
 					content_values.add(line);
 				else
 					content_values.add("");
-				i++;
 			}
 		}
 		catch(Exception e){
 		}
-		return content_values.toArray(new String[0]);
+		return content_values.toArray(new String[content_values.size()]);
 	}
 
 	private class refresh_feeds extends AsyncTask<Boolean, Integer, Long> {
@@ -972,7 +936,7 @@ public class main_view extends Activity
 				for(int k=0; k<feeds_array.length; k++)
 				{
 					log("k = " + k);
-					boolean success = false;
+					boolean success;
 					if(ton[0])
 						success = true;
 					else
@@ -1048,8 +1012,9 @@ public class main_view extends Activity
 									if((!ith_list.contains(links[j]))||(ith_list.size() == 0))
 									{
 										ith					.add_list(titles[j], descriptions[j], links[j], image_set.get(j), image_heights.get(j), image_widths.get(j));
-										get_card_adapter(0)	.add_list(titles[j], descriptions[j], links[j], image_set.get(j), image_heights.get(j), image_widths.get(j));
 										publishProgress(i);
+										get_card_adapter(0)	.add_list(titles[j], descriptions[j], links[j], image_set.get(j), image_heights.get(j), image_widths.get(j));
+										publishProgress(0);
 									}
 								}
 						}
@@ -1063,10 +1028,8 @@ public class main_view extends Activity
 		}
 
 		@Override
-		protected void onProgressUpdate(Integer... progress)
-		{
+		protected void onProgressUpdate(Integer... progress){
 			get_card_adapter(progress[0]).notifyDataSetChanged();
-			get_card_adapter(0).notifyDataSetChanged();
 		}
 
 		@Override
@@ -1136,8 +1099,8 @@ public class main_view extends Activity
 		Set<String> set = new LinkedHashSet<String>(Arrays.asList(feeds));
 		temp.delete();
 		feeds = set.toArray(new String[0]);
-		for(int i=0; i<feeds.length; i++)
-			append_string_to_file(content_name, feeds[i] + "\n");
+		for(String feed : feeds)
+			append_string_to_file(content_name, feed + "\n");
 	}
 
 	private void log(String text)
@@ -1187,7 +1150,7 @@ public class main_view extends Activity
 		Integer[] size = new Integer[2];
 		BitmapFactory.Options o = new BitmapFactory.Options();
 		o.inSampleSize = 1;
-		Bitmap bitmap = BitmapFactory.decodeFile(image_path, o);
+		BitmapFactory.decodeFile(image_path, o);
 		size[0] = o.outWidth;
 		size[1] = o.outHeight;
 		return size;

@@ -27,12 +27,12 @@ import java.lang.ref.WeakReference;
 
 public class card_adapter extends BaseAdapter
 {
-	private List<String> content_titles = new ArrayList();
-	private List<String> content_des = new ArrayList();
-	private List<String> content_links = new ArrayList();
-	private List<String> content_images = new ArrayList();
-	private List<Integer> content_height = new ArrayList();
-	private List<Integer> content_width = new ArrayList();
+	private List<String> content_titles = new ArrayList<String>();
+	private List<String> content_des = new ArrayList<String>();
+	private List<String> content_links = new ArrayList<String>();
+	private List<String> content_images = new ArrayList<String>();
+	private List<Integer> content_height = new ArrayList<Integer>();
+	private List<Integer> content_width = new ArrayList<Integer>();
 
 	LayoutInflater inflater;
 
@@ -54,17 +54,17 @@ public class card_adapter extends BaseAdapter
 		content_height.add(new_height);
 		content_width.add(new_width);
 		if(eight == 0)
-			this.eight = (int) ((8 * main_view.get_pixel_density() + 0.5f));
+			eight = (int) ((8 * main_view.get_pixel_density() + 0.5f));
 
 	}
 
 	public void clear_list(){
-		content_titles = new ArrayList();
-		content_des = new ArrayList();
-		content_links = new ArrayList();
-		content_images = new ArrayList();
-		content_height = new ArrayList();
-		content_width = new ArrayList();
+		content_titles = new ArrayList<String>();
+		content_des = new ArrayList<String>();
+		content_links = new ArrayList<String>();
+		content_images = new ArrayList<String>();
+		content_height = new ArrayList<Integer>();
+		content_width = new ArrayList(Integer>();
 	}
 
 	public List<String> return_links(){
@@ -164,8 +164,7 @@ public class card_adapter extends BaseAdapter
 	{
 		BitmapFactory.Options o = new BitmapFactory.Options();
 		o.inSampleSize = 1;
-		Bitmap bitmap = BitmapFactory.decodeFile(filePath, o);
-		return bitmap;
+		return BitmapFactory.decodeFile(filePath, o);
 	}
 
 	public void loadBitmap(int position, ImageView image_view, int height, int width)
@@ -235,8 +234,7 @@ public class card_adapter extends BaseAdapter
 		protected Bitmap doInBackground(Integer... ton)
 		{
 			position = ton[0];
-			Bitmap image = decodeFile(content_images.get(ton[0]));
-			return image;
+			return decodeFile(content_images.get(ton[0]));
 		}
 
 		@Override
