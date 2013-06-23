@@ -807,6 +807,27 @@ public class main_view extends Activity
 		return line_values;
 	}
 
+	private String return_first_line_containing(String file_name, String content)
+	{
+		String line = "";
+
+		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
+		{
+			try
+			{
+				File in = new File(get_filepath(file_name));
+				BufferedReader reader = new BufferedReader(new FileReader(in));
+								
+				while(!line.contains(content))
+					line = reader.readLine();
+			}
+			catch (Exception e){
+				line = "";
+			}
+		}
+		return line;
+	}
+
 	private String[] read_file_to_array_skip(String file_name)
 	{
 		String[] line_values;
@@ -924,7 +945,16 @@ public class main_view extends Activity
 					if((!ton[0])&&(i != 0))
 						success = update_feed(feed);
 				}
-				sort_groups_by_time(current_groups[i]);
+
+				File test;
+				if(i == 0)
+					test = new File("all_feeds.txt.content.txt");
+				else
+					test = new File(current_groups[i] + ".txt.content.txt");
+
+				/// Only sort the new ones into the group chaches
+				if((!test.exists())||(!ton[0]))
+					sort_groups_by_time(current_groups[i]);
 
 				if(success)
 				{
@@ -955,8 +985,7 @@ public class main_view extends Activity
 									download_file(images[m], icon_name);
 									compress_file(image_path);
 								}
-								/// Make this function more efficient.
-								Integer[] dim = get_dim(image_path);
+								Integer[] dim = get_dim(icon_name);
 								image_height = dim[1];
 								image_width = dim[0];
 							}
@@ -1028,7 +1057,6 @@ public class main_view extends Activity
 			if(pubDates[0].length()<8)
 				pubDates = 		read_csv_to_array("updated", content_path);
 
-			log("starting pubDate loop");
 			for(int i=0; i<pubDates.length; i++)
 			{
 				content_all.add(content[i]);
@@ -1046,17 +1074,14 @@ public class main_view extends Activity
 
 				for(int j=0; j<dates.size(); j++)
 				{
-					log("j = " + j);
 					if(time.before(dates.get(j)))
 					{
-						log("time was before that j");
 						dates.add(j, time);
 						links_ordered.add(j , links[i]);
 						break;
 					}
 					else if((j == dates.size() - 1)&&(time.after(dates.get(j))))
 					{
-						log("time was the latest one");
 						dates.add(time);
 						links_ordered.add(links[i]);
 						break;
@@ -1064,14 +1089,11 @@ public class main_view extends Activity
 				}
 				if(dates.size() == 0)
 				{
-					log("first date");
 					dates.add(time);
 					links_ordered.add(links[i]);
 				}
 			}
 		}
-
-		log("Finished making links_ordered");
 
 		String group_content_path = group + ".txt.content.txt";
 		File group_content = new File(get_filepath(group_content_path));
@@ -1120,10 +1142,6 @@ public class main_view extends Activity
 				return false;
 		}
 		catch(Exception e){
-			StringWriter sw = new StringWriter();
-			PrintWriter pw = new PrintWriter(sw);
-			e.printStackTrace(pw);
-			append_string_to_file("updater.dump.txt", sw.toString());	
 			return false;
 		}
 	}
@@ -1183,14 +1201,28 @@ public class main_view extends Activity
 		}
 	}
 
-	private Integer[] get_dim(final String image_path)
+	private Integer[] get_dim(final String image_name)
 	{
 		Integer[] size = new Integer[2];
-		BitmapFactory.Options o = new BitmapFactory.Options();
-		o.inSampleSize = 1;
-		BitmapFactory.decodeFile(image_path, o);
-		size[0] = o.outWidth;
-		size[1] = o.outHeight;
+		String line = return_first_line_containing("image_size.cache.txt", image_name);
+		if(line == "")
+		{
+			BitmapFactory.Options o = new BitmapFactory.Options();
+			o.inSampleSize = 1;
+			BitmapFactory.decodeFile(get_filepath(image_name), o);
+			size[0] = o.outWidth;
+			size[1] = o.outHeight;
+			append_string_to_file("image_size.cache.txt", image_name + "|" + size[0] + "|" + size[1] + "\n");
+		}
+		else
+		{
+			int first = line.indexOf('|') + 1;
+			int second = line.indexOf('|', first + 1) + 1;
+			size[0] = Integer.parseInt(line.substring(first, second - 1));
+			size[1] = Integer.parseInt(line.substring(second, line.length()));
+			log(line);
+			log(size[0] + "," + size[1]);
+		}
 		return size;
 	}
 }
