@@ -5,6 +5,11 @@ import android.view.MotionEvent;
 import android.content.ClipData;
 import android.view.View.DragShadowBuilder;
 
+import android.view.DragEvent;
+import android.view.View.OnDragListener;
+import android.widget.LinearLayout;
+import android.view.ViewManager;
+
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +20,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import java.util.List;
 import java.util.ArrayList;
+
+import android.graphics.Canvas;
+import android.graphics.Point;
 
 public class group_adapter extends BaseAdapter
 {
@@ -93,7 +101,7 @@ public class group_adapter extends BaseAdapter
 			{
 				View view_parent = (View) view.getParent();
 				ClipData data = ClipData.newPlainText("", "");
-				DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(view_parent);
+				custom_drag_builder shadowBuilder = new custom_drag_builder(view_parent);
 				view_parent.startDrag(data, shadowBuilder, view_parent, 0);
 				view_parent.setVisibility(View.INVISIBLE);
 				return true;
@@ -107,12 +115,12 @@ public class group_adapter extends BaseAdapter
 	///Pish starts here
 	/*class MyDragListener implements OnDragListener
 	{
-		Drawable enterShape = getResources().getDrawable(R.drawable.shape_droptarget);
-		Drawable normalShape = getResources().getDrawable(R.drawable.shape);
-		
 		@Override
 		public boolean onDrag(View v, DragEvent event)
 		{
+			String old_title;
+			String new_title;
+			View old_view;
 			int action = event.getAction();
 			switch (event.getAction())
 			{
@@ -120,10 +128,14 @@ public class group_adapter extends BaseAdapter
 					// Do nothing
 					break;
 				case DragEvent.ACTION_DRAG_ENTERED:
-					v.setBackgroundDrawable(enterShape);
+					new_title = ((TextView)v.findViewById(R.id.group_item)).getText().toString();
+					v.setVisibility(View.INVISIBLE);
+					((TextView)old_view.findViewById(R.id.group_item)).setText(new_title);
+					old_view.setVisibility(View.VISIBLE);
 					break;
 				case DragEvent.ACTION_DRAG_EXITED:        
-					v.setBackgroundDrawable(normalShape);
+					old_view = v;
+					//v.setVisibility(View.VISIBLE);
 					break;
 				case DragEvent.ACTION_DROP:
 					// Dropped, reassign View to ViewGroup
@@ -135,11 +147,30 @@ public class group_adapter extends BaseAdapter
 					view.setVisibility(View.VISIBLE);
 					break;
 				case DragEvent.ACTION_DRAG_ENDED:
-					v.setBackgroundDrawable(normalShape);
 					default:
 					break;
 			}
 			return true;
 		}
-	} */
+	}*/
+
+	class custom_drag_builder extends View.DragShadowBuilder
+	{
+		private View view_store;
+
+		private custom_drag_builder(View v) {
+			super(v);
+			view_store = v;
+		}
+
+		@Override
+		public void onProvideShadowMetrics(Point shadowSize, Point shadowTouchPoint)
+		{
+			shadowSize.x = view_store.getWidth();
+			shadowSize.y = view_store.getHeight();
+
+			shadowTouchPoint.x = (int)(shadowSize.x * 19 / 20);
+			shadowTouchPoint.y = (int)(shadowSize.y / 2);
+		}
+	}
 } 

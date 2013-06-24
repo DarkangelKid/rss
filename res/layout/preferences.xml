@@ -1,22 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen
 	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:simplerss="http://robobunny.com"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent">
 	<PreferenceCategory
-		android:title="First Category">
+			android:title="Cache">
 		<CheckBoxPreference
-			android:key="pref_sync"
-			android:title="CheckBox"
-			android:summary="Summary"
-			android:defaultValue="true" />
+				android:key="pref_sync"
+				android:title="CheckBox"
+				android:summary="Summary"
+				android:defaultValue="true" />
 	</PreferenceCategory>
-	
-	<PreferenceCategory>
-		<EditTextPreference
-			android:key="edittext_preference"
-			android:title="title_edittext_preference"
-			android:summary="summary_edittext_preference"
-			android:dialogTitle="dialog_title_edittext_preference" />
+
+	<PreferenceCategory
+			android:title="First Category">
+		<yay.poloure.simplerss.SeekBarPreference
+				android:key="speechRate"
+				android:title="Speech speed"
+				android:summary="Adjust reading speed"
+				android:defaultValue="80"
+				android:max="200"
+				simplerss:min="1"
+				simplerss:unitsLeft=""
+				simplerss:unitsRight=""/>
 	</PreferenceCategory>
 </PreferenceScreen>
