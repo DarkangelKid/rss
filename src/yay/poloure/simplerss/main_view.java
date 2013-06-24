@@ -59,6 +59,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.Date;
+import java.util.Locale;
+import java.text.SimpleDateFormat;
 import java.io.StringWriter;
 import java.io.PrintWriter;
 import android.graphics.BitmapFactory;
@@ -145,7 +148,6 @@ public class main_view extends Activity
 		viewPager.setOffscreenPageLimit(128);
 
 		update_groups();
-		set_refresh(true);
 		new refresh_feeds().execute(true);
 
 		PagerTabStrip pagerTabStrip = (PagerTabStrip) findViewById(R.id.pager_title_strip);
@@ -286,7 +288,6 @@ public class main_view extends Activity
 	public class manager_fragment extends Fragment
 	{
 		private ListView manage_list;
-		//private ArrayAdapter<String> manage_adapter;
 		private group_adapter manage_adapter;
 
 		@Override
@@ -299,9 +300,6 @@ public class main_view extends Activity
 				manage_adapter.add_list(group);
 			manage_list.setAdapter(manage_adapter);
 			manage_adapter.notifyDataSetChanged();
-			/*manage_adapter = new ArrayAdapter<String>(getActivity(), R.layout.manage_list_item, R.id.group_item, current_groups);
-			manage_list.setAdapter(manage_adapter);
-			manage_adapter.notifyDataSetChanged();*/
 			return view;
 		}
 
@@ -407,6 +405,7 @@ public class main_view extends Activity
 		this.optionsMenu = menu;
 		MenuInflater menu_inflater = getMenuInflater();
 		menu_inflater.inflate(R.menu.main_overflow, menu);
+		//set_refresh(true);
 		return true;
 	}
 
@@ -808,6 +807,65 @@ public class main_view extends Activity
 		return line_values;
 	}
 
+	private String return_first_line_containing(String file_name, String content)
+	{
+		String line = "";
+
+		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
+		{
+			try
+			{
+				File in = new File(get_filepath(file_name));
+				BufferedReader reader = new BufferedReader(new FileReader(in));
+								
+				while(!line.contains(content))
+					line = reader.readLine();
+			}
+			catch (Exception e){
+				line = "";
+			}
+		}
+		return line;
+	}
+
+	private String[] read_file_to_array_skip(String file_name)
+	{
+		String[] line_values;
+		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
+		{
+			try
+			{
+				String line;
+				int number_of_lines = 0, i = 0;
+				File in = new File(get_filepath(file_name));
+
+				BufferedReader reader = new BufferedReader(new FileReader(in));
+
+				while(reader.readLine() != null)
+					number_of_lines++;
+
+				reader.close();
+				reader = new BufferedReader(new FileReader(in));
+				
+				line_values = new String[number_of_lines];
+				reader.readLine();
+				
+				while((line = reader.readLine()) != null)
+				{
+					line_values[i] = line;
+					i++;
+				}
+			}
+			catch (Exception e){
+				line_values = new String[0];
+			}
+		}
+		else
+			line_values = new String[0];
+		
+		return line_values;
+	}
+
 	private String[] read_feeds_to_array(String file_path)
 	{
 		String[] content_values;
@@ -875,69 +933,79 @@ public class main_view extends Activity
 
 		@Override
 		protected Long doInBackground(Boolean... ton)
-		{			
+		{
 			for(int i=1; i<current_groups.length; i++)
 			{
 				String[] feeds_array = read_feeds_to_array(get_filepath(current_groups[i] + ".txt"));
 				String[] titles, descriptions, links, images;
+				boolean success = true;
 
 				for(String feed : feeds_array)
 				{
-					boolean success;
-					if(ton[0])
-						success = true;
-					else
+					if((!ton[0])&&(i != 0))
 						success = update_feed(feed);
-					if(success)
+				}
+
+				File test;
+				if(i == 0)
+					test = new File("all_feeds.txt.content.txt");
+				else
+					test = new File(current_groups[i] + ".txt.content.txt");
+
+				/// Only sort the new ones into the group chaches
+				if((!test.exists())||(!ton[0]))
+					sort_groups_by_time(current_groups[i]);
+
+				if(success)
+				{
+					String content_path;
+					if(i == 0)
+						content_path = get_filepath("all_feeds.txt.content.txt");
+					else
+						content_path = get_filepath(current_groups[i] + ".txt.content.txt");
+
+					titles = 				read_csv_to_array("title", content_path);
+					if(titles.length>0)
 					{
-						String content_path = get_filepath(feed + ".store.txt") + ".content.txt";
-						titles = 			read_csv_to_array("title", content_path);
-						if(titles.length>0)
+						images = 			read_csv_to_array("image", content_path);
+						descriptions = 		read_csv_to_array("description", content_path);
+						links = 			read_csv_to_array("link", content_path);
+
+						int image_width, image_height;
+						String image_path;
+
+						for(int m=0; m<titles.length; m++)
 						{
-							images = 			read_csv_to_array("image", content_path);
-							descriptions = 		read_csv_to_array("description", content_path);
-							links = 			read_csv_to_array("link", content_path);
-							if(links[0].length()<10)
-								links = 		read_csv_to_array("id", content_path);
-								
-							ArrayList<String> image_set = new ArrayList<String>();
-							ArrayList<Integer> image_heights = new ArrayList<Integer>();
-							ArrayList<Integer> image_widths = new ArrayList<Integer>();
-
-							for(int m=0; m<titles.length; m++)
+							if(!images[m].equals(""))
 							{
-								if(!images[m].equals(""))
+								String icon_name = images[m].substring(images[m].lastIndexOf("/") + 1, images[m].length());
+								image_path = get_filepath(icon_name);
+								if(!((new File(image_path)).exists()))
 								{
-									String icon_name = images[m].substring(images[m].lastIndexOf("/") + 1, images[m].length());
-									String image_path = get_filepath(icon_name);
-									if(!((new File(image_path)).exists()))
-									{
-										download_file(images[m], icon_name);
-										compress_file(image_path);
-									}
-									image_set.add(image_path);
-									Integer[] dim = get_dim(image_path);
-									image_heights.add(dim[1]);
-									image_widths.add(dim[0]);
+									download_file(images[m], icon_name);
+									compress_file(image_path);
 								}
-								else
-								{
-									image_set.add("");
-									image_heights.add(0);
-									image_widths.add(0);
-								}
+								Integer[] dim = get_dim(icon_name);
+								image_height = dim[1];
+								image_width = dim[0];
 							}
-
+							else
+							{
+								image_path = "";
+								image_height = 0;
+								image_width = 0;
+							}
 							//smoothScrollToPosition(int position)
 							List<String> ith_list = get_card_adapter(i).return_links();
-								for(int j=0; j<links.length; j++)
-								{
-									if((!ith_list.contains(links[j]))||(ith_list.size() == 0))
-										publishProgress(i, titles[j], descriptions[j], links[j], image_set.get(j), image_heights.get(j), image_widths.get(j));
-								}
+							if((!ith_list.contains(links[m]))||(ith_list.size() == 0))
+								publishProgress(i, titles[m], descriptions[m], links[m], image_path, image_height, image_width);
 						}
 					}
 				}
+				if(i == 0)
+					i = current_groups.length;
+				if(i == current_groups.length - 1)
+					i = -1;
 			}
 			return 1L;
 		}
@@ -945,9 +1013,6 @@ public class main_view extends Activity
 		@Override
 		protected void onProgressUpdate(Object... progress){
 			card_adapter ith = get_card_adapter((Integer) progress[0]);
-			ith.add_list((String) progress[1], (String) progress[2], (String) progress[3], (String) progress[4], (Integer) progress[5], (Integer) progress[6]); 
-			ith.notifyDataSetChanged();
-			ith = get_card_adapter(0);
 			ith.add_list((String) progress[1], (String) progress[2], (String) progress[3], (String) progress[4], (Integer) progress[5], (Integer) progress[6]); 
 			ith.notifyDataSetChanged();
 		}
@@ -968,6 +1033,85 @@ public class main_view extends Activity
 						.findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + Integer.toString(page_index)))
 						.getListAdapter());
 	}
+
+	private void sort_groups_by_time(String group)
+	{
+		String[] links, pubDates, content;
+		Date time;
+		if(group.equals("All"))
+			group = "all_feeds";
+
+		String[] feeds_array = read_feeds_to_array(get_filepath(group + ".txt"));
+		List<Date> dates = new ArrayList<Date>();
+		List<String> links_ordered = new ArrayList<String>();
+		List<String> content_all = new ArrayList<String>();
+		
+		for(String feed : feeds_array)
+		{
+			String content_path = get_filepath(feed + ".store.txt") + ".content.txt";
+			links = 			read_csv_to_array("link", content_path);
+			content = read_file_to_array_skip(feed + ".store.txt.content.txt");
+			pubDates = 			read_csv_to_array("pubDate", content_path);
+			if(pubDates[0].length()<8)
+				pubDates = 		read_csv_to_array("published", content_path);
+			if(pubDates[0].length()<8)
+				pubDates = 		read_csv_to_array("updated", content_path);
+
+			for(int i=0; i<pubDates.length; i++)
+			{
+				content_all.add(content[i]);
+				try{
+					time = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.ENGLISH)).parse(pubDates[i]);
+				}
+				catch(Exception e){
+					try{
+						time = (new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH)).parse(pubDates[i]);
+					}
+					catch(Exception t){
+						time = new Date();
+					}
+				}
+
+				for(int j=0; j<dates.size(); j++)
+				{
+					if(time.before(dates.get(j)))
+					{
+						dates.add(j, time);
+						links_ordered.add(j , links[i]);
+						break;
+					}
+					else if((j == dates.size() - 1)&&(time.after(dates.get(j))))
+					{
+						dates.add(time);
+						links_ordered.add(links[i]);
+						break;
+					}
+				}
+				if(dates.size() == 0)
+				{
+					dates.add(time);
+					links_ordered.add(links[i]);
+				}
+			}
+		}
+
+		String group_content_path = group + ".txt.content.txt";
+		File group_content = new File(get_filepath(group_content_path));
+		group_content.delete();
+
+		for(String link : links_ordered)
+		{
+			for(String line : content_all)
+			{
+				if(line.contains(link))
+				{
+					append_string_to_file(group_content_path, line + "\n");
+					break;
+				}
+			}
+		}
+	}
+
 
 	private boolean update_feed(String feed_name)
 	{
@@ -998,10 +1142,6 @@ public class main_view extends Activity
 				return false;
 		}
 		catch(Exception e){
-			StringWriter sw = new StringWriter();
-			PrintWriter pw = new PrintWriter(sw);
-			e.printStackTrace(pw);
-			append_string_to_file("updater.dump.txt", sw.toString());	
 			return false;
 		}
 	}
@@ -1061,14 +1201,28 @@ public class main_view extends Activity
 		}
 	}
 
-	private Integer[] get_dim(final String image_path)
+	private Integer[] get_dim(final String image_name)
 	{
 		Integer[] size = new Integer[2];
-		BitmapFactory.Options o = new BitmapFactory.Options();
-		o.inSampleSize = 1;
-		BitmapFactory.decodeFile(image_path, o);
-		size[0] = o.outWidth;
-		size[1] = o.outHeight;
+		String line = return_first_line_containing("image_size.cache.txt", image_name);
+		if(line == "")
+		{
+			BitmapFactory.Options o = new BitmapFactory.Options();
+			o.inSampleSize = 1;
+			BitmapFactory.decodeFile(get_filepath(image_name), o);
+			size[0] = o.outWidth;
+			size[1] = o.outHeight;
+			append_string_to_file("image_size.cache.txt", image_name + "|" + size[0] + "|" + size[1] + "\n");
+		}
+		else
+		{
+			int first = line.indexOf('|') + 1;
+			int second = line.indexOf('|', first + 1) + 1;
+			size[0] = Integer.parseInt(line.substring(first, second - 1));
+			size[1] = Integer.parseInt(line.substring(second, line.length()));
+			log(line);
+			log(size[0] + "," + size[1]);
+		}
 		return size;
 	}
 }

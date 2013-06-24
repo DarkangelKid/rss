@@ -43,12 +43,12 @@ public class card_adapter extends BaseAdapter
 
 	public void add_list(String new_title, String new_des, String new_link, String new_image, int new_height, int new_width)
 	{
-		content_titles.add(new_title);
-		content_des.add(new_des.replaceAll("<([^;]*)>", ""));
-		content_links.add(new_link);
-		content_images.add(new_image);
-		content_height.add(new_height);
-		content_width.add(new_width);
+		content_titles.add(0, new_title);
+		content_des.add(0, new_des.replaceAll("<([^;]*)>", ""));
+		content_links.add(0, new_link);
+		content_images.add(0, new_image);
+		content_height.add(0, new_height);
+		content_width.add(0, new_width);
 		if(eight == 0)
 			eight = (int) ((8 * main_view.get_pixel_density() + 0.5f));
 

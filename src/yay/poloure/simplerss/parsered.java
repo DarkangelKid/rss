@@ -16,10 +16,10 @@ class parsered
 	{
 		try
 		{
-			final String[] start = new String[]{"<name>", "<id>", "<link>",  "<description>", "<title>", "<content type=\"html\">", "<content>", "<icon>"};
-			final String[] end = new String[]{"</name>", "</id>", "</link>", "</description>", "</title>", "</content>", "</content>", "</icon>"};
-			String[] of_types = new String[]{"<name>", "<id>", "<link>",  "<description>", "<title>", "<content type=\"html\">", "<content>", "<icon>",
-				"</name>", "</id>", "</link>", "</description>", "</title>", "</content>", "</content>", "</icon>", "<entry", "<item", "</entry", "</item"}; 
+			final String[] start = new String[]{"<name>", "<link>", "<published>", "<updated>", "<pubDate>", "<description>", "<title>", "<content type=\"html\">", "<content>", "<icon>"};
+			final String[] end = new String[]{"</name>", "</link>", "</published>", "</updated>", "</pubDate>", "</description>", "</title>", "</content>", "</content>", "</icon>"};
+			String[] of_types = new String[]{"<name>", "<link>", "<published>", "<updated>", "<pubDate>", "<description>", "<title>", "<content type=\"html\">", "<content>", "<icon>",
+				"</name>", "</link>", "</published>", "</updated>", "</pubDate>", "</description>", "</title>", "</content>", "</content>", "</icon>", "<entry", "<item", "</entry", "</item"}; 
 				
 			File in = new File(file_name);
 			BufferedReader reader = new BufferedReader(new FileReader(in));
@@ -36,7 +36,10 @@ class parsered
 				if((buf_string.contains("<entry"))||(buf_string.contains("<item")))
 					to_file(file_name + ".content.txt", "\n", true);
 				else if((buf_string.contains("</entry"))||(buf_string.contains("</item")))
+				{
 					check_for_image(file_name);
+					check_for_url(file_name);
+				}
 				else
 				{
 					for(int i=0; i<start.length; i++)
@@ -62,16 +65,15 @@ class parsered
 									.replace("\r"," ")
 									.replace("\n","")
 									.replace("&lt;", "<")
-									.replace("&gt;", ">");
+									.replace("&gt;", ">")
+									.replace("&quot;", "\"")
+									.replace("&amp;", "&")
+									.replace("mdash;", "—");
 									
 								if(cont.contains("img src="))
 									to_file(file_name + ".content.dump.txt", cont.substring(cont.indexOf("src=\"") + 5, cont.indexOf("\"", cont.indexOf("src=\"") + 6)) + "\n", false);
 
-									cont = cont.replaceAll("\\<.*?\\>", "")
-									.replace("&quot;", "\"")
-									.replace("&amp;", "&")
-									.replace("mdash;", "—")
-									.trim();
+									cont = cont.replaceAll("\\<.*?\\>", "").trim();
 								to_file(file_name + ".content.txt", cont, true);
 								
 								buf = new char[1024];
@@ -115,6 +117,21 @@ class parsered
 		im.delete();
 	}
 
+	private void check_for_url(String file_name)
+	{
+		File iu = new File(file_name + ".content.url.txt");
+		try
+		{
+			BufferedReader u = new BufferedReader(new FileReader(iu));
+			String url = u.readLine();
+			if(url.length()>6)
+				to_file(file_name + ".content.txt" , "link|" + url + "|", true);
+		}
+		catch(Exception e){
+		}
+		iu.delete();
+	}
+
 	private String get_next_tag(BufferedReader reader, String[] types, String file_name) throws Exception
 	{
 		boolean found = false;
@@ -138,6 +155,9 @@ class parsered
 			
 			if(tag.contains("img src="))
 				to_file(file_name + ".content.dump.txt", tag.substring(tag.indexOf("src=\"") + 5, tag.indexOf("\"", tag.indexOf("src=\"") + 6)) + "\n", false);
+
+			if((tag.contains("type=\"text/html\""))&&(tag.contains("href=\"")))
+				to_file(file_name + ".content.url.txt", tag.substring(tag.indexOf("href=\"") + 6, tag.indexOf("\"", tag.indexOf("href=\"") + 7)) + "\n", false);
 
 			for(String type : types)
 			{
