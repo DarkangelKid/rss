@@ -146,14 +146,14 @@ public class main_view extends Activity
 		viewPager = (ViewPager) findViewById(R.id.pager);
 		viewPager.setAdapter(page_adapter);
 		viewPager.setOffscreenPageLimit(128);
+		viewPager.setOnPageChangeListener(new page_listener());
 
 		update_groups();
-		new refresh_feeds().execute(true);
+		new refresh_feeds().execute(true, 0);
 
 		PagerTabStrip pagerTabStrip = (PagerTabStrip) findViewById(R.id.pager_title_strip);
 		pagerTabStrip.setDrawFullUnderline(true);
 		pagerTabStrip.setTabIndicatorColor(Color.argb(0, 51, 181, 229));
-		log("PagerTab stuff done.");
 
 		mTitle = "Feeds";
 		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -241,6 +241,26 @@ public class main_view extends Activity
 	{
 		mTitle = title;
 		getActionBar().setTitle(title);
+	}
+
+	private final class page_listener implements ViewPager.OnPageChangeListener
+	{
+		@Override
+		public void onPageScrollStateChanged(int state)
+		{
+		}
+
+		@Override
+		public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels)
+		{
+		}
+
+		@Override
+		public void onPageSelected(int position)
+		{
+			if(get_card_adapter(position).getCount() == 0)
+				new refresh_feeds().execute(true, position);
+		}
 	}
 
 	private class top_fragment extends Fragment
@@ -420,7 +440,7 @@ public class main_view extends Activity
 		}
 		else if(item.getTitle().equals("refresh"))
 		{
-			new refresh_feeds().execute(false);
+			new refresh_feeds().execute(false, ((ViewPager) findViewById(R.id.pager)).getCurrentItem());
 			return true;
 		}
 		
@@ -742,7 +762,7 @@ public class main_view extends Activity
 	private void add_feed(String feed_name, String feed_url, String feed_group)
 	{
 		append_string_to_file(feed_group + ".txt", feed_name + "|" + feed_url + "|" + feed_group + "\n");
-		append_string_to_file("all_feeds.txt", feed_name + "|" + feed_url + "|" + feed_group + "\n");
+		append_string_to_file("All.txt", feed_name + "|" + feed_url + "|" + feed_group + "\n");
 	}
 
 	private void update_groups()
@@ -799,7 +819,6 @@ public class main_view extends Activity
 			}
 		}
 		else{
-			toast_message("External storage is not mounted", 1);
 			line_values = new String[0];
 		}
 		
@@ -910,12 +929,14 @@ public class main_view extends Activity
 
 			while((line = reader.readLine()) != null)
 			{
-				int content_start = line.indexOf(content_type) + content_type.length();
-				line = line.substring(content_start, line.indexOf('|', content_start));
-				if(line.length()>1)
-					content_values.add(line);
-				else
+				if((!line.contains(content_type))||(line.contains(content_type + '|')))
 					content_values.add("");
+				else
+				{
+					int content_start = line.indexOf(content_type) + content_type.length();
+					line = line.substring(content_start, line.indexOf('|', content_start));
+					content_values.add(line);
+				}
 			}
 		}
 		catch(Exception e){
@@ -923,7 +944,7 @@ public class main_view extends Activity
 		return content_values.toArray(new String[content_values.size()]);
 	}
 
-	private class refresh_feeds extends AsyncTask<Boolean, Object, Long> {
+	private class refresh_feeds extends AsyncTask<Object, Object, Long> {
 
 		@Override
 		protected void onPreExecute(){
@@ -931,37 +952,31 @@ public class main_view extends Activity
 		}
 
 		@Override
-		protected Long doInBackground(Boolean... ton)
+		protected Long doInBackground(Object... ton)
 		{
-			for(int i=1; i<current_groups.length; i++)
+			String[] feeds_array = read_feeds_to_array(get_filepath(current_groups[((Integer) ton[1])] + ".txt"));
+			String[] titles, descriptions, links, images;
+			boolean success = true, exists = true;
+
+			for(String feed : feeds_array)
 			{
-				String[] feeds_array = read_feeds_to_array(get_filepath(current_groups[i] + ".txt"));
-				String[] titles, descriptions, links, images;
-				boolean success = true;
+				if((!((Boolean) ton[0]))&&(((Integer) ton[1]) != 0))
+					success = update_feed(feed);
+				if(!((new File(get_filepath(feed + ".store.txt.content.txt"))).exists()))
+					exists = false;
+			}
 
-				for(String feed : feeds_array)
-				{
-					if((!ton[0])&&(i != 0))
-						success = update_feed(feed);
-				}
-
-				File test;
-				if(i == 0)
-					test = new File("all_feeds.txt.content.txt");
-				else
-					test = new File(current_groups[i] + ".txt.content.txt");
+			if(exists)
+			{
+				File test = new File(get_filepath(current_groups[((Integer) ton[1])] + ".txt.content.txt"));
 
 				/// Only sort the new ones into the group chaches
-				if((!test.exists())||(!ton[0]))
-					sort_groups_by_time(current_groups[i]);
+				if((!test.exists())||(!((Boolean) ton[0])))
+					sort_groups_by_time(current_groups[((Integer) ton[1])]);
 
 				if(success)
 				{
-					String content_path;
-					if(i == 0)
-						content_path = get_filepath("all_feeds.txt.content.txt");
-					else
-						content_path = get_filepath(current_groups[i] + ".txt.content.txt");
+					String content_path = get_filepath(current_groups[((Integer) ton[1])] + ".txt.content.txt");
 
 					titles = 				read_csv_to_array("title", content_path);
 					if(titles.length>0)
@@ -995,16 +1010,12 @@ public class main_view extends Activity
 								image_width = 0;
 							}
 							//smoothScrollToPosition(int position)
-							List<String> ith_list = get_card_adapter(i).return_links();
+							List<String> ith_list = get_card_adapter(((Integer) ton[1])).return_links();
 							if((!ith_list.contains(links[m]))||(ith_list.size() == 0))
-								publishProgress(i, titles[m], descriptions[m], links[m], image_path, image_height, image_width);
+								publishProgress(((Integer) ton[1]), titles[m], descriptions[m], links[m], image_path, image_height, image_width);
 						}
 					}
 				}
-				if(i == 0)
-					i = current_groups.length;
-				if(i == current_groups.length - 1)
-					i = -1;
 			}
 			return 1L;
 		}
@@ -1037,8 +1048,6 @@ public class main_view extends Activity
 	{
 		String[] links, pubDates, content;
 		Date time;
-		if(group.equals("All"))
-			group = "all_feeds";
 
 		String[] feeds_array = read_feeds_to_array(get_filepath(group + ".txt"));
 		List<Date> dates = new ArrayList<Date>();
@@ -1048,16 +1057,25 @@ public class main_view extends Activity
 		for(String feed : feeds_array)
 		{
 			String content_path = get_filepath(feed + ".store.txt") + ".content.txt";
+			log("reading links");
 			links = 			read_csv_to_array("link", content_path);
 			content = read_file_to_array_skip(feed + ".store.txt.content.txt");
+			log("reading content");
 			pubDates = 			read_csv_to_array("pubDate", content_path);
-			if(pubDates[0].length()<8)
+			log("reading dates");
+			if(pubDates[0].length()<8){
 				pubDates = 		read_csv_to_array("published", content_path);
-			if(pubDates[0].length()<8)
+				log("read published");
+			}
+			if(pubDates[0].length()<8){
 				pubDates = 		read_csv_to_array("updated", content_path);
+				log("read updated");
+			}
+			log(pubDates[0]);
 
 			for(int i=0; i<pubDates.length; i++)
 			{
+				log(links[i] + " " + content[i] + " " + pubDates[i]);
 				content_all.add(content[i]);
 				try{
 					time = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.ENGLISH)).parse(pubDates[i]);
@@ -1067,7 +1085,23 @@ public class main_view extends Activity
 						time = (new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH)).parse(pubDates[i]);
 					}
 					catch(Exception t){
-						time = new Date();
+						try{
+							time = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH)).parse(pubDates[i]);
+						}
+						catch(Exception c){
+							try{
+								time = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.ENGLISH)).parse(pubDates[i]);
+							}
+							catch(Exception n){
+								try{
+									time = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ENGLISH)).parse(pubDates[i]);
+								}
+								catch(Exception o){
+									log("Format not found and date looks like: " + pubDates[i]);
+									time = new Date();
+								}
+							}
+						}
 					}
 				}
 
@@ -1094,9 +1128,13 @@ public class main_view extends Activity
 			}
 		}
 
+		log("left loops");
+
 		String group_content_path = group + ".txt.content.txt";
 		File group_content = new File(get_filepath(group_content_path));
 		group_content.delete();
+
+		log("deleted file");
 
 		for(String link : links_ordered)
 		{
@@ -1104,11 +1142,13 @@ public class main_view extends Activity
 			{
 				if(line.contains(link))
 				{
+					log("appended to: " + group_content_path);
 					append_string_to_file(group_content_path, line + "\n");
 					break;
 				}
 			}
 		}
+		log("finished");
 	}
 
 
@@ -1117,7 +1157,7 @@ public class main_view extends Activity
 		boolean found = false;
 		try{
 			String line = "";
-			BufferedReader read = (new BufferedReader(new FileReader(new File(get_filepath("all_feeds.txt")))));
+			BufferedReader read = (new BufferedReader(new FileReader(new File(get_filepath("All.txt")))));
 			while(!(line.contains(feed_name))){
 				line = read.readLine();
 				found = true;
