@@ -101,6 +101,14 @@ public class main_view extends Activity
 		File dump = new File(get_filepath("dump.txt"));
 		dump.delete();
 
+		File images_folder = new File(get_filepath("images"));
+		File thumbnail_folder = new File(get_filepath("thumbnails"));
+
+		if(!images_folder.exists())
+			images_folder.mkdir();
+		if(!thumbnail_folder.exists())
+			thumbnail_folder.mkdir();
+
 		current_groups = read_file_to_array("group_list.txt");
 		if(current_groups.length == 0)
 			append_string_to_file("group_list.txt", "All\n");
@@ -941,34 +949,37 @@ public class main_view extends Activity
 						descriptions = 		read_csv_to_array("description", content_path);
 						links = 			read_csv_to_array("link", content_path);
 
-						int image_width, image_height;
-						String image_path;
+						int image_width = 0, image_height = 0;
+						String partial_image_path = get_filepath("images/");
+						String partial_thumbnail_path = get_filepath("thumbnails/");
+						String image_name = "", thumbnail_path = "";
+						File image, thumbnail;
 
 						for(int m=0; m<titles.length; m++)
 						{
 							if(!images[m].equals(""))
 							{
-								String icon_name = images[m].substring(images[m].lastIndexOf("/") + 1, images[m].length());
-								image_path = get_filepath(icon_name);
-								if(!((new File(image_path)).exists()))
+								image_name = images[m].substring(images[m].lastIndexOf("/") + 1, images[m].length());
+								image = new File(partial_image_path + image_name);
+								thumbnail = new File(partial_thumbnail_path + image_name);
+
+								if(!image.exists())
 								{
-									download_file(images[m], icon_name);
-									compress_file(image_path);
+									download_file(images[m], "images/" + image_name);
+									compress_file(partial_image_path + image_name, partial_thumbnail_path + image_name, image_name);
 								}
-								Integer[] dim = get_dim(icon_name);
+								else if(!thumbnail.exists())
+									compress_file(partial_image_path + image_name, partial_thumbnail_path + image_name, image_name);
+
+								Integer[] dim = get_dim(image_name);
 								image_height = dim[1];
 								image_width = dim[0];
+								thumbnail_path = partial_thumbnail_path + image_name;
 							}
-							else
-							{
-								image_path = "";
-								image_height = 0;
-								image_width = 0;
-							}
-							//smoothScrollToPosition(int position)
+
 							List<String> ith_list = get_card_adapter(((Integer) ton[1])).return_links();
 							if((!ith_list.contains(links[m]))||(ith_list.size() == 0))
-								publishProgress(((Integer) ton[1]), titles[m], descriptions[m], links[m], image_path, image_height, image_width);
+								publishProgress(((Integer) ton[1]), titles[m], descriptions[m], links[m], thumbnail_path, image_height, image_width);
 						}
 					}
 				}
@@ -1149,18 +1160,18 @@ public class main_view extends Activity
 		append_string_to_file("dump.txt", text + "\n");
 	}
 
-	void compress_file(String file_path)
+	void compress_file(String image_path, String thumbnail_path, String image_name)
 	{
 		BitmapFactory.Options o = new BitmapFactory.Options();
 		o.inJustDecodeBounds = true;
-		BitmapFactory.decodeFile(file_path, o);
+		BitmapFactory.decodeFile(image_path, o);
 
 		if(width < 10)
 		{
 			Display display = getWindowManager().getDefaultDisplay();
 			Point size = new Point();
 			display.getSize(size);
-			width = (int) Math.round(((float)size.x)*0.70);
+			width = (int) Math.round(((float)size.x)*0.80);
 		}
 
 		int width_tmp = o.outWidth;
@@ -1175,11 +1186,12 @@ public class main_view extends Activity
 			
 		BitmapFactory.Options o2 = new BitmapFactory.Options();
 		o2.inSampleSize = insample;
-		Bitmap bitmap = BitmapFactory.decodeFile(file_path, o2);
+		Bitmap bitmap = BitmapFactory.decodeFile(image_path, o2);
+		append_string_to_file("image_size.cache.txt", image_name + "|" + o2.outWidth + "|" + o2.outHeight + "\n");
 
 		try
 		{
-			FileOutputStream out = new FileOutputStream(file_path + ".small.png");
+			FileOutputStream out = new FileOutputStream(thumbnail_path);
 			bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
 		}
 		catch (Exception e){
@@ -1190,24 +1202,11 @@ public class main_view extends Activity
 	{
 		Integer[] size = new Integer[2];
 		String line = return_first_line_containing("image_size.cache.txt", image_name);
-		if(line == "")
-		{
-			BitmapFactory.Options o = new BitmapFactory.Options();
-			o.inSampleSize = 1;
-			BitmapFactory.decodeFile(get_filepath(image_name), o);
-			size[0] = o.outWidth;
-			size[1] = o.outHeight;
-			append_string_to_file("image_size.cache.txt", image_name + "|" + size[0] + "|" + size[1] + "\n");
-		}
-		else
-		{
-			int first = line.indexOf('|') + 1;
-			int second = line.indexOf('|', first + 1) + 1;
-			size[0] = Integer.parseInt(line.substring(first, second - 1));
-			size[1] = Integer.parseInt(line.substring(second, line.length()));
-			log(line);
-			log(size[0] + "," + size[1]);
-		}
+
+		int first = line.indexOf('|') + 1;
+		int second = line.indexOf('|', first + 1) + 1;
+		size[0] = Integer.parseInt(line.substring(first, second - 1));
+		size[1] = Integer.parseInt(line.substring(second, line.length()));
 		return size;
 	}
 }

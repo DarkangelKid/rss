@@ -1,8 +1,10 @@
 package yay.poloure.simplerss;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.BitmapDrawable;
@@ -15,9 +17,11 @@ import android.widget.TextView;
 import android.view.ViewGroup.LayoutParams;
 import java.util.List;
 import java.util.ArrayList;
+import android.net.Uri;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import java.io.File;
 import java.io.StringWriter;
 import java.io.PrintWriter;
 import java.io.FileWriter;
@@ -34,10 +38,13 @@ public class card_adapter extends BaseAdapter
 	private List<Integer> content_width = new ArrayList<Integer>();
 	
 	private final LayoutInflater inflater;
+	private Context context;
 
 	private static int eight = 0;
 
-	public card_adapter(Context context){
+	public card_adapter(Context context_main)
+	{
+		context = context_main;
 		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 
@@ -90,6 +97,7 @@ public class card_adapter extends BaseAdapter
 		else
 			holder = (ViewHolder) convertView.getTag();
 
+		convertView.setOnClickListener(new browser_call());
 		holder.title_view.setText(content_titles.get(position));
 		holder.time_view.setText(content_links.get(position));
 		String des = content_des.get(position);
@@ -200,7 +208,13 @@ public class card_adapter extends BaseAdapter
 		}
 	}
 
-	class display_image extends AsyncTask<Integer, Void, Bitmap>
+	public class image
+	{
+		public Bitmap img;
+		public String path;
+	}
+
+	class display_image extends AsyncTask<Integer, Void, image>
 	{
 		private final WeakReference<ImageView> image_view_reference;
 		private int position = 0;
@@ -210,19 +224,23 @@ public class card_adapter extends BaseAdapter
 		}
 		
 		@Override
-		protected Bitmap doInBackground(Integer... ton)
+		protected image doInBackground(Integer... ton)
 		{
 			position = ton[0];
-			return decodeFile(content_images.get(ton[0]));
+			image i = new image();
+			String image_path = content_images.get(ton[0]);
+			i.img = ((Bitmap) decodeFile(image_path));
+			i.path = ((String) image_path.replaceAll("thumbnails", "images"));
+			return i;
 		}
 
 		@Override
-		protected void onPostExecute(Bitmap image)
+		protected void onPostExecute(image im)
 		{
 			 if(isCancelled())
-				image = null;
+				im.img = null;
 				
-			if(image_view_reference != null && image != null)
+			if(image_view_reference != null && im.img != null)
 			{
 				final ImageView image_view = image_view_reference.get();
 				final display_image worker_task = get_task(image_view);
@@ -231,12 +249,40 @@ public class card_adapter extends BaseAdapter
 					final TransitionDrawable td = new TransitionDrawable(new Drawable[]
 					{
 						new ColorDrawable(android.R.color.transparent),
-						new BitmapDrawable(main_view.get_resources(), image)
+						new BitmapDrawable(main_view.get_resources(), im.img)
 					});
 					image_view.setImageDrawable(td);
 					td.startTransition(230);
+					image_view.setOnClickListener(new image_call(im.path));
 				}
 			}
+		}
+	}
+
+	private class browser_call implements View.OnClickListener
+	{
+		@Override
+		public void onClick(View v)
+		{
+			context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(((TextView) v.findViewById(R.id.time)).getText().toString())));
+		}
+	}
+
+	private class image_call implements View.OnClickListener
+	{
+		private String image_path;
+		public image_call(String im)
+		{
+			image_path = im;
+		}
+		
+		@Override
+		public void onClick(View v)
+		{
+			Intent intent = new Intent();
+			intent.setAction(Intent.ACTION_VIEW);
+			intent.setDataAndType(Uri.fromFile(new File(image_path)), "image/*");
+			context.startActivity(intent);
 		}
 	}
 } 

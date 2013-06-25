@@ -62,13 +62,17 @@ class parsered
 									count++;
 								}
 								String cont = (new String(buf)).trim()
-									.replace("\r"," ")
-									.replace("\n","")
+									.replace("\r", " ")
+									.replace("\n", "")
+									.replace("&amp;", "&")
 									.replace("&lt;", "<")
 									.replace("&gt;", ">")
 									.replace("&quot;", "\"")
-									.replace("&amp;", "&")
-									.replace("mdash;", "—");
+									.replace("&mdash;", "—")
+									.replace("&hellip;", "…")
+									.replace("&rsquo;", "'")
+									.replace("  ", "\n")
+									.replace("\t", "\n");
 									
 								if(cont.contains("img src="))
 									to_file(file_name + ".content.dump.txt", cont.substring(cont.indexOf("src=\"") + 5, cont.indexOf("\"", cont.indexOf("src=\"") + 6)) + "\n", false);
