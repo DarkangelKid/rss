@@ -207,8 +207,8 @@ public class card_adapter extends BaseAdapter
 			return display_image_reference.get();
 		}
 	}
-
-	public class image
+	
+	private class image
 	{
 		public Bitmap img;
 		public String path;

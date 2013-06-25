@@ -976,6 +976,12 @@ public class main_view extends Activity
 								image_width = dim[0];
 								thumbnail_path = partial_thumbnail_path + image_name;
 							}
+							else
+							{
+								thumbnail_path = "";
+								image_height = 0;
+								image_width = 0;
+							}
 
 							List<String> ith_list = get_card_adapter(((Integer) ton[1])).return_links();
 							if((!ith_list.contains(links[m]))||(ith_list.size() == 0))

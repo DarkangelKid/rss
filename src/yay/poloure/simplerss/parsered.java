@@ -70,9 +70,7 @@ class parsered
 									.replace("&quot;", "\"")
 									.replace("&mdash;", "—")
 									.replace("&hellip;", "…")
-									.replace("&rsquo;", "'")
-									.replace("  ", "\n")
-									.replace("\t", "\n");
+									.replace("&rsquo;", "'");
 									
 								if(cont.contains("img src="))
 									to_file(file_name + ".content.dump.txt", cont.substring(cont.indexOf("src=\"") + 5, cont.indexOf("\"", cont.indexOf("src=\"") + 6)) + "\n", false);
