@@ -83,7 +83,7 @@ public class main_view extends Activity
 	private ViewPager viewPager;
 	private static Resources res;
 
-	private static String[] current_groups;
+	public static String[] current_groups;
 	private static final int CONTENT_VIEW_ID = 10101010;
 	private String[] nav_items, nav_final;
 
@@ -288,7 +288,7 @@ public class main_view extends Activity
 	public class manager_fragment extends Fragment
 	{
 		private ListView manage_list;
-		private group_adapter manage_adapter;
+		public group_adapter manage_adapter;
 
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -302,7 +302,6 @@ public class main_view extends Activity
 			manage_adapter.notifyDataSetChanged();
 			return view;
 		}
-
 	}
 	
 	//shit start
@@ -1144,6 +1143,11 @@ public class main_view extends Activity
 		catch(Exception e){
 			return false;
 		}
+	}
+
+	private static String[] get_groups()
+	{
+		return current_groups;
 	}
 
 	private void remove_duplicates(String content_name)
