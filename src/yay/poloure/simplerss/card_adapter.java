@@ -281,7 +281,8 @@ public class card_adapter extends BaseAdapter
 		{
 			Intent intent = new Intent();
 			intent.setAction(Intent.ACTION_VIEW);
-			intent.setDataAndType(Uri.fromFile(new File(image_path)), "image/*");
+			String type = image_path.substring(image_path.lastIndexOf('.') + 1, image_path.length());
+			intent.setDataAndTypeAndNormalize(Uri.fromFile(new File(image_path)), "image/" + type);
 			context.startActivity(intent);
 		}
 	}
