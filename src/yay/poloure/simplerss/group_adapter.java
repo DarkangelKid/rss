@@ -146,7 +146,6 @@ public class group_adapter extends BaseAdapter
 			switch (event.getAction())
 			{
 				case DragEvent.ACTION_DRAG_STARTED:
-					slog(old_title);
 					break;
 				case DragEvent.ACTION_DRAG_ENTERED:
 					new_title = ((TextView) v.findViewById(R.id.group_item)).getText().toString();
@@ -175,7 +174,6 @@ public class group_adapter extends BaseAdapter
 		{
 			long_press_title = ((TextView)v.findViewById(R.id.group_item)).getText().toString();
 			delete_dialog();
-			slog("Long Pressed that shit!");
 			return true;
 		}
 	}
@@ -183,13 +181,10 @@ public class group_adapter extends BaseAdapter
 	public void delete_dialog()
 	{
 		AlertDialog.Builder builder = new AlertDialog.Builder(this.context);
-		//builder.setMessage("Look at this dialog!")
 		builder.setCancelable(true)
 				.setPositiveButton("Delete", new DialogInterface.OnClickListener()
 		{
 			public void onClick(DialogInterface dialog, int id) {
-			//do things
-				slog(long_press_title);
 				int i = 0;
 				while(i < group_list.size())
 				{
@@ -215,7 +210,6 @@ public class group_adapter extends BaseAdapter
 		while(!next.equals(main_view.current_groups[j])){
 			j++;
 		}
-		slog(main_view.current_groups[i] + " " + main_view.current_groups[j]);
 		String old = main_view.current_groups[i];
 		main_view.current_groups[i] = main_view.current_groups[j];
 		group_list.set(i, main_view.current_groups[j]);
