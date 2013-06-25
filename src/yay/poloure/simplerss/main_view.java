@@ -83,7 +83,7 @@ public class main_view extends Activity
 	private ViewPager viewPager;
 	private static Resources res;
 
-	private static String[] current_groups;
+	public static String[] current_groups;
 	private static final int CONTENT_VIEW_ID = 10101010;
 	private String[] nav_items, nav_final;
 
@@ -308,7 +308,7 @@ public class main_view extends Activity
 	public class manager_fragment extends Fragment
 	{
 		private ListView manage_list;
-		private group_adapter manage_adapter;
+		public group_adapter manage_adapter;
 
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -322,52 +322,7 @@ public class main_view extends Activity
 			manage_adapter.notifyDataSetChanged();
 			return view;
 		}
-
 	}
-	
-	//shit start
-	//findViewById(R.id.bottomright).setOnDragListener(new MyDragListener());
-	 
-	/*class MyDragListener implements OnDragListener
-	{
-		Drawable enterShape = getResources().getDrawable(R.drawable.shape_droptarget);
-		Drawable normalShape = getResources().getDrawable(R.drawable.shape);
-		
-		@Override
-		public boolean onDrag(View v, DragEvent event)
-		{
-			int action = event.getAction();
-			switch (event.getAction())
-			{
-				case DragEvent.ACTION_DRAG_STARTED:
-					break;
-					
-				case DragEvent.ACTION_DRAG_ENTERED:
-					v.setBackgroundDrawable(enterShape);
-					break;
-					
-				case DragEvent.ACTION_DRAG_EXITED:        
-					v.setBackgroundDrawable(normalShape);
-					break;
-					
-				case DragEvent.ACTION_DROP:
-					  View view = (View) event.getLocalState();
-					  ViewGroup owner = (ViewGroup) view.getParent();
-					  owner.removeView(view);
-					  LinearLayout container = (LinearLayout) v;
-					  container.addView(view);
-					  view.setVisibility(View.VISIBLE);
-					  break;
-					  
-				case DragEvent.ACTION_DRAG_ENDED:
-					  v.setBackgroundDrawable(normalShape);
-					  default:
-					  break;
-			}
-			return true;
-		}
-	}*/
-	//shit end
 
 	public static class viewpager_adapter extends FragmentPagerAdapter
 	{
@@ -1058,25 +1013,16 @@ public class main_view extends Activity
 		for(String feed : feeds_array)
 		{
 			String content_path = get_filepath(feed + ".store.txt") + ".content.txt";
-			log("reading links");
 			links = 			read_csv_to_array("link", content_path);
 			content = read_file_to_array_skip(feed + ".store.txt.content.txt");
-			log("reading content");
 			pubDates = 			read_csv_to_array("pubDate", content_path);
-			log("reading dates");
-			if(pubDates[0].length()<8){
+			if(pubDates[0].length()<8)
 				pubDates = 		read_csv_to_array("published", content_path);
-				log("read published");
-			}
-			if(pubDates[0].length()<8){
+			if(pubDates[0].length()<8)
 				pubDates = 		read_csv_to_array("updated", content_path);
-				log("read updated");
-			}
-			log(pubDates[0]);
 
 			for(int i=0; i<pubDates.length; i++)
 			{
-				log(links[i] + " " + content[i] + " " + pubDates[i]);
 				content_all.add(content[i]);
 				try{
 					time = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.ENGLISH)).parse(pubDates[i]);
@@ -1129,13 +1075,9 @@ public class main_view extends Activity
 			}
 		}
 
-		log("left loops");
-
 		String group_content_path = group + ".txt.content.txt";
 		File group_content = new File(get_filepath(group_content_path));
 		group_content.delete();
-
-		log("deleted file");
 
 		for(String link : links_ordered)
 		{
@@ -1143,13 +1085,11 @@ public class main_view extends Activity
 			{
 				if(line.contains(link))
 				{
-					log("appended to: " + group_content_path);
 					append_string_to_file(group_content_path, line + "\n");
 					break;
 				}
 			}
 		}
-		log("finished");
 	}
 
 
@@ -1184,6 +1124,11 @@ public class main_view extends Activity
 		catch(Exception e){
 			return false;
 		}
+	}
+
+	private static String[] get_groups()
+	{
+		return current_groups;
 	}
 
 	private void remove_duplicates(String content_name)

@@ -18,24 +18,38 @@ import android.graphics.drawable.Drawable;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.ListView;
 import java.util.List;
 import java.util.ArrayList;
 
 import android.graphics.Canvas;
 import android.graphics.Point;
 
+import java.io.FileWriter;
+import java.io.BufferedWriter;
+
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+
 public class group_adapter extends BaseAdapter
 {
+	String old_title = "";
+	String new_title = "";
+
+	String long_press_title;
+
 	private List<String> group_list = new ArrayList();
 
 	LayoutInflater inflater;
 
 	private final Context context;
+	private ListView list_view;
 
 	public group_adapter(Context context)
 	{
 		this.context = context;
 		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		list_view = ((ListView)(inflater.inflate(R.layout.manage_fragment, null)).findViewById(R.id.group_listview));
 	}
 
 	public void add_list(String new_group)
@@ -71,6 +85,7 @@ public class group_adapter extends BaseAdapter
 			ViewHolder holder;
 			if(convertView == null)
 			{
+				
 				convertView = inflater.inflate(R.layout.manage_list_item, parent, false);
 				holder = new ViewHolder();
 				holder.group_view = (TextView) convertView.findViewById(R.id.group_item);
@@ -82,6 +97,8 @@ public class group_adapter extends BaseAdapter
 
 			holder.group_view.setText(group_list.get(position));
 			holder.image_view.setOnTouchListener(new MyTouchListener());
+			convertView.setOnDragListener(new MyDragListener());
+			convertView.setOnLongClickListener(new long_press_listener());
 			
 			return convertView;
 	}
@@ -100,10 +117,11 @@ public class group_adapter extends BaseAdapter
 			if (motionEvent.getAction() == MotionEvent.ACTION_DOWN)
 			{
 				View view_parent = (View) view.getParent();
+				old_title = ((TextView)view_parent.findViewById(R.id.group_item)).getText().toString();
 				ClipData data = ClipData.newPlainText("", "");
 				custom_drag_builder shadowBuilder = new custom_drag_builder(view_parent);
 				view_parent.startDrag(data, shadowBuilder, view_parent, 0);
-				view_parent.setVisibility(View.INVISIBLE);
+				//view_parent.setVisibility(View.INVISIBLE);
 				return true;
 			}
 			else {
@@ -112,39 +130,34 @@ public class group_adapter extends BaseAdapter
 		  }
 	}
 
+	private void refresh_data()
+	{
+		notifyDataSetChanged();
+	}
+
 	///Pish starts here
-	/*class MyDragListener implements OnDragListener
+	class MyDragListener implements OnDragListener
 	{
 		@Override
 		public boolean onDrag(View v, DragEvent event)
 		{
-			String old_title;
-			String new_title;
 			View old_view;
 			int action = event.getAction();
 			switch (event.getAction())
 			{
 				case DragEvent.ACTION_DRAG_STARTED:
-					// Do nothing
 					break;
 				case DragEvent.ACTION_DRAG_ENTERED:
-					new_title = ((TextView)v.findViewById(R.id.group_item)).getText().toString();
+					new_title = ((TextView) v.findViewById(R.id.group_item)).getText().toString();
 					v.setVisibility(View.INVISIBLE);
-					((TextView)old_view.findViewById(R.id.group_item)).setText(new_title);
-					old_view.setVisibility(View.VISIBLE);
+					rearrange_groups(old_title, new_title);
+					refresh_data();
 					break;
 				case DragEvent.ACTION_DRAG_EXITED:        
-					old_view = v;
-					//v.setVisibility(View.VISIBLE);
+					v.setVisibility(View.VISIBLE);
 					break;
 				case DragEvent.ACTION_DROP:
-					// Dropped, reassign View to ViewGroup
-					View view = (View) event.getLocalState();
-					ViewGroup owner = (ViewGroup) view.getParent();
-					owner.removeView(view);
-					LinearLayout container = (LinearLayout) v;
-					container.addView(view);
-					view.setVisibility(View.VISIBLE);
+					v.setVisibility(View.VISIBLE);
 					break;
 				case DragEvent.ACTION_DRAG_ENDED:
 					default:
@@ -152,7 +165,57 @@ public class group_adapter extends BaseAdapter
 			}
 			return true;
 		}
-	}*/
+	}
+
+	class long_press_listener implements View.OnLongClickListener
+	{
+		@Override
+		public boolean onLongClick(View v)
+		{
+			long_press_title = ((TextView)v.findViewById(R.id.group_item)).getText().toString();
+			delete_dialog();
+			return true;
+		}
+	}
+
+	public void delete_dialog()
+	{
+		AlertDialog.Builder builder = new AlertDialog.Builder(this.context);
+		builder.setCancelable(true)
+				.setPositiveButton("Delete", new DialogInterface.OnClickListener()
+		{
+			public void onClick(DialogInterface dialog, int id) {
+				int i = 0;
+				while(i < group_list.size())
+				{
+					if(long_press_title.equals(group_list.get(i)))
+						break;
+					i = i + 1;
+				}
+				group_list.remove(i);
+				refresh_data();
+			}
+		});
+		AlertDialog alert = builder.create();
+		alert.show();
+	} 
+
+	private void rearrange_groups(String previous, String next)
+	{
+		int i = 0;
+		while(!previous.equals(main_view.current_groups[i])){
+			i++;
+		}
+		int j = 0;
+		while(!next.equals(main_view.current_groups[j])){
+			j++;
+		}
+		String old = main_view.current_groups[i];
+		main_view.current_groups[i] = main_view.current_groups[j];
+		group_list.set(i, main_view.current_groups[j]);
+		main_view.current_groups[j] = old;
+		group_list.set(j, old);
+	}
 
 	class custom_drag_builder extends View.DragShadowBuilder
 	{
@@ -171,6 +234,19 @@ public class group_adapter extends BaseAdapter
 
 			shadowTouchPoint.x = (int)(shadowSize.x * 19 / 20);
 			shadowTouchPoint.y = (int)(shadowSize.y / 2);
+		}
+	}
+	
+	private void slog(String string)
+	{
+		try
+		{
+			BufferedWriter out = new BufferedWriter(new FileWriter("/storage/emulated/0/Android/data/yay.poloure.simplerss/files/dump.txt", true));
+			out.write(string + "\n");
+			out.close();
+		}
+		catch (Exception e)
+		{
 		}
 	}
 } 
