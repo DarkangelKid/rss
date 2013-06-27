@@ -11,7 +11,5 @@
 			android:dividerHeight="12dp"
 			android:drawSelectorOnTop="true"
 			android:padding="12dip"
-			android:clipToPadding="false"
-			android:stackFromBottom="true"
-			android:transcriptMode="normal"/>
+			android:clipToPadding="false"/>
 </LinearLayout>

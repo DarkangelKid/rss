@@ -27,6 +27,10 @@ import java.io.PrintWriter;
 import java.io.FileWriter;
 import java.io.BufferedWriter;
 import java.lang.ref.WeakReference;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
+import android.view.animation.LinearInterpolator;
 
 public class card_adapter extends BaseAdapter
 {
@@ -97,17 +101,17 @@ public class card_adapter extends BaseAdapter
 		else
 			holder = (ViewHolder) convertView.getTag();
 
-		convertView.setOnClickListener(new browser_call());
-		holder.title_view.setText(content_titles.get(position));
-		holder.time_view.setText(content_links.get(position));
-		String des = content_des.get(position);
-
 		boolean image_exists = false;
-		if((content_width.get(position)>0)&&(content_height.get(position)>0))
+		if(content_width.get(position)>32)
 			image_exists = true;
 
 		if(image_exists)
 			loadBitmap(position, holder.image_view, content_height.get(position), content_width.get(position));
+
+		convertView.setOnClickListener(new browser_call());
+		holder.title_view.setText(content_titles.get(position));
+		holder.time_view.setText(content_links.get(position));
+		String des = content_des.get(position).replace("  ", "\n").replace("\t", "\n");
 
 		if(des.length() > 1)
 		{
@@ -248,11 +252,12 @@ public class card_adapter extends BaseAdapter
 				{
 					final TransitionDrawable td = new TransitionDrawable(new Drawable[]
 					{
-						new ColorDrawable(android.R.color.transparent),
+						image_view.getDrawable(),
 						new BitmapDrawable(main_view.get_resources(), im.img)
 					});
 					image_view.setImageDrawable(td);
 					td.startTransition(230);
+					
 					image_view.setOnClickListener(new image_call(im.path));
 				}
 			}
