@@ -783,43 +783,58 @@ public class main_view extends Activity
 		{
 			String group_path = get_filepath(current_groups[((Integer) ton[1])] + ".txt");
 			String current_group = current_groups[((Integer) ton[1])];
+			log(current_group);
 			String[] feeds_array = read_csv_to_array("name", group_path, 0);
 			String[] url_array = read_csv_to_array("url", group_path, 0);
+			log(feeds_array[0] + url_array[0]);
 			String[] titles, descriptions, links, images;
 			boolean success = true, exists = true;
-
+			
+			log(Integer.toString(feeds_array.length));
 			for(int i=0; i<feeds_array.length; i++)
 			{
-				if((!((Boolean) ton[0]))&&(((Integer) ton[1]) != 0))
+				if((!((Boolean) ton[0]))&&(((Integer) ton[1]) != 0)){
 					success = update_feed(feeds_array[i], url_array[i]);
-				if(!((new File(get_filepath(feeds_array[i] + ".store.txt.content.txt"))).exists()))
+					log("first if");
+				}
+				if(!((new File(get_filepath(feeds_array[i] + ".store.txt.content.txt"))).exists())){
 					exists = false;
+					log("second if");
+				}
 			}
-
+			log(Boolean.toString(exists));
 			if(exists)
 			{
 				String content_path = group_path + ".content.txt";
 				File test = new File(content_path);
+				log(content_path);
 
 				/// Only sort the new ones into the group chaches
-				if((!test.exists())||(!((Boolean) ton[0])))
+				if((!test.exists())||(!((Boolean) ton[0]))){
+					log("sorting");
 					sort_group_content_by_time(current_group);
+					log("sorted");
+				}
 
 				if(success)
 				{
+					log("titles");
 					titles = 				read_csv_to_array("title", content_path, 0);
 					if(titles.length>0)
 					{
 						images = 			read_csv_to_array("image", content_path, 0);
 						descriptions = 		read_csv_to_array("description", content_path, 0);
 						links = 			read_csv_to_array("link", content_path, 0);
+						log("after");
 
 						int image_width = 0, image_height = 0;
 						String partial_image_path = get_filepath("images/");
 						String partial_thumbnail_path = get_filepath("thumbnails/");
 						String image_name = "", thumbnail_path = "";
 						File image, thumbnail;
+						log("after2");
 
+						log(Integer.toString(titles.length));
 						for(int m=0; m<titles.length; m++)
 						{
 							if(!images[m].equals(""))
@@ -827,6 +842,7 @@ public class main_view extends Activity
 								image_name = images[m].substring(images[m].lastIndexOf("/") + 1, images[m].length());
 								image = new File(partial_image_path + image_name);
 								thumbnail = new File(partial_thumbnail_path + image_name);
+								log(Integer.toString(m));
 
 								if(!image.exists())
 								{
@@ -861,25 +877,30 @@ public class main_view extends Activity
 		@Override
 		protected void onProgressUpdate(Object... progress){
 			ListFragment l = ((card_fragment) getFragmentManager().findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + Integer.toString((Integer) progress[0])));
-			card_adapter ith = ((card_adapter) l.getListAdapter());
-			
-			ListView lv = l.getListView();
-			int index = lv.getFirstVisiblePosition() + 1;
-			View v = lv.getChildAt(0);
-			int top = (v == null) ? 0 : v.getTop();
-			if(top == 0)
-				index++;
-			else if (top < 0 && lv.getChildAt(1) != null)
+			if(l != null)
 			{
-				index++;
-				v = lv.getChildAt(1);
-				top = v.getTop();
+				card_adapter ith = ((card_adapter) l.getListAdapter());
+				
+				ListView lv = l.getListView();
+				int index = lv.getFirstVisiblePosition() + 1;
+				View v = lv.getChildAt(0);
+				int top = (v == null) ? 0 : v.getTop();
+				if(top == 0)
+					index++;
+				else if (top < 0 && lv.getChildAt(1) != null)
+				{
+					index++;
+					v = lv.getChildAt(1);
+					top = v.getTop();
+				}
+
+				ith.add_list((String) progress[1], (String) progress[2], (String) progress[3], (String) progress[4], (Integer) progress[5], (Integer) progress[6]); 
+				ith.notifyDataSetChanged();
+
+				lv.setSelectionFromTop(index, top - twelve);
 			}
-
-			ith.add_list((String) progress[1], (String) progress[2], (String) progress[3], (String) progress[4], (Integer) progress[5], (Integer) progress[6]); 
-			ith.notifyDataSetChanged();
-
-			lv.setSelectionFromTop(index, top - twelve);
+			else
+				toast_message("ListFragment " + Integer.toString((Integer) progress[0]) + "NullPointerException", 1);
 		}
 
 		@Override
