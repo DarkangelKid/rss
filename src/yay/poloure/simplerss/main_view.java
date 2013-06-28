@@ -86,6 +86,7 @@ public class main_view extends Activity
 	private static int twelve;
 	private static int first_height;
 	private int check_finished;
+	public static String storage;
 
 	public static String[] current_groups;
 	private static final int CONTENT_VIEW_ID = 10101010;
@@ -118,11 +119,13 @@ public class main_view extends Activity
 		frame.setId(CONTENT_VIEW_ID);
 		setContentView(frame, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
-		File dump = new File(get_filepath("dump.txt"));
+		storage = this.getExternalFilesDir(null).getAbsolutePath() + "/";
+
+		File dump = new File(storage + "dump.txt");
 		dump.delete();
 
-		File images_folder = new File(get_filepath("images"));
-		File thumbnail_folder = new File(get_filepath("thumbnails"));
+		File images_folder = new File(storage + "images");
+		File thumbnail_folder = new File(storage + "thumbnails");
 
 		if(!images_folder.exists())
 			images_folder.mkdir();
@@ -637,7 +640,7 @@ public class main_view extends Activity
 					try
 					{
 						in = new BufferedInputStream(new URL(urler).openStream());
-						fout = new FileOutputStream(get_filepath(file_name));
+						fout = new FileOutputStream(storage + file_name);
 
 						byte data[] = new byte[1024];
 						int count;
@@ -659,17 +662,13 @@ public class main_view extends Activity
 			}
 	}
 
-	private String get_filepath(String filename){
-		return this.getExternalFilesDir(null).getAbsolutePath() + "/" + filename;
-	}
-
 	private void append_string_to_file(String file_name, String string)
 	{
 		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
 		{
 			try
 			{
-				BufferedWriter out = new BufferedWriter(new FileWriter(get_filepath(file_name), true));
+				BufferedWriter out = new BufferedWriter(new FileWriter(storage + file_name, true));
 				out.write(string);
 				out.close();
 			}
@@ -710,7 +709,7 @@ public class main_view extends Activity
 		{
 			try
 			{
-				File in = new File(get_filepath(file_name));
+				File in = new File(storage + file_name);
 				BufferedReader reader = new BufferedReader(new FileReader(in));
 								
 				while(!line.contains(content))
@@ -758,7 +757,7 @@ public class main_view extends Activity
 		List<String> lines = new ArrayList<String>();
 		try
 		{
-			stream = new BufferedReader(new FileReader(get_filepath(file_name)));
+			stream = new BufferedReader(new FileReader(storage + file_name));
 			for(int i=0; i<lines_to_skip; i++)
 				stream.readLine();
 			while((line = stream.readLine()) != null)
@@ -787,9 +786,9 @@ public class main_view extends Activity
 			int page_number = ((Integer) ton[1]);
 
 			String group = current_groups[page_number];
-			String group_file_path = get_filepath(group + ".txt");
-			String partial_image_path = get_filepath("images/");
-			String partial_thumbnail_path = get_filepath("thumbnails/");
+			String group_file_path = storage + group + ".txt";
+			String partial_image_path = storage + "images/";
+			String partial_thumbnail_path = storage + "thumbnails/";
 			String[] group_feeds_names = read_csv_to_array("name", group_file_path, 0);
 			String[] group_feeds_urls = read_csv_to_array("url", group_file_path, 0);
 			String image_name = "", thumbnail_path = "", feed_path = "";
@@ -803,7 +802,7 @@ public class main_view extends Activity
 			{
 				for(int i=0; i<group_feeds_names.length; i++)
 				{
-					feed_path = get_filepath(group_feeds_names[i]); /// mariam_feed.txt
+					feed_path = storage + group_feeds_names[i]; /// mariam_feed.txt
 					download_file(group_feeds_urls[i], group_feeds_names[i] + ".store.txt"); /// Downloads file as mariam_feed.store.txt
 					new parsered(feed_path + ".store.txt"); /// Parses the file and makes other files like mariam_feed.store.txt.content.txt
 					(new File(feed_path + ".store.txt")).delete();
@@ -812,7 +811,7 @@ public class main_view extends Activity
 			}
 
 			/// Make group content file
-			String group_content_path = get_filepath(group + ".txt.content.txt");
+			String group_content_path = storage + group + ".txt.content.txt";
 			File group_content_file = new File(group_content_path);
 
 			/// if we have updated the feeds OR if the group content file does not exist, make the group content file.
@@ -822,7 +821,7 @@ public class main_view extends Activity
 			{
 				for(String feed : group_feeds_names)
 				{
-					if((new File(get_filepath(feed + ".store.txt.content.txt")).exists()))
+					if((new File(storage + feed + ".store.txt.content.txt").exists()))
 					{
 						sort_group_content_by_time(group);
 						break;
@@ -923,7 +922,7 @@ public class main_view extends Activity
 		String[] links, pubDates;
 		Date time;
 
-		String[] feeds_array = read_csv_to_array("name", get_filepath(group + ".txt"), 0);
+		String[] feeds_array = read_csv_to_array("name", storage + group + ".txt", 0);
 		List<Date> dates = new ArrayList<Date>();
 		List<String> links_ordered = new ArrayList<String>();
 		List<String> content_all = new ArrayList<String>();
@@ -931,7 +930,7 @@ public class main_view extends Activity
 		
 		for(String feed : feeds_array)
 		{
-			String content_path = get_filepath(feed + ".store.txt") + ".content.txt";
+			String content_path = storage + feed + ".store.txt.content.txt";
 			File test = new File(content_path);
 			if(test.exists())
 			{
@@ -999,7 +998,7 @@ public class main_view extends Activity
 		}
 
 		String group_content_path = group + ".txt.content.txt";
-		File group_content = new File(get_filepath(group_content_path));
+		File group_content = new File(storage + group_content_path);
 		group_content.delete();
 
 		if(links_ordered.size()>0)
@@ -1025,7 +1024,7 @@ public class main_view extends Activity
 			String line = "";
 			String content_name = feed_name + ".store.txt.content.txt";
 			String store_name = feed_name + ".store.txt";
-			String store_path = get_filepath(store_name);
+			String store_path = storage + store_name;
 				
 			download_file(url, store_name);
 			new parsered(store_path);
@@ -1047,7 +1046,7 @@ public class main_view extends Activity
 	private void remove_duplicates(String content_name)
 	{
 		Set<String> set = new LinkedHashSet<String>(read_file_to_list(content_name, 0));
-		(new File(get_filepath(content_name))).delete();
+		(new File(storage + content_name)).delete();
 
 		String[] feeds = set.toArray(new String[set.size()]);
 		
