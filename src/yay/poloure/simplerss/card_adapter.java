@@ -111,7 +111,10 @@ public class card_adapter extends BaseAdapter
 		convertView.setOnClickListener(new browser_call());
 		holder.title_view.setText(content_titles.get(position));
 		holder.time_view.setText(content_links.get(position));
-		String des = content_des.get(position).replace("  ", "\n").replace("\t", "\n");
+		
+		String des = "";
+		if(!content_des.contains(content_titles.get(position)))
+			des = content_des.get(position).replace("  ", "\n").replace("\t", "\n");
 
 		if(des.length() > 1)
 		{
@@ -125,6 +128,7 @@ public class card_adapter extends BaseAdapter
 			}
 			else
 			{
+				holder.description_view.setPadding(0, 0, 0, 0);
 				ViewGroup.LayoutParams iv = holder.image_view.getLayoutParams();
 				iv.height = 0;
 				iv.width = 0;

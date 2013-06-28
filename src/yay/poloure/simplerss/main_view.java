@@ -771,8 +771,8 @@ public class main_view extends Activity
 		return lines;
 	}
 
-	private class refresh_feeds extends AsyncTask<Object, Object, Long> {
-
+	private class refresh_feeds extends AsyncTask<Object, Object, Long>
+	{
 		@Override
 		protected void onPreExecute(){
 			set_refresh(true);
@@ -781,101 +781,99 @@ public class main_view extends Activity
 		@Override
 		protected Long doInBackground(Object... ton)
 		{
-			String group_path = get_filepath(current_groups[((Integer) ton[1])] + ".txt");
-			String current_group = current_groups[((Integer) ton[1])];
-			log(current_group);
-			String[] feeds_array = read_csv_to_array("name", group_path, 0);
-			String[] url_array = read_csv_to_array("url", group_path, 0);
-			log(feeds_array[0] + url_array[0]);
-			String[] titles, descriptions, links, images;
-			boolean success = true, exists = true;
-			
-			log(Integer.toString(feeds_array.length));
-			for(int i=0; i<feeds_array.length; i++)
+			/// ton[1] = page number or position in current_groups.
+			/// ton[0] = if true, do not download new data.
+			Boolean skip_download = ((Boolean) ton[0]);
+			int page_number = ((Integer) ton[1]);
+
+			String group = current_groups[page_number];
+			String group_file_path = get_filepath(group + ".txt");
+			String partial_image_path = get_filepath("images/");
+			String partial_thumbnail_path = get_filepath("thumbnails/");
+			String[] group_feeds_names = read_csv_to_array("name", group_file_path, 0);
+			String[] group_feeds_urls = read_csv_to_array("url", group_file_path, 0);
+			String image_name = "", thumbnail_path = "", feed_path = "";
+			File image_file, thumbnail_file;
+
+			if(group_feeds_names.length < 1)
+				return 0L;
+
+			/// If we should download and update the feeds inside that group.
+			if(!skip_download)
 			{
-				if((!((Boolean) ton[0]))&&(((Integer) ton[1]) != 0)){
-					success = update_feed(feeds_array[i], url_array[i]);
-					log("first if");
-				}
-				if(!((new File(get_filepath(feeds_array[i] + ".store.txt.content.txt"))).exists())){
-					exists = false;
-					log("second if");
+				for(int i=0; i<group_feeds_names.length; i++)
+				{
+					feed_path = get_filepath(group_feeds_names[i]); /// mariam_feed.txt
+					download_file(group_feeds_urls[i], group_feeds_names[i] + ".store.txt"); /// Downloads file as mariam_feed.store.txt
+					new parsered(feed_path + ".store.txt"); /// Parses the file and makes other files like mariam_feed.store.txt.content.txt
+					(new File(feed_path + ".store.txt")).delete();
+					remove_duplicates(feed_path + ".store.txt.content.txt"); /// Finally we have the feeds content files.
 				}
 			}
-			log(Boolean.toString(exists));
-			if(exists)
+
+			/// Make group content file
+			String group_content_path = get_filepath(group + ".txt.content.txt");
+			File group_content_file = new File(group_content_path);
+
+			/// if we have updated the feeds OR if the group content file does not exist, make the group content file.
+			if((!skip_download))
+				sort_group_content_by_time(group);
+			else
 			{
-				String content_path = group_path + ".content.txt";
-				File test = new File(content_path);
-				log(content_path);
-
-				/// Only sort the new ones into the group chaches
-				if((!test.exists())||(!((Boolean) ton[0]))){
-					log("sorting");
-					sort_group_content_by_time(current_group);
-					log("sorted");
-				}
-
-				if(success)
+				for(String feed : group_feeds_names)
 				{
-					log("titles");
-					titles = 				read_csv_to_array("title", content_path, 0);
-					if(titles.length>0)
+					if((new File(get_filepath(feed + ".store.txt.content.txt")).exists()))
 					{
-						images = 			read_csv_to_array("image", content_path, 0);
-						descriptions = 		read_csv_to_array("description", content_path, 0);
-						links = 			read_csv_to_array("link", content_path, 0);
-						log("after");
-
-						int image_width = 0, image_height = 0;
-						String partial_image_path = get_filepath("images/");
-						String partial_thumbnail_path = get_filepath("thumbnails/");
-						String image_name = "", thumbnail_path = "";
-						File image, thumbnail;
-						log("after2");
-
-						log(Integer.toString(titles.length));
-						for(int m=0; m<titles.length; m++)
-						{
-							if(!images[m].equals(""))
-							{
-								image_name = images[m].substring(images[m].lastIndexOf("/") + 1, images[m].length());
-								image = new File(partial_image_path + image_name);
-								thumbnail = new File(partial_thumbnail_path + image_name);
-								log(Integer.toString(m));
-
-								if(!image.exists())
-								{
-									download_file(images[m], "images/" + image_name);
-									compress_file(partial_image_path + image_name, partial_thumbnail_path + image_name, image_name);
-								}
-								else if(!thumbnail.exists())
-									compress_file(partial_image_path + image_name, partial_thumbnail_path + image_name, image_name);
-
-								Integer[] dim = get_image_dimensions(image_name);
-								image_height = dim[1];
-								image_width = dim[0];
-								thumbnail_path = partial_thumbnail_path + image_name;
-							}
-							else
-							{
-								thumbnail_path = "";
-								image_height = 0;
-								image_width = 0;
-							}
-
-							List<String> ith_list = get_card_adapter(((Integer) ton[1])).return_links();
-							if((!ith_list.contains(links[m]))||(ith_list.size() == 0))
-								publishProgress(((Integer) ton[1]), titles[m], descriptions[m], links[m], thumbnail_path, image_height, image_width);
-						}
+						sort_group_content_by_time(group);
+						break;
 					}
 				}
 			}
-			return 1L;
+
+			String [] titles = 			read_csv_to_array("title", group_content_path, 0);
+
+			if(titles.length < 1)
+				return 0L;
+
+			String [] images = 			read_csv_to_array("image", group_content_path, 0);
+			String [] descriptions = 	read_csv_to_array("description", group_content_path, 0);
+			String [] links = 			read_csv_to_array("link", group_content_path, 0);
+
+			List<String> ith_list = get_card_adapter(page_number).return_links();
+
+			/// For each line of the group_content_file
+			for(int m=0; m<titles.length; m++)
+			{
+				thumbnail_path = "";
+				Integer[] dim = {0, 0};
+				
+				if(!images[m].equals(""))
+				{
+					image_name = images[m].substring(images[m].lastIndexOf("/") + 1, images[m].length());
+					image_file = new File(partial_image_path + image_name);
+					thumbnail_file = new File(partial_thumbnail_path + image_name);
+
+					if(!image_file.exists())
+						download_file(images[m], "images/" + image_name);
+					if(!thumbnail_file.exists())
+						compress_file(partial_image_path + image_name, partial_thumbnail_path + image_name, image_name);
+
+					dim = get_image_dimensions(image_name);
+					thumbnail_path = partial_thumbnail_path + image_name;
+				}
+
+				if((!ith_list.contains(links[m]))||(ith_list.size() == 0))
+				{
+					publishProgress(page_number, titles[m], descriptions[m], links[m], thumbnail_path, dim[1], dim[0]);
+					ith_list.add(links[m]);
+				}
+			}
+			return 0L;
 		}
 
 		@Override
-		protected void onProgressUpdate(Object... progress){
+		protected void onProgressUpdate(Object... progress)
+		{
 			ListFragment l = ((card_fragment) getFragmentManager().findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + Integer.toString((Integer) progress[0])));
 			if(l != null)
 			{
@@ -906,9 +904,9 @@ public class main_view extends Activity
 		@Override
 		protected void onPostExecute(Long tun)
 		{
-			if(viewPager.getOffscreenPageLimit() > 1){
+			if(viewPager.getOffscreenPageLimit() > 1)
 				viewPager.setOffscreenPageLimit(1);
-			}
+
 			set_refresh(false);
 		}
 	}
@@ -934,64 +932,68 @@ public class main_view extends Activity
 		for(String feed : feeds_array)
 		{
 			String content_path = get_filepath(feed + ".store.txt") + ".content.txt";
-			links = 			read_csv_to_array("link", content_path, 1);
-			content = read_file_to_list(feed + ".store.txt.content.txt", 1);
-			pubDates = 			read_csv_to_array("pubDate", content_path, 1);
-			if(pubDates[0].length()<8)
-				pubDates = 		read_csv_to_array("published", content_path, 1);
-			if(pubDates[0].length()<8)
-				pubDates = 		read_csv_to_array("updated", content_path, 1);
-
-			for(int i=0; i<pubDates.length; i++)
+			File test = new File(content_path);
+			if(test.exists())
 			{
-				content_all.add(content.get(i));
-				try{
-					time = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.ENGLISH)).parse(pubDates[i]);
-				}
-				catch(Exception e){
-					try{
-						time = (new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH)).parse(pubDates[i]);
-					}
-					catch(Exception t){
-						try{
-							time = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH)).parse(pubDates[i]);
-						}
-						catch(Exception c){
-							try{
-								time = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.ENGLISH)).parse(pubDates[i]);
-							}
-							catch(Exception n){
-								try{
-									time = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ENGLISH)).parse(pubDates[i]);
-								}
-								catch(Exception o){
-									log("Format not found and date looks like: " + pubDates[i]);
-									time = new Date();
-								}
-							}
-						}
-					}
-				}
+				links = 			read_csv_to_array("link", content_path, 1);
+				content = read_file_to_list(feed + ".store.txt.content.txt", 1);
+				pubDates = 			read_csv_to_array("pubDate", content_path, 1);
+				if(pubDates[0].length()<8)
+					pubDates = 		read_csv_to_array("published", content_path, 1);
+				if(pubDates[0].length()<8)
+					pubDates = 		read_csv_to_array("updated", content_path, 1);
 
-				for(int j=0; j<dates.size(); j++)
+				for(int i=0; i<pubDates.length; i++)
 				{
-					if(time.before(dates.get(j)))
-					{
-						dates.add(j, time);
-						links_ordered.add(j , links[i]);
-						break;
+					content_all.add(content.get(i));
+					try{
+						time = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.ENGLISH)).parse(pubDates[i]);
 					}
-					else if((j == dates.size() - 1)&&(time.after(dates.get(j))))
+					catch(Exception e){
+						try{
+							time = (new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH)).parse(pubDates[i]);
+						}
+						catch(Exception t){
+							try{
+								time = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH)).parse(pubDates[i]);
+							}
+							catch(Exception c){
+								try{
+									time = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.ENGLISH)).parse(pubDates[i]);
+								}
+								catch(Exception n){
+									try{
+										time = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ENGLISH)).parse(pubDates[i]);
+									}
+									catch(Exception o){
+										log("Format not found and date looks like: " + pubDates[i]);
+										time = new Date();
+									}
+								}
+							}
+						}
+					}
+
+					for(int j=0; j<dates.size(); j++)
+					{
+						if(time.before(dates.get(j)))
+						{
+							dates.add(j, time);
+							links_ordered.add(j , links[i]);
+							break;
+						}
+						else if((j == dates.size() - 1)&&(time.after(dates.get(j))))
+						{
+							dates.add(time);
+							links_ordered.add(links[i]);
+							break;
+						}
+					}
+					if(dates.size() == 0)
 					{
 						dates.add(time);
 						links_ordered.add(links[i]);
-						break;
 					}
-				}
-				if(dates.size() == 0)
-				{
-					dates.add(time);
-					links_ordered.add(links[i]);
 				}
 			}
 		}
@@ -1000,14 +1002,17 @@ public class main_view extends Activity
 		File group_content = new File(get_filepath(group_content_path));
 		group_content.delete();
 
-		for(String link : links_ordered)
+		if(links_ordered.size()>0)
 		{
-			for(String line : content_all)
+			for(String link : links_ordered)
 			{
-				if(line.contains(link))
+				for(String line : content_all)
 				{
-					append_string_to_file(group_content_path, line + "\n");
-					break;
+					if(line.contains(link))
+					{
+						append_string_to_file(group_content_path, line + "\n");
+						break;
+					}
 				}
 			}
 		}
