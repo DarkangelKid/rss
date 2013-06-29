@@ -97,13 +97,13 @@ public class main_view extends Activity
 
 	private void add_feed(String feed_name, String feed_url, String feed_group)
 	{
-		append_string_to_file(feed_group + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|\n");
-		append_string_to_file("All.txt", "name|" +  feed_name + "|url|" + feed_url + "|\n");
+		append_string_to_file("groups/" + feed_group + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|\n");
+		append_string_to_file("groups/All.txt", "name|" +  feed_name + "|url|" + feed_url + "|\n");
 	}
 
 	private void add_group(String group_name)
 	{
-		append_string_to_file("group_list.txt", group_name + "\n");
+		append_string_to_file("groups/group_list.txt", group_name + "\n");
 		update_groups();
 	}
 	
@@ -121,21 +121,22 @@ public class main_view extends Activity
 
 		storage = this.getExternalFilesDir(null).getAbsolutePath() + "/";
 
-		File dump = new File(storage + "dump.txt");
-		dump.delete();
+		(new File(storage + "dump.txt")).delete();
 
-		File images_folder = new File(storage + "images");
-		File thumbnail_folder = new File(storage + "thumbnails");
+		String[] folders = {"images", "thumbnails", "groups", "content"};
+		File folder_file;
 
-		if(!images_folder.exists())
-			images_folder.mkdir();
-		if(!thumbnail_folder.exists())
-			thumbnail_folder.mkdir();
+		for(String folder : folders)
+		{
+			folder_file = new File(storage + folder);
+			if(!folder_file.exists())
+				folder_file.mkdir();
+		}
 
-		List<String> gs = read_file_to_list("group_list.txt", 0);
+		List<String> gs = read_file_to_list("groups/group_list.txt", 0);
 		current_groups = gs.toArray(new String[gs.size()]);
 		if(current_groups.length == 0)
-			append_string_to_file("group_list.txt", "All\n");
+			append_string_to_file("groups/group_list.txt", "All\n");
 
 		getActionBar().setIcon(R.drawable.rss_icon);
 		
@@ -180,7 +181,7 @@ public class main_view extends Activity
 			viewPager.setOnPageChangeListener(new page_listener());
 
 			update_groups();
-			if(read_file_to_list("All.txt", 0).size()>0)
+			if(read_file_to_list("groups/All.txt", 0).size()>0)
 				new refresh_feeds().execute(true, 0);
 
 			PagerTabStrip pagerTabStrip = (PagerTabStrip) findViewById(R.id.pager_title_strip);
@@ -680,14 +681,14 @@ public class main_view extends Activity
 
 	private void check_for_no_groups()
 	{
-		List<String> groups = read_file_to_list("group_list.txt", 0);
+		List<String> groups = read_file_to_list("groups/group_list.txt", 0);
 		if(!groups.contains("All"))
 			add_group("All");
 	}
 
 	private void update_groups()
 	{
-		List<String> gs = read_file_to_list("group_list.txt", 0);
+		List<String> gs = read_file_to_list("groups/group_list.txt", 0);
 		current_groups = gs.toArray(new String[gs.size()]);
 		if((current_groups.length+3)>nav_final.length)
 		{
@@ -786,7 +787,7 @@ public class main_view extends Activity
 			int page_number = ((Integer) ton[1]);
 
 			String group = current_groups[page_number];
-			String group_file_path = storage + group + ".txt";
+			String group_file_path = storage + "groups/" + group + ".txt";
 			String partial_image_path = storage + "images/";
 			String partial_thumbnail_path = storage + "thumbnails/";
 			String[] group_feeds_names = read_csv_to_array("name", group_file_path, 0);
@@ -802,8 +803,8 @@ public class main_view extends Activity
 			{
 				for(int i=0; i<group_feeds_names.length; i++)
 				{
-					feed_path = storage + group_feeds_names[i]; /// mariam_feed.txt
-					download_file(group_feeds_urls[i], group_feeds_names[i] + ".store.txt"); /// Downloads file as mariam_feed.store.txt
+					feed_path = storage + "content/" + group_feeds_names[i]; /// mariam_feed.txt
+					download_file(group_feeds_urls[i], "content/" + group_feeds_names[i] + ".store.txt"); /// Downloads file as mariam_feed.store.txt
 					new parsered(feed_path + ".store.txt"); /// Parses the file and makes other files like mariam_feed.store.txt.content.txt
 					(new File(feed_path + ".store.txt")).delete();
 					remove_duplicates(feed_path + ".store.txt.content.txt"); /// Finally we have the feeds content files.
@@ -811,7 +812,7 @@ public class main_view extends Activity
 			}
 
 			/// Make group content file
-			String group_content_path = storage + group + ".txt.content.txt";
+			String group_content_path = storage + "groups/" + group + ".txt.content.txt";
 			File group_content_file = new File(group_content_path);
 
 			/// if we have updated the feeds OR if the group content file does not exist, make the group content file.
@@ -821,7 +822,7 @@ public class main_view extends Activity
 			{
 				for(String feed : group_feeds_names)
 				{
-					if((new File(storage + feed + ".store.txt.content.txt").exists()))
+					if((new File(storage + "content/" + feed + ".store.txt.content.txt").exists()))
 					{
 						sort_group_content_by_time(group);
 						break;
@@ -922,7 +923,7 @@ public class main_view extends Activity
 		String[] links, pubDates;
 		Date time;
 
-		String[] feeds_array = read_csv_to_array("name", storage + group + ".txt", 0);
+		String[] feeds_array = read_csv_to_array("name", storage + "groups/" + group + ".txt", 0);
 		List<Date> dates = new ArrayList<Date>();
 		List<String> links_ordered = new ArrayList<String>();
 		List<String> content_all = new ArrayList<String>();
@@ -930,12 +931,12 @@ public class main_view extends Activity
 		
 		for(String feed : feeds_array)
 		{
-			String content_path = storage + feed + ".store.txt.content.txt";
+			String content_path = storage + "content/" + feed + ".store.txt.content.txt";
 			File test = new File(content_path);
 			if(test.exists())
 			{
 				links = 			read_csv_to_array("link", content_path, 1);
-				content = read_file_to_list(feed + ".store.txt.content.txt", 1);
+				content = read_file_to_list("content/" + feed + ".store.txt.content.txt", 1);
 				pubDates = 			read_csv_to_array("pubDate", content_path, 1);
 				if(pubDates[0].length()<8)
 					pubDates = 		read_csv_to_array("published", content_path, 1);
@@ -997,7 +998,7 @@ public class main_view extends Activity
 			}
 		}
 
-		String group_content_path = group + ".txt.content.txt";
+		String group_content_path = "groups/" + group + ".txt.content.txt";
 		File group_content = new File(storage + group_content_path);
 		group_content.delete();
 
@@ -1022,11 +1023,11 @@ public class main_view extends Activity
 		boolean found = false;
 		try{
 			String line = "";
-			String content_name = feed_name + ".store.txt.content.txt";
+			String content_name = "content/" + feed_name + ".store.txt.content.txt";
 			String store_name = feed_name + ".store.txt";
-			String store_path = storage + store_name;
+			String store_path = storage + "content/" + store_name;
 				
-			download_file(url, store_name);
+			download_file(url, "content/" + store_name);
 			new parsered(store_path);
 			(new File(store_path)).delete();
 

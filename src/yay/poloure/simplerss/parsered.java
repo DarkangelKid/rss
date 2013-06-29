@@ -70,6 +70,9 @@ class parsered
 									.replace("&quot;", "\"")
 									.replace("&mdash;", "—")
 									.replace("&hellip;", "…")
+									.replace("&#8217;", "'")
+									.replace("\t", "&t&")
+									.replace("</p>", "&n&")
 									.replace("&rsquo;", "'");
 									
 								if(cont.contains("img src="))

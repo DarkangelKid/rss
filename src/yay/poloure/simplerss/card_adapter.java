@@ -113,8 +113,8 @@ public class card_adapter extends BaseAdapter
 		holder.time_view.setText(content_links.get(position));
 		
 		String des = "";
-		if(!content_des.contains(content_titles.get(position)))
-			des = content_des.get(position).replace("  ", "\n").replace("\t", "\n");
+		if(!content_des.get(position).replaceAll("&n&", "").contains(content_titles.get(position).substring(0, content_titles.get(position).length() - 3)))
+			des = content_des.get(position).replace("  ", "\n").replace("&t&", "\n").replace("&n&", "\n").trim();
 
 		if(des.length() > 1)
 		{
