@@ -293,6 +293,7 @@ public class main_view extends Activity
 		@Override
 		public void onPageSelected(int position)
 		{
+			/// Add a global new feeds downloaded so update all method here
 			if(get_card_adapter(position).getCount() == 0)
 				new refresh_feeds().execute(true, position);
 		}
@@ -904,8 +905,8 @@ public class main_view extends Activity
 		@Override
 		protected void onPostExecute(Long tun)
 		{
-			if(viewPager.getOffscreenPageLimit() > 1)
-				viewPager.setOffscreenPageLimit(1);
+			//if(viewPager.getOffscreenPageLimit() > 1)
+				//viewPager.setOffscreenPageLimit(1);
 
 			set_refresh(false);
 		}
