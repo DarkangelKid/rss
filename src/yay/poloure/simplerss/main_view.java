@@ -206,45 +206,45 @@ public class main_view extends Activity
 		if (savedInstanceState == null)
 		{
 
-		getActionBar().setTitle("Feeds");
-		FrameLayout frame = new FrameLayout(this);
-		frame.setId(CONTENT_VIEW_ID);
-		setContentView(frame, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+			getActionBar().setTitle("Feeds");
+			FrameLayout frame = new FrameLayout(this);
+			frame.setId(CONTENT_VIEW_ID);
+			setContentView(frame, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
-		storage = this.getExternalFilesDir(null).getAbsolutePath() + "/";
+			storage = this.getExternalFilesDir(null).getAbsolutePath() + "/";
 
-		(new File(storage + "dump.txt")).delete();
+			(new File(storage + "dump.txt")).delete();
 
-		String[] folders = {"images", "thumbnails", "groups", "content"};
-		File folder_file;
+			String[] folders = {"images", "thumbnails", "groups", "content"};
+			File folder_file;
 
-		for(String folder : folders)
-		{
-			folder_file = new File(storage + folder);
-			if(!folder_file.exists())
-				folder_file.mkdir();
-		}
+			for(String folder : folders)
+			{
+				folder_file = new File(storage + folder);
+				if(!folder_file.exists())
+					folder_file.mkdir();
+			}
 
-		List<String> gs = read_file_to_list("groups/group_list.txt", 0);
-		current_groups = gs.toArray(new String[gs.size()]);
-		if(current_groups.length == 0)
-			append_string_to_file("groups/group_list.txt", "All\n");
+			List<String> gs = read_file_to_list("groups/group_list.txt", 0);
+			current_groups = gs.toArray(new String[gs.size()]);
+			if(current_groups.length == 0)
+				append_string_to_file("groups/group_list.txt", "All\n");
 
-		getActionBar().setIcon(R.drawable.rss_icon);
-		
-			getFragmentManager().beginTransaction()
-						.add(CONTENT_VIEW_ID, new top_fragment())
-						.commit();
-			Fragment feed = new the_feed_fragment();
-			Fragment pref = new PrefsFragment();
-			Fragment man = new manage_fragment();
-			getFragmentManager().beginTransaction()
-				.add(R.id.content_frame, feed, "Feeds")
-				.add(R.id.content_frame, pref, "Settings")
-				.add(R.id.content_frame, man, "Manage")
-				.hide(man)
-				.hide(pref)
-				.commit();
+			getActionBar().setIcon(R.drawable.rss_icon);
+			
+				getFragmentManager().beginTransaction()
+							.add(CONTENT_VIEW_ID, new top_fragment())
+							.commit();
+				Fragment feed = new the_feed_fragment();
+				Fragment pref = new PrefsFragment();
+				Fragment man = new manage_fragment();
+				getFragmentManager().beginTransaction()
+					.add(R.id.content_frame, feed, "Feeds")
+					.add(R.id.content_frame, pref, "Settings")
+					.add(R.id.content_frame, man, "Manage")
+					.hide(man)
+					.hide(pref)
+					.commit();
 		}
 	}
 
@@ -1188,10 +1188,11 @@ public class main_view extends Activity
 			String group_content_path = storage + "groups/" + group + ".txt.content.txt";
 			File group_content_file = new File(group_content_path);
 
-			/// if we have updated the feeds OR if the group content file does not exist, make the group content file.
+			/// If we have updated the feeds, resort the group_content file.
 			if((!skip_download))
 				sort_group_content_by_time(group);
-			else
+			/// If we have skipped the download, and either the page number is zero (which it only is if new data had been made since) or the group content file does not exist yet.
+			else if((!group_content_file.exists())||(page_number == 0))
 			{
 				for(String feed : group_feeds_names)
 				{
