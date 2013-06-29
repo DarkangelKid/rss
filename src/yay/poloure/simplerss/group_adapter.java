@@ -121,7 +121,6 @@ public class group_adapter extends BaseAdapter
 				ClipData data = ClipData.newPlainText("", "");
 				custom_drag_builder shadowBuilder = new custom_drag_builder(view_parent);
 				view_parent.startDrag(data, shadowBuilder, view_parent, 0);
-				//view_parent.setVisibility(View.INVISIBLE);
 				return true;
 			}
 			else {
@@ -152,6 +151,8 @@ public class group_adapter extends BaseAdapter
 					v.setVisibility(View.INVISIBLE);
 					rearrange_groups(old_title, new_title);
 					refresh_data();
+					/// Save the new order by overwriting the group_list.txt file with group_list, then call the update_groups() function.
+					main_view.update_group_order(group_list);
 					break;
 				case DragEvent.ACTION_DRAG_EXITED:        
 					v.setVisibility(View.VISIBLE);

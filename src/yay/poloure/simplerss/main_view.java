@@ -72,7 +72,7 @@ public class main_view extends Activity
 {
 	private DrawerLayout drawer_layout;
 
-	private ListView navigation_list;
+	private static ListView navigation_list;
 	private ActionBarDrawerToggle drawer_toggle;
 	private Menu optionsMenu;
 
@@ -81,19 +81,21 @@ public class main_view extends Activity
 	private int width;
 
 	private static int download_finished;
-	private ViewPager viewPager;
+	private static ViewPager viewPager;
 	private ViewPager manage_pager;
 	private static Resources res;
 	private static int twelve;
 	private static int first_height;
 	private int check_finished;
+	private Boolean new_items;
 	public static String storage;
+	public static Context context;
 
 	public static String[] current_groups;
 	private static String[] feed_titles, feed_urls, feed_groups;
 	
 	private static final int CONTENT_VIEW_ID = 10101010;
-	private String[] nav_items, nav_final;
+	private static String[] nav_items, nav_final;
 
 	private Fragment man, pref, feed;
 
@@ -193,7 +195,7 @@ public class main_view extends Activity
 			
 			manage_pager = (ViewPager) findViewById(R.id.manage_viewpager);
 			manage_pager.setAdapter(new manage_pager_adapter(getFragmentManager()));
-			
+			context = getApplicationContext();
 			update_groups();
 			if(read_file_to_list("groups/All.txt", 0).size()>0)
 				new refresh_feeds().execute(true, 0);
@@ -311,8 +313,14 @@ public class main_view extends Activity
 		@Override
 		public void onPageSelected(int position)
 		{
-			/// Add a global new feeds downloaded so update all method here
-			if(get_card_adapter(position).getCount() == 0)
+			/// Add a global new feeds downloaded so update all method here.
+			/// Replace 0 with the index of all.
+			if((position == 0)&&(new_items))
+			{
+				new refresh_feeds().execute(true, 0);
+				new_items = false;
+			}
+			else if(get_card_adapter(position).getCount() == 0)
 				new refresh_feeds().execute(true, position);
 		}
 	}
@@ -765,19 +773,16 @@ public class main_view extends Activity
 			}
 	}
 
-	private void append_string_to_file(String file_name, String string)
+	private static void append_string_to_file(String file_name, String string)
 	{
-		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
+		try
 		{
-			try
-			{
-				BufferedWriter out = new BufferedWriter(new FileWriter(storage + file_name, true));
-				out.write(string);
-				out.close();
-			}
-			catch (Exception e)
-			{
-			}
+			BufferedWriter out = new BufferedWriter(new FileWriter(storage + file_name, true));
+			out.write(string);
+			out.close();
+		}
+		catch (Exception e)
+		{
 		}
 	}
 
@@ -788,20 +793,40 @@ public class main_view extends Activity
 			add_group("All");
 	}
 
-	private void update_groups()
+	private static void update_groups()
 	{
 		List<String> gs = read_file_to_list("groups/group_list.txt", 0);
 		current_groups = gs.toArray(new String[gs.size()]);
+		ArrayAdapter<String> nav_adapter;
 		if((current_groups.length+3)>nav_final.length)
 		{
 			String[] nav_finaler = new String[nav_final.length + 1];
 			System.arraycopy(nav_final, 0, nav_finaler, 0, nav_final.length);
 			nav_finaler[nav_finaler.length - 1] = current_groups[current_groups.length - 1];
 			nav_final = nav_finaler;
-			ArrayAdapter<String> nav_adapter = new ArrayAdapter<String>(this, R.layout.drawer_list_item, nav_final);
-			navigation_list.setAdapter(nav_adapter);
-			viewPager.getAdapter().notifyDataSetChanged();
+			nav_adapter = new ArrayAdapter<String>(get_context(), R.layout.drawer_list_item, nav_final);
 		}
+		else
+		{
+			for(int i=0; i<current_groups.length; i++)
+				nav_final[i+3] = current_groups[i];
+			nav_adapter = new ArrayAdapter<String>(get_context(), R.layout.drawer_list_item, nav_final);
+		}
+		navigation_list.setAdapter(nav_adapter);
+		viewPager.getAdapter().notifyDataSetChanged();
+	}
+
+	public static void update_group_order(List<String> new_order)
+	{
+		(new File(storage + "groups/group_list.txt")).delete();
+		for(String group : new_order)
+			append_string_to_file("groups/group_list.txt", group + "\n");
+		update_groups();
+	}
+
+	public static Context get_context()
+	{
+		return context;
 	}
 
 	private String return_first_line_containing(String file_name, String content)
@@ -853,7 +878,7 @@ public class main_view extends Activity
 		return lines.toArray(new String[lines.size()]);
 	}
 
-	private List<String> read_file_to_list(String file_name, int lines_to_skip)
+	private static List<String> read_file_to_list(String file_name, int lines_to_skip)
 	{
 		String line = null;
 		BufferedReader stream = null;
@@ -968,6 +993,7 @@ public class main_view extends Activity
 				{
 					publishProgress(page_number, titles[m], descriptions[m], links[m], thumbnail_path, dim[1], dim[0]);
 					ith_list.add(links[m]);
+					new_items = true;
 				}
 			}
 			return 0L;

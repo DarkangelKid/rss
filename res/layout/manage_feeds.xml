@@ -12,6 +12,9 @@
 			android:layout_height="match_parent"
 			android:divider="#00000000"
 			android:dividerHeight="8dp"
-			android:layout_margin="12dp"/>
+			android:scrollbars="none"
+			android:drawSelectorOnTop="false"
+			android:padding="12dip"
+			android:clipToPadding="false"/>
 
 </LinearLayout> 
