@@ -37,6 +37,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.content.res.Configuration;
 
 import android.widget.Button;
@@ -76,7 +77,7 @@ public class main_view extends Activity
 	private ActionBarDrawerToggle drawer_toggle;
 	private Menu optionsMenu;
 
-	private String mTitle, feed_title;
+	private static String mTitle, feed_title;
 	private static float density;
 	private int width;
 
@@ -86,10 +87,10 @@ public class main_view extends Activity
 	private static Resources res;
 	private static int twelve;
 	private static int first_height;
-	private int check_finished;
+	private static int check_finished;
 	private Boolean new_items;
 	public static String storage;
-	public static Context context;
+	public static Context context, activity_context;
 
 	public static String[] current_groups;
 	private static String[] feed_titles, feed_urls, feed_groups;
@@ -104,15 +105,95 @@ public class main_view extends Activity
 	{
 		append_string_to_file("groups/" + feed_group + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|\n");
 		append_string_to_file("groups/All.txt", "name|" +  feed_name + "|url|" + feed_url + "|group|" + feed_group + "|\n");
-					
+		update_feeds_list();
+	}
+	
+	private static void edit_feed(String old_feed_name, String feed_name, String feed_url, String old_group, String feed_group)
+	{
+		/// Update the All.txt file
+		List<String> feeds = read_file_to_list("groups/All.txt", 0);
+		(new File(storage + "groups/All.txt")).delete();
+		for(int i=0; i<feeds.size(); i++)
+		{
+			if(feeds.get(i).contains(old_feed_name))
+				append_string_to_file("groups/All.txt", "name|" +  feed_name + "|url|" + feed_url + "|group|" + feed_group + "|\n");
+			else
+				append_string_to_file("groups/All.txt", feeds.get(i) + "\n");
+		}
+		
+		/// Update the group file
+		File group_file = new File(storage + "groups/" + feed_group + ".txt");
+		if(group_file.exists())
+		{
+			(new File(storage + "groups/" + feed_group + ".txt.content.txt")).delete();
+			feeds = read_file_to_list("groups/" + feed_group + ".txt", 0);
+			group_file.delete();
+			for(int i=0; i<feeds.size(); i++)
+			{
+				if(feeds.get(i).contains(old_feed_name))
+					append_string_to_file("groups/" + feed_group + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|\n");
+				else
+					append_string_to_file("groups/" + feed_group + ".txt", feeds.get(i) + "\n");
+			}
+		}
+		else
+		{ 
+			/// Just append to the file
+			append_string_to_file("groups/" + feed_group + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|\n");
+			feeds = read_file_to_list("groups/" + old_group + ".txt", 0);
+			group_file = new File(storage + "groups/" + old_group + ".txt");
+			group_file.delete();
+			Boolean append = false;
+			for(int i=0; i<feeds.size(); i++)
+			{
+				if(!feeds.get(i).contains(old_feed_name))
+				{
+					append_string_to_file("groups/" + old_group + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|\n");
+					append = true;
+				}
+			}
+			if(append == false)
+			{
+				feeds = read_file_to_list("groups/group_list.txt", 0);
+				group_file = new File(storage + "groups/group_list.txt");
+				group_file.delete();
+				for(int i=0; i<feeds.size(); i++)
+				{
+					if(!feeds.get(i).contains(old_group))
+						append_string_to_file("groups/group_list.txt", feeds.get(i) + "\n");
+				}
+			}
+		}
+		(new File(storage + "groups/All.txt.content.txt")).delete();
+		feed_adapter temp = feed_manage.return_feed_adapter();
+		temp.clear_list();
+		update_feeds_list();
+		for(int i = 0; i < feed_titles.length; i++)
+		{
+			temp.add_list(feed_titles[i], feed_urls[i] + "\n" + feed_groups[i]);
+			temp.notifyDataSetChanged();
+		}
+		
+		update_groups();
+		
+		/// TODO: Hard reset the groups content file.
+		if(!old_group.equals(feed_group))
+		{
+			(new File(storage + "content/" + old_feed_name + ".store.txt.content.txt")).delete();
+			(new File(storage + "groups/" + old_group + ".txt.content.txt")).delete();
+			sort_group_content_by_time(old_group);
+			//new refresh_feeds().execute(true, 0);
+			//new refresh_feeds().execute(true, 0);
+		}
+	}
+	
+	private static void update_feeds_list()
+	{
 		feed_titles = read_csv_to_array("name", "groups/All.txt", 0);
 		feed_urls = read_csv_to_array("url", "groups/All.txt", 0);
 		feed_groups = read_csv_to_array("group", "groups/All.txt", 0);
-		
-		
 	}
-
-	private void add_group(String group_name)
+	private static void add_group(String group_name)
 	{
 		append_string_to_file("groups/group_list.txt", group_name + "\n");
 		update_groups();
@@ -196,6 +277,7 @@ public class main_view extends Activity
 			manage_pager = (ViewPager) findViewById(R.id.manage_viewpager);
 			manage_pager.setAdapter(new manage_pager_adapter(getFragmentManager()));
 			context = getApplicationContext();
+			activity_context = this;
 			update_groups();
 			if(read_file_to_list("groups/All.txt", 0).size()>0)
 				new refresh_feeds().execute(true, 0);
@@ -414,7 +496,7 @@ public class main_view extends Activity
 	public static class feed_manage extends Fragment
 	{
 		private ListView feed_list;
-		public feed_adapter feed_list_adapter;
+		public static feed_adapter feed_list_adapter;
 		
 		static feed_manage manage_feeds_instance(int num)
 		{
@@ -425,11 +507,26 @@ public class main_view extends Activity
 			return m;
 		}
 		
+		public static feed_adapter return_feed_adapter()
+		{
+			return feed_list_adapter;
+		}
+		
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
 			View view = inflater.inflate(R.layout.manage_feeds, container, false);
 			feed_list = (ListView) view.findViewById(R.id.feeds_listview);
+			
+			feed_list.setOnItemClickListener(new OnItemClickListener()
+			{
+				public void onItemClick(AdapterView<?> parent, View view, int position, long id) 
+				{
+					///show dialog
+					show_edit_dialog(position);
+				}
+			});
+			
 			feed_list_adapter = new feed_adapter(getActivity());
 			feed_list.setAdapter(feed_list_adapter);
 			
@@ -470,7 +567,7 @@ public class main_view extends Activity
 		}
 	}
 	
-	public static class manage_pager_adapter extends FragmentPagerAdapter
+	public class manage_pager_adapter extends FragmentPagerAdapter
 	{
 		public manage_pager_adapter(FragmentManager fm){
 			super(fm);
@@ -693,15 +790,159 @@ public class main_view extends Activity
 		});
 		alertDialog.show();
 	}
-
-	private void toast_message(String message, int zero_or_one)
+	
+	///cock
+	private static void show_edit_dialog(int position)
 	{
-		Context context = getApplicationContext();
+		LayoutInflater inflater = LayoutInflater.from(activity_context);
+		final View edit_rss_dialog = inflater.inflate(R.layout.add_rss_dialog, null);
+		
+		final String current_group = feed_groups[position];
+		final String current_title = feed_titles[position];
+
+		Spinner group_spinner = (Spinner) edit_rss_dialog.findViewById(R.id.group_spinner);
+		ArrayAdapter adapter = new ArrayAdapter(activity_context, R.layout.group_spinner_text, current_groups);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		group_spinner.setAdapter(adapter);
+		
+		int i;
+		for(i = 0; i < current_groups.length; i++)
+		{
+			if(current_groups[i].equals(current_group))
+				break;
+		}
+		
+		((EditText)edit_rss_dialog.findViewById(R.id.name_edit)).setText(current_title);
+		((EditText)edit_rss_dialog.findViewById(R.id.URL_edit)).setText(feed_urls[position]);
+		group_spinner.setSelection(i);
+		
+		final AlertDialog edit_dialog = new AlertDialog.Builder(activity_context, 2)
+				.setTitle("Edit Feed")
+				.setView(edit_rss_dialog)
+				.setCancelable(true)
+				.setPositiveButton
+				("Accept",new DialogInterface.OnClickListener()
+					{
+						@Override
+						public void onClick(DialogInterface dialog,int id)
+						{
+						}
+					}
+				)
+				.setNegativeButton
+				("Cancel",new DialogInterface.OnClickListener()
+					{
+						@Override
+						public void onClick(DialogInterface dialog,int id)
+						{
+						}
+					}
+				)
+				.create();
+		edit_dialog.setOnShowListener(new DialogInterface.OnShowListener()
+		{
+			@Override
+			public void onShow(DialogInterface dialog)
+			{
+				Button b = edit_dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+				b.setOnClickListener(new View.OnClickListener()
+				{
+					@Override
+					public void onClick(View view)
+					{
+						String new_group = ((EditText) edit_rss_dialog.findViewById(R.id.group_edit)).getText().toString().trim().toLowerCase();
+						boolean found = false;
+						boolean new_group_mode = false;
+						if(new_group.length()>0)
+						{
+							new_group_mode = true;
+							for(String group : current_groups)
+							{
+								if((group.toLowerCase()).equals(new_group))
+									found = true;
+							}
+
+							String[] words = new_group.split("\\s");
+							new_group = "";
+
+							if(words.length == 1)
+							{
+								char cap = Character.toUpperCase(words[0].charAt(0));
+								new_group +=  cap + words[0].substring(1, words[0].length());
+							}
+							else
+							{
+								for(int i = 0; i < words.length - 1; i++)
+								{
+									char cap = Character.toUpperCase(words[i].charAt(0));
+									new_group +=  cap + words[i].substring(1, words[i].length()) + " ";
+								}
+								char cap = Character.toUpperCase(words[words.length - 1].charAt(0));
+								new_group +=  cap + words[words.length - 1].substring(1, words[words.length - 1].length());
+							}
+						}
+						else
+							new_group = ((Spinner) edit_rss_dialog.findViewById(R.id.group_spinner)).getSelectedItem().toString();
+
+						Boolean rss = false;
+						String URL_check = ((EditText) edit_rss_dialog.findViewById(R.id.URL_edit)).getText().toString().trim();
+						String feed_name = ((EditText) edit_rss_dialog.findViewById(R.id.name_edit)).getText().toString().trim();
+
+						check_finished = -1;
+						if((!URL_check.contains("http"))&&(!URL_check.contains("https")))
+						{
+							new check_feed_exists().execute("http://" + URL_check);
+							while(check_finished == -1){
+							}
+							if(check_finished == 0)
+							{
+								check_finished = -1;
+								new check_feed_exists().execute("https://" + URL_check);
+								while(check_finished == -1){
+								}
+								if(check_finished == 1)
+									URL_check = "https://" + URL_check;
+							}
+							else if(check_finished == 1)
+								URL_check = "http://" + URL_check;
+						}
+						else
+						{
+							new check_feed_exists().execute(URL_check);
+							while(check_finished == -1){
+							}
+						}
+						if(check_finished == 1)
+							rss = true;
+
+						if(rss!= null && !rss)
+							toast_message("Invalid RSS URL", 0);
+						else
+						{
+							if((!found)&&(new_group_mode))
+								add_group(new_group);
+
+							if(feed_name.equals(""))
+								feed_name = feed_title;
+
+							edit_feed(current_title, feed_name, URL_check, current_group, new_group);
+							edit_dialog.dismiss();
+						}
+					}
+				});
+			}
+		});
+		edit_dialog.show();
+	}
+	///cock
+
+	static private void toast_message(String message, int zero_or_one)
+	{
 		Toast message_toast = Toast.makeText(context, message, zero_or_one);
 		message_toast.show();
 	}
 
-	class check_feed_exists extends AsyncTask<String, Void, Integer>
+	static class check_feed_exists extends AsyncTask<String, Void, Integer>
 	{
 		@Override
 		protected Integer doInBackground(String... urls)
@@ -713,7 +954,6 @@ public class main_view extends Activity
 				byte data[] = new byte[512];
 				in.read(data, 0, 512);
 				String line = new String(data);
-				log(line);
 				if((line.contains("rss"))||((line.contains("Atom"))||(line.contains("atom"))))
 				{
 					while((!line.contains("<title>"))&&(!line.contains("</title>")))
@@ -723,7 +963,6 @@ public class main_view extends Activity
 					}
 					int ind = line.indexOf("<title>") + 7;
 					feed_title = line.substring(ind, line.indexOf("</", ind));
-					log(feed_title);
 					check_finished = 1;
 				}
 				else
@@ -804,14 +1043,21 @@ public class main_view extends Activity
 			System.arraycopy(nav_final, 0, nav_finaler, 0, nav_final.length);
 			nav_finaler[nav_finaler.length - 1] = current_groups[current_groups.length - 1];
 			nav_final = nav_finaler;
-			nav_adapter = new ArrayAdapter<String>(get_context(), R.layout.drawer_list_item, nav_final);
+		}
+		else if((current_groups.length+3)<nav_final.length)
+		{	
+			String[] nav_finaler = new String[nav_final.length - 1];
+			nav_finaler[0] = nav_final[0];	nav_finaler[1] = nav_final[1];	nav_finaler[2] = nav_final[2];
+			for(int i=0; i<current_groups.length; i++)
+				nav_final[i+3] = current_groups[i];
+			nav_final = nav_finaler;
 		}
 		else
 		{
 			for(int i=0; i<current_groups.length; i++)
 				nav_final[i+3] = current_groups[i];
-			nav_adapter = new ArrayAdapter<String>(get_context(), R.layout.drawer_list_item, nav_final);
 		}
+		nav_adapter = new ArrayAdapter<String>(get_context(), R.layout.drawer_list_item, nav_final);
 		navigation_list.setAdapter(nav_adapter);
 		viewPager.getAdapter().notifyDataSetChanged();
 	}
@@ -850,7 +1096,7 @@ public class main_view extends Activity
 		return line;
 	}
 
-	private String[] read_csv_to_array(String content_type, String feed_path, int lines_to_skip)
+	private static String[] read_csv_to_array(String content_type, String feed_path, int lines_to_skip)
 	{
 		String line = null;
 		BufferedReader stream = null;
@@ -1046,7 +1292,7 @@ public class main_view extends Activity
 						.getListAdapter());
 	}
 
-	private void sort_group_content_by_time(String group)
+	private static void sort_group_content_by_time(String group)
 	{
 		String[] links, pubDates;
 		Date time;
@@ -1183,7 +1429,7 @@ public class main_view extends Activity
 			append_string_to_file(content_name, feed + "\n");
 	}
 
-	private void log(String text)
+	private static void log(String text)
 	{
 		append_string_to_file("dump.txt", text + "\n");
 	}
