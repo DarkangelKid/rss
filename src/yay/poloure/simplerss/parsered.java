@@ -70,7 +70,8 @@ class parsered
 									.replace("&quot;", "\"")
 									.replace("&mdash;", "—")
 									.replace("&hellip;", "…")
-									.replace("&#8217;", "'")
+									.replace("&#8217;", "’")
+									.replace("&#8216;", "‘")
 									.replace("\t", "&t&")
 									.replace("</p>", "&n&")
 									.replace("&rsquo;", "'");
@@ -170,6 +171,7 @@ class parsered
 					found = true;
 			}
 		}
+		tag = tag.replace("\r", " ").replace("\n", "");
 		if(eof == -1)
 			return "eof";
 		else
