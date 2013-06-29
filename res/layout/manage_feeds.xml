@@ -7,7 +7,7 @@
 		android:id="@+id/manage_layout">
 
 	<ListView
-			android:id="@+id/group_listview"
+			android:id="@+id/feeds_listview"
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
 			android:divider="#00000000"

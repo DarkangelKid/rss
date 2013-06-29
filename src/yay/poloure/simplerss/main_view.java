@@ -70,7 +70,7 @@ import android.graphics.Bitmap;
 
 public class main_view extends Activity
 {
-	private DrawerLayout mDrawerLayout;
+	private DrawerLayout drawer_layout;
 
 	private ListView navigation_list;
 	private ActionBarDrawerToggle drawer_toggle;
@@ -82,6 +82,7 @@ public class main_view extends Activity
 
 	private static int download_finished;
 	private ViewPager viewPager;
+	private ViewPager manage_pager;
 	private static Resources res;
 	private static int twelve;
 	private static int first_height;
@@ -89,6 +90,8 @@ public class main_view extends Activity
 	public static String storage;
 
 	public static String[] current_groups;
+	private static String[] feed_titles, feed_urls, feed_groups;
+	
 	private static final int CONTENT_VIEW_ID = 10101010;
 	private String[] nav_items, nav_final;
 
@@ -98,7 +101,13 @@ public class main_view extends Activity
 	private void add_feed(String feed_name, String feed_url, String feed_group)
 	{
 		append_string_to_file("groups/" + feed_group + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|\n");
-		append_string_to_file("groups/All.txt", "name|" +  feed_name + "|url|" + feed_url + "|\n");
+		append_string_to_file("groups/All.txt", "name|" +  feed_name + "|url|" + feed_url + "|group|" + feed_group + "|\n");
+					
+		feed_titles = read_csv_to_array("name", "groups/All.txt", 0);
+		feed_urls = read_csv_to_array("url", "groups/All.txt", 0);
+		feed_groups = read_csv_to_array("group", "groups/All.txt", 0);
+		
+		
 	}
 
 	private void add_group(String group_name)
@@ -145,7 +154,7 @@ public class main_view extends Activity
 						.commit();
 			Fragment feed = new the_feed_fragment();
 			Fragment pref = new PrefsFragment();
-			Fragment man = new manager_fragment();
+			Fragment man = new manage_fragment();
 			getFragmentManager().beginTransaction()
 				.add(R.id.content_frame, feed, "Feeds")
 				.add(R.id.content_frame, pref, "Settings")
@@ -173,25 +182,34 @@ public class main_view extends Activity
 			navigation_list.setAdapter(nav_adapter);
 			navigation_list.setOnItemClickListener(new DrawerItemClickListener());
 
-			viewpager_adapter page_adapter = new viewpager_adapter(getFragmentManager());
-
 			viewPager = (ViewPager) findViewById(R.id.pager);
-			viewPager.setAdapter(page_adapter);
+			viewPager.setAdapter(new viewpager_adapter(getFragmentManager()));
 			viewPager.setOffscreenPageLimit(128);
 			viewPager.setOnPageChangeListener(new page_listener());
-
+						
+			feed_titles = read_csv_to_array("name", storage + "groups/All.txt", 0);
+			feed_urls = read_csv_to_array("url", storage + "groups/All.txt", 0);
+			feed_groups = read_csv_to_array("group", storage + "groups/All.txt", 0);
+			
+			manage_pager = (ViewPager) findViewById(R.id.manage_viewpager);
+			manage_pager.setAdapter(new manage_pager_adapter(getFragmentManager()));
+			
 			update_groups();
 			if(read_file_to_list("groups/All.txt", 0).size()>0)
 				new refresh_feeds().execute(true, 0);
 
-			PagerTabStrip pagerTabStrip = (PagerTabStrip) findViewById(R.id.pager_title_strip);
-			pagerTabStrip.setDrawFullUnderline(true);
-			pagerTabStrip.setTabIndicatorColor(Color.argb(0, 51, 181, 229));
+			PagerTabStrip pager_tab_strip = (PagerTabStrip) findViewById(R.id.pager_title_strip);
+			pager_tab_strip.setDrawFullUnderline(true);
+			pager_tab_strip.setTabIndicatorColor(Color.argb(0, 51, 181, 229));
+			
+			PagerTabStrip manage_strip = (PagerTabStrip) findViewById(R.id.manage_title_strip);
+			manage_strip.setDrawFullUnderline(true);
+			manage_strip.setTabIndicatorColor(Color.argb(0, 51, 181, 229));
 
 			mTitle = "Feeds";
-			mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-			mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, 8388611);
-			drawer_toggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
+			drawer_layout = (DrawerLayout) findViewById(R.id.drawer_layout);
+			drawer_layout.setDrawerShadow(R.drawable.drawer_shadow, 8388611);
+			drawer_toggle = new ActionBarDrawerToggle(this, drawer_layout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
 			{
 				public void onDrawerClosed(View view){
 					getActionBar().setTitle(mTitle);
@@ -202,7 +220,7 @@ public class main_view extends Activity
 				}
 			};
 
-			mDrawerLayout.setDrawerListener(drawer_toggle);
+			drawer_layout.setDrawerListener(drawer_toggle);
 			getActionBar().setDisplayHomeAsUpEnabled(true);
 			getActionBar().setHomeButtonEnabled(true);
 			
@@ -268,7 +286,7 @@ public class main_view extends Activity
 			else
 				set_title("Feeds");
 		}
-		mDrawerLayout.closeDrawer(navigation_list);
+		drawer_layout.closeDrawer(navigation_list);
 		mTitle = page_title;
 	}
 
@@ -340,11 +358,36 @@ public class main_view extends Activity
 		}
 	}
 
-	public class manager_fragment extends Fragment
+	private class manage_fragment extends Fragment
+	{
+		@Override
+		public void onCreate(Bundle savedInstanceState)
+		{
+			super.onCreate(savedInstanceState);
+			//setRetainInstance(true);
+		}
+		
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+		{
+			return inflater.inflate(R.layout.manage_pager, container, false);
+		}
+	}
+
+	public static class group_fragment extends Fragment
 	{
 		private ListView manage_list;
 		public group_adapter manage_adapter;
-
+		
+		static group_fragment manage_groups_instance(int num)
+		{
+			group_fragment m = new group_fragment();
+			Bundle args = new Bundle();
+			args.putInt("num", num);
+			m.setArguments(args);
+			return m;
+		}
+		
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
@@ -357,6 +400,38 @@ public class main_view extends Activity
 			manage_adapter.notifyDataSetChanged();
 			return view;
 		}
+	}
+	
+	public static class feed_manage extends Fragment
+	{
+		private ListView feed_list;
+		public feed_adapter feed_list_adapter;
+		
+		static feed_manage manage_feeds_instance(int num)
+		{
+			feed_manage m = new feed_manage();
+			Bundle args = new Bundle();
+			args.putInt("num", num);
+			m.setArguments(args);
+			return m;
+		}
+		
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+		{
+			View view = inflater.inflate(R.layout.manage_feeds, container, false);
+			feed_list = (ListView) view.findViewById(R.id.feeds_listview);
+			feed_list_adapter = new feed_adapter(getActivity());
+			feed_list.setAdapter(feed_list_adapter);
+			
+			for(int i = 0; i < feed_titles.length; i++)
+			{
+				feed_list_adapter.add_list(feed_titles[i], feed_urls[i] + "\n" + feed_groups[i]);
+				feed_list_adapter.notifyDataSetChanged();
+			}
+			return view;
+		}
+		
 	}
 
 	public static class viewpager_adapter extends FragmentPagerAdapter
@@ -383,6 +458,32 @@ public class main_view extends Activity
 					return current_groups[position];
 			}
 			return "";
+		}
+	}
+	
+	public static class manage_pager_adapter extends FragmentPagerAdapter
+	{
+		public manage_pager_adapter(FragmentManager fm){
+			super(fm);
+		}
+ 
+		@Override
+		public int getCount(){
+			return 2;
+		}
+		@Override
+		public Fragment getItem(int position){
+			if(position == 0)
+				return group_fragment.manage_groups_instance(position);
+			else
+				return feed_manage.manage_feeds_instance(position);
+		}
+		@Override
+		public String getPageTitle(int position){
+			if(position == 0)
+				return "Groups";
+			else
+				return "Feeds";
 		}
 	}
 
