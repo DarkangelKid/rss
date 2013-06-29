@@ -62,8 +62,8 @@ class parsered
 									count++;
 								}
 								String cont = (new String(buf)).trim()
-									.replace("\r", " ")
-									.replace("\n", "")
+									.replaceAll("\r", " ")
+									.replaceAll("\n", "")
 									.replace("&amp;", "&")
 									.replace("&lt;", "<")
 									.replace("&gt;", ">")
@@ -72,16 +72,15 @@ class parsered
 									.replace("&hellip;", "…")
 									.replace("&#8217;", "’")
 									.replace("&#8216;", "‘")
-									.replace("\t", "&t&")
+									.replaceAll("\t", "&t&")
 									.replace("</p>", "&n&")
 									.replace("&rsquo;", "'");
 									
 								if(cont.contains("img src="))
 									to_file(file_name + ".content.dump.txt", cont.substring(cont.indexOf("src=\"") + 5, cont.indexOf("\"", cont.indexOf("src=\"") + 6)) + "\n", false);
 
-									cont = cont.replaceAll("\\<.*?\\>", "").trim();
-								to_file(file_name + ".content.txt", cont, true);
-								
+								to_file(file_name + ".content.txt", cont.replaceAll("\\<.*?\\>", "").trim(), true);
+
 								buf = new char[1024];
 								count = 0;
 								while(current[0] != '>')
@@ -94,7 +93,26 @@ class parsered
 								end_tag = new String(buf);
 								end_tag = end_tag.trim();
 								if(!(end_tag.equals(end[i])))
+								{
+									end_tag = end_tag
+									.replaceAll("\r", " ")
+									.replaceAll("\n", "")
+									.replace("<![CDATA[", "")
+									.replace("]]>", "")
+									.replace("&amp;", "&")
+									.replace("&lt;", "<")
+									.replace("&gt;", ">")
+									.replace("&quot;", "\"")
+									.replace("&mdash;", "—")
+									.replace("&hellip;", "…")
+									.replace("&#8217;", "’")
+									.replace("&#8216;", "‘")
+									.replaceAll("\t", "&t&")
+									.replace("</p>", "&n&")
+									.replace("&rsquo;", "'")
+									.replaceAll("\\<.*?\\>", "");
 									to_file(file_name + ".content.txt", end_tag, true);
+								}
 							}
 							to_file(file_name + ".content.txt", "|", true);
 							break;
@@ -171,7 +189,6 @@ class parsered
 					found = true;
 			}
 		}
-		tag = tag.replace("\r", " ").replace("\n", "");
 		if(eof == -1)
 			return "eof";
 		else
