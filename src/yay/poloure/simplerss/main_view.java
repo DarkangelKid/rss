@@ -945,7 +945,7 @@ public class main_view extends Activity
 			/// if we have updated the feeds OR if the group content file does not exist, make the group content file.
 			if((!skip_download))
 				sort_group_content_by_time(group);
-			else
+			else if((!group_content_file.exists())||(page_number == 0))
 			{
 				for(String feed : group_feeds_names)
 				{
