@@ -120,6 +120,13 @@ public class main_view extends Activity
 			else
 				append_string_to_file("groups/All.txt", feeds.get(i) + "\n");
 		}
+
+		/// If we have renamed the title, rename the content/title.txt file.
+		if(!old_feed_name.equals(feed_name))
+		{
+			(new File(storage + "content/" + old_feed_name + ".store.txt.content.txt"))
+			.renameTo((new File(storage + "content/" + feed_name + ".store.txt.content.txt")));
+		}
 		
 		/// Update the group file
 		File group_file = new File(storage + "groups/" + feed_group + ".txt");
@@ -167,7 +174,9 @@ public class main_view extends Activity
 		(new File(storage + "groups/All.txt.content.txt")).delete();
 		feed_adapter temp = feed_manage.return_feed_adapter();
 		temp.clear_list();
+		/// Update the feed_titles, feed_urls, and feed_group lists from the groups/All.txt file.
 		update_feeds_list();
+		/// Add the new feeds to the feed_adapter (Manage/Feeds).
 		for(int i = 0; i < feed_titles.length; i++)
 		{
 			temp.add_list(feed_titles[i], feed_urls[i] + "\n" + feed_groups[i]);
@@ -176,10 +185,9 @@ public class main_view extends Activity
 		
 		update_groups();
 		
-		/// TODO: Hard reset the groups content file.
+		/// If we moved to a new group, delete the old cache file, force a refresh, and refresh the new one.
 		if(!old_group.equals(feed_group))
 		{
-			(new File(storage + "content/" + old_feed_name + ".store.txt.content.txt")).delete();
 			(new File(storage + "groups/" + old_group + ".txt.content.txt")).delete();
 			sort_group_content_by_time(old_group);
 			//new refresh_feeds().execute(true, 0);
@@ -1240,7 +1248,8 @@ public class main_view extends Activity
 				{
 					publishProgress(page_number, titles[m], descriptions[m], links[m], thumbnail_path, dim[1], dim[0]);
 					ith_list.add(links[m]);
-					new_items = true;
+					if(skip_download == false)
+						new_items = true;
 				}
 			}
 			return 0L;
