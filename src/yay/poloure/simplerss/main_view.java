@@ -1289,7 +1289,15 @@ public class main_view extends Activity
 					download_file(group_feeds_urls.get(i), "content/" + group_feeds_names.get(i) + ".store.txt"); /// Downloads file as mariam_feed.store.txt
 					new parsered(feed_path + ".store.txt"); /// Parses the file and makes other files like mariam_feed.store.txt.content.txt
 					(new File(feed_path + ".store.txt")).delete();
-					remove_duplicates(feed_path + ".store.txt.content.txt"); /// Finally we have the feeds content files.
+					remove_duplicates("content/" + group_feeds_names.get(i) + ".store.txt.content.txt"); /// Finally we have the feeds content files.
+				}
+			}
+			else
+			{
+				for(String feed : group_feeds_names)
+				{
+					if(!(new File(storage + "content/" + feed + ".store.txt.content.txt")).exists())
+						return 0L;
 				}
 			}
 
@@ -1305,7 +1313,7 @@ public class main_view extends Activity
 			{
 				for(String feed : group_feeds_names)
 				{
-					if((new File(storage + "content/" + feed + ".store.txt.content.txt").exists()))
+					if((new File(storage + "content/" + feed + ".store.txt.content.txt")).exists())
 					{
 						sort_group_content_by_time(group);
 						break;
@@ -1406,7 +1414,6 @@ public class main_view extends Activity
 		{
 			//if(viewPager.getOffscreenPageLimit() > 1)
 				//viewPager.setOffscreenPageLimit(1);
-
 			set_refresh(false);
 		}
 	}
@@ -1423,11 +1430,11 @@ public class main_view extends Activity
 		String[] links, pubDates;
 		Date time;
 
-		String[] feeds_array = read_csv_to_array("name", storage + "groups/" + group + ".txt", 0);
-		List<Date> dates = new ArrayList<Date>();
-		List<String> links_ordered = new ArrayList<String>();
-		List<String> content_all = new ArrayList<String>();
-		List<String> content = new ArrayList<String>();
+		String[] feeds_array 		= read_csv_to_array("name", storage + "groups/" + group + ".txt", 0);
+		List<Date> dates 			= new ArrayList<Date>();
+		List<String> links_ordered 	= new ArrayList<String>();
+		List<String> content_all 	= new ArrayList<String>();
+		List<String> content 		= new ArrayList<String>();
 
 		for(String feed : feeds_array)
 		{
@@ -1435,13 +1442,13 @@ public class main_view extends Activity
 			File test = new File(content_path);
 			if(test.exists())
 			{
-				links = 			read_csv_to_array("link", content_path, 1);
-				content = 			read_file_to_list("content/" + feed + ".store.txt.content.txt", 1);
-				pubDates = 			read_csv_to_array("pubDate", content_path, 1);
+				links 				= read_csv_to_array("link", content_path, 1);
+				content 			= read_file_to_list("content/" + feed + ".store.txt.content.txt", 1);
+				pubDates 			= read_csv_to_array("pubDate", content_path, 1);
 				if(pubDates[0].length()<8)
-					pubDates = 		read_csv_to_array("published", content_path, 1);
+					pubDates 		= read_csv_to_array("published", content_path, 1);
 				if(pubDates[0].length()<8)
-					pubDates = 		read_csv_to_array("updated", content_path, 1);
+					pubDates 		= read_csv_to_array("updated", content_path, 1);
 
 				for(int i=0; i<pubDates.length; i++)
 				{
@@ -1515,27 +1522,6 @@ public class main_view extends Activity
 					}
 				}
 			}
-		}
-	}
-
-	private boolean update_feed(String feed_name, String url)
-	{
-		boolean found = false;
-		try{
-			String line = "";
-			String content_name = "content/" + feed_name + ".store.txt.content.txt";
-			String store_name = feed_name + ".store.txt";
-			String store_path = storage + "content/" + store_name;
-
-			download_file(url, "content/" + store_name);
-			new parsered(store_path);
-			(new File(store_path)).delete();
-
-			remove_duplicates(content_name);
-			return true;
-		}
-		catch(Exception e){
-			return false;
 		}
 	}
 
