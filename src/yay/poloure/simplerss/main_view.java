@@ -285,6 +285,7 @@ public class main_view extends Activity
 			manage_pager.setAdapter(new manage_pager_adapter(getFragmentManager()));
 			context = getApplicationContext();
 			activity_context = this;
+			new_items = false;
 			update_groups();
 			if(read_file_to_list("groups/All.txt", 0).size()>0)
 				new refresh_feeds().execute(true, 0);
@@ -1290,13 +1291,16 @@ public class main_view extends Activity
 			log("asking for list");
 			List<String> ith_list = get_card_adapter(page_number).return_links();
 
+			/// load the image_dimensions to a list.
+			List<String> dimensions = read_file_to_list(group + ".image_size.cache.txt", 0);
+
 			/// For each line of the group_content_file
 			for(int m=0; m<titles.length; m++)
 			{
 				log("m = " + Integer.toString(m));
 				thumbnail_path = "";
 				Integer[] dim = {0, 0};
-				
+
 				if(!images[m].equals(""))
 				{
 					image_name = images[m].substring(images[m].lastIndexOf("/") + 1, images[m].length());
@@ -1306,9 +1310,15 @@ public class main_view extends Activity
 						download_file(images[m], "images/" + image_name);
 					/// If the thumbnail does not exist in thumbnails/, compress the image in images/ to thumbnails with image_name.
 					if(!(new File(partial_thumbnail_path + image_name)).exists())
-						compress_file(partial_image_path + image_name, partial_thumbnail_path + image_name, image_name);
+						dimensions = compress_file(partial_image_path + image_name, partial_thumbnail_path + image_name, image_name, group, dimensions);
 
-					dim = get_image_dimensions(image_name);
+					dim = get_image_dimensions(dimensions, image_name);
+					if(dim[0] == 0)
+					{
+						dimensions = compress_file(partial_image_path + image_name, partial_thumbnail_path + image_name, image_name, group, dimensions);
+						dim = get_image_dimensions(dimensions, image_name);
+					}
+
 					thumbnail_path = partial_thumbnail_path + image_name;
 				}
 
@@ -1514,7 +1524,7 @@ public class main_view extends Activity
 		append_string_to_file_static("dump.txt", text + "\n");
 	}
 
-	void compress_file(String image_path, String thumbnail_path, String image_name)
+	List<String> compress_file(String image_path, String thumbnail_path, String image_name, String group, List<String> dimensions)
 	{
 		BitmapFactory.Options o = new BitmapFactory.Options();
 		o.inJustDecodeBounds = true;
@@ -1539,7 +1549,8 @@ public class main_view extends Activity
 		BitmapFactory.Options o2 = new BitmapFactory.Options();
 		o2.inSampleSize = insample;
 		Bitmap bitmap = BitmapFactory.decodeFile(image_path, o2);
-		append_string_to_file("image_size.cache.txt", image_name + "|" + o2.outWidth + "|" + o2.outHeight + "\n");
+		append_string_to_file(group + ".image_size.cache.txt", image_name + "|" + o2.outWidth + "|" + o2.outHeight + "\n");
+		dimensions.add(image_name + "|" + o2.outWidth + "|" + o2.outHeight);
 
 		try
 		{
@@ -1548,17 +1559,24 @@ public class main_view extends Activity
 		}
 		catch (Exception e){
 		}
+
+		return dimensions;
 	}
 
-	private Integer[] get_image_dimensions(final String image_name)
+	private Integer[] get_image_dimensions(List<String> dim_list, final String image_name)
 	{
-		Integer[] size = new Integer[2];
-		String line = return_first_line_containing("image_size.cache.txt", image_name);
-
-		int first = line.indexOf('|') + 1;
-		int second = line.indexOf('|', first + 1) + 1;
-		size[0] = Integer.parseInt(line.substring(first, second - 1));
-		size[1] = Integer.parseInt(line.substring(second, line.length()));
+		Integer[] size = {0, 0};
+		for(String dimer : dim_list)
+		{
+			if(dimer.contains(image_name))
+			{
+				int first = dimer.indexOf('|') + 1;
+				int second = dimer.indexOf('|', first + 1) + 1;
+				size[0] = Integer.parseInt(dimer.substring(first, second - 1));
+				size[1] = Integer.parseInt(dimer.substring(second, dimer.length()));
+				return size;
+			}
+		}
 		return size;
 	}
 }
