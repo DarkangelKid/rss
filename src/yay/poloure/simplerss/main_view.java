@@ -38,6 +38,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.content.res.Configuration;
 
 import android.widget.Button;
@@ -544,9 +545,48 @@ public class main_view extends Activity
 				feed_list_adapter.add_list(feed_titles.get(i), feed_urls.get(i) + "\n" + feed_groups.get(i));
 				feed_list_adapter.notifyDataSetChanged();
 			}
+
+			feed_list.setOnItemLongClickListener(new OnItemLongClickListener()
+			{
+				@Override
+				public boolean onItemLongClick(AdapterView<?> parent, View view, int pos, long id)
+				{
+					final int position = pos;
+					AlertDialog.Builder builder = new AlertDialog.Builder(activity_context);
+					builder.setCancelable(true)
+							.setPositiveButton("Delete", new DialogInterface.OnClickListener()
+					{
+						public void onClick(DialogInterface dialog, int id)
+						{
+							String details = feed_list_adapter.get_info(position);
+							String title = feed_list_adapter.getItem(position);
+							details = details.substring(details.indexOf('\n') + 1, details.indexOf(' '));
+							(new File(storage + "content/" + title + ".store.txt.content.txt")).delete();
+							(new File(storage + "groups/" + details + ".txt")).delete();
+							(new File(storage + "groups/" + details + ".txt.content.txt")).delete();
+							(new File(storage + details + ".image_size.cache.txt")).delete();
+							
+							File all_file = new File(storage + "groups/All.txt");
+							List<String> feeds = read_file_to_list_static("groups/All.txt", 0);
+							all_file.delete();
+							for(int i = 0; i < feeds.size(); i++)
+							{
+								if(!feeds.get(i).contains(title))
+									append_string_to_file_static("groups/All.txt", feeds.get(i) + "\n");
+							}
+
+							feed_list_adapter.remove_item(position);
+							feed_list_adapter.notifyDataSetChanged();
+						}
+					});
+					AlertDialog alert = builder.create();
+					alert.show();
+					return true;
+				}
+			});
+			
 			return view;
 		}
-
 	}
 
 	public static class viewpager_adapter extends FragmentPagerAdapter

@@ -49,9 +49,19 @@ public class feed_adapter extends BaseAdapter
 		return position;
 	}
 	
+	public void remove_item(int position)
+	{
+		title_list.remove(position);
+		info_list.remove(position);
+	}
+	
 	@Override
 	public String getItem(int position){
 		return title_list.get(position);
+	}
+	
+	public String get_info(int position){
+			return info_list.get(position);
 	}
 	
 	@Override
