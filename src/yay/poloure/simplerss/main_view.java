@@ -563,18 +563,44 @@ public class main_view extends Activity
 							String title = feed_list_adapter.getItem(position);
 							details = details.substring(details.indexOf('\n') + 1, details.indexOf(' '));
 							(new File(storage + "content/" + title + ".store.txt.content.txt")).delete();
-							(new File(storage + "groups/" + details + ".txt")).delete();
+							(new File(storage + "groups/All.txt.content.txt")).delete();
 							(new File(storage + "groups/" + details + ".txt.content.txt")).delete();
 							(new File(storage + details + ".image_size.cache.txt")).delete();
 							
-							File all_file = new File(storage + "groups/All.txt");
-							List<String> feeds = read_file_to_list_static("groups/All.txt", 0);
+							File all_file = new File(storage + "groups/" + details + ".txt");
+							List<String> feeds = read_file_to_list_static("groups/" + details + ".txt", 0);
+							all_file.delete();
+							for(int i = 0; i < feeds.size(); i++)
+							{
+								if(!feeds.get(i).contains(title))
+									append_string_to_file_static("groups/" + details + ".txt", feeds.get(i) + "\n");
+							}
+							
+							if(!(new File(storage + "groups/" + details + ".txt")).exists())
+							{
+								all_file = new File(storage + "groups/group_list.txt");
+								feeds = read_file_to_list_static("groups/group_list.txt", 0);
+								all_file.delete();
+								for(int i = 0; i < feeds.size(); i++)
+								{
+									if(!feeds.get(i).contains(details))
+										append_string_to_file_static("groups/group_list.txt", feeds.get(i) + "\n");
+								}
+							}
+
+							feed_list_adapter.remove_item(position);
+							feed_list_adapter.notifyDataSetChanged();
+							
+							all_file = new File(storage + "groups/All.txt");
+							feeds = read_file_to_list_static("groups/All.txt", 0);
 							all_file.delete();
 							for(int i = 0; i < feeds.size(); i++)
 							{
 								if(!feeds.get(i).contains(title))
 									append_string_to_file_static("groups/All.txt", feeds.get(i) + "\n");
 							}
+							
+							/// remove deleted files content from groups that it was in
 
 							feed_list_adapter.remove_item(position);
 							feed_list_adapter.notifyDataSetChanged();
