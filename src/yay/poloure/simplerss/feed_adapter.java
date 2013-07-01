@@ -31,6 +31,12 @@ public class feed_adapter extends BaseAdapter
 		info_list.add(new_info);
 	}
 	
+	public void add_list_pos(int pos, String new_title, String new_info)
+	{
+		title_list.add(pos, new_title);
+		info_list.add(pos, new_info);
+	}
+	
 	public void clear_list(){
 		title_list = new ArrayList<String>();
 	}
