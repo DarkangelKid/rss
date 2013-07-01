@@ -62,8 +62,8 @@ class parsered
 									count++;
 								}
 								String cont = (new String(buf)).trim()
-									.replaceAll("[\r\n]", " ")
-									.replace("&nbsp;", " ")
+									.replaceAll("\r", " ")
+									.replaceAll("\n", "")
 									.replace("&amp;", "&")
 									.replace("&lt;", "<")
 									.replace("&gt;", ">")
@@ -72,7 +72,8 @@ class parsered
 									.replace("&hellip;", "…")
 									.replace("&#8217;", "’")
 									.replace("&#8216;", "‘")
-									.replace("\t", "&t&")
+									.replace("&nbsp;", " ")
+									.replaceAll("\t", "&t&")
 									.replace("</p>", "&n&")
 									.replace("&rsquo;", "'");
 									
