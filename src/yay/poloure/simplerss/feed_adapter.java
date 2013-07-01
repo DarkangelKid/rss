@@ -32,7 +32,7 @@ public class feed_adapter extends BaseAdapter
 	}
 	
 	public void clear_list(){
-		title_list = new ArrayList();
+		title_list = new ArrayList<String>();
 	}
 	
 	public List<String> return_titles(){

@@ -1419,7 +1419,14 @@ public class main_view extends Activity
 				return 0L;
 
 			/// Get a list of all the pages items' urls.
-			List<String> ith_list = get_card_adapter(page_number).return_links();
+			List<String> ith_list;
+			try{
+				ith_list = get_card_adapter(page_number).return_links();
+			}
+			catch(Exception e){
+				log("BUG : Card_adapter returned null for page : " + Integer.toString(page_number));
+				return 0L;
+			}
 
 			/// load the image_dimensions to a list.
 			List<String> dimensions = read_file_to_list(group + ".image_size.cache.txt", 0);
@@ -1514,7 +1521,7 @@ public class main_view extends Activity
 
 	private void sort_group_content_by_time(String group)
 	{
-		String[] links, pubDates;
+		List<String> links, pubDates;
 		Date time;
 
 		String[] feeds_array 		= read_csv_to_array("name", storage + "groups/" + group + ".txt", 0);
@@ -1529,38 +1536,48 @@ public class main_view extends Activity
 			File test = new File(content_path);
 			if(test.exists())
 			{
-				links 				= read_csv_to_array("link", content_path, 1);
-				content 			= read_file_to_list("content/" + feed + ".store.txt.content.txt", 1);
-				pubDates 			= read_csv_to_array("pubDate", content_path, 1);
-				if(pubDates[0].length()<8)
-					pubDates 		= read_csv_to_array("published", content_path, 1);
-				if(pubDates[0].length()<8)
-					pubDates 		= read_csv_to_array("updated", content_path, 1);
 
-				for(int i=0; i<pubDates.length; i++)
+				String[] passer 				= {content_path, "1", "link", "pubDate"};
+				List< List<String> > contenter	= read_multiple_csv_to_list(passer);
+				links 							= contenter.get(0);
+				pubDates						= contenter.get(1);
+				content 						= read_file_to_list("content/" + feed + ".store.txt.content.txt", 1);
+
+				if(pubDates.get(0).length()<8)
+				{
+					String[] passer2 			= {content_path, "1", "published"};
+					pubDates 					= read_multiple_csv_to_list(passer2).get(0);
+				}
+				if(pubDates.get(0).length()<8)
+				{
+					String[] passer3 			= {content_path, "1", "updated"};
+					pubDates 					= read_multiple_csv_to_list(passer3).get(0);
+				}
+
+				for(int i=0; i<pubDates.size(); i++)
 				{
 					content_all.add(content.get(i));
 					try{
-						time = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.ENGLISH)).parse(pubDates[i]);
+						time 					= (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.ENGLISH)).parse(pubDates.get(i));
 					}
 					catch(Exception e){
 						try{
-							time = (new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH)).parse(pubDates[i]);
+							time 				= (new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH)).parse(pubDates.get(i));
 						}
 						catch(Exception t){
 							try{
-								time = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH)).parse(pubDates[i]);
+								time 			= (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH)).parse(pubDates.get(i));
 							}
 							catch(Exception c){
 								try{
-									time = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.ENGLISH)).parse(pubDates[i]);
+									time 		= (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.ENGLISH)).parse(pubDates.get(i));
 								}
 								catch(Exception n){
 									try{
-										time = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ENGLISH)).parse(pubDates[i]);
+										time 	= (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ENGLISH)).parse(pubDates.get(i));
 									}
 									catch(Exception o){
-										log("Format not found and date looks like: " + pubDates[i]);
+										log("BUG : Format not found and date looks like: " + pubDates.get(i));
 										time = new Date();
 									}
 								}
@@ -1573,20 +1590,20 @@ public class main_view extends Activity
 						if(time.before(dates.get(j)))
 						{
 							dates.add(j, time);
-							links_ordered.add(j , links[i]);
+							links_ordered.add(j, links.get(i));
 							break;
 						}
 						else if((j == dates.size() - 1)&&(time.after(dates.get(j))))
 						{
 							dates.add(time);
-							links_ordered.add(links[i]);
+							links_ordered.add(links.get(i));
 							break;
 						}
 					}
 					if(dates.size() == 0)
 					{
 						dates.add(time);
-						links_ordered.add(links[i]);
+						links_ordered.add(links.get(i));
 					}
 				}
 			}
