@@ -189,7 +189,7 @@ public class main_view extends Activity
 	private static void update_feeds_list()
 	{
 		String[] pass 					= {storage + "groups/All.txt", "0", "name", "url", "group"};
-		List< List<String> > content 	= read_multiple_csv_to_list_static(pass);
+		List< List<String> > content 	= read_csv_to_list_static(pass);
 		feed_titles 		= content.get(0);
 		feed_urls 			= content.get(1);
 		feed_groups 		= content.get(2);
@@ -272,7 +272,7 @@ public class main_view extends Activity
 			viewPager.setOnPageChangeListener(new page_listener());
 
 			String[] pass 					= {storage + "groups/All.txt", "0", "name", "url", "group"};
-			List< List<String> > content 	= read_multiple_csv_to_list(pass);
+			List< List<String> > content 	= read_csv_to_list(pass);
 			feed_titles 		= content.get(0);
 			feed_urls 			= content.get(1);
 			feed_groups 		= content.get(2);
@@ -1167,35 +1167,7 @@ public class main_view extends Activity
 		return context;
 	}
 
-	private String[] read_csv_to_array(String content_type, String feed_path, int lines_to_skip)
-	{
-		String line = null;
-		BufferedReader stream = null;
-		List<String> lines = new ArrayList<String>();
-		content_type = content_type + "|";
-		try
-		{
-			stream = new BufferedReader(new FileReader(feed_path));
-			for(int i=0; i<lines_to_skip; i++)
-				stream.readLine();
-			while((line = stream.readLine()) != null)
-			{
-				if((!line.contains(content_type))||(line.contains(content_type + '|')))
-					lines.add("");
-				else
-				{
-					int content_start = line.indexOf(content_type) + content_type.length();
-					line = line.substring(content_start, line.indexOf('|', content_start));
-					lines.add(line);
-				}
-			}
-		}
-		catch(IOException e){
-		}
-		return lines.toArray(new String[lines.size()]);
-	}
-	
-	private List< List<String> > read_multiple_csv_to_list(String[] type)
+	private List< List<String> > read_csv_to_list(String[] type)
 	{
 		String feed_path = type[0];
 		int lines_to_skip = Integer.parseInt(type[1]);
@@ -1237,7 +1209,7 @@ public class main_view extends Activity
 		return types;
 	}
 
-	private static List< List<String> > read_multiple_csv_to_list_static(String[] type)
+	private static List< List<String> > read_csv_to_list_static(String[] type)
 	{
 		String feed_path = type[0];
 		int lines_to_skip = Integer.parseInt(type[1]);
@@ -1357,7 +1329,7 @@ public class main_view extends Activity
 			String partial_thumbnail_path 	= storage + "thumbnails/";
 
 			String[] pass 						= {group_file_path, "0", "name", "url"};
-			List< List<String> > content 		= read_multiple_csv_to_list(pass);
+			List< List<String> > content 		= read_csv_to_list(pass);
 			List<String> group_feeds_names 		= content.get(0);
 			List<String> group_feeds_urls 		= content.get(1);
 
@@ -1408,7 +1380,7 @@ public class main_view extends Activity
 			}
 
 			String[] passer = {group_content_path, "0", "title", "image", "description", "link"};
-			List< List<String> > contenter = read_multiple_csv_to_list(passer);
+			List< List<String> > contenter = read_csv_to_list(passer);
 			List<String> titles 		= contenter.get(0);
 			List<String> images 		= contenter.get(1);
 			List<String> descriptions 	= contenter.get(2);
@@ -1520,11 +1492,12 @@ public class main_view extends Activity
 
 	private void sort_group_content_by_time(String group)
 	{
-		List<String> links, pubDates;
 		Date time;
 
-		String[] feeds_array 		= read_csv_to_array("name", storage + "groups/" + group + ".txt", 0);
+		List<String> feeds_array	= read_csv_to_list(new String[]{storage + "groups/" + group + ".txt", "0", "name"}).get(0);
 		List<Date> dates 			= new ArrayList<Date>();
+		List<String> links			= new ArrayList<String>();
+		List<String> pubDates		= new ArrayList<String>();
 		List<String> links_ordered 	= new ArrayList<String>();
 		List<String> content_all 	= new ArrayList<String>();
 		List<String> content 		= new ArrayList<String>();
@@ -1536,22 +1509,15 @@ public class main_view extends Activity
 			if(test.exists())
 			{
 
-				String[] passer 				= {content_path, "1", "link", "pubDate"};
-				List< List<String> > contenter	= read_multiple_csv_to_list(passer);
+				List< List<String> > contenter	= read_csv_to_list(new String[]{content_path, "1", "link", "pubDate"});
 				links 							= contenter.get(0);
 				pubDates						= contenter.get(1);
 				content 						= read_file_to_list("content/" + feed + ".store.txt.content.txt", 1);
 
 				if(pubDates.get(0).length()<8)
-				{
-					String[] passer2 			= {content_path, "1", "published"};
-					pubDates 					= read_multiple_csv_to_list(passer2).get(0);
-				}
+					pubDates 					= read_csv_to_list(new String[]{content_path, "1", "published"}).get(0);
 				if(pubDates.get(0).length()<8)
-				{
-					String[] passer3 			= {content_path, "1", "updated"};
-					pubDates 					= read_multiple_csv_to_list(passer3).get(0);
-				}
+					pubDates 					= read_csv_to_list(new String[]{content_path, "1", "updated"}).get(0);
 
 				for(int i=0; i<pubDates.size(); i++)
 				{
