@@ -191,7 +191,6 @@ public class main_view extends Activity
 		super.onCreate(savedInstanceState);
 		if (savedInstanceState == null)
 		{
-
 			getActionBar().setTitle("Feeds");
 			FrameLayout frame = new FrameLayout(this);
 			frame.setId(CONTENT_VIEW_ID);
@@ -434,7 +433,7 @@ public class main_view extends Activity
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
 			View view = super.onCreateView(inflater, container, savedInstanceState);
-			view.setBackgroundColor(getResources().getColor(R.color.white));
+			view.setBackgroundColor(Color.WHITE);
 			return view;
 		}
 	}
@@ -545,6 +544,7 @@ public class main_view extends Activity
 							(new File(storage + "groups/All.txt.content.txt")).delete();
 							(new File(storage + "groups/" + details + ".txt.content.txt")).delete();
 							(new File(storage + details + ".image_size.cache.txt")).delete();
+							/// Perhaps regen the all_image.cache.txt
 							
 							File all_file = new File(storage + "groups/" + details + ".txt");
 							List<String> feeds = read_file_to_list_static("groups/" + details + ".txt", 0);
@@ -1014,7 +1014,7 @@ public class main_view extends Activity
 				if((line.contains("rss"))||((line.contains("Atom"))||(line.contains("atom"))))
 				{
 					int count = 0;
-					while((!line.contains("<title>"))&&(!line.contains("</title>")))
+					while((!line.contains("<title"))&&(!line.contains("</title>")))
 					{
 						in.read(data, count, 512 + count);
 						byte[] next = new byte[data.length + 512];
@@ -1024,7 +1024,7 @@ public class main_view extends Activity
 						line = new String(data);
 						count = count + 512;
 					}
-					int ind = line.indexOf("<title>") + 7;
+					int ind = line.indexOf(">", line.indexOf("<title")) + 1;
 					feed_title = line.substring(ind, line.indexOf("</", ind));
 					check_finished = 1;
 				}
@@ -1525,9 +1525,14 @@ public class main_view extends Activity
 									try{
 										time 	= (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ENGLISH)).parse(pubDates.get(i));
 									}
-									catch(Exception o){
-										log("BUG : Format not found and date looks like: " + pubDates.get(i));
-										time = new Date();
+									catch(Exception r){
+										try{
+											time = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH)).parse(pubDates.get(i));
+										}
+										catch(Exception x){
+											log("BUG : Format not found and date looks like: " + pubDates.get(i));
+											time = new Date();
+										}
 									}
 								}
 							}
