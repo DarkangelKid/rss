@@ -72,6 +72,7 @@ class parsered
 									.replace("&hellip;", "…")
 									.replace("&#8217;", "’")
 									.replace("&#8216;", "‘")
+									.replace("&nbsp;", " ")
 									.replaceAll("\t", "&t&")
 									.replace("</p>", "&n&")
 									.replace("&rsquo;", "'");
