@@ -283,9 +283,7 @@ public class main_view extends Activity
 			activity_context = this;
 			new_items = false;
 			update_groups();
-			if(read_file_to_list("groups/All.txt", 0).size()>0)
-				new refresh_feeds().execute(true, 0);
-
+			
 			PagerTabStrip pager_tab_strip = (PagerTabStrip) findViewById(R.id.pager_title_strip);
 			pager_tab_strip.setDrawFullUnderline(true);
 			pager_tab_strip.setTabIndicatorColor(Color.argb(0, 51, 181, 229));
@@ -311,6 +309,9 @@ public class main_view extends Activity
 			drawer_layout.setDrawerListener(drawer_toggle);
 			getActionBar().setDisplayHomeAsUpEnabled(true);
 			getActionBar().setHomeButtonEnabled(true);
+
+			if(read_file_to_list("groups/All.txt", 0).size()>0)
+				new refresh_feeds().execute(true, 0);
 
 			drawer_toggle.syncState();
 			density = getResources().getDisplayMetrics().density;
