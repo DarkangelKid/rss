@@ -81,6 +81,7 @@ public class main_view extends Activity
 	private static ViewPager viewPager;
 	private ViewPager manage_pager;
 	private static Resources res;
+	public static int positionrr, poser;
 	private static int twelve;
 	private static int check_finished;
 	private Boolean new_items;
@@ -100,7 +101,7 @@ public class main_view extends Activity
 		update_feeds_list();
 	}
 
-	private static void edit_feed(String old_feed_name, String feed_name, String feed_url, String old_group, String feed_group)
+	private static void edit_feed(int pos, String old_feed_name, String feed_name, String feed_url, String old_group, String feed_group)
 	{
 		/// Update the All.txt file
 		List<String> feeds = read_file_to_list_static("groups/All.txt", 0);
@@ -120,25 +121,14 @@ public class main_view extends Activity
 			.renameTo((new File(storage + "content/" + feed_name + ".store.txt.content.txt")));
 		}
 
-		/// Update the group file
-		File group_file = new File(storage + "groups/" + feed_group + ".txt");
-		if(group_file.exists())
+		/// If we moved to a new group, delete the old cache file, force a refresh, and refresh the new one.
+		if(!old_group.equals(feed_group))
 		{
-			(new File(storage + "groups/" + feed_group + ".txt.content.txt")).delete();
-			feeds = read_file_to_list_static("groups/" + feed_group + ".txt", 0);
-			group_file.delete();
-			for(int i=0; i<feeds.size(); i++)
-			{
-				if(feeds.get(i).contains(old_feed_name))
-					append_string_to_file_static("groups/" + feed_group + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|\n");
-				else
-					append_string_to_file_static("groups/" + feed_group + ".txt", feeds.get(i) + "\n");
-			}
-		}
-		else
-		{
-			/// Just append to the file
+			/// Update the group file
+			File group_file = new File(storage + "groups/" + feed_group + ".txt");
 			append_string_to_file_static("groups/" + feed_group + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|\n");
+
+			/// Then delete from old group file
 			feeds = read_file_to_list_static("groups/" + old_group + ".txt", 0);
 			group_file = new File(storage + "groups/" + old_group + ".txt");
 			group_file.delete();
@@ -147,7 +137,7 @@ public class main_view extends Activity
 			{
 				if(!feeds.get(i).contains(old_feed_name))
 				{
-					append_string_to_file_static("groups/" + old_group + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|\n");
+					append_string_to_file_static("groups/" + old_group + ".txt", feeds.get(i) + "\n");
 					append = true;
 				}
 			}
@@ -162,28 +152,23 @@ public class main_view extends Activity
 						append_string_to_file_static("groups/group_list.txt", feeds.get(i) + "\n");
 				}
 			}
+			(new File(storage + "groups/" + old_group + ".txt.content.txt")).delete();
+			//sort_group_content_by_time();
+			//new refresh_feeds().execute(true, 0);
+			//new refresh_feeds().execute(true, 0);
 		}
+		
 		(new File(storage + "groups/All.txt.content.txt")).delete();
 		feed_adapter temp = feed_manage.return_feed_adapter();
-		temp.clear_list();
+
 		/// Update the feed_titles, feed_urls, and feed_group lists from the groups/All.txt file.
 		update_feeds_list();
 		/// Add the new feeds to the feed_adapter (Manage/Feeds).
-		for(int i = 0; i < feed_titles.size(); i++)
-		{
-			temp.add_list(feed_titles.get(i), feed_urls.get(i) + "\n" + feed_groups.get(i));
-			temp.notifyDataSetChanged();
-		}
+		temp.remove_item(poser);
+		temp.add_list_pos(poser, feed_name, feed_url + "\n" + feed_group + " • " + Integer.toString(count_lines("content/" + feed_name + ".store.txt.content.txt") - 1) + " items");
+		temp.notifyDataSetChanged();
 
 		update_groups();
-
-		/// If we moved to a new group, delete the old cache file, force a refresh, and refresh the new one.
-		if(!old_group.equals(feed_group))
-		{
-			(new File(storage + "groups/" + old_group + ".txt.content.txt")).delete();
-			//new refresh_feeds().execute(true, 0);
-			//new refresh_feeds().execute(true, 0);
-		}
 	}
 
 	private static void update_feeds_list()
@@ -546,15 +531,15 @@ public class main_view extends Activity
 				@Override
 				public boolean onItemLongClick(AdapterView<?> parent, View view, int pos, long id)
 				{
-					final int position = pos;
+					positionrr = pos;
 					AlertDialog.Builder builder = new AlertDialog.Builder(activity_context);
 					builder.setCancelable(true)
 							.setPositiveButton("Delete", new DialogInterface.OnClickListener()
 					{
 						public void onClick(DialogInterface dialog, int id)
 						{
-							String details = feed_list_adapter.get_info(position);
-							String title = feed_list_adapter.getItem(position);
+							String details = feed_list_adapter.get_info(positionrr);
+							String title = feed_list_adapter.getItem(positionrr);
 							details = details.substring(details.indexOf('\n') + 1, details.indexOf(' '));
 							(new File(storage + "content/" + title + ".store.txt.content.txt")).delete();
 							(new File(storage + "groups/All.txt.content.txt")).delete();
@@ -582,9 +567,6 @@ public class main_view extends Activity
 								}
 							}
 
-							feed_list_adapter.remove_item(position);
-							feed_list_adapter.notifyDataSetChanged();
-							
 							all_file = new File(storage + "groups/All.txt");
 							feeds = read_file_to_list_static("groups/All.txt", 0);
 							all_file.delete();
@@ -596,7 +578,7 @@ public class main_view extends Activity
 							
 							/// remove deleted files content from groups that it was in
 
-							feed_list_adapter.remove_item(position);
+							feed_list_adapter.remove_item(positionrr);
 							feed_list_adapter.notifyDataSetChanged();
 						}
 					});
@@ -867,6 +849,7 @@ public class main_view extends Activity
 	///cock
 	private static void show_edit_dialog(int position)
 	{
+		poser = position;
 		LayoutInflater inflater = LayoutInflater.from(activity_context);
 		final View edit_rss_dialog = inflater.inflate(R.layout.add_rss_dialog, null);
 
@@ -998,7 +981,7 @@ public class main_view extends Activity
 							if(feed_name.equals(""))
 								feed_name = feed_title;
 
-							edit_feed(current_title, feed_name, URL_check, current_group, new_group);
+							edit_feed(poser, current_title, feed_name, URL_check, current_group, new_group);
 							edit_dialog.dismiss();
 						}
 					}
