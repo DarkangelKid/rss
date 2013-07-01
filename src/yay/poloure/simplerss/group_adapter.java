@@ -38,7 +38,7 @@ public class group_adapter extends BaseAdapter
 
 	String long_press_title;
 
-	private List<String> group_list = new ArrayList();
+	private List<String> group_list = new ArrayList<String>();
 
 	LayoutInflater inflater;
 
@@ -58,7 +58,7 @@ public class group_adapter extends BaseAdapter
 	}
 
 	public void clear_list(){
-		group_list = new ArrayList();
+		group_list = new ArrayList<String>();
 	}
 	public List<String> return_titles(){
 		return group_list;
