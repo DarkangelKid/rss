@@ -57,9 +57,7 @@ import java.io.FileReader;
 import java.io.BufferedWriter;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.lang.Thread;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.Date;
@@ -80,12 +78,10 @@ public class main_view extends Activity
 	private static float density;
 	private int width;
 
-	private static int download_finished;
 	private static ViewPager viewPager;
 	private ViewPager manage_pager;
 	private static Resources res;
 	private static int twelve;
-	private static int first_height;
 	private static int check_finished;
 	private Boolean new_items;
 	public static String storage;
@@ -95,10 +91,7 @@ public class main_view extends Activity
 	private static List<String> feed_titles, feed_urls, feed_groups;
 
 	private static final int CONTENT_VIEW_ID = 10101010;
-	private static String[] nav_items, nav_final;
-
-	private Fragment man, pref, feed;
-
+	private static String[] nav_final;
 
 	private void add_feed(String feed_name, String feed_url, String feed_group)
 	{
