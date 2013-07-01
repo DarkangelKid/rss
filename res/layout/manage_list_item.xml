@@ -20,8 +20,9 @@
 				android:layout_height="wrap_content"
 				android:gravity="center_vertical"
 				android:paddingTop="4dp"
-				android:paddingLeft="12dp"
-				android:paddingRight="12dp"/>
+				android:paddingLeft="8dp"
+				android:paddingRight="8dp"
+				android:maxLines="1"/>
 		<TextView
 				android:id="@+id/group_feeds"
 				android:text="@+id/group_feeds"
@@ -31,10 +32,10 @@
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:gravity="center_vertical"
-				android:paddingTop="2dp"
-				android:paddingLeft="12dp"
-				android:paddingRight="12dp"
-				android:paddingBottom="4dp"/>
+				android:paddingLeft="8dp"
+				android:paddingRight="8dp"
+				android:paddingBottom="6dp"
+				android:maxLines="1"/>
 	</LinearLayout>
 	<ImageView
 			android:id="@+id/drag_image"
