@@ -542,7 +542,8 @@ public class main_view extends Activity
 
 			for(int i = 0; i < feed_titles.size(); i++)
 			{
-				feed_list_adapter.add_list(feed_titles.get(i), feed_urls.get(i) + "\n" + feed_groups.get(i));
+				/// Read the feed_title content file to see how many readLines it will take.
+				feed_list_adapter.add_list(feed_titles.get(i), feed_urls.get(i) + "\n" + feed_groups.get(i) + " • " + Integer.toString(count_lines("content/" + feed_titles.get(i) + ".store.txt.content.txt") - 1) + " items");
 				feed_list_adapter.notifyDataSetChanged();
 			}
 
@@ -1268,6 +1269,22 @@ public class main_view extends Activity
 		catch(IOException e){
 		}
 		return lines;
+	}
+
+	private static int count_lines(String file_name)
+	{
+		BufferedReader stream = null;
+		int i = 0;
+		try
+		{
+			stream = new BufferedReader(new FileReader(storage + file_name));
+			while(stream.readLine() != null)
+				i++;
+			stream.close();
+		}
+		catch(IOException e){
+		}
+		return i;
 	}
 
 	private static List<String> read_file_to_list_static(String file_name, int lines_to_skip)
