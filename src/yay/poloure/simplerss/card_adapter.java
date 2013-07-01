@@ -14,6 +14,9 @@ import android.content.res.Resources;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.widget.Toast;
 import android.view.ViewGroup.LayoutParams;
 import java.util.List;
 import java.util.ArrayList;
@@ -109,6 +112,8 @@ public class card_adapter extends BaseAdapter
 			loadBitmap(position, holder.image_view, content_height.get(position), content_width.get(position));
 
 		convertView.setOnClickListener(new browser_call());
+		convertView.setOnLongClickListener(new long_press());
+		
 		holder.title_view.setText(content_titles.get(position));
 		holder.time_view.setText(content_links.get(position));
 		
@@ -293,6 +298,21 @@ public class card_adapter extends BaseAdapter
 			String type = image_path.substring(image_path.lastIndexOf('.') + 1, image_path.length());
 			intent.setDataAndTypeAndNormalize(Uri.fromFile(new File(image_path)), "image/" + type);
 			context.startActivity(intent);
+		}
+	}
+
+	class long_press implements View.OnLongClickListener
+	{
+		@Override
+		public boolean onLongClick(View v)
+		{
+			String long_press_url = ((TextView) v.findViewById(R.id.time)).getText().toString();
+			ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+			ClipData clip = ClipData.newPlainText("label", long_press_url);
+			clipboard.setPrimaryClip(clip);
+			Toast message_toast = Toast.makeText(context, "Copied link url to clipboard.", 1);
+			message_toast.show();
+			return true;
 		}
 	}
 } 
