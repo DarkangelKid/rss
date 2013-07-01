@@ -24,7 +24,7 @@
 				android:paddingRight="12dp"/>
 		<TextView
 				android:id="@+id/group_feeds"
-				android:text="List of feeds in groups."
+				android:text="@+id/group_feeds"
 				android:textColor="#808080"
 				android:textSize="12sp"
 				android:background="#00000000"

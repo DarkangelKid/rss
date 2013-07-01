@@ -473,8 +473,21 @@ public class main_view extends Activity
 			View view = inflater.inflate(R.layout.manage_fragment, container, false);
 			manage_list = (ListView) view.findViewById(R.id.group_listview);
 			manage_adapter = new group_adapter(getActivity());
-			for(String group : current_groups)
-				manage_adapter.add_list(group);
+			for(int i = 1; i < current_groups.length; i++)
+			{
+				List<String> content = read_csv_to_list_static(new String[]{storage + "groups/" + current_groups[i] + ".txt", "0", "name"}).get(0);
+				String info = "";
+				int number = 3;
+				if(content.size() < 3)
+					number = content.size();
+				for(int j = 0; j < number - 1; j++)
+					info = info + content.get(i) + ", ";
+				info = info + content.get(number - 1);
+				if(content.size() > 3)
+					info = info + ", ...";
+
+				manage_adapter.add_list(current_groups[i], info);
+			}
 			manage_list.setAdapter(manage_adapter);
 			manage_adapter.notifyDataSetChanged();
 			return view;
@@ -1312,8 +1325,7 @@ public class main_view extends Activity
 			String partial_image_path 		= storage + "images/";
 			String partial_thumbnail_path 	= storage + "thumbnails/";
 
-			String[] pass 						= {group_file_path, "0", "name", "url"};
-			List< List<String> > content 		= read_csv_to_list(pass);
+			List< List<String> > content 		= read_csv_to_list(new String[]{group_file_path, "0", "name", "url"});
 			List<String> group_feeds_names 		= content.get(0);
 			List<String> group_feeds_urls 		= content.get(1);
 

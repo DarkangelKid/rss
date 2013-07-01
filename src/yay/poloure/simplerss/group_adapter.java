@@ -39,6 +39,7 @@ public class group_adapter extends BaseAdapter
 	String long_press_title;
 
 	private List<String> group_list = new ArrayList<String>();
+	private List<String> info_list = new ArrayList<String>();
 
 	LayoutInflater inflater;
 
@@ -52,13 +53,15 @@ public class group_adapter extends BaseAdapter
 		list_view = ((ListView)(inflater.inflate(R.layout.manage_fragment, null)).findViewById(R.id.group_listview));
 	}
 
-	public void add_list(String new_group)
+	public void add_list(String new_group, String new_info)
 	{
 		group_list.add(new_group);
+		info_list.add(new_info);
 	}
 
 	public void clear_list(){
 		group_list = new ArrayList<String>();
+		info_list = new ArrayList<String>();
 	}
 	public List<String> return_titles(){
 		return group_list;
@@ -89,6 +92,7 @@ public class group_adapter extends BaseAdapter
 				convertView = inflater.inflate(R.layout.manage_list_item, parent, false);
 				holder = new ViewHolder();
 				holder.group_view = (TextView) convertView.findViewById(R.id.group_item);
+				holder.info_view = (TextView) convertView.findViewById(R.id.group_feeds);
 				holder.image_view = (ImageView) convertView.findViewById(R.id.drag_image);
 				convertView.setTag(holder);
 			}
@@ -96,6 +100,7 @@ public class group_adapter extends BaseAdapter
 				holder = (ViewHolder) convertView.getTag();
 
 			holder.group_view.setText(group_list.get(position));
+			holder.info_view.setText(info_list.get(position));
 			holder.image_view.setOnTouchListener(new MyTouchListener());
 			convertView.setOnDragListener(new MyDragListener());
 			convertView.setOnLongClickListener(new long_press_listener());
@@ -106,6 +111,7 @@ public class group_adapter extends BaseAdapter
 	static class ViewHolder
 	{
 		TextView group_view;
+		TextView info_view;
 		ImageView image_view;
 	}
 
