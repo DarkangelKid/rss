@@ -167,6 +167,7 @@ public class group_adapter extends BaseAdapter
 					List<String> new_l = group_list;
 					new_l.add(0, "All");
 					main_view.update_group_order(new_l);
+					refresh_data();
 					break;
 				case DragEvent.ACTION_DRAG_ENDED:
 					default:
@@ -219,8 +220,11 @@ public class group_adapter extends BaseAdapter
 		while(!next.equals(group_list.get(j))){
 			j++;
 		}
+		String old_info = info_list.get(i);
 		String old = group_list.get(i);
+		info_list.set(i, info_list.get(j));
 		group_list.set(i, group_list.get(j));
+		info_list.set(j, old_info);
 		group_list.set(j, old);
 	}
 

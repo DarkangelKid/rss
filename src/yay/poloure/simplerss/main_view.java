@@ -1145,7 +1145,10 @@ public class main_view extends Activity
 		else
 		{
 			for(int i=0; i<current_groups.length; i++)
+			{
+				log(current_groups[i]);
 				nav_final[i+3] = current_groups[i];
+			}
 		}
 		nav_adapter = new ArrayAdapter<String>(get_context(), R.layout.drawer_list_item, nav_final);
 		navigation_list.setAdapter(nav_adapter);
