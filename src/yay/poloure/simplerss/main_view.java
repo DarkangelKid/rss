@@ -38,6 +38,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.content.res.Configuration;
 
 import android.widget.Button;
@@ -56,9 +57,7 @@ import java.io.FileReader;
 import java.io.BufferedWriter;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.lang.Thread;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.Date;
@@ -79,12 +78,10 @@ public class main_view extends Activity
 	private static float density;
 	private int width;
 
-	private static int download_finished;
 	private static ViewPager viewPager;
 	private ViewPager manage_pager;
 	private static Resources res;
 	private static int twelve;
-	private static int first_height;
 	private static int check_finished;
 	private Boolean new_items;
 	public static String storage;
@@ -94,10 +91,7 @@ public class main_view extends Activity
 	private static List<String> feed_titles, feed_urls, feed_groups;
 
 	private static final int CONTENT_VIEW_ID = 10101010;
-	private static String[] nav_items, nav_final;
-
-	private Fragment man, pref, feed;
-
+	private static String[] nav_final;
 
 	private void add_feed(String feed_name, String feed_url, String feed_group)
 	{
@@ -545,9 +539,74 @@ public class main_view extends Activity
 				feed_list_adapter.add_list(feed_titles.get(i), feed_urls.get(i) + "\n" + feed_groups.get(i) + " • " + Integer.toString(count_lines("content/" + feed_titles.get(i) + ".store.txt.content.txt") - 1) + " items");
 				feed_list_adapter.notifyDataSetChanged();
 			}
+
+			feed_list.setOnItemLongClickListener(new OnItemLongClickListener()
+			{
+				@Override
+				public boolean onItemLongClick(AdapterView<?> parent, View view, int pos, long id)
+				{
+					final int position = pos;
+					AlertDialog.Builder builder = new AlertDialog.Builder(activity_context);
+					builder.setCancelable(true)
+							.setPositiveButton("Delete", new DialogInterface.OnClickListener()
+					{
+						public void onClick(DialogInterface dialog, int id)
+						{
+							String details = feed_list_adapter.get_info(position);
+							String title = feed_list_adapter.getItem(position);
+							details = details.substring(details.indexOf('\n') + 1, details.indexOf(' '));
+							(new File(storage + "content/" + title + ".store.txt.content.txt")).delete();
+							(new File(storage + "groups/All.txt.content.txt")).delete();
+							(new File(storage + "groups/" + details + ".txt.content.txt")).delete();
+							(new File(storage + details + ".image_size.cache.txt")).delete();
+							
+							File all_file = new File(storage + "groups/" + details + ".txt");
+							List<String> feeds = read_file_to_list_static("groups/" + details + ".txt", 0);
+							all_file.delete();
+							for(int i = 0; i < feeds.size(); i++)
+							{
+								if(!feeds.get(i).contains(title))
+									append_string_to_file_static("groups/" + details + ".txt", feeds.get(i) + "\n");
+							}
+							
+							if(!(new File(storage + "groups/" + details + ".txt")).exists())
+							{
+								all_file = new File(storage + "groups/group_list.txt");
+								feeds = read_file_to_list_static("groups/group_list.txt", 0);
+								all_file.delete();
+								for(int i = 0; i < feeds.size(); i++)
+								{
+									if(!feeds.get(i).contains(details))
+										append_string_to_file_static("groups/group_list.txt", feeds.get(i) + "\n");
+								}
+							}
+
+							feed_list_adapter.remove_item(position);
+							feed_list_adapter.notifyDataSetChanged();
+							
+							all_file = new File(storage + "groups/All.txt");
+							feeds = read_file_to_list_static("groups/All.txt", 0);
+							all_file.delete();
+							for(int i = 0; i < feeds.size(); i++)
+							{
+								if(!feeds.get(i).contains(title))
+									append_string_to_file_static("groups/All.txt", feeds.get(i) + "\n");
+							}
+							
+							/// remove deleted files content from groups that it was in
+
+							feed_list_adapter.remove_item(position);
+							feed_list_adapter.notifyDataSetChanged();
+						}
+					});
+					AlertDialog alert = builder.create();
+					alert.show();
+					return true;
+				}
+			});
+			
 			return view;
 		}
-
 	}
 
 	public static class viewpager_adapter extends FragmentPagerAdapter
