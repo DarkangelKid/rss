@@ -158,13 +158,15 @@ public class group_adapter extends BaseAdapter
 					rearrange_groups(old_title, new_title);
 					refresh_data();
 					/// Save the new order by overwriting the group_list.txt file with group_list, then call the update_groups() function.
-					main_view.update_group_order(group_list);
 					break;
 				case DragEvent.ACTION_DRAG_EXITED:        
 					v.setVisibility(View.VISIBLE);
 					break;
 				case DragEvent.ACTION_DROP:
 					v.setVisibility(View.VISIBLE);
+					List<String> new_l = group_list;
+					new_l.add(0, "All");
+					main_view.update_group_order(new_l);
 					break;
 				case DragEvent.ACTION_DRAG_ENDED:
 					default:
@@ -210,17 +212,15 @@ public class group_adapter extends BaseAdapter
 	private void rearrange_groups(String previous, String next)
 	{
 		int i = 0;
-		while(!previous.equals(main_view.current_groups[i])){
+		while(!previous.equals(group_list.get(i))){
 			i++;
 		}
 		int j = 0;
-		while(!next.equals(main_view.current_groups[j])){
+		while(!next.equals(group_list.get(j))){
 			j++;
 		}
-		String old = main_view.current_groups[i];
-		main_view.current_groups[i] = main_view.current_groups[j];
-		group_list.set(i, main_view.current_groups[j]);
-		main_view.current_groups[j] = old;
+		String old = group_list.get(i);
+		group_list.set(i, group_list.get(j));
 		group_list.set(j, old);
 	}
 

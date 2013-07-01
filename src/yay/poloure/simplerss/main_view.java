@@ -481,8 +481,9 @@ public class main_view extends Activity
 				if(content.size() < 3)
 					number = content.size();
 				for(int j = 0; j < number - 1; j++)
-					info = info + content.get(i) + ", ";
-				info = info + content.get(number - 1);
+					info = info + content.get(j) + ", ";
+				if(content.size() > 0)
+					info = info + content.get(number - 1);
 				if(content.size() > 3)
 					info = info + ", ...";
 
