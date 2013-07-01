@@ -16,10 +16,10 @@ class parsered
 	{
 		try
 		{
-			final String[] start = new String[]{"<name>", "<link>", "<published>", "<updated>", "<pubDate>", "<description>", "<title>", "<content type=\"html\">", "<content>", "<icon>"};
-			final String[] end = new String[]{"</name>", "</link>", "</published>", "</updated>", "</pubDate>", "</description>", "</title>", "</content>", "</content>", "</icon>"};
-			String[] of_types = new String[]{"<name>", "<link>", "<published>", "<updated>", "<pubDate>", "<description>", "<title>", "<content type=\"html\">", "<content>", "<icon>",
-				"</name>", "</link>", "</published>", "</updated>", "</pubDate>", "</description>", "</title>", "</content>", "</content>", "</icon>", "<entry", "<item", "</entry", "</item"}; 
+			final String[] start = new String[]{"<name>", "<link>", "<published>", "<updated>", "<pubDate>", "<description>", "<title", "<content"};
+			final String[] end = new String[]{"</name>", "</link>", "</published>", "</updated>", "</pubDate>", "</description>", "</title", "</content"};
+			String[] of_types = new String[]{"<name>", "<link>", "<published>", "<updated>", "<pubDate>", "<description>", "<title", "<content",
+				"</name>", "</link>", "</published>", "</updated>", "</pubDate>", "</description>", "</title", "</content", "<entry", "<item", "</entry", "</item"}; 
 				
 			File in = new File(file_name);
 			BufferedReader reader = new BufferedReader(new FileReader(in));
@@ -44,14 +44,14 @@ class parsered
 				{
 					for(int i=0; i<start.length; i++)
 					{
-						if(buf_string.equals(start[i]))
+						if(buf_string.contains(start[i]))
 						{
-							if(buf_string.equals("<content type=\"html\">"))
+							if(buf_string.contains("<content"))
 								buf_string = "<description>";
-							else if(buf_string.equals("<content>"))
-								buf_string = "<description>";
+							else if(buf_string.contains("<title"))
+								buf_string = "<title>";
 							to_file(file_name + ".content.txt", buf_string.substring(1, buf_string.length() - 1) + "|", true);
-							while(!(end_tag.equals(end[i])))
+							while(!(end_tag.contains(end[i])))
 							{
 								int count = 0;
 								current = new char[1];
@@ -92,7 +92,7 @@ class parsered
 								buf[count] = current[0];
 								end_tag = new String(buf);
 								end_tag = end_tag.trim();
-								if(!(end_tag.equals(end[i])))
+								if(!(end_tag.contains(end[i])))
 								{
 									end_tag = end_tag
 									.replaceAll("\r", " ")
@@ -182,6 +182,8 @@ class parsered
 
 			if((tag.contains("type=\"text/html\""))&&(tag.contains("href=\"")))
 				to_file(file_name + ".content.url.txt", tag.substring(tag.indexOf("href=\"") + 6, tag.indexOf("\"", tag.indexOf("href=\"") + 7)) + "\n", false);
+			else if((tag.contains("type=\'text/html\'"))&&(tag.contains("href=\'")))
+				to_file(file_name + ".content.url.txt", tag.substring(tag.indexOf("href=\'") + 6, tag.indexOf("\'", tag.indexOf("href=\'") + 7)) + "\n", false);
 
 			for(String type : types)
 			{

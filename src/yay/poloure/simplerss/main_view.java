@@ -850,6 +850,9 @@ public class main_view extends Activity
 							if(feed_name.equals(""))
 								feed_name = feed_title;
 
+							
+							feed_name = feed_name.replace("/","");
+
 							add_feed(feed_name, URL_check, new_group);
 							alertDialog.dismiss();
 						}
@@ -1021,14 +1024,21 @@ public class main_view extends Activity
 				BufferedInputStream in = null;
 				in = new BufferedInputStream((new URL(urls[0])).openStream());
 				byte data[] = new byte[512];
+				byte data2[] = new byte[512];
 				in.read(data, 0, 512);
 				String line = new String(data);
 				if((line.contains("rss"))||((line.contains("Atom"))||(line.contains("atom"))))
 				{
+					int count = 0;
 					while((!line.contains("<title>"))&&(!line.contains("</title>")))
 					{
-						in.read(data, 0, 512);
+						in.read(data, count, 512 + count);
+						byte[] next = new byte[data.length + 512];
+						System.arraycopy(data, 0, next, 0, data.length);
+						System.arraycopy(data2, 0, next, data.length, 512);
+						data = next;
 						line = new String(data);
+						count = count + 512;
 					}
 					int ind = line.indexOf("<title>") + 7;
 					feed_title = line.substring(ind, line.indexOf("</", ind));
