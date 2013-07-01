@@ -473,7 +473,7 @@ public class main_view extends Activity
 			View view = inflater.inflate(R.layout.manage_fragment, container, false);
 			manage_list = (ListView) view.findViewById(R.id.group_listview);
 			manage_adapter = new group_adapter(getActivity());
-			for(int i = 1; i < current_groups.length; i++)
+			for(int i = 0; i < current_groups.length; i++)
 			{
 				List<String> content = read_csv_to_list_static(new String[]{storage + "groups/" + current_groups[i] + ".txt", "0", "name"}).get(0);
 				String info = "";
@@ -486,8 +486,10 @@ public class main_view extends Activity
 					info = info + content.get(number - 1);
 				if(content.size() > 3)
 					info = info + ", ...";
+				if(i == 0)
+					info = Integer.toString(current_groups.length) + " groups";
 
-				manage_adapter.add_list(current_groups[i], info);
+				manage_adapter.add_list(current_groups[i], Integer.toString(content.size()) + " feeds • " + info);
 			}
 			manage_list.setAdapter(manage_adapter);
 			manage_adapter.notifyDataSetChanged();
@@ -847,7 +849,6 @@ public class main_view extends Activity
 							if(feed_name.equals(""))
 								feed_name = feed_title;
 
-							
 							feed_name = feed_name.replace("/","");
 
 							add_feed(feed_name, URL_check, new_group);

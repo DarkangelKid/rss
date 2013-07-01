@@ -99,11 +99,18 @@ public class group_adapter extends BaseAdapter
 			else
 				holder = (ViewHolder) convertView.getTag();
 
+			
+
 			holder.group_view.setText(group_list.get(position));
 			holder.info_view.setText(info_list.get(position));
-			holder.image_view.setOnTouchListener(new MyTouchListener());
-			convertView.setOnDragListener(new MyDragListener());
-			convertView.setOnLongClickListener(new long_press_listener());
+			if(position != 0)
+			{
+				holder.image_view.setOnTouchListener(new MyTouchListener());
+				convertView.setOnDragListener(new MyDragListener());
+				convertView.setOnLongClickListener(new long_press_listener());
+			}
+			else
+				holder.image_view.setVisibility(View.INVISIBLE);
 			
 			return convertView;
 	}
@@ -117,7 +124,6 @@ public class group_adapter extends BaseAdapter
 
 	public final class MyTouchListener implements OnTouchListener
 	{
-		
 		public boolean onTouch(View view, MotionEvent motionEvent)
 		{
 			if (motionEvent.getAction() == MotionEvent.ACTION_DOWN)
@@ -129,10 +135,9 @@ public class group_adapter extends BaseAdapter
 				view_parent.startDrag(data, shadowBuilder, view_parent, 0);
 				return true;
 			}
-			else {
+			else
 				return false;
-			}
-		  }
+		}
 	}
 
 	private void refresh_data()
@@ -146,7 +151,6 @@ public class group_adapter extends BaseAdapter
 		@Override
 		public boolean onDrag(View v, DragEvent event)
 		{
-			View old_view;
 			int action = event.getAction();
 			switch (event.getAction())
 			{
@@ -164,10 +168,9 @@ public class group_adapter extends BaseAdapter
 					break;
 				case DragEvent.ACTION_DROP:
 					v.setVisibility(View.VISIBLE);
-					List<String> new_l = group_list;
-					new_l.add(0, "All");
-					main_view.update_group_order(new_l);
-					refresh_data();
+					//List<String> new_l = group_list;
+					//new_l.add(0, "All");
+					main_view.update_group_order(group_list);
 					break;
 				case DragEvent.ACTION_DRAG_ENDED:
 					default:
@@ -222,8 +225,10 @@ public class group_adapter extends BaseAdapter
 		}
 		String old_info = info_list.get(i);
 		String old = group_list.get(i);
+
 		info_list.set(i, info_list.get(j));
 		group_list.set(i, group_list.get(j));
+
 		info_list.set(j, old_info);
 		group_list.set(j, old);
 	}
