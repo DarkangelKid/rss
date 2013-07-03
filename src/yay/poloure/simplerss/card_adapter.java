@@ -121,24 +121,13 @@ public class card_adapter extends BaseAdapter
 		if((!content_des.get(position).replace("&n&", "").contains(content_titles.get(position).substring(0, content_titles.get(position).length() - 3)))||(!image_exists))
 			des = content_des.get(position).replace("  ", "\n").replace("&t&", "\n").replace("&n&", "\n").trim();
 
-		if(des.length() > 1)
+		if((des.length() > 1)&&(image_exists))
 		{
-			if(image_exists)
-			{
-				holder.description_view.setPadding(eight, 0, 0, 0);
-				ViewGroup.LayoutParams iv = holder.image_view.getLayoutParams();
-				iv.height = LayoutParams.WRAP_CONTENT;
-				iv.width = LayoutParams.WRAP_CONTENT;
-				holder.image_view.setLayoutParams(iv);
-			}
-			else
-			{
-				holder.description_view.setPadding(0, 0, 0, 0);
-				ViewGroup.LayoutParams iv = holder.image_view.getLayoutParams();
-				iv.height = 0;
-				iv.width = 0;
-				holder.image_view.setLayoutParams(iv);
-			}
+			holder.description_view.setPadding(eight, 0, 0, 0);
+			ViewGroup.LayoutParams iv = holder.image_view.getLayoutParams();
+			iv.height = LayoutParams.WRAP_CONTENT;
+			iv.width = LayoutParams.WRAP_CONTENT;
+			holder.image_view.setLayoutParams(iv);
 		}
 		else if(image_exists)
 		{
@@ -147,6 +136,14 @@ public class card_adapter extends BaseAdapter
 				iv.width = LayoutParams.MATCH_PARENT;
 				holder.image_view.setLayoutParams(iv);
 				holder.description_view.setPadding(0, 0, 0, 0);
+		}
+		else
+		{
+			holder.description_view.setPadding(0, 0, 0, 0);
+			ViewGroup.LayoutParams iv = holder.image_view.getLayoutParams();
+			iv.height = 0;
+			iv.width = 0;
+			holder.image_view.setLayoutParams(iv);
 		}
 		holder.description_view.setText(des);
 		return convertView;

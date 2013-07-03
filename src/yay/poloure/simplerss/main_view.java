@@ -849,7 +849,15 @@ public class main_view extends Activity
 							if(feed_name.equals(""))
 								feed_name = feed_title;
 
-							feed_name = feed_name.replace("/","").replace(":", "");
+							feed_name = feed_name.replace("/","")
+												.replace("\\", "")
+												.replace("?", "")
+												.replace("%", "")
+												.replace("*", "")
+												.replace("|", "")
+												.replace("<", "")
+												.replace(">", "")
+												.replace(":", "");
 
 							add_feed(feed_name, URL_check, new_group);
 							alertDialog.dismiss();
@@ -996,7 +1004,15 @@ public class main_view extends Activity
 							if(feed_name.equals(""))
 								feed_name = feed_title;
 
-							feed_name = feed_name.replace("/","").replace(":", "");
+							feed_name = feed_name.replace("/","")
+												.replace("\\", "")
+												.replace("?", "")
+												.replace("%", "")
+												.replace("*", "")
+												.replace("|", "")
+												.replace("<", "")
+												.replace(">", "")
+												.replace(":", "");
 
 							edit_feed(poser, current_title, feed_name, URL_check, current_group, new_group);
 							edit_dialog.dismiss();
@@ -1007,7 +1023,6 @@ public class main_view extends Activity
 		});
 		edit_dialog.show();
 	}
-	///cock
 
 	static private void toast_message(String message, int zero_or_one)
 	{
@@ -1614,8 +1629,13 @@ public class main_view extends Activity
 
 		String[] feeds = set.toArray(new String[set.size()]);
 
-		for(String feed : feeds)
-			append_string_to_file(content_name, feed + "\n");
+		for(int i = 0; i < feeds.length; i++)
+		{
+			if((feeds[i].contains("description|"))||(i == 0))
+				append_string_to_file(content_name, feeds[i] + "\n");
+			else
+				append_string_to_file(content_name, feeds[i] + "description||\n");
+		}
 	}
 
 	private static void log(String text)

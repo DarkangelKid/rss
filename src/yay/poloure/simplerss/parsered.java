@@ -26,6 +26,8 @@ class parsered
 			int filesize = (int) (in.length() + 1);
 			char[] current = new char[1];
 			char[] buf = new char[filesize + 1];
+			int description_length = 0;
+			Boolean tag_content;
 			String end_tag = "";
 			reader.mark(2);
 
@@ -50,6 +52,8 @@ class parsered
 								buf_string = "<description>";
 							else if(buf_string.contains("<title"))
 								buf_string = "<title>";
+							if(!buf_string.contains("description"))
+								description_length = -2048;
 							to_file(file_name + ".content.txt", buf_string.substring(1, buf_string.length() - 1) + "|", true);
 							while(!(end_tag.contains(end[i])))
 							{
@@ -64,6 +68,7 @@ class parsered
 								String cont = (new String(buf)).trim()
 									.replaceAll("\r", " ")
 									.replaceAll("\n", "")
+									.replace("|", "")
 									.replace("&amp;", "&")
 									.replace("&lt;", "<")
 									.replace("&gt;", ">")
@@ -80,7 +85,15 @@ class parsered
 								if(cont.contains("img src="))
 									to_file(file_name + ".content.dump.txt", cont.substring(cont.indexOf("src=\"") + 5, cont.indexOf("\"", cont.indexOf("src=\"") + 6)) + "\n", false);
 
-								to_file(file_name + ".content.txt", cont.replaceAll("\\<.*?\\>", "").trim(), true);
+								cont = cont.replaceAll("\\<.*?\\>", "").trim();
+
+								int take = description_length;
+								description_length = description_length + cont.length();
+								
+								if(description_length > 512)
+									to_file(file_name + ".content.txt", cont.substring(0, 512 - take), true);
+								else
+									to_file(file_name + ".content.txt", cont, true);
 
 								buf = new char[1024];
 								count = 0;
@@ -95,27 +108,39 @@ class parsered
 								end_tag = end_tag.trim();
 								if(!(end_tag.contains(end[i])))
 								{
-									end_tag = end_tag
-									.replaceAll("\r", " ")
-									.replaceAll("\n", "")
-									.replace("<![CDATA[", "")
-									.replace("]]>", "")
-									.replace("&amp;", "&")
-									.replace("&lt;", "<")
-									.replace("&gt;", ">")
-									.replace("&quot;", "\"")
-									.replace("&mdash;", "—")
-									.replace("&hellip;", "…")
-									.replace("&#8217;", "’")
-									.replace("&#8216;", "‘")
-									.replaceAll("\t", "&t&")
-									.replace("</p>", "&n&")
-									.replace("&rsquo;", "'")
-									.replaceAll("\\<.*?\\>", "");
-									to_file(file_name + ".content.txt", end_tag, true);
+									if(end_tag.contains("<![CDATA["))
+									{
+										end_tag = end_tag
+										.replaceAll("\r", " ")
+										.replaceAll("\n", "")
+										.replace("|", "")
+										.replace("<![CDATA[", "")
+										.replace("]]>", "")
+										.replace("&amp;", "&")
+										.replace("&lt;", "<")
+										.replace("&gt;", ">")
+										.replace("&quot;", "\"")
+										.replace("&mdash;", "—")
+										.replace("&hellip;", "…")
+										.replace("&#8217;", "’")
+										.replace("&#8216;", "‘")
+										.replaceAll("\t", "&t&")
+										.replace("</p>", "&n&")
+										.replace("&rsquo;", "'")
+										.replaceAll("\\<.*?\\>", "");
+
+										take = description_length;
+
+										description_length = description_length + end_tag.length();
+										if(description_length > 512)
+											to_file(file_name + ".content.txt", end_tag.substring(0, 512 - take), true);
+										else
+											to_file(file_name + ".content.txt", cont, true);
+									}
 								}
 							}
 							to_file(file_name + ".content.txt", "|", true);
+							description_length = 0;
 							break;
 						}
 					}
