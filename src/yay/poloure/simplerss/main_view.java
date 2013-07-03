@@ -849,7 +849,7 @@ public class main_view extends Activity
 							if(feed_name.equals(""))
 								feed_name = feed_title;
 
-							feed_name = feed_name.replace("/","");
+							feed_name = feed_name.replace("/","").replace(":", "");
 
 							add_feed(feed_name, URL_check, new_group);
 							alertDialog.dismiss();
@@ -995,6 +995,8 @@ public class main_view extends Activity
 
 							if(feed_name.equals(""))
 								feed_name = feed_title;
+
+							feed_name = feed_name.replace("/","").replace(":", "");
 
 							edit_feed(poser, current_title, feed_name, URL_check, current_group, new_group);
 							edit_dialog.dismiss();
