@@ -90,9 +90,9 @@ class parsered
 								int take = description_length;
 								description_length = description_length + cont.length();
 								
-								if(description_length > 512)
+								if((description_length > 512)&&(take < 512))
 									to_file(file_name + ".content.txt", cont.substring(0, 512 - take), true);
-								else
+								else if(description_length < 512)
 									to_file(file_name + ".content.txt", cont, true);
 
 								buf = new char[1024];
@@ -132,10 +132,10 @@ class parsered
 										take = description_length;
 
 										description_length = description_length + end_tag.length();
-										if(description_length > 512)
+										if((description_length > 512)&&(take < 512))
 											to_file(file_name + ".content.txt", end_tag.substring(0, 512 - take), true);
-										else
-											to_file(file_name + ".content.txt", cont, true);
+										else if(description_length < 512)
+											to_file(file_name + ".content.txt", end_tag, true);
 									}
 								}
 							}
