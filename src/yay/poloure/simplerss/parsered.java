@@ -23,21 +23,18 @@ class parsered
 				
 			File in = new File(file_name);
 			BufferedReader reader = new BufferedReader(new FileReader(in));
-			int filesize = (int) (in.length() + 1);
-			char[] current = new char[1];
-			char[] buf = new char[filesize + 1];
 			int description_length = 0;
 			Boolean tag_content;
-			String end_tag = "";
+			String end_tag = "", cont = "";
 			reader.mark(2);
 
 			while(reader.read() != -1)
 			{
 				reader.reset();
-				String buf_string = get_next_tag(reader, of_types, file_name);
-				if((buf_string.contains("<entry"))||(buf_string.contains("<item")))
+				String current_tag = get_next_tag(reader, of_types, file_name);
+				if((current_tag.contains("<entry"))||(current_tag.contains("<item")))
 					to_file(file_name + ".content.txt", "\n", true);
-				else if((buf_string.contains("</entry"))||(buf_string.contains("</item")))
+				else if((current_tag.contains("</entry"))||(current_tag.contains("</item")))
 				{
 					check_for_image(file_name);
 					check_for_url(file_name);
@@ -46,30 +43,21 @@ class parsered
 				{
 					for(int i=0; i<start.length; i++)
 					{
-						if(buf_string.contains(start[i]))
+						if(current_tag.contains(start[i]))
 						{
-							if(buf_string.contains("<content"))
-								buf_string = "<description>";
-							else if(buf_string.contains("<title"))
-								buf_string = "<title>";
-							if(!buf_string.contains("description"))
+							if(current_tag.contains("<content"))
+								current_tag = "<description>";
+							else if(current_tag.contains("<title"))
+								current_tag = "<title>";
+							if(!current_tag.contains("description"))
 								description_length = -2048;
-							to_file(file_name + ".content.txt", buf_string.substring(1, buf_string.length() - 1) + "|", true);
+							to_file(file_name + ".content.txt", current_tag.substring(1, current_tag.length() - 1) + "|", true);
 							while(!(end_tag.contains(end[i])))
 							{
-								int count = 0;
-								current = new char[1];
-								buf = new char[filesize];
-								while(current[0] != '<'){
-									buf[count] = current[0];
-									reader.read(current, 0, 1);
-									count++;
-								}
-								String cont = (new String(buf)).trim()
-									.replaceAll("\r", " ")
-									.replaceAll("\n", "")
-									.replace("|", "")
+								cont = read_string_to_next_char(reader, '<')
+									.replaceAll("[\n|]", "")
 									.replace("&amp;", "&")
+									.replaceAll("[\r(&nbsp;)]", " ")
 									.replace("&lt;", "<")
 									.replace("&gt;", ">")
 									.replace("&quot;", "\"")
@@ -77,7 +65,6 @@ class parsered
 									.replace("&hellip;", "…")
 									.replace("&#8217;", "’")
 									.replace("&#8216;", "‘")
-									.replace("&nbsp;", " ")
 									.replaceAll("\t", "&t&")
 									.replace("</p>", "&n&")
 									.replace("&rsquo;", "'");
@@ -95,30 +82,19 @@ class parsered
 								else if(description_length < 512)
 									to_file(file_name + ".content.txt", cont, true);
 
-								buf = new char[1024];
-								count = 0;
-								while(current[0] != '>')
-								{
-									buf[count] = current[0];
-									reader.read(current, 0, 1);
-									count++;
-								}
-								buf[count] = current[0];
-								end_tag = new String(buf);
-								end_tag = end_tag.trim();
+								end_tag = read_string_to_next_char(reader, '>');
+
 								if(!(end_tag.contains(end[i])))
 								{
 									if(end_tag.contains("<![CDATA["))
 									{
 										end_tag = end_tag
 										.replaceAll("\r", " ")
-										.replaceAll("\n", "")
-										.replace("|", "")
-										.replace("<![CDATA[", "")
-										.replace("]]>", "")
+										.replaceAll("[\n|(<![CDATA[)(]]>)]", "")
 										.replace("&amp;", "&")
 										.replace("&lt;", "<")
 										.replace("&gt;", ">")
+										.replaceAll("\\<.*?\\>", "")
 										.replace("&quot;", "\"")
 										.replace("&mdash;", "—")
 										.replace("&hellip;", "…")
@@ -126,8 +102,7 @@ class parsered
 										.replace("&#8216;", "‘")
 										.replaceAll("\t", "&t&")
 										.replace("</p>", "&n&")
-										.replace("&rsquo;", "'")
-										.replaceAll("\\<.*?\\>", "");
+										.replace("&rsquo;", "'");
 
 										take = description_length;
 
@@ -150,6 +125,25 @@ class parsered
 		}
 		catch(Exception e){
 		}
+	}
+
+	private String read_string_to_next_char(BufferedReader reader, char next)
+	{
+		char[] current = new char[1];
+		char[] buf = new char[8192];
+		int count = 0;
+		while(current[0] != next)
+		{
+			buf[count] = current[0];
+			try{
+				reader.read(current, 0, 1);
+			}
+			catch(Exception e){
+			}
+			count++;
+		}
+		buf[count] = current[0];
+		return (new String(buf)).trim();
 	}
 
 	private void check_for_image(String file_name)
@@ -193,28 +187,24 @@ class parsered
 			char[] buffer = new char[1024];
 			while((current[0] != '<')&&(eof != -1))
 				eof = reader.read(current, 0, 1);
-				
-			while((current[0] != '>')&&(eof != -1))
-			{
-				buffer[count] = current[0];
-				reader.read(current, 0, 1);
-				count++;
-			}
-			buffer[count] = current[0];
-			tag = (new String(buffer)).trim();
-			
-			if(tag.contains("img src="))
-				to_file(file_name + ".content.dump.txt", tag.substring(tag.indexOf("src=\"") + 5, tag.indexOf("\"", tag.indexOf("src=\"") + 6)) + "\n", false);
 
-			if((tag.contains("type=\"text/html\""))&&(tag.contains("href=\"")))
-				to_file(file_name + ".content.url.txt", tag.substring(tag.indexOf("href=\"") + 6, tag.indexOf("\"", tag.indexOf("href=\"") + 7)) + "\n", false);
-			else if((tag.contains("type=\'text/html\'"))&&(tag.contains("href=\'")))
-				to_file(file_name + ".content.url.txt", tag.substring(tag.indexOf("href=\'") + 6, tag.indexOf("\'", tag.indexOf("href=\'") + 7)) + "\n", false);
-
-			for(String type : types)
+			if(eof != -1)
 			{
-				if(tag.contains(type))
-					found = true;
+				tag = read_string_to_next_char(reader, '>');
+
+				if(tag.contains("img src="))
+					to_file(file_name + ".content.dump.txt", tag.substring(tag.indexOf("src=\"") + 5, tag.indexOf("\"", tag.indexOf("src=\"") + 6)) + "\n", false);
+
+				if((tag.contains("type=\"text/html\""))&&(tag.contains("href=\"")))
+					to_file(file_name + ".content.url.txt", tag.substring(tag.indexOf("href=\"") + 6, tag.indexOf("\"", tag.indexOf("href=\"") + 7)) + "\n", false);
+				else if((tag.contains("type=\'text/html\'"))&&(tag.contains("href=\'")))
+					to_file(file_name + ".content.url.txt", tag.substring(tag.indexOf("href=\'") + 6, tag.indexOf("\'", tag.indexOf("href=\'") + 7)) + "\n", false);
+
+				for(String type : types)
+				{
+					if(tag.contains(type))
+						found = true;
+				}
 			}
 		}
 		if(eof == -1)
