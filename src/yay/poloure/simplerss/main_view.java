@@ -351,9 +351,8 @@ public class main_view extends Activity
 						.commit();
 
 			navigation_list.setItemChecked(position, true);
-			if(position < 3){
+			if(position < 3)
 				set_title(page_title);
-			}
 			else
 				set_title("Feeds");
 		}
@@ -1431,12 +1430,12 @@ public class main_view extends Activity
 						download_file(images.get(m), "images/" + image_name);
 					/// If the thumbnail does not exist in thumbnails/, compress the image in images/ to thumbnails with image_name.
 					if(!(new File(partial_thumbnail_path + image_name)).exists())
-						dimensions = compress_file(partial_image_path + image_name, partial_thumbnail_path + image_name, image_name, group, dimensions, false);
+						dimensions.add(compress_file(partial_image_path + image_name, partial_thumbnail_path + image_name, image_name, group, false));
 
 					dim = get_image_dimensions(dimensions, image_name);
 					if(dim[0] == 0)
 					{
-						dimensions = compress_file(partial_image_path + image_name, partial_thumbnail_path + image_name, image_name, group, dimensions, true);
+						dimensions.add(compress_file(partial_image_path + image_name, partial_thumbnail_path + image_name, image_name, group, true));
 						dim = get_image_dimensions(dimensions, image_name);
 					}
 
@@ -1623,7 +1622,7 @@ public class main_view extends Activity
 		append_string_to_file_static("dump.txt", text + "\n");
 	}
 
-	List<String> compress_file(String image_path, String thumbnail_path, String image_name, String group, List<String> dimensions, Boolean skip_save)
+	String compress_file(String image_path, String thumbnail_path, String image_name, String group, Boolean skip_save)
 	{
 		int insample;
 		if(!skip_save)
@@ -1654,7 +1653,6 @@ public class main_view extends Activity
 		o2.inSampleSize = insample;
 		Bitmap bitmap = BitmapFactory.decodeFile(image_path, o2);
 		append_string_to_file(group + ".image_size.cache.txt", image_name + "|" + o2.outWidth + "|" + o2.outHeight + "\n");
-		dimensions.add(image_name + "|" + o2.outWidth + "|" + o2.outHeight);
 
 		if(!skip_save)
 		{
@@ -1667,7 +1665,7 @@ public class main_view extends Activity
 			}
 		}
 
-		return dimensions;
+		return image_name + "|" + o2.outWidth + "|" + o2.outHeight;
 	}
 
 	private Integer[] get_image_dimensions(List<String> dim_list, final String image_name)
