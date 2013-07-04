@@ -6,6 +6,11 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.File;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.List;
+import java.util.ArrayList;
+
 class parsered
 {
 	public parsered(String file_path){
@@ -22,10 +27,28 @@ class parsered
 				"</name>", "</link>", "</published>", "</updated>", "</pubDate>", "</description>", "</title", "</content", "<entry", "<item", "</entry", "</item"}; 
 				
 			File in = new File(file_name);
+			File out = new File(file_name + ".content.txt");
+			Set<String> set;
+
+			/// Read the file's lines to a list and make a set from that.
+			if(out.exists())
+			{
+				String liner = "";
+				List<String> lines = new ArrayList<String>();
+				BufferedReader stream = new BufferedReader(new FileReader(out));
+				while((liner = stream.readLine()) != null)
+					lines.add(liner);
+				stream.close();
+
+				set = new LinkedHashSet<String>(lines);
+			}
+			else
+				set = new LinkedHashSet<String>();
+
 			BufferedReader reader = new BufferedReader(new FileReader(in));
 			int description_length = 0;
 			Boolean tag_content;
-			String end_tag = "", cont = "";
+			String end_tag = "", cont = "", line = "";
 			reader.mark(2);
 
 			while(reader.read() != -1)
@@ -33,11 +56,16 @@ class parsered
 				reader.reset();
 				String current_tag = get_next_tag(reader, of_types, file_name);
 				if((current_tag.contains("<entry"))||(current_tag.contains("<item")))
-					to_file(file_name + ".content.txt", "\n", true);
+				{
+					/// Add line to set and reset the line.
+					if(line.length() > 1)
+						set.add(line);
+					line = "";
+				}
 				else if((current_tag.contains("</entry"))||(current_tag.contains("</item")))
 				{
-					check_for_image(file_name);
-					check_for_url(file_name);
+					line = line + check_for_image(file_name);
+					line = line + check_for_url(file_name);
 				}
 				else
 				{
@@ -45,31 +73,26 @@ class parsered
 					{
 						if(current_tag.contains(start[i]))
 						{
+							description_length = 0;
+
 							if(current_tag.contains("<content"))
 								current_tag = "<description>";
 							else if(current_tag.contains("<title"))
 								current_tag = "<title>";
 							if(!current_tag.contains("description"))
 								description_length = -2048;
-							to_file(file_name + ".content.txt", current_tag.substring(1, current_tag.length() - 1) + "|", true);
+
+							/// Write description| to the line buffer.
+							line = line + current_tag.substring(1, current_tag.length() - 1) + "|";
+
 							while(!(end_tag.contains(end[i])))
 							{
 								cont = read_string_to_next_char(reader, '<', false)
-									.replaceAll("\n", "")
-									.replace("|", "")
-									.replace("&amp;", "&")
-									.replace("&nbsp;", " ")
-									.replaceAll("\r", " ")
-									.replace("&lt;", "<")
-									.replace("&gt;", ">")
-									.replace("&quot;", "\"")
-									.replace("&mdash;", "—")
-									.replace("&hellip;", "…")
-									.replace("&#8217;", "’")
-									.replace("&#8216;", "‘")
-									.replaceAll("\t", "&t&")
-									.replace("</p>", "&n&")
-									.replace("&rsquo;", "'");
+									.replaceAll("\n", "")		.replace("|", "")			.replace("&amp;", "&")
+									.replace("&nbsp;", " ")		.replaceAll("\r", " ")		.replace("&lt;", "<")
+									.replace("&gt;", ">")		.replace("&quot;", "\"")	.replace("&mdash;", "—")
+									.replace("&hellip;", "…")	.replace("&#8217;", "’")	.replace("&#8216;", "‘")
+									.replaceAll("\t", "&t&")	.replace("</p>", "&n&")		.replace("&rsquo;", "'");
 									
 								if(cont.contains("img src="))
 									to_file(file_name + ".content.dump.txt", cont.substring(cont.indexOf("src=\"") + 5, cont.indexOf("\"", cont.indexOf("src=\"") + 6)) + "\n", false);
@@ -80,9 +103,9 @@ class parsered
 								description_length = description_length + cont.length();
 								
 								if((description_length > 512)&&(take < 512))
-									to_file(file_name + ".content.txt", cont.substring(0, 512 - take), true);
+									line = line + cont.substring(0, 512 - take);
 								else if(description_length < 512)
-									to_file(file_name + ".content.txt", cont, true);
+									line = line + cont;
 
 								end_tag = "<" + read_string_to_next_char(reader, '>', true);
 
@@ -91,42 +114,43 @@ class parsered
 									if(end_tag.contains("<![CDATA["))
 									{
 										end_tag = end_tag
-											.replaceAll("\r", " ")
-											.replaceAll("\n", "")
-											.replace("|", "")
-											.replace("<![CDATA[", "")
-											.replace("]]>", "")
-											.replace("&amp;", "&")
-											.replace("&lt;", "<")
-											.replace("&gt;", ">")
-											.replaceAll("\\<.*?\\>", "")
-											.replace("&quot;", "\"")
-											.replace("&mdash;", "—")
-											.replace("&hellip;", "…")
-											.replace("&#8217;", "’")
-											.replace("&#8216;", "‘")
-											.replaceAll("\t", "&t&")
-											.replace("</p>", "&n&")
-											.replace("&rsquo;", "'");
+											.replaceAll("\r", " ")		.replaceAll("\n", "")		.replace("|", "")
+											.replace("<![CDATA[", "")	.replace("]]>", "")			.replace("&amp;", "&")
+											.replace("&lt;", "<")		.replace("&gt;", ">")		.replaceAll("\\<.*?\\>", "")
+											.replace("&quot;", "\"")	.replace("&mdash;", "—")	.replace("&hellip;", "…")
+											.replace("&#8217;", "’")	.replace("&#8216;", "‘")	.replaceAll("\t", "&t&")
+											.replace("</p>", "&n&")		.replace("&rsquo;", "'");
 
 										take = description_length;
 
 										description_length = description_length + end_tag.length();
 										if((description_length > 512)&&(take < 512))
-											to_file(file_name + ".content.txt", end_tag.substring(0, 512 - take), true);
+											line = line + end_tag.substring(0, 512 - take);
 										else if(description_length < 512)
-											to_file(file_name + ".content.txt", end_tag, true);
+											line = line + end_tag;
 									}
 								}
 							}
-							to_file(file_name + ".content.txt", "|", true);
-							description_length = 0;
+							line = line + "|";
 							break;
 						}
 					}
 				}
 				reader.mark(2);
 			}
+
+			/// Add the last line that has no <entry / <item after it.
+			set.add(line);
+			/// Write the new content to the file.
+			in.delete();
+			out.delete();
+
+			String[] feeds = set.toArray(new String[set.size()]);
+
+			BufferedWriter write = new BufferedWriter(new FileWriter(file_name + ".content.txt", true));
+			for(String feed : feeds)
+				write.write(feed + "\n");
+			write.close();
 		}
 		catch(Exception e){
 		}
@@ -141,11 +165,7 @@ class parsered
 			while(current[0] != next)
 			{
 				buf[count] = current[0];
-				try{
-					reader.read(current, 0, 1);
-				}
-				catch(Exception e){
-				}
+				reader.read(current, 0, 1);
 				count++;
 			}
 			if(keep_last_char)
@@ -157,34 +177,38 @@ class parsered
 		}
 	}
 
-	private void check_for_image(String file_name)
+	private String check_for_image(String file_name)
 	{
 		File im = new File(file_name + ".content.dump.txt");
+		String popo = "";
 		try
 		{
 			BufferedReader image = new BufferedReader(new FileReader(im));
 			String image_url = image.readLine();
 			if(image_url.length()>6)
-				to_file(file_name + ".content.txt" , "image|" + image_url + "|", true);
+				popo = "image|" + image_url + "|";
 		}
 		catch(Exception e){
 		}
 		im.delete();
+		return popo;
 	}
 
-	private void check_for_url(String file_name)
+	private String check_for_url(String file_name)
 	{
 		File iu = new File(file_name + ".content.url.txt");
+		String momo = "";
 		try
 		{
 			BufferedReader u = new BufferedReader(new FileReader(iu));
 			String url = u.readLine();
 			if(url.length()>6)
-				to_file(file_name + ".content.txt" , "link|" + url + "|", true);
+				momo = "link|" + url + "|";
 		}
 		catch(Exception e){
 		}
 		iu.delete();
+		return momo;
 	}
 
 	private String get_next_tag(BufferedReader reader, String[] types, String file_name) throws Exception

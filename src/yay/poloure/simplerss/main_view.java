@@ -7,7 +7,6 @@ import android.content.res.Resources;
 import android.content.DialogInterface;
 
 import android.app.AlertDialog;
-import java.util.List;
 
 import android.os.Bundle;
 
@@ -57,9 +56,8 @@ import java.io.FileReader;
 import java.io.BufferedWriter;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.List;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.Set;
 import java.util.Date;
 import java.util.Locale;
 import java.text.SimpleDateFormat;
@@ -1364,8 +1362,6 @@ public class main_view extends Activity
 					feed_path = storage + "content/" + group_feeds_names.get(i); /// mariam_feed.txt
 					download_file(group_feeds_urls.get(i), "content/" + group_feeds_names.get(i) + ".store.txt"); /// Downloads file as mariam_feed.store.txt
 					new parsered(feed_path + ".store.txt"); /// Parses the file and makes other files like mariam_feed.store.txt.content.txt
-					(new File(feed_path + ".store.txt")).delete();
-					remove_duplicates("content/" + group_feeds_names.get(i) + ".store.txt.content.txt"); /// Finally we have the feeds content files.
 				}
 			}
 			else
@@ -1620,22 +1616,6 @@ public class main_view extends Activity
 	private static String[] get_groups()
 	{
 		return current_groups;
-	}
-
-	private void remove_duplicates(String content_name)
-	{
-		Set<String> set = new LinkedHashSet<String>(read_file_to_list(content_name, 0));
-		(new File(storage + content_name)).delete();
-
-		String[] feeds = set.toArray(new String[set.size()]);
-
-		for(int i = 0; i < feeds.length; i++)
-		{
-			if((feeds[i].contains("description|"))||(i == 0))
-				append_string_to_file(content_name, feeds[i] + "\n");
-			else
-				append_string_to_file(content_name, feeds[i] + "description||\n");
-		}
 	}
 
 	private static void log(String text)
