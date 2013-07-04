@@ -135,21 +135,26 @@ class parsered
 	private String read_string_to_next_char(BufferedReader reader, char next, Boolean keep_last_char)
 	{
 		char[] current = new char[1];
-		char[] buf = new char[8192];
+		char[] buf = new char[65536];
 		int count = 0;
-		while(current[0] != next)
-		{
-			buf[count] = current[0];
-			try{
-				reader.read(current, 0, 1);
+		try{
+			while(current[0] != next)
+			{
+				buf[count] = current[0];
+				try{
+					reader.read(current, 0, 1);
+				}
+				catch(Exception e){
+				}
+				count++;
 			}
-			catch(Exception e){
-			}
-			count++;
+			if(keep_last_char)
+				buf[count] = current[0];
+			return (new String(buf)).trim();
 		}
-		if(keep_last_char)
-			buf[count] = current[0];
-		return (new String(buf)).trim();
+		catch(Exception e){
+			return "Content exceeds 65536 chars";
+		}
 	}
 
 	private void check_for_image(String file_name)
