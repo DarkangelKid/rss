@@ -5,12 +5,15 @@ import android.preference.PreferenceFragment;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.DialogInterface;
+import android.content.Intent;
 
 import android.app.AlertDialog;
 
 import android.os.Bundle;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 
 import android.app.ListFragment;
 import android.view.Display;
@@ -304,6 +307,16 @@ public class main_view extends Activity
 			twelve = (int) ((12 * density + 0.5f));
 			res = getResources();
 		}
+	}
+	
+	protected void onStop()
+	{
+		super.onStop();
+		Intent intent = new Intent(this, service_update.class);
+		intent.putExtra("GROUP_NUMBER", "0");
+		PendingIntent pend_intent = PendingIntent.getActivity(this, 0, intent, 0);
+		AlarmManager alarm_refresh = (AlarmManager)getSystemService(Activity.ALARM_SERVICE);
+		alarm_refresh.set(AlarmManager.RTC_WAKEUP, 180000, pend_intent);
 	}
 
 	public static Resources get_resources(){
