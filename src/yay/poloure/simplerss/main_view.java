@@ -696,7 +696,7 @@ public class main_view extends Activity
 		}
 		else if(item.getTitle().equals("refresh"))
 		{
-			new update_group().execute(((ViewPager) findViewById(R.id.pager)).getCurrentItem(), true);
+			new update_group().execute(((ViewPager) findViewById(R.id.pager)).getCurrentItem(), false);
 			return true;
 		}
 
