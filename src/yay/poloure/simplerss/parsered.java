@@ -28,23 +28,18 @@ class parsered
 				
 			File in = new File(file_name);
 			File out = new File(file_name + ".content.txt");
-			Set<String> set;
+			Set<String> set = new LinkedHashSet<String>();
 
 			/// Read the file's lines to a list and make a set from that.
 			if(out.exists())
 			{
 				String liner = "";
-				List<String> lines = new ArrayList<String>();
 				BufferedReader stream = new BufferedReader(new FileReader(out));
 				while((liner = stream.readLine()) != null)
-					lines.add(liner);
+					set.add(liner);
 				stream.close();
-
-				set = new LinkedHashSet<String>(lines);
 			}
-			else
-				set = new LinkedHashSet<String>();
-
+			
 			BufferedReader reader = new BufferedReader(new FileReader(in));
 			int description_length = 0;
 			Boolean tag_content;

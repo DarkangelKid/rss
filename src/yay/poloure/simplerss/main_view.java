@@ -89,6 +89,9 @@ public class main_view extends Activity
 	public static String[] current_groups;
 	private static List<String> feed_titles, feed_urls, feed_groups;
 
+	public static ListView feed_list;
+	public static feed_adapter feed_list_adapter;
+
 	private static final int CONTENT_VIEW_ID = 10101010;
 	private static String[] nav_final;
 
@@ -99,17 +102,17 @@ public class main_view extends Activity
 		update_feeds_list();
 	}
 
-	private static void edit_feed(int pos, String old_feed_name, String feed_name, String feed_url, String old_group, String feed_group)
+	private void edit_feed(int pos, String old_feed_name, String feed_name, String feed_url, String old_group, String feed_group)
 	{
 		/// Update the All.txt file
-		List<String> feeds = read_file_to_list_static("groups/All.txt", 0);
+		List<String> feeds = read_file_to_list("groups/All.txt", 0);
 		(new File(storage + "groups/All.txt")).delete();
 		for(int i=0; i<feeds.size(); i++)
 		{
 			if(feeds.get(i).contains(old_feed_name))
-				append_string_to_file_static("groups/All.txt", "name|" +  feed_name + "|url|" + feed_url + "|group|" + feed_group + "|\n");
+				append_string_to_file("groups/All.txt", "name|" +  feed_name + "|url|" + feed_url + "|group|" + feed_group + "|\n");
 			else
-				append_string_to_file_static("groups/All.txt", feeds.get(i) + "\n");
+				append_string_to_file("groups/All.txt", feeds.get(i) + "\n");
 		}
 
 		/// If we have renamed the title, rename the content/title.txt file.
@@ -124,10 +127,10 @@ public class main_view extends Activity
 		{
 			/// Update the group file
 			File group_file = new File(storage + "groups/" + feed_group + ".txt");
-			append_string_to_file_static("groups/" + feed_group + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|\n");
+			append_string_to_file("groups/" + feed_group + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|\n");
 
 			/// Then delete from old group file
-			feeds = read_file_to_list_static("groups/" + old_group + ".txt", 0);
+			feeds = read_file_to_list("groups/" + old_group + ".txt", 0);
 			group_file = new File(storage + "groups/" + old_group + ".txt");
 			group_file.delete();
 			Boolean append = false;
@@ -135,19 +138,19 @@ public class main_view extends Activity
 			{
 				if(!feeds.get(i).contains(old_feed_name))
 				{
-					append_string_to_file_static("groups/" + old_group + ".txt", feeds.get(i) + "\n");
+					append_string_to_file("groups/" + old_group + ".txt", feeds.get(i) + "\n");
 					append = true;
 				}
 			}
 			if(append == false)
 			{
-				feeds = read_file_to_list_static("groups/group_list.txt", 0);
+				feeds = read_file_to_list("groups/group_list.txt", 0);
 				group_file = new File(storage + "groups/group_list.txt");
 				group_file.delete();
 				for(int i=0; i<feeds.size(); i++)
 				{
 					if(!feeds.get(i).contains(old_group))
-						append_string_to_file_static("groups/group_list.txt", feeds.get(i) + "\n");
+						append_string_to_file("groups/group_list.txt", feeds.get(i) + "\n");
 				}
 			}
 			(new File(storage + "groups/" + old_group + ".txt.content.txt")).delete();
@@ -157,7 +160,7 @@ public class main_view extends Activity
 		}
 		
 		(new File(storage + "groups/All.txt.content.txt")).delete();
-		feed_adapter temp = feed_manage.return_feed_adapter();
+		feed_adapter temp = feed_list_adapter;
 
 		/// Update the feed_titles, feed_urls, and feed_group lists from the groups/All.txt file.
 		update_feeds_list();
@@ -169,17 +172,17 @@ public class main_view extends Activity
 		update_groups();
 	}
 
-	private static void update_feeds_list()
+	private void update_feeds_list()
 	{
 		String[] pass 					= {storage + "groups/All.txt", "0", "name", "url", "group"};
-		List< List<String> > content 	= read_csv_to_list_static(pass);
+		List< List<String> > content 	= read_csv_to_list(pass);
 		feed_titles 		= content.get(0);
 		feed_urls 			= content.get(1);
 		feed_groups 		= content.get(2);
 	}
-	private static void add_group(String group_name)
+	private void add_group(String group_name)
 	{
-		append_string_to_file_static("groups/group_list.txt", group_name + "\n");
+		append_string_to_file("groups/group_list.txt", group_name + "\n");
 		update_groups();
 	}
 
@@ -216,11 +219,11 @@ public class main_view extends Activity
 			getActionBar().setIcon(R.drawable.rss_icon);
 
 				getFragmentManager().beginTransaction()
-							.add(CONTENT_VIEW_ID, new top_fragment())
+							.add(CONTENT_VIEW_ID, new fragment_top())
 							.commit();
-				Fragment feed = new the_feed_fragment();
-				Fragment pref = new PrefsFragment();
-				Fragment man = new manage_fragment();
+				Fragment feed = new fragment_feed();
+				Fragment pref = new fragment_preferences();
+				Fragment man = new fragment_manage();
 				getFragmentManager().beginTransaction()
 					.add(R.id.content_frame, feed, "Feeds")
 					.add(R.id.content_frame, pref, "Settings")
@@ -261,11 +264,12 @@ public class main_view extends Activity
 
 			manage_pager = (ViewPager) findViewById(R.id.manage_viewpager);
 			manage_pager.setAdapter(new manage_pager_adapter(getFragmentManager()));
+
 			context = getApplicationContext();
 			activity_context = this;
 			new_items = false;
 			update_groups();
-			
+
 			PagerTabStrip pager_tab_strip = (PagerTabStrip) findViewById(R.id.pager_title_strip);
 			pager_tab_strip.setDrawFullUnderline(true);
 			pager_tab_strip.setTabIndicatorColor(Color.argb(0, 51, 181, 229));
@@ -393,7 +397,7 @@ public class main_view extends Activity
 		}
 	}
 
-	private class top_fragment extends Fragment
+	private class fragment_top extends Fragment
 	{
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -402,7 +406,7 @@ public class main_view extends Activity
 		}
 	}
 
-	private class the_feed_fragment extends Fragment
+	private class fragment_feed extends Fragment
 	{
 		@Override
 		public void onCreate(Bundle savedInstanceState){
@@ -417,7 +421,7 @@ public class main_view extends Activity
 		}
 	}
 
-	private static class PrefsFragment extends PreferenceFragment
+	private static class fragment_preferences extends PreferenceFragment
 	{
 
 		@Override
@@ -435,7 +439,7 @@ public class main_view extends Activity
 		}
 	}
 
-	private class manage_fragment extends Fragment
+	private class fragment_manage extends Fragment
 	{
 		@Override
 		public void onCreate(Bundle savedInstanceState)
@@ -450,19 +454,10 @@ public class main_view extends Activity
 		}
 	}
 
-	public static class group_fragment extends Fragment
+	public class fragment_group extends Fragment
 	{
 		private ListView manage_list;
 		public group_adapter manage_adapter;
-
-		static group_fragment manage_groups_instance(int num)
-		{
-			group_fragment m = new group_fragment();
-			Bundle args = new Bundle();
-			args.putInt("num", num);
-			m.setArguments(args);
-			return m;
-		}
 
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -472,7 +467,7 @@ public class main_view extends Activity
 			manage_adapter = new group_adapter(getActivity());
 			for(int i = 0; i < current_groups.length; i++)
 			{
-				List<String> content = read_csv_to_list_static(new String[]{storage + "groups/" + current_groups[i] + ".txt", "0", "name"}).get(0);
+				List<String> content = read_csv_to_list(new String[]{storage + "groups/" + current_groups[i] + ".txt", "0", "name"}).get(0);
 				String info = "";
 				int number = 3;
 				if(content.size() < 3)
@@ -494,39 +489,22 @@ public class main_view extends Activity
 		}
 	}
 
-	public static class feed_manage extends Fragment
+	public class feed_manage extends Fragment
 	{
-		private ListView feed_list;
-		public static feed_adapter feed_list_adapter;
-
-		static feed_manage manage_feeds_instance(int num)
-		{
-			feed_manage m = new feed_manage();
-			Bundle args = new Bundle();
-			args.putInt("num", num);
-			m.setArguments(args);
-			return m;
-		}
-
-		public static feed_adapter return_feed_adapter()
-		{
-			return feed_list_adapter;
-		}
-
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
 			View view = inflater.inflate(R.layout.manage_feeds, container, false);
 			feed_list = (ListView) view.findViewById(R.id.feeds_listview);
 
+			
 			feed_list.setOnItemClickListener(new OnItemClickListener()
-			{
-				public void onItemClick(AdapterView<?> parent, View view, int position, long id)
-				{
-					///show dialog
-					show_edit_dialog(position);
-				}
-			});
+						{
+							public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+							{
+								show_edit_dialog(position);
+							}
+						});
 
 			feed_list_adapter = new feed_adapter(getActivity());
 			feed_list.setAdapter(feed_list_adapter);
@@ -560,37 +538,53 @@ public class main_view extends Activity
 							/// Perhaps regen the all_image.cache.txt
 							
 							File all_file = new File(storage + "groups/" + details + ".txt");
-							List<String> feeds = read_file_to_list_static("groups/" + details + ".txt", 0);
+							List<String> feeds = read_file_to_list("groups/" + details + ".txt", 0);
 							all_file.delete();
 							for(int i = 0; i < feeds.size(); i++)
 							{
 								if(!feeds.get(i).contains(title))
-									append_string_to_file_static("groups/" + details + ".txt", feeds.get(i) + "\n");
+									append_string_to_file("groups/" + details + ".txt", feeds.get(i) + "\n");
 							}
 							
 							if(!(new File(storage + "groups/" + details + ".txt")).exists())
 							{
 								all_file = new File(storage + "groups/group_list.txt");
-								feeds = read_file_to_list_static("groups/group_list.txt", 0);
-								all_file.delete();
-								for(int i = 0; i < feeds.size(); i++)
+								BufferedWriter group_file = null;
+								try
 								{
-									if(!feeds.get(i).contains(details))
-										append_string_to_file_static("groups/group_list.txt", feeds.get(i) + "\n");
+									try
+									{
+										group_file = new BufferedWriter(new FileWriter(all_file));
+										feeds = read_file_to_list("groups/group_list.txt", 0);
+										all_file.delete();
+
+										for(int i = 0; i < feeds.size(); i++)
+										{
+											if(!feeds.get(i).contains(details))
+												group_file.write(feeds.get(i) + "\n");
+										}
+									}
+									finally
+									{
+										if(group_file != null)
+											group_file.close();
+									}
+								}
+								catch(IOException e)
+								{
 								}
 							}
 
 							all_file = new File(storage + "groups/All.txt");
-							feeds = read_file_to_list_static("groups/All.txt", 0);
+							feeds = read_file_to_list("groups/All.txt", 0);
 							all_file.delete();
 							for(int i = 0; i < feeds.size(); i++)
 							{
 								if(!feeds.get(i).contains(title))
-									append_string_to_file_static("groups/All.txt", feeds.get(i) + "\n");
+									append_string_to_file("groups/All.txt", feeds.get(i) + "\n");
 							}
 							
 							/// remove deleted files content from groups that it was in
-
 							feed_list_adapter.remove_item(positionrr);
 							feed_list_adapter.notifyDataSetChanged();
 						}
@@ -600,7 +594,6 @@ public class main_view extends Activity
 					return true;
 				}
 			});
-			
 			return view;
 		}
 	}
@@ -618,7 +611,7 @@ public class main_view extends Activity
 
  		@Override
 		public Fragment getItem(int position){
-			return card_fragment.newInstance(position);
+			return fragment_card.newInstance(position);
 		}
 
 		@Override
@@ -645,9 +638,9 @@ public class main_view extends Activity
 		@Override
 		public Fragment getItem(int position){
 			if(position == 0)
-				return group_fragment.manage_groups_instance(position);
+				return new fragment_group();
 			else
-				return feed_manage.manage_feeds_instance(position);
+				return new feed_manage();
 		}
 		@Override
 		public String getPageTitle(int position){
@@ -658,11 +651,11 @@ public class main_view extends Activity
 		}
 	}
 
-	public static class card_fragment extends ListFragment
+	public static class fragment_card extends ListFragment
 	{
-		static card_fragment newInstance(int num)
+		static fragment_card newInstance(int num)
 		{
-			card_fragment f = new card_fragment();
+			fragment_card f = new fragment_card();
 			Bundle args = new Bundle();
 			args.putInt("num", num);
 			f.setArguments(args);
@@ -867,7 +860,7 @@ public class main_view extends Activity
 	}
 
 	///cock
-	private static void show_edit_dialog(int position)
+	private void show_edit_dialog(int position)
 	{
 		poser = position;
 		LayoutInflater inflater = LayoutInflater.from(activity_context);
@@ -1027,7 +1020,7 @@ public class main_view extends Activity
 		message_toast.show();
 	}
 
-	static class check_feed_exists extends AsyncTask<String, Void, Integer>
+	class check_feed_exists extends AsyncTask<String, Void, Integer>
 	{
 		@Override
 		protected Integer doInBackground(String... urls)
@@ -1073,51 +1066,36 @@ public class main_view extends Activity
 
 	private void download_file(String urler, String file_name)
 	{
-			if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
+		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
+		{
+			try
 			{
+				BufferedInputStream in = null;
+				FileOutputStream fout = null;
 				try
 				{
-					BufferedInputStream in = null;
-					FileOutputStream fout = null;
-					try
-					{
-						in = new BufferedInputStream(new URL(urler).openStream());
-						fout = new FileOutputStream(storage + file_name);
+					in = new BufferedInputStream(new URL(urler).openStream());
+					fout = new FileOutputStream(storage + file_name);
 
-						byte data[] = new byte[1024];
-						int count;
-						while ((count = in.read(data, 0, 1024)) != -1)
-						{
-							fout.write(data, 0, count);
-						}
-					}
-					finally
-					{
-						if (in != null)
-							in.close();
-						if (fout != null)
-							fout.close();
-					}
+					byte data[] = new byte[1024];
+					int count;
+					while ((count = in.read(data, 0, 1024)) != -1)
+						fout.write(data, 0, count);
 				}
-				catch(Exception e){
+				finally
+				{
+					if (in != null)
+						in.close();
+					if (fout != null)
+						fout.close();
 				}
 			}
+			catch(Exception e){
+			}
+		}
 	}
 
 	private void append_string_to_file(String file_name, String string)
-	{
-		try
-		{
-			BufferedWriter out = new BufferedWriter(new FileWriter(storage + file_name, true));
-			out.write(string);
-			out.close();
-		}
-		catch (Exception e)
-		{
-		}
-	}
-
-	private static void append_string_to_file_static(String file_name, String string)
 	{
 		try
 		{
@@ -1137,9 +1115,9 @@ public class main_view extends Activity
 			add_group("All");
 	}
 
-	private static void update_groups()
+	private void update_groups()
 	{
-		List<String> gs = read_file_to_list_static("groups/group_list.txt", 0);
+		List<String> gs = read_file_to_list("groups/group_list.txt", 0);
 		current_groups = gs.toArray(new String[gs.size()]);
 		ArrayAdapter<String> nav_adapter;
 		if((current_groups.length+3)>nav_final.length)
@@ -1170,11 +1148,11 @@ public class main_view extends Activity
 		viewPager.getAdapter().notifyDataSetChanged();
 	}
 
-	public static void update_group_order(List<String> new_order)
+	public void update_group_order(List<String> new_order)
 	{
 		(new File(storage + "groups/group_list.txt")).delete();
 		for(String group : new_order)
-			append_string_to_file_static("groups/group_list.txt", group + "\n");
+			append_string_to_file("groups/group_list.txt", group + "\n");
 		update_groups();
 	}
 
@@ -1184,48 +1162,6 @@ public class main_view extends Activity
 	}
 
 	private List< List<String> > read_csv_to_list(String[] type)
-	{
-		String feed_path = type[0];
-		int lines_to_skip = Integer.parseInt(type[1]);
-		int number_of_items = type.length - 2;
-
-		String line = null;
-		BufferedReader stream = null;
-		List< List<String> > types = new ArrayList< List<String> >();
-		for(int i = 0; i < number_of_items; i++)
-			types.add(new ArrayList< String >());
-
-		String content = "";
-
-		try
-		{
-			stream = new BufferedReader(new FileReader(feed_path));
-
-			/// Skip lines.
-			for(int i=0; i<lines_to_skip; i++)
-				stream.readLine();
-
-			while((line = stream.readLine()) != null)
-			{
-				for(int i = 0; i < number_of_items; i++)
-				{
-					content = type[2 + i] + "|";
-					if((!line.contains(content))||(line.contains(content + '|')))
-						types.get(i).add("");
-					else
-					{
-						int content_start = line.indexOf(content) + content.length();
-						types.get(i).add(line.substring(content_start, line.indexOf('|', content_start)));
-					}
-				}
-			}
-		}
-		catch(IOException e){
-		}
-		return types;
-	}
-
-	private static List< List<String> > read_csv_to_list_static(String[] type)
 	{
 		String feed_path = type[0];
 		int lines_to_skip = Integer.parseInt(type[1]);
@@ -1304,24 +1240,108 @@ public class main_view extends Activity
 		return i;
 	}
 
-	private static List<String> read_file_to_list_static(String file_name, int lines_to_skip)
+	private class update_group extends AsyncTask<Integer, Object, Long>
 	{
-		String line = null;
-		BufferedReader stream = null;
-		List<String> lines = new ArrayList<String>();
-		try
+		@Override
+		protected void onPreExecute(){
+			set_refresh(true);
+		}
+
+		@Override
+		protected Long doInBackground(Integer... ton)
 		{
-			stream = new BufferedReader(new FileReader(storage + file_name));
-			for(int i=0; i<lines_to_skip; i++)
-				stream.readLine();
-			while((line = stream.readLine()) != null)
-				lines.add(line);
-			if (stream != null)
-				stream.close();
+			/// ton[1] = page number or position in current_groups.
+			/// ton[0] = if true, do not download new data.
+			int page_number = ton[0];
+
+			String group = current_groups[page_number];
+			String group_file_path 			= storage + "groups/" + group + ".txt";
+			String partial_image_path 		= storage + "images/";
+			String partial_thumbnail_path 	= storage + "thumbnails/";
+
+			List< List<String> > content 		= read_csv_to_list(new String[]{group_file_path, "0", "name", "url"});
+			List<String> group_feeds_names 		= content.get(0);
+			List<String> group_feeds_urls 		= content.get(1);
+
+			String image_name = "", thumbnail_path = "", feed_path = "";
+
+			if(group_feeds_names.size() < 1)
+				return 0L;
+
+			/// If we should download and update the feeds inside that group.
+			for(int i=0; i<group_feeds_names.size(); i++)
+			{
+				feed_path = storage + "content/" + group_feeds_names.get(i); /// mariam_feed.txt
+				download_file(group_feeds_urls.get(i), "content/" + group_feeds_names.get(i) + ".store.txt"); /// Downloads file as mariam_feed.store.txt
+				new parsered(feed_path + ".store.txt"); /// Parses the file and makes other files like mariam_feed.store.txt.content.txt
+			}
+
+			/// Make group content file
+			String group_content_path = storage + "groups/" + group + ".txt.content.txt";
+
+			/// If we have updated the feeds, resort the group_content file.
+			/// TODO: If there was a new item returned from download_file, update the times
+			sort_group_content_by_time(group);
+
+			String[] passer = {group_content_path, "0", "image"};
+			List< List<String> > contenter 	= read_csv_to_list(passer);
+			List<String> images 			= contenter.get(0);
+
+			/// For each line of the group_content_file
+			for(int m=0; m<images.size(); m++)
+			{
+				if(!images.get(m).equals(""))
+				{
+					image_name = images.get(m).substring(images.get(m).lastIndexOf("/") + 1, images.get(m).length());
+
+					/// If the image_name does not exist in images/ then download the file at url (images[m]) to images with name image_name
+					if(!(new File(partial_image_path + image_name)).exists())
+						download_file(images.get(m), "images/" + image_name);
+					/// If the thumbnail does not exist in thumbnails/, compress the image in images/ to thumbnails with image_name.
+					if(!(new File(partial_thumbnail_path + image_name)).exists())
+						compress_file(partial_image_path + image_name, partial_thumbnail_path + image_name, image_name, group, false);
+				}
+			}
+			return 0L;
 		}
-		catch(IOException e){
+
+		@Override
+		protected void onProgressUpdate(Object... progress)
+		{
+			ListFragment l = ((fragment_card) getFragmentManager().findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + Integer.toString((Integer) progress[0])));
+			if(l != null)
+			{
+				card_adapter ith = ((card_adapter) l.getListAdapter());
+
+				ListView lv = l.getListView();
+				int index = lv.getFirstVisiblePosition() + 1;
+				View v = lv.getChildAt(0);
+				int top = (v == null) ? 0 : v.getTop();
+				if(top == 0)
+					index++;
+				else if (top < 0 && lv.getChildAt(1) != null)
+				{
+					index++;
+					v = lv.getChildAt(1);
+					top = v.getTop();
+				}
+
+				ith.add_list((String) progress[1], (String) progress[2], (String) progress[3], (String) progress[4], (Integer) progress[5], (Integer) progress[6]);
+				ith.notifyDataSetChanged();
+
+				lv.setSelectionFromTop(index, top - twelve);
+			}
+			else
+				toast_message("ListFragment " + Integer.toString((Integer) progress[0]) + "NullPointerException", 1);
 		}
-		return lines;
+
+		@Override
+		protected void onPostExecute(Long tun)
+		{
+			//if(viewPager.getOffscreenPageLimit() > 1)
+				//viewPager.setOffscreenPageLimit(1);
+			set_refresh(false);
+		}
 	}
 
 	private class refresh_feeds extends AsyncTask<Object, Object, Long>
@@ -1460,7 +1480,7 @@ public class main_view extends Activity
 		@Override
 		protected void onProgressUpdate(Object... progress)
 		{
-			ListFragment l = ((card_fragment) getFragmentManager().findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + Integer.toString((Integer) progress[0])));
+			ListFragment l = ((fragment_card) getFragmentManager().findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + Integer.toString((Integer) progress[0])));
 			if(l != null)
 			{
 				card_adapter ith = ((card_adapter) l.getListAdapter());
@@ -1498,7 +1518,7 @@ public class main_view extends Activity
 
 	private card_adapter get_card_adapter(int page_index)
 	{
-		return ((card_adapter)((card_fragment) getFragmentManager()
+		return ((card_adapter)((fragment_card) getFragmentManager()
 						.findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + Integer.toString(page_index)))
 						.getListAdapter());
 	}
@@ -1617,9 +1637,9 @@ public class main_view extends Activity
 		return current_groups;
 	}
 
-	private static void log(String text)
+	private void log(String text)
 	{
-		append_string_to_file_static("dump.txt", text + "\n");
+		append_string_to_file("dump.txt", text + "\n");
 	}
 
 	String compress_file(String image_path, String thumbnail_path, String image_name, String group, Boolean skip_save)
