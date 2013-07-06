@@ -155,8 +155,8 @@ public class main_view extends Activity
 			}
 			(new File(storage + "groups/" + old_group + ".txt.content.txt")).delete();
 			//sort_group_content_by_time();
-			//new refresh_feeds().execute(true, 0);
-			//new refresh_feeds().execute(true, 0);
+			//new refresh_page().execute(true, 0);
+			//new refresh_page().execute(true, 0);
 		}
 		
 		(new File(storage + "groups/All.txt.content.txt")).delete();
@@ -297,7 +297,7 @@ public class main_view extends Activity
 			getActionBar().setHomeButtonEnabled(true);
 
 			if(read_file_to_list("groups/All.txt", 0).size()>0)
-				new refresh_feeds().execute(true, 0);
+				new refresh_page().execute(0);
 
 			drawer_toggle.syncState();
 			density = getResources().getDisplayMetrics().density;
@@ -398,11 +398,11 @@ public class main_view extends Activity
 			/// Replace 0 with the index of all.
 			if((position == 0)&&(new_items))
 			{
-				new refresh_feeds().execute(true, 0);
+				new refresh_page().execute(0);
 				new_items = false;
 			}
 			else if(get_card_adapter(position).getCount() == 0)
-				new refresh_feeds().execute(true, position);
+				new refresh_page().execute(position);
 		}
 	}
 
@@ -705,7 +705,7 @@ public class main_view extends Activity
 		}
 		else if(item.getTitle().equals("refresh"))
 		{
-			new refresh_feeds().execute(false, ((ViewPager) findViewById(R.id.pager)).getCurrentItem());
+			new update_group().execute(((ViewPager) findViewById(R.id.pager)).getCurrentItem(), true);
 			return true;
 		}
 
@@ -1212,7 +1212,6 @@ public class main_view extends Activity
 		return types;
 	}
 
-
 	private List<String> read_file_to_list(String file_name, int lines_to_skip)
 	{
 		String line = null;
@@ -1249,7 +1248,7 @@ public class main_view extends Activity
 		return i;
 	}
 
-	private class update_group extends AsyncTask<Integer, Object, Long>
+	private class update_group extends AsyncTask<Object, Void, Integer>
 	{
 		@Override
 		protected void onPreExecute(){
@@ -1257,11 +1256,12 @@ public class main_view extends Activity
 		}
 
 		@Override
-		protected Long doInBackground(Integer... ton)
+		protected Integer doInBackground(Object... ton)
 		{
 			/// ton[1] = page number or position in current_groups.
 			/// ton[0] = if true, do not download new data.
-			int page_number = ton[0];
+			int page_number = (Integer) ton[0];
+			Boolean skip_refresh = (Boolean) ton[1];
 
 			String group = current_groups[page_number];
 			String group_file_path 			= storage + "groups/" + group + ".txt";
@@ -1275,7 +1275,7 @@ public class main_view extends Activity
 			String image_name = "", thumbnail_path = "", feed_path = "";
 
 			if(group_feeds_names.size() < 1)
-				return 0L;
+				return -2;
 
 			/// If we should download and update the feeds inside that group.
 			for(int i=0; i<group_feeds_names.size(); i++)
@@ -1311,62 +1311,37 @@ public class main_view extends Activity
 						compress_file(partial_image_path + image_name, partial_thumbnail_path + image_name, image_name, group, false);
 				}
 			}
-			return 0L;
-		}
-
-		@Override
-		protected void onProgressUpdate(Object... progress)
-		{
-			ListFragment l = ((fragment_card) getFragmentManager().findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + Integer.toString((Integer) progress[0])));
-			if(l != null)
-			{
-				card_adapter ith = ((card_adapter) l.getListAdapter());
-
-				ListView lv = l.getListView();
-				int index = lv.getFirstVisiblePosition() + 1;
-				View v = lv.getChildAt(0);
-				int top = (v == null) ? 0 : v.getTop();
-				if(top == 0)
-					index++;
-				else if (top < 0 && lv.getChildAt(1) != null)
-				{
-					index++;
-					v = lv.getChildAt(1);
-					top = v.getTop();
-				}
-
-				ith.add_list((String) progress[1], (String) progress[2], (String) progress[3], (String) progress[4], (Integer) progress[5], (Integer) progress[6]);
-				ith.notifyDataSetChanged();
-
-				lv.setSelectionFromTop(index, top - twelve);
-			}
+			if(!skip_refresh)
+				return page_number;
 			else
-				toast_message("ListFragment " + Integer.toString((Integer) progress[0]) + "NullPointerException", 1);
+				return -2;
 		}
 
 		@Override
-		protected void onPostExecute(Long tun)
+		protected void onProgressUpdate(Void... prog){
+		}
+
+		@Override
+		protected void onPostExecute(Integer tun)
 		{
-			//if(viewPager.getOffscreenPageLimit() > 1)
-				//viewPager.setOffscreenPageLimit(1);
-			set_refresh(false);
+			if(tun > -2)
+				new refresh_page().execute(tun);
+			else
+				set_refresh(false);
 		}
 	}
 
-	private class refresh_feeds extends AsyncTask<Object, Object, Long>
+	private class refresh_page extends AsyncTask<Integer, Object, Long>
 	{
 		@Override
 		protected void onPreExecute(){
-			set_refresh(true);
 		}
 
 		@Override
-		protected Long doInBackground(Object... ton)
+		protected Long doInBackground(Integer... ton)
 		{
-			/// ton[1] = page number or position in current_groups.
-			/// ton[0] = if true, do not download new data.
-			Boolean skip_download = ((Boolean) ton[0]);
-			int page_number = ((Integer) ton[1]);
+			/// ton[0] = page number or position in current_groups.
+			int page_number = ton[0];
 
 			String group = current_groups[page_number];
 			String group_file_path 			= storage + "groups/" + group + ".txt";
@@ -1383,33 +1358,18 @@ public class main_view extends Activity
 				return 0L;
 
 			/// If we should download and update the feeds inside that group.
-			if(!skip_download)
+			for(String feed : group_feeds_names)
 			{
-				for(int i=0; i<group_feeds_names.size(); i++)
-				{
-					feed_path = storage + "content/" + group_feeds_names.get(i); /// mariam_feed.txt
-					download_file(group_feeds_urls.get(i), "content/" + group_feeds_names.get(i) + ".store.txt"); /// Downloads file as mariam_feed.store.txt
-					new parsered(feed_path + ".store.txt"); /// Parses the file and makes other files like mariam_feed.store.txt.content.txt
-				}
-			}
-			else
-			{
-				for(String feed : group_feeds_names)
-				{
-					if(!(new File(storage + "content/" + feed + ".store.txt.content.txt")).exists())
-						return 0L;
-				}
+				if(!(new File(storage + "content/" + feed + ".store.txt.content.txt")).exists())
+					return 0L;
 			}
 
 			/// Make group content file
 			String group_content_path = storage + "groups/" + group + ".txt.content.txt";
 			File group_content_file = new File(group_content_path);
 
-			/// If we have updated the feeds, resort the group_content file.
-			if((!skip_download))
-				sort_group_content_by_time(group);
 			/// If we have skipped the download, and either the page number is zero (which it only is if new data had been made since) or the group content file does not exist yet.
-			else if((!group_content_file.exists())||((page_number == 0)&&(new_items)))
+			if((!group_content_file.exists())||(new_items))
 			{
 				for(String feed : group_feeds_names)
 				{
@@ -1454,7 +1414,6 @@ public class main_view extends Activity
 				{
 					image_name = images.get(m).substring(images.get(m).lastIndexOf("/") + 1, images.get(m).length());
 
-					/// If the image_name does not exist in images/ then download the file at url (images[m]) to images with name image_name
 					if(!(new File(partial_image_path + image_name)).exists())
 						download_file(images.get(m), "images/" + image_name);
 					/// If the thumbnail does not exist in thumbnails/, compress the image in images/ to thumbnails with image_name.
@@ -1471,7 +1430,7 @@ public class main_view extends Activity
 					thumbnail_path = partial_thumbnail_path + image_name;
 				}
 
-				// Perhaps shorten descriptions to eight lines max here so that parsing is faster.
+				// Checks to see if page has this item.
 
 				if((!ith_list.contains(links.get(m)))||(ith_list.size() == 0))
 				{
@@ -1479,7 +1438,8 @@ public class main_view extends Activity
 					/// Add this url to the card list we have stored instead of reasking for the new list.
 					ith_list.add(links.get(m));
 					/// If we have downloaded new data on other pages bar 0, and it gets here, there is new data for 0 to refresh with.
-					if((skip_download == false)&&(page_number != 0))
+					if(page_number != 0)
+					// Make this an array for the group pages.
 						new_items = true;
 				}
 			}
