@@ -305,6 +305,15 @@ public class main_view extends Activity
 			res = getResources();
 		}
 	}
+	
+	protected void onStop()
+	{
+		super.onStop();
+		Intent intent = new Intent(this, service_update.class);
+		intent.putExtra("GROUP_NUMBER", "0");
+		AlarmManager alarm_refresh = (AlarmManager)getSystemService(Activity.ALARM_SERVICE);
+		alarm_refresh.set(RTC_WAKEUP, 180000, intent);
+	}
 
 	public static Resources get_resources(){
 		return res;
