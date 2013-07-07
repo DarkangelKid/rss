@@ -6,52 +6,56 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 
 import android.app.AlertDialog;
-
-import android.os.Bundle;
-
-import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
-
-import android.app.ListFragment;
-import android.view.Display;
-import android.graphics.Point;
 import android.app.Fragment;
+import android.app.ListFragment;
 import android.app.FragmentManager;
+import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
+
+import android.os.Bundle;
+import android.os.AsyncTask;
+import android.os.Environment;
+
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.PagerTabStrip;
 import android.support.v4.widget.DrawerLayout;
 
-import android.graphics.Color;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuInflater;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.view.ViewGroup.LayoutParams;
+
+import android.widget.FrameLayout;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.content.res.Configuration;
-
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 
-import android.os.Environment;
-import java.io.File;
 import java.net.URL;
 
-import android.os.AsyncTask;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
+
+import java.io.File;
 import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -59,13 +63,12 @@ import java.io.FileReader;
 import java.io.BufferedWriter;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Locale;
 import java.text.SimpleDateFormat;
+
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap;
+import android.graphics.Point;
+import android.graphics.Color;
 
 public class main_view extends Activity
 {
@@ -88,6 +91,7 @@ public class main_view extends Activity
 	private Boolean new_items;
 	public static String storage;
 	public static Context context, activity_context;
+	private static Boolean not_first_time = false;
 
 	public static String[] current_groups;
 	private static List<String> feed_titles, feed_urls, feed_groups;
@@ -306,6 +310,8 @@ public class main_view extends Activity
 			density = getResources().getDisplayMetrics().density;
 			twelve = (int) ((12 * density + 0.5f));
 			res = getResources();
+			set_refresh(check_service_running());
+			not_first_time = true;
 		}
 	}
 	
@@ -321,12 +327,20 @@ public class main_view extends Activity
 		//startService(intent);
 	}
 
+	@Override
+	protected void onStart()
+	{
+		if(not_first_time)
+			set_refresh(check_service_running());
+	}
+
 	public static Resources get_resources(){
 		return res;
 	}
 
 	@Override
-	public void onConfigurationChanged(Configuration newConfig) {
+	public void onConfigurationChanged(Configuration newConfig)
+	{
 		super.onConfigurationChanged(newConfig);
 		drawer_toggle.onConfigurationChanged(newConfig);
 	}
@@ -353,6 +367,18 @@ public class main_view extends Activity
 			int page = position - 3;
 			viewPager.setCurrentItem(page);
 		}
+	}
+
+	private boolean check_service_running()
+	{
+		ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+		for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE))
+		{
+			if (service_update.class.getName().equals(service.service.getClassName())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public static float get_pixel_density(){
@@ -1417,7 +1443,7 @@ public class main_view extends Activity
 		{
 			//if(viewPager.getOffscreenPageLimit() > 1)
 				//viewPager.setOffscreenPageLimit(1);
-			set_refresh(false);
+			set_refresh(check_service_running());
 		}
 	}
 
