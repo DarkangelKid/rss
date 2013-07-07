@@ -3,10 +3,14 @@ package yay.poloure.simplerss;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
+import android.view.Display;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.FileReader;
+import java.io.BufferedWriter;
 import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.BufferedInputStream;
@@ -14,6 +18,10 @@ import java.net.URL;
 
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+
+import android.graphics.BitmapFactory;
+import android.graphics.Bitmap;
+import android.graphics.Point;
 
 public class service_update extends IntentService
 {
@@ -37,20 +45,38 @@ public class service_update extends IntentService
 
 		String grouper = read_file_to_list(storage + "groups/group_list.txt", 0).get(group);
 		String group_file_path 		= storage + "groups/" + grouper + ".txt";
+		String partial_image_path 		= storage + "images/";
+		String partial_thumbnail_path 	= storage + "thumbnails/";
 
 		List< List<String> > content 		= read_csv_to_list(new String[]{group_file_path, "0", "name", "url"});
 		List<String> group_feeds_names 		= content.get(0);
 		List<String> group_feeds_urls 		= content.get(1);
 
-		String feed_path = "";
+		String image_name = "", thumbnail_path = "", feed_path = "";
 
 		/// If we should download and update the feeds inside that group.
-		for(int i=0; i<group_feeds_names.size(); i++)
+		String group_content_path = storage + "groups/" + grouper + ".txt.content.txt";
+
+		String[] passer = {group_content_path, "0", "image"};
+		List< List<String> > contenter 	= read_csv_to_list(passer);
+		List<String> images 			= contenter.get(0);
+
+			/// For each line of the group_content_file
+		for(int m=0; m<images.size(); m++)
 		{
-			feed_path = storage + "content/" + group_feeds_names.get(i); /// mariam_feed.txt
-			download_file(group_feeds_urls.get(i), "content/" + group_feeds_names.get(i) + ".store.txt"); /// Downloads file as mariam_feed.store.txt
-			new parsered(feed_path + ".store.txt"); /// Parses the file and makes other files like mariam_feed.store.txt.content.txt
+			if(!images.get(m).equals(""))
+			{
+				image_name = images.get(m).substring(images.get(m).lastIndexOf("/") + 1, images.get(m).length());
+
+				/// If the image_name does not exist in images/ then download the file at url (images[m]) to images with name image_name
+				if(!(new File(partial_image_path + image_name)).exists())
+					download_file(images.get(m), "images/" + image_name);
+				/// If the thumbnail does not exist in thumbnails/, compress the image in images/ to thumbnails with image_name.
+				if(!(new File(partial_thumbnail_path + image_name)).exists())
+					compress_file(partial_image_path + image_name, partial_thumbnail_path + image_name, image_name, grouper, false);
+			}
 		}
+
 		wakelock.release();
 	}
 	
@@ -118,29 +144,81 @@ public class service_update extends IntentService
 	
 	private void download_file(String urler, String file_name)
 	{
+		try
+		{
+			BufferedInputStream in = null;
+			FileOutputStream fout = null;
 			try
 			{
-				BufferedInputStream in = null;
-				FileOutputStream fout = null;
-				try
-				{
-					in = new BufferedInputStream(new URL(urler).openStream());
-					fout = new FileOutputStream(storage + file_name);
+				in = new BufferedInputStream(new URL(urler).openStream());
+				fout = new FileOutputStream(storage + file_name);
 
-					byte data[] = new byte[1024];
-					int count;
-					while ((count = in.read(data, 0, 1024)) != -1)
-						fout.write(data, 0, count);
-				}
-				finally
-				{
-					if (in != null)
-						in.close();
-					if (fout != null)
-						fout.close();
-				}
+				byte data[] = new byte[1024];
+				int count;
+				while ((count = in.read(data, 0, 1024)) != -1)
+					fout.write(data, 0, count);
 			}
-			catch(Exception e){
+			finally
+			{
+				if (in != null)
+					in.close();
+				if (fout != null)
+					fout.close();
 			}
+		}
+		catch(Exception e){
+		}
+	}
+
+	String compress_file(String image_path, String thumbnail_path, String image_name, String group, Boolean skip_save)
+	{
+		int insample;
+		if(!skip_save)
+		{
+			BitmapFactory.Options o = new BitmapFactory.Options();
+			o.inJustDecodeBounds = true;
+			BitmapFactory.decodeFile(image_path, o);
+
+			int width = main_view.return_width();
+			int width_tmp = o.outWidth;
+
+			if(width_tmp > width)
+				insample =  Math.round((float) width_tmp / (float) width);
+			else
+				insample = 1;
+		}
+		else
+			insample = 1;
+
+		BitmapFactory.Options o2 = new BitmapFactory.Options();
+		o2.inSampleSize = insample;
+		Bitmap bitmap = BitmapFactory.decodeFile(image_path, o2);
+		append_string_to_file(group + ".image_size.cache.txt", image_name + "|" + o2.outWidth + "|" + o2.outHeight + "\n");
+
+		if(!skip_save)
+		{
+			try
+			{
+				FileOutputStream out = new FileOutputStream(thumbnail_path);
+				bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
+			}
+			catch (Exception e){
+			}
+		}
+
+		return image_name + "|" + o2.outWidth + "|" + o2.outHeight;
+	}
+
+	private static void append_string_to_file(String file_name, String string)
+	{
+		try
+		{
+			BufferedWriter out = new BufferedWriter(new FileWriter(storage + file_name, true));
+			out.write(string);
+			out.close();
+		}
+		catch (Exception e)
+		{
+		}
 	}
 }
