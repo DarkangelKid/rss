@@ -330,6 +330,7 @@ public class main_view extends Activity
 	@Override
 	protected void onStart()
 	{
+		super.onStart();
 		if(not_first_time)
 			set_refresh(check_service_running());
 	}
