@@ -429,6 +429,7 @@ public class main_view extends Activity
 		{
 			/// Add a global new feeds downloaded so update all method here.
 			/// Replace 0 with the index of all.
+			
 			if((position == 0)&&(new_items))
 			{
 				new refresh_page().execute(0);
@@ -1377,18 +1378,8 @@ public class main_view extends Activity
 				{
 					image_name = images.get(m).substring(images.get(m).lastIndexOf("/") + 1, images.get(m).length());
 
-					if(!(new File(partial_image_path + image_name)).exists())
-						download_file(images.get(m), "images/" + image_name);
-					/// If the thumbnail does not exist in thumbnails/, compress the image in images/ to thumbnails with image_name.
-					if(!(new File(partial_thumbnail_path + image_name)).exists())
-						dimensions.add(compress_file(partial_image_path + image_name, partial_thumbnail_path + image_name, image_name, group, false));
-
-					dim = get_image_dimensions(dimensions, image_name);
-					if(dim[0] == 0)
-					{
-						dimensions.add(compress_file(partial_image_path + image_name, partial_thumbnail_path + image_name, image_name, group, true));
+					if((new File(partial_thumbnail_path + image_name)).exists())
 						dim = get_image_dimensions(dimensions, image_name);
-					}
 
 					thumbnail_path = partial_thumbnail_path + image_name;
 				}
