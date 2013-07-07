@@ -7,6 +7,9 @@ import android.view.Display;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
+import java.text.SimpleDateFormat;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.FileReader;
@@ -38,25 +41,22 @@ public class service_update extends IntentService
 	@Override
 	protected void onHandleIntent(Intent intent)
 	{
-		slog("service started");
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		PowerManager.WakeLock wakelock = pm.newWakeLock(pm.PARTIAL_WAKE_LOCK, "SIMPLERSS");
 		wakelock.acquire();
-		
-		slog("wakelock acquired");
-		
+
 		group = Integer.parseInt(intent.getStringExtra("GROUP_NUMBER"));
 		storage = this.getExternalFilesDir(null).getAbsolutePath() + "/";
 		
-		slog("storage set");
-		slog(storage);
-		slog(Integer.toString(group));
+		log("storage set");
+		log(storage);
+		log(Integer.toString(group));
 
 		String grouper = read_file_to_list("groups/group_list.txt", 0).get(group);
 		String group_file_path 		= storage + "groups/" + grouper + ".txt";
 		String partial_image_path 		= storage + "images/";
 		String partial_thumbnail_path 	= storage + "thumbnails/";
-		
+
 		List< List<String> > content 		= read_csv_to_list(new String[]{group_file_path, "0", "name", "url"});
 		List<String> group_feeds_names 		= content.get(0);
 		List<String> group_feeds_urls 		= content.get(1);
@@ -68,7 +68,11 @@ public class service_update extends IntentService
 			feed_path = storage + "content/" + group_feeds_names.get(i); /// mariam_feed.txt
 			download_file(group_feeds_urls.get(i), "content/" + group_feeds_names.get(i) + ".store.txt"); /// Downloads file as mariam_feed.store.txt
 			new parsered(feed_path + ".store.txt"); /// Parses the file and makes other files like mariam_feed.store.txt.content.txt
+			log("got a feed and parsed");
 		}
+
+		/// Sort group order
+		sort_group_content_by_time(grouper);
 
 		/// If we should download and update the feeds inside that group.
 		String group_content_path = storage + "groups/" + grouper + ".txt.content.txt";
@@ -77,19 +81,28 @@ public class service_update extends IntentService
 		List< List<String> > contenter 	= read_csv_to_list(passer);
 		List<String> images 			= contenter.get(0);
 
+		log("size of image list = " + Integer.toString(images.size()));
+
 			/// For each line of the group_content_file
 		for(int m=0; m<images.size(); m++)
 		{
 			if(!images.get(m).equals(""))
 			{
 				image_name = images.get(m).substring(images.get(m).lastIndexOf("/") + 1, images.get(m).length());
+				log(image_name);
 
 				/// If the image_name does not exist in images/ then download the file at url (images[m]) to images with name image_name
 				if(!(new File(partial_image_path + image_name)).exists())
+				{
+					log("downloading image");
 					download_file(images.get(m), "images/" + image_name);
+				}
 				/// If the thumbnail does not exist in thumbnails/, compress the image in images/ to thumbnails with image_name.
 				if(!(new File(partial_thumbnail_path + image_name)).exists())
+				{
+					log("compressing file");
 					compress_file(partial_image_path + image_name, partial_thumbnail_path + image_name, image_name, grouper, false);
+				}
 			}
 		}
 
@@ -238,16 +251,125 @@ public class service_update extends IntentService
 		}
 	}
 	
-	private static void slog(String string)
+	private static void log(String string)
 	{
 		try
 		{
-			BufferedWriter out = new BufferedWriter(new FileWriter("/storage/emulated/0/Android/data/yay.poloure.simplerss/files/dump.txt", true));
+			BufferedWriter out = new BufferedWriter(new FileWriter(storage + "dump.txt", true));
 			out.write(string + "\n");
 			out.close();
 		}
 		catch (Exception e)
 		{
+		}
+	}
+
+	private void sort_group_content_by_time(String group)
+	{
+		Date time;
+
+		List<String> feeds_array	= read_csv_to_list(new String[]{storage + "groups/" + group + ".txt", "0", "name"}).get(0);
+		List<Date> dates 			= new ArrayList<Date>();
+		List<String> links			= new ArrayList<String>();
+		List<String> pubDates		= new ArrayList<String>();
+		List<String> links_ordered 	= new ArrayList<String>();
+		List<String> content_all 	= new ArrayList<String>();
+		List<String> content 		= new ArrayList<String>();
+
+		for(String feed : feeds_array)
+		{
+			String content_path = storage + "content/" + feed + ".store.txt.content.txt";
+			File test = new File(content_path);
+			if(test.exists())
+			{
+
+				List< List<String> > contenter	= read_csv_to_list(new String[]{content_path, "1", "link", "pubDate"});
+				links 							= contenter.get(0);
+				pubDates						= contenter.get(1);
+				content 						= read_file_to_list("content/" + feed + ".store.txt.content.txt", 1);
+
+				if(pubDates.get(0).length()<8)
+					pubDates 					= read_csv_to_list(new String[]{content_path, "1", "published"}).get(0);
+				if(pubDates.get(0).length()<8)
+					pubDates 					= read_csv_to_list(new String[]{content_path, "1", "updated"}).get(0);
+
+				for(int i=0; i<pubDates.size(); i++)
+				{
+					content_all.add(content.get(i));
+					try{
+						time 					= (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.ENGLISH)).parse(pubDates.get(i));
+					}
+					catch(Exception e){
+						try{
+							time 				= (new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH)).parse(pubDates.get(i));
+						}
+						catch(Exception t){
+							try{
+								time 			= (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH)).parse(pubDates.get(i));
+							}
+							catch(Exception c){
+								try{
+									time 		= (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.ENGLISH)).parse(pubDates.get(i));
+								}
+								catch(Exception n){
+									try{
+										time 	= (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ENGLISH)).parse(pubDates.get(i));
+									}
+									catch(Exception r){
+										try{
+											time = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH)).parse(pubDates.get(i));
+										}
+										catch(Exception x){
+											log("BUG : Format not found and date looks like: " + pubDates.get(i));
+											time = new Date();
+										}
+									}
+								}
+							}
+						}
+					}
+
+					for(int j=0; j<dates.size(); j++)
+					{
+						if(time.before(dates.get(j)))
+						{
+							dates.add(j, time);
+							links_ordered.add(j, links.get(i));
+							break;
+						}
+						else if((j == dates.size() - 1)&&(time.after(dates.get(j))))
+						{
+							dates.add(time);
+							links_ordered.add(links.get(i));
+							break;
+						}
+					}
+					if(dates.size() == 0)
+					{
+						dates.add(time);
+						links_ordered.add(links.get(i));
+					}
+				}
+			}
+		}
+
+		String group_content_path = "groups/" + group + ".txt.content.txt";
+		File group_content = new File(storage + group_content_path);
+		group_content.delete();
+
+		if(links_ordered.size()>0)
+		{
+			for(String link : links_ordered)
+			{
+				for(String line : content_all)
+				{
+					if(line.contains(link))
+					{
+						append_string_to_file(group_content_path, line + "\n");
+						break;
+					}
+				}
+			}
 		}
 	}
 }
