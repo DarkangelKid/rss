@@ -63,6 +63,13 @@ public class service_update extends IntentService
 
 		String image_name = "", thumbnail_path = "", feed_path = "";
 
+		for(int i=0; i<group_feeds_names.size(); i++)
+		{
+			feed_path = storage + "content/" + group_feeds_names.get(i); /// mariam_feed.txt
+			download_file(group_feeds_urls.get(i), "content/" + group_feeds_names.get(i) + ".store.txt"); /// Downloads file as mariam_feed.store.txt
+			new parsered(feed_path + ".store.txt"); /// Parses the file and makes other files like mariam_feed.store.txt.content.txt
+		}
+
 		/// If we should download and update the feeds inside that group.
 		String group_content_path = storage + "groups/" + grouper + ".txt.content.txt";
 
