@@ -374,7 +374,7 @@ public class main_view extends Activity
 		ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
 		for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE))
 		{
-			if (service_update.class.getName().equals(service.service.getClassName())) {
+			if(service_update.class.getName().equals(service.service.getClassName())) {
 				return true;
 			}
 		}
