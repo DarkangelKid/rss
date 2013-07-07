@@ -51,6 +51,7 @@ import android.widget.Spinner;
 import java.net.URL;
 
 import java.util.List;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
@@ -93,14 +94,13 @@ public class main_view extends Activity
 	public static Context context, activity_context;
 	private static Boolean not_first_time = false;
 
-	public static String[] current_groups;
+	public static List<String> current_groups = new ArrayList<String>();
 	private static List<String> feed_titles, feed_urls, feed_groups;
 
 	public static ListView feed_list;
 	public static feed_adapter feed_list_adapter;
 
 	private static final int CONTENT_VIEW_ID = 10101010;
-	private static String[] nav_final;
 
 	private void add_feed(String feed_name, String feed_url, String feed_group)
 	{
@@ -109,71 +109,46 @@ public class main_view extends Activity
 		update_feeds_list();
 	}
 
-	private void edit_feed(int pos, String old_feed_name, String feed_name, String feed_url, String old_group, String feed_group)
+	private void edit_feed(int pos, String old_name, String new_name, String new_url, String old_group, String new_group)
 	{
-		/// Update the All.txt file
-		List<String> feeds = read_file_to_list("groups/All.txt", 0);
-		(new File(storage + "groups/All.txt")).delete();
-		for(int i=0; i<feeds.size(); i++)
-		{
-			if(feeds.get(i).contains(old_feed_name))
-				append_string_to_file("groups/All.txt", "name|" +  feed_name + "|url|" + feed_url + "|group|" + feed_group + "|\n");
-			else
-				append_string_to_file("groups/All.txt", feeds.get(i) + "\n");
-		}
+		/// Delete the feed info from the all group and add the new group info to the end of the all content file.
+		remove_string_from_file("groups/All.txt", old_name, true);
+		append_string_to_file("groups/All.txt", "name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|\n");
+		(new File(storage + "groups/All.txt.content.txt")).delete();
 
 		/// If we have renamed the title, rename the content/title.txt file.
-		if(!old_feed_name.equals(feed_name))
-		{
-			(new File(storage + "content/" + old_feed_name + ".store.txt.content.txt"))
-			.renameTo((new File(storage + "content/" + feed_name + ".store.txt.content.txt")));
-		}
+		if(!old_name.equals(new_name))
+			(new File(storage + "content/" + old_name + ".store.txt.content.txt"))
+			.renameTo((new File(storage + "content/" + new_name + ".store.txt.content.txt")));
 
 		/// If we moved to a new group, delete the old cache file, force a refresh, and refresh the new one.
-		if(!old_group.equals(feed_group))
+		if(!old_group.equals(new_group))
 		{
-			/// Update the group file
-			File group_file = new File(storage + "groups/" + feed_group + ".txt");
-			append_string_to_file("groups/" + feed_group + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|\n");
+			/// Remove the line from the old group file containing the old_feed_name and add to the new group file.
+			remove_string_from_file("groups/" + old_group + ".txt", old_name, true);
+			append_string_to_file("groups/" + new_group + ".txt", "name|" +  new_name + "|url|" + new_url + "|\n");
 
-			/// Then delete from old group file
-			feeds = read_file_to_list("groups/" + old_group + ".txt", 0);
-			group_file = new File(storage + "groups/" + old_group + ".txt");
-			group_file.delete();
-			Boolean append = false;
-			for(int i=0; i<feeds.size(); i++)
-			{
-				if(!feeds.get(i).contains(old_feed_name))
-				{
-					append_string_to_file("groups/" + old_group + ".txt", feeds.get(i) + "\n");
-					append = true;
-				}
-			}
-			if(append == false)
-			{
-				feeds = read_file_to_list("groups/group_list.txt", 0);
-				group_file = new File(storage + "groups/group_list.txt");
-				group_file.delete();
-				for(int i=0; i<feeds.size(); i++)
-				{
-					if(!feeds.get(i).contains(old_group))
-						append_string_to_file("groups/group_list.txt", feeds.get(i) + "\n");
-				}
-			}
+			/// If the above group file no longer exists because there are no lines left, remove the group from the group list.
+			if(!(new File(storage + "groups/" + old_group + ".txt")).exists())
+				remove_string_from_file("groups/group_list.txt", old_group, false);
+
+			/// Delete the old and new group_file content files.
 			(new File(storage + "groups/" + old_group + ".txt.content.txt")).delete();
-			//sort_group_content_by_time();
-			//new refresh_page().execute(true, 0);
-			//new refresh_page().execute(true, 0);
+			(new File(storage + "groups/" + new_group + ".txt.content.txt")).delete();
 		}
-		
-		(new File(storage + "groups/All.txt.content.txt")).delete();
+		/// The group is the same but the titles and urls may have changed.
+		else
+		{
+			remove_string_from_file("groups/" + old_group + ".txt", old_name, true);
+			append_string_to_file("groups/" + old_group + ".txt", "name|" +  new_name + "|url|" + new_url + "|\n");
+		}
+
 		feed_adapter temp = feed_list_adapter;
 
-		/// Update the feed_titles, feed_urls, and feed_group lists from the groups/All.txt file.
 		update_feeds_list();
 		/// Add the new feeds to the feed_adapter (Manage/Feeds).
 		temp.remove_item(poser);
-		temp.add_list_pos(poser, feed_name, feed_url + "\n" + feed_group + " • " + Integer.toString(count_lines("content/" + feed_name + ".store.txt.content.txt") - 1) + " items");
+		temp.add_list_pos(poser, new_name, new_url + "\n" + new_group + " • " + Integer.toString(count_lines("content/" + new_name + ".store.txt.content.txt") - 1) + " items");
 		temp.notifyDataSetChanged();
 
 		update_groups();
@@ -187,6 +162,7 @@ public class main_view extends Activity
 		feed_urls 			= content.get(1);
 		feed_groups 		= content.get(2);
 	}
+
 	private void add_group(String group_name)
 	{
 		append_string_to_file("groups/group_list.txt", group_name + "\n");
@@ -218,26 +194,27 @@ public class main_view extends Activity
 					folder_file.mkdir();
 			}
 
-			List<String> gs = read_file_to_list("groups/group_list.txt", 0);
-			current_groups = gs.toArray(new String[gs.size()]);
-			if(current_groups.length == 0)
+			if(!(new File(storage + "groups/group_list.txt")).exists())
+			{
 				append_string_to_file("groups/group_list.txt", "All\n");
+				update_groups();
+			}
 
 			getActionBar().setIcon(R.drawable.rss_icon);
 
-				getFragmentManager().beginTransaction()
-							.add(CONTENT_VIEW_ID, new fragment_top())
-							.commit();
-				Fragment feed = new fragment_feed();
-				Fragment pref = new fragment_preferences();
-				Fragment man = new fragment_manage();
-				getFragmentManager().beginTransaction()
-					.add(R.id.content_frame, feed, "Feeds")
-					.add(R.id.content_frame, pref, "Settings")
-					.add(R.id.content_frame, man, "Manage")
-					.hide(man)
-					.hide(pref)
-					.commit();
+			getFragmentManager().beginTransaction()
+						.add(CONTENT_VIEW_ID, new fragment_top())
+						.commit();
+			Fragment feed = new fragment_feed();
+			Fragment pref = new fragment_preferences();
+			Fragment man = new fragment_manage();
+			getFragmentManager().beginTransaction()
+				.add(R.id.content_frame, feed, "Feeds")
+				.add(R.id.content_frame, pref, "Settings")
+				.add(R.id.content_frame, man, "Manage")
+				.hide(man)
+				.hide(pref)
+				.commit();
 		}
 	}
 
@@ -247,15 +224,12 @@ public class main_view extends Activity
 		super.onPostCreate(savedInstanceState);
 		if (savedInstanceState == null)
 		{
-
-			String[] nav_items = new String[]{"Feeds", "Manage", "Settings"};
-			nav_final = new String[current_groups.length + nav_items.length];
-			System.arraycopy(nav_items, 0, nav_final, 0, nav_items.length);
-			System.arraycopy(current_groups, 0, nav_final, nav_items.length, current_groups.length);
+			List<String> nav = current_groups;
+			nav.addAll(0, Arrays.asList("Feeds", "Manage", "Settings"));
+			String[] navigation_bar_data = nav.toArray(new String[nav.size()]);
 
 			navigation_list = (ListView) findViewById(R.id.left_drawer);
-			ArrayAdapter<String> nav_adapter = new ArrayAdapter<String>(this, R.layout.drawer_list_item, nav_final);
-			navigation_list.setAdapter(nav_adapter);
+			navigation_list.setAdapter(new ArrayAdapter<String>(get_context(), R.layout.drawer_list_item, navigation_bar_data));
 			navigation_list.setOnItemClickListener(new DrawerItemClickListener());
 
 			viewPager = (ViewPager) findViewById(R.id.pager);
@@ -508,9 +482,9 @@ public class main_view extends Activity
 			View view = inflater.inflate(R.layout.manage_fragment, container, false);
 			manage_list = (ListView) view.findViewById(R.id.group_listview);
 			manage_adapter = new group_adapter(getActivity());
-			for(int i = 0; i < current_groups.length; i++)
+			for(int i = 0; i < current_groups.size(); i++)
 			{
-				List<String> content = read_csv_to_list(new String[]{storage + "groups/" + current_groups[i] + ".txt", "0", "name"}).get(0);
+				List<String> content = read_csv_to_list(new String[]{storage + "groups/" + current_groups.get(i) + ".txt", "0", "name"}).get(0);
 				String info = "";
 				int number = 3;
 				if(content.size() < 3)
@@ -522,9 +496,9 @@ public class main_view extends Activity
 				if(content.size() > 3)
 					info = info + ", ...";
 				if(i == 0)
-					info = Integer.toString(current_groups.length) + " groups";
+					info = Integer.toString(current_groups.size()) + " groups";
 
-				manage_adapter.add_list(current_groups[i], Integer.toString(content.size()) + " feeds • " + info);
+				manage_adapter.add_list(current_groups.get(i), Integer.toString(content.size()) + " feeds • " + info);
 			}
 			manage_list.setAdapter(manage_adapter);
 			manage_adapter.notifyDataSetChanged();
@@ -649,7 +623,7 @@ public class main_view extends Activity
 
 		@Override
 		public int getCount(){
-			return current_groups.length;
+			return current_groups.size();
 		}
 
  		@Override
@@ -659,10 +633,10 @@ public class main_view extends Activity
 
 		@Override
 		public String getPageTitle(int position){
-			for(int i = 0; i < current_groups.length; i++)
+			for(int i = 0; i < current_groups.size(); i++)
 			{
 				if(position == i)
-					return current_groups[position];
+					return current_groups.get(position);
 			}
 			return "";
 		}
@@ -923,9 +897,9 @@ public class main_view extends Activity
 		group_spinner.setAdapter(adapter);
 
 		int i;
-		for(i = 0; i < current_groups.length; i++)
+		for(i = 0; i < current_groups.size(); i++)
 		{
-			if(current_groups[i].equals(current_group))
+			if(current_groups.get(i).equals(current_group))
 				break;
 		}
 
@@ -1156,6 +1130,26 @@ public class main_view extends Activity
 		}
 	}
 
+	/// Relies on read_file_to_list && storage.
+	private void remove_string_from_file(String file_name, String string, Boolean contains)
+	{
+		final List<String> list = read_file_to_list(file_name, 0);
+		(new File(storage + file_name)).delete();
+		for(String item : list)
+		{
+			if(contains)
+			{
+				if(!item.contains(string))
+					append_string_to_file(file_name, item + "\n");
+			}
+			else
+			{
+				if(!item.equals(string))
+					append_string_to_file(file_name, item + "\n");
+			}
+		}
+	}
+
 	private void check_for_no_groups()
 	{
 		List<String> groups = read_file_to_list("groups/group_list.txt", 0);
@@ -1165,34 +1159,13 @@ public class main_view extends Activity
 
 	private static void update_groups()
 	{
-		List<String> gs = read_file_to_list("groups/group_list.txt", 0);
-		current_groups = gs.toArray(new String[gs.size()]);
-		ArrayAdapter<String> nav_adapter;
-		if((current_groups.length+3)>nav_final.length)
-		{
-			String[] nav_finaler = new String[nav_final.length + 1];
-			System.arraycopy(nav_final, 0, nav_finaler, 0, nav_final.length);
-			nav_finaler[nav_finaler.length - 1] = current_groups[current_groups.length - 1];
-			nav_final = nav_finaler;
-		}
-		else if((current_groups.length+3)<nav_final.length)
-		{
-			String[] nav_finaler = new String[nav_final.length - 1];
-			nav_finaler[0] = nav_final[0];	nav_finaler[1] = nav_final[1];	nav_finaler[2] = nav_final[2];
-			for(int i=0; i<current_groups.length; i++)
-				nav_final[i+3] = current_groups[i];
-			nav_final = nav_finaler;
-		}
-		else
-		{
-			for(int i=0; i<current_groups.length; i++)
-			{
-				log(current_groups[i]);
-				nav_final[i+3] = current_groups[i];
-			}
-		}
-		nav_adapter = new ArrayAdapter<String>(get_context(), R.layout.drawer_list_item, nav_final);
-		navigation_list.setAdapter(nav_adapter);
+		List<String> current_groups = read_file_to_list("groups/group_list.txt", 0);
+
+		List<String> nav = current_groups;
+		nav.addAll(0, Arrays.asList("Feeds", "Manage", "Settings"));
+		String[] navigation_bar_data = nav.toArray(new String[nav.size()]);
+
+		navigation_list.setAdapter(new ArrayAdapter<String>(get_context(), R.layout.drawer_list_item, navigation_bar_data));
 		viewPager.getAdapter().notifyDataSetChanged();
 	}
 
@@ -1307,7 +1280,7 @@ public class main_view extends Activity
 			/// ton[0] = page number or position in current_groups.
 			int page_number = ton[0];
 
-			String group = current_groups[page_number];
+			String group = current_groups.get(page_number);
 			String group_file_path 			= storage + "groups/" + group + ".txt";
 			String partial_image_path 		= storage + "images/";
 			String partial_thumbnail_path 	= storage + "thumbnails/";
@@ -1555,7 +1528,7 @@ public class main_view extends Activity
 		}
 	}
 
-	private static String[] get_groups()
+	private static List<String> get_groups()
 	{
 		return current_groups;
 	}
