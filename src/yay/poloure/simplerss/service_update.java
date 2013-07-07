@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.io.FileReader;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.FileOutputStream;
 import java.io.BufferedInputStream;
 import java.net.URL;
@@ -28,19 +30,30 @@ public class service_update extends IntentService
 	@Override
 	protected void onHandleIntent(Intent intent)
 	{
+		slog("service started");
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		PowerManager.WakeLock wakelock = pm.newWakeLock(pm.PARTIAL_WAKE_LOCK, "SIMPLERSS");
 		wakelock.acquire();
 		
+		slog("wakelock acquired");
+		
 		group = Integer.parseInt(intent.getStringExtra("GROUP_NUMBER"));
 		storage = this.getExternalFilesDir(null).getAbsolutePath() + "/";
+		
+		slog("storage set");
+		slog(storage);
+		slog(Integer.toString(group));
 
-		String grouper = read_file_to_list(storage + "groups/group_list.txt", 0).get(group);
-		String group_file_path 		= storage + "groups/" + grouper + ".txt";
+		String grouper = read_file_to_list("groups/group_list.txt", 0).get(group);
+		String group_file_path = storage + "groups/" + grouper + ".txt";
+
+		slog("file read");
 
 		List< List<String> > content 		= read_csv_to_list(new String[]{group_file_path, "0", "name", "url"});
 		List<String> group_feeds_names 		= content.get(0);
 		List<String> group_feeds_urls 		= content.get(1);
+
+		slog("list shit done");
 
 		String feed_path = "";
 
@@ -51,6 +64,10 @@ public class service_update extends IntentService
 			download_file(group_feeds_urls.get(i), "content/" + group_feeds_names.get(i) + ".store.txt"); /// Downloads file as mariam_feed.store.txt
 			new parsered(feed_path + ".store.txt"); /// Parses the file and makes other files like mariam_feed.store.txt.content.txt
 		}
+		
+		slog("parsed");
+		slog("about to release wakelock");
+		
 		wakelock.release();
 	}
 	
@@ -142,5 +159,18 @@ public class service_update extends IntentService
 			}
 			catch(Exception e){
 			}
+	}
+	
+	private static void slog(String string)
+	{
+		try
+		{
+			BufferedWriter out = new BufferedWriter(new FileWriter("/storage/emulated/0/Android/data/yay.poloure.simplerss/files/dump.txt", true));
+			out.write(string + "\n");
+			out.close();
+		}
+		catch (Exception e)
+		{
+		}
 	}
 }
