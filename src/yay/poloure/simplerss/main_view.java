@@ -315,8 +315,8 @@ public class main_view extends Activity
 		Intent intent = new Intent(this, service_update.class);
 		intent.putExtra("GROUP_NUMBER", "0");
 		PendingIntent pend_intent = PendingIntent.getActivity(this, 0, intent, 0);
-		AlarmManager alarm_refresh = (AlarmManager)getSystemService(Activity.ALARM_SERVICE);
-		alarm_refresh.set(AlarmManager.RTC_WAKEUP, 180000, pend_intent);
+		AlarmManager alarm_refresh = (AlarmManager) getSystemService(Activity.ALARM_SERVICE);
+		alarm_refresh.set(AlarmManager.RTC_WAKEUP, 600000, pend_intent);
 	}
 
 	public static Resources get_resources(){
@@ -1108,7 +1108,7 @@ public class main_view extends Activity
 		}
 	}
 
-	private void append_string_to_file(String file_name, String string)
+	private static void append_string_to_file(String file_name, String string)
 	{
 		try
 		{
@@ -1128,7 +1128,7 @@ public class main_view extends Activity
 			add_group("All");
 	}
 
-	private void update_groups()
+	private static void update_groups()
 	{
 		List<String> gs = read_file_to_list("groups/group_list.txt", 0);
 		current_groups = gs.toArray(new String[gs.size()]);
@@ -1161,7 +1161,7 @@ public class main_view extends Activity
 		viewPager.getAdapter().notifyDataSetChanged();
 	}
 
-	public void update_group_order(List<String> new_order)
+	public static void update_group_order(List<String> new_order)
 	{
 		(new File(storage + "groups/group_list.txt")).delete();
 		for(String group : new_order)
@@ -1216,7 +1216,7 @@ public class main_view extends Activity
 		return types;
 	}
 
-	private List<String> read_file_to_list(String file_name, int lines_to_skip)
+	private static List<String> read_file_to_list(String file_name, int lines_to_skip)
 	{
 		String line = null;
 		BufferedReader stream = null;
@@ -1610,7 +1610,7 @@ public class main_view extends Activity
 		return current_groups;
 	}
 
-	private void log(String text)
+	private static void log(String text)
 	{
 		append_string_to_file("dump.txt", text + "\n");
 	}
