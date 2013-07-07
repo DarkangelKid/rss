@@ -77,7 +77,7 @@ public class main_view extends Activity
 
 	private static String mTitle, feed_title;
 	private static float density;
-	private int width;
+	private static int width;
 
 	private static ViewPager viewPager;
 	private ViewPager manage_pager;
@@ -313,18 +313,12 @@ public class main_view extends Activity
 	protected void onStop()
 	{
 		super.onStop();
-		log("onstop");
 		Intent intent = new Intent(this, service_update.class);
 		intent.putExtra("GROUP_NUMBER", "0");
-		log("intent created");
 		PendingIntent pend_intent = PendingIntent.getActivity(this, 0, intent, 0);
-		log("pending created");
 		AlarmManager alarm_refresh = (AlarmManager) getSystemService(Activity.ALARM_SERVICE);
-		log("alarm created");
 		alarm_refresh.set(AlarmManager.RTC_WAKEUP, 60000, pend_intent);
-		log("alarm set");
-		startService(intent);
-		log("fuck it, i'll do it live");
+		//startService(intent);
 	}
 
 	public static Resources get_resources(){
@@ -717,7 +711,7 @@ public class main_view extends Activity
 		}
 		else if(item.getTitle().equals("refresh"))
 		{
-			new update_group().execute(((ViewPager) findViewById(R.id.pager)).getCurrentItem(), false);
+			update_group(((ViewPager) findViewById(R.id.pager)).getCurrentItem());
 			return true;
 		}
 
@@ -737,6 +731,11 @@ public class main_view extends Activity
 					refreshItem.setActionView(null);
 			}
 		}
+	}
+
+	public static int return_width()
+	{
+		return width;
 	}
 
 	private void show_add_dialog()
@@ -1260,87 +1259,12 @@ public class main_view extends Activity
 		return i;
 	}
 
-	private class update_group extends AsyncTask<Object, Void, Integer>
+	private void update_group(int page_number)
 	{
-		@Override
-		protected void onPreExecute(){
-			set_refresh(true);
-		}
-
-		@Override
-		protected Integer doInBackground(Object... ton)
-		{
-			/// ton[1] = page number or position in current_groups.
-			/// ton[0] = if true, do not download new data.
-			int page_number = (Integer) ton[0];
-			Boolean skip_refresh = (Boolean) ton[1];
-
-			String group = current_groups[page_number];
-			String group_file_path 			= storage + "groups/" + group + ".txt";
-			String partial_image_path 		= storage + "images/";
-			String partial_thumbnail_path 	= storage + "thumbnails/";
-
-			List< List<String> > content 		= read_csv_to_list(new String[]{group_file_path, "0", "name", "url"});
-			List<String> group_feeds_names 		= content.get(0);
-			List<String> group_feeds_urls 		= content.get(1);
-
-			String image_name = "", thumbnail_path = "", feed_path = "";
-
-			if(group_feeds_names.size() < 1)
-				return -2;
-
-			/// If we should download and update the feeds inside that group.
-			for(int i=0; i<group_feeds_names.size(); i++)
-			{
-				feed_path = storage + "content/" + group_feeds_names.get(i); /// mariam_feed.txt
-				download_file(group_feeds_urls.get(i), "content/" + group_feeds_names.get(i) + ".store.txt"); /// Downloads file as mariam_feed.store.txt
-				new parsered(feed_path + ".store.txt"); /// Parses the file and makes other files like mariam_feed.store.txt.content.txt
-			}
-
-			/// Make group content file
-			String group_content_path = storage + "groups/" + group + ".txt.content.txt";
-
-			/// If we have updated the feeds, resort the group_content file.
-			/// TODO: If there was a new item returned from download_file, update the times
-			sort_group_content_by_time(group);
-
-			String[] passer = {group_content_path, "0", "image"};
-			List< List<String> > contenter 	= read_csv_to_list(passer);
-			List<String> images 			= contenter.get(0);
-
-			/// For each line of the group_content_file
-			for(int m=0; m<images.size(); m++)
-			{
-				if(!images.get(m).equals(""))
-				{
-					image_name = images.get(m).substring(images.get(m).lastIndexOf("/") + 1, images.get(m).length());
-
-					/// If the image_name does not exist in images/ then download the file at url (images[m]) to images with name image_name
-					if(!(new File(partial_image_path + image_name)).exists())
-						download_file(images.get(m), "images/" + image_name);
-					/// If the thumbnail does not exist in thumbnails/, compress the image in images/ to thumbnails with image_name.
-					if(!(new File(partial_thumbnail_path + image_name)).exists())
-						compress_file(partial_image_path + image_name, partial_thumbnail_path + image_name, image_name, group, false);
-				}
-			}
-			if(!skip_refresh)
-				return page_number;
-			else
-				return -2;
-		}
-
-		@Override
-		protected void onProgressUpdate(Void... prog){
-		}
-
-		@Override
-		protected void onPostExecute(Integer tun)
-		{
-			if(tun > -2)
-				new refresh_page().execute(tun);
-			else
-				set_refresh(false);
-		}
+		set_refresh(true);
+		Intent intent = new Intent(this, service_update.class);
+		intent.putExtra("GROUP_NUMBER", Integer.toString(page_number));
+		startService(intent);
 	}
 
 	private class refresh_page extends AsyncTask<Integer, Object, Long>
