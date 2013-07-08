@@ -282,6 +282,12 @@ public class main_view extends Activity
 			if(read_file_to_list("groups/All.txt", 0).size()>0)
 				new refresh_page().execute(0);
 
+			/// Save the width for compression
+			Display display = getWindowManager().getDefaultDisplay();
+			Point size = new Point();
+			display.getSize(size);
+			width = (int) Math.round(((float)size.x)*0.80);
+
 			drawer_toggle.syncState();
 			density = getResources().getDisplayMetrics().density;
 			twelve = (int) ((12 * density + 0.5f));
@@ -1514,7 +1520,7 @@ public class main_view extends Activity
 		return (new File(storage + file_name)).exists();
 	}
 
-	String compress_file(String image_name, String group, Boolean skip_save)
+	private String compress_file(String image_name, String group, Boolean skip_save)
 	{
 		int insample;
 		if(!skip_save)
@@ -1522,14 +1528,6 @@ public class main_view extends Activity
 			BitmapFactory.Options o = new BitmapFactory.Options();
 			o.inJustDecodeBounds = true;
 			BitmapFactory.decodeFile(storage + "images/" + image_name, o);
-
-			if(width < 10)
-			{
-				Display display = getWindowManager().getDefaultDisplay();
-				Point size = new Point();
-				display.getSize(size);
-				width = (int) Math.round(((float)size.x)*0.80);
-			}
 
 			int width_tmp = o.outWidth;
 
