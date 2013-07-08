@@ -114,7 +114,7 @@ public class main_view extends Activity
 		/// Delete the feed info from the all group and add the new group info to the end of the all content file.
 		remove_string_from_file("groups/All.txt", old_name, true);
 		append_string_to_file("groups/All.txt", "name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|\n");
-		(new File(storage + "groups/All.txt.content.txt")).delete();
+		delete("groups/All.txt.content.txt")
 
 		/// If we have renamed the title, rename the content/title.txt file.
 		if(!old_name.equals(new_name))
@@ -133,8 +133,8 @@ public class main_view extends Activity
 				remove_string_from_file("groups/group_list.txt", old_group, false);
 
 			/// Delete the old and new group_file content files.
-			(new File(storage + "groups/" + old_group + ".txt.content.txt")).delete();
-			(new File(storage + "groups/" + new_group + ".txt.content.txt")).delete();
+			delete("groups/" + old_group + ".txt.content.txt");
+			delete("groups/" + new_group + ".txt.content.txt");
 		}
 		/// The group is the same but the titles and urls may have changed.
 		else
@@ -181,7 +181,7 @@ public class main_view extends Activity
 
 			storage = this.getExternalFilesDir(null).getAbsolutePath() + "/";
 
-			(new File(storage + "dump.txt")).delete();
+			delete("dump.txt");
 
 			String[] folders = {"images", "thumbnails", "groups", "content"};
 			File folder_file;
@@ -484,7 +484,8 @@ public class main_view extends Activity
 			View view = inflater.inflate(R.layout.manage_fragment, container, false);
 			manage_list = (ListView) view.findViewById(R.id.group_listview);
 			manage_adapter = new group_adapter(getActivity());
-			for(int i = 0; i < current_groups.size(); i++)
+			final int size = current_groups.size();
+			for(int i = 0; i < size; i++)
 			{
 				List<String> content = read_csv_to_list(new String[]{storage + "groups/" + current_groups.get(i) + ".txt", "0", "name"}).get(0);
 				String info = "";
@@ -528,7 +529,8 @@ public class main_view extends Activity
 			feed_list_adapter = new feed_adapter(getActivity());
 			feed_list.setAdapter(feed_list_adapter);
 
-			for(int i = 0; i < feed_titles.size(); i++)
+			final int size = feed_titles.size();
+			for(int i = 0; i < size; i++)
 			{
 				/// Read the feed_title content file to see how many readLines it will take.
 				feed_list_adapter.add_list(feed_titles.get(i), feed_urls.get(i) + "\n" + feed_groups.get(i) + " • " + Integer.toString(count_lines("content/" + feed_titles.get(i) + ".store.txt.content.txt") - 1) + " items");
@@ -545,63 +547,23 @@ public class main_view extends Activity
 					builder.setCancelable(true)
 							.setPositiveButton("Delete", new DialogInterface.OnClickListener()
 					{
+						/// Delete the feed.
 						public void onClick(DialogInterface dialog, int id)
 						{
-							String details = feed_list_adapter.get_info(positionrr);
-							String title = feed_list_adapter.getItem(positionrr);
-							details = details.substring(details.indexOf('\n') + 1, details.indexOf(' '));
-							(new File(storage + "content/" + title + ".store.txt.content.txt")).delete();
-							(new File(storage + "groups/All.txt.content.txt")).delete();
-							(new File(storage + "groups/" + details + ".txt.content.txt")).delete();
-							(new File(storage + details + ".image_size.cache.txt")).delete();
+							String group = feed_list_adapter.get_info(positionrr).substring(details.indexOf('\n') + 1, details.indexOf(' '));
+							String name = feed_list_adapter.getItem(positionrr);
+							delete("content/" + name + ".store.txt.content.txt");
+							delete("groups/All.txt.content.txt");
+							delete("groups/" + group + ".txt.content.txt");
+							delete(group + ".image_size.cache.txt");
 							/// Perhaps regen the all_image.cache.txt
-							
-							File all_file = new File(storage + "groups/" + details + ".txt");
-							List<String> feeds = read_file_to_list("groups/" + details + ".txt", 0);
-							all_file.delete();
-							for(int i = 0; i < feeds.size(); i++)
-							{
-								if(!feeds.get(i).contains(title))
-									append_string_to_file("groups/" + details + ".txt", feeds.get(i) + "\n");
-							}
-							
-							if(!(new File(storage + "groups/" + details + ".txt")).exists())
-							{
-								all_file = new File(storage + "groups/group_list.txt");
-								BufferedWriter group_file = null;
-								try
-								{
-									try
-									{
-										group_file = new BufferedWriter(new FileWriter(all_file));
-										feeds = read_file_to_list("groups/group_list.txt", 0);
-										all_file.delete();
 
-										for(int i = 0; i < feeds.size(); i++)
-										{
-											if(!feeds.get(i).contains(details))
-												group_file.write(feeds.get(i) + "\n");
-										}
-									}
-									finally
-									{
-										if(group_file != null)
-											group_file.close();
-									}
-								}
-								catch(IOException e)
-								{
-								}
-							}
+							remove_string_from_file("groups/" + group + ".txt", name, true);
+							remove_string_from_file("groups/All.txt", name, true);
 
-							all_file = new File(storage + "groups/All.txt");
-							feeds = read_file_to_list("groups/All.txt", 0);
-							all_file.delete();
-							for(int i = 0; i < feeds.size(); i++)
-							{
-								if(!feeds.get(i).contains(title))
-									append_string_to_file("groups/All.txt", feeds.get(i) + "\n");
-							}
+							/// If the group file no longer exists because it was the last feed in it, delete the group from the group_list.
+							if(!(new File(storage + "groups/" + group + ".txt")).exists())
+								remove_string_from_file("groups/group_list.txt", group, false);
 
 							/// remove deleted files content from groups that it was in
 							feed_list_adapter.remove_item(positionrr);
@@ -1134,7 +1096,7 @@ public class main_view extends Activity
 	private void remove_string_from_file(String file_name, String string, Boolean contains)
 	{
 		final List<String> list = read_file_to_list(file_name, 0);
-		(new File(storage + file_name)).delete();
+		delete(file_name);
 		for(String item : list)
 		{
 			if(contains)
@@ -1165,7 +1127,7 @@ public class main_view extends Activity
 
 	public static void update_group_order(List<String> new_order)
 	{
-		(new File(storage + "groups/group_list.txt")).delete();
+		delete("groups/group_list.txt");
 		for(String group : new_order)
 			append_string_to_file("groups/group_list.txt", group + "\n");
 		update_groups();
@@ -1502,9 +1464,8 @@ public class main_view extends Activity
 			}
 		}
 
-		String group_content_path = "groups/" + group + ".txt.content.txt";
-		File group_content = new File(storage + group_content_path);
-		group_content.delete();
+		final String group_content_path = "groups/" + group + ".txt.content.txt";
+		delete(group_content_path);
 
 		if(links_ordered.size()>0)
 		{
@@ -1530,6 +1491,11 @@ public class main_view extends Activity
 	private static void log(String text)
 	{
 		append_string_to_file("dump.txt", text + "\n");
+	}
+
+	private void delete(String file_name)
+	{
+		(new File(storage + file_name)).delete();
 	}
 
 	String compress_file(String image_path, String thumbnail_path, String image_name, String group, Boolean skip_save)

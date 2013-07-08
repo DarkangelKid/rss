@@ -47,10 +47,6 @@ public class service_update extends IntentService
 
 		group = Integer.parseInt(intent.getStringExtra("GROUP_NUMBER"));
 		storage = this.getExternalFilesDir(null).getAbsolutePath() + "/";
-		
-		log("storage set");
-		log(storage);
-		log(Integer.toString(group));
 
 		String grouper = read_file_to_list("groups/group_list.txt", 0).get(group);
 		String group_file_path 		= storage + "groups/" + grouper + ".txt";
@@ -63,12 +59,12 @@ public class service_update extends IntentService
 
 		String image_name = "", thumbnail_path = "", feed_path = "";
 
-		for(int i=0; i<group_feeds_names.size(); i++)
+		final int size = group_feeds_names.size();
+		for(int i=0; i<size; i++)
 		{
 			feed_path = storage + "content/" + group_feeds_names.get(i); /// mariam_feed.txt
 			download_file(group_feeds_urls.get(i), "content/" + group_feeds_names.get(i) + ".store.txt"); /// Downloads file as mariam_feed.store.txt
 			new parsered(feed_path + ".store.txt"); /// Parses the file and makes other files like mariam_feed.store.txt.content.txt
-			log("got a feed and parsed");
 		}
 
 		/// Sort group order
@@ -81,28 +77,19 @@ public class service_update extends IntentService
 		List< List<String> > contenter 	= read_csv_to_list(passer);
 		List<String> images 			= contenter.get(0);
 
-		log("size of image list = " + Integer.toString(images.size()));
-
 			/// For each line of the group_content_file
 		for(int m=0; m<images.size(); m++)
 		{
 			if(!images.get(m).equals(""))
 			{
 				image_name = images.get(m).substring(images.get(m).lastIndexOf("/") + 1, images.get(m).length());
-				log(image_name);
 
 				/// If the image_name does not exist in images/ then download the file at url (images[m]) to images with name image_name
 				if(!(new File(partial_image_path + image_name)).exists())
-				{
-					log("downloading image");
 					download_file(images.get(m), "images/" + image_name);
-				}
 				/// If the thumbnail does not exist in thumbnails/, compress the image in images/ to thumbnails with image_name.
 				if(!(new File(partial_thumbnail_path + image_name)).exists())
-				{
-					log("compressing file");
 					compress_file(partial_image_path + image_name, partial_thumbnail_path + image_name, image_name, grouper, false);
-				}
 			}
 		}
 
