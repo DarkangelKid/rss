@@ -94,7 +94,7 @@ public class main_view extends Activity
 	public static Context context, activity_context;
 	private static Boolean not_first_time = false;
 
-	public static List<String> current_groups = new ArrayList<String>();
+	public static List<String> current_groups;
 	private static List<String> feed_titles, feed_urls, feed_groups;
 
 	public static ListView feed_list;
@@ -156,8 +156,7 @@ public class main_view extends Activity
 
 	private void update_feeds_list()
 	{
-		String[] pass 					= {storage + "groups/All.txt", "0", "name", "url", "group"};
-		List< List<String> > content 	= read_csv_to_list(pass);
+		List< List<String> > content 	= read_csv_to_list(new String[]{storage + "groups/All.txt", "0", "name", "url", "group"});
 		feed_titles 		= content.get(0);
 		feed_urls 			= content.get(1);
 		feed_groups 		= content.get(2);
@@ -197,8 +196,10 @@ public class main_view extends Activity
 			if(!(new File(storage + "groups/group_list.txt")).exists())
 			{
 				append_string_to_file("groups/group_list.txt", "All\n");
-				update_groups();
+				current_groups.add("All");
 			}
+			else
+				current_groups = read_file_to_list("groups/group_list.txt", 0);
 
 			getActionBar().setIcon(R.drawable.rss_icon);
 
@@ -224,12 +225,13 @@ public class main_view extends Activity
 		super.onPostCreate(savedInstanceState);
 		if (savedInstanceState == null)
 		{
-			List<String> nav = current_groups;
+			List<String> nav = new ArrayList<String>();
+			nav.addAll(current_groups);
 			nav.addAll(0, Arrays.asList("Feeds", "Manage", "Settings"));
 			String[] navigation_bar_data = nav.toArray(new String[nav.size()]);
 
 			navigation_list = (ListView) findViewById(R.id.left_drawer);
-			navigation_list.setAdapter(new ArrayAdapter<String>(get_context(), R.layout.drawer_list_item, navigation_bar_data));
+			navigation_list.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, navigation_bar_data));
 			navigation_list.setOnItemClickListener(new DrawerItemClickListener());
 
 			viewPager = (ViewPager) findViewById(R.id.pager);
@@ -600,7 +602,7 @@ public class main_view extends Activity
 								if(!feeds.get(i).contains(title))
 									append_string_to_file("groups/All.txt", feeds.get(i) + "\n");
 							}
-							
+
 							/// remove deleted files content from groups that it was in
 							feed_list_adapter.remove_item(positionrr);
 							feed_list_adapter.notifyDataSetChanged();
@@ -744,8 +746,6 @@ public class main_view extends Activity
 	{
 		LayoutInflater inflater = LayoutInflater.from(this);
 		final View add_rss_dialog = inflater.inflate(R.layout.add_rss_dialog, null);
-
-		check_for_no_groups();
 
 		Spinner group_spinner = (Spinner) add_rss_dialog.findViewById(R.id.group_spinner);
 		ArrayAdapter adapter = new ArrayAdapter(this, R.layout.group_spinner_text, current_groups);
@@ -1150,18 +1150,12 @@ public class main_view extends Activity
 		}
 	}
 
-	private void check_for_no_groups()
-	{
-		List<String> groups = read_file_to_list("groups/group_list.txt", 0);
-		if(!groups.contains("All"))
-			add_group("All");
-	}
-
 	private static void update_groups()
 	{
-		List<String> current_groups = read_file_to_list("groups/group_list.txt", 0);
+		current_groups = read_file_to_list("groups/group_list.txt", 0);
 
-		List<String> nav = current_groups;
+		List<String> nav = new ArrayList<String>();
+		nav.addAll(current_groups);
 		nav.addAll(0, Arrays.asList("Feeds", "Manage", "Settings"));
 		String[] navigation_bar_data = nav.toArray(new String[nav.size()]);
 
