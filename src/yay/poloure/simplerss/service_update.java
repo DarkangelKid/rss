@@ -94,6 +94,7 @@ public class service_update extends IntentService
 		}
 
 		wakelock.release();
+		stopSelf();
 	}
 	
 	private List<String> read_file_to_list(String file_name, int lines_to_skip)
@@ -209,7 +210,9 @@ public class service_update extends IntentService
 		BitmapFactory.Options o2 = new BitmapFactory.Options();
 		o2.inSampleSize = insample;
 		Bitmap bitmap = BitmapFactory.decodeFile(image_path, o2);
-		append_string_to_file(group + ".image_size.cache.txt", image_name + "|" + o2.outWidth + "|" + o2.outHeight + "\n");
+
+		if(o2.outWidth > 9)
+			append_string_to_file(group + ".image_size.cache.txt", image_name + "|" + o2.outWidth + "|" + o2.outHeight + "\n");
 
 		if(!skip_save)
 		{
