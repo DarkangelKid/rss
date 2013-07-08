@@ -89,7 +89,7 @@ public class service_update extends IntentService
 					download_file(images.get(m), "images/" + image_name);
 				/// If the thumbnail does not exist in thumbnails/, compress the image in images/ to thumbnails with image_name.
 				if(!(new File(partial_thumbnail_path + image_name)).exists())
-					compress_file(partial_image_path + image_name, partial_thumbnail_path + image_name, image_name, grouper, false);
+					compress_file(image_name, grouper, false);
 			}
 		}
 
@@ -187,16 +187,18 @@ public class service_update extends IntentService
 		}
 	}
 
-	String compress_file(String image_path, String thumbnail_path, String image_name, String group, Boolean skip_save)
+	private String compress_file(String image_name, String group, Boolean skip_save)
 	{
 		int insample;
 		if(!skip_save)
 		{
 			BitmapFactory.Options o = new BitmapFactory.Options();
 			o.inJustDecodeBounds = true;
-			BitmapFactory.decodeFile(image_path, o);
+			BitmapFactory.decodeFile(storage + "images/" + image_name, o);
 
 			int width = main_view.return_width();
+
+			/// TODO: If the activity has not run deal with it. and not produce the compressed file.
 			int width_tmp = o.outWidth;
 
 			if(width_tmp > width)
@@ -209,8 +211,7 @@ public class service_update extends IntentService
 
 		BitmapFactory.Options o2 = new BitmapFactory.Options();
 		o2.inSampleSize = insample;
-		Bitmap bitmap = BitmapFactory.decodeFile(image_path, o2);
-
+		Bitmap bitmap = BitmapFactory.decodeFile(storage + "images/" + image_name, o2);
 		if(o2.outWidth > 9)
 			append_string_to_file(group + ".image_size.cache.txt", image_name + "|" + o2.outWidth + "|" + o2.outHeight + "\n");
 
@@ -218,7 +219,7 @@ public class service_update extends IntentService
 		{
 			try
 			{
-				FileOutputStream out = new FileOutputStream(thumbnail_path);
+				FileOutputStream out = new FileOutputStream(storage + "thumbnails/" + image_name);
 				bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
 			}
 			catch (Exception e){
