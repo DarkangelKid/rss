@@ -297,7 +297,7 @@ public class main_view extends Activity
 		intent.putExtra("GROUP_NUMBER", "0");
 		PendingIntent pend_intent = PendingIntent.getActivity(this, 0, intent, 0);
 		AlarmManager alarm_refresh = (AlarmManager) getSystemService(Activity.ALARM_SERVICE);
-		alarm_refresh.set(AlarmManager.RTC_WAKEUP, 60000, pend_intent);
+		alarm_refresh.setRepeating(AlarmManager.RTC_WAKEUP, 60000, 60000, pend_intent);
 		//startService(intent);
 	}
 
