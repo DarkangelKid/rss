@@ -311,10 +311,11 @@ public class main_view extends Activity
 		super.onStart();
 		if(!refreshing)
 			set_refresh(check_service_running());
-		Intent intentstop = new Intent(this, service_update.class);
-		PendingIntent senderstop = PendingIntent.getService(this, 0, intentstop, 0);
+		Intent intent = new Intent(this, service_update.class);
+		intent.putExtra("GROUP_NUMBER", "0");
+		PendingIntent pend_intent = PendingIntent.getService(this, 0, intent, 0);
 		AlarmManager alarm_manager = (AlarmManager) getSystemService(Activity.ALARM_SERVICE);
-		alarm_manager.cancel(senderstop);
+		alarm_manager.cancel(pend_intent);
 	}
 
 	public static Resources get_resources(){
