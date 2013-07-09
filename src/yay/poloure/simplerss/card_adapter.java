@@ -239,8 +239,8 @@ public class card_adapter extends BaseAdapter
 			position = ton[0];
 			image i = new image();
 			String image_path = content_images.get(ton[0]);
-			i.img = ((Bitmap) decodeFile(image_path));
-			i.path = ((String) image_path.replaceAll("thumbnails", "images"));
+			i.img = decodeFile(image_path);
+			i.path = image_path.replaceAll("thumbnails", "images");
 			return i;
 		}
 
@@ -298,7 +298,7 @@ public class card_adapter extends BaseAdapter
 		}
 	}
 
-	class long_press implements View.OnLongClickListener
+	private class long_press implements View.OnLongClickListener
 	{
 		@Override
 		public boolean onLongClick(View v)
@@ -307,7 +307,7 @@ public class card_adapter extends BaseAdapter
 			ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
 			ClipData clip = ClipData.newPlainText("label", long_press_url);
 			clipboard.setPrimaryClip(clip);
-			Toast message_toast = Toast.makeText(context, "Copied link url to clipboard.", 1);
+			Toast message_toast = Toast.makeText(context, "Copied link url to clipboard.", Toast.LENGTH_SHORT);
 			message_toast.show();
 			return true;
 		}

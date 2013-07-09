@@ -33,7 +33,7 @@ class parsered
 			/// Read the file's lines to a list and make a set from that.
 			if(out.exists())
 			{
-				String liner = "";
+				String liner;
 				BufferedReader stream = new BufferedReader(new FileReader(out));
 				while((liner = stream.readLine()) != null)
 					set.add(liner);
@@ -41,9 +41,8 @@ class parsered
 			}
 			
 			BufferedReader reader = new BufferedReader(new FileReader(in));
-			int description_length = 0;
-			Boolean tag_content;
-			String end_tag = "", cont = "", line = "";
+			int description_length;
+			String end_tag = "", cont, line = "";
 			reader.mark(2);
 
 			while(reader.read() != -1)
@@ -211,7 +210,7 @@ class parsered
 		boolean found = false;
 		String tag = "";
 		int eof = 0;
-		while((!found)&&(eof != -1))
+		while(!found)
 		{
 			char current = '\0';
 			while(current != '<')
