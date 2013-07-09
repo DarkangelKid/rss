@@ -105,7 +105,7 @@ public class card_adapter extends BaseAdapter
 			holder = (ViewHolder) convertView.getTag();
 
 		boolean image_exists = false;
-		if(content_width.get(position)>32)
+		if(content_width.get(position) > 32)
 			image_exists = true;
 
 		if(image_exists)
