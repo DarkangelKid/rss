@@ -106,6 +106,52 @@ public class main_view extends Activity
 		append_string_to_file("groups/" + feed_group + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|\n");
 		append_string_to_file("groups/All.txt", "name|" +  feed_name + "|url|" + feed_url + "|group|" + feed_group + "|\n");
 		update_feeds_list();
+		update_manage();
+	}
+
+	private void update_manage()
+	{
+		update_manage_feeds();
+		update_manage_groups();
+	}
+
+	private void update_manage_feeds()
+	{
+		feed_list_adapter.clear_list();
+		final int size = feed_titles.size();
+		for(int i = 0; i < size; i++)
+			feed_list_adapter.add_list(feed_titles.get(i), feed_urls.get(i) + "\n" + feed_groups.get(i) + " • " + Integer.toString(count_lines("content/" + feed_titles.get(i) + ".store.txt.content.txt") - 1) + " items");
+		feed_list_adapter.notifyDataSetChanged();
+	}
+
+	private void update_manage_groups()
+	{
+		group_adapter manage_adapter = (group_adapter)((fragment_group) getFragmentManager().findFragmentByTag("android:switcher:" + ((ViewPager) findViewById(R.id.manage_viewpager)).getId() + ":0")).return_listview().getAdapter();
+		manage_adapter.clear_list();
+		final int size = current_groups.size();
+		for(int i = 0; i < size; i++)
+		{
+			List<String> content = read_csv_to_list(new String[]{storage + "groups/" + current_groups.get(i) + ".txt", "0", "name"}).get(0);
+			String info = "";
+			int number = 3;
+			if(content.size() < 3)
+				number = content.size();
+			for(int j = 0; j < number - 1; j++)
+				info = info + content.get(j) + ", ";
+			if(content.size() > 0)
+				info = info + content.get(number - 1);
+			if(content.size() > 3)
+				info = info + ", ...";
+			if(i == 0)
+			{
+				if(size == 1)
+					info = "1 group";
+				else
+					info = i + " groups";
+			}
+			manage_adapter.add_list(current_groups.get(i), Integer.toString(content.size()) + " feeds • " + info);
+		}
+		manage_adapter.notifyDataSetChanged();
 	}
 
 	private void edit_feed(String old_name, String new_name, String new_url, String old_group, String new_group)
@@ -151,6 +197,7 @@ public class main_view extends Activity
 		temp.notifyDataSetChanged();
 
 		update_groups();
+		update_manage();
 	}
 
 	private void update_feeds_list()
@@ -471,36 +518,20 @@ public class main_view extends Activity
 	public class fragment_group extends Fragment
 	{
 		private ListView manage_list;
-		public group_adapter manage_adapter;
 
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
 			View view = inflater.inflate(R.layout.manage_fragment, container, false);
 			manage_list = (ListView) view.findViewById(R.id.group_listview);
-			manage_adapter = new group_adapter(getActivity());
-			final int size = current_groups.size();
-			for(int i = 0; i < size; i++)
-			{
-				List<String> content = read_csv_to_list(new String[]{storage + "groups/" + current_groups.get(i) + ".txt", "0", "name"}).get(0);
-				String info = "";
-				int number = 3;
-				if(content.size() < 3)
-					number = content.size();
-				for(int j = 0; j < number - 1; j++)
-					info = info + content.get(j) + ", ";
-				if(content.size() > 0)
-					info = info + content.get(number - 1);
-				if(content.size() > 3)
-					info = info + ", ...";
-				if(i == 0)
-					info = Integer.toString(current_groups.size()) + " groups";
-
-				manage_adapter.add_list(current_groups.get(i), Integer.toString(content.size()) + " feeds • " + info);
-			}
+			group_adapter manage_adapter = new group_adapter(getActivity());
 			manage_list.setAdapter(manage_adapter);
-			manage_adapter.notifyDataSetChanged();
+			update_manage_groups();
 			return view;
+		}
+
+		private ListView return_listview(){
+			return manage_list;
 		}
 	}
 
@@ -524,13 +555,7 @@ public class main_view extends Activity
 			feed_list_adapter = new feed_adapter(getActivity());
 			feed_list.setAdapter(feed_list_adapter);
 
-			final int size = feed_titles.size();
-			for(int i = 0; i < size; i++)
-			{
-				/// Read the feed_title content file to see how many readLines it will take.
-				feed_list_adapter.add_list(feed_titles.get(i), feed_urls.get(i) + "\n" + feed_groups.get(i) + " • " + Integer.toString(count_lines("content/" + feed_titles.get(i) + ".store.txt.content.txt") - 1) + " items");
-				feed_list_adapter.notifyDataSetChanged();
-			}
+			update_manage_feeds();
 
 			feed_list.setOnItemLongClickListener(new OnItemLongClickListener()
 			{
@@ -567,6 +592,7 @@ public class main_view extends Activity
 							/// remove deleted files content from groups that it was in
 							feed_list_adapter.remove_item(positionrr);
 							feed_list_adapter.notifyDataSetChanged();
+							update_manage_groups();
 						}
 					})
 					.setPositiveButton("Clear Content", new DialogInterface.OnClickListener()
@@ -1135,7 +1161,10 @@ public class main_view extends Activity
 		current_groups = read_file_to_list("groups/group_list.txt", 0);
 
 		if(current_groups.size() == 0)
+		{
+			append_string_to_file("groups/group_list.txt", "All\n");
 			current_groups.add("All");
+		}
 
 		List<String> nav = new ArrayList<String>();
 		nav.addAll(current_groups);
