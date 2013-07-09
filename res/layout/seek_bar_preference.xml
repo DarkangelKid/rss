@@ -2,9 +2,9 @@
 		android:id="@android:id/widget_frame"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:paddingLeft="15dp"
+		android:paddingLeft="8dp"
 		android:paddingTop="5dp"
-		android:paddingRight="10dp"
+		android:paddingRight="8dp"
 		android:paddingBottom="5dp">
 	<TextView
 			android:id="@android:id/title"
@@ -12,16 +12,16 @@
 			android:layout_alignParentTop="true"
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
-			android:textSize="20sp"
-			android:typeface="sans"
-			android:textStyle="normal"
-			android:textColor="#313131"/>
+			android:textSize="18sp"
+			android:textColor="#000000"/>
 	<TextView
 			android:id="@android:id/summary"
 			android:layout_alignParentLeft="true"
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
-			android:layout_below="@android:id/title"/>
+			android:paddingLeft="1dp"
+			android:layout_below="@android:id/title"
+			android:textColor="#303030"/>
 	<TextView android:id="@+id/seekBarPrefUnitsRight"
 			android:layout_alignParentRight="true"
 			android:layout_below="@android:id/title"

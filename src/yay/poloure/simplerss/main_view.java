@@ -291,6 +291,7 @@ public class main_view extends Activity
 		}
 	}
 	
+	
 	protected void onStop()
 	{
 		super.onStop();
@@ -299,9 +300,11 @@ public class main_view extends Activity
 			Intent intent = new Intent(this, service_update.class);
 			intent.putExtra("GROUP_NUMBER", "0");
 			PendingIntent pend_intent = PendingIntent.getService(this, 0, intent, 0);
-			final long interval = times[((int)(PreferenceManager.getDefaultSharedPreferences(this)).getInt("refresh_time", 20)/5)]*60000;
+			long interval = (long) times[((int)(PreferenceManager.getDefaultSharedPreferences(this)).getInt("refresh_time", 20)/5)]*60000;
+			//long interval = 60000;
+			log(Long.toString(interval));
 			AlarmManager alarm_refresh = (AlarmManager) getSystemService(Activity.ALARM_SERVICE);
-			alarm_refresh.setRepeating(AlarmManager.RTC_WAKEUP, (new Date()).getTime() + interval, interval, pend_intent);
+			alarm_refresh.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + interval, interval, pend_intent);
 		}
 	}
 
@@ -548,7 +551,7 @@ public class main_view extends Activity
 					positionrr = pos;
 					AlertDialog.Builder builder = new AlertDialog.Builder(activity_context);
 					builder.setCancelable(true)
-							.setPositiveButton("Delete", new DialogInterface.OnClickListener()
+							.setNegativeButton("Delete", new DialogInterface.OnClickListener()
 					{
 						/// Delete the feed.
 						public void onClick(DialogInterface dialog, int id)
@@ -572,6 +575,24 @@ public class main_view extends Activity
 							/// remove deleted files content from groups that it was in
 							feed_list_adapter.remove_item(positionrr);
 							feed_list_adapter.notifyDataSetChanged();
+						}
+					})
+					.setPositiveButton("Clear Content", new DialogInterface.OnClickListener()
+					{
+						/// Delete the feed.
+						public void onClick(DialogInterface dialog, int id)
+						{
+							String group = feed_list_adapter.get_info(positionrr);
+							group = group.substring(group.indexOf('\n') + 1, group.indexOf(' '));
+							String name = feed_list_adapter.getItem(positionrr);
+							delete("content/" + name + ".store.txt.content.txt");
+							delete("groups/All.txt.content.txt");
+							delete("groups/" + group + ".txt.content.txt");
+							delete(group + ".image_size.cache.txt");
+
+							/// remove deleted files content from groups that it was in
+							/// TODO: update item info
+							//feed_list_adapter.notifyDataSetChanged();
 						}
 					});
 					AlertDialog alert = builder.create();
