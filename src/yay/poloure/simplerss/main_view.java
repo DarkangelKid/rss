@@ -53,6 +53,8 @@ import android.widget.Spinner;
 import java.net.URL;
 
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Date;
@@ -83,12 +85,13 @@ public class main_view extends Activity
 
 	private static float density;
 
-	private static ViewPager viewPager;
 	private static Resources res;
 	private static int positionrr, poser, twelve, check_finished, width;
-	private Boolean new_items, refreshing = false;
-	private static String mTitle, feed_title, storage;
+	private Boolean new_items = false, refreshing = false;
+	private String mTitle, feed_title;
+	private static String storage;
 	private static Context context, activity_context;
+	private static ViewPager viewpager;
 
 	private static List<String> current_groups, feed_titles, feed_urls, feed_groups;
 
@@ -189,14 +192,6 @@ public class main_view extends Activity
 					folder_file.mkdir();
 			}
 
-			if(!exists("groups/group_list.txt"))
-			{
-				append_string_to_file("groups/group_list.txt", "All\n");
-				current_groups.add("All");
-			}
-			else
-				current_groups = read_file_to_list("groups/group_list.txt", 0);
-
 			getActionBar().setIcon(R.drawable.rss_icon);
 
 			getFragmentManager().beginTransaction()
@@ -221,33 +216,27 @@ public class main_view extends Activity
 		super.onPostCreate(savedInstanceState);
 		if (savedInstanceState == null)
 		{
-			List<String> nav = new ArrayList<String>();
-			nav.addAll(current_groups);
-			nav.addAll(0, Arrays.asList("Feeds", "Manage", "Settings"));
-			String[] navigation_bar_data = nav.toArray(new String[nav.size()]);
+			context = getApplicationContext();
+			activity_context = this;
 
 			navigation_list = (ListView) findViewById(R.id.left_drawer);
-			navigation_list.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, navigation_bar_data));
 			navigation_list.setOnItemClickListener(new DrawerItemClickListener());
 
-			viewPager = (ViewPager) findViewById(R.id.pager);
-			viewPager.setAdapter(new viewpager_adapter(getFragmentManager()));
-			viewPager.setOffscreenPageLimit(128);
-			viewPager.setOnPageChangeListener(new page_listener());
+			update_groups();
 
-			String[] pass 					= {storage + "groups/All.txt", "0", "name", "url", "group"};
-			List< List<String> > content 	= read_csv_to_list(pass);
+			viewpager = (ViewPager) findViewById(R.id.pager);
+			viewpager.setAdapter(new viewpager_adapter(getFragmentManager()));
+			viewpager.setOffscreenPageLimit(128);
+			viewpager.setOnPageChangeListener(new page_listener());
+
+			/// TODO: check to see if needed.
+			List< List<String> > content 	= read_csv_to_list(new String[]{storage + "groups/All.txt", "0", "name", "url", "group"});
 			feed_titles 					= content.get(0);
 			feed_urls 						= content.get(1);
 			feed_groups 					= content.get(2);
 
 			ViewPager manage_pager = (ViewPager) findViewById(R.id.manage_viewpager);
 			manage_pager.setAdapter(new manage_pager_adapter(getFragmentManager()));
-
-			context = getApplicationContext();
-			activity_context = this;
-			new_items = false;
-			update_groups();
 
 			PagerTabStrip pager_tab_strip = (PagerTabStrip) findViewById(R.id.pager_title_strip);
 			pager_tab_strip.setDrawFullUnderline(true);
@@ -351,7 +340,7 @@ public class main_view extends Activity
 		{
 			switch_page("Feeds", position);
 			int page = position - 3;
-			viewPager.setCurrentItem(page);
+			((ViewPager) findViewById(R.id.pager)).setCurrentItem(page);
 		}
 	}
 
@@ -567,7 +556,10 @@ public class main_view extends Activity
 
 							/// If the group file no longer exists because it was the last feed in it, delete the group from the group_list.
 							if(!exists("groups/" + group + ".txt"))
+							{
 								remove_string_from_file("groups/group_list.txt", group, false);
+								update_groups();
+							}
 
 							/// remove deleted files content from groups that it was in
 							feed_list_adapter.remove_item(positionrr);
@@ -601,12 +593,7 @@ public class main_view extends Activity
 
 		@Override
 		public String getPageTitle(int position){
-			for(int i = 0; i < current_groups.size(); i++)
-			{
-				if(position == i)
-					return current_groups.get(position);
-			}
-			return "";
+			return current_groups.get(position);
 		}
 	}
 
@@ -665,7 +652,6 @@ public class main_view extends Activity
 		this.optionsMenu = menu;
 		MenuInflater menu_inflater = getMenuInflater();
 		menu_inflater.inflate(R.menu.main_overflow, menu);
-		//set_refresh(true);
 		return true;
 	}
 
@@ -1127,13 +1113,18 @@ public class main_view extends Activity
 	{
 		current_groups = read_file_to_list("groups/group_list.txt", 0);
 
+		if(current_groups.size() == 0)
+			current_groups.add("All");
+
 		List<String> nav = new ArrayList<String>();
 		nav.addAll(current_groups);
 		nav.addAll(0, Arrays.asList("Feeds", "Manage", "Settings"));
 		String[] navigation_bar_data = nav.toArray(new String[nav.size()]);
 
 		navigation_list.setAdapter(new ArrayAdapter<String>(get_context(), R.layout.drawer_list_item, navigation_bar_data));
-		viewPager.getAdapter().notifyDataSetChanged();
+		if(viewpager != null)
+			viewpager.getAdapter().notifyDataSetChanged();
+		/// TODO: add an element to the list for new items.
 	}
 
 	public static void update_group_order(List<String> new_order)
@@ -1151,9 +1142,9 @@ public class main_view extends Activity
 
 	private List< List<String> > read_csv_to_list(String[] type)
 	{
-		String feed_path = type[0];
-		int lines_to_skip = Integer.parseInt(type[1]);
-		int number_of_items = type.length - 2;
+		final String feed_path = type[0];
+		final int lines_to_skip = Integer.parseInt(type[1]);
+		final int number_of_items = type.length - 2;
 
 		String line;
 		BufferedReader stream;
@@ -1162,13 +1153,12 @@ public class main_view extends Activity
 			types.add(new ArrayList< String >());
 
 		String content;
-
 		try
 		{
 			stream = new BufferedReader(new FileReader(feed_path));
 
 			/// Skip lines.
-			for(int i=0; i<lines_to_skip; i++)
+			for(int i = 0; i < lines_to_skip; i++)
 				stream.readLine();
 
 			while((line = stream.readLine()) != null)
@@ -1295,10 +1285,10 @@ public class main_view extends Activity
 			if(titles.get(0).length() < 1)
 				return 0L;
 
-			/// Get a list of all the pages items' urls.
-			List<String> ith_list;
+			/// Get a set of all the pages items' urls.
+			Set<String> existing_items = new HashSet<String>();
 			try{
-				ith_list = get_card_adapter(page_number).return_links();
+				existing_items = new HashSet<String>(get_card_adapter(page_number).return_links());
 			}
 			catch(Exception e){
 				return 0L;
@@ -1308,7 +1298,8 @@ public class main_view extends Activity
 			List<String> dimensions = read_file_to_list(group + ".image_size.cache.txt", 0);
 
 			/// For each line of the group_content_file
-			for(int m=0; m<titles.size(); m++)
+			final int size = titles.size();
+			for(int m=0; m<size; m++)
 			{
 				thumbnail_path = "";
 				Integer[] dim = {0, 0};
@@ -1334,16 +1325,13 @@ public class main_view extends Activity
 				}
 
 				// Checks to see if page has this item.
-
-				if((!ith_list.contains(links.get(m)))||(ith_list.size() == 0))
+				if(existing_items.add(links.get(m)))
 				{
 					publishProgress(page_number, titles.get(m), descriptions.get(m), links.get(m), thumbnail_path, dim[1], dim[0]);
-					/// Add this url to the card list we have stored instead of reasking for the new list.
-					ith_list.add(links.get(m));
 					/// If we have downloaded new data on other pages bar 0, and it gets here, there is new data for 0 to refresh with.
 					if(page_number != 0)
 					// Make this an array for the group pages.
-						new_items = true;
+					new_items = true;
 				}
 			}
 			return 0L;
@@ -1352,7 +1340,7 @@ public class main_view extends Activity
 		@Override
 		protected void onProgressUpdate(Object... progress)
 		{
-			ListFragment l = ((fragment_card) getFragmentManager().findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + Integer.toString((Integer) progress[0])));
+			ListFragment l = ((fragment_card) getFragmentManager().findFragmentByTag("android:switcher:" + ((ViewPager) findViewById(R.id.pager)).getId() + ":" + Integer.toString((Integer) progress[0])));
 			if(l != null)
 			{
 				card_adapter ith = ((card_adapter) l.getListAdapter());
@@ -1389,7 +1377,7 @@ public class main_view extends Activity
 	private card_adapter get_card_adapter(int page_index)
 	{
 		return ((card_adapter)((fragment_card) getFragmentManager()
-						.findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + Integer.toString(page_index)))
+						.findFragmentByTag("android:switcher:" + ((ViewPager) findViewById(R.id.pager)).getId() + ":" + Integer.toString(page_index)))
 						.getListAdapter());
 	}
 
@@ -1420,7 +1408,8 @@ public class main_view extends Activity
 				if(pubDates.get(0).length()<8)
 					pubDates 					= read_csv_to_list(new String[]{content_path, "1", "updated"}).get(0);
 
-				for(int i=0; i<pubDates.size(); i++)
+				final int size = pubDates.size();
+				for(int i=0; i<size; i++)
 				{
 					content_all.add(content.get(i));
 					try{
@@ -1455,8 +1444,9 @@ public class main_view extends Activity
 							}
 						}
 					}
-
-					for(int j=0; j<dates.size(); j++)
+					
+					final int sizer = dates.size();
+					for(int j=0; j<sizer; j++)
 					{
 						if(time.before(dates.get(j)))
 						{

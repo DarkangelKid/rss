@@ -176,7 +176,7 @@ public class SeekBarPreference extends Preference implements OnSeekBarChangeList
 				newValue = 100;
 			}
 		}
-		
+
 		// change rejected, revert to the previous value
 		/*if(!callChangeListener(newValue))
 		{
