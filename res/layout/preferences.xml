@@ -7,18 +7,14 @@
 	<PreferenceCategory
 			android:title="Cache">
 		<CheckBoxPreference
-				android:key="pref_sync"
-				android:title="CheckBox"
-				android:summary="Summary"
-				android:defaultValue="true" />
-	</PreferenceCategory>
-
-	<PreferenceCategory
-			android:title="First Category">
+				android:key="refresh"
+				android:title="Autorefresh"
+				android:summary="Check to enable autorefresh"
+				android:defaultValue="false" />
 		<yay.poloure.simplerss.SeekBarPreference
-				android:key="speechRate"
-				android:title="Speech speed"
-				android:summary="Adjust reading speed"
+				android:key="refresh_time"
+				android:title="Refresh Time"
+				android:summary="Adjust autorefresh interval"
 				android:defaultValue="20"
 				android:max="100"
 				simplerss:min="0"
