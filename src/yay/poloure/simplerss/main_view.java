@@ -1,12 +1,14 @@
 package yay.poloure.simplerss;
 
 import android.preference.PreferenceFragment;
+import android.preference.PreferenceManager;
 
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.SharedPreferences;
 
 import android.app.AlertDialog;
 import android.app.AlarmManager;
@@ -290,11 +292,15 @@ public class main_view extends Activity
 	protected void onStop()
 	{
 		super.onStop();
-		Intent intent = new Intent(this, service_update.class);
-		intent.putExtra("GROUP_NUMBER", "0");
-		PendingIntent pend_intent = PendingIntent.getService(this, 0, intent, 0);
-		AlarmManager alarm_refresh = (AlarmManager) getSystemService(Activity.ALARM_SERVICE);
-		alarm_refresh.setRepeating(AlarmManager.RTC_WAKEUP, 60000, 60000, pend_intent);
+		if((PreferenceManager.getDefaultSharedPreferences(this)).getBoolean("refresh", false))
+		{
+			Intent intent = new Intent(this, service_update.class);
+			intent.putExtra("GROUP_NUMBER", "0");
+			PendingIntent pend_intent = PendingIntent.getService(this, 0, intent, 0);
+			final long interval = (PreferenceManager.getDefaultSharedPreferences(this)).getLong("refresh_time", 3600000);
+			AlarmManager alarm_refresh = (AlarmManager) getSystemService(Activity.ALARM_SERVICE);
+			alarm_refresh.setRepeating(AlarmManager.RTC_WAKEUP, (new Date()).getTime() + interval, interval, pend_intent);
+		}
 	}
 
 	@Override
@@ -303,11 +309,13 @@ public class main_view extends Activity
 		super.onStart();
 		if(!refreshing)
 			set_refresh(check_service_running());
-		Intent intent = new Intent(this, service_update.class);
-		intent.putExtra("GROUP_NUMBER", "0");
-		PendingIntent pend_intent = PendingIntent.getService(this, 0, intent, 0);
-		AlarmManager alarm_manager = (AlarmManager) getSystemService(Activity.ALARM_SERVICE);
-		alarm_manager.cancel(pend_intent);
+		if((PreferenceManager.getDefaultSharedPreferences(this)).getBoolean("refresh", false))
+		{
+			Intent intent = new Intent(this, service_update.class);
+			PendingIntent pend_intent = PendingIntent.getService(this, 0, intent, 0);
+			AlarmManager alarm_manager = (AlarmManager) getSystemService(Activity.ALARM_SERVICE);
+			alarm_manager.cancel(pend_intent);
+		}
 	}
 
 	public static Resources get_resources(){
