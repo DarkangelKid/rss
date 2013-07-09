@@ -93,6 +93,8 @@ public class main_view extends Activity
 	private static feed_adapter feed_list_adapter;
 
 	private static final int CONTENT_VIEW_ID = 10101010;
+	private static final int[] times = new int[]{15, 30, 45, 60, 120, 180, 240, 300, 360, 400, 480, 540, 600, 660, 720, 960, 1440, 2880, 10080, 43829};
+
 
 	private void add_feed(String feed_name, String feed_url, String feed_group)
 	{

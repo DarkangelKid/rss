@@ -19,9 +19,9 @@
 				android:key="speechRate"
 				android:title="Speech speed"
 				android:summary="Adjust reading speed"
-				android:defaultValue="80"
-				android:max="200"
-				simplerss:min="1"
+				android:defaultValue="20"
+				android:max="100"
+				simplerss:min="0"
 				simplerss:unitsLeft=""
 				simplerss:unitsRight=""/>
 	</PreferenceCategory>
