@@ -79,26 +79,18 @@ public class main_view extends Activity
 	private ActionBarDrawerToggle drawer_toggle;
 	private Menu optionsMenu;
 
-	private static String mTitle, feed_title;
 	private static float density;
-	private static int width;
 
 	private static ViewPager viewPager;
-	private ViewPager manage_pager;
 	private static Resources res;
-	public static int positionrr, poser;
-	private static int twelve;
-	private static int check_finished;
-	private Boolean new_items;
-	private Boolean refreshing = false;
-	public static String storage;
-	public static Context context, activity_context;
+	private static int positionrr, poser, twelve, check_finished, width;
+	private Boolean new_items, refreshing = false;
+	private static String mTitle, feed_title, storage;
+	private static Context context, activity_context;
 
-	public static List<String> current_groups;
-	private static List<String> feed_titles, feed_urls, feed_groups;
+	private static List<String> current_groups, feed_titles, feed_urls, feed_groups;
 
-	public static ListView feed_list;
-	public static feed_adapter feed_list_adapter;
+	private static feed_adapter feed_list_adapter;
 
 	private static final int CONTENT_VIEW_ID = 10101010;
 
@@ -109,7 +101,7 @@ public class main_view extends Activity
 		update_feeds_list();
 	}
 
-	private void edit_feed(int pos, String old_name, String new_name, String new_url, String old_group, String new_group)
+	private void edit_feed(String old_name, String new_name, String new_url, String old_group, String new_group)
 	{
 		/// Delete the feed info from the all group and add the new group info to the end of the all content file.
 		remove_string_from_file("groups/All.txt", old_name, true);
@@ -245,7 +237,7 @@ public class main_view extends Activity
 			feed_urls 						= content.get(1);
 			feed_groups 					= content.get(2);
 
-			manage_pager = (ViewPager) findViewById(R.id.manage_viewpager);
+			ViewPager manage_pager = (ViewPager) findViewById(R.id.manage_viewpager);
 			manage_pager.setAdapter(new manage_pager_adapter(getFragmentManager()));
 
 			context = getApplicationContext();
@@ -464,12 +456,6 @@ public class main_view extends Activity
 	private class fragment_manage extends Fragment
 	{
 		@Override
-		public void onCreate(Bundle savedInstanceState)
-		{
-			super.onCreate(savedInstanceState);
-		}
-
-		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
 			return inflater.inflate(R.layout.manage_pager, container, false);
@@ -512,13 +498,13 @@ public class main_view extends Activity
 		}
 	}
 
-	public class feed_manage extends Fragment
+	private class feed_manage extends Fragment
 	{
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
 			View view = inflater.inflate(R.layout.manage_feeds, container, false);
-			feed_list = (ListView) view.findViewById(R.id.feeds_listview);
+			ListView feed_list = (ListView) view.findViewById(R.id.feeds_listview);
 
 			
 			feed_list.setOnItemClickListener(new OnItemClickListener()
@@ -717,7 +703,7 @@ public class main_view extends Activity
 		final View add_rss_dialog = inflater.inflate(R.layout.add_rss_dialog, null);
 
 		Spinner group_spinner = (Spinner) add_rss_dialog.findViewById(R.id.group_spinner);
-		ArrayAdapter adapter = new ArrayAdapter(this, R.layout.group_spinner_text, current_groups);
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.group_spinner_text, current_groups);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		group_spinner.setAdapter(adapter);
 
@@ -820,8 +806,8 @@ public class main_view extends Activity
 						if(check_finished == 1)
 							rss = true;
 
-						if(rss!= null && !rss)
-							toast_message("Invalid RSS URL", 0);
+						if(!rss)
+							toast_message("Invalid RSS URL", false);
 						else
 						{
 							if((!found)&&(new_group_mode))
@@ -861,7 +847,7 @@ public class main_view extends Activity
 		final String current_title = feed_titles.get(position);
 
 		Spinner group_spinner = (Spinner) edit_rss_dialog.findViewById(R.id.group_spinner);
-		ArrayAdapter adapter = new ArrayAdapter(activity_context, R.layout.group_spinner_text, current_groups);
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(activity_context, R.layout.group_spinner_text, current_groups);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		group_spinner.setAdapter(adapter);
 
@@ -976,7 +962,7 @@ public class main_view extends Activity
 							rss = true;
 
 						if(rss!= null && !rss)
-							toast_message("Invalid RSS URL", 0);
+							toast_message("Invalid RSS URL", false);
 						else
 						{
 							if((!found)&&(new_group_mode))
@@ -995,7 +981,7 @@ public class main_view extends Activity
 												.replace(">", "")
 												.replace(":", "");
 
-							edit_feed(poser, current_title, feed_name, URL_check, current_group, new_group);
+							edit_feed(current_title, feed_name, URL_check, current_group, new_group);
 							edit_dialog.dismiss();
 						}
 					}
@@ -1005,20 +991,24 @@ public class main_view extends Activity
 		edit_dialog.show();
 	}
 
-	static private void toast_message(String message, int zero_or_one)
+	private static void toast_message(String message, final Boolean short_long)
 	{
-		Toast message_toast = Toast.makeText(context, message, zero_or_one);
+		Toast message_toast;
+		if(short_long)
+			message_toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
+		else
+			message_toast = Toast.makeText(context, message, Toast.LENGTH_LONG);
 		message_toast.show();
 	}
 
-	class check_feed_exists extends AsyncTask<String, Void, Integer>
+	private class check_feed_exists extends AsyncTask<String, Void, Integer>
 	{
 		@Override
 		protected Integer doInBackground(String... urls)
 		{
 			try
 			{
-				BufferedInputStream in = null;
+				BufferedInputStream in;
 				in = new BufferedInputStream((new URL(urls[0])).openStream());
 				byte data[] = new byte[512];
 				byte data2[] = new byte[512];
@@ -1140,7 +1130,7 @@ public class main_view extends Activity
 		update_groups();
 	}
 
-	public static Context get_context()
+	private static Context get_context()
 	{
 		return context;
 	}
@@ -1151,13 +1141,13 @@ public class main_view extends Activity
 		int lines_to_skip = Integer.parseInt(type[1]);
 		int number_of_items = type.length - 2;
 
-		String line = null;
-		BufferedReader stream = null;
+		String line;
+		BufferedReader stream;
 		List< List<String> > types = new ArrayList< List<String> >();
 		for(int i = 0; i < number_of_items; i++)
 			types.add(new ArrayList< String >());
 
-		String content = "";
+		String content;
 
 		try
 		{
@@ -1189,8 +1179,8 @@ public class main_view extends Activity
 
 	private static List<String> read_file_to_list(String file_name, int lines_to_skip)
 	{
-		String line = null;
-		BufferedReader stream = null;
+		String line;
+		BufferedReader stream;
 		List<String> lines = new ArrayList<String>();
 		try
 		{
@@ -1199,8 +1189,7 @@ public class main_view extends Activity
 				stream.readLine();
 			while((line = stream.readLine()) != null)
 				lines.add(line);
-			if (stream != null)
-				stream.close();
+			stream.close();
 		}
 		catch(IOException e){
 		}
@@ -1209,7 +1198,7 @@ public class main_view extends Activity
 
 	private static int count_lines(String file_name)
 	{
-		BufferedReader stream = null;
+		BufferedReader stream;
 		int i = 0;
 		try
 		{
@@ -1248,14 +1237,12 @@ public class main_view extends Activity
 
 			String group = current_groups.get(page_number);
 			String group_file_path 			= storage + "groups/" + group + ".txt";
-			String partial_image_path 		= storage + "images/";
 			String partial_thumbnail_path 	= storage + "thumbnails/";
 
 			List< List<String> > content 		= read_csv_to_list(new String[]{group_file_path, "0", "name", "url"});
 			List<String> group_feeds_names 		= content.get(0);
-			List<String> group_feeds_urls 		= content.get(1);
 
-			String image_name = "", thumbnail_path = "", feed_path = "";
+			String image_name, thumbnail_path;
 
 			if(group_feeds_names.size() < 1)
 				return 0L;
@@ -1398,11 +1385,9 @@ public class main_view extends Activity
 
 		List<String> feeds_array	= read_csv_to_list(new String[]{storage + "groups/" + group + ".txt", "0", "name"}).get(0);
 		List<Date> dates 			= new ArrayList<Date>();
-		List<String> links			= new ArrayList<String>();
-		List<String> pubDates		= new ArrayList<String>();
 		List<String> links_ordered 	= new ArrayList<String>();
 		List<String> content_all 	= new ArrayList<String>();
-		List<String> content 		= new ArrayList<String>();
+		List<String> links, pubDates, content;
 
 		for(String feed : feeds_array)
 		{
@@ -1498,11 +1483,6 @@ public class main_view extends Activity
 				}
 			}
 		}
-	}
-
-	private static List<String> get_groups()
-	{
-		return current_groups;
 	}
 
 	private static void log(String text)
