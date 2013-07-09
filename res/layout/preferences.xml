@@ -15,9 +15,9 @@
 				android:key="refresh_time"
 				android:title="Refresh Time"
 				android:summary="Adjust autorefresh interval"
-				android:defaultValue="30"
-				android:max="120"
-				simplerss:min="1"
+				android:defaultValue="20"
+				android:max="100"
+				simplerss:min="0"
 				simplerss:unitsLeft=""
 				simplerss:unitsRight=""/>
 	</PreferenceCategory>

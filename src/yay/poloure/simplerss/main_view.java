@@ -95,6 +95,8 @@ public class main_view extends Activity
 	private static feed_adapter feed_list_adapter;
 
 	private static final int CONTENT_VIEW_ID = 10101010;
+	private static final int[] times = new int[]{15, 30, 45, 60, 120, 180, 240, 300, 360, 400, 480, 540, 600, 660, 720, 960, 1440, 2880, 10080, 43829};
+
 
 	private void add_feed(String feed_name, String feed_url, String feed_group)
 	{
@@ -297,7 +299,7 @@ public class main_view extends Activity
 			Intent intent = new Intent(this, service_update.class);
 			intent.putExtra("GROUP_NUMBER", "0");
 			PendingIntent pend_intent = PendingIntent.getService(this, 0, intent, 0);
-			final long interval = (PreferenceManager.getDefaultSharedPreferences(this)).getLong("refresh_time", 3600000);
+			final long interval = times[((int)(PreferenceManager.getDefaultSharedPreferences(this)).getInt("refresh_time", 20)/5)]*60000;
 			AlarmManager alarm_refresh = (AlarmManager) getSystemService(Activity.ALARM_SERVICE);
 			alarm_refresh.setRepeating(AlarmManager.RTC_WAKEUP, (new Date()).getTime() + interval, interval, pend_intent);
 		}
