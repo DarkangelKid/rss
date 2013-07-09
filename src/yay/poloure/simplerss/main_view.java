@@ -147,7 +147,7 @@ public class main_view extends Activity
 				if(size == 1)
 					info = "1 group";
 				else
-					info = i + " groups";
+					info = current_groups.size() + " groups";
 			}
 			manage_adapter.add_list(current_groups.get(i), Integer.toString(content.size()) + " feeds • " + info);
 		}
