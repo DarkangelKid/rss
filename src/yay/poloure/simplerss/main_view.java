@@ -86,7 +86,7 @@ public class main_view extends Activity
 	private static float density;
 
 	private static Resources res;
-	private static int positionrr, poser, twelve, check_finished, width;
+	private static int positionrr, poser, twelve, check_finished, width, group_pos;
 	private Boolean new_items = false, refreshing = false;
 	private String mTitle, feed_title;
 	private static String storage;
@@ -96,6 +96,8 @@ public class main_view extends Activity
 	private static List<String> current_groups, feed_titles, feed_urls, feed_groups;
 
 	private static feed_adapter feed_list_adapter;
+
+	private static group_adapter group_list_adapter;
 
 	private static final int CONTENT_VIEW_ID = 10101010;
 	private static final int[] times = new int[]{15, 30, 45, 60, 120, 180, 240, 300, 360, 400, 480, 540, 600, 660, 720, 960, 1440, 2880, 10080, 43829};
@@ -524,9 +526,32 @@ public class main_view extends Activity
 		{
 			View view = inflater.inflate(R.layout.manage_fragment, container, false);
 			manage_list = (ListView) view.findViewById(R.id.group_listview);
-			group_adapter manage_adapter = new group_adapter(getActivity());
-			manage_list.setAdapter(manage_adapter);
+			group_list_adapter = new group_adapter(getActivity());
+			manage_list.setAdapter(group_list_adapter);
 			update_manage_groups();
+			manage_list.setOnItemLongClickListener(new OnItemLongClickListener()
+			{
+				@Override
+				public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id)
+				{
+					if(position == 0)
+						return false;
+					group_pos = position;
+					AlertDialog.Builder builder = new AlertDialog.Builder(activity_context);
+					builder.setCancelable(true)
+							.setPositiveButton("Delete", new DialogInterface.OnClickListener()
+					{
+						public void onClick(DialogInterface dialog, int id) 
+						{
+							group_list_adapter.remove_item(group_pos);
+							group_list_adapter.notifyDataSetChanged();
+						}
+					});
+					AlertDialog alert = builder.create();
+					alert.show();
+					return true;
+				} 
+			});
 			return view;
 		}
 
