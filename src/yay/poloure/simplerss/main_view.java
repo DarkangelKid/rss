@@ -119,41 +119,55 @@ public class main_view extends Activity
 
 	private void update_manage_feeds()
 	{
-		feed_list_adapter.clear_list();
-		final int size = feed_titles.size();
-		for(int i = 0; i < size; i++)
-			feed_list_adapter.add_list(feed_titles.get(i), feed_urls.get(i) + "\n" + feed_groups.get(i) + " • " + Integer.toString(count_lines("content/" + feed_titles.get(i) + ".store.txt.content.txt") - 1) + " items");
-		feed_list_adapter.notifyDataSetChanged();
+		if(feed_list_adapter != null)
+		{
+			feed_list_adapter.clear_list();
+			final int size = feed_titles.size();
+			for(int i = 0; i < size; i++)
+				feed_list_adapter.add_list(feed_titles.get(i), feed_urls.get(i) + "\n" + feed_groups.get(i) + " • " + Integer.toString(count_lines("content/" + feed_titles.get(i) + ".store.txt.content.txt") - 1) + " items");
+			feed_list_adapter.notifyDataSetChanged();
+		}
 	}
 
 	private void update_manage_groups()
 	{
-		group_adapter manage_adapter = (group_adapter)((fragment_group) getFragmentManager().findFragmentByTag("android:switcher:" + ((ViewPager) findViewById(R.id.manage_viewpager)).getId() + ":0")).return_listview().getAdapter();
-		manage_adapter.clear_list();
-		final int size = current_groups.size();
-		for(int i = 0; i < size; i++)
+		fragment_group grp_frag;
+		group_adapter manage_adapter = null;
+		try
 		{
-			List<String> content = read_csv_to_list(new String[]{storage + "groups/" + current_groups.get(i) + ".txt", "0", "name"}).get(0);
-			String info = "";
-			int number = 3;
-			if(content.size() < 3)
-				number = content.size();
-			for(int j = 0; j < number - 1; j++)
-				info = info + content.get(j) + ", ";
-			if(content.size() > 0)
-				info = info + content.get(number - 1);
-			if(content.size() > 3)
-				info = info + ", ...";
-			if(i == 0)
-			{
-				if(size == 1)
-					info = "1 group";
-				else
-					info = current_groups.size() + " groups";
-			}
-			manage_adapter.add_list(current_groups.get(i), Integer.toString(content.size()) + " feeds • " + info);
+			grp_frag = (fragment_group) getFragmentManager().findFragmentByTag("android:switcher:" + ((ViewPager) findViewById(R.id.manage_viewpager)).getId() + ":0");
+			manage_adapter = (group_adapter)((fragment_group) getFragmentManager().findFragmentByTag("android:switcher:" + ((ViewPager) findViewById(R.id.manage_viewpager)).getId() + ":0")).return_listview().getAdapter();
 		}
-		manage_adapter.notifyDataSetChanged();
+		catch(Exception e){
+		}
+		if(manage_adapter != null)
+		{
+			manage_adapter.clear_list();
+			final int size = current_groups.size();
+			for(int i = 0; i < size; i++)
+			{
+				List<String> content = read_csv_to_list(new String[]{storage + "groups/" + current_groups.get(i) + ".txt", "0", "name"}).get(0);
+				String info = "";
+				int number = 3;
+				if(content.size() < 3)
+					number = content.size();
+				for(int j = 0; j < number - 1; j++)
+					info = info + content.get(j) + ", ";
+				if(content.size() > 0)
+					info = info + content.get(number - 1);
+				if(content.size() > 3)
+					info = info + ", ...";
+				if(i == 0)
+				{
+					if(size == 1)
+						info = "1 group";
+					else
+						info = current_groups.size() + " groups";
+				}
+				manage_adapter.add_list(current_groups.get(i), Integer.toString(content.size()) + " feeds • " + info);
+			}
+			manage_adapter.notifyDataSetChanged();
+		}
 	}
 
 	private void edit_feed(String old_name, String new_name, String new_url, String old_group, String new_group)
@@ -775,7 +789,12 @@ public class main_view extends Activity
 		final View add_rss_dialog = inflater.inflate(R.layout.add_rss_dialog, null);
 
 		Spinner group_spinner = (Spinner) add_rss_dialog.findViewById(R.id.group_spinner);
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.group_spinner_text, current_groups);
+		List<String> spinner_groups = new ArrayList<String>();
+		for(int i = 1; i < current_groups.size(); i++)
+		{
+			spinner_groups.add(current_groups.get(i));
+		}
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.group_spinner_text, spinner_groups);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		group_spinner.setAdapter(adapter);
 
@@ -919,7 +938,9 @@ public class main_view extends Activity
 		final String current_title = feed_titles.get(position);
 
 		Spinner group_spinner = (Spinner) edit_rss_dialog.findViewById(R.id.group_spinner);
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(activity_context, R.layout.group_spinner_text, current_groups);
+		List<String> spinner_groups = current_groups;
+		spinner_groups.remove(0);
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(activity_context, R.layout.group_spinner_text, spinner_groups);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		group_spinner.setAdapter(adapter);
 
