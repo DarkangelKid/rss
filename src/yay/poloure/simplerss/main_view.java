@@ -353,7 +353,6 @@ public class main_view extends Activity
 			intent.putExtra("GROUP_NUMBER", "0");
 			PendingIntent pend_intent = PendingIntent.getService(this, 0, intent, 0);
 			long interval = (long) times[((int)(PreferenceManager.getDefaultSharedPreferences(this)).getInt("refresh_time", 20)/5)]*60000;
-			//long interval = 60000;
 			log(Long.toString(interval));
 			AlarmManager alarm_refresh = (AlarmManager) getSystemService(Activity.ALARM_SERVICE);
 			alarm_refresh.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + interval, interval, pend_intent);
