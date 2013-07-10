@@ -17,8 +17,11 @@ import android.widget.TextView;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.widget.Toast;
+import android.widget.ListView;
 import android.view.ViewGroup.LayoutParams;
 import java.util.List;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import java.util.ArrayList;
 import android.net.Uri;
 import android.graphics.Bitmap;
@@ -43,11 +46,15 @@ public class card_adapter extends BaseAdapter
 	private List<String> content_images = new ArrayList<String>();
 	private List<Integer> content_height = new ArrayList<Integer>();
 	private List<Integer> content_width = new ArrayList<Integer>();
+	private List<Boolean> content_marker = new ArrayList<Boolean>();
 	
 	private final LayoutInflater inflater;
 	private Context context;
+	private ListView listview;
 
 	private static int eight = 0;
+	private int top_item_position = -1;
+	private String top_url;
 
 	public card_adapter(Context context_main)
 	{
@@ -55,7 +62,7 @@ public class card_adapter extends BaseAdapter
 		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 
-	public void add_list(String new_title, String new_des, String new_link, String new_image, int new_height, int new_width)
+	public void add_list(String new_title, String new_des, String new_link, String new_image, int new_height, int new_width, Boolean new_marker)
 	{
 		content_titles.add(0, new_title);
 		content_des.add(0, new_des.replaceAll("<([^;]*)>", ""));
@@ -63,6 +70,7 @@ public class card_adapter extends BaseAdapter
 		content_images.add(0, new_image);
 		content_height.add(0, new_height);
 		content_width.add(0, new_width);
+		content_marker.add(0, new_marker);
 		if(eight == 0)
 			eight = (int) ((8 * main_view.get_pixel_density() + 0.5f));
 
@@ -93,6 +101,7 @@ public class card_adapter extends BaseAdapter
 		ViewHolder holder;
 		if(convertView == null)
 		{
+			listview = (ListView) parent;
 			convertView = inflater.inflate(R.layout.card_layout, parent, false);
 			holder = new ViewHolder();
 			holder.title_view = (TextView) convertView.findViewById(R.id.title);
@@ -113,6 +122,43 @@ public class card_adapter extends BaseAdapter
 
 		convertView.setOnClickListener(new browser_call());
 		convertView.setOnLongClickListener(new long_press());
+		((ListView) parent).setOnScrollListener(new AbsListView.OnScrollListener()
+		{
+			@Override
+			public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount){
+			}
+
+			@Override
+			public void onScrollStateChanged(AbsListView view, int scrollState)
+			{
+				//if(scrollState ==  AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
+				//{
+					//if(ith.return_top_view_url() is before the marker array index, change the array index.
+					//position of first marker is first element in content_marker to equal true.
+
+					/// Maybe plus one.
+					int firstVisibleItem = listview.getFirstVisiblePosition();
+					int i;
+					int size = content_marker.size();
+					Boolean found = false;
+					for(i = 0; i < size; i++)
+					{
+						if(content_marker.get(i))
+						{
+							found = true;
+							break;
+						}
+					}
+
+					if((firstVisibleItem < i)&&(found))
+					{
+						//top_url = content_links.get(firstVisibleItem);
+						content_marker.set(firstVisibleItem, true);
+						top_item_position = i;
+					}
+				//}
+			}
+		});
 		
 		holder.title_view.setText(content_titles.get(position));
 		holder.time_view.setText(content_links.get(position));
@@ -147,6 +193,13 @@ public class card_adapter extends BaseAdapter
 		}
 		holder.description_view.setText(des);
 		return convertView;
+	}
+
+	public String return_latest_url()
+	{
+		if(top_item_position == -1)
+			return "";
+		return content_links.get(top_item_position);
 	}
 
 	static class ViewHolder

@@ -32,6 +32,7 @@ public class service_update extends IntentService
 {
 	int group;
 	private static String storage;
+	final private int width = Integer.parseInt(main_view.read_file_to_list("width.txt", 0).get(0));
 	
 	public service_update()
 	{
@@ -195,8 +196,6 @@ public class service_update extends IntentService
 			BitmapFactory.Options o = new BitmapFactory.Options();
 			o.inJustDecodeBounds = true;
 			BitmapFactory.decodeFile(storage + "images/" + image_name, o);
-
-			int width = main_view.return_width();
 
 			/// TODO: If the activity has not run deal with it. and not produce the compressed file.
 			int width_tmp = o.outWidth;

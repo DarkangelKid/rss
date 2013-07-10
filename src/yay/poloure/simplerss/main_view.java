@@ -311,14 +311,20 @@ public class main_view extends Activity
 			getActionBar().setDisplayHomeAsUpEnabled(true);
 			getActionBar().setHomeButtonEnabled(true);
 
+			/// Save the width for compression
+			if(!exists(storage + "width.txt"))
+			{
+				Display display = getWindowManager().getDefaultDisplay();
+				Point size = new Point();
+				display.getSize(size);
+				width = (int) Math.round(((float)size.x)*0.80);
+				append_string_to_file("width.txt", Integer.toString(width) + "\n");
+			}
+			else
+				width = Integer.parseInt(read_file_to_list("width.txt", 0).get(0));
+
 			if(read_file_to_list("groups/All.txt", 0).size()>0)
 				new refresh_page().execute(0);
-
-			/// Save the width for compression
-			Display display = getWindowManager().getDefaultDisplay();
-			Point size = new Point();
-			display.getSize(size);
-			width = (int) Math.round(((float)size.x)*0.80);
 
 			drawer_toggle.syncState();
 			density = getResources().getDisplayMetrics().density;
@@ -337,10 +343,37 @@ public class main_view extends Activity
 			intent.putExtra("GROUP_NUMBER", "0");
 			PendingIntent pend_intent = PendingIntent.getService(this, 0, intent, 0);
 			long interval = (long) times[((int)(PreferenceManager.getDefaultSharedPreferences(this)).getInt("refresh_time", 20)/5)]*60000;
-			//long interval = 60000;
 			log(Long.toString(interval));
 			AlarmManager alarm_refresh = (AlarmManager) getSystemService(Activity.ALARM_SERVICE);
 			alarm_refresh.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + interval, interval, pend_intent);
+		}
+		/// Save the positions.
+		for(int i = 0; i < current_groups.size(); i++)
+		{
+			String group = current_groups.get(i);
+			try
+			{
+				card_adapter adapter = (card_adapter)((fragment_card) getFragmentManager().findFragmentByTag("android:switcher:" + ((ViewPager) findViewById(R.id.pager)).getId() + ":" + Integer.toString(i))).getListView().getAdapter();
+				if(adapter.getCount() > 0)
+				{
+					List<String> lines = read_file_to_list("groups/" + group + ".txt.content.txt", 0);
+					delete("groups/" + group + ".txt.content.txt");
+					BufferedWriter out = new BufferedWriter(new FileWriter(storage + "groups/" + group + ".txt.content.txt", true));
+					String url = adapter.return_latest_url();
+					for(String line : lines)
+					{
+						if((url.equals("")||(!line.contains(url))))
+							out.write(line + "\n");
+						else if(!line.contains("marker|1|"))
+							out.write(line + "marker|1|\n");
+						else
+							out.write(line + "\n");
+					}
+					out.close();
+				}
+			}
+			catch(Exception e){
+			}
 		}
 	}
 
@@ -1231,7 +1264,7 @@ public class main_view extends Activity
 		return types;
 	}
 
-	private static List<String> read_file_to_list(String file_name, int lines_to_skip)
+	public static List<String> read_file_to_list(String file_name, int lines_to_skip)
 	{
 		String line;
 		BufferedReader stream;
@@ -1271,7 +1304,6 @@ public class main_view extends Activity
 		set_refresh(true);
 		Intent intent = new Intent(this, service_update.class);
 		intent.putExtra("GROUP_NUMBER", Integer.toString(page_number));
-		log("Starting service");
 		startService(intent);
 	}
 
@@ -1287,6 +1319,7 @@ public class main_view extends Activity
 		protected Long doInBackground(Integer... ton)
 		{
 			/// ton[0] = page number or position in current_groups.
+			/// TODO: setRecyclerListener(AbsListView.RecyclerListener listener);
 			int page_number = ton[0];
 
 			String group = current_groups.get(page_number);
@@ -1313,6 +1346,7 @@ public class main_view extends Activity
 			File group_content_file = new File(group_content_path);
 
 			/// If we have skipped the download, and either the page number is zero (which it only is if new data had been made since) or the group content file does not exist yet.
+			new_items = true;
 			if((!group_content_file.exists())||(new_items))
 			{
 				for(String feed : group_feeds_names)
@@ -1325,12 +1359,13 @@ public class main_view extends Activity
 				}
 			}
 
-			String[] passer = {group_content_path, "0", "title", "image", "description", "link"};
+			String[] passer = {group_content_path, "0", "title", "image", "description", "link", "marker"};
 			List< List<String> > contenter = read_csv_to_list(passer);
 			List<String> titles 		= contenter.get(0);
 			List<String> images 		= contenter.get(1);
 			List<String> descriptions 	= contenter.get(2);
 			List<String> links			= contenter.get(3);
+			List<String> marker			= contenter.get(4);
 			
 			if(titles.get(0).length() < 1)
 				return 0L;
@@ -1377,7 +1412,7 @@ public class main_view extends Activity
 				// Checks to see if page has this item.
 				if(existing_items.add(links.get(m)))
 				{
-					publishProgress(page_number, titles.get(m), descriptions.get(m), links.get(m), thumbnail_path, dim[1], dim[0]);
+					publishProgress(page_number, titles.get(m), descriptions.get(m), links.get(m), thumbnail_path, dim[1], dim[0], marker.get(m));
 					/// If we have downloaded new data on other pages bar 0, and it gets here, there is new data for 0 to refresh with.
 					if(page_number != 0)
 					// Make this an array for the group pages.
@@ -1387,6 +1422,8 @@ public class main_view extends Activity
 			return 0L;
 		}
 
+		private int marker_position = -1;
+
 		@Override
 		protected void onProgressUpdate(Object... progress)
 		{
@@ -1394,9 +1431,18 @@ public class main_view extends Activity
 			if(l != null)
 			{
 				card_adapter ith = ((card_adapter) l.getListAdapter());
-
 				ListView lv = l.getListView();
-				int index = lv.getFirstVisiblePosition() + 1;
+				Boolean marker = false;
+				/// It should stop at the latest one unless there is not a newest one. So stay at 0 until it finds one.
+				if(((String) progress[7]).equals("1"))
+				{
+					marker = true;
+					marker_position = 0;
+				}
+				else if(marker_position != -1)
+					marker_position++;
+
+				/*int index = lv.getFirstVisiblePosition() + 1;
 				View v = lv.getChildAt(0);
 				int top = (v == null) ? 0 : v.getTop();
 				if(top == 0)
@@ -1406,12 +1452,16 @@ public class main_view extends Activity
 					index++;
 					v = lv.getChildAt(1);
 					top = v.getTop();
-				}
+				}*/
 
-				ith.add_list((String) progress[1], (String) progress[2], (String) progress[3], (String) progress[4], (Integer) progress[5], (Integer) progress[6]);
+				ith.add_list((String) progress[1], (String) progress[2], (String) progress[3], (String) progress[4], (Integer) progress[5], (Integer) progress[6], marker);
 				ith.notifyDataSetChanged();
 
-				lv.setSelectionFromTop(index, top - twelve);
+				//lv.setSelectionFromTop(index, top - twelve);
+				if(marker_position != -1)
+					lv.setSelection(marker_position);
+				else
+					lv.setSelection(lv.getCount() - 1);
 			}
 		}
 
@@ -1521,25 +1571,57 @@ public class main_view extends Activity
 		}
 
 		final String group_content_path = "groups/" + group + ".txt.content.txt";
+		String last_url = "";
+		if(exists("groups/" + group + ".txt.content.txt"))
+		{
+			List< List<String> > bonne = read_csv_to_list(new String[]{storage + "groups/" + group + ".txt.content.txt", "0", "link", "marker"});
+			List<String> urls = bonne.get(0);
+			List<String> marks = bonne.get(1);
+			int sized = marks.size();
+			for(int i = sized - 1; i >= 0; i--)
+			{
+				if(marks.get(i).equals("1"))
+				{
+					last_url = urls.get(i);
+					break;
+				}
+			}
+			if((last_url.equals(""))&&(sized > 0))
+				last_url = urls.get(0);
+		}
+		if(last_url.equals(""))
+			last_url = links_ordered.get(0);
+
 		delete(group_content_path);
 
-		if(links_ordered.size()>0)
+		try
 		{
-			for(String link : links_ordered)
+			BufferedWriter out = new BufferedWriter(new FileWriter(storage + group_content_path, true));
+
+			if(links_ordered.size()>0)
 			{
-				for(String line : content_all)
+				for(String link : links_ordered)
 				{
-					if(line.contains(link))
+					for(String line : content_all)
 					{
-						append_string_to_file(group_content_path, line + "\n");
-						break;
+						if(line.contains(link))
+						{
+							if(link.equals(last_url))
+								out.write(line + "marker|1|\n");
+							else
+								out.write(line + "\n");
+							break;
+						}
 					}
 				}
 			}
+			out.close();
+		}
+		catch(Exception e){
 		}
 	}
 
-	private static void log(String text)
+	public static void log(String text)
 	{
 		append_string_to_file("dump.txt", text + "\n");
 	}
