@@ -386,8 +386,8 @@ public class main_view extends Activity
 					{
 						if((url.equals("")||(!line.contains(url))))
 							out.write(line + "\n");
-						else if(!line.contains("marker|1|"))
-							out.write(line + "marker|1|\n");
+						else if(!line.substring(0, 9).equals("marker|1|"))
+							out.write("marker|1|" + line + "\n");
 						else
 							out.write(line + "\n");
 					}
@@ -1668,7 +1668,7 @@ public class main_view extends Activity
 						if(line.contains(link))
 						{
 							if(link.equals(last_url))
-								out.write(line + "marker|1|\n");
+								out.write("marker|1|" + line + "\n");
 							else
 								out.write(line + "\n");
 							break;
