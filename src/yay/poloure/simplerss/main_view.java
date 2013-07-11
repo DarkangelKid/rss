@@ -1205,7 +1205,7 @@ public class main_view extends Activity
 		}
 	}
 
-	private static void append_string_to_file(String file_name, String string)
+	public static void append_string_to_file(String file_name, String string)
 	{
 		try
 		{
@@ -1675,12 +1675,12 @@ public class main_view extends Activity
 		append_string_to_file("dump.txt", text + "\n");
 	}
 
-	private static void delete(String file_name)
+	public static void delete(String file_name)
 	{
 		(new File(storage + file_name)).delete();
 	}
 
-	private static Boolean exists(String file_name)
+	public static Boolean exists(String file_name)
 	{
 		return (new File(storage + file_name)).exists();
 	}
