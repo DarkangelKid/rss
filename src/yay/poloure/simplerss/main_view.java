@@ -970,26 +970,24 @@ public class main_view extends Activity
 		final String current_group = feed_groups.get(position);
 		final String current_title = feed_titles.get(position);
 
+		int current_spinner_position = 0;
+
 		Spinner group_spinner = (Spinner) edit_rss_dialog.findViewById(R.id.group_spinner);
 		List<String> spinner_groups = new ArrayList<String>();
 		for(int i = 1; i < current_groups.size(); i++)
 		{
 			spinner_groups.add(current_groups.get(i));
+			if((current_groups.get(i)).equals(current_group))
+				current_spinner_position = i - 1;
 		}
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(activity_context, R.layout.group_spinner_text, spinner_groups);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		group_spinner.setAdapter(adapter);
-
-		int i;
-		for(i = 0; i < current_groups.size(); i++)
-		{
-			if(current_groups.get(i).equals(current_group))
-				break;
-		}
+		group_spinner.setSelection(current_spinner_position);
 
 		((EditText)edit_rss_dialog.findViewById(R.id.name_edit)).setText(current_title);
 		((EditText)edit_rss_dialog.findViewById(R.id.URL_edit)).setText(feed_urls.get(position));
-		group_spinner.setSelection(i);
+		group_spinner.setSelection(current_spinner_position);
 
 		final AlertDialog edit_dialog = new AlertDialog.Builder(activity_context, 2)
 				.setTitle("Edit Feed")
