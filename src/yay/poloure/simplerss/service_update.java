@@ -79,6 +79,8 @@ public class service_update extends IntentService
 		if(!grouper.equals("All"))
 			sort_group_content_by_time("All");
 
+		
+
 		/// If we should download and update the feeds inside that group.
 		String group_content_path = storage + "groups/" + grouper + ".txt.content.txt";
 
@@ -87,7 +89,8 @@ public class service_update extends IntentService
 		List<String> images 			= contenter.get(0);
 
 			/// For each line of the group_content_file
-		for(int m=0; m<images.size(); m++)
+		final int sizer = images.size();
+		for(int m = 0; m < sizer; m++)
 		{
 			if(!images.get(m).equals(""))
 			{
@@ -103,9 +106,20 @@ public class service_update extends IntentService
 		}
 		///notification start
 
+		int count = 0;
+		List<String> count_list = read_file_to_list("groups/All.txt.content.txt", 0);
+		final int sized = count_list.size();
+		int i;
+		for(i = sized - 1; i >= 0; i--)
+		{
+			if(count_list.get(i).contains("marker|1|"))
+				break;
+		}
+		final int unread_items = sized - i;
+
 		NotificationCompat.Builder not_builder = new NotificationCompat.Builder(this)
 				.setSmallIcon(R.drawable.rss_icon)
-				.setContentTitle("SimpleRSS")
+				.setContentTitle(Integer.toString(unread_items) + " Unread Item" + ((unread_items == 1) ? "" : "s"))
 				.setContentText("Refresh complete")
 				.setAutoCancel(true);
 
