@@ -1376,6 +1376,16 @@ public class main_view extends Activity
 		{
 			/// ton[0] = page number or position in current_groups.
 			/// TODO: setRecyclerListener(AbsListView.RecyclerListener listener);
+			
+			while(check_service_running())
+			{
+				try{
+					Thread.sleep(200);
+				}
+				catch(Exception e){
+				}
+			}
+			
 			int page_number = ton[0];
 
 			String group = current_groups.get(page_number);
