@@ -1490,6 +1490,7 @@ public class main_view extends Activity
 				ListView lv = l.getListView();
 				Boolean marker = false;
 				/// It should stop at the latest one unless there is not a newest one. So stay at 0 until it finds one.
+				log(((String) progress[7]));
 				if(((String) progress[7]).equals("1"))
 				{
 					marker = true;
