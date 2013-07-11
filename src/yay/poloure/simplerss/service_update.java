@@ -75,7 +75,6 @@ public class service_update extends IntentService
 		}
 
 		/// Sort group order
-		sort_group_content_by_time(grouper);
 		if(!grouper.equals("All"))
 			sort_group_content_by_time("All");
 
