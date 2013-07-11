@@ -55,7 +55,8 @@ public class service_update extends IntentService
 		group = Integer.parseInt(intent.getStringExtra("GROUP_NUMBER"));
 		storage = this.getExternalFilesDir(null).getAbsolutePath() + "/";
 
-		String grouper = read_file_to_list("groups/group_list.txt", 0).get(group);
+		List<String> all_groups = read_file_to_list("groups/group_list.txt", 0);
+		String grouper = all_groups.get(group);
 		String group_file_path 		= storage + "groups/" + grouper + ".txt";
 		String partial_image_path 		= storage + "images/";
 		String partial_thumbnail_path 	= storage + "thumbnails/";
@@ -77,6 +78,14 @@ public class service_update extends IntentService
 		/// Sort group order
 		if(!grouper.equals("All"))
 			sort_group_content_by_time("All");
+		else
+		{
+			for(String gro : all_groups)
+			{
+				if(!gro.equals("All"))
+					sort_group_content_by_time(gro);
+			}
+		}
 
 		/// If we should download and update the feeds inside that group.
 		String group_content_path = storage + "groups/" + grouper + ".txt.content.txt";
@@ -101,35 +110,49 @@ public class service_update extends IntentService
 					compress_file(image_name, grouper, false);
 			}
 		}
-		///notification start
 
-		int count = 0;
-		List<String> count_list = read_file_to_list("groups/All.txt.content.txt", 0);
-		final int sized = count_list.size();
-		int i;
-		for(i = sized - 1; i >= 0; i--)
+		/// Read all the group files and how many new items.
+		List<Integer> unread_list = new ArrayList<Integer>();
+		for(String gro : all_groups)
 		{
-			if(count_list.get(i).substring(0, 9).equals("marker|1|"))
-				break;
+			int count = 0;
+			List<String> count_list = read_file_to_list("groups/" + gro + ".txt.content.txt", 0);
+			int sized = count_list.size();
+			int i;
+			for(i = sized - 1; i >= 0; i--)
+			{
+				if(count_list.get(i).substring(0, 9).equals("marker|1|"))
+					break;
+			}
+			unread_list.add(sized - i - 1);
 		}
-		final int unread_items = sized - i - 1;
+		
+		int group_items = 0;
+		for(int un : unread_list)
+		{
+			if(un > 0)
+				group_items++;
+		}
 
-		NotificationCompat.Builder not_builder = new NotificationCompat.Builder(this)
-				.setSmallIcon(R.drawable.rss_icon)
-				.setContentTitle(Integer.toString(unread_items) + " Unread Item" + ((unread_items == 1) ? "" : "s"))
-				.setContentText("Refresh complete")
-				.setAutoCancel(true);
+		if(unread_list.get(0) > 0)
+		{
+			NotificationCompat.Builder not_builder = new NotificationCompat.Builder(this)
+					.setSmallIcon(R.drawable.rss_icon)
+					.setContentTitle(Integer.toString(unread_list.get(0)) + " Unread Item" + ((unread_list.get(0) == 1) ? "" : "s"))
+					.setContentText(Integer.toString(group_items) + " groups have unread item" + ((group_items == 1) ? "." : "s."))
+					.setAutoCancel(true);
 
-		Intent result_intent = new Intent(this, main_view.class);
+			Intent result_intent = new Intent(this, main_view.class);
 
-		TaskStackBuilder stack_builder = TaskStackBuilder.create(this);
+			TaskStackBuilder stack_builder = TaskStackBuilder.create(this);
 
-		stack_builder.addParentStack(main_view.class);
-		stack_builder.addNextIntent(result_intent);
-		PendingIntent result_pending_intent = stack_builder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-		not_builder.setContentIntent(result_pending_intent);
-		NotificationManager notification_manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		notification_manager.notify(1, not_builder.build());
+			stack_builder.addParentStack(main_view.class);
+			stack_builder.addNextIntent(result_intent);
+			PendingIntent result_pending_intent = stack_builder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+			not_builder.setContentIntent(result_pending_intent);
+			NotificationManager notification_manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+			notification_manager.notify(1, not_builder.build());
+		}
 
 		///notification end
 		wakelock.release();
