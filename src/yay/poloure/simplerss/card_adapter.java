@@ -150,12 +150,13 @@ public class card_adapter extends BaseAdapter
 						}
 					}
 
-					if((firstVisibleItem < i)&&(found))
+					if((firstVisibleItem < i)&&(found)&&(firstVisibleItem != -1))
 					{
 						//top_url = content_links.get(firstVisibleItem);
 						content_marker.set(firstVisibleItem, true);
-						top_item_position = i;
+						top_item_position = firstVisibleItem;
 					}
+					main_view.log(Integer.toString(top_item_position));
 				//}
 			}
 		});
