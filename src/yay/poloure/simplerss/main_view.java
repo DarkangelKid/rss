@@ -175,7 +175,6 @@ public class main_view extends Activity
 		/// Delete the feed info from the all group and add the new group info to the end of the all content file.
 		remove_string_from_file("groups/All.txt", old_name, true);
 		append_string_to_file("groups/All.txt", "name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|\n");
-		delete("groups/All.txt.content.txt");
 
 		/// If we have renamed the title, rename the content/title.txt file.
 		if(!old_name.equals(new_name))
@@ -192,10 +191,6 @@ public class main_view extends Activity
 			/// If the above group file no longer exists because there are no lines left, remove the group from the group list.
 			if(!exists("groups/" + old_group + ".txt"))
 				remove_string_from_file("groups/group_list.txt", old_group, false);
-
-			/// Delete the old and new group_file content files.
-			delete("groups/" + old_group + ".txt.content.txt");
-			delete("groups/" + new_group + ".txt.content.txt");
 		}
 		/// The group is the same but the titles and urls may have changed.
 		else
@@ -214,6 +209,12 @@ public class main_view extends Activity
 
 		update_groups();
 		update_manage();
+
+		sort_group_content_by_time("All");
+		if(exists("groups/" + old_group + ".txt"))
+			sort_group_content_by_time(old_group);
+		if(exists("groups/" + new_group + ".txt"))
+			sort_group_content_by_time(new_group);
 	}
 
 	private void update_feeds_list()
@@ -645,9 +646,6 @@ public class main_view extends Activity
 							String group = feed_list_adapter.get_info(positionrr);
 							group = group.substring(group.indexOf('\n') + 1, group.indexOf(' '));
 							String name = feed_list_adapter.getItem(positionrr);
-							delete("content/" + name + ".store.txt.content.txt");
-							delete("groups/All.txt.content.txt");
-							delete("groups/" + group + ".txt.content.txt");
 							delete(group + ".image_size.cache.txt");
 							/// Perhaps regen the all_image.cache.txt
 
@@ -660,6 +658,10 @@ public class main_view extends Activity
 								remove_string_from_file("groups/group_list.txt", group, false);
 								update_groups();
 							}
+
+							sort_group_content_by_time("All");
+							if(exists("groups/" + group + ".txt"))
+								sort_group_content_by_time(group);
 
 							/// remove deleted files content from groups that it was in
 							feed_list_adapter.remove_item(positionrr);
@@ -676,9 +678,10 @@ public class main_view extends Activity
 							group = group.substring(group.indexOf('\n') + 1, group.indexOf(' '));
 							String name = feed_list_adapter.getItem(positionrr);
 							delete("content/" + name + ".store.txt.content.txt");
-							delete("groups/All.txt.content.txt");
 							delete("groups/" + group + ".txt.content.txt");
 							delete(group + ".image_size.cache.txt");
+
+							sort_group_content_by_time("All");
 
 							/// remove deleted files content from groups that it was in
 							/// TODO: update item info
