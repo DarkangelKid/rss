@@ -111,10 +111,10 @@ public class service_update extends IntentService
 		int i;
 		for(i = sized - 1; i >= 0; i--)
 		{
-			if(count_list.get(i).contains("marker|1|"))
+			if(count_list.get(i).substring(0, 9).equals("marker|1|"))
 				break;
 		}
-		final int unread_items = sized - i;
+		final int unread_items = sized - i - 1;
 
 		NotificationCompat.Builder not_builder = new NotificationCompat.Builder(this)
 				.setSmallIcon(R.drawable.rss_icon)
