@@ -82,6 +82,12 @@ public class group_adapter extends BaseAdapter
 		return group_list.get(position);
 	}
 
+	public void remove_item(int position)
+	{
+		group_list.remove(position);
+		info_list.remove(position);
+	}
+
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
@@ -107,7 +113,6 @@ public class group_adapter extends BaseAdapter
 			{
 				holder.image_view.setOnTouchListener(new MyTouchListener());
 				convertView.setOnDragListener(new MyDragListener());
-				convertView.setOnLongClickListener(new long_press_listener());
 			}
 			else
 				holder.image_view.setVisibility(View.INVISIBLE);
@@ -179,39 +184,6 @@ public class group_adapter extends BaseAdapter
 			return true;
 		}
 	}
-
-	class long_press_listener implements View.OnLongClickListener
-	{
-		@Override
-		public boolean onLongClick(View v)
-		{
-			long_press_title = ((TextView)v.findViewById(R.id.group_item)).getText().toString();
-			delete_dialog();
-			return true;
-		}
-	}
-
-	public void delete_dialog()
-	{
-		AlertDialog.Builder builder = new AlertDialog.Builder(this.context);
-		builder.setCancelable(true)
-				.setPositiveButton("Delete", new DialogInterface.OnClickListener()
-		{
-			public void onClick(DialogInterface dialog, int id) {
-				int i = 0;
-				while(i < group_list.size())
-				{
-					if(long_press_title.equals(group_list.get(i)))
-						break;
-					i = i + 1;
-				}
-				group_list.remove(i);
-				refresh_data();
-			}
-		});
-		AlertDialog alert = builder.create();
-		alert.show();
-	} 
 
 	private void rearrange_groups(String previous, String next)
 	{

@@ -28,6 +28,12 @@ import android.graphics.BitmapFactory;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
+import android.app.NotificationManager;
+import android.content.Intent;
+import android.app.PendingIntent;
+
 public class service_update extends IntentService
 {
 	int group;
@@ -93,7 +99,25 @@ public class service_update extends IntentService
 					compress_file(image_name, grouper, false);
 			}
 		}
+		///notification start
 
+		NotificationCompat.Builder not_builder = new NotificationCompat.Builder(this)
+				.setSmallIcon(R.drawable.rss_icon)
+				.setContentTitle("SimpleRSS")
+				.setContentText("Refresh complete");
+
+		Intent result_intent = new Intent(this, main_view.class);
+
+		TaskStackBuilder stack_builder = TaskStackBuilder.create(this);
+
+		stack_builder.addParentStack(main_view.class);
+		stack_builder.addNextIntent(result_intent);
+		PendingIntent result_pending_intent = stack_builder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+		not_builder.setContentIntent(result_pending_intent);
+		NotificationManager notification_manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		notification_manager.notify(1, not_builder.build());
+
+		///notification end
 		wakelock.release();
 		stopSelf();
 	}
