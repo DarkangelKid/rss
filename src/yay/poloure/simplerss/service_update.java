@@ -104,7 +104,8 @@ public class service_update extends IntentService
 		NotificationCompat.Builder not_builder = new NotificationCompat.Builder(this)
 				.setSmallIcon(R.drawable.rss_icon)
 				.setContentTitle("SimpleRSS")
-				.setContentText("Refresh complete");
+				.setContentText("Refresh complete")
+				.setAutoCancel(true);
 
 		Intent result_intent = new Intent(this, main_view.class);
 
