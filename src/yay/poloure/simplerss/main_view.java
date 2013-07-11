@@ -1439,6 +1439,7 @@ public class main_view extends Activity
 
 			/// For each line of the group_content_file
 			final int size = titles.size();
+			ssize = size;
 			for(int m=0; m<size; m++)
 			{
 				thumbnail_path = "";
@@ -1478,6 +1479,8 @@ public class main_view extends Activity
 		}
 
 		private int marker_position = -1;
+		private int ssize;
+		private int count = 0;
 
 		@Override
 		protected void onProgressUpdate(Object... progress)
@@ -1494,7 +1497,7 @@ public class main_view extends Activity
 					marker = true;
 					marker_position = 0;
 				}
-				else if(marker_position != -1)
+				if(marker_position != -1)
 					marker_position++;
 
 				/*int index = lv.getFirstVisiblePosition() + 1;
@@ -1511,10 +1514,16 @@ public class main_view extends Activity
 
 				ith.add_list((String) progress[1], (String) progress[2], (String) progress[3], (String) progress[4], (Integer) progress[5], (Integer) progress[6], marker);
 				ith.notifyDataSetChanged();
+				count++;
 
 				//lv.setSelectionFromTop(index, top - twelve);
 				if(marker_position != -1)
-					lv.setSelection(marker_position);
+				{
+					if((count == ssize)&&(marker_position == 1))
+						lv.setSelection(0);
+					else
+						lv.setSelection(marker_position);
+				}
 				else
 					lv.setSelection(lv.getCount() - 1);
 			}
