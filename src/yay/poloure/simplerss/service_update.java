@@ -284,15 +284,15 @@ public class service_update extends IntentService
 			if(test.exists())
 			{
 
-				List< List<String> > contenter	= read_csv_to_list(new String[]{content_path, "1", "link", "pubDate"});
+				List< List<String> > contenter	= read_csv_to_list(new String[]{content_path, "0", "link", "pubDate"});
 				links 							= contenter.get(0);
 				pubDates						= contenter.get(1);
-				content 						= read_file_to_list("content/" + feed + ".store.txt.content.txt", 1);
+				content 						= read_file_to_list("content/" + feed + ".store.txt.content.txt", 0);
 
 				if(pubDates.get(0).length()<8)
-					pubDates 					= read_csv_to_list(new String[]{content_path, "1", "published"}).get(0);
+					pubDates 					= read_csv_to_list(new String[]{content_path, "0", "published"}).get(0);
 				if(pubDates.get(0).length()<8)
-					pubDates 					= read_csv_to_list(new String[]{content_path, "1", "updated"}).get(0);
+					pubDates 					= read_csv_to_list(new String[]{content_path, "0", "updated"}).get(0);
 
 				final int size = pubDates.size();
 				for(int i=0; i<size; i++)

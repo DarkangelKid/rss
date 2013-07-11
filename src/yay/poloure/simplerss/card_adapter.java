@@ -132,7 +132,7 @@ public class card_adapter extends BaseAdapter
 			public void onScrollStateChanged(AbsListView view, int scrollState)
 			{
 					/// Maybe plus one.
-					int firstVisibleItem = listview.getFirstVisiblePosition();
+					int firstVisibleItem = listview.getFirstVisiblePosition() + 1;
 					int i;
 					int size = content_marker.size();
 					Boolean found = false;
