@@ -1376,6 +1376,16 @@ public class main_view extends Activity
 		{
 			/// ton[0] = page number or position in current_groups.
 			/// TODO: setRecyclerListener(AbsListView.RecyclerListener listener);
+			
+			while(check_service_running())
+			{
+				try{
+					Thread.sleep(200);
+				}
+				catch(Exception e){
+				}
+			}
+			
 			int page_number = ton[0];
 
 			String group = current_groups.get(page_number);
@@ -1492,6 +1502,7 @@ public class main_view extends Activity
 				ListView lv = l.getListView();
 				Boolean marker = false;
 				/// It should stop at the latest one unless there is not a newest one. So stay at 0 until it finds one.
+				log(((String) progress[7]));
 				if(((String) progress[7]).equals("1"))
 				{
 					marker = true;

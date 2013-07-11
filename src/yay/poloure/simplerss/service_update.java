@@ -89,8 +89,6 @@ public class service_update extends IntentService
 			}
 		}
 
-		
-
 		/// If we should download and update the feeds inside that group.
 		String group_content_path = storage + "groups/" + grouper + ".txt.content.txt";
 
@@ -138,12 +136,12 @@ public class service_update extends IntentService
 				group_items++;
 		}
 
-		if((unread_list.get(0) > 0)&&(!check_activity_running()))
+		if((unread_list.get(0) > 0))
 		{
 			NotificationCompat.Builder not_builder = new NotificationCompat.Builder(this)
 					.setSmallIcon(R.drawable.rss_icon)
 					.setContentTitle(Integer.toString(unread_list.get(0)) + " Unread Item" + ((unread_list.get(0) == 1) ? "" : "s"))
-					.setContentText(Integer.toString(group_items) + " groups have unread item" + ((group_items == 1) ? "." : "s."))
+					.setContentText(Integer.toString(group_items - 1) + " groups have unread item" + (((group_items - 1) == 1) ? "." : "s."))
 					.setAutoCancel(true);
 
 			Intent result_intent = new Intent(this, main_view.class);
