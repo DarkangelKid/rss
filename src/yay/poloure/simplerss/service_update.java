@@ -23,6 +23,8 @@ import java.net.URL;
 
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningTaskInfo;
 
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap;
@@ -134,7 +136,7 @@ public class service_update extends IntentService
 				group_items++;
 		}
 
-		if(unread_list.get(0) > 0)
+		if((unread_list.get(0) > 0)&&(!check_activity_running()))
 		{
 			NotificationCompat.Builder not_builder = new NotificationCompat.Builder(this)
 					.setSmallIcon(R.drawable.rss_icon)
@@ -158,6 +160,20 @@ public class service_update extends IntentService
 		wakelock.release();
 		stopSelf();
 	}
+
+	public boolean check_activity_running()
+	{
+		ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+		List<RunningTaskInfo> tasks = activityManager.getRunningTasks(Integer.MAX_VALUE);
+
+		for(RunningTaskInfo task : tasks)
+		{
+			if(getPackageName().equalsIgnoreCase(task.baseActivity.getPackageName())) 
+				return true;                                  
+		}
+		return false;
+    }
+
 	
 	private List<String> read_file_to_list(String file_name, int lines_to_skip)
 	{
