@@ -364,8 +364,13 @@ public class main_view extends Activity
 			AlarmManager alarm_refresh = (AlarmManager) getSystemService(Activity.ALARM_SERVICE);
 			alarm_refresh.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + interval, interval, pend_intent);
 		}
-		/// Save the positions.
-		for(int i = 0; i < current_groups.size(); i++)
+		save_positions();
+	}
+
+	private void save_positions()
+	{
+		final int size = current_groups.size();
+		for(int i = 0; i < size; i++)
 		{
 			String group = current_groups.get(i);
 			try
@@ -1351,6 +1356,7 @@ public class main_view extends Activity
 
 	private void update_group(int page_number)
 	{
+		save_positions();
 		set_refresh(true);
 		Intent intent = new Intent(this, service_update.class);
 		intent.putExtra("GROUP_NUMBER", Integer.toString(page_number));
@@ -1581,7 +1587,7 @@ public class main_view extends Activity
 									try{
 										time 	= (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ENGLISH)).parse(pubDates.get(i));
 									}
-									catch(Exception r){
+									catch(Exception o){
 										try{
 											time 	= (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH)).parse(pubDates.get(i));
 										}
