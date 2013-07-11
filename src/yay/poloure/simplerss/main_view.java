@@ -1583,11 +1583,16 @@ public class main_view extends Activity
 									}
 									catch(Exception r){
 										try{
-											time = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH)).parse(pubDates.get(i));
+											time 	= (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH)).parse(pubDates.get(i));
 										}
-										catch(Exception x){
-											log("BUG : Format not found and date looks like: " + pubDates.get(i));
-											time = new Date();
+										catch(Exception r){
+											try{
+												time = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH)).parse(pubDates.get(i));
+											}
+											catch(Exception x){
+												main_view.log("BUG : Format not found and date looks like: " + pubDates.get(i));
+												time = new Date();
+											}
 										}
 									}
 								}

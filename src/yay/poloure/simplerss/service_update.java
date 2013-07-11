@@ -75,7 +75,6 @@ public class service_update extends IntentService
 		}
 
 		/// Sort group order
-		sort_group_content_by_time(grouper);
 		if(!grouper.equals("All"))
 			sort_group_content_by_time("All");
 
@@ -307,11 +306,16 @@ public class service_update extends IntentService
 									}
 									catch(Exception r){
 										try{
-											time = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH)).parse(pubDates.get(i));
+											time 	= (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH)).parse(pubDates.get(i));
 										}
-										catch(Exception x){
-											main_view.log("BUG : Format not found and date looks like: " + pubDates.get(i));
-											time = new Date();
+										catch(Exception r){
+											try{
+												time = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH)).parse(pubDates.get(i));
+											}
+											catch(Exception x){
+												main_view.log("BUG : Format not found and date looks like: " + pubDates.get(i));
+												time = new Date();
+											}
 										}
 									}
 								}
