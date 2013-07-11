@@ -1415,13 +1415,13 @@ public class main_view extends Activity
 				}
 			}
 
-			String[] passer = {group_content_path, "0", "title", "image", "description", "link", "marker"};
+			String[] passer = {group_content_path, "0", "marker", "title", "image", "description", "link"};
 			List< List<String> > contenter = read_csv_to_list(passer);
-			List<String> titles 		= contenter.get(0);
-			List<String> images 		= contenter.get(1);
-			List<String> descriptions 	= contenter.get(2);
-			List<String> links			= contenter.get(3);
-			List<String> marker			= contenter.get(4);
+			List<String> marker			= contenter.get(0);
+			List<String> titles 		= contenter.get(1);
+			List<String> images 		= contenter.get(2);
+			List<String> descriptions 	= contenter.get(3);
+			List<String> links			= contenter.get(4);
 			
 			if(titles.get(0).length() < 1)
 				return 0L;
@@ -1636,14 +1636,15 @@ public class main_view extends Activity
 		String last_url = "";
 		if(exists("groups/" + group + ".txt.content.txt"))
 		{
-			List< List<String> > bonne = read_csv_to_list(new String[]{storage + "groups/" + group + ".txt.content.txt", "0", "link", "marker"});
-			List<String> urls = bonne.get(0);
-			List<String> marks = bonne.get(1);
+			List< List<String> > bonne = read_csv_to_list(new String[]{storage + "groups/" + group + ".txt.content.txt", "0", "marker", "link"});
+			List<String> urls = bonne.get(1);
+			List<String> marks = bonne.get(0);
 			int sized = marks.size();
 			for(int i = sized - 1; i >= 0; i--)
 			{
 				if(marks.get(i).equals("1"))
 				{
+					log("last_url found at " + Integer.toString(i));
 					last_url = urls.get(i);
 					break;
 				}
@@ -1669,7 +1670,10 @@ public class main_view extends Activity
 						if(line.contains(link))
 						{
 							if(link.equals(last_url))
+							{
+								log("there is a line with marker at the begining");
 								out.write("marker|1|" + line + "\n");
+							}
 							else
 								out.write(line + "\n");
 							break;
