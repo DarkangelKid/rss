@@ -131,11 +131,6 @@ public class card_adapter extends BaseAdapter
 			@Override
 			public void onScrollStateChanged(AbsListView view, int scrollState)
 			{
-				//if(scrollState ==  AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
-				//{
-					//if(ith.return_top_view_url() is before the marker array index, change the array index.
-					//position of first marker is first element in content_marker to equal true.
-
 					/// Maybe plus one.
 					int firstVisibleItem = listview.getFirstVisiblePosition();
 					int i;
@@ -156,8 +151,6 @@ public class card_adapter extends BaseAdapter
 						content_marker.set(firstVisibleItem, true);
 						top_item_position = firstVisibleItem;
 					}
-					main_view.log(Integer.toString(top_item_position));
-				//}
 			}
 		});
 		
