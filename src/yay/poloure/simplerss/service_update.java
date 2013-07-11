@@ -237,7 +237,7 @@ public class service_update extends IntentService
 		o2.inSampleSize = insample;
 		Bitmap bitmap = BitmapFactory.decodeFile(storage + "images/" + image_name, o2);
 		if(o2.outWidth > 9)
-			append_string_to_file(group + ".image_size.cache.txt", image_name + "|" + o2.outWidth + "|" + o2.outHeight + "\n");
+			main_view.append_string_to_file(group + ".image_size.cache.txt", image_name + "|" + o2.outWidth + "|" + o2.outHeight + "\n");
 
 		if(!skip_save)
 		{
@@ -253,43 +253,15 @@ public class service_update extends IntentService
 		return image_name + "|" + o2.outWidth + "|" + o2.outHeight;
 	}
 
-	private static void append_string_to_file(String file_name, String string)
-	{
-		try
-		{
-			BufferedWriter out = new BufferedWriter(new FileWriter(storage + file_name, true));
-			out.write(string);
-			out.close();
-		}
-		catch (Exception e)
-		{
-		}
-	}
-	
-	private static void log(String string)
-	{
-		try
-		{
-			BufferedWriter out = new BufferedWriter(new FileWriter(storage + "dump.txt", true));
-			out.write(string + "\n");
-			out.close();
-		}
-		catch (Exception e)
-		{
-		}
-	}
-
 	private void sort_group_content_by_time(String group)
 	{
 		Date time;
 
 		List<String> feeds_array	= read_csv_to_list(new String[]{storage + "groups/" + group + ".txt", "0", "name"}).get(0);
 		List<Date> dates 			= new ArrayList<Date>();
-		List<String> links			= new ArrayList<String>();
-		List<String> pubDates		= new ArrayList<String>();
 		List<String> links_ordered 	= new ArrayList<String>();
 		List<String> content_all 	= new ArrayList<String>();
-		List<String> content 		= new ArrayList<String>();
+		List<String> links, pubDates, content;
 
 		for(String feed : feeds_array)
 		{
@@ -308,7 +280,8 @@ public class service_update extends IntentService
 				if(pubDates.get(0).length()<8)
 					pubDates 					= read_csv_to_list(new String[]{content_path, "1", "updated"}).get(0);
 
-				for(int i=0; i<pubDates.size(); i++)
+				final int size = pubDates.size();
+				for(int i=0; i<size; i++)
 				{
 					content_all.add(content.get(i));
 					try{
@@ -335,7 +308,7 @@ public class service_update extends IntentService
 											time = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH)).parse(pubDates.get(i));
 										}
 										catch(Exception x){
-											log("BUG : Format not found and date looks like: " + pubDates.get(i));
+											main_view.log("BUG : Format not found and date looks like: " + pubDates.get(i));
 											time = new Date();
 										}
 									}
@@ -343,8 +316,9 @@ public class service_update extends IntentService
 							}
 						}
 					}
-
-					for(int j=0; j<dates.size(); j++)
+					
+					final int sizer = dates.size();
+					for(int j=0; j<sizer; j++)
 					{
 						if(time.before(dates.get(j)))
 						{
@@ -368,23 +342,54 @@ public class service_update extends IntentService
 			}
 		}
 
-		String group_content_path = "groups/" + group + ".txt.content.txt";
-		File group_content = new File(storage + group_content_path);
-		group_content.delete();
-
-		if(links_ordered.size()>0)
+		final String group_content_path = "groups/" + group + ".txt.content.txt";
+		String last_url = "";
+		if(main_view.exists("groups/" + group + ".txt.content.txt"))
 		{
-			for(String link : links_ordered)
+			List< List<String> > bonne = read_csv_to_list(new String[]{storage + "groups/" + group + ".txt.content.txt", "0", "link", "marker"});
+			List<String> urls = bonne.get(0);
+			List<String> marks = bonne.get(1);
+			int sized = marks.size();
+			for(int i = sized - 1; i >= 0; i--)
 			{
-				for(String line : content_all)
+				if(marks.get(i).equals("1"))
 				{
-					if(line.contains(link))
+					last_url = urls.get(i);
+					break;
+				}
+			}
+			if((last_url.equals(""))&&(sized > 0))
+				last_url = urls.get(0);
+		}
+		if(last_url.equals(""))
+			last_url = links_ordered.get(0);
+
+		main_view.delete(group_content_path);
+
+		try
+		{
+			BufferedWriter out = new BufferedWriter(new FileWriter(storage + group_content_path, true));
+
+			if(links_ordered.size()>0)
+			{
+				for(String link : links_ordered)
+				{
+					for(String line : content_all)
 					{
-						append_string_to_file(group_content_path, line + "\n");
-						break;
+						if(line.contains(link))
+						{
+							if(link.equals(last_url))
+								out.write(line + "marker|1|\n");
+							else
+								out.write(line + "\n");
+							break;
+						}
 					}
 				}
 			}
+			out.close();
+		}
+		catch(Exception e){
 		}
 	}
 }
