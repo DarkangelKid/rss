@@ -29,6 +29,7 @@ class parsered
 			File in = new File(file_name);
 			File out = new File(file_name + ".content.txt");
 			Set<String> set = new LinkedHashSet<String>();
+			Boolean write_mode = false;
 
 			/// Read the file's lines to a list and make a set from that.
 			if(out.exists())
@@ -52,9 +53,10 @@ class parsered
 				if((current_tag.contains("<entry"))||(current_tag.contains("<item")))
 				{
 					/// Add line to set and reset the line.
-					if(line.length() > 1)
+					if((line.length() > 1)&&(write_mode))
 						set.add(line);
 					line = "";
+					write_mode = true;
 				}
 				else if((current_tag.contains("</entry"))||(current_tag.contains("</item")))
 				{
@@ -134,7 +136,8 @@ class parsered
 			}
 
 			/// Add the last line that has no <entry / <item after it.
-			set.add(line);
+			if(write_mode)
+				set.add(line);
 			/// Write the new content to the file.
 			in.delete();
 			out.delete();
