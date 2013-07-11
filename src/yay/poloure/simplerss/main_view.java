@@ -937,8 +937,11 @@ public class main_view extends Activity
 		final String current_title = feed_titles.get(position);
 
 		Spinner group_spinner = (Spinner) edit_rss_dialog.findViewById(R.id.group_spinner);
-		List<String> spinner_groups = current_groups;
-		spinner_groups.remove(0);
+		List<String> spinner_groups = new ArrayList<String>();
+		for(int i = 1; i < current_groups.size(); i++)
+		{
+			spinner_groups.add(current_groups.get(i));
+		}
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(activity_context, R.layout.group_spinner_text, spinner_groups);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		group_spinner.setAdapter(adapter);
