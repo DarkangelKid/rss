@@ -11,6 +11,7 @@
 	<string name="delete_dialog">Delete</string>
 	<string name="clear_dialog">Clear Content</string>
 	<string name="add_dialog_title">Add Feed</string>
+	<string name="edit_dialog_title">Edit Feed</string>
 
 	<string name="feed_name_dialog">Feed Name</string>
 	<string name="feed_name_hint">optional</string>
@@ -18,4 +19,16 @@
 	<string name="feed_url_hint">http://example.com/rss</string>
 	<string name="feed_group_dialog">Group</string>
 	<string name="feed_group_hint">new group</string>
+	<string name="cancel_dialog">Cancel</string>
+	<string name="add_dialog">Add</string>
+	<string name="accept_dialog">Accept</string>
+
+	<string name="groups_manage_sub">Groups</string>
+	<string name="feeds_manage_sub">Feeds</string>
+
+	<string name="refresh_cat_preferences">Auto Refresh</string>
+	<string name="refresh_summary_preferences">Check to enable auto refresh</string>
+	<string name="refresh_time_preferences">Refresh Time</string>
+	<string name="refresh_time_summary_preferences">Adjust autorefresh interval</string>
+
 </resources>

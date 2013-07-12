@@ -757,9 +757,9 @@ public class main_view extends Activity
 		@Override
 		public String getPageTitle(int position){
 			if(position == 0)
-				return "Groups";
+				return getString(R.string.groups_manage_sub);
 			else
-				return "Feeds";
+				return getString(R.string.feeds_manage_sub);
 		}
 	}
 
@@ -857,7 +857,7 @@ public class main_view extends Activity
 				.setView(add_rss_dialog)
 				.setCancelable(true)
 				.setPositiveButton
-				("Add",new DialogInterface.OnClickListener()
+				(getString(R.string.add_dialog),new DialogInterface.OnClickListener()
 					{
 						@Override
 						public void onClick(DialogInterface dialog,int id)
@@ -866,7 +866,7 @@ public class main_view extends Activity
 					}
 				)
 				.setNegativeButton
-				("Cancel",new DialogInterface.OnClickListener()
+				(getString(R.string.cancel_dialog),new DialogInterface.OnClickListener()
 					{
 						@Override
 						public void onClick(DialogInterface dialog,int id)
@@ -1011,11 +1011,11 @@ public class main_view extends Activity
 		group_spinner.setSelection(current_spinner_position);
 
 		final AlertDialog edit_dialog = new AlertDialog.Builder(activity_context, 2)
-				.setTitle("Edit Feed")
+				.setTitle(getString(R.string.edit_dialog_title))
 				.setView(edit_rss_dialog)
 				.setCancelable(true)
 				.setPositiveButton
-				("Accept",new DialogInterface.OnClickListener()
+				(getString(R.string.accept_dialog), new DialogInterface.OnClickListener()
 					{
 						@Override
 						public void onClick(DialogInterface dialog,int id)
@@ -1024,7 +1024,7 @@ public class main_view extends Activity
 					}
 				)
 				.setNegativeButton
-				("Cancel",new DialogInterface.OnClickListener()
+				(getString(R.string.cancel_dialog),new DialogInterface.OnClickListener()
 					{
 						@Override
 						public void onClick(DialogInterface dialog,int id)
