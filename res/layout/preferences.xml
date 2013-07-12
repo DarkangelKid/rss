@@ -5,16 +5,16 @@
 	android:layout_width="match_parent"
 	android:layout_height="match_parent">
 	<PreferenceCategory
-			android:title="Autorefresh">
+			android:title="@string/refresh_cat_preferences">
 		<CheckBoxPreference
 				android:key="refresh"
-				android:title="Autorefresh"
-				android:summary="Check to enable autorefresh"
+				android:title="@string/refresh_cat_preferences"
+				android:summary="@string/refresh_summary_preferences"
 				android:defaultValue="false" />
 		<yay.poloure.simplerss.SeekBarPreference
 				android:key="refresh_time"
-				android:title="Refresh Time"
-				android:summary="Adjust autorefresh interval"
+				android:title="@string/refresh_time_preferences"
+				android:summary="@string/refresh_time_summary_preferences"
 				android:defaultValue="20"
 				android:max="100"
 				simplerss:min="0"
