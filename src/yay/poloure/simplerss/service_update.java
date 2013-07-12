@@ -40,8 +40,8 @@ public class service_update extends IntentService
 {
 	int group;
 	private static String storage;
+	final private int width = Integer.parseInt(main_view.read_file_to_list(storage + "width.txt", 0).get(0));
 	private String all_string;
-	final private int width = Integer.parseInt(main_view.read_file_to_list("width.txt", 0).get(0));
 
 	public service_update()
 	{
@@ -59,14 +59,18 @@ public class service_update extends IntentService
 
 		group = Integer.parseInt(intent.getStringExtra("GROUP_NUMBER"));
 		storage = this.getExternalFilesDir(null).getAbsolutePath() + "/";
+		if(!storage.equals(""))
+		{
+			main_view.delete(storage + "storage_location.txt");
+			main_view.append_string_to_file(storage + "storage_location.txt", storage);
+		}
 
-		List<String> all_groups = read_file_to_list("groups/group_list.txt", 0);
+		List<String> all_groups = main_view.read_file_to_list(storage + "groups/group_list.txt", 0);
 		String grouper = all_groups.get(group);
 		String group_file_path 		= storage + "groups/" + grouper + ".txt";
 		String partial_image_path 		= storage + "images/";
-		String partial_thumbnail_path 	= storage + "thumbnails/";
 
-		List< List<String> > content 		= read_csv_to_list(new String[]{group_file_path, "0", "name", "url"});
+		List< List<String> > content 		= main_view.read_csv_to_list(new String[]{group_file_path, "0", "name", "url"});
 		List<String> group_feeds_names 		= content.get(0);
 		List<String> group_feeds_urls 		= content.get(1);
 
@@ -76,24 +80,23 @@ public class service_update extends IntentService
 		for(int i=0; i<size; i++)
 		{
 			feed_path = storage + "content/" + group_feeds_names.get(i); /// mariam_feed.txt
-			download_file(group_feeds_urls.get(i), "content/" + group_feeds_names.get(i) + ".store.txt"); /// Downloads file as mariam_feed.store.txt
+			main_view.download_file(group_feeds_urls.get(i), feed_path + ".store.txt"); /// Downloads file as mariam_feed.store.txt
 			new parsered(feed_path + ".store.txt"); /// Parses the file and makes other files like mariam_feed.store.txt.content.txt
 		}
 
 		/// Sort group order
 		if(!grouper.equals(all_string))
-			sort_group_content_by_time(all_string);
+			main_view.sort_group_content_by_time(all_string);
 		else
 		{
 			for(String gro : all_groups)
-				sort_group_content_by_time(gro);
+				main_view.sort_group_content_by_time(gro);
 		}
 
 		/// If we should download and update the feeds inside that group.
 		String group_content_path = storage + "groups/" + grouper + ".txt.content.txt";
 
-		String[] passer = {group_content_path, "0", "image"};
-		List< List<String> > contenter 	= read_csv_to_list(passer);
+		List< List<String> > contenter 	= main_view.read_csv_to_list(new String[]{group_content_path, "0", "image"});
 		List<String> images 			= contenter.get(0);
 
 			/// For each line of the group_content_file
@@ -106,21 +109,20 @@ public class service_update extends IntentService
 
 				/// If the image_name does not exist in images/ then download the file at url (images[m]) to images with name image_name
 				if(!(new File(partial_image_path + image_name)).exists())
-					download_file(images.get(m), "images/" + image_name);
+					main_view.download_file(images.get(m), storage + "images/" + image_name);
 				/// If the thumbnail does not exist in thumbnails/, compress the image in images/ to thumbnails with image_name.
-				if(!(new File(partial_thumbnail_path + image_name)).exists())
-					compress_file(image_name, grouper, false);
+				if(!(new File(storage + "thumbnails/" + image_name)).exists())
+					main_view.compress_file(storage, image_name, grouper, false);
 			}
 		}
 
 		/// Read all the group files and how many new items.
-
 		/// TODO: If new feed, count new set objects and return from parser to add to the total.
 		List<Integer> unread_list = new ArrayList<Integer>();
 		for(String gro : all_groups)
 		{
 			int count = 0;
-			List<String> count_list = read_file_to_list("groups/" + gro + ".txt.content.txt", 0);
+			List<String> count_list = main_view.read_file_to_list(storage + "groups/" + gro + ".txt.content.txt", 0);
 			int sized = count_list.size();
 			int i;
 
@@ -173,7 +175,7 @@ public class service_update extends IntentService
 		stopSelf();
 	}
 
-	public boolean check_activity_running()
+	private boolean check_activity_running()
 	{
 		ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
 		List<RunningTaskInfo> tasks = activityManager.getRunningTasks(Integer.MAX_VALUE);
@@ -184,285 +186,5 @@ public class service_update extends IntentService
 				return true;
 		}
 		return false;
-    }
-
-
-	private List<String> read_file_to_list(String file_name, int lines_to_skip)
-	{
-		String line = null;
-		BufferedReader stream = null;
-		List<String> lines = new ArrayList<String>();
-		try
-		{
-			stream = new BufferedReader(new FileReader(storage + file_name));
-			for(int i=0; i<lines_to_skip; i++)
-				stream.readLine();
-			while((line = stream.readLine()) != null)
-				lines.add(line);
-			if (stream != null)
-				stream.close();
-		}
-		catch(Exception e){
-		}
-		return lines;
-	}
-
-	private List< List<String> > read_csv_to_list(String[] type)
-	{
-		String feed_path = type[0];
-		int lines_to_skip = Integer.parseInt(type[1]);
-		int number_of_items = type.length - 2;
-
-		String line = null;
-		BufferedReader stream = null;
-		List< List<String> > types = new ArrayList< List<String> >();
-		for(int i = 0; i < number_of_items; i++)
-			types.add(new ArrayList< String >());
-
-		String content = "";
-
-		try
-		{
-			stream = new BufferedReader(new FileReader(feed_path));
-
-			/// Skip lines.
-			for(int i=0; i<lines_to_skip; i++)
-				stream.readLine();
-
-			while((line = stream.readLine()) != null)
-			{
-				for(int i = 0; i < number_of_items; i++)
-				{
-					content = type[2 + i] + "|";
-					if((!line.contains(content))||(line.contains(content + '|')))
-						types.get(i).add("");
-					else
-					{
-						int content_start = line.indexOf(content) + content.length();
-						types.get(i).add(line.substring(content_start, line.indexOf('|', content_start)));
-					}
-				}
-			}
-		}
-		catch(Exception e){
-		}
-		return types;
-	}
-
-	private void download_file(String urler, String file_name)
-	{
-		try
-		{
-			BufferedInputStream in = null;
-			FileOutputStream fout = null;
-			try
-			{
-				in = new BufferedInputStream(new URL(urler).openStream());
-				fout = new FileOutputStream(storage + file_name);
-
-				byte data[] = new byte[1024];
-				int count;
-				while ((count = in.read(data, 0, 1024)) != -1)
-					fout.write(data, 0, count);
-			}
-			finally
-			{
-				if (in != null)
-					in.close();
-				if (fout != null)
-					fout.close();
-			}
-		}
-		catch(Exception e){
-		}
-	}
-
-	private String compress_file(String image_name, String group, Boolean skip_save)
-	{
-		int insample;
-		if(!skip_save)
-		{
-			BitmapFactory.Options o = new BitmapFactory.Options();
-			o.inJustDecodeBounds = true;
-			BitmapFactory.decodeFile(storage + "images/" + image_name, o);
-
-			/// TODO: If the activity has not run deal with it. and not produce the compressed file.
-			int width_tmp = o.outWidth;
-
-			if(width_tmp > width)
-				insample =  Math.round((float) width_tmp / (float) width);
-			else
-				insample = 1;
-		}
-		else
-			insample = 1;
-
-		BitmapFactory.Options o2 = new BitmapFactory.Options();
-		o2.inSampleSize = insample;
-		Bitmap bitmap = BitmapFactory.decodeFile(storage + "images/" + image_name, o2);
-		if(o2.outWidth > 9)
-			main_view.append_string_to_file(group + ".image_size.cache.txt", image_name + "|" + o2.outWidth + "|" + o2.outHeight + "\n");
-
-		if(!skip_save)
-		{
-			try
-			{
-				FileOutputStream out = new FileOutputStream(storage + "thumbnails/" + image_name);
-				bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
-			}
-			catch (Exception e){
-			}
-		}
-
-		return image_name + "|" + o2.outWidth + "|" + o2.outHeight;
-	}
-
-	private void sort_group_content_by_time(String group)
-	{
-		Date time;
-
-		List<String> feeds_array	= read_csv_to_list(new String[]{storage + "groups/" + group + ".txt", "0", "name"}).get(0);
-		List<Date> dates 			= new ArrayList<Date>();
-		List<String> links_ordered 	= new ArrayList<String>();
-		List<String> content_all 	= new ArrayList<String>();
-		List<String> links, pubDates, content;
-
-		for(String feed : feeds_array)
-		{
-			String content_path = storage + "content/" + feed + ".store.txt.content.txt";
-			File test = new File(content_path);
-			if(test.exists())
-			{
-
-				List< List<String> > contenter	= read_csv_to_list(new String[]{content_path, "0", "link", "pubDate"});
-				links 							= contenter.get(0);
-				pubDates						= contenter.get(1);
-				content 						= read_file_to_list("content/" + feed + ".store.txt.content.txt", 0);
-
-				if(pubDates.get(0).length()<8)
-					pubDates 					= read_csv_to_list(new String[]{content_path, "0", "published"}).get(0);
-				if(pubDates.get(0).length()<8)
-					pubDates 					= read_csv_to_list(new String[]{content_path, "0", "updated"}).get(0);
-
-				final int size = pubDates.size();
-				for(int i=0; i<size; i++)
-				{
-					content_all.add(content.get(i));
-					try{
-						time 					= (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.ENGLISH)).parse(pubDates.get(i));
-					}
-					catch(Exception e){
-						try{
-							time 				= (new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH)).parse(pubDates.get(i));
-						}
-						catch(Exception t){
-							try{
-								time 			= (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH)).parse(pubDates.get(i));
-							}
-							catch(Exception c){
-								try{
-									time 		= (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.ENGLISH)).parse(pubDates.get(i));
-								}
-								catch(Exception n){
-									try{
-										time 	= (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ENGLISH)).parse(pubDates.get(i));
-									}
-									catch(Exception o){
-										try{
-											time 	= (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH)).parse(pubDates.get(i));
-										}
-										catch(Exception r){
-											try{
-												time = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH)).parse(pubDates.get(i));
-											}
-											catch(Exception x){
-												main_view.log("BUG : Format not found and date looks like: " + pubDates.get(i));
-												time = new Date();
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-
-					final int sizer = dates.size();
-					for(int j=0; j<sizer; j++)
-					{
-						if(time.before(dates.get(j)))
-						{
-							dates.add(j, time);
-							links_ordered.add(j, links.get(i));
-							break;
-						}
-						else if((j == dates.size() - 1)&&(time.after(dates.get(j))))
-						{
-							dates.add(time);
-							links_ordered.add(links.get(i));
-							break;
-						}
-					}
-					if(dates.size() == 0)
-					{
-						dates.add(time);
-						links_ordered.add(links.get(i));
-					}
-				}
-			}
-		}
-
-		final String group_content_path = "groups/" + group + ".txt.content.txt";
-		String last_url = "";
-		if(main_view.exists("groups/" + group + ".txt.content.txt"))
-		{
-			List< List<String> > bonne = read_csv_to_list(new String[]{storage + "groups/" + group + ".txt.content.txt", "0", "marker", "link"});
-			List<String> urls = bonne.get(1);
-			List<String> marks = bonne.get(0);
-			int sized = marks.size();
-			for(int i = sized - 1; i >= 0; i--)
-			{
-				if(marks.get(i).equals("1"))
-				{
-					main_view.log("last_url found at " + Integer.toString(i));
-					last_url = urls.get(i);
-					break;
-				}
-			}
-			if((last_url.equals(""))&&(sized > 0))
-				last_url = urls.get(0);
-		}
-		if(last_url.equals(""))
-			last_url = links_ordered.get(0);
-
-		main_view.delete(group_content_path);
-
-		try
-		{
-			BufferedWriter out = new BufferedWriter(new FileWriter(storage + group_content_path, true));
-
-			if(links_ordered.size()>0)
-			{
-				for(String link : links_ordered)
-				{
-					for(String line : content_all)
-					{
-						if(line.contains(link))
-						{
-							if(link.equals(last_url))
-							{
-								main_view.log("there is a line with marker at the begining");
-								out.write("marker|1|" + line + "\n");
-							}
-							else
-								out.write(line + "\n");
-							break;
-						}
-					}
-				}
-			}
-			out.close();
-		}
-		catch(Exception e){
-		}
 	}
 }

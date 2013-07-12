@@ -110,8 +110,9 @@ public class main_view extends Activity
 
 	private void add_feed(String feed_name, String feed_url, String feed_group)
 	{
-		append_string_to_file("groups/" + feed_group + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|\n");
-		append_string_to_file("groups/" + all_string + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|group|" + feed_group + "|\n");
+		append_string_to_file(storage + "groups/" + feed_group + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|\n");
+		append_string_to_file(storage + "groups/" + all_string + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|group|" + feed_group + "|\n");
+
 		update_feeds_list();
 		update_manage();
 	}
@@ -129,7 +130,7 @@ public class main_view extends Activity
 			feed_list_adapter.clear_list();
 			final int size = feed_titles.size();
 			for(int i = 0; i < size; i++)
-				feed_list_adapter.add_list(feed_titles.get(i), feed_urls.get(i) + "\n" + feed_groups.get(i) + " • " + Integer.toString(count_lines("content/" + feed_titles.get(i) + ".store.txt.content.txt") - 1) + " items");
+				feed_list_adapter.add_list(feed_titles.get(i), feed_urls.get(i) + "\n" + feed_groups.get(i) + " • " + Integer.toString(count_lines(storage + "content/" + feed_titles.get(i) + ".store.txt.content.txt") - 1) + " items");
 			feed_list_adapter.notifyDataSetChanged();
 		}
 	}
@@ -178,8 +179,8 @@ public class main_view extends Activity
 	private void edit_feed(String old_name, String new_name, String new_url, String old_group, String new_group)
 	{
 		/// Delete the feed info from the all group and add the new group info to the end of the all content file.
-		remove_string_from_file("groups/" + all_string + ".txt", old_name, true);
-		append_string_to_file("groups/" + all_string + ".txt", "name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|\n");
+		remove_string_from_file(storage + "groups/" + all_string + ".txt", old_name, true);
+		append_string_to_file(storage + "groups/" + all_string + ".txt", "name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|\n");
 
 		/// If we have renamed the title, rename the content/title.txt file.
 		if(!old_name.equals(new_name))
@@ -190,18 +191,18 @@ public class main_view extends Activity
 		if(!old_group.equals(new_group))
 		{
 			/// Remove the line from the old group file containing the old_feed_name and add to the new group file.
-			remove_string_from_file("groups/" + old_group + ".txt", old_name, true);
-			append_string_to_file("groups/" + new_group + ".txt", "name|" +  new_name + "|url|" + new_url + "|\n");
+			remove_string_from_file(storage + "groups/" + old_group + ".txt", old_name, true);
+			append_string_to_file(storage + "groups/" + new_group + ".txt", "name|" +  new_name + "|url|" + new_url + "|\n");
 
 			/// If the above group file no longer exists because there are no lines left, remove the group from the group list.
 			if(!exists("groups/" + old_group + ".txt"))
-				remove_string_from_file("groups/group_list.txt", old_group, false);
+				remove_string_from_file(storage + "groups/group_list.txt", old_group, false);
 		}
 		/// The group is the same but the titles and urls may have changed.
 		else
 		{
-			remove_string_from_file("groups/" + old_group + ".txt", old_name, true);
-			append_string_to_file("groups/" + old_group + ".txt", "name|" +  new_name + "|url|" + new_url + "|\n");
+			remove_string_from_file(storage + "groups/" + old_group + ".txt", old_name, true);
+			append_string_to_file(storage + "groups/" + old_group + ".txt", "name|" +  new_name + "|url|" + new_url + "|\n");
 		}
 
 		feed_adapter temp = feed_list_adapter;
@@ -209,7 +210,7 @@ public class main_view extends Activity
 		update_feeds_list();
 		/// Add the new feeds to the feed_adapter (Manage/Feeds).
 		temp.remove_item(poser);
-		temp.add_list_pos(poser, new_name, new_url + "\n" + new_group + " • " + Integer.toString(count_lines("content/" + new_name + ".store.txt.content.txt") - 1) + " items");
+		temp.add_list_pos(poser, new_name, new_url + "\n" + new_group + " • " + Integer.toString(count_lines(storage + "content/" + new_name + ".store.txt.content.txt") - 1) + " items");
 		temp.notifyDataSetChanged();
 
 		update_groups();
@@ -232,7 +233,7 @@ public class main_view extends Activity
 
 	private void add_group(String group_name)
 	{
-		append_string_to_file("groups/group_list.txt", group_name + "\n");
+		append_string_to_file(storage + "groups/group_list.txt", group_name + "\n");
 		update_groups();
 	}
 
@@ -254,8 +255,13 @@ public class main_view extends Activity
 			setContentView(frame, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
 			storage = this.getExternalFilesDir(null).getAbsolutePath() + "/";
+			if(!storage.equals(""))
+			{
+				delete(storage + "storage_location.txt");
+				append_string_to_file(storage + "storage_location.txt", storage);
+			}
 
-			delete("dump.txt");
+			delete(storage + "dump.txt");
 
 			String[] folders = {"images", "thumbnails", "groups", "content"};
 			File folder_file;
@@ -346,12 +352,12 @@ public class main_view extends Activity
 				Point size = new Point();
 				display.getSize(size);
 				width = (int) Math.round(((float)size.x)*0.80);
-				append_string_to_file("width.txt", Integer.toString(width) + "\n");
+				append_string_to_file(storage + "width.txt", Integer.toString(width) + "\n");
 			}
 			else
-				width = Integer.parseInt(read_file_to_list("width.txt", 0).get(0));
+				width = Integer.parseInt(read_file_to_list(storage + "width.txt", 0).get(0));
 
-			if(read_file_to_list("groups/" + all_string + ".txt", 0).size()>0)
+			if(read_file_to_list(storage + "groups/" + all_string + ".txt", 0).size()>0)
 				new refresh_page().execute(0);
 
 			drawer_toggle.syncState();
@@ -360,7 +366,6 @@ public class main_view extends Activity
 			res = getResources();
 		}
 	}
-
 
 	protected void onStop()
 	{
@@ -389,8 +394,8 @@ public class main_view extends Activity
 				card_adapter adapter = (card_adapter)((fragment_card) getFragmentManager().findFragmentByTag("android:switcher:" + ((ViewPager) findViewById(R.id.pager)).getId() + ":" + Integer.toString(i))).getListView().getAdapter();
 				if(adapter.getCount() > 0)
 				{
-					List<String> lines = read_file_to_list("groups/" + group + ".txt.content.txt", 0);
-					delete("groups/" + group + ".txt.content.txt");
+					List<String> lines = read_file_to_list(storage + "groups/" + group + ".txt.content.txt", 0);
+					delete(storage + "groups/" + group + ".txt.content.txt");
 					BufferedWriter out = new BufferedWriter(new FileWriter(storage + "groups/" + group + ".txt.content.txt", true));
 					String url = adapter.return_latest_url();
 					for(String line : lines)
@@ -662,21 +667,21 @@ public class main_view extends Activity
 							String group = feed_list_adapter.get_info(positionrr);
 							group = group.substring(group.indexOf('\n') + 1, group.indexOf(' '));
 							String name = feed_list_adapter.getItem(positionrr);
-							delete(group + ".image_size.cache.txt");
+							delete(storage + group + ".image_size.cache.txt");
 							/// Perhaps regen the all_image.cache.txt
 
-							remove_string_from_file("groups/" + group + ".txt", name, true);
-							remove_string_from_file("groups/" + all_string + ".txt", name, true);
+							remove_string_from_file(storage + "groups/" + group + ".txt", name, true);
+							remove_string_from_file(storage + "groups/" + all_string + ".txt", name, true);
 
 							/// If the group file no longer exists because it was the last feed in it, delete the group from the group_list.
-							if(!exists("groups/" + group + ".txt"))
+							if(!exists(storage + "groups/" + group + ".txt"))
 							{
-								remove_string_from_file("groups/group_list.txt", group, false);
+								remove_string_from_file(storage + "groups/group_list.txt", group, false);
 								update_groups();
 							}
 
 							sort_group_content_by_time(all_string);
-							if(exists("groups/" + group + ".txt"))
+							if(exists(storage + "groups/" + group + ".txt"))
 								sort_group_content_by_time(group);
 
 							/// remove deleted files content from groups that it was in
@@ -693,9 +698,9 @@ public class main_view extends Activity
 							String group = feed_list_adapter.get_info(positionrr);
 							group = group.substring(group.indexOf('\n') + 1, group.indexOf(' '));
 							String name = feed_list_adapter.getItem(positionrr);
-							delete("content/" + name + ".store.txt.content.txt");
-							delete("groups/" + group + ".txt.content.txt");
-							delete(group + ".image_size.cache.txt");
+							delete(storage + "content/" + name + ".store.txt.content.txt");
+							delete(storage + "groups/" + group + ".txt.content.txt");
+							delete(storage + group + ".image_size.cache.txt");
 
 							sort_group_content_by_time(all_string);
 
@@ -1191,7 +1196,7 @@ public class main_view extends Activity
 		}
 	}
 
-	private void download_file(String urler, String file_name)
+	public static void download_file(String urler, String file_path)
 	{
 		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
 		{
@@ -1202,7 +1207,7 @@ public class main_view extends Activity
 				try
 				{
 					in = new BufferedInputStream(new URL(urler).openStream());
-					fout = new FileOutputStream(storage + file_name);
+					fout = new FileOutputStream(file_path);
 
 					byte data[] = new byte[1024];
 					int count;
@@ -1222,11 +1227,11 @@ public class main_view extends Activity
 		}
 	}
 
-	public static void append_string_to_file(String file_name, String string)
+	public static void append_string_to_file(String file_path, String string)
 	{
 		try
 		{
-			BufferedWriter out = new BufferedWriter(new FileWriter(storage + file_name, true));
+			BufferedWriter out = new BufferedWriter(new FileWriter(file_path, true));
 			out.write(string);
 			out.close();
 		}
@@ -1236,32 +1241,32 @@ public class main_view extends Activity
 	}
 
 	/// Relies on read_file_to_list && storage.
-	private void remove_string_from_file(String file_name, String string, Boolean contains)
+	private void remove_string_from_file(String file_path, String string, Boolean contains)
 	{
-		final List<String> list = read_file_to_list(file_name, 0);
-		delete(file_name);
+		final List<String> list = read_file_to_list(file_path, 0);
+		delete(file_path);
 		for(String item : list)
 		{
 			if(contains)
 			{
 				if(!item.contains(string))
-					append_string_to_file(file_name, item + "\n");
+					append_string_to_file(file_path, item + "\n");
 			}
 			else
 			{
 				if(!item.equals(string))
-					append_string_to_file(file_name, item + "\n");
+					append_string_to_file(file_path, item + "\n");
 			}
 		}
 	}
 
 	private static void update_groups()
 	{
-		current_groups = read_file_to_list("groups/group_list.txt", 0);
+		current_groups = read_file_to_list(storage + "groups/group_list.txt", 0);
 
 		if(current_groups.size() == 0)
 		{
-			append_string_to_file("groups/group_list.txt", all_string + "\n");
+			append_string_to_file(storage + "groups/group_list.txt", all_string + "\n");
 			current_groups.add(all_string);
 		}
 
@@ -1278,9 +1283,9 @@ public class main_view extends Activity
 
 	public static void update_group_order(List<String> new_order)
 	{
-		delete("groups/group_list.txt");
+		delete(storage + "groups/group_list.txt");
 		for(String group : new_order)
-			append_string_to_file("groups/group_list.txt", group + "\n");
+			append_string_to_file(storage + "groups/group_list.txt", group + "\n");
 		update_groups();
 	}
 
@@ -1289,7 +1294,7 @@ public class main_view extends Activity
 		return context;
 	}
 
-	private List< List<String> > read_csv_to_list(String[] type)
+	public static List< List<String> > read_csv_to_list(String[] type)
 	{
 		final String feed_path = type[0];
 		final int lines_to_skip = Integer.parseInt(type[1]);
@@ -1330,14 +1335,14 @@ public class main_view extends Activity
 		return types;
 	}
 
-	public static List<String> read_file_to_list(String file_name, int lines_to_skip)
+	public static List<String> read_file_to_list(String file_path, int lines_to_skip)
 	{
 		String line;
 		BufferedReader stream;
 		List<String> lines = new ArrayList<String>();
 		try
 		{
-			stream = new BufferedReader(new FileReader(storage + file_name));
+			stream = new BufferedReader(new FileReader(file_path));
 			for(int i=0; i<lines_to_skip; i++)
 				stream.readLine();
 			while((line = stream.readLine()) != null)
@@ -1349,13 +1354,13 @@ public class main_view extends Activity
 		return lines;
 	}
 
-	private static int count_lines(String file_name)
+	private static int count_lines(String file_path)
 	{
 		BufferedReader stream;
 		int i = 0;
 		try
 		{
-			stream = new BufferedReader(new FileReader(storage + file_name));
+			stream = new BufferedReader(new FileReader(file_path));
 			while(stream.readLine() != null)
 				i++;
 			stream.close();
@@ -1401,7 +1406,6 @@ public class main_view extends Activity
 
 			String group = current_groups.get(page_number);
 			String group_file_path 			= storage + "groups/" + group + ".txt";
-			String partial_thumbnail_path 	= storage + "thumbnails/";
 
 			List< List<String> > content 		= read_csv_to_list(new String[]{group_file_path, "0", "name", "url"});
 			List<String> group_feeds_names 		= content.get(0);
@@ -1414,7 +1418,7 @@ public class main_view extends Activity
 			/// If we should download and update the feeds inside that group.
 			for(String feed : group_feeds_names)
 			{
-				if(!exists("content/" + feed + ".store.txt.content.txt"))
+				if(!exists(storage + "content/" + feed + ".store.txt.content.txt"))
 					return 0L;
 			}
 
@@ -1428,7 +1432,7 @@ public class main_view extends Activity
 			{
 				for(String feed : group_feeds_names)
 				{
-					if(exists("content/" + feed + ".store.txt.content.txt"))
+					if(exists(storage + "content/" + feed + ".store.txt.content.txt"))
 					{
 						sort_group_content_by_time(group);
 						break;
@@ -1456,7 +1460,7 @@ public class main_view extends Activity
 			}
 
 			/// load the image_dimensions to a list.
-			List<String> dimensions = read_file_to_list(group + ".image_size.cache.txt", 0);
+			List<String> dimensions = read_file_to_list(storage + group + ".image_size.cache.txt", 0);
 
 			/// For each line of the group_content_file
 			final int size = titles.size();
@@ -1470,20 +1474,20 @@ public class main_view extends Activity
 				{
 					image_name = images.get(m).substring(images.get(m).lastIndexOf("/") + 1, images.get(m).length());
 
-					if((!exists("thumbnails/" + image_name))&&(!check_service_running()))
+					if((!exists(storage + "thumbnails/" + image_name))&&(!check_service_running()))
 					{
-						if(!exists("images" + image_name))
-							download_file(images.get(m), "images/" + image_name);
-						dimensions.add(compress_file(image_name, group, false));
+						if(!exists(storage + "images/" + image_name))
+							download_file(images.get(m), storage + "images/" + image_name);
+						dimensions.add(compress_file(storage, image_name, group, false));
 					}
 
 					dim = get_image_dimensions(dimensions, image_name);
 					if(dim[0] < 6)
 					{
-						dimensions.add(compress_file(image_name, group, true));
+						dimensions.add(compress_file(storage, image_name, group, true));
 						dim = get_image_dimensions(dimensions, image_name);
 					}
-					thumbnail_path = partial_thumbnail_path + image_name;
+					thumbnail_path = storage + "thumbnails/" + image_name;
 				}
 
 				// Checks to see if page has this item.
@@ -1567,9 +1571,12 @@ public class main_view extends Activity
 						.getListAdapter());
 	}
 
-	private void sort_group_content_by_time(String group)
+	public static void sort_group_content_by_time(String group)
 	{
 		Date time;
+
+		if(storage.equals(""))
+			storage = read_file_to_list(storage + "storage_location.txt", 0).get(0);
 
 		List<String> feeds_array	= read_csv_to_list(new String[]{storage + "groups/" + group + ".txt", "0", "name"}).get(0);
 		List<Date> dates 			= new ArrayList<Date>();
@@ -1587,7 +1594,7 @@ public class main_view extends Activity
 				List< List<String> > contenter	= read_csv_to_list(new String[]{content_path, "0", "link", "pubDate"});
 				links 							= contenter.get(0);
 				pubDates						= contenter.get(1);
-				content 						= read_file_to_list("content/" + feed + ".store.txt.content.txt", 0);
+				content 						= read_file_to_list(storage + "content/" + feed + ".store.txt.content.txt", 0);
 
 				if(pubDates.get(0).length()<8)
 					pubDates 					= read_csv_to_list(new String[]{content_path, "0", "published"}).get(0);
@@ -1661,11 +1668,11 @@ public class main_view extends Activity
 			}
 		}
 
-		final String group_content_path = "groups/" + group + ".txt.content.txt";
 		String last_url = "";
-		if(exists("groups/" + group + ".txt.content.txt"))
+		final String group_path = storage + "groups/" + group + ".txt.content.txt";
+		if(exists(group_path))
 		{
-			List< List<String> > bonne = read_csv_to_list(new String[]{storage + "groups/" + group + ".txt.content.txt", "0", "marker", "link"});
+			List< List<String> > bonne = read_csv_to_list(new String[]{group_path, "0", "marker", "link"});
 			List<String> urls = bonne.get(1);
 			List<String> marks = bonne.get(0);
 			int sized = marks.size();
@@ -1684,11 +1691,11 @@ public class main_view extends Activity
 		if(last_url.equals(""))
 			last_url = links_ordered.get(0);
 
-		delete(group_content_path);
+		delete(group_path);
 
 		try
 		{
-			BufferedWriter out = new BufferedWriter(new FileWriter(storage + group_content_path, true));
+			BufferedWriter out = new BufferedWriter(new FileWriter(group_path, true));
 
 			if(links_ordered.size()>0)
 			{
@@ -1721,24 +1728,24 @@ public class main_view extends Activity
 		append_string_to_file("dump.txt", text + "\n");
 	}
 
-	public static void delete(String file_name)
+	public static void delete(String file_path)
 	{
-		(new File(storage + file_name)).delete();
+		(new File(file_path)).delete();
 	}
 
-	public static Boolean exists(String file_name)
+	public static Boolean exists(String file_path)
 	{
-		return (new File(storage + file_name)).exists();
+		return (new File(file_path)).exists();
 	}
 
-	private String compress_file(String image_name, String group, Boolean skip_save)
+	public static String compress_file(String path, String image_name, String group, Boolean skip_save)
 	{
 		int insample;
 		if(!skip_save)
 		{
 			BitmapFactory.Options o = new BitmapFactory.Options();
 			o.inJustDecodeBounds = true;
-			BitmapFactory.decodeFile(storage + "images/" + image_name, o);
+			BitmapFactory.decodeFile(path + "images/" + image_name, o);
 
 			int width_tmp = o.outWidth;
 
@@ -1752,15 +1759,15 @@ public class main_view extends Activity
 
 		BitmapFactory.Options o2 = new BitmapFactory.Options();
 		o2.inSampleSize = insample;
-		Bitmap bitmap = BitmapFactory.decodeFile(storage + "images/" + image_name, o2);
+		Bitmap bitmap = BitmapFactory.decodeFile(path + "images/" + image_name, o2);
 		if(o2.outWidth > 9)
-			append_string_to_file(group + ".image_size.cache.txt", image_name + "|" + o2.outWidth + "|" + o2.outHeight + "\n");
+			append_string_to_file(path + group + ".image_size.cache.txt", image_name + "|" + o2.outWidth + "|" + o2.outHeight + "\n");
 
 		if(!skip_save)
 		{
 			try
 			{
-				FileOutputStream out = new FileOutputStream(storage + "thumbnails/" + image_name);
+				FileOutputStream out = new FileOutputStream(path + "thumbnails/" + image_name);
 				bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
 			}
 			catch (Exception e){
