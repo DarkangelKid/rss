@@ -349,8 +349,7 @@ public class main_view extends Activity
 			res = getResources();
 		}
 	}
-	
-	
+
 	protected void onStop()
 	{
 		super.onStop();
@@ -508,7 +507,7 @@ public class main_view extends Activity
 		{
 			/// Add a global new feeds downloaded so update all method here.
 			/// Replace 0 with the index of all.
-			
+
 			if((position == 0)&&(new_items))
 			{
 				new refresh_page().execute(0);
@@ -594,7 +593,7 @@ public class main_view extends Activity
 					builder.setCancelable(true)
 							.setPositiveButton("Delete", new DialogInterface.OnClickListener()
 					{
-						public void onClick(DialogInterface dialog, int id) 
+						public void onClick(DialogInterface dialog, int id)
 						{
 							group_list_adapter.remove_item(group_pos);
 							group_list_adapter.notifyDataSetChanged();
@@ -603,7 +602,7 @@ public class main_view extends Activity
 					AlertDialog alert = builder.create();
 					alert.show();
 					return true;
-				} 
+				}
 			});
 			return view;
 		}
@@ -621,7 +620,7 @@ public class main_view extends Activity
 			View view = inflater.inflate(R.layout.manage_feeds, container, false);
 			ListView feed_list = (ListView) view.findViewById(R.id.feeds_listview);
 
-			
+
 			feed_list.setOnItemClickListener(new OnItemClickListener()
 						{
 							public void onItemClick(AdapterView<?> parent, View view, int position, long id)
@@ -1376,7 +1375,7 @@ public class main_view extends Activity
 		{
 			/// ton[0] = page number or position in current_groups.
 			/// TODO: setRecyclerListener(AbsListView.RecyclerListener listener);
-			
+
 			while(check_service_running())
 			{
 				try{
@@ -1385,7 +1384,7 @@ public class main_view extends Activity
 				catch(Exception e){
 				}
 			}
-			
+
 			int page_number = ton[0];
 
 			String group = current_groups.get(page_number);
@@ -1431,7 +1430,7 @@ public class main_view extends Activity
 			List<String> images 		= contenter.get(2);
 			List<String> descriptions 	= contenter.get(3);
 			List<String> links			= contenter.get(4);
-			
+
 			if(titles.get(0).length() < 1)
 				return 0L;
 
@@ -1556,9 +1555,12 @@ public class main_view extends Activity
 						.getListAdapter());
 	}
 
-	private void sort_group_content_by_time(String group)
+	private static void sort_group_content_by_time(String group)
 	{
 		Date time;
+
+		if(storage.equals(""))
+			storage = getExternalFilesDir(null).getAbsolutePath() + "/";
 
 		List<String> feeds_array	= read_csv_to_list(new String[]{storage + "groups/" + group + ".txt", "0", "name"}).get(0);
 		List<Date> dates 			= new ArrayList<Date>();
@@ -1624,7 +1626,7 @@ public class main_view extends Activity
 							}
 						}
 					}
-					
+
 					final int sizer = dates.size();
 					for(int j=0; j<sizer; j++)
 					{
