@@ -304,11 +304,14 @@ public class main_view extends Activity
 		super.onPostCreate(savedInstanceState);
 		if (savedInstanceState == null)
 		{
+			log("start post create");
 			context = getApplicationContext();
 			activity_context = this;
 
 			navigation_list = (ListView) findViewById(R.id.left_drawer);
+			log("created nav list");
 			navigation_list.setOnItemClickListener(new DrawerItemClickListener());
+			log("created onitem listener");
 
 			update_groups();
 
@@ -372,6 +375,7 @@ public class main_view extends Activity
 			density = getResources().getDisplayMetrics().density;
 			twelve = (int) ((12 * density + 0.5f));
 			res = getResources();
+			log("end post create");
 		}
 	}
 
@@ -483,10 +487,10 @@ public class main_view extends Activity
 			switch_page(manage_string, position);
 		else if(position == 0)
 			switch_page(feeds_string, position);
-		else
+		else if(position > 3)
 		{
 			switch_page(feeds_string, position);
-			int page = position - 3;
+			int page = position - 4;
 			((ViewPager) findViewById(R.id.pager)).setCurrentItem(page);
 		}
 	}
@@ -495,11 +499,8 @@ public class main_view extends Activity
 	{
 		ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
 		for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE))
-		{
-			if(service_update.class.getName().equals(service.service.getClassName())) {
+			if(service_update.class.getName().equals(service.service.getClassName()))
 				return true;
-			}
-		}
 		return false;
 	}
 
@@ -1300,10 +1301,18 @@ public class main_view extends Activity
 
 		List<String> nav = new ArrayList<String>();
 		nav.addAll(current_groups);
-		nav.addAll(0, Arrays.asList("Feeds", "Manage", "Settings"));
-		String[] navigation_bar_data = nav.toArray(new String[nav.size()]);
+		nav.addAll(0, Arrays.asList("Feeds", "Manage", "Settings", "Groups")); ///changed this shit
 
-		navigation_list.setAdapter(new ArrayAdapter<String>(get_context(), R.layout.drawer_list_item, navigation_bar_data));
+		log("creating drawer adapter");
+		drawer_adapter nav_adapter = new drawer_adapter(get_context());
+		log("setting adapter");
+		navigation_list.setAdapter(nav_adapter);
+		log("add data");
+		nav_adapter.add_list(nav);
+		log("notify adapter");
+		nav_adapter.notifyDataSetChanged();
+		log("done");
+
 		if(viewpager != null)
 			viewpager.getAdapter().notifyDataSetChanged();
 	}
@@ -1711,7 +1720,7 @@ public class main_view extends Activity
 
 	public static void log(String text)
 	{
-		append_string_to_file("dump.txt", text + "\n");
+		append_string_to_file(storage + "dump.txt", text + "\n");
 	}
 
 	public static void delete(String file_path)
