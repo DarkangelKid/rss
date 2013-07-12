@@ -458,6 +458,12 @@ public class main_view extends Activity
 			else if(string.equals("false"))
 				new_items.add(false);
 		}
+		if(new_items.size() != current_groups.size())
+		{
+			new_items.clear();
+			for(String string : current_groups)
+				new_items.add(true);
+		}
 	}
 
 	public static Resources get_resources(){
