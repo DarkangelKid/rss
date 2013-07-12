@@ -41,6 +41,7 @@ public class service_update extends IntentService
 	int group;
 	private static String storage;
 	final private int width = Integer.parseInt(main_view.read_file_to_list(storage + "width.txt", 0).get(0));
+	private String all_string;
 
 	public service_update()
 	{
@@ -53,6 +54,8 @@ public class service_update extends IntentService
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		PowerManager.WakeLock wakelock = pm.newWakeLock(pm.PARTIAL_WAKE_LOCK, "SIMPLERSS");
 		wakelock.acquire();
+
+		all_string = getString(R.string.all_group);
 
 		group = Integer.parseInt(intent.getStringExtra("GROUP_NUMBER"));
 		storage = this.getExternalFilesDir(null).getAbsolutePath() + "/";
@@ -82,8 +85,8 @@ public class service_update extends IntentService
 		}
 
 		/// Sort group order
-		if(!grouper.equals("All"))
-			main_view.sort_group_content_by_time("All");
+		if(!grouper.equals(all_string))
+			main_view.sort_group_content_by_time(all_string);
 		else
 		{
 			for(String gro : all_groups)

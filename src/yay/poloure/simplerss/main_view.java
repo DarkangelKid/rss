@@ -105,12 +105,14 @@ public class main_view extends Activity
 	private String manage_string;
 	private String settings_string;
 	private String navigation_string;
+	private static String all_string;
 
 
 	private void add_feed(String feed_name, String feed_url, String feed_group)
 	{
 		append_string_to_file(storage + "groups/" + feed_group + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|\n");
-		append_string_to_file(storage + "groups/All.txt", "name|" +  feed_name + "|url|" + feed_url + "|group|" + feed_group + "|\n");
+		append_string_to_file(storage + "groups/" + all_string + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|group|" + feed_group + "|\n");
+
 		update_feeds_list();
 		update_manage();
 	}
@@ -177,8 +179,8 @@ public class main_view extends Activity
 	private void edit_feed(String old_name, String new_name, String new_url, String old_group, String new_group)
 	{
 		/// Delete the feed info from the all group and add the new group info to the end of the all content file.
-		remove_string_from_file(storage + "groups/All.txt", old_name, true);
-		append_string_to_file(storage + "groups/All.txt", "name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|\n");
+		remove_string_from_file(storage + "groups/" + all_string + ".txt", old_name, true);
+		append_string_to_file(storage + "groups/" + all_string + ".txt", "name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|\n");
 
 		/// If we have renamed the title, rename the content/title.txt file.
 		if(!old_name.equals(new_name))
@@ -214,7 +216,7 @@ public class main_view extends Activity
 		update_groups();
 		update_manage();
 
-		sort_group_content_by_time("All");
+		sort_group_content_by_time(all_string);
 		if(exists("groups/" + old_group + ".txt"))
 			sort_group_content_by_time(old_group);
 		if(exists("groups/" + new_group + ".txt"))
@@ -223,7 +225,7 @@ public class main_view extends Activity
 
 	private void update_feeds_list()
 	{
-		List< List<String> > content 	= read_csv_to_list(new String[]{storage + "groups/All.txt", "0", "name", "url", "group"});
+		List< List<String> > content 	= read_csv_to_list(new String[]{storage + "groups/" + all_string + ".txt", "0", "name", "url", "group"});
 		feed_titles 		= content.get(0);
 		feed_urls 			= content.get(1);
 		feed_groups 		= content.get(2);
@@ -245,6 +247,7 @@ public class main_view extends Activity
 			manage_string = getString(R.string.manage_title);
 			settings_string = getString(R.string.settings_title);
 			navigation_string = getString(R.string.navigation_title);
+			all_string = getString(R.string.all_group);
 
 			getActionBar().setTitle(feeds_string);
 			FrameLayout frame = new FrameLayout(this);
@@ -308,7 +311,7 @@ public class main_view extends Activity
 			viewpager.setOnPageChangeListener(new page_listener());
 
 			/// TODO: check to see if needed.
-			List< List<String> > content 	= read_csv_to_list(new String[]{storage + "groups/All.txt", "0", "name", "url", "group"});
+			List< List<String> > content 	= read_csv_to_list(new String[]{storage + "groups/"+ all_string + ".txt", "0", "name", "url", "group"});
 			feed_titles 					= content.get(0);
 			feed_urls 						= content.get(1);
 			feed_groups 					= content.get(2);
@@ -354,7 +357,7 @@ public class main_view extends Activity
 			else
 				width = Integer.parseInt(read_file_to_list(storage + "width.txt", 0).get(0));
 
-			if(read_file_to_list(storage + "groups/All.txt", 0).size()>0)
+			if(read_file_to_list(storage + "groups/" + all_string + ".txt", 0).size()>0)
 				new refresh_page().execute(0);
 
 			drawer_toggle.syncState();
@@ -668,7 +671,7 @@ public class main_view extends Activity
 							/// Perhaps regen the all_image.cache.txt
 
 							remove_string_from_file(storage + "groups/" + group + ".txt", name, true);
-							remove_string_from_file(storage + "groups/All.txt", name, true);
+							remove_string_from_file(storage + "groups/" + all_string + ".txt", name, true);
 
 							/// If the group file no longer exists because it was the last feed in it, delete the group from the group_list.
 							if(!exists(storage + "groups/" + group + ".txt"))
@@ -677,7 +680,7 @@ public class main_view extends Activity
 								update_groups();
 							}
 
-							sort_group_content_by_time("All");
+							sort_group_content_by_time(all_string);
 							if(exists(storage + "groups/" + group + ".txt"))
 								sort_group_content_by_time(group);
 
@@ -699,7 +702,7 @@ public class main_view extends Activity
 							delete(storage + "groups/" + group + ".txt.content.txt");
 							delete(storage + group + ".image_size.cache.txt");
 
-							sort_group_content_by_time("All");
+							sort_group_content_by_time(all_string);
 
 							/// remove deleted files content from groups that it was in
 							/// TODO: update item info
@@ -1263,8 +1266,8 @@ public class main_view extends Activity
 
 		if(current_groups.size() == 0)
 		{
-			append_string_to_file(storage + "groups/group_list.txt", "All\n");
-			current_groups.add("All");
+			append_string_to_file(storage + "groups/group_list.txt", all_string + "\n");
+			current_groups.add(all_string);
 		}
 
 		List<String> nav = new ArrayList<String>();
