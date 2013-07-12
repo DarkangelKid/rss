@@ -395,11 +395,9 @@ public class main_view extends Activity
 		save_positions();
 
 		/// Save the new_items array to file
-		for(int i = 0; i < new_items.size(); i++)
-		{
-			delete(storage + "new_items.txt");
-			append_string_to_file(storage + "new_items.txt", Boolean.toString(new_items.get(i)) + "\n");
-		}
+		delete(storage + "new_items.txt");
+		for(Boolean state : new_items)
+			append_string_to_file(storage + "new_items.txt", Boolean.toString(state) + "\n");
 	}
 
 	private void save_positions()
@@ -458,6 +456,8 @@ public class main_view extends Activity
 			else if(string.equals("false"))
 				new_items.add(false);
 		}
+		storage = this.getExternalFilesDir(null).getAbsolutePath() + "/";
+		current_groups = read_file_to_list(storage + "groups/group_list.txt", 0);
 		if(new_items.size() != current_groups.size())
 		{
 			new_items.clear();
