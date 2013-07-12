@@ -101,6 +101,10 @@ public class main_view extends Activity
 
 	private static final int CONTENT_VIEW_ID = 10101010;
 	private static final int[] times = new int[]{15, 30, 45, 60, 120, 180, 240, 300, 360, 400, 480, 540, 600, 660, 720, 960, 1440, 2880, 10080, 43829};
+	private String feeds_string;
+	private String manage_string;
+	private String settings_string;
+	private String navigation_string;
 
 
 	private void add_feed(String feed_name, String feed_url, String feed_group)
@@ -237,7 +241,12 @@ public class main_view extends Activity
 		super.onCreate(savedInstanceState);
 		if (savedInstanceState == null)
 		{
-			getActionBar().setTitle("Feeds");
+			feeds_string = getString(R.string.feeds_title);
+			manage_string = getString(R.string.manage_title);
+			settings_string = getString(R.string.settings_title);
+			navigation_string = getString(R.string.navigation_title);
+
+			getActionBar().setTitle(feeds_string);
 			FrameLayout frame = new FrameLayout(this);
 			frame.setId(CONTENT_VIEW_ID);
 			setContentView(frame, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
@@ -265,9 +274,9 @@ public class main_view extends Activity
 			Fragment pref = new fragment_preferences();
 			Fragment man = new fragment_manage();
 			getFragmentManager().beginTransaction()
-				.add(R.id.content_frame, feed, "Feeds")
-				.add(R.id.content_frame, pref, "Settings")
-				.add(R.id.content_frame, man, "Manage")
+				.add(R.id.content_frame, feed, feeds_string)
+				.add(R.id.content_frame, pref, settings_string)
+				.add(R.id.content_frame, man, manage_string)
 				.hide(man)
 				.hide(pref)
 				.commit();
@@ -310,7 +319,7 @@ public class main_view extends Activity
 			manage_strip.setDrawFullUnderline(true);
 			manage_strip.setTabIndicatorColor(Color.argb(0, 51, 181, 229));
 
-			mTitle = "Feeds";
+			mTitle = feeds_string;
 			drawer_layout = (DrawerLayout) findViewById(R.id.drawer_layout);
 			drawer_layout.setDrawerShadow(R.drawable.drawer_shadow, 8388611);
 			drawer_toggle = new ActionBarDrawerToggle(this, drawer_layout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
@@ -320,7 +329,7 @@ public class main_view extends Activity
 				}
 
 				public void onDrawerOpened(View drawerView){
-					getActionBar().setTitle("Navigation");
+					getActionBar().setTitle(navigation_string);
 				}
 			};
 
@@ -349,8 +358,8 @@ public class main_view extends Activity
 			res = getResources();
 		}
 	}
-	
-	
+
+
 	protected void onStop()
 	{
 		super.onStop();
@@ -436,14 +445,14 @@ public class main_view extends Activity
 	private void selectItem(int position)
 	{
 		if(position == 2)
-			switch_page("Settings", position);
+			switch_page(settings_string, position);
 		else if(position == 1)
-			switch_page("Manage", position);
+			switch_page(manage_string, position);
 		else if(position == 0)
-			switch_page("Feeds", position);
+			switch_page(feeds_string, position);
 		else
 		{
-			switch_page("Feeds", position);
+			switch_page(feeds_string, position);
 			int page = position - 3;
 			((ViewPager) findViewById(R.id.pager)).setCurrentItem(page);
 		}
@@ -479,7 +488,7 @@ public class main_view extends Activity
 			if(position < 3)
 				set_title(page_title);
 			else
-				set_title("Feeds");
+				set_title(feeds_string);
 		}
 		drawer_layout.closeDrawer(navigation_list);
 		mTitle = page_title;
@@ -508,7 +517,7 @@ public class main_view extends Activity
 		{
 			/// Add a global new feeds downloaded so update all method here.
 			/// Replace 0 with the index of all.
-			
+
 			if((position == 0)&&(new_items))
 			{
 				new refresh_page().execute(0);
@@ -592,9 +601,9 @@ public class main_view extends Activity
 					group_pos = position;
 					AlertDialog.Builder builder = new AlertDialog.Builder(activity_context);
 					builder.setCancelable(true)
-							.setPositiveButton("Delete", new DialogInterface.OnClickListener()
+							.setPositiveButton(getString(R.string.delete_dialog), new DialogInterface.OnClickListener()
 					{
-						public void onClick(DialogInterface dialog, int id) 
+						public void onClick(DialogInterface dialog, int id)
 						{
 							group_list_adapter.remove_item(group_pos);
 							group_list_adapter.notifyDataSetChanged();
@@ -603,7 +612,7 @@ public class main_view extends Activity
 					AlertDialog alert = builder.create();
 					alert.show();
 					return true;
-				} 
+				}
 			});
 			return view;
 		}
@@ -621,7 +630,7 @@ public class main_view extends Activity
 			View view = inflater.inflate(R.layout.manage_feeds, container, false);
 			ListView feed_list = (ListView) view.findViewById(R.id.feeds_listview);
 
-			
+
 			feed_list.setOnItemClickListener(new OnItemClickListener()
 						{
 							public void onItemClick(AdapterView<?> parent, View view, int position, long id)
@@ -643,7 +652,7 @@ public class main_view extends Activity
 					positionrr = pos;
 					AlertDialog.Builder builder = new AlertDialog.Builder(activity_context);
 					builder.setCancelable(true)
-							.setNegativeButton("Delete", new DialogInterface.OnClickListener()
+							.setNegativeButton(getString(R.string.delete_dialog), new DialogInterface.OnClickListener()
 					{
 						/// Delete the feed.
 						public void onClick(DialogInterface dialog, int id)
@@ -674,7 +683,7 @@ public class main_view extends Activity
 							update_manage_groups();
 						}
 					})
-					.setPositiveButton("Clear Content", new DialogInterface.OnClickListener()
+					.setPositiveButton(getString(R.string.clear_dialog), new DialogInterface.OnClickListener()
 					{
 						/// Delete the feed.
 						public void onClick(DialogInterface dialog, int id)
@@ -1376,7 +1385,7 @@ public class main_view extends Activity
 		{
 			/// ton[0] = page number or position in current_groups.
 			/// TODO: setRecyclerListener(AbsListView.RecyclerListener listener);
-			
+
 			while(check_service_running())
 			{
 				try{
@@ -1385,7 +1394,7 @@ public class main_view extends Activity
 				catch(Exception e){
 				}
 			}
-			
+
 			int page_number = ton[0];
 
 			String group = current_groups.get(page_number);
@@ -1431,7 +1440,7 @@ public class main_view extends Activity
 			List<String> images 		= contenter.get(2);
 			List<String> descriptions 	= contenter.get(3);
 			List<String> links			= contenter.get(4);
-			
+
 			if(titles.get(0).length() < 1)
 				return 0L;
 
@@ -1624,7 +1633,7 @@ public class main_view extends Activity
 							}
 						}
 					}
-					
+
 					final int sizer = dates.size();
 					for(int j=0; j<sizer; j++)
 					{

@@ -1,5 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="drawer_open">Open navigation drawer</string>
-    <string name="drawer_close">Close navigation drawer</string>
+	<string name="drawer_open">Open navigation drawer</string>
+	<string name="drawer_close">Close navigation drawer</string>
+
+	<string name="feeds_title">Feeds</string>
+	<string name="manage_title">Manage</string>
+	<string name="settings_title">Settings</string>
+	<string name="navigation_title">Navigation</string>
+
+	<string name="delete_dialog">Delete</string>
+	<string name="clear_dialog">Clear Content</string>
+	<string name="add_dialog_title">Add Feed</string>
+
+	<string name="feed_name_dialog">Feed Name</string>
+	<string name="feed_name_hint">optional</string>
+	<string name="feed_url_dialog">Feed URL</string>
+	<string name="feed_url_hint">http://example.com/rss</string>
+	<string name="feed_group_dialog">Group</string>
+	<string name="feed_group_hint">new group</string>
 </resources>

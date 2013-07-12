@@ -4,18 +4,18 @@
 		android:orientation="vertical"
 		android:windowSoftInputMode="stateVisible">
 
-	<TextView 
+	<TextView
 			android:id="@+id/title_text"
 			android:layout_height="wrap_content"
 			android:layout_width="wrap_content"
 			android:layout_marginLeft="10dp"
 			android:layout_marginRight="10dp"
 			android:layout_marginTop="8dp"
-			android:text="Feed Name"
+			android:text="@string/feed_name_dialog"
 			android:gravity="left"
 			android:textSize="14sp"
 			android:textColor="#cdcdcd" />
-			
+
 	<EditText
 			android:id="@+id/name_edit"
 			android:layout_height="wrap_content"
@@ -27,7 +27,7 @@
 			android:autoText="true"
 			android:capitalize="words"
 			android:gravity="fill_horizontal"
-			android:hint="optional"
+			android:hint="@string/feed_name_hint"
 			android:textSize="18sp"
 			android:textColor="#ffffff" />
 
@@ -38,11 +38,11 @@
 			android:layout_marginLeft="10dp"
 			android:layout_marginRight="10dp"
 			android:layout_marginTop="8dp"
-			android:text="Feed URL"
+			android:text="@string/feed_url_dialog"
 			android:gravity="left"
 			android:textSize="14sp"
 			android:textColor="#cdcdcd"/>
-			
+
 	<EditText
 			android:id="@+id/URL_edit"
 			android:layout_height="wrap_content"
@@ -54,7 +54,7 @@
 			android:autoText="false"
 			android:capitalize="none"
 			android:gravity="fill_horizontal"
-			android:hint="http://example.com/rss"
+			android:hint="@string/feed_url_hint"
 			android:inputType="textUri"
 			android:textSize="18sp"
 			android:textColor="#ffffff"/>
@@ -66,7 +66,7 @@
 			android:layout_marginLeft="10dp"
 			android:layout_marginRight="10dp"
 			android:layout_marginTop="8dp"
-			android:text="Group"
+			android:text="@string/feed_group_dialog"
 			android:gravity="left"
 			android:textSize="14sp"
 			android:textColor="#cdcdcd"/>
@@ -84,7 +84,7 @@
 				android:textCursorDrawable="@drawable/white_cursor"
 				android:autoText="false"
 				android:gravity="fill_horizontal"
-				android:hint="new group"
+				android:hint="@string/feed_group_hint"
 				android:textSize="18sp"
 				android:textColor="#ffffff"
 				android:layout_weight="1"/>
@@ -95,7 +95,7 @@
 				android:layout_marginLeft="8dp"
 				android:layout_marginRight="8dp"
 				android:layout_marginBottom="4dp"/>
-		
+
 	</LinearLayout>
-    
+
 </LinearLayout>
