@@ -83,10 +83,7 @@ public class service_update extends IntentService
 		else
 		{
 			for(String gro : all_groups)
-			{
-				if(!gro.equals("All"))
-					sort_group_content_by_time(gro);
-			}
+				sort_group_content_by_time(gro);
 		}
 
 		/// If we should download and update the feeds inside that group.
@@ -114,6 +111,8 @@ public class service_update extends IntentService
 		}
 
 		/// Read all the group files and how many new items.
+		
+		/// TODO: If new feed, count new set objects and return from parser to add to the total.
 		List<Integer> unread_list = new ArrayList<Integer>();
 		for(String gro : all_groups)
 		{
@@ -121,27 +120,36 @@ public class service_update extends IntentService
 			List<String> count_list = read_file_to_list("groups/" + gro + ".txt.content.txt", 0);
 			int sized = count_list.size();
 			int i;
+			
 			for(i = sized - 1; i >= 0; i--)
 			{
 				if(count_list.get(i).substring(0, 9).equals("marker|1|"))
 					break;
 			}
-			unread_list.add(sized - i - 1);
+			if(i == sized - 1)
+				i++;
+			unread_list.add(sized - i);
 		}
 		
 		int group_items = 0;
+		int total = 0;
 		for(int un : unread_list)
 		{
 			if(un > 0)
 				group_items++;
 		}
+		for(int i = 1 ; i < unread_list.size(); i++)
+			total += unread_list.get(i);
 
-		if((unread_list.get(0) > 0))
+		if(total > 0)
 		{
 			NotificationCompat.Builder not_builder = new NotificationCompat.Builder(this)
 					.setSmallIcon(R.drawable.rss_icon)
-					.setContentTitle(Integer.toString(unread_list.get(0)) + " Unread Item" + ((unread_list.get(0) == 1) ? "" : "s"))
-					.setContentText(Integer.toString(group_items - 1) + " groups have unread item" + (((group_items - 1) == 1) ? "." : "s."))
+					.setContentTitle(Integer.toString(total) + " Unread Item" + ((total == 1) ? "" : "s"))
+					.setContentText(
+					Integer.toString(group_items - 1) + 
+					((group_items - 1 == 1) ? " group has" : " groups have") + 
+					((total == 1) ? " an unread item." : " unread items."))
 					.setAutoCancel(true);
 
 			Intent result_intent = new Intent(this, main_view.class);
@@ -155,6 +163,7 @@ public class service_update extends IntentService
 			NotificationManager notification_manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 			notification_manager.notify(1, not_builder.build());
 		}
+		main_view.log(Integer.toString(unread_list.get(0)));
 
 		///notification end
 		wakelock.release();
@@ -403,14 +412,15 @@ public class service_update extends IntentService
 		String last_url = "";
 		if(main_view.exists("groups/" + group + ".txt.content.txt"))
 		{
-			List< List<String> > bonne = read_csv_to_list(new String[]{storage + "groups/" + group + ".txt.content.txt", "0", "link", "marker"});
-			List<String> urls = bonne.get(0);
-			List<String> marks = bonne.get(1);
+			List< List<String> > bonne = read_csv_to_list(new String[]{storage + "groups/" + group + ".txt.content.txt", "0", "marker", "link"});
+			List<String> urls = bonne.get(1);
+			List<String> marks = bonne.get(0);
 			int sized = marks.size();
 			for(int i = sized - 1; i >= 0; i--)
 			{
 				if(marks.get(i).equals("1"))
 				{
+					main_view.log("last_url found at " + Integer.toString(i));
 					last_url = urls.get(i);
 					break;
 				}
@@ -436,7 +446,10 @@ public class service_update extends IntentService
 						if(line.contains(link))
 						{
 							if(link.equals(last_url))
-								out.write(line + "marker|1|\n");
+							{
+								main_view.log("there is a line with marker at the begining");
+								out.write("marker|1|" + line + "\n");
+							}
 							else
 								out.write(line + "\n");
 							break;
