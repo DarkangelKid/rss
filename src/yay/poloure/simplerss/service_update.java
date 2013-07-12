@@ -40,19 +40,22 @@ public class service_update extends IntentService
 {
 	int group;
 	private static String storage;
+	private String all_string;
 	final private int width = Integer.parseInt(main_view.read_file_to_list("width.txt", 0).get(0));
-	
+
 	public service_update()
 	{
 		super("service_update");
 	}
-	
+
 	@Override
 	protected void onHandleIntent(Intent intent)
 	{
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		PowerManager.WakeLock wakelock = pm.newWakeLock(pm.PARTIAL_WAKE_LOCK, "SIMPLERSS");
 		wakelock.acquire();
+
+		all_string = getString(R.string.all_group);
 
 		group = Integer.parseInt(intent.getStringExtra("GROUP_NUMBER"));
 		storage = this.getExternalFilesDir(null).getAbsolutePath() + "/";
@@ -78,8 +81,8 @@ public class service_update extends IntentService
 		}
 
 		/// Sort group order
-		if(!grouper.equals("All"))
-			sort_group_content_by_time("All");
+		if(!grouper.equals(all_string))
+			sort_group_content_by_time(all_string);
 		else
 		{
 			for(String gro : all_groups)
@@ -111,7 +114,7 @@ public class service_update extends IntentService
 		}
 
 		/// Read all the group files and how many new items.
-		
+
 		/// TODO: If new feed, count new set objects and return from parser to add to the total.
 		List<Integer> unread_list = new ArrayList<Integer>();
 		for(String gro : all_groups)
@@ -120,7 +123,7 @@ public class service_update extends IntentService
 			List<String> count_list = read_file_to_list("groups/" + gro + ".txt.content.txt", 0);
 			int sized = count_list.size();
 			int i;
-			
+
 			for(i = sized - 1; i >= 0; i--)
 			{
 				if(count_list.get(i).substring(0, 9).equals("marker|1|"))
@@ -130,7 +133,7 @@ public class service_update extends IntentService
 				i++;
 			unread_list.add(sized - i);
 		}
-		
+
 		int group_items = 0;
 		int total = 0;
 		for(int un : unread_list)
@@ -147,8 +150,8 @@ public class service_update extends IntentService
 					.setSmallIcon(R.drawable.rss_icon)
 					.setContentTitle(Integer.toString(total) + " Unread Item" + ((total == 1) ? "" : "s"))
 					.setContentText(
-					Integer.toString(group_items - 1) + 
-					((group_items - 1 == 1) ? " group has" : " groups have") + 
+					Integer.toString(group_items - 1) +
+					((group_items - 1 == 1) ? " group has" : " groups have") +
 					((total == 1) ? " an unread item." : " unread items."))
 					.setAutoCancel(true);
 
@@ -177,13 +180,13 @@ public class service_update extends IntentService
 
 		for(RunningTaskInfo task : tasks)
 		{
-			if(getPackageName().equalsIgnoreCase(task.baseActivity.getPackageName())) 
-				return true;                                  
+			if(getPackageName().equalsIgnoreCase(task.baseActivity.getPackageName()))
+				return true;
 		}
 		return false;
     }
 
-	
+
 	private List<String> read_file_to_list(String file_name, int lines_to_skip)
 	{
 		String line = null;
@@ -203,7 +206,7 @@ public class service_update extends IntentService
 		}
 		return lines;
 	}
-	
+
 	private List< List<String> > read_csv_to_list(String[] type)
 	{
 		String feed_path = type[0];
@@ -245,7 +248,7 @@ public class service_update extends IntentService
 		}
 		return types;
 	}
-	
+
 	private void download_file(String urler, String file_name)
 	{
 		try
@@ -382,7 +385,7 @@ public class service_update extends IntentService
 							}
 						}
 					}
-					
+
 					final int sizer = dates.size();
 					for(int j=0; j<sizer; j++)
 					{

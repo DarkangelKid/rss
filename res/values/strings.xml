@@ -29,6 +29,8 @@
 	<string name="refresh_cat_preferences">Auto Refresh</string>
 	<string name="refresh_summary_preferences">Check to enable auto refresh</string>
 	<string name="refresh_time_preferences">Refresh Time</string>
-	<string name="refresh_time_summary_preferences">Adjust autorefresh interval</string>
+	<string name="refresh_time_summary_preferences">Adjust auto refresh interval</string>
+
+	<string name="all_group">All</string>
 
 </resources>
