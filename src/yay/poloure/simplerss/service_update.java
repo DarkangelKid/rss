@@ -40,7 +40,6 @@ public class service_update extends IntentService
 {
 	int group;
 	private static String storage;
-	final private int width = Integer.parseInt(main_view.read_file_to_list(storage + "width.txt", 0).get(0));
 	private String all_string;
 
 	public service_update()
@@ -86,7 +85,10 @@ public class service_update extends IntentService
 
 		/// Sort group order
 		if(!grouper.equals(all_string))
+		{
 			main_view.sort_group_content_by_time(all_string);
+			main_view.sort_group_content_by_time(grouper);
+		}
 		else
 		{
 			for(String gro : all_groups)
@@ -94,8 +96,7 @@ public class service_update extends IntentService
 		}
 
 		/// If we should download and update the feeds inside that group.
-		String group_content_path = storage + "groups/" + grouper + ".txt.content.txt";
-
+		String group_content_path 		= storage + "groups/" + grouper + ".txt.content.txt";
 		List< List<String> > contenter 	= main_view.read_csv_to_list(new String[]{group_content_path, "0", "image"});
 		List<String> images 			= contenter.get(0);
 

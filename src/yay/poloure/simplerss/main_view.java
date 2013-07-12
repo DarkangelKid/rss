@@ -87,7 +87,8 @@ public class main_view extends Activity
 
 	private static Resources res;
 	private static int positionrr, poser, twelve, check_finished, width, group_pos;
-	private Boolean new_items = false, refreshing = false;
+	private static List<Boolean> new_items;
+	private Boolean refreshing = false;
 	private String mTitle, feed_title;
 	private static String storage;
 	private static Context context, activity_context;
@@ -106,6 +107,8 @@ public class main_view extends Activity
 	private String settings_string;
 	private String navigation_string;
 	private static String all_string;
+
+	/// TODO: When deleting a feed, check to see if the marker is in one of it's urls, if so put the marker at the newest item.
 
 	private static final SimpleDateFormat[] formats = new SimpleDateFormat[]
 	{
@@ -386,6 +389,13 @@ public class main_view extends Activity
 			alarm_refresh.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + interval, interval, pend_intent);
 		}
 		save_positions();
+
+		/// Save the new_items array to file
+		for(int i = 0; i < new_items.size(); i++)
+		{
+			delete(storage + "new_items.txt");
+			append_string_to_file(storage + "new_items.txt", Boolean.toString(new_items.get(i)) + "\n");
+		}
 	}
 
 	private void save_positions()
@@ -426,12 +436,23 @@ public class main_view extends Activity
 		super.onStart();
 		if(!refreshing)
 			set_refresh(check_service_running());
+
 		if((PreferenceManager.getDefaultSharedPreferences(this)).getBoolean("refresh", false))
 		{
 			Intent intent = new Intent(this, service_update.class);
 			PendingIntent pend_intent = PendingIntent.getService(this, 0, intent, 0);
 			AlarmManager alarm_manager = (AlarmManager) getSystemService(Activity.ALARM_SERVICE);
 			alarm_manager.cancel(pend_intent);
+		}
+
+		List<String> strings = read_file_to_list(storage + "new_items.txt", 0);
+		new_items = new ArrayList<Boolean>();
+		for(String string : strings)
+		{
+			if(string.equals("true"))
+				new_items.add(true);
+			else if(string.equals("false"))
+				new_items.add(false);
 		}
 	}
 
@@ -527,16 +548,13 @@ public class main_view extends Activity
 		@Override
 		public void onPageSelected(int position)
 		{
-			/// Add a global new feeds downloaded so update all method here.
-			/// Replace 0 with the index of all.
-
-			if((position == 0)&&(new_items))
-			{
-				new refresh_page().execute(0);
-				new_items = false;
-			}
-			else if(get_card_adapter(position).getCount() == 0)
+			if(get_card_adapter(position).getCount() == 0)
 				new refresh_page().execute(position);
+			else if(new_items.get(position))
+			{
+				new refresh_page().execute(position);
+				new_items.set(position, false);
+			}
 		}
 	}
 
@@ -673,7 +691,6 @@ public class main_view extends Activity
 							group = group.substring(group.indexOf('\n') + 1, group.indexOf(' '));
 							String name = feed_list_adapter.getItem(positionrr);
 							delete(storage + group + ".image_size.cache.txt");
-							/// Perhaps regen the all_image.cache.txt
 
 							remove_string_from_file(storage + "groups/" + group + ".txt", name, true);
 							remove_string_from_file(storage + "groups/" + all_string + ".txt", name, true);
@@ -1270,11 +1287,16 @@ public class main_view extends Activity
 	{
 		current_groups = read_file_to_list(storage + "groups/group_list.txt", 0);
 
-		if(current_groups.size() == 0)
+		final int size = current_groups.size();
+		if(size == 0)
 		{
 			append_string_to_file(storage + "groups/group_list.txt", all_string + "\n");
 			current_groups.add(all_string);
 		}
+
+		new_items.clear();
+		for(int i = 0; i < size; i++)
+			new_items.add(false);
 
 		List<String> nav = new ArrayList<String>();
 		nav.addAll(current_groups);
@@ -1284,7 +1306,6 @@ public class main_view extends Activity
 		navigation_list.setAdapter(new ArrayAdapter<String>(get_context(), R.layout.drawer_list_item, navigation_bar_data));
 		if(viewpager != null)
 			viewpager.getAdapter().notifyDataSetChanged();
-		/// TODO: add an element to the list for new items.
 	}
 
 	public static void update_group_order(List<String> new_order)
@@ -1383,10 +1404,25 @@ public class main_view extends Activity
 		Intent intent = new Intent(this, service_update.class);
 		intent.putExtra("GROUP_NUMBER", Integer.toString(page_number));
 		startService(intent);
+		if(page_number == 0)
+		{
+			for(int i = 0; i < new_items.size(); i++)
+				new_items.set(i, true);
+		}
+		else
+		{
+			new_items.set(0, true);
+			new_items.set(page_number, true);
+		}
 	}
 
 	private class refresh_page extends AsyncTask<Integer, Object, Long>
 	{
+		private int marker_position = -1;
+		private int ssize;
+		private int refresh_count = 0;
+		private ListFragment l;
+
 		@Override
 		protected void onPreExecute(){
 			set_refresh(true);
@@ -1396,7 +1432,6 @@ public class main_view extends Activity
 		@Override
 		protected Long doInBackground(Integer... ton)
 		{
-			/// ton[0] = page number or position in current_groups.
 			/// TODO: setRecyclerListener(AbsListView.RecyclerListener listener);
 
 			while(check_service_running())
@@ -1408,38 +1443,23 @@ public class main_view extends Activity
 				}
 			}
 
-			int page_number = ton[0];
-
+			int page_number 				= ton[0];
 			String group 					= current_groups.get(page_number);
 			final String group_file_path 	= storage + "groups/" + group + ".txt";
 			final String group_content_path = group_file_path + ".content.txt";
-
-
-			List< List<String> > content 		= read_csv_to_list(new String[]{group_file_path, "0", "name", "url"});
-			List<String> group_feeds_names 		= content.get(0);
-
 			String image_name, thumbnail_path;
 
-			if(group_feeds_names.size() < 1)
-				return 0L;
-
-			/// Checks the groups feeds to see if any has a content file.
-			new_items = true;
-			Boolean content_exists = false;
-			if((!exists(group_content_path))||(new_items))
+			try
 			{
-				for(String feed : group_feeds_names)
-				{
-					if(exists(storage + "content/" + feed + ".store.txt.content.txt"))
-					{
-						sort_group_content_by_time(group);
-						content_exists = true;
-						break;
-					}
-				}
+				l = (fragment_card) getFragmentManager().findFragmentByTag("android:switcher:" + ((ViewPager) findViewById(R.id.pager)).getId() + ":" + Integer.toString(page_number));
+				refresh_count = l.getListView().getFirstVisiblePosition();
 			}
-			/// If it found that the group has no feed content files, end.
-			if(!content_exists)
+			catch(Exception e){
+				refresh_count = 0;
+			}
+
+			/// If the group has no feeds  or  the content file does not exist, end.
+			if((!exists(group_file_path))||(!exists(group_content_path)))
 				return 0L;
 
 			List< List<String> > contenter = read_csv_to_list(new String[]{group_content_path, "0", "marker", "title", "image", "description", "link"});
@@ -1494,25 +1514,16 @@ public class main_view extends Activity
 
 				// Checks to see if page has this item.
 				if(existing_items.add(links.get(m)))
-				{
 					publishProgress(page_number, titles.get(m), descriptions.get(m), links.get(m), thumbnail_path, dim[1], dim[0], marker.get(m));
-					/// If we have downloaded new data on other pages bar 0, and it gets here, there is new data for 0 to refresh with.
-					if(page_number != 0)
-					// Make this an array for the group pages.
-					new_items = true;
-				}
 			}
 			return 0L;
 		}
 
-		private int marker_position = -1;
-		private int ssize;
-		private int count = 0;
-
 		@Override
 		protected void onProgressUpdate(Object... progress)
 		{
-			ListFragment l = ((fragment_card) getFragmentManager().findFragmentByTag("android:switcher:" + ((ViewPager) findViewById(R.id.pager)).getId() + ":" + Integer.toString((Integer) progress[0])));
+			if(l == null)
+				l = (fragment_card) getFragmentManager().findFragmentByTag("android:switcher:" + ((ViewPager) findViewById(R.id.pager)).getId() + ":" + Integer.toString((Integer) progress[0]));
 			if(l != null)
 			{
 				card_adapter ith = ((card_adapter) l.getListAdapter());
@@ -1542,18 +1553,18 @@ public class main_view extends Activity
 
 				ith.add_list((String) progress[1], (String) progress[2], (String) progress[3], (String) progress[4], (Integer) progress[5], (Integer) progress[6], marker);
 				ith.notifyDataSetChanged();
-				count++;
+				refresh_count++;
 
 				//lv.setSelectionFromTop(index, top - twelve);
 				if(marker_position != -1)
 				{
-					if((count == ssize)&&(marker_position == 1))
+					if((refresh_count == ssize)&&(marker_position == 1))
 						lv.setSelection(0);
 					else
 						lv.setSelection(marker_position);
 				}
 				else
-					lv.setSelection(lv.getCount() - 1);
+					lv.setSelection(refresh_count);
 			}
 		}
 
@@ -1572,6 +1583,11 @@ public class main_view extends Activity
 						.findFragmentByTag("android:switcher:" + ((ViewPager) findViewById(R.id.pager)).getId() + ":" + Integer.toString(page_index)))
 						.getListAdapter());
 	}
+
+	/*public static void set_new_items_array(int position, Boolean value)
+	{
+		new_items_array[position] = value;
+	}*/
 
 	public static void sort_group_content_by_time(String group)
 	{
@@ -1718,6 +1734,8 @@ public class main_view extends Activity
 			BitmapFactory.decodeFile(path + "images/" + image_name, o);
 
 			int width_tmp = o.outWidth;
+			if(width < 2)
+				width = Integer.parseInt(main_view.read_file_to_list(storage + "width.txt", 0).get(0));
 
 			if(width_tmp > width)
 				insample =  Math.round((float) width_tmp / (float) width);
