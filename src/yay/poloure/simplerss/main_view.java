@@ -107,6 +107,14 @@ public class main_view extends Activity
 	private String navigation_string;
 	private static String all_string;
 
+	private static final SimpleDateFormat[] formats = new SimpleDateFormat[]
+	{
+		new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH),
+		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH),
+		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ENGLISH),
+		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH),
+		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH)
+	};
 
 	private void add_feed(String feed_name, String feed_url, String feed_group)
 	{
@@ -114,11 +122,6 @@ public class main_view extends Activity
 		append_string_to_file(storage + "groups/" + all_string + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|group|" + feed_group + "|\n");
 
 		update_feeds_list();
-		update_manage();
-	}
-
-	private void update_manage()
-	{
 		update_manage_feeds();
 		update_manage_groups();
 	}
@@ -214,7 +217,8 @@ public class main_view extends Activity
 		temp.notifyDataSetChanged();
 
 		update_groups();
-		update_manage();
+		update_manage_feeds();
+		update_manage_groups();
 
 		sort_group_content_by_time(all_string);
 		if(exists("groups/" + old_group + ".txt"))
@@ -352,6 +356,7 @@ public class main_view extends Activity
 				Point size = new Point();
 				display.getSize(size);
 				width = (int) Math.round(((float)size.x)*0.80);
+				delete(storage + "width.txt");
 				append_string_to_file(storage + "width.txt", Integer.toString(width) + "\n");
 			}
 			else
@@ -677,12 +682,13 @@ public class main_view extends Activity
 							if(!exists(storage + "groups/" + group + ".txt"))
 							{
 								remove_string_from_file(storage + "groups/group_list.txt", group, false);
+								delete(storage + "groups/" + group + ".txt");
 								update_groups();
 							}
+							else
+								sort_group_content_by_time(group);
 
 							sort_group_content_by_time(all_string);
-							if(exists(storage + "groups/" + group + ".txt"))
-								sort_group_content_by_time(group);
 
 							/// remove deleted files content from groups that it was in
 							feed_list_adapter.remove_item(positionrr);
@@ -1404,8 +1410,10 @@ public class main_view extends Activity
 
 			int page_number = ton[0];
 
-			String group = current_groups.get(page_number);
-			String group_file_path 			= storage + "groups/" + group + ".txt";
+			String group 					= current_groups.get(page_number);
+			final String group_file_path 	= storage + "groups/" + group + ".txt";
+			final String group_content_path = group_file_path + ".content.txt";
+
 
 			List< List<String> > content 		= read_csv_to_list(new String[]{group_file_path, "0", "name", "url"});
 			List<String> group_feeds_names 		= content.get(0);
@@ -1415,30 +1423,24 @@ public class main_view extends Activity
 			if(group_feeds_names.size() < 1)
 				return 0L;
 
-			/// If we should download and update the feeds inside that group.
-			for(String feed : group_feeds_names)
-			{
-				if(!exists(storage + "content/" + feed + ".store.txt.content.txt"))
-					return 0L;
-			}
-
-			/// Make group content file
-			String group_content_path = storage + "groups/" + group + ".txt.content.txt";
-			File group_content_file = new File(group_content_path);
-
-			/// If we have skipped the download, and either the page number is zero (which it only is if new data had been made since) or the group content file does not exist yet.
+			/// Checks the groups feeds to see if any has a content file.
 			new_items = true;
-			if((!group_content_file.exists())||(new_items))
+			Boolean content_exists = false;
+			if((!exists(group_content_path))||(new_items))
 			{
 				for(String feed : group_feeds_names)
 				{
 					if(exists(storage + "content/" + feed + ".store.txt.content.txt"))
 					{
 						sort_group_content_by_time(group);
+						content_exists = true;
 						break;
 					}
 				}
 			}
+			/// If it found that the group has no feed content files, end.
+			if(!content_exists)
+				return 0L;
 
 			List< List<String> > contenter = read_csv_to_list(new String[]{group_content_path, "0", "marker", "title", "image", "description", "link"});
 			List<String> marker			= contenter.get(0);
@@ -1573,12 +1575,13 @@ public class main_view extends Activity
 
 	public static void sort_group_content_by_time(String group)
 	{
-		Date time;
-
 		if(storage.equals(""))
 			storage = read_file_to_list(storage + "storage_location.txt", 0).get(0);
 
-		List<String> feeds_array	= read_csv_to_list(new String[]{storage + "groups/" + group + ".txt", "0", "name"}).get(0);
+		String last_url = "";
+		final String group_path = storage + "groups/" + group + ".txt.content.txt";
+		final List<String> feeds_array	= read_csv_to_list(new String[]{storage + "groups/" + group + ".txt", "0", "name"}).get(0);
+		Date time = new Date();
 		List<Date> dates 			= new ArrayList<Date>();
 		List<String> links_ordered 	= new ArrayList<String>();
 		List<String> content_all 	= new ArrayList<String>();
@@ -1586,62 +1589,37 @@ public class main_view extends Activity
 
 		for(String feed : feeds_array)
 		{
-			String content_path = storage + "content/" + feed + ".store.txt.content.txt";
-			File test = new File(content_path);
-			if(test.exists())
+			final String content_path = storage + "content/" + feed + ".store.txt.content.txt";
+			if(exists(content_path))
 			{
-
 				List< List<String> > contenter	= read_csv_to_list(new String[]{content_path, "0", "link", "pubDate"});
 				links 							= contenter.get(0);
 				pubDates						= contenter.get(1);
-				content 						= read_file_to_list(storage + "content/" + feed + ".store.txt.content.txt", 0);
+				content 						= read_file_to_list(content_path, 0);
 
-				if(pubDates.get(0).length()<8)
+				if(pubDates.get(0).length() < 8)
 					pubDates 					= read_csv_to_list(new String[]{content_path, "0", "published"}).get(0);
-				if(pubDates.get(0).length()<8)
+				if(pubDates.get(0).length() < 8)
 					pubDates 					= read_csv_to_list(new String[]{content_path, "0", "updated"}).get(0);
 
 				final int size = pubDates.size();
-				for(int i=0; i<size; i++)
+				for(int i = 0; i < size; i++)
 				{
 					content_all.add(content.get(i));
-					try{
-						time 					= (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.ENGLISH)).parse(pubDates.get(i));
-					}
-					catch(Exception e){
+					Boolean time_format_found = false;
+					for(SimpleDateFormat format : formats)
+					{
 						try{
-							time 				= (new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH)).parse(pubDates.get(i));
+							time = format.parse(pubDates.get(i));
+							time_format_found = true;
 						}
-						catch(Exception t){
-							try{
-								time 			= (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH)).parse(pubDates.get(i));
-							}
-							catch(Exception c){
-								try{
-									time 		= (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.ENGLISH)).parse(pubDates.get(i));
-								}
-								catch(Exception n){
-									try{
-										time 	= (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ENGLISH)).parse(pubDates.get(i));
-									}
-									catch(Exception o){
-										try{
-											time 	= (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH)).parse(pubDates.get(i));
-										}
-										catch(Exception r){
-											try{
-												time = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH)).parse(pubDates.get(i));
-											}
-											catch(Exception x){
-												main_view.log("BUG : Format not found and date looks like: " + pubDates.get(i));
-												time = new Date();
-											}
-										}
-									}
-								}
-							}
+						catch(Exception e){
 						}
 					}
+
+					/// If our loop always catched.
+					if(!time_format_found)
+						main_view.log("BUG : Format not found and date looks like: " + pubDates.get(i));
 
 					final int sizer = dates.size();
 					for(int j=0; j<sizer; j++)
@@ -1668,8 +1646,6 @@ public class main_view extends Activity
 			}
 		}
 
-		String last_url = "";
-		final String group_path = storage + "groups/" + group + ".txt.content.txt";
 		if(exists(group_path))
 		{
 			List< List<String> > bonne = read_csv_to_list(new String[]{group_path, "0", "marker", "link"});
@@ -1680,7 +1656,6 @@ public class main_view extends Activity
 			{
 				if(marks.get(i).equals("1"))
 				{
-					log("last_url found at " + Integer.toString(i));
 					last_url = urls.get(i);
 					break;
 				}
@@ -1700,22 +1675,17 @@ public class main_view extends Activity
 			if(links_ordered.size()>0)
 			{
 				for(String link : links_ordered)
-				{
 					for(String line : content_all)
 					{
 						if(line.contains(link))
 						{
 							if(link.equals(last_url))
-							{
-								log("there is a line with marker at the begining");
 								out.write("marker|1|" + line + "\n");
-							}
 							else
 								out.write(line + "\n");
 							break;
 						}
 					}
-				}
 			}
 			out.close();
 		}
