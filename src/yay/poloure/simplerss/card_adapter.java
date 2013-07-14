@@ -152,6 +152,12 @@ public class card_adapter extends BaseAdapter
 						content_marker.set(firstVisibleItem, true);
 						top_item_position = firstVisibleItem;
 					}
+				if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
+				{
+					drawer_adapter nav_adapter = main_view.return_nav_adapter();
+					nav_adapter.add_count(main_view.get_unread_counts());
+					nav_adapter.notifyDataSetChanged();
+				}
 			}
 		});
 
