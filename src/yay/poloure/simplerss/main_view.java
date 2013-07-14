@@ -956,8 +956,13 @@ public class main_view extends Activity
 						String new_group = ((EditText) add_rss_dialog.findViewById(R.id.group_edit)).getText().toString().trim().toLowerCase();
 						String URL_check = ((EditText) add_rss_dialog.findViewById(R.id.URL_edit)).getText().toString().trim();
 						String feed_name = ((EditText) add_rss_dialog.findViewById(R.id.name_edit)).getText().toString().trim();
-						String spinner_group = ((Spinner) add_rss_dialog.findViewById(R.id.group_spinner)).getSelectedItem().toString();
-
+						String spinner_group;
+						try{
+							spinner_group = ((Spinner) add_rss_dialog.findViewById(R.id.group_spinner)).getSelectedItem().toString();
+						}
+						catch(Exception e){
+							spinner_group = "Unsorted";
+						}
 						process_user_feed(alertDialog, new_group, URL_check, feed_name, spinner_group, "add");
 					}
 				});
