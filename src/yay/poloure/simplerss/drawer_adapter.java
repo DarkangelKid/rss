@@ -9,6 +9,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import java.util.List;
 import android.widget.ListView;
+import android.widget.ImageView;
 
 public class drawer_adapter extends BaseAdapter
 {
@@ -84,7 +85,7 @@ public class drawer_adapter extends BaseAdapter
 				ViewGroup view_group = (ViewGroup)inflater.inflate(R.layout.static_drawer_item, parent, false);
 				holder = new StaticViewHolder();
 				holder.title_view = (TextView) view_group.findViewById(R.id.menu_item);
-				//holder.icon_view = (ImageView) convertView.findViewById(R.id.icon_item);
+				holder.icon_view = (ImageView) view_group.findViewById(R.id.icon_item);
 				view_group.setTag(holder);
 				view = view_group;
 			}
@@ -93,8 +94,14 @@ public class drawer_adapter extends BaseAdapter
 				view = convertView;
 				holder = (StaticViewHolder) convertView.getTag();
 			}
+
 			holder.title_view.setText(menu_list.get(position));
-			//holder.info_view.setText(info_list.get(position));
+			if(position == 0)
+				holder.icon_view.setImageResource(R.drawable.feeds);
+			else if(position == 1)
+				holder.icon_view.setImageResource(R.drawable.manage);
+			else
+				holder.icon_view.setImageResource(R.drawable.settings);
 			return view;
 		}
 
@@ -108,7 +115,7 @@ public class drawer_adapter extends BaseAdapter
 				ViewGroup view_group = (ViewGroup)inflater.inflate(R.layout.header_drawer_item, parent, false);
 				holder = new HeaderViewHolder();
 				holder.title_view = (TextView) view_group.findViewById(R.id.title_item);
-				//holder.divider_view = (ImageView) convertView.findViewById(R.id.info_item);
+				holder.divider_view = (ImageView) view_group.findViewById(R.id.divider_item);
 				view_group.setTag(holder);
 				view = view_group;
 			}
@@ -118,7 +125,7 @@ public class drawer_adapter extends BaseAdapter
 				holder = (HeaderViewHolder) convertView.getTag();
 			}
 			holder.title_view.setText(menu_list.get(position));
-			//holder.info_view.setText(info_list.get(position));
+			holder.divider_view.setImageResource(R.drawable.drawer_divider);
 
 			return view;
 		}
@@ -130,9 +137,9 @@ public class drawer_adapter extends BaseAdapter
 			View view;
 			if(convertView == null)
 			{
-				ViewGroup view_group = (ViewGroup)inflater.inflate(R.layout.static_drawer_item, parent, false);
+				ViewGroup view_group = (ViewGroup)inflater.inflate(R.layout.group_drawer_item, parent, false);
 				holder = new TextViewHolder();
-				holder.title_view = (TextView) view_group.findViewById(R.id.menu_item);
+				holder.title_view = (TextView) view_group.findViewById(R.id.group_title);
 				view_group.setTag(holder);
 				view = view_group;
 			}
@@ -141,7 +148,9 @@ public class drawer_adapter extends BaseAdapter
 				view = convertView;
 				holder = (TextViewHolder) convertView.getTag();
 			}
+			main_view.log(menu_list.get(position));
 			holder.title_view.setText(menu_list.get(position));
+
 			return view;
 		}
 	}
@@ -149,16 +158,19 @@ public class drawer_adapter extends BaseAdapter
 	static class StaticViewHolder
 	{
 		TextView title_view;
+		ImageView icon_view;
 	}
 
 	static class HeaderViewHolder
 	{
 		TextView title_view;
+		ImageView divider_view;
 	}
 
 	static class TextViewHolder
 	{
 		TextView title_view;
+		//TextView unread_view;
 	}
 
 }
