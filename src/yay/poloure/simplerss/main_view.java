@@ -1344,8 +1344,6 @@ public class main_view extends Activity
 		nav.addAll(current_groups);
 		nav.addAll(0, Arrays.asList("Feeds", "Manage", "Settings", "Groups")); ///changed this shit
 
-		drawer_adapter nav_adapter = new drawer_adapter(get_context());
-		navigation_list.setAdapter(nav_adapter);
 		nav_adapter.add_list(nav);
 		nav_adapter.add_count(get_unread_counts());
 		nav_adapter.notifyDataSetChanged();
@@ -1373,7 +1371,6 @@ public class main_view extends Activity
 		nav.addAll(current_groups);
 		nav.addAll(0, Arrays.asList("Feeds", "Manage", "Settings", "Groups")); ///changed this shit
 
-		navigation_list.setAdapter(nav_adapter);
 		nav_adapter.add_list(nav);
 		nav_adapter.add_count(get_unread_counts());
 		nav_adapter.notifyDataSetChanged();
@@ -1473,6 +1470,10 @@ public class main_view extends Activity
 		return i;
 	}
 
+	public static drawer_adapter return_nav_adapter(){
+		return nav_adapter;
+	}
+
 	/// TODO: write a load_position function instead of sorting by time.
 
 	public static List<Integer> get_unread_counts()
@@ -1493,6 +1494,7 @@ public class main_view extends Activity
 			}
 			if(ith == null)
 			{
+				log("The card adapter at " + Integer.toString(j) + " could not be loaded and reading from file.");
 				count = 0;
 				count_list = read_file_to_list(storage + "groups/" + current_groups.get(j) + ".txt.content.txt", 0);
 				sized = count_list.size();
@@ -1507,8 +1509,10 @@ public class main_view extends Activity
 					i++;
 				unread_list.add(sized - i);
 			}
-			else
+			else{
+				log("The card adapter at " + Integer.toString(j) + " was loaded and returned position " + Integer.toString(ith.return_unread_item_count()));
 				unread_list.add(ith.return_unread_item_count());
+			}
 		}
 
 		for(Integer un : unread_list)
