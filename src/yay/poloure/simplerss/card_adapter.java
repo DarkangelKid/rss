@@ -47,7 +47,7 @@ public class card_adapter extends BaseAdapter
 	private List<Integer> content_height = new ArrayList<Integer>();
 	private List<Integer> content_width = new ArrayList<Integer>();
 	private List<Boolean> content_marker = new ArrayList<Boolean>();
-	
+
 	private final LayoutInflater inflater;
 	private Context context;
 	private ListView listview;
@@ -73,9 +73,8 @@ public class card_adapter extends BaseAdapter
 		content_marker.add(0, new_marker);
 		if(eight == 0)
 			eight = (int) ((8 * main_view.get_pixel_density() + 0.5f));
-
 	}
-	
+
 	public List<String> return_links(){
 		return content_links;
 	}
@@ -135,17 +134,13 @@ public class card_adapter extends BaseAdapter
 					int firstVisibleItem = listview.getFirstVisiblePosition();
 					int i;
 					int size = content_marker.size();
-					Boolean found = false;
 					for(i = 0; i < size; i++)
 					{
 						if(content_marker.get(i))
-						{
-							found = true;
 							break;
-						}
 					}
 
-					if((firstVisibleItem < i)&&(found)&&(firstVisibleItem != -1))
+					if((firstVisibleItem < i)&&(firstVisibleItem != -1))
 					{
 						//top_url = content_links.get(firstVisibleItem);
 						content_marker.set(firstVisibleItem, true);
@@ -153,10 +148,10 @@ public class card_adapter extends BaseAdapter
 					}
 			}
 		});
-		
+
 		holder.title_view.setText(content_titles.get(position));
 		holder.time_view.setText(content_links.get(position));
-		
+
 		String des = "";
 		if((!content_des.get(position).replace("&n&", "").contains(content_titles.get(position).substring(0, content_titles.get(position).length() - 3)))||(!image_exists))
 			des = content_des.get(position).replace("  ", "\n").replace("&t&", "\n").replace("&n&", "\n").trim();
@@ -264,7 +259,7 @@ public class card_adapter extends BaseAdapter
 			return display_image_reference.get();
 		}
 	}
-	
+
 	private class image
 	{
 		public Bitmap img;
@@ -279,7 +274,7 @@ public class card_adapter extends BaseAdapter
 		public display_image(ImageView imageView) {
 			image_view_reference = new WeakReference<ImageView>(imageView);
 		}
-		
+
 		@Override
 		protected image doInBackground(Integer... ton)
 		{
@@ -296,7 +291,7 @@ public class card_adapter extends BaseAdapter
 		{
 			 if(isCancelled())
 				im.img = null;
-				
+
 			if(image_view_reference != null && im.img != null)
 			{
 				final ImageView image_view = image_view_reference.get();
@@ -310,7 +305,7 @@ public class card_adapter extends BaseAdapter
 					});
 					image_view.setImageDrawable(td);
 					td.startTransition(230);
-					
+
 					image_view.setOnClickListener(new image_call(im.path));
 				}
 			}
@@ -333,7 +328,7 @@ public class card_adapter extends BaseAdapter
 		{
 			image_path = im;
 		}
-		
+
 		@Override
 		public void onClick(View v)
 		{
@@ -359,4 +354,4 @@ public class card_adapter extends BaseAdapter
 			return true;
 		}
 	}
-} 
+}

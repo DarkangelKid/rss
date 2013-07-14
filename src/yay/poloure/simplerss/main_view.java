@@ -304,14 +304,11 @@ public class main_view extends Activity
 		super.onPostCreate(savedInstanceState);
 		if (savedInstanceState == null)
 		{
-			log("start post create");
 			context = getApplicationContext();
 			activity_context = this;
 
 			navigation_list = (ListView) findViewById(R.id.left_drawer);
-			log("created nav list");
 			navigation_list.setOnItemClickListener(new DrawerItemClickListener());
-			log("created onitem listener");
 
 			update_groups();
 
@@ -375,7 +372,6 @@ public class main_view extends Activity
 			density = getResources().getDisplayMetrics().density;
 			twelve = (int) ((12 * density + 0.5f));
 			res = getResources();
-			log("end post create");
 		}
 	}
 
@@ -388,7 +384,6 @@ public class main_view extends Activity
 			intent.putExtra("GROUP_NUMBER", "0");
 			PendingIntent pend_intent = PendingIntent.getService(this, 0, intent, 0);
 			long interval = (long) times[((int)(PreferenceManager.getDefaultSharedPreferences(this)).getInt("refresh_time", 20)/5)]*60000;
-			log(Long.toString(interval));
 			AlarmManager alarm_refresh = (AlarmManager) getSystemService(Activity.ALARM_SERVICE);
 			alarm_refresh.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + interval, interval, pend_intent);
 		}
@@ -402,34 +397,61 @@ public class main_view extends Activity
 
 	private void save_positions()
 	{
+		card_adapter adapter;
+		BufferedWriter out;
+		String url, group;
+		List<String> feeds, lines;
+		Boolean found_url = false;
 		final int size = current_groups.size();
-		for(int i = 0; i < size; i++)
+
+		for(int i = 1; i < size; i++)
 		{
-			String group = current_groups.get(i);
 			try
 			{
-				card_adapter adapter = (card_adapter)((fragment_card) getFragmentManager().findFragmentByTag("android:switcher:" + ((ViewPager) findViewById(R.id.pager)).getId() + ":" + Integer.toString(i))).getListView().getAdapter();
+				group = current_groups.get(i);
+				adapter = (card_adapter)((fragment_card) getFragmentManager().findFragmentByTag("android:switcher:" + ((ViewPager) findViewById(R.id.pager)).getId() + ":" + Integer.toString(i))).getListView().getAdapter();
 				if(adapter.getCount() > 0)
 				{
-					List<String> lines = read_file_to_list(storage + "groups/" + group + ".txt.content.txt", 0);
-					delete(storage + "groups/" + group + ".txt.content.txt");
-					BufferedWriter out = new BufferedWriter(new FileWriter(storage + "groups/" + group + ".txt.content.txt", true));
-					String url = adapter.return_latest_url();
-					for(String line : lines)
+					/// Read each of the content files from the group and find the line with the url.
+					feeds = read_csv_to_list(new String[]{storage + "groups/" + group + ".txt", "0", "name"}).get(0);
+					found_url = false;
+					url = adapter.return_latest_url();
+					log("URL: " + url);
+					for(String feed: feeds)
 					{
-						if((url.equals("")||(!line.contains(url))))
-							out.write(line + "\n");
-						else if(!line.substring(0, 9).equals("marker|1|"))
-							out.write("marker|1|" + line + "\n");
-						else
-							out.write(line + "\n");
+						lines = read_file_to_list(storage + "content/" + feed + ".store.txt.content.txt", 0);
+						delete(storage + "content/" + feed + ".store.txt.content.txt");
+
+						out = new BufferedWriter(new FileWriter(storage + "content/" + feed + ".store.txt.content.txt", true));
+						for(String line : lines)
+						{
+							if(!found_url)
+							{
+								if(url.equals("")||(!line.contains(url)))
+									out.write(line + "\n");
+								else if(!line.substring(0, 9).equals("marker|1|"))
+								{
+									out.write("marker|1|" + line + "\n");
+									found_url = true;
+								}
+								else
+									out.write(line + "\n");
+							}
+							else
+								out.write(line + "\n");
+						}
+						out.close();
+						if(found_url)
+							break;
 					}
-					out.close();
+					sort_group_content_by_time(group);
 				}
 			}
 			catch(Exception e){
 			}
 		}
+		if(found_url)
+			sort_group_content_by_time("All");
 	}
 
 	@Override
@@ -1309,15 +1331,10 @@ public class main_view extends Activity
 		nav.addAll(current_groups);
 		nav.addAll(0, Arrays.asList("Feeds", "Manage", "Settings", "Groups")); ///changed this shit
 
-		log("creating drawer adapter");
 		drawer_adapter nav_adapter = new drawer_adapter(get_context());
-		log("setting adapter");
 		navigation_list.setAdapter(nav_adapter);
-		log("add data");
 		nav_adapter.add_list(nav);
-		log("notify adapter");
 		nav_adapter.notifyDataSetChanged();
-		log("done");
 
 		if(viewpager != null)
 			viewpager.getAdapter().notifyDataSetChanged();
@@ -1410,6 +1427,30 @@ public class main_view extends Activity
 		catch(IOException e){
 		}
 		return i;
+	}
+
+	public static List<Integer> get_unread_counts()
+	{
+		List<Integer> unread_list = new ArrayList<Integer>();
+		List<String> count_list;
+		int count, sized, i;
+		for(String group_item : current_groups)
+		{
+			count = 0;
+			count_list = read_file_to_list(storage + "groups/" + group_item + ".txt.content.txt", 0);
+			sized = count_list.size();
+			i = 0;
+
+			for(i = sized - 1; i >= 0; i--)
+			{
+				if(count_list.get(i).substring(0, 9).equals("marker|1|"))
+					break;
+			}
+			if(i == sized - 1)
+				i++;
+			unread_list.add(sized - i);
+		}
+		return unread_list;
 	}
 
 	private void update_group(int page_number)
@@ -1545,7 +1586,6 @@ public class main_view extends Activity
 				ListView lv = l.getListView();
 				Boolean marker = false;
 				/// It should stop at the latest one unless there is not a newest one. So stay at 0 until it finds one.
-				log(((String) progress[7]));
 				if(((String) progress[7]).equals("1"))
 				{
 					marker = true;
@@ -1677,26 +1717,6 @@ public class main_view extends Activity
 			}
 		}
 
-		if(exists(group_path))
-		{
-			List< List<String> > bonne = read_csv_to_list(new String[]{group_path, "0", "marker", "link"});
-			List<String> urls = bonne.get(1);
-			List<String> marks = bonne.get(0);
-			int sized = marks.size();
-			for(int i = sized - 1; i >= 0; i--)
-			{
-				if(marks.get(i).equals("1"))
-				{
-					last_url = urls.get(i);
-					break;
-				}
-			}
-			if((last_url.equals(""))&&(sized > 0))
-				last_url = urls.get(0);
-		}
-		if(last_url.equals(""))
-			last_url = links_ordered.get(0);
-
 		delete(group_path);
 
 		try
@@ -1707,16 +1727,8 @@ public class main_view extends Activity
 			{
 				for(String link : links_ordered)
 					for(String line : content_all)
-					{
 						if(line.contains(link))
-						{
-							if(link.equals(last_url))
-								out.write("marker|1|" + line + "\n");
-							else
-								out.write(line + "\n");
-							break;
-						}
-					}
+							out.write(line + "\n");
 			}
 			out.close();
 		}
