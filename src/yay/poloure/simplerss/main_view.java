@@ -114,6 +114,143 @@ public class main_view extends Activity
 
 	/// TODO: When deleting a feed, check to see if the marker is in one of it's urls, if so put the marker at the newest item.
 
+	@Override
+	public void onCreate(Bundle savedInstanceState)
+	{
+		super.onCreate(savedInstanceState);
+		if (savedInstanceState == null)
+		{
+			feeds_string = getString(R.string.feeds_title);
+			manage_string = getString(R.string.manage_title);
+			settings_string = getString(R.string.settings_title);
+			navigation_string = getString(R.string.navigation_title);
+			all_string = getString(R.string.all_group);
+
+			getActionBar().setTitle(feeds_string);
+			FrameLayout frame = new FrameLayout(this);
+			frame.setId(CONTENT_VIEW_ID);
+			setContentView(frame, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+
+			storage = this.getExternalFilesDir(null).getAbsolutePath() + "/";
+			if(!storage.equals(""))
+			{
+				delete(storage + "storage_location.txt");
+				append_string_to_file(storage + "storage_location.txt", storage);
+			}
+
+			delete(storage + "dump.txt");
+
+			String[] folders = {"images", "thumbnails", "groups", "content"};
+			File folder_file;
+
+			for(String folder : folders)
+			{
+				folder_file = new File(storage + folder);
+				if(!folder_file.exists())
+					folder_file.mkdir();
+			}
+
+			getActionBar().setIcon(R.drawable.rss_icon);
+
+			getFragmentManager().beginTransaction()
+						.add(CONTENT_VIEW_ID, new fragment_top())
+						.commit();
+			Fragment feed = new fragment_feed();
+			Fragment pref = new fragment_preferences();
+			Fragment man = new fragment_manage();
+			getFragmentManager().beginTransaction()
+				.add(R.id.content_frame, feed, feeds_string)
+				.add(R.id.content_frame, pref, settings_string)
+				.add(R.id.content_frame, man, manage_string)
+				.hide(man)
+				.hide(pref)
+				.commit();
+		}
+	}
+
+	@Override
+	protected void onPostCreate(Bundle savedInstanceState)
+	{
+		super.onPostCreate(savedInstanceState);
+		if (savedInstanceState == null)
+		{
+			context = getApplicationContext();
+			activity_context = this;
+
+			navigation_list = (ListView) findViewById(R.id.left_drawer);
+			navigation_list.setOnItemClickListener(new DrawerItemClickListener());
+
+			nav_adapter = new drawer_adapter(get_context());
+			navigation_list.setAdapter(nav_adapter);
+
+			update_groups();
+			log(Integer.toString(get_unread_counts().get(0)));
+			viewpager = (ViewPager) findViewById(R.id.pager);
+			viewpager.setAdapter(new viewpager_adapter(getFragmentManager()));
+			viewpager.setOffscreenPageLimit(128);
+			viewpager.setOnPageChangeListener(new page_listener());
+
+			/// TODO: check to see if needed.
+			List< List<String> > content 	= read_csv_to_list(new String[]{storage + "groups/"+ all_string + ".txt", "0", "name", "url", "group"});
+			feed_titles 					= content.get(0);
+			feed_urls 						= content.get(1);
+			feed_groups 					= content.get(2);
+
+			ViewPager manage_pager = (ViewPager) findViewById(R.id.manage_viewpager);
+			manage_pager.setAdapter(new manage_pager_adapter(getFragmentManager()));
+
+			PagerTabStrip pager_tab_strip = (PagerTabStrip) findViewById(R.id.pager_title_strip);
+			pager_tab_strip.setDrawFullUnderline(true);
+			pager_tab_strip.setTabIndicatorColor(Color.argb(0, 51, 181, 229));
+
+			PagerTabStrip manage_strip = (PagerTabStrip) findViewById(R.id.manage_title_strip);
+			manage_strip.setDrawFullUnderline(true);
+			manage_strip.setTabIndicatorColor(Color.argb(0, 51, 181, 229));
+
+			mTitle = feeds_string;
+			drawer_layout = (DrawerLayout) findViewById(R.id.drawer_layout);
+			drawer_layout.setDrawerShadow(R.drawable.drawer_shadow, 8388611);
+			drawer_toggle = new ActionBarDrawerToggle(this, drawer_layout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
+			{
+				@Override
+				public void onDrawerClosed(View view){
+					getActionBar().setTitle(mTitle);
+				}
+
+				@Override
+				public void onDrawerOpened(View drawerView){
+					getActionBar().setTitle(navigation_string);
+				}
+			};
+
+			drawer_layout.setDrawerListener(drawer_toggle);
+			getActionBar().setDisplayHomeAsUpEnabled(true);
+			getActionBar().setHomeButtonEnabled(true);
+
+			/// Save the width for compression
+			if(!exists(storage + "width.txt"))
+			{
+				Display display = getWindowManager().getDefaultDisplay();
+				Point size = new Point();
+				display.getSize(size);
+				width = (int) Math.round(((float)size.x)*0.80);
+				delete(storage + "width.txt");
+				append_string_to_file(storage + "width.txt", Integer.toString(width) + "\n");
+			}
+			else
+				width = Integer.parseInt(read_file_to_list(storage + "width.txt", 0).get(0));
+
+			if(read_file_to_list(storage + "groups/" + all_string + ".txt", 0).size() > 0)
+				new refresh_page(0).execute();
+
+			drawer_toggle.syncState();
+			density = getResources().getDisplayMetrics().density;
+			twelve = (int) ((12 * density + 0.5f));
+			res = getResources();
+			fragment_manager = getFragmentManager();
+		}
+	}
+
 	private static final SimpleDateFormat[] formats = new SimpleDateFormat[]
 	{
 		new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH),
@@ -246,153 +383,6 @@ public class main_view extends Activity
 	{
 		append_string_to_file(storage + "groups/group_list.txt", group_name + "\n");
 		update_groups();
-	}
-
-	@Override
-	public void onCreate(Bundle savedInstanceState)
-	{
-		super.onCreate(savedInstanceState);
-		if (savedInstanceState == null)
-		{
-			feeds_string = getString(R.string.feeds_title);
-			manage_string = getString(R.string.manage_title);
-			settings_string = getString(R.string.settings_title);
-			navigation_string = getString(R.string.navigation_title);
-			all_string = getString(R.string.all_group);
-
-			getActionBar().setTitle(feeds_string);
-			FrameLayout frame = new FrameLayout(this);
-			frame.setId(CONTENT_VIEW_ID);
-			setContentView(frame, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-
-			storage = this.getExternalFilesDir(null).getAbsolutePath() + "/";
-			if(!storage.equals(""))
-			{
-				delete(storage + "storage_location.txt");
-				append_string_to_file(storage + "storage_location.txt", storage);
-			}
-
-			delete(storage + "dump.txt");
-
-			String[] folders = {"images", "thumbnails", "groups", "content"};
-			File folder_file;
-
-			for(String folder : folders)
-			{
-				folder_file = new File(storage + folder);
-				if(!folder_file.exists())
-					folder_file.mkdir();
-			}
-
-			getActionBar().setIcon(R.drawable.rss_icon);
-
-			getFragmentManager().beginTransaction()
-						.add(CONTENT_VIEW_ID, new fragment_top())
-						.commit();
-			Fragment feed = new fragment_feed();
-			Fragment pref = new fragment_preferences();
-			Fragment man = new fragment_manage();
-			getFragmentManager().beginTransaction()
-				.add(R.id.content_frame, feed, feeds_string)
-				.add(R.id.content_frame, pref, settings_string)
-				.add(R.id.content_frame, man, manage_string)
-				.hide(man)
-				.hide(pref)
-				.commit();
-		}
-	}
-
-	@Override
-	protected void onPostCreate(Bundle savedInstanceState)
-	{
-		super.onPostCreate(savedInstanceState);
-		if (savedInstanceState == null)
-		{
-			context = getApplicationContext();
-			activity_context = this;
-
-			navigation_list = (ListView) findViewById(R.id.left_drawer);
-			navigation_list.setOnItemClickListener(new DrawerItemClickListener());
-
-			nav_adapter = new drawer_adapter(get_context());
-			navigation_list.setAdapter(nav_adapter);
-
-			update_groups();
-			log(Integer.toString(get_unread_counts().get(0)));
-			viewpager = (ViewPager) findViewById(R.id.pager);
-			viewpager.setAdapter(new viewpager_adapter(getFragmentManager()));
-			viewpager.setOffscreenPageLimit(128);
-			viewpager.setOnPageChangeListener(new page_listener());
-
-			/// TODO: check to see if needed.
-			List< List<String> > content 	= read_csv_to_list(new String[]{storage + "groups/"+ all_string + ".txt", "0", "name", "url", "group"});
-			feed_titles 					= content.get(0);
-			feed_urls 						= content.get(1);
-			feed_groups 					= content.get(2);
-
-			ViewPager manage_pager = (ViewPager) findViewById(R.id.manage_viewpager);
-			manage_pager.setAdapter(new manage_pager_adapter(getFragmentManager()));
-
-			PagerTabStrip pager_tab_strip = (PagerTabStrip) findViewById(R.id.pager_title_strip);
-			pager_tab_strip.setDrawFullUnderline(true);
-			pager_tab_strip.setTabIndicatorColor(Color.argb(0, 51, 181, 229));
-
-			PagerTabStrip manage_strip = (PagerTabStrip) findViewById(R.id.manage_title_strip);
-			manage_strip.setDrawFullUnderline(true);
-			manage_strip.setTabIndicatorColor(Color.argb(0, 51, 181, 229));
-
-			mTitle = feeds_string;
-			drawer_layout = (DrawerLayout) findViewById(R.id.drawer_layout);
-			drawer_layout.setDrawerShadow(R.drawable.drawer_shadow, 8388611);
-			drawer_toggle = new ActionBarDrawerToggle(this, drawer_layout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
-			{
-				@Override
-				public void onDrawerClosed(View view){
-					getActionBar().setTitle(mTitle);
-				}
-
-				@Override
-				public void onDrawerOpened(View drawerView){
-					getActionBar().setTitle(navigation_string);
-				}
-
-				@Override
-				public void onDrawerStateChanged(int newState)
-				{
-					if(newState == DrawerLayout.STATE_DRAGGING)
-					{
-						nav_adapter.add_count(get_unread_counts());
-						nav_adapter.notifyDataSetChanged();
-					}
-				}
-			};
-
-			drawer_layout.setDrawerListener(drawer_toggle);
-			getActionBar().setDisplayHomeAsUpEnabled(true);
-			getActionBar().setHomeButtonEnabled(true);
-
-			/// Save the width for compression
-			if(!exists(storage + "width.txt"))
-			{
-				Display display = getWindowManager().getDefaultDisplay();
-				Point size = new Point();
-				display.getSize(size);
-				width = (int) Math.round(((float)size.x)*0.80);
-				delete(storage + "width.txt");
-				append_string_to_file(storage + "width.txt", Integer.toString(width) + "\n");
-			}
-			else
-				width = Integer.parseInt(read_file_to_list(storage + "width.txt", 0).get(0));
-
-			if(read_file_to_list(storage + "groups/" + all_string + ".txt", 0).size() > 0)
-				new refresh_page(0).execute();
-
-			drawer_toggle.syncState();
-			density = getResources().getDisplayMetrics().density;
-			twelve = (int) ((12 * density + 0.5f));
-			res = getResources();
-			fragment_manager = getFragmentManager();
-		}
 	}
 
 	protected void onStop()
