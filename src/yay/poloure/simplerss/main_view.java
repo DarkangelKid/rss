@@ -417,34 +417,37 @@ public class main_view extends Activity
 					found_url = false;
 					url = adapter.return_latest_url();
 					log("URL: " + url);
-					for(String feed: feeds)
+					if(!url.equals(""))
 					{
-						lines = read_file_to_list(storage + "content/" + feed + ".store.txt.content.txt", 0);
-						delete(storage + "content/" + feed + ".store.txt.content.txt");
-
-						out = new BufferedWriter(new FileWriter(storage + "content/" + feed + ".store.txt.content.txt", true));
-						for(String line : lines)
+						for(String feed: feeds)
 						{
-							if(!found_url)
+							lines = read_file_to_list(storage + "content/" + feed + ".store.txt.content.txt", 0);
+							delete(storage + "content/" + feed + ".store.txt.content.txt");
+
+							out = new BufferedWriter(new FileWriter(storage + "content/" + feed + ".store.txt.content.txt", true));
+							for(String line : lines)
 							{
-								if(url.equals("")||(!line.contains(url)))
-									out.write(line + "\n");
-								else if(!line.substring(0, 9).equals("marker|1|"))
+								if(!found_url)
 								{
-									out.write("marker|1|" + line + "\n");
-									found_url = true;
+									if(!line.contains(url))
+										out.write(line + "\n");
+									else if(!line.substring(0, 9).equals("marker|1|"))
+									{
+										out.write("marker|1|" + line + "\n");
+										found_url = true;
+									}
+									else
+										out.write(line + "\n");
 								}
 								else
 									out.write(line + "\n");
 							}
-							else
-								out.write(line + "\n");
+							out.close();
+							if(found_url)
+								break;
 						}
-						out.close();
-						if(found_url)
-							break;
+						sort_group_content_by_time(group);
 					}
-					sort_group_content_by_time(group);
 				}
 			}
 			catch(Exception e){
