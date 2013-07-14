@@ -38,6 +38,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 
 import android.widget.FrameLayout;
 import android.widget.ArrayAdapter;
@@ -108,6 +110,7 @@ public class main_view extends Activity
 	private String settings_string;
 	private String navigation_string;
 	private static String all_string;
+	private static FragmentManager fragment_manager;
 
 	/// TODO: When deleting a feed, check to see if the marker is in one of it's urls, if so put the marker at the newest item.
 
@@ -381,13 +384,14 @@ public class main_view extends Activity
 			else
 				width = Integer.parseInt(read_file_to_list(storage + "width.txt", 0).get(0));
 
-			if(read_file_to_list(storage + "groups/" + all_string + ".txt", 0).size()>0)
-				new refresh_page().execute(0);
+			if(read_file_to_list(storage + "groups/" + all_string + ".txt", 0).size() > 0)
+				new refresh_page(0).execute();
 
 			drawer_toggle.syncState();
 			density = getResources().getDisplayMetrics().density;
 			twelve = (int) ((12 * density + 0.5f));
 			res = getResources();
+			fragment_manager = getFragmentManager();
 		}
 	}
 
@@ -597,10 +601,10 @@ public class main_view extends Activity
 		public void onPageSelected(int position)
 		{
 			if(get_card_adapter(position).getCount() == 0)
-				new refresh_page().execute(position);
+				new refresh_page(position).execute();
 			else if(new_items.get(position))
 			{
-				new refresh_page().execute(position);
+				new refresh_page(position).execute();
 				new_items.set(position, false);
 			}
 		}
@@ -748,7 +752,7 @@ public class main_view extends Activity
 							{
 								remove_string_from_file(storage + "groups/group_list.txt", group, false);
 								delete(storage + "groups/" + group + ".txt");
-								update_groups();
+								update_groups_non_static();
 							}
 							else
 								sort_group_content_by_time(group);
@@ -1333,8 +1337,37 @@ public class main_view extends Activity
 
 	private static void update_groups()
 	{
+		final int previous_size = current_groups.size();
 		current_groups = read_file_to_list(storage + "groups/group_list.txt", 0);
+		final int size = current_groups.size();
+		if(size == 0)
+		{
+			append_string_to_file(storage + "groups/group_list.txt", all_string + "\n");
+			current_groups.add(all_string);
+		}
 
+		new_items.clear();
+		for(int i = 0; i < size; i++)
+			new_items.add(false);
+
+		List<String> nav = new ArrayList<String>();
+		nav.addAll(current_groups);
+		nav.addAll(0, Arrays.asList("Feeds", "Manage", "Settings", "Groups")); ///changed this shit
+
+		drawer_adapter nav_adapter = new drawer_adapter(get_context());
+		navigation_list.setAdapter(nav_adapter);
+		nav_adapter.add_list(nav);
+		nav_adapter.add_count(get_unread_counts());
+		nav_adapter.notifyDataSetChanged();
+
+		if(viewpager != null)
+			viewpager.getAdapter().notifyDataSetChanged();
+	}
+
+	private void update_groups_non_static()
+	{
+		final int previous_size = current_groups.size();
+		current_groups = read_file_to_list(storage + "groups/group_list.txt", 0);
 		final int size = current_groups.size();
 		if(size == 0)
 		{
@@ -1355,6 +1388,8 @@ public class main_view extends Activity
 		nav_adapter.add_count(get_unread_counts());
 		nav_adapter.notifyDataSetChanged();
 
+		if(previous_size != size)
+			viewpager.setAdapter(new viewpager_adapter(getFragmentManager()));
 		if(viewpager != null)
 			viewpager.getAdapter().notifyDataSetChanged();
 	}
@@ -1448,27 +1483,48 @@ public class main_view extends Activity
 		return i;
 	}
 
+	/// TODO: write a load_position function instead of sorting by time.
+
 	public static List<Integer> get_unread_counts()
 	{
 		List<Integer> unread_list = new ArrayList<Integer>();
 		List<String> count_list;
-		int count, sized, i;
-		for(String group_item : current_groups)
-		{
-			count = 0;
-			count_list = read_file_to_list(storage + "groups/" + group_item + ".txt.content.txt", 0);
-			sized = count_list.size();
-			i = 0;
+		int count, sized, i, total = 0;
+		card_adapter ith = null;
 
-			for(i = sized - 1; i >= 0; i--)
-			{
-				if(count_list.get(i).substring(0, 9).equals("marker|1|"))
-					break;
+		final int size = current_groups.size();
+		for(int j = 1; j < size; j++)
+		{
+			try{
+				ith = (card_adapter)((fragment_card) fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(j))).getListAdapter();
+;
 			}
-			if(i == sized - 1)
-				i++;
-			unread_list.add(sized - i);
+			catch(Exception e){
+			}
+			if(ith == null)
+			{
+				count = 0;
+				count_list = read_file_to_list(storage + "groups/" + current_groups.get(j) + ".txt.content.txt", 0);
+				sized = count_list.size();
+				i = 0;
+
+				for(i = sized - 1; i >= 0; i--)
+				{
+					if(count_list.get(i).substring(0, 9).equals("marker|1|"))
+						break;
+				}
+				if(i == sized - 1)
+					i++;
+				unread_list.add(sized - i);
+			}
+			else
+				unread_list.add(ith.return_unread_item_count());
 		}
+
+		for(Integer un : unread_list)
+			total += un;
+		unread_list.add(0, total);
+
 		return unread_list;
 	}
 
@@ -1491,12 +1547,18 @@ public class main_view extends Activity
 		}
 	}
 
-	private class refresh_page extends AsyncTask<Integer, Object, Long>
+	private class refresh_page extends AsyncTask<Void, Object, Long>
 	{
-		private int marker_position = -1;
-		private int ssize;
-		private int refresh_count = 0;
+		private int marker_position = -1, ssize, refresh_count = 0, page_number;
 		private ListFragment l;
+		Boolean first;
+		Animation animFadeOut = AnimationUtils.loadAnimation(getApplicationContext(), android.R.anim.fade_out);
+		Animation animFadeIn = AnimationUtils.loadAnimation(getApplicationContext(), android.R.anim.fade_in);
+
+		public refresh_page(int page){
+			page_number = page;
+			first = true;
+		}
 
 		@Override
 		protected void onPreExecute(){
@@ -1505,7 +1567,7 @@ public class main_view extends Activity
 		}
 
 		@Override
-		protected Long doInBackground(Integer... ton)
+		protected Long doInBackground(Void... hey)
 		{
 			/// TODO: setRecyclerListener(AbsListView.RecyclerListener listener);
 
@@ -1518,20 +1580,10 @@ public class main_view extends Activity
 				}
 			}
 
-			int page_number 				= ton[0];
 			String group 					= current_groups.get(page_number);
 			final String group_file_path 	= storage + "groups/" + group + ".txt";
 			final String group_content_path = group_file_path + ".content.txt";
 			String image_name, thumbnail_path;
-
-			try
-			{
-				l = (fragment_card) getFragmentManager().findFragmentByTag("android:switcher:" + ((ViewPager) findViewById(R.id.pager)).getId() + ":" + Integer.toString(page_number));
-				refresh_count = l.getListView().getFirstVisiblePosition();
-			}
-			catch(Exception e){
-				refresh_count = 0;
-			}
 
 			/// If the group has no feeds  or  the content file does not exist, end.
 			if((!exists(group_file_path))||(!exists(group_content_path)))
@@ -1603,6 +1655,12 @@ public class main_view extends Activity
 			{
 				card_adapter ith = ((card_adapter) l.getListAdapter());
 				ListView lv = l.getListView();
+				if(first)
+				{
+					if(refresh_count == 0)
+						l.getListView().setVisibility(View.INVISIBLE);
+					first = false;
+				}
 				Boolean marker = false;
 				/// It should stop at the latest one unless there is not a newest one. So stay at 0 until it finds one.
 				if(((String) progress[7]).equals("1"))
@@ -1645,6 +1703,12 @@ public class main_view extends Activity
 		@Override
 		protected void onPostExecute(Long tun)
 		{
+			if(l != null)
+			{
+				ListView lv = l.getListView();
+				lv.setAnimation(animFadeIn);
+				lv.setVisibility(View.VISIBLE);
+			}
 			//if(viewPager.getOffscreenPageLimit() > 1)
 				//viewPager.setOffscreenPageLimit(1);
 			set_refresh(check_service_running());
