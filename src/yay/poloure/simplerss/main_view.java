@@ -114,140 +114,6 @@ public class main_view extends Activity
 
 	/// TODO: When deleting a feed, check to see if the marker is in one of it's urls, if so put the marker at the newest item.
 
-	private static final SimpleDateFormat[] formats = new SimpleDateFormat[]
-	{
-		new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH),
-		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH),
-		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ENGLISH),
-		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH),
-		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH)
-	};
-
-	private void add_feed(String feed_name, String feed_url, String feed_group)
-	{
-		append_string_to_file(storage + "groups/" + feed_group + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|\n");
-		append_string_to_file(storage + "groups/" + all_string + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|group|" + feed_group + "|\n");
-
-		update_feeds_list();
-		update_manage_feeds();
-		update_manage_groups();
-	}
-
-	private void update_manage_feeds()
-	{
-		if(feed_list_adapter != null)
-		{
-			feed_list_adapter.clear_list();
-			final int size = feed_titles.size();
-			for(int i = 0; i < size; i++)
-				feed_list_adapter.add_list(feed_titles.get(i), feed_urls.get(i) + "\n" + feed_groups.get(i) + " • " + Integer.toString(count_lines(storage + "content/" + feed_titles.get(i) + ".store.txt.content.txt") - 1) + " items");
-			feed_list_adapter.notifyDataSetChanged();
-		}
-	}
-
-	private void update_manage_groups()
-	{
-		fragment_group grp_frag;
-		group_adapter manage_adapter = null;
-		try
-		{
-			grp_frag = (fragment_group) getFragmentManager().findFragmentByTag("android:switcher:" + ((ViewPager) findViewById(R.id.manage_viewpager)).getId() + ":0");
-			manage_adapter = (group_adapter)((fragment_group) getFragmentManager().findFragmentByTag("android:switcher:" + ((ViewPager) findViewById(R.id.manage_viewpager)).getId() + ":0")).return_listview().getAdapter();
-		}
-		catch(Exception e){
-		}
-		if(manage_adapter != null)
-		{
-			manage_adapter.clear_list();
-			final int size = current_groups.size();
-			for(int i = 0; i < size; i++)
-			{
-				List<String> content = read_csv_to_list(new String[]{storage + "groups/" + current_groups.get(i) + ".txt", "0", "name"}).get(0);
-				String info = "";
-				int number = 3;
-				if(content.size() < 3)
-					number = content.size();
-				for(int j = 0; j < number - 1; j++)
-					info = info + content.get(j) + ", ";
-				if(content.size() > 0)
-					info = info + content.get(number - 1);
-				if(content.size() > 3)
-					info = info + ", ...";
-				if(i == 0)
-				{
-					if(size == 1)
-						info = "1 group";
-					else
-						info = current_groups.size() + " groups";
-				}
-				manage_adapter.add_list(current_groups.get(i), Integer.toString(content.size()) + " feeds • " + info);
-			}
-			manage_adapter.notifyDataSetChanged();
-		}
-	}
-
-	private void edit_feed(String old_name, String new_name, String new_url, String old_group, String new_group)
-	{
-		/// Delete the feed info from the all group and add the new group info to the end of the all content file.
-		remove_string_from_file(storage + "groups/" + all_string + ".txt", old_name, true);
-		append_string_to_file(storage + "groups/" + all_string + ".txt", "name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|\n");
-
-		/// If we have renamed the title, rename the content/title.txt file.
-		if(!old_name.equals(new_name))
-			(new File(storage + "content/" + old_name + ".store.txt.content.txt"))
-			.renameTo((new File(storage + "content/" + new_name + ".store.txt.content.txt")));
-
-		/// If we moved to a new group, delete the old cache file, force a refresh, and refresh the new one.
-		if(!old_group.equals(new_group))
-		{
-			/// Remove the line from the old group file containing the old_feed_name and add to the new group file.
-			remove_string_from_file(storage + "groups/" + old_group + ".txt", old_name, true);
-			append_string_to_file(storage + "groups/" + new_group + ".txt", "name|" +  new_name + "|url|" + new_url + "|\n");
-
-			/// If the above group file no longer exists because there are no lines left, remove the group from the group list.
-			if(!exists("groups/" + old_group + ".txt"))
-				remove_string_from_file(storage + "groups/group_list.txt", old_group, false);
-		}
-		/// The group is the same but the titles and urls may have changed.
-		else
-		{
-			remove_string_from_file(storage + "groups/" + old_group + ".txt", old_name, true);
-			append_string_to_file(storage + "groups/" + old_group + ".txt", "name|" +  new_name + "|url|" + new_url + "|\n");
-		}
-
-		feed_adapter temp = feed_list_adapter;
-
-		update_feeds_list();
-		/// Add the new feeds to the feed_adapter (Manage/Feeds).
-		temp.remove_item(poser);
-		temp.add_list_pos(poser, new_name, new_url + "\n" + new_group + " • " + Integer.toString(count_lines(storage + "content/" + new_name + ".store.txt.content.txt") - 1) + " items");
-		temp.notifyDataSetChanged();
-
-		update_groups();
-		update_manage_feeds();
-		update_manage_groups();
-
-		sort_group_content_by_time(all_string);
-		if(exists("groups/" + old_group + ".txt"))
-			sort_group_content_by_time(old_group);
-		if(exists("groups/" + new_group + ".txt"))
-			sort_group_content_by_time(new_group);
-	}
-
-	private void update_feeds_list()
-	{
-		List< List<String> > content 	= read_csv_to_list(new String[]{storage + "groups/" + all_string + ".txt", "0", "name", "url", "group"});
-		feed_titles 		= content.get(0);
-		feed_urls 			= content.get(1);
-		feed_groups 		= content.get(2);
-	}
-
-	private void add_group(String group_name)
-	{
-		append_string_to_file(storage + "groups/group_list.txt", group_name + "\n");
-		update_groups();
-	}
-
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -383,6 +249,140 @@ public class main_view extends Activity
 			res = getResources();
 			fragment_manager = getFragmentManager();
 		}
+	}
+
+	private static final SimpleDateFormat[] formats = new SimpleDateFormat[]
+	{
+		new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH),
+		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH),
+		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ENGLISH),
+		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH),
+		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH)
+	};
+
+	private void add_feed(String feed_name, String feed_url, String feed_group)
+	{
+		append_string_to_file(storage + "groups/" + feed_group + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|\n");
+		append_string_to_file(storage + "groups/" + all_string + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|group|" + feed_group + "|\n");
+
+		update_feeds_list();
+		update_manage_feeds();
+		update_manage_groups();
+	}
+
+	private void update_manage_feeds()
+	{
+		if(feed_list_adapter != null)
+		{
+			feed_list_adapter.clear_list();
+			final int size = feed_titles.size();
+			for(int i = 0; i < size; i++)
+				feed_list_adapter.add_list(feed_titles.get(i), feed_urls.get(i) + "\n" + feed_groups.get(i) + " • " + Integer.toString(count_lines(storage + "content/" + feed_titles.get(i) + ".store.txt.content.txt") - 1) + " items");
+			feed_list_adapter.notifyDataSetChanged();
+		}
+	}
+
+	private void update_manage_groups()
+	{
+		fragment_group grp_frag;
+		group_adapter manage_adapter = null;
+		try
+		{
+			grp_frag = (fragment_group) getFragmentManager().findFragmentByTag("android:switcher:" + ((ViewPager) findViewById(R.id.manage_viewpager)).getId() + ":0");
+			manage_adapter = (group_adapter)((fragment_group) getFragmentManager().findFragmentByTag("android:switcher:" + ((ViewPager) findViewById(R.id.manage_viewpager)).getId() + ":0")).return_listview().getAdapter();
+		}
+		catch(Exception e){
+		}
+		if(manage_adapter != null)
+		{
+			manage_adapter.clear_list();
+			final int size = current_groups.size();
+			for(int i = 0; i < size; i++)
+			{
+				List<String> content = read_csv_to_list(new String[]{storage + "groups/" + current_groups.get(i) + ".txt", "0", "name"}).get(0);
+				String info = "";
+				int number = 3;
+				if(content.size() < 3)
+					number = content.size();
+				for(int j = 0; j < number - 1; j++)
+					info = info + content.get(j) + ", ";
+				if(content.size() > 0)
+					info = info + content.get(number - 1);
+				if(content.size() > 3)
+					info = info + ", ...";
+				if(i == 0)
+				{
+					if(size == 1)
+						info = "1 group";
+					else
+						info = current_groups.size() + " groups";
+				}
+				manage_adapter.add_list(current_groups.get(i), Integer.toString(content.size()) + " feeds • " + info);
+			}
+			manage_adapter.notifyDataSetChanged();
+		}
+	}
+
+	private void edit_feed(String old_name, String new_name, String new_url, String old_group, String new_group)
+	{
+		/// Delete the feed info from the all group and add the new group info to the end of the all content file.
+		remove_string_from_file(storage + "groups/" + all_string + ".txt", old_name, true);
+		append_string_to_file(storage + "groups/" + all_string + ".txt", "name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|\n");
+
+		/// If we have renamed the title, rename the content/title.txt file.
+		if(!old_name.equals(new_name))
+			(new File(storage + "content/" + old_name + ".store.txt.content.txt"))
+			.renameTo((new File(storage + "content/" + new_name + ".store.txt.content.txt")));
+
+		/// If we moved to a new group, delete the old cache file, force a refresh, and refresh the new one.
+		if(!old_group.equals(new_group))
+		{
+			/// Remove the line from the old group file containing the old_feed_name and add to the new group file.
+			remove_string_from_file(storage + "groups/" + old_group + ".txt", old_name, true);
+			append_string_to_file(storage + "groups/" + new_group + ".txt", "name|" +  new_name + "|url|" + new_url + "|\n");
+
+			/// If the above group file no longer exists because there are no lines left, remove the group from the group list.
+			if(!exists("groups/" + old_group + ".txt"))
+				remove_string_from_file(storage + "groups/group_list.txt", old_group, false);
+		}
+		/// The group is the same but the titles and urls may have changed.
+		else
+		{
+			remove_string_from_file(storage + "groups/" + old_group + ".txt", old_name, true);
+			append_string_to_file(storage + "groups/" + old_group + ".txt", "name|" +  new_name + "|url|" + new_url + "|\n");
+		}
+
+		feed_adapter temp = feed_list_adapter;
+
+		update_feeds_list();
+		/// Add the new feeds to the feed_adapter (Manage/Feeds).
+		temp.remove_item(poser);
+		temp.add_list_pos(poser, new_name, new_url + "\n" + new_group + " • " + Integer.toString(count_lines(storage + "content/" + new_name + ".store.txt.content.txt") - 1) + " items");
+		temp.notifyDataSetChanged();
+
+		update_groups();
+		update_manage_feeds();
+		update_manage_groups();
+
+		sort_group_content_by_time(all_string);
+		if(exists("groups/" + old_group + ".txt"))
+			sort_group_content_by_time(old_group);
+		if(exists("groups/" + new_group + ".txt"))
+			sort_group_content_by_time(new_group);
+	}
+
+	private void update_feeds_list()
+	{
+		List< List<String> > content 	= read_csv_to_list(new String[]{storage + "groups/" + all_string + ".txt", "0", "name", "url", "group"});
+		feed_titles 		= content.get(0);
+		feed_urls 			= content.get(1);
+		feed_groups 		= content.get(2);
+	}
+
+	private void add_group(String group_name)
+	{
+		append_string_to_file(storage + "groups/group_list.txt", group_name + "\n");
+		update_groups();
 	}
 
 	protected void onStop()
