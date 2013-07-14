@@ -101,6 +101,7 @@ public class main_view extends Activity
 	private static feed_adapter feed_list_adapter;
 
 	private static group_adapter group_list_adapter;
+	private static drawer_adapter nav_adapter;
 
 	private static final int CONTENT_VIEW_ID = 10101010;
 	private static final int[] times = new int[]{15, 30, 45, 60, 120, 180, 240, 300, 360, 400, 480, 540, 600, 660, 720, 960, 1440, 2880, 10080, 43829};
@@ -312,8 +313,11 @@ public class main_view extends Activity
 			navigation_list = (ListView) findViewById(R.id.left_drawer);
 			navigation_list.setOnItemClickListener(new DrawerItemClickListener());
 
-			update_groups();
+			nav_adapter = new drawer_adapter(get_context());
+			navigation_list.setAdapter(nav_adapter);
 
+			update_groups();
+			log(Integer.toString(get_unread_counts().get(0)));
 			viewpager = (ViewPager) findViewById(R.id.pager);
 			viewpager.setAdapter(new viewpager_adapter(getFragmentManager()));
 			viewpager.setOffscreenPageLimit(128);
@@ -341,12 +345,24 @@ public class main_view extends Activity
 			drawer_layout.setDrawerShadow(R.drawable.drawer_shadow, 8388611);
 			drawer_toggle = new ActionBarDrawerToggle(this, drawer_layout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
 			{
+				@Override
 				public void onDrawerClosed(View view){
 					getActionBar().setTitle(mTitle);
 				}
 
+				@Override
 				public void onDrawerOpened(View drawerView){
 					getActionBar().setTitle(navigation_string);
+				}
+
+				@Override
+				public void onDrawerStateChanged(int newState)
+				{
+					if(newState == DrawerLayout.STATE_DRAGGING)
+					{
+						nav_adapter.add_count(get_unread_counts());
+						nav_adapter.notifyDataSetChanged();
+					}
 				}
 			};
 
@@ -1364,9 +1380,9 @@ public class main_view extends Activity
 		nav.addAll(current_groups);
 		nav.addAll(0, Arrays.asList("Feeds", "Manage", "Settings", "Groups")); ///changed this shit
 
-		drawer_adapter nav_adapter = new drawer_adapter(get_context());
 		navigation_list.setAdapter(nav_adapter);
 		nav_adapter.add_list(nav);
+		nav_adapter.add_count(get_unread_counts());
 		nav_adapter.notifyDataSetChanged();
 
 		if(previous_size != size)

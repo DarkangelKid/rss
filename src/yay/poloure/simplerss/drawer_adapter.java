@@ -14,6 +14,7 @@ import android.widget.ImageView;
 public class drawer_adapter extends BaseAdapter
 {
 	private List<String> menu_list = new ArrayList<String>();
+	private List<Integer> count_list = new ArrayList<Integer>();
 
 	LayoutInflater inflater;
 
@@ -29,6 +30,12 @@ public class drawer_adapter extends BaseAdapter
 	{
 		menu_list.clear();
 		menu_list.addAll(new_title);
+	}
+
+	public void add_count(List<Integer> new_count)
+	{
+		count_list.clear();
+		count_list.addAll(new_count);
 	}
 
 	@Override
@@ -140,6 +147,7 @@ public class drawer_adapter extends BaseAdapter
 				ViewGroup view_group = (ViewGroup)inflater.inflate(R.layout.group_drawer_item, parent, false);
 				holder = new TextViewHolder();
 				holder.title_view = (TextView) view_group.findViewById(R.id.group_title);
+				holder.unread_view = (TextView) view_group.findViewById(R.id.unread_item);
 				view_group.setTag(holder);
 				view = view_group;
 			}
@@ -150,6 +158,7 @@ public class drawer_adapter extends BaseAdapter
 			}
 			main_view.log(menu_list.get(position));
 			holder.title_view.setText(menu_list.get(position));
+			holder.unread_view.setText(Integer.toString(count_list.get(position - 4)));
 
 			return view;
 		}
@@ -170,7 +179,7 @@ public class drawer_adapter extends BaseAdapter
 	static class TextViewHolder
 	{
 		TextView title_view;
-		//TextView unread_view;
+		TextView unread_view;
 	}
 
 }
