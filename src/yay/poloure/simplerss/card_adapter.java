@@ -79,6 +79,12 @@ public class card_adapter extends BaseAdapter
 		return content_links;
 	}
 
+	public int return_unread_item_count(){
+		if(top_item_position == -1)
+			return 0;
+		return top_item_position;
+	}
+
 	@Override
 	public int getCount(){
 		return content_titles.size();

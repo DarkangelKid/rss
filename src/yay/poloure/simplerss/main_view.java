@@ -110,6 +110,7 @@ public class main_view extends Activity
 	private String settings_string;
 	private String navigation_string;
 	private static String all_string;
+	private static FragmentManager fragment_manager;
 
 	/// TODO: When deleting a feed, check to see if the marker is in one of it's urls, if so put the marker at the newest item.
 
@@ -390,6 +391,7 @@ public class main_view extends Activity
 			density = getResources().getDisplayMetrics().density;
 			twelve = (int) ((12 * density + 0.5f));
 			res = getResources();
+			fragment_manager = getFragmentManager();
 		}
 	}
 
@@ -1355,6 +1357,7 @@ public class main_view extends Activity
 		drawer_adapter nav_adapter = new drawer_adapter(get_context());
 		navigation_list.setAdapter(nav_adapter);
 		nav_adapter.add_list(nav);
+		nav_adapter.add_count(get_unread_counts());
 		nav_adapter.notifyDataSetChanged();
 
 		if(viewpager != null)
@@ -1487,23 +1490,35 @@ public class main_view extends Activity
 		List<Integer> unread_list = new ArrayList<Integer>();
 		List<String> count_list;
 		int count, sized, i, total = 0;
+		card_adapter ith = null;
 
 		final int size = current_groups.size();
 		for(int j = 1; j < size; j++)
 		{
-			count = 0;
-			count_list = read_file_to_list(storage + "groups/" + group_item + ".txt.content.txt", 0);
-			sized = count_list.size();
-			i = 0;
-
-			for(i = sized - 1; i >= 0; i--)
-			{
-				if(count_list.get(i).substring(0, 9).equals("marker|1|"))
-					break;
+			try{
+				ith = (card_adapter)((fragment_card) fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(j))).getListAdapter();
+;
 			}
-			if(i == sized - 1)
-				i++;
-			unread_list.add(sized - i);
+			catch(Exception e){
+			}
+			if(ith == null)
+			{
+				count = 0;
+				count_list = read_file_to_list(storage + "groups/" + current_groups.get(j) + ".txt.content.txt", 0);
+				sized = count_list.size();
+				i = 0;
+
+				for(i = sized - 1; i >= 0; i--)
+				{
+					if(count_list.get(i).substring(0, 9).equals("marker|1|"))
+						break;
+				}
+				if(i == sized - 1)
+					i++;
+				unread_list.add(sized - i);
+			}
+			else
+				unread_list.add(ith.return_unread_item_count());
 		}
 
 		for(Integer un : unread_list)
