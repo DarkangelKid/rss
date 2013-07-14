@@ -119,33 +119,21 @@ public class service_update extends IntentService
 
 		/// Read all the group files and how many new items.
 		/// TODO: If new feed, count new set objects and return from parser to add to the total.
-		List<Integer> unread_list = new ArrayList<Integer>();
-		for(String gro : all_groups)
-		{
-			int count = 0;
-			List<String> count_list = main_view.read_file_to_list(storage + "groups/" + gro + ".txt.content.txt", 0);
-			int sized = count_list.size();
-			int i;
+		List<Integer> unread_list = main_view.get_unread_counts();
 
-			for(i = sized - 1; i >= 0; i--)
+		int group_items = 1;
+		int total = 0, count = 0;
+		final int sizes = unread_list.size();
+
+		for(int i = 1 ; i < sizes; i++)
+		{
+			count = unread_list.get(i);
+			if(count > 0)
 			{
-				if(count_list.get(i).substring(0, 9).equals("marker|1|"))
-					break;
-			}
-			if(i == sized - 1)
-				i++;
-			unread_list.add(sized - i);
-		}
-
-		int group_items = 0;
-		int total = 0;
-		for(int un : unread_list)
-		{
-			if(un > 0)
+				total += count;
 				group_items++;
+			}
 		}
-		for(int i = 1 ; i < unread_list.size(); i++)
-			total += unread_list.get(i);
 
 		if(total > 0)
 		{
