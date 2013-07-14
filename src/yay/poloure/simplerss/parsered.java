@@ -16,7 +16,7 @@ class parsered
 	public parsered(String file_path){
 		parse_local_xml(file_path);
 	}
-	
+
 	private void parse_local_xml(String file_name)
 	{
 		try
@@ -24,8 +24,8 @@ class parsered
 			final String[] start = new String[]{"<name>", "<link>", "<published>", "<updated>", "<pubDate>", "<description>", "<title", "<content"};
 			final String[] end = new String[]{"</name>", "</link>", "</published>", "</updated>", "</pubDate>", "</description>", "</title", "</content"};
 			String[] of_types = new String[]{"<name>", "<link>", "<published>", "<updated>", "<pubDate>", "<description>", "<title", "<content",
-				"</name>", "</link>", "</published>", "</updated>", "</pubDate>", "</description>", "</title", "</content", "<entry", "<item", "</entry", "</item"}; 
-				
+				"</name>", "</link>", "</published>", "</updated>", "</pubDate>", "</description>", "</title", "</content", "<entry", "<item", "</entry", "</item"};
+
 			File in = new File(file_name);
 			File out = new File(file_name + ".content.txt");
 			Set<String> set = new LinkedHashSet<String>();
@@ -40,7 +40,7 @@ class parsered
 					set.add(liner);
 				stream.close();
 			}
-			
+
 			BufferedReader reader = new BufferedReader(new FileReader(in));
 			int description_length;
 			String end_tag = "", cont, line = "";
@@ -54,7 +54,10 @@ class parsered
 				{
 					/// Add line to set and reset the line.
 					if((line.length() > 1)&&(write_mode))
-						set.add(line);
+					{
+						if(!set.contains("marker|1|" + line))
+							set.add(line);
+					}
 					line = "";
 					write_mode = true;
 				}
@@ -89,7 +92,7 @@ class parsered
 									.replace("&gt;", ">")		.replace("&quot;", "\"")	.replace("&mdash;", "—")
 									.replace("&hellip;", "…")	.replace("&#8217;", "’")	.replace("&#8216;", "‘")
 									.replaceAll("\t", "&t&")	.replace("</p>", "&n&")		.replace("&rsquo;", "'");
-									
+
 								if(cont.contains("img src="))
 									to_file(file_name + ".content.dump.txt", cont.substring(cont.indexOf("src=\"") + 5, cont.indexOf("\"", cont.indexOf("src=\"") + 6)) + "\n", false);
 
@@ -97,7 +100,7 @@ class parsered
 
 								int take = description_length;
 								description_length = description_length + cont.length();
-								
+
 								if((description_length > 512)&&(take < 512))
 									line = line + cont.substring(0, 512 - take);
 								else if(description_length < 512)
@@ -137,7 +140,10 @@ class parsered
 
 			/// Add the last line that has no <entry / <item after it.
 			if(write_mode)
-				set.add(line);
+			{
+				if(!set.contains("marker|1|" + line))
+					set.add(line);
+			}
 			/// Write the new content to the file.
 			in.delete();
 			out.delete();
@@ -224,7 +230,7 @@ class parsered
 				else
 					current = (char) eof;
 			}
-			
+
 			tag = "<" + read_string_to_next_char(reader, '>', true);
 
 			if(tag.contains("img src="))

@@ -91,7 +91,7 @@ public class main_view extends Activity
 	private static int positionrr, poser, twelve, check_finished, width, group_pos;
 	private static List<Boolean> new_items;
 	private Boolean refreshing = false;
-	private String mTitle, feed_title;
+	private String mTitle, feed_title, current_group, current_title;
 	private static String storage;
 	private static Context context, activity_context;
 	private static ViewPager viewpager;
@@ -184,7 +184,7 @@ public class main_view extends Activity
 			navigation_list.setAdapter(nav_adapter);
 
 			update_groups();
-			log(Integer.toString(get_unread_counts().get(0)));
+
 			viewpager = (ViewPager) findViewById(R.id.pager);
 			viewpager.setAdapter(new viewpager_adapter(getFragmentManager()));
 			viewpager.setOffscreenPageLimit(128);
@@ -426,7 +426,6 @@ public class main_view extends Activity
 					feeds = read_csv_to_list(new String[]{storage + "groups/" + group + ".txt", "0", "name"}).get(0);
 					found_url = false;
 					url = adapter.return_latest_url();
-					log("URL: " + url);
 					if(!url.equals(""))
 					{
 						for(String feed: feeds)
@@ -955,93 +954,16 @@ public class main_view extends Activity
 					public void onClick(View view)
 					{
 						String new_group = ((EditText) add_rss_dialog.findViewById(R.id.group_edit)).getText().toString().trim().toLowerCase();
-						boolean found = false;
-						boolean new_group_mode = false;
-						if(new_group.length()>0)
-						{
-							new_group_mode = true;
-							for(String group : current_groups)
-							{
-								if((group.toLowerCase()).equals(new_group))
-									found = true;
-							}
-
-							String[] words = new_group.split("\\s");
-							new_group = "";
-
-							if(words.length == 1)
-							{
-								char cap = Character.toUpperCase(words[0].charAt(0));
-								new_group +=  cap + words[0].substring(1, words[0].length());
-							}
-							else
-							{
-								for(int i = 0; i < words.length - 1; i++)
-								{
-									char cap = Character.toUpperCase(words[i].charAt(0));
-									new_group +=  cap + words[i].substring(1, words[i].length()) + " ";
-								}
-								char cap = Character.toUpperCase(words[words.length - 1].charAt(0));
-								new_group +=  cap + words[words.length - 1].substring(1, words[words.length - 1].length());
-							}
-						}
-						else
-							new_group = ((Spinner) add_rss_dialog.findViewById(R.id.group_spinner)).getSelectedItem().toString();
-
-						Boolean rss = false;
 						String URL_check = ((EditText) add_rss_dialog.findViewById(R.id.URL_edit)).getText().toString().trim();
 						String feed_name = ((EditText) add_rss_dialog.findViewById(R.id.name_edit)).getText().toString().trim();
-
-						check_finished = -1;
-						if((!URL_check.contains("http"))&&(!URL_check.contains("https")))
-						{
-							new check_feed_exists().execute("http://" + URL_check);
-							while(check_finished == -1){
-							}
-							if(check_finished == 0)
-							{
-								check_finished = -1;
-								new check_feed_exists().execute("https://" + URL_check);
-								while(check_finished == -1){
-								}
-								if(check_finished == 1)
-									URL_check = "https://" + URL_check;
-							}
-							else if(check_finished == 1)
-								URL_check = "http://" + URL_check;
+						String spinner_group;
+						try{
+							spinner_group = ((Spinner) add_rss_dialog.findViewById(R.id.group_spinner)).getSelectedItem().toString();
 						}
-						else
-						{
-							new check_feed_exists().execute(URL_check);
-							while(check_finished == -1){
-							}
+						catch(Exception e){
+							spinner_group = "Unsorted";
 						}
-						if(check_finished == 1)
-							rss = true;
-
-						if(!rss)
-							toast_message("Invalid RSS URL", false);
-						else
-						{
-							if((!found)&&(new_group_mode))
-								add_group(new_group);
-
-							if(feed_name.equals(""))
-								feed_name = feed_title;
-
-							feed_name = feed_name.replace("/","")
-												.replace("\\", "")
-												.replace("?", "")
-												.replace("%", "")
-												.replace("*", "")
-												.replace("|", "")
-												.replace("<", "")
-												.replace(">", "")
-												.replace(":", "");
-
-							add_feed(feed_name, URL_check, new_group);
-							alertDialog.dismiss();
-						}
+						process_user_feed(alertDialog, new_group, URL_check, feed_name, spinner_group, "add");
 					}
 				});
 			}
@@ -1055,9 +977,8 @@ public class main_view extends Activity
 		poser = position;
 		LayoutInflater inflater = LayoutInflater.from(activity_context);
 		final View edit_rss_dialog = inflater.inflate(R.layout.add_rss_dialog, null);
-
-		final String current_group = feed_groups.get(position);
-		final String current_title = feed_titles.get(position);
+		current_group = feed_groups.get(position);
+		current_title = feed_titles.get(position);
 
 		int current_spinner_position = 0;
 
@@ -1112,99 +1033,107 @@ public class main_view extends Activity
 					@Override
 					public void onClick(View view)
 					{
-						String new_group = ((EditText) edit_rss_dialog.findViewById(R.id.group_edit)).getText().toString().trim().toLowerCase();
-						boolean found = false;
-						boolean new_group_mode = false;
-						if(new_group.length()>0)
-						{
-							new_group_mode = true;
-							for(String group : current_groups)
-							{
-								if((group.toLowerCase()).equals(new_group))
-									found = true;
-							}
+						String new_group 		= ((EditText) edit_rss_dialog.findViewById(R.id.group_edit)).getText().toString().trim().toLowerCase();
+						String URL_check 		= ((EditText) edit_rss_dialog.findViewById(R.id.URL_edit)).getText().toString().trim();
+						String feed_name 		= ((EditText) edit_rss_dialog.findViewById(R.id.name_edit)).getText().toString().trim();
+						String spinner_group 	= ((Spinner) edit_rss_dialog.findViewById(R.id.group_spinner)).getSelectedItem().toString();
 
-							String[] words = new_group.split("\\s");
-							new_group = "";
-
-							if(words.length == 1)
-							{
-								char cap = Character.toUpperCase(words[0].charAt(0));
-								new_group +=  cap + words[0].substring(1, words[0].length());
-							}
-							else
-							{
-								for(int i = 0; i < words.length - 1; i++)
-								{
-									char cap = Character.toUpperCase(words[i].charAt(0));
-									new_group +=  cap + words[i].substring(1, words[i].length()) + " ";
-								}
-								char cap = Character.toUpperCase(words[words.length - 1].charAt(0));
-								new_group +=  cap + words[words.length - 1].substring(1, words[words.length - 1].length());
-							}
-						}
-						else
-							new_group = ((Spinner) edit_rss_dialog.findViewById(R.id.group_spinner)).getSelectedItem().toString();
-
-						Boolean rss = false;
-						String URL_check = ((EditText) edit_rss_dialog.findViewById(R.id.URL_edit)).getText().toString().trim();
-						String feed_name = ((EditText) edit_rss_dialog.findViewById(R.id.name_edit)).getText().toString().trim();
-
-						check_finished = -1;
-						if((!URL_check.contains("http"))&&(!URL_check.contains("https")))
-						{
-							new check_feed_exists().execute("http://" + URL_check);
-							while(check_finished == -1){
-							}
-							if(check_finished == 0)
-							{
-								check_finished = -1;
-								new check_feed_exists().execute("https://" + URL_check);
-								while(check_finished == -1){
-								}
-								if(check_finished == 1)
-									URL_check = "https://" + URL_check;
-							}
-							else if(check_finished == 1)
-								URL_check = "http://" + URL_check;
-						}
-						else
-						{
-							new check_feed_exists().execute(URL_check);
-							while(check_finished == -1){
-							}
-						}
-						if(check_finished == 1)
-							rss = true;
-
-						if(rss!= null && !rss)
-							toast_message("Invalid RSS URL", false);
-						else
-						{
-							if((!found)&&(new_group_mode))
-								add_group(new_group);
-
-							if(feed_name.equals(""))
-								feed_name = feed_title;
-
-							feed_name = feed_name.replace("/","")
-												.replace("\\", "")
-												.replace("?", "")
-												.replace("%", "")
-												.replace("*", "")
-												.replace("|", "")
-												.replace("<", "")
-												.replace(">", "")
-												.replace(":", "");
-
-							edit_feed(current_title, feed_name, URL_check, current_group, new_group);
-							edit_dialog.dismiss();
-						}
+						process_user_feed(edit_dialog, new_group, URL_check, feed_name, spinner_group, "edit");
 					}
 				});
 			}
 		});
 		edit_dialog.show();
+	}
+
+	private void process_user_feed(AlertDialog edit_dialog, String new_group, String URL_check, String feed_name, String spinner_group, String mode)
+	{
+		boolean found = false, new_group_mode = false;
+		if(new_group.length()>0)
+		{
+			new_group_mode = true;
+			for(String group : current_groups)
+			{
+				if((group.toLowerCase()).equals(new_group))
+					found = true;
+			}
+
+			String[] words = new_group.split("\\s");
+			new_group = "";
+
+			if(words.length == 1)
+			{
+				char cap = Character.toUpperCase(words[0].charAt(0));
+				new_group +=  cap + words[0].substring(1, words[0].length());
+			}
+			else
+			{
+				for(int i = 0; i < words.length - 1; i++)
+				{
+					char cap = Character.toUpperCase(words[i].charAt(0));
+					new_group +=  cap + words[i].substring(1, words[i].length()) + " ";
+				}
+				char cap = Character.toUpperCase(words[words.length - 1].charAt(0));
+				new_group +=  cap + words[words.length - 1].substring(1, words[words.length - 1].length());
+			}
+		}
+		else
+			new_group = spinner_group;
+
+		Boolean rss = false;
+
+		check_finished = -1;
+		if((!URL_check.contains("http"))&&(!URL_check.contains("https")))
+		{
+			new check_feed_exists().execute("http://" + URL_check);
+			while(check_finished == -1){
+			}
+			if(check_finished == 0)
+			{
+				check_finished = -1;
+				new check_feed_exists().execute("https://" + URL_check);
+				while(check_finished == -1){
+				}
+				if(check_finished == 1)
+					URL_check = "https://" + URL_check;
+			}
+			else if(check_finished == 1)
+				URL_check = "http://" + URL_check;
+		}
+		else
+		{
+			new check_feed_exists().execute(URL_check);
+			while(check_finished == -1){
+			}
+		}
+		if(check_finished == 1)
+			rss = true;
+
+		if(rss!= null && !rss)
+			toast_message("Invalid RSS URL", false);
+		else
+		{
+			if((!found)&&(new_group_mode))
+				add_group(new_group);
+
+			if(feed_name.equals(""))
+				feed_name = feed_title;
+
+			feed_name = feed_name.replace("/","")
+								.replace("\\", "")
+								.replace("?", "")
+								.replace("%", "")
+								.replace("*", "")
+								.replace("|", "")
+								.replace("<", "")
+								.replace(">", "")
+								.replace(":", "");
+			if(mode.equals("edit"))
+				edit_feed(current_title, feed_name, URL_check, current_group, new_group);
+			else
+				add_feed(feed_name, URL_check, new_group);
+			edit_dialog.dismiss();
+		}
 	}
 
 	private static void toast_message(String message, final Boolean short_long)
@@ -1226,25 +1155,26 @@ public class main_view extends Activity
 			{
 				BufferedInputStream in;
 				in = new BufferedInputStream((new URL(urls[0])).openStream());
-				byte data[] = new byte[512];
-				byte data2[] = new byte[512];
+				byte data[] = new byte[512], data2[], next[];
 				in.read(data, 0, 512);
+				int length;
+
 				String line = new String(data);
 				if((line.contains("rss"))||((line.contains("Atom"))||(line.contains("atom"))))
 				{
-					int count = 0;
 					while((!line.contains("<title"))&&(!line.contains("</title>")))
 					{
-						in.read(data, count, 512 + count);
-						byte[] next = new byte[data.length + 512];
-						System.arraycopy(data, 0, next, 0, data.length);
-						System.arraycopy(data2, 0, next, data.length, 512);
-						data = next;
+						length = data.length;
+						data2 = new byte[512];
+						in.read(data2, 0, 512);
+
+						data = concat_byte_arrays(data, data2);
 						line = new String(data);
-						count = count + 512;
+						log("\n\nNEXT :" + line);
 					}
 					int ind = line.indexOf(">", line.indexOf("<title")) + 1;
 					feed_title = line.substring(ind, line.indexOf("</", ind));
+					log(feed_title);
 					check_finished = 1;
 				}
 				else
@@ -1259,6 +1189,16 @@ public class main_view extends Activity
 		@Override
 		protected void onPostExecute(Integer end){
 		}
+	}
+
+	private byte[] concat_byte_arrays(byte[] a, byte[] b)
+	{
+		final int a_length = a.length;
+		final int b_length = b.length;
+		byte[] c = new byte[a_length + b_length];
+		System.arraycopy(a, 0, c, 0, a_length);
+		System.arraycopy(b, 0, c, a_length, b_length);
+		return c;
 	}
 
 	public static void download_file(String urler, String file_path)
@@ -1482,19 +1422,20 @@ public class main_view extends Activity
 		List<String> count_list;
 		int count, sized, i, total = 0;
 		card_adapter ith = null;
+		fragment_card fc = null;
 
 		final int size = current_groups.size();
 		for(int j = 1; j < size; j++)
 		{
 			try{
-				ith = (card_adapter)((fragment_card) fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(j))).getListAdapter();
-;
+				fc = (fragment_card) (fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(j)));
+				ith = (card_adapter) fc.getListAdapter();
 			}
 			catch(Exception e){
 			}
-			if(ith == null)
+			/// TODO: Or if no items are in the list.
+			if((ith == null)||(ith.getCount() == 0)||(ith.return_unread_item_count() == -1))
 			{
-				log("The card adapter at " + Integer.toString(j) + " could not be loaded and reading from file.");
 				count = 0;
 				count_list = read_file_to_list(storage + "groups/" + current_groups.get(j) + ".txt.content.txt", 0);
 				sized = count_list.size();
@@ -1505,14 +1446,10 @@ public class main_view extends Activity
 					if(count_list.get(i).substring(0, 9).equals("marker|1|"))
 						break;
 				}
-				if(i == sized - 1)
-					i++;
-				unread_list.add(sized - i);
+				unread_list.add(sized - i - 1);
 			}
-			else{
-				log("The card adapter at " + Integer.toString(j) + " was loaded and returned position " + Integer.toString(ith.return_unread_item_count()));
+			else
 				unread_list.add(ith.return_unread_item_count());
-			}
 		}
 
 		for(Integer un : unread_list)

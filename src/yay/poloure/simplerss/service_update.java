@@ -157,7 +157,6 @@ public class service_update extends IntentService
 			NotificationManager notification_manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 			notification_manager.notify(1, not_builder.build());
 		}
-		main_view.log(Integer.toString(unread_list.get(0)));
 
 		///notification end
 		wakelock.release();
