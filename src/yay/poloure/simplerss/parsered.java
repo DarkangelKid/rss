@@ -126,7 +126,7 @@ class parsered
 								cont = regex_tags.matcher(cont).replaceAll("");
 
 							/// Format the final string.
-							cont = cont.replaceAll("\n", "&n&").replace("|", "").replace("&amp;", "&")
+							cont = cont.replaceAll("\n", " ").replace("|", "").replace("&amp;", "&")
 								.replace("&nbsp;", " ").replaceAll("\r", " ");
 
 							take = description_length;

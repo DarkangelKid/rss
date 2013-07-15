@@ -909,35 +909,6 @@ public class main_view extends Activity
 		}
 	}
 
-	/*@Override
-	public boolean onCreateOptionsMenu(Menu menu)
-	{
-		this.optionsMenu = menu;
-		MenuInflater menu_inflater = getMenuInflater();
-		menu_inflater.inflate(R.menu.main_overflow, menu);
-
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item)
-	{
-		if(drawer_toggle.onOptionsItemSelected(item))
-			return true;
-		else if(item.getTitle().equals("add"))
-		{
-			show_add_dialog();
-			return true;
-		}
-		else if(item.getTitle().equals("refresh"))
-		{
-			update_group(((ViewPager) findViewById(R.id.pager)).getCurrentItem());
-			return true;
-		}
-
-		return super.onOptionsItemSelected(item);
-	}*/
-
 	private void set_refresh(final boolean mode)
 	{
 		if(optionsMenu != null)
@@ -1227,11 +1198,9 @@ public class main_view extends Activity
 
 						data = concat_byte_arrays(data, data2);
 						line = new String(data);
-						log("\n\nNEXT :" + line);
 					}
 					int ind = line.indexOf(">", line.indexOf("<title")) + 1;
 					feed_title = line.substring(ind, line.indexOf("</", ind));
-					log(feed_title);
 					check_finished = 1;
 				}
 				else

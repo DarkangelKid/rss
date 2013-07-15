@@ -94,7 +94,7 @@ public class group_adapter extends BaseAdapter
 			ViewHolder holder;
 			if(convertView == null)
 			{
-				
+
 				convertView = inflater.inflate(R.layout.manage_list_item, parent, false);
 				holder = new ViewHolder();
 				holder.group_view = (TextView) convertView.findViewById(R.id.group_item);
@@ -105,7 +105,7 @@ public class group_adapter extends BaseAdapter
 			else
 				holder = (ViewHolder) convertView.getTag();
 
-			
+
 
 			holder.group_view.setText(group_list.get(position));
 			holder.info_view.setText(info_list.get(position));
@@ -116,7 +116,7 @@ public class group_adapter extends BaseAdapter
 			}
 			else
 				holder.image_view.setVisibility(View.INVISIBLE);
-			
+
 			return convertView;
 	}
 
@@ -168,7 +168,7 @@ public class group_adapter extends BaseAdapter
 					refresh_data();
 					/// Save the new order by overwriting the group_list.txt file with group_list, then call the update_groups() function.
 					break;
-				case DragEvent.ACTION_DRAG_EXITED:        
+				case DragEvent.ACTION_DRAG_EXITED:
 					v.setVisibility(View.VISIBLE);
 					break;
 				case DragEvent.ACTION_DROP:
@@ -224,17 +224,4 @@ public class group_adapter extends BaseAdapter
 			shadowTouchPoint.y = (int)(shadowSize.y / 2);
 		}
 	}
-	
-	private void slog(String string)
-	{
-		try
-		{
-			BufferedWriter out = new BufferedWriter(new FileWriter("/storage/emulated/0/Android/data/yay.poloure.simplerss/files/dump.txt", true));
-			out.write(string + "\n");
-			out.close();
-		}
-		catch (Exception e)
-		{
-		}
-	}
-} 
+}

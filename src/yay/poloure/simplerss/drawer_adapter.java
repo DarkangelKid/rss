@@ -156,7 +156,6 @@ public class drawer_adapter extends BaseAdapter
 				view = convertView;
 				holder = (TextViewHolder) convertView.getTag();
 			}
-			main_view.log(menu_list.get(position));
 			holder.title_view.setText(menu_list.get(position));
 			String number = Integer.toString(count_list.get(position - 4));
 				holder.unread_view.setText((number.equals("0")) ? "" : number);

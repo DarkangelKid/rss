@@ -54,7 +54,6 @@ public class card_adapter extends BaseAdapter
 
 	private static int eight = 0;
 	private int top_item_position = -1;
-	private String top_url;
 
 	public card_adapter(Context context_main)
 	{
@@ -104,93 +103,105 @@ public class card_adapter extends BaseAdapter
 		ViewHolder holder;
 		if(convertView == null)
 		{
-			listview = (ListView) parent;
-			convertView = inflater.inflate(R.layout.card_layout, parent, false);
-			holder = new ViewHolder();
-			holder.title_view = (TextView) convertView.findViewById(R.id.title);
-			holder.time_view = (TextView) convertView.findViewById(R.id.time);
+			listview 				= (ListView) parent;
+			convertView 			= inflater.inflate(R.layout.card_layout, parent, false);
+			holder 					= new ViewHolder();
+			holder.title_view 		= (TextView) convertView.findViewById(R.id.title);
+			holder.time_view 		= (TextView) convertView.findViewById(R.id.time);
 			holder.description_view = (TextView) convertView.findViewById(R.id.description);
-			holder.image_view = (ImageView) convertView.findViewById(R.id.image);
-			convertView.setTag(holder);
+			holder.image_view 		= (ImageView) convertView.findViewById(R.id.image);
+			convertView			.setTag(holder);
+			convertView			.setOnClickListener(new browser_call());
+			convertView			.setOnLongClickListener(new long_press());
+			((ListView) parent)	.setOnScrollListener(new AbsListView.OnScrollListener()
+			{
+				@Override
+				public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount){
+				}
+
+				@Override
+				public void onScrollStateChanged(AbsListView view, int scrollState)
+				{
+					if((scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)||(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL))
+					{
+						if(top_item_position == - 1)
+						{
+							final int size = content_marker.size();
+							for(int i = 0; i < size; i++)
+							{
+								if(content_marker.get(i))
+								{
+									top_item_position = i;
+									break;
+								}
+							}
+							if(top_item_position == -1)
+								top_item_position = size - 1;
+						}
+
+						final int firstVisibleItem = listview.getFirstVisiblePosition();
+						if((firstVisibleItem != -1)&&(firstVisibleItem < top_item_position))
+							top_item_position = firstVisibleItem;
+					}
+					if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
+					{
+						drawer_adapter nav_adapter = main_view.return_nav_adapter();
+						nav_adapter.add_count(main_view.get_unread_counts());
+						nav_adapter.notifyDataSetChanged();
+					}
+				}
+			});
 		}
 		else
 			holder = (ViewHolder) convertView.getTag();
 
-		boolean image_exists = false;
-		if(content_width.get(position) > 32)
+		final String title 					= content_titles.get(position);
+		final String description 			= content_des.get(position);
+		final String link					= content_links.get(position);
+		final int height 					= content_height.get(position);
+		final int width						= content_width.get(position);
+		//final int title_length 				= title.length();
+		boolean image_exists 				= false;
+		boolean use_original_description 	= false;
+
+		if(width > 32)
 			image_exists = true;
 
 		if(image_exists)
-			loadBitmap(position, holder.image_view, content_height.get(position), content_width.get(position));
+			loadBitmap(position, holder.image_view, height, width);
 
-		convertView.setOnClickListener(new browser_call());
-		convertView.setOnLongClickListener(new long_press());
-		((ListView) parent).setOnScrollListener(new AbsListView.OnScrollListener()
-		{
-			@Override
-			public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount){
-			}
+		holder.title_view.setText(title);
+		holder.time_view.setText(link);
+		holder.description_view.setText(description);
 
-			@Override
-			public void onScrollStateChanged(AbsListView view, int scrollState)
-			{
-					/// Maybe plus one.
-					int firstVisibleItem = listview.getFirstVisiblePosition();
-					int i;
-					int size = content_marker.size();
-					for(i = 0; i < size; i++)
-					{
-						if(content_marker.get(i))
-							break;
-					}
+		/*if(!image_exists)
+			use_original_description = true;*/
 
-					if((firstVisibleItem < i)&&(firstVisibleItem != -1))
-					{
-						//top_url = content_links.get(firstVisibleItem);
-						content_marker.set(firstVisibleItem, true);
-						top_item_position = firstVisibleItem;
-					}
-				if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
-				{
-					drawer_adapter nav_adapter = main_view.return_nav_adapter();
-					nav_adapter.add_count(main_view.get_unread_counts());
-					nav_adapter.notifyDataSetChanged();
-				}
-			}
-		});
-
-		holder.title_view.setText(content_titles.get(position));
-		holder.time_view.setText(content_links.get(position));
-
-		String des = "";
-		if((!content_des.get(position).replace("&n&", "").contains(content_titles.get(position).substring(0, content_titles.get(position).length() - 3)))||(!image_exists))
-			des = content_des.get(position).replace("  ", "\n").replace("&t&", "\n").replace("&n&", "\n").trim();
-
-		if((des.length() > 1)&&(image_exists))
+		if((image_exists)&&(!description.isEmpty()))
 		{
 			holder.description_view.setPadding(eight, 0, 0, 0);
-			ViewGroup.LayoutParams iv = holder.image_view.getLayoutParams();
-			iv.height = LayoutParams.WRAP_CONTENT;
-			iv.width = LayoutParams.WRAP_CONTENT;
+			ViewGroup.LayoutParams iv 		= holder.image_view.getLayoutParams();
+			iv.height 						= LayoutParams.WRAP_CONTENT;
+			iv.width 						= LayoutParams.WRAP_CONTENT;
 			holder.image_view.setLayoutParams(iv);
 		}
 		else if(image_exists)
 		{
-				ViewGroup.LayoutParams iv = holder.image_view.getLayoutParams();
-				iv.height = LayoutParams.MATCH_PARENT;
-				iv.width = LayoutParams.MATCH_PARENT;
+				ViewGroup.LayoutParams iv 	= holder.image_view.getLayoutParams();
+				iv.height 					= LayoutParams.MATCH_PARENT;
+				iv.width 					= LayoutParams.MATCH_PARENT;
 				holder.image_view.setLayoutParams(iv);
 				holder.description_view.setPadding(0, 0, 0, 0);
 		}
 		else
 		{
 			holder.description_view.setPadding(0, 0, 0, 0);
-			ViewGroup.LayoutParams iv = holder.image_view.getLayoutParams();
-			iv.height = 0;
-			iv.width = 0;
+			ViewGroup.LayoutParams iv 		= holder.image_view.getLayoutParams();
+			iv.height 						= 0;
+			iv.width 						= 0;
 			holder.image_view.setLayoutParams(iv);
 		}
-		holder.description_view.setText(des);
+
 		return convertView;
 	}
 
