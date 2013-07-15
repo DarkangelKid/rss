@@ -23,6 +23,7 @@ import java.net.URL;
 
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+import android.os.Process;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 
@@ -53,6 +54,8 @@ public class service_update extends IntentService
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		PowerManager.WakeLock wakelock = pm.newWakeLock(pm.PARTIAL_WAKE_LOCK, "SIMPLERSS");
 		wakelock.acquire();
+
+		Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
 		all_string = getString(R.string.all_group);
 
