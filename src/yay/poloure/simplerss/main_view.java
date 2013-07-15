@@ -909,6 +909,15 @@ public class main_view extends Activity
 		}
 	}
 
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
+		if(drawer_toggle.onOptionsItemSelected(item))
+			return true;
+
+		return super.onOptionsItemSelected(item);
+	}
+
 	private void set_refresh(final boolean mode)
 	{
 		if(optionsMenu != null)
