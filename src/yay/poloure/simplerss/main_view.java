@@ -463,7 +463,7 @@ public class main_view extends Activity
 			}
 		}
 		if(found_url)
-			sort_group_content_by_time("All");
+			sort_group_content_by_time(all_string);
 	}
 
 	@Override
