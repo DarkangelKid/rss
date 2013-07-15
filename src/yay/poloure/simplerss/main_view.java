@@ -917,26 +917,16 @@ public class main_view extends Activity
 		menu_inflater.inflate(R.menu.main_overflow, menu);
 
 		return true;
-	}
+	}*/
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
 		if(drawer_toggle.onOptionsItemSelected(item))
 			return true;
-		else if(item.getTitle().equals("add"))
-		{
-			show_add_dialog();
-			return true;
-		}
-		else if(item.getTitle().equals("refresh"))
-		{
-			update_group(((ViewPager) findViewById(R.id.pager)).getCurrentItem());
-			return true;
-		}
 
 		return super.onOptionsItemSelected(item);
-	}*/
+	}
 
 	private void set_refresh(final boolean mode)
 	{
