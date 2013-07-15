@@ -83,7 +83,7 @@ public class main_view extends Activity
 
 	private static ListView navigation_list;
 	private ActionBarDrawerToggle drawer_toggle;
-	private Menu optionsMenu;
+	private static Menu optionsMenu;
 
 	private static float density;
 
@@ -614,12 +614,41 @@ public class main_view extends Activity
 		public void onCreate(Bundle savedInstanceState){
 			super.onCreate(savedInstanceState);
 			setRetainInstance(true);
+			setHasOptionsMenu(true);
 		}
 
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
 			return inflater.inflate(R.layout.feed_fragment, container, false);
+		}
+
+		@Override
+		public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
+		{
+			main_view.optionsMenu = menu;
+			inflater.inflate(R.menu.main_overflow, menu);
+			super.onCreateOptionsMenu(menu, inflater);
+		}
+
+		@Override
+		public boolean onOptionsItemSelected(MenuItem item)
+		{
+			if(drawer_toggle.onOptionsItemSelected(item))
+				return true;
+			else if(item.getTitle().equals("add"))
+			{
+				show_add_dialog();
+				return true;
+			}
+			else if(item.getTitle().equals("refresh"))
+			{
+				update_group(((ViewPager) findViewById(R.id.pager)).getCurrentItem());
+				log("refresh" + Integer.toString(((ViewPager) findViewById(R.id.pager)).getCurrentItem()));
+				return true;
+			}
+
+			return super.onOptionsItemSelected(item);
 		}
 	}
 
@@ -644,9 +673,36 @@ public class main_view extends Activity
 	private class fragment_manage extends Fragment
 	{
 		@Override
+		public void onCreate(Bundle savedInstanceState)
+		{
+			super.onCreate(savedInstanceState);
+			setHasOptionsMenu(true);
+		}
+
+		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
 			return inflater.inflate(R.layout.manage_pager, container, false);
+		}
+
+		@Override
+		public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
+		{
+			inflater.inflate(R.menu.manage_overflow, menu);
+			super.onCreateOptionsMenu(menu, inflater);
+		}
+
+		@Override
+		public boolean onOptionsItemSelected(MenuItem item)
+		{
+			if(drawer_toggle.onOptionsItemSelected(item))
+				return true;
+			else if(item.getTitle().equals("add"))
+			{
+				show_add_dialog();
+				return true;
+			}
+			return super.onOptionsItemSelected(item);
 		}
 	}
 
@@ -853,12 +909,13 @@ public class main_view extends Activity
 		}
 	}
 
-	@Override
+	/*@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
 		this.optionsMenu = menu;
 		MenuInflater menu_inflater = getMenuInflater();
 		menu_inflater.inflate(R.menu.main_overflow, menu);
+
 		return true;
 	}
 
@@ -879,7 +936,7 @@ public class main_view extends Activity
 		}
 
 		return super.onOptionsItemSelected(item);
-	}
+	}*/
 
 	private void set_refresh(final boolean mode)
 	{
