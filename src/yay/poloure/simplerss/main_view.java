@@ -90,7 +90,6 @@ public class main_view extends Activity
 	private static Resources res;
 	private static int positionrr, poser, twelve, check_finished, width, group_pos;
 	private static List<Boolean> new_items;
-	private Boolean refreshing = false;
 	private String mTitle, feed_title, current_group, current_title;
 	private static String storage;
 	private static Context context, activity_context;
@@ -105,14 +104,18 @@ public class main_view extends Activity
 
 	private static final int CONTENT_VIEW_ID = 10101010;
 	private static final int[] times = new int[]{15, 30, 45, 60, 120, 180, 240, 300, 360, 400, 480, 540, 600, 660, 720, 960, 1440, 2880, 10080, 43829};
-	private String feeds_string;
-	private String manage_string;
-	private String settings_string;
-	private String navigation_string;
+	private String feeds_string, manage_string, settings_string, navigation_string;
 	private static String all_string;
 	private static FragmentManager fragment_manager;
 
-	/// TODO: When deleting a feed, check to see if the marker is in one of it's urls, if so put the marker at the newest item.
+	private static final SimpleDateFormat[] formats = new SimpleDateFormat[]
+	{
+		new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH),
+		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH),
+		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ENGLISH),
+		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH),
+		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH)
+	};
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -226,6 +229,7 @@ public class main_view extends Activity
 			drawer_layout.setDrawerListener(drawer_toggle);
 			getActionBar().setDisplayHomeAsUpEnabled(true);
 			getActionBar().setHomeButtonEnabled(true);
+			//set_refresh(check_service_running());
 
 			/// Save the width for compression
 			if(!exists(storage + "width.txt"))
@@ -250,15 +254,6 @@ public class main_view extends Activity
 			fragment_manager = getFragmentManager();
 		}
 	}
-
-	private static final SimpleDateFormat[] formats = new SimpleDateFormat[]
-	{
-		new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH),
-		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH),
-		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ENGLISH),
-		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH),
-		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH)
-	};
 
 	private void add_feed(String feed_name, String feed_url, String feed_group)
 	{
@@ -470,8 +465,7 @@ public class main_view extends Activity
 	protected void onStart()
 	{
 		super.onStart();
-		if(!refreshing)
-			set_refresh(check_service_running());
+		set_refresh(check_service_running());
 
 		if((PreferenceManager.getDefaultSharedPreferences(this)).getBoolean("refresh", false))
 		{
@@ -928,10 +922,7 @@ public class main_view extends Activity
 				if (mode)
 					refreshItem.setActionView(R.layout.progress_circle);
 				else
-				{
 					refreshItem.setActionView(null);
-					refreshing = false;
-				}
 			}
 		}
 	}
@@ -1511,15 +1502,16 @@ public class main_view extends Activity
 			new_items.set(0, true);
 			new_items.set(page_number, true);
 		}
+		new refresh_page(page_number).execute();
 	}
 
 	private class refresh_page extends AsyncTask<Void, Object, Long>
 	{
-		private int marker_position = -1, ssize, refresh_count = 0, page_number;
-		private ListFragment l;
+		int marker_position = -1, ssize, refresh_count = 0, page_number;
+		ListFragment l;
 		Boolean first;
-		Animation animFadeOut = AnimationUtils.loadAnimation(getApplicationContext(), android.R.anim.fade_out);
-		Animation animFadeIn = AnimationUtils.loadAnimation(getApplicationContext(), android.R.anim.fade_in);
+		final Animation animFadeOut = AnimationUtils.loadAnimation(getApplicationContext(), android.R.anim.fade_out);
+		final Animation animFadeIn = AnimationUtils.loadAnimation(getApplicationContext(), android.R.anim.fade_in);
 
 		public refresh_page(int page){
 			page_number = page;
@@ -1528,8 +1520,6 @@ public class main_view extends Activity
 
 		@Override
 		protected void onPreExecute(){
-			set_refresh(true);
-			refreshing = true;
 		}
 
 		@Override
@@ -1677,7 +1667,7 @@ public class main_view extends Activity
 			}
 			//if(viewPager.getOffscreenPageLimit() > 1)
 				//viewPager.setOffscreenPageLimit(1);
-			set_refresh(check_service_running());
+			set_refresh(false);
 		}
 	}
 
