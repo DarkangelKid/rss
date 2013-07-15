@@ -30,6 +30,7 @@ class parsered
 			File out = new File(file_name + ".content.txt");
 			Set<String> set = new LinkedHashSet<String>();
 			Boolean write_mode = false;
+			int pos;
 
 			/// Read the file's lines to a list and make a set from that.
 			if(out.exists())
@@ -45,11 +46,12 @@ class parsered
 			int description_length;
 			String end_tag = "", cont, line = "";
 			reader.mark(2);
+			String current_tag;
 
 			while(reader.read() != -1)
 			{
 				reader.reset();
-				String current_tag = get_next_tag(reader, of_types, file_name);
+				current_tag = get_next_tag(reader, of_types, file_name);
 				if((current_tag.contains("<entry"))||(current_tag.contains("<item")))
 				{
 					/// Add line to set and reset the line.
@@ -86,10 +88,12 @@ class parsered
 
 							while(!(end_tag.contains(end[i])))
 							{
+								/// TODO: Do I really need tag parsing here?
 								cont = read_string_to_next_char(reader, '<', false)
 									.replaceAll("\n", "")		.replace("|", "")			.replace("&amp;", "&")
 									.replace("&nbsp;", " ")		.replaceAll("\r", " ")		.replace("&lt;", "<")
-									.replace("&gt;", ">")		.replace("&quot;", "\"")	.replace("&mdash;", "—")
+									.replace("&gt;", ">")		.replace("]]>", "")			.replace("&quot;", "\"")
+									.replace("&mdash;", "—")
 									.replace("&hellip;", "…")	.replace("&#8217;", "’")	.replace("&#8216;", "‘")
 									.replaceAll("\t", "&t&")	.replace("</p>", "&n&")		.replace("&rsquo;", "'");
 
@@ -110,24 +114,33 @@ class parsered
 
 								if(!(end_tag.contains(end[i])))
 								{
-									if(end_tag.contains("<![CDATA["))
+									end_tag = end_tag
+										.replaceAll("\r", " ")		.replaceAll("\n", "")		.replace("|", "")
+										.replace("<![CDATA[", "")	.replace("]]>", "")			.replace("&amp;", "&")
+										.replace("&lt;", "<")		.replace("&gt;", ">")		.replace("&quot;", "\"")
+										.replace("&mdash;", "—")	.replace("&hellip;", "…")
+										.replace("&#8217;", "’")	.replace("&#8216;", "‘")	.replaceAll("\t", "&t&")
+										.replace("</p>", "&n&")		.replace("&rsquo;", "'");
+
+									if(end_tag.contains("img src=\""))
 									{
-										end_tag = end_tag
-											.replaceAll("\r", " ")		.replaceAll("\n", "")		.replace("|", "")
-											.replace("<![CDATA[", "")	.replace("]]>", "")			.replace("&amp;", "&")
-											.replace("&lt;", "<")		.replace("&gt;", ">")		.replaceAll("\\<.*?\\>", "")
-											.replace("&quot;", "\"")	.replace("&mdash;", "—")	.replace("&hellip;", "…")
-											.replace("&#8217;", "’")	.replace("&#8216;", "‘")	.replaceAll("\t", "&t&")
-											.replace("</p>", "&n&")		.replace("&rsquo;", "'");
-
-										take = description_length;
-
-										description_length = description_length + end_tag.length();
-										if((description_length > 512)&&(take < 512))
-											line = line + end_tag.substring(0, 512 - take);
-										else if(description_length < 512)
-											line = line + end_tag;
+										pos = end_tag.indexOf("src=\"") + 5;
+										to_file(file_name + ".content.dump.txt", end_tag.substring(pos, end_tag.indexOf("\"", pos + 1)) + "\n", false);
 									}
+									else if(end_tag.contains("img src=\'"))
+									{
+										pos = end_tag.indexOf("src=\'") + 5;
+										to_file(file_name + ".content.dump.txt", end_tag.substring(pos, end_tag.indexOf("\'", pos + 1)) + "\n", false);
+									}
+									end_tag = end_tag.replaceAll("\\<.*?\\>", "");
+
+									take = description_length;
+
+									description_length = description_length + end_tag.length();
+									if((description_length > 512)&&(take < 512))
+										line = line + end_tag.substring(0, 512 - take);
+									else if(description_length < 512)
+										line = line + end_tag;
 								}
 							}
 							line = line + "|";
@@ -240,7 +253,6 @@ class parsered
 				to_file(file_name + ".content.url.txt", tag.substring(tag.indexOf("href=\"") + 6, tag.indexOf("\"", tag.indexOf("href=\"") + 7)) + "\n", false);
 			else if((tag.contains("type=\'text/html\'"))&&(tag.contains("href=\'")))
 				to_file(file_name + ".content.url.txt", tag.substring(tag.indexOf("href=\'") + 6, tag.indexOf("\'", tag.indexOf("href=\'") + 7)) + "\n", false);
-
 			for(String type : types)
 			{
 				if(tag.contains(type))
