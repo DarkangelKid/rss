@@ -420,7 +420,7 @@ public class main_view extends Activity
 			try
 			{
 				group = current_groups.get(i);
-				adapter = (card_adapter)((fragment_card) getFragmentManager().findFragmentByTag("android:switcher:" + ((ViewPager) findViewById(R.id.pager)).getId() + ":" + Integer.toString(i))).getListView().getAdapter();
+				adapter = (card_adapter)((fragment_card) getFragmentManager().findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(i))).getListView().getAdapter();
 				if(adapter.getCount() > 0)
 				{
 					/// Read each of the content files from the group and find the line with the url.
@@ -1413,7 +1413,7 @@ public class main_view extends Activity
 					content_start = content_index + content_length;
 					bar_index = line.indexOf('|', content_start);
 
-					if((content_index == -1)||(content_start + 1 == bar_index))
+					if((content_index == -1)||(content_start == bar_index))
 						types.get(i).add("");
 					else
 						types.get(i).add(line.substring(content_start, bar_index));
