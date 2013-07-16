@@ -216,11 +216,8 @@ public class card_adapter extends BaseAdapter
 		return convertView;
 	}
 
-	public String return_latest_url()
-	{
-		if(top_item_position == -1)
-			return "";
-		return content_links.get(top_item_position);
+	public String return_latest_url(){
+		return (top_item_position != -1) ? content_links.get(top_item_position) : "";
 	}
 
 	static class ViewHolder
