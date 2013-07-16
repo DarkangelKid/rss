@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
+//import android.os.Debug;
 
 class parsered
 {
@@ -178,7 +179,7 @@ class parsered
 		{
 			while(!found)
 			{
-				cont.append(read_string_to_next_char(reader, '<', true));
+				cont.append(read_string_to_next_char(reader, '<'));
 				reader.mark(8);
 				reader.read(test_tag, 0, 8);
 				if(("<" + new String(test_tag)).contains(end_tag))
@@ -193,30 +194,25 @@ class parsered
 		return cont.toString();
 	}
 
-	private String read_string_to_next_char(BufferedReader reader, char next, Boolean keep_last_char)
+	private String read_string_to_next_char(BufferedReader reader, char next)
 	{
-		char[] current = new char[1];
-		char[] buf = new char[65536];
-		int count = 0;
+		StringBuilder build = new StringBuilder();
+		char current;
 		try{
-			while(current[0] != next)
-			{
-				buf[count] = current[0];
-				reader.read(current, 0, 1);
-				count++;
-			}
-			if(keep_last_char)
-				buf[count] = current[0];
-			return (new String(buf)).trim();
+			while((current = ((char) reader.read())) != next)
+				build.append(current);
+			build.append(next);
+
+			return build.toString();
 		}
 		catch(Exception e){
-			return "Content exceeds 65536 chars";
+			return "";
 		}
 	}
 
 	private String check_for_image(String file_name)
 	{
-		File im = new File(file_name + ".content.dump.txt");
+		final File im = new File(file_name + ".content.dump.txt");
 		String popo = "";
 		try
 		{
@@ -233,7 +229,7 @@ class parsered
 
 	private String check_for_url(String file_name)
 	{
-		File iu = new File(file_name + ".content.url.txt");
+		final File iu = new File(file_name + ".content.url.txt");
 		String momo = "";
 		try
 		{
@@ -251,6 +247,7 @@ class parsered
 	private String get_next_tag(BufferedReader reader, String[] types, String file_name) throws Exception
 	{
 		boolean found = false;
+		int tem, tem2, tem3;
 		String tag = "";
 		int eof = 0;
 		while(!found)
@@ -265,15 +262,41 @@ class parsered
 					current = (char) eof;
 			}
 
-			tag = "<" + read_string_to_next_char(reader, '>', true);
+			tag = "<" + read_string_to_next_char(reader, '>');
 
-			if(tag.contains("img src="))
-				to_file(file_name + ".content.dump.txt", tag.substring(tag.indexOf("src=\"") + 5, tag.indexOf("\"", tag.indexOf("src=\"") + 6)) + "\n", false);
+			tem = tag.indexOf("img src=");
+			if(tem != -1)
+			{
+				tem2 = tag.indexOf("\"", tem + 10);
+				if(tem2 == -1)
+					tem2 = tag.indexOf("\'", tem + 10);
+				else
+				{
+					tem3 = tag.indexOf("\'", tem + 10);
+					if((tem3 != -1)&&(tem3 < tem2))
+							tem2 = tem3;
+				}
+				to_file(file_name + ".content.dump.txt", tag.substring(tem + 9, tem2) + "\n", false);
+			}
 
-			if((tag.contains("type=\"text/html\""))&&(tag.contains("href=\"")))
-				to_file(file_name + ".content.url.txt", tag.substring(tag.indexOf("href=\"") + 6, tag.indexOf("\"", tag.indexOf("href=\"") + 7)) + "\n", false);
-			else if((tag.contains("type=\'text/html\'"))&&(tag.contains("href=\'")))
-				to_file(file_name + ".content.url.txt", tag.substring(tag.indexOf("href=\'") + 6, tag.indexOf("\'", tag.indexOf("href=\'") + 7)) + "\n", false);
+			if(tag.contains("type=\"text/html\""))
+			{
+				tem = tag.indexOf("href=");
+				if(tem != -1)
+				{
+					tem2 = tag.indexOf("\"", tem + 7);
+					if(tem2 == -1)
+						tem2 = tag.indexOf("\'", tem + 7);
+					else
+					{
+						tem3 = tag.indexOf("\'", tem + 7);
+						if((tem3 != -1)&&(tem3 < tem2))
+								tem2 = tem3;
+					}
+					to_file(file_name + ".content.url.txt", tag.substring(tem + 6, tem2) + "\n", false);
+				}
+			}
+
 			for(String type : types)
 			{
 				if(tag.contains(type))

@@ -24,6 +24,7 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import java.util.ArrayList;
 import android.net.Uri;
+import android.os.Process;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -33,10 +34,19 @@ import java.io.PrintWriter;
 import java.io.FileWriter;
 import java.io.BufferedWriter;
 import java.lang.ref.WeakReference;
+import java.lang.ref.SoftReference;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
-import android.view.animation.LinearInterpolator;
+import android.view.animation.DecelerateInterpolator;
+
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.concurrent.ConcurrentHashMap;
+import android.os.Handler;
+import android.graphics.Color;
+
+import android.os.Debug;
 
 public class card_adapter extends BaseAdapter
 {
@@ -160,47 +170,44 @@ public class card_adapter extends BaseAdapter
 		final String link					= content_links.get(position);
 		final int height 					= content_height.get(position);
 		final int width						= content_width.get(position);
-		//final int title_length 				= title.length();
 		boolean image_exists 				= false;
-		boolean use_original_description 	= false;
 
 		if(width > 32)
 			image_exists = true;
 
 		if(image_exists)
-			loadBitmap(position, holder.image_view, height, width);
+		{
+			final String image_path = content_images.get(position);
+				load(image_path, holder.image_view);
+		}
 
-		holder.title_view.setText(title);
-		holder.time_view.setText(link);
-		holder.description_view.setText(description);
-
-		/*if(!image_exists)
-			use_original_description = true;*/
-
+		ViewGroup.LayoutParams iv = holder.image_view.getLayoutParams();
 		if((image_exists)&&(!description.isEmpty()))
 		{
+			/// The height for this needs to be divided by the shrink ratio.
 			holder.description_view.setPadding(eight, 0, 0, 0);
-			ViewGroup.LayoutParams iv 		= holder.image_view.getLayoutParams();
-			iv.height 						= LayoutParams.WRAP_CONTENT;
-			iv.width 						= LayoutParams.WRAP_CONTENT;
+			iv.height 					= height;
+			iv.width 					= LayoutParams.WRAP_CONTENT;
 			holder.image_view.setLayoutParams(iv);
 		}
-		else if(image_exists)
+		if(image_exists)
 		{
-				ViewGroup.LayoutParams iv 	= holder.image_view.getLayoutParams();
-				iv.height 					= LayoutParams.MATCH_PARENT;
-				iv.width 					= LayoutParams.MATCH_PARENT;
-				holder.image_view.setLayoutParams(iv);
-				holder.description_view.setPadding(0, 0, 0, 0);
+			iv.height 					= height;
+			iv.width 					= width;
+			holder.image_view.setLayoutParams(iv);
+			holder.description_view.setPadding(0, 0, 0, 0);
 		}
 		else
 		{
 			holder.description_view.setPadding(0, 0, 0, 0);
-			ViewGroup.LayoutParams iv 		= holder.image_view.getLayoutParams();
-			iv.height 						= 0;
-			iv.width 						= 0;
+			iv.height 					= 0;
+			iv.width 					= 0;
 			holder.image_view.setLayoutParams(iv);
 		}
+
+		holder.title_view.setText(title);
+		holder.time_view.setText(link);
+		holder.description_view.setText(description);
 
 		return convertView;
 	}
@@ -227,110 +234,201 @@ public class card_adapter extends BaseAdapter
 		return BitmapFactory.decodeFile(filePath, o);
 	}
 
-	void loadBitmap(int position, ImageView image_view, int height, int width)
+	public void load(String path, ImageView imageView)
 	{
-		if(cancelPotentialWork(position, image_view))
+		resetPurgeTimer();
+		Bitmap bitmap = getBitmapFromCache(path);
+
+		if(bitmap == null)
+			force_load(path, imageView);
+		else
 		{
-			final display_image task = new display_image(image_view);
-			Bitmap.Config conf = Bitmap.Config.ALPHA_8;
-			final AsyncDrawable asyncDrawable = new AsyncDrawable(main_view.get_resources(), Bitmap.createBitmap(width, height, conf), task);
-			image_view.setImageDrawable(asyncDrawable);
-			task.execute(position);
+			cancelPotentialDownload(path, imageView);
+			imageView.setImageBitmap(bitmap);
 		}
 	}
 
-	private static boolean cancelPotentialWork(int position, ImageView image_view) {
-		final display_image worker_task = get_task(image_view);
-
-		if (worker_task != null)
+	private void force_load(String url, ImageView imageView)
+	{
+		if (url == null)
 		{
-			final int check = worker_task.position;
-			if (check != position)
-				worker_task.cancel(true);
+			imageView.setImageDrawable(null);
+			return;
+		}
+
+		if(cancelPotentialDownload(url, imageView))
+		{
+			load_image task = new load_image(imageView);
+			DownloadedDrawable downloadedDrawable = new DownloadedDrawable(task);
+			imageView.setImageDrawable(downloadedDrawable);
+			task.execute(url);
+		}
+	}
+
+	private static boolean cancelPotentialDownload(String url, ImageView imageView)
+	{
+		load_image bitmapDownloaderTask = getBitmapDownloaderTask(imageView);
+
+		if (bitmapDownloaderTask != null)
+		{
+			String bitmapUrl = bitmapDownloaderTask.url;
+			if ((bitmapUrl == null) || (!bitmapUrl.equals(url)))
+				bitmapDownloaderTask.cancel(true);
 			else
 				return false;
 		}
 		return true;
 	}
 
-	private static display_image get_task(ImageView image_view) {
-	   if (image_view != null)
-	   {
-		   final Drawable drawable = image_view.getDrawable();
-		   if (drawable instanceof AsyncDrawable) {
-			   final AsyncDrawable asyncDrawable = (AsyncDrawable) drawable;
-			   return asyncDrawable.get_display_image_task();
-		   }
+
+	private static load_image getBitmapDownloaderTask(ImageView imageView)
+	{
+		if (imageView != null)
+		{
+			Drawable drawable = imageView.getDrawable();
+			if (drawable instanceof DownloadedDrawable)
+			{
+				DownloadedDrawable downloadedDrawable = (DownloadedDrawable)drawable;
+				return downloadedDrawable.getBitmapDownloaderTask();
+			}
 		}
 		return null;
 	}
 
-	static class AsyncDrawable extends BitmapDrawable
+	class load_image extends AsyncTask<String, Void, Bitmap>
 	{
-		private final WeakReference<display_image> display_image_reference;
+		private String url;
+		private final WeakReference<ImageView> imageViewReference;
 
-		public AsyncDrawable(Resources res, Bitmap bitmap, display_image task)
+		public load_image(ImageView imageView)
 		{
-			super(res, bitmap);
-			display_image_reference = new WeakReference<display_image>(task);
-		}
-
-		public display_image get_display_image_task()
-		{
-			return display_image_reference.get();
-		}
-	}
-
-	private class image
-	{
-		public Bitmap img;
-		public String path;
-	}
-
-	class display_image extends AsyncTask<Integer, Void, image>
-	{
-		private final WeakReference<ImageView> image_view_reference;
-		private int position = 0;
-
-		public display_image(ImageView imageView) {
-			image_view_reference = new WeakReference<ImageView>(imageView);
+			imageViewReference = new WeakReference<ImageView>(imageView);
 		}
 
 		@Override
-		protected image doInBackground(Integer... ton)
+		protected Bitmap doInBackground(String... ton)
 		{
-			position = ton[0];
-			image i = new image();
-			String image_path = content_images.get(ton[0]);
-			i.img = decodeFile(image_path);
-			i.path = image_path.replaceAll("thumbnails", "images");
-			return i;
+			url = ton[0];
+			return decodeFile(url);
 		}
 
 		@Override
-		protected void onPostExecute(image im)
+		protected void onPostExecute(Bitmap im)
 		{
-			 if(isCancelled())
-				im.img = null;
+			if (isCancelled())
+				im = null;
 
-			if(image_view_reference != null && im.img != null)
+			addBitmapToCache(url, im);
+
+			if (imageViewReference != null)
 			{
-				final ImageView image_view = image_view_reference.get();
-				final display_image worker_task = get_task(image_view);
-				if(this == worker_task && image_view != null)
+				ImageView image_view = imageViewReference.get();
+				load_image bitmapDownloaderTask = getBitmapDownloaderTask(image_view);
+				if(this == bitmapDownloaderTask)
 				{
-					final TransitionDrawable td = new TransitionDrawable(new Drawable[]
-					{
-						image_view.getDrawable(),
-						new BitmapDrawable(main_view.get_resources(), im.img)
-					});
-					image_view.setImageDrawable(td);
-					td.startTransition(230);
-
-					image_view.setOnClickListener(new image_call(im.path));
+					Animation fadeIn = new AlphaAnimation(0, 1);
+					fadeIn.setDuration(210);
+					fadeIn.setInterpolator(new DecelerateInterpolator());
+					image_view.setImageBitmap(im);
+					image_view.startAnimation(fadeIn);
+					image_view.setOnClickListener(new image_call(url.replaceAll("thumbnails", "images")));
 				}
 			}
 		}
+	}
+
+	static class DownloadedDrawable extends ColorDrawable
+	{
+		private final WeakReference<load_image> bitmapDownloaderTaskReference;
+
+		public DownloadedDrawable(load_image bitmapDownloaderTask)
+		{
+			super(Color.WHITE);
+			bitmapDownloaderTaskReference =
+				new WeakReference<load_image>(bitmapDownloaderTask);
+		}
+
+		public load_image getBitmapDownloaderTask(){
+			return bitmapDownloaderTaskReference.get();
+		}
+	}
+
+	private static final int HARD_CACHE_CAPACITY = 10;
+	private static final int DELAY_BEFORE_PURGE = 10 * 1000;
+
+	private final HashMap<String, Bitmap> sHardBitmapCache =
+		new LinkedHashMap<String, Bitmap>(HARD_CACHE_CAPACITY / 2, 0.75f, true)
+		{
+			@Override
+			protected boolean removeEldestEntry(LinkedHashMap.Entry<String, Bitmap> eldest) {
+				if (size() > HARD_CACHE_CAPACITY)
+				{
+					sSoftBitmapCache.put(eldest.getKey(), new SoftReference<Bitmap>(eldest.getValue()));
+					return true;
+				}
+				else
+					return false;
+			}
+		};
+
+	private final static ConcurrentHashMap<String, SoftReference<Bitmap>> sSoftBitmapCache =
+		new ConcurrentHashMap<String, SoftReference<Bitmap>>(HARD_CACHE_CAPACITY / 2);
+
+	private final Handler purgeHandler = new Handler();
+
+	private final Runnable purger = new Runnable()
+	{
+		public void run(){
+			clearCache();
+		}
+	};
+
+	private void addBitmapToCache(String url, Bitmap bitmap)
+	{
+		if(bitmap != null)
+		{
+			synchronized(sHardBitmapCache){
+				sHardBitmapCache.put(url, bitmap);
+			}
+		}
+	}
+
+	private Bitmap getBitmapFromCache(String url)
+	{
+		synchronized(sHardBitmapCache)
+		{
+			final Bitmap bitmap = sHardBitmapCache.get(url);
+			if(bitmap != null)
+			{
+				sHardBitmapCache.remove(url);
+				sHardBitmapCache.put(url, bitmap);
+				return bitmap;
+			}
+		}
+
+		SoftReference<Bitmap> bitmapReference = sSoftBitmapCache.get(url);
+		if(bitmapReference != null)
+		{
+			final Bitmap bitmap = bitmapReference.get();
+			if (bitmap != null)
+				return bitmap;
+			else
+				sSoftBitmapCache.remove(url);
+		}
+
+		return null;
+	}
+
+	public void clearCache()
+	{
+		sHardBitmapCache.clear();
+		sSoftBitmapCache.clear();
+	}
+
+	private void resetPurgeTimer()
+	{
+		purgeHandler.removeCallbacks(purger);
+		purgeHandler.postDelayed(purger, DELAY_BEFORE_PURGE);
 	}
 
 	private class browser_call implements View.OnClickListener
