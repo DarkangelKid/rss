@@ -1390,30 +1390,30 @@ public class main_view extends Activity
 	{
 		final String feed_path = type[0];
 		final int number_of_items = type.length - 1;
-		int content_start;
+		int content_start, content_index, i, bar_index, content_length;
+		String line, content;
 
-		String line;
-		BufferedReader stream;
 		List< List<String> > types = new ArrayList< List<String> >();
-		for(int i = 0; i < number_of_items; i++)
+		for(i = 0; i < number_of_items; i++)
 			types.add(new ArrayList< String >());
 
-		String content;
 		try
 		{
-			stream = new BufferedReader(new FileReader(feed_path));
+			BufferedReader stream = new BufferedReader(new FileReader(feed_path));
 			while((line = stream.readLine()) != null)
 			{
-				for(int i = 0; i < number_of_items; i++)
+				for(i = 0; i < number_of_items; i++)
 				{
 					content = type[1 + i] + "|";
-					if((!line.contains(content))||(line.contains(content + '|')))
+					content_length = content.length();
+					content_index = line.indexOf(content);
+					content_start = content_index + content_length;
+					bar_index = line.indexOf('|', content_start);
+
+					if((content_index == -1)||(content_start + 1 == bar_index))
 						types.get(i).add("");
 					else
-					{
-						content_start = line.indexOf(content) + content.length();
-						types.get(i).add(line.substring(content_start, line.indexOf('|', content_start)));
-					}
+						types.get(i).add(line.substring(content_start, bar_index));
 				}
 			}
 		}
@@ -1459,8 +1459,6 @@ public class main_view extends Activity
 		return nav_adapter;
 	}
 
-	/// TODO: write a load_position function instead of sorting by time.
-
 	public static List<Integer> get_unread_counts()
 	{
 		List<Integer> unread_list = new ArrayList<Integer>();
@@ -1484,7 +1482,6 @@ public class main_view extends Activity
 				count = 0;
 				count_list = read_file_to_list(storage + "groups/" + current_groups.get(j) + ".txt.content.txt");
 				sized = count_list.size();
-				i = 0;
 
 				for(i = sized - 1; i >= 0; i--)
 				{
@@ -1538,13 +1535,12 @@ public class main_view extends Activity
 
 		@Override
 		protected void onPreExecute(){
+			Debug.startMethodTracing("refresh");
 		}
 
 		@Override
 		protected Long doInBackground(Void... hey)
 		{
-			/// TODO: setRecyclerListener(AbsListView.RecyclerListener listener);
-
 			while(check_service_running())
 			{
 				try{
@@ -1588,6 +1584,7 @@ public class main_view extends Activity
 			/// For each line of the group_content_file
 			final int size = titles.size();
 			ssize = size;
+			String image_path;
 			for(int m=0; m<size; m++)
 			{
 				thumbnail_path = "";
@@ -1596,21 +1593,17 @@ public class main_view extends Activity
 				if(!images.get(m).equals(""))
 				{
 					image_name = images.get(m).substring(images.get(m).lastIndexOf("/") + 1, images.get(m).length());
+					thumbnail_path = storage + "thumbnails/" + image_name;
 
-					if((!exists(storage + "thumbnails/" + image_name))&&(!check_service_running()))
+					if((!exists(thumbnail_path))&&(!check_service_running()))
 					{
-						if(!exists(storage + "images/" + image_name))
-							download_file(images.get(m), storage + "images/" + image_name);
+						image_path = storage + "images/" + image_name;
+						if(!exists(image_path))
+							download_file(images.get(m), image_path);
 						dimensions.add(compress_file(storage, image_name, group, false));
 					}
 
 					dim = get_image_dimensions(dimensions, image_name);
-					if(dim[0] < 6)
-					{
-						dimensions.add(compress_file(storage, image_name, group, true));
-						dim = get_image_dimensions(dimensions, image_name);
-					}
-					thumbnail_path = storage + "thumbnails/" + image_name;
 				}
 
 				// Checks to see if page has this item.
@@ -1686,6 +1679,7 @@ public class main_view extends Activity
 			//if(viewPager.getOffscreenPageLimit() > 1)
 				//viewPager.setOffscreenPageLimit(1);
 			set_refresh(false);
+			Debug.stopMethodTracing();
 		}
 	}
 
@@ -1703,7 +1697,6 @@ public class main_view extends Activity
 
 	public static void sort_group_content_by_time(String group)
 	{
-		//Debug.startMethodTracing("sort");
 		if(storage.equals(""))
 			storage = read_file_to_list(storage + "storage_location.txt").get(0);
 
@@ -1753,7 +1746,6 @@ public class main_view extends Activity
 		}
 		catch(Exception e){
 		}
-		//Debug.stopMethodTracing();
 	}
 
 	public static void log(String text)
@@ -1812,14 +1804,18 @@ public class main_view extends Activity
 	private Integer[] get_image_dimensions(List<String> dim_list, final String image_name)
 	{
 		Integer[] size = {0, 0};
-		for(String dimer : dim_list)
+		final int sizer = dim_list.size();
+		String line;
+		for(int i = 0 ; i < sizer; i++)
 		{
-			if(dimer.contains(image_name))
+			line = dim_list.get(i);
+			if(line.contains(image_name))
 			{
-				int first = dimer.indexOf('|') + 1;
-				int second = dimer.indexOf('|', first + 1) + 1;
-				size[0] = Integer.parseInt(dimer.substring(first, second - 1));
-				size[1] = Integer.parseInt(dimer.substring(second, dimer.length()));
+				int first = line.indexOf('|') + 1;
+				int second = line.indexOf('|', first + 1) + 1;
+				size[0] = Integer.parseInt(line.substring(first, second - 1));
+				size[1] = Integer.parseInt(line.substring(second, line.length()));
+				dim_list.remove(i);
 				return size;
 			}
 		}
