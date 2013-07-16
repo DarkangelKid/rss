@@ -3,6 +3,7 @@ package yay.poloure.simplerss;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
+import android.widget.RelativeLayout;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -64,11 +65,14 @@ public class card_adapter extends BaseAdapter
 
 	private static int eight = 0;
 	private int top_item_position = -1;
+	private int screen_width;
 
 	public card_adapter(Context context_main)
 	{
 		context = context_main;
 		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		eight = (int) ((8 * main_view.get_pixel_density() + 0.5f));
+		screen_width = main_view.get_width();
 	}
 
 	public void add_list(String new_title, String new_des, String new_link, String new_image, int new_height, int new_width, Boolean new_marker)
@@ -80,8 +84,6 @@ public class card_adapter extends BaseAdapter
 		content_height.add(0, new_height);
 		content_width.add(0, new_width);
 		content_marker.add(0, new_marker);
-		if(eight == 0)
-			eight = (int) ((8 * main_view.get_pixel_density() + 0.5f));
 	}
 
 	public List<String> return_links(){
@@ -166,7 +168,7 @@ public class card_adapter extends BaseAdapter
 			holder = (ViewHolder) convertView.getTag();
 
 		final String title 					= content_titles.get(position);
-		final String description 			= content_des.get(position);
+		String description 					= content_des.get(position);
 		final String link					= content_links.get(position);
 		final int height 					= content_height.get(position);
 		final int width						= content_width.get(position);
@@ -180,6 +182,8 @@ public class card_adapter extends BaseAdapter
 			final String image_path = content_images.get(position);
 				load(image_path, holder.image_view);
 		}
+		if(description.contains(title))
+			description = "";
 
 		ViewGroup.LayoutParams iv = holder.image_view.getLayoutParams();
 		if((image_exists)&&(!description.isEmpty()))
@@ -192,8 +196,8 @@ public class card_adapter extends BaseAdapter
 		}
 		if(image_exists)
 		{
-			iv.height 					= height;
-			iv.width 					= width;
+			iv.height 					= (int) (((screen_width)/width) * height);
+			iv.width 					= LayoutParams.MATCH_PARENT;
 			holder.image_view.setLayoutParams(iv);
 			holder.description_view.setPadding(0, 0, 0, 0);
 		}
