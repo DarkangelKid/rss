@@ -1510,7 +1510,6 @@ public class main_view extends Activity
 		int marker_position = -1, ssize, refresh_count = 0, page_number;
 		ListFragment l;
 		Boolean first;
-		final Animation animFadeOut = AnimationUtils.loadAnimation(getApplicationContext(), android.R.anim.fade_out);
 		final Animation animFadeIn = AnimationUtils.loadAnimation(getApplicationContext(), android.R.anim.fade_in);
 
 		public refresh_page(int page){
