@@ -98,7 +98,6 @@ public class service_update extends IntentService
 				main_view.sort_group_content_by_time(gro);
 		}
 
-		/// If we should download and update the feeds inside that group.
 		String group_content_path 		= storage + "groups/" + grouper + ".txt.content.txt";
 		List< List<String> > contenter 	= main_view.read_csv_to_list(new String[]{group_content_path, "0", "image"});
 		List<String> images 			= contenter.get(0);

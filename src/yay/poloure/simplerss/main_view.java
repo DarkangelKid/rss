@@ -57,6 +57,8 @@ import java.net.URL;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Date;
@@ -76,6 +78,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Color;
+import android.os.Debug;
+import android.text.format.Time;
 
 public class main_view extends Activity
 {
@@ -107,15 +111,7 @@ public class main_view extends Activity
 	private String feeds_string, manage_string, settings_string, navigation_string;
 	private static String all_string;
 	private static FragmentManager fragment_manager;
-
-	private static final SimpleDateFormat[] formats = new SimpleDateFormat[]
-	{
-		new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH),
-		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH),
-		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ENGLISH),
-		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH),
-		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH)
-	};
+	private static final SimpleDateFormat rfc3339 = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS'Z'");
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -237,14 +233,14 @@ public class main_view extends Activity
 				Display display = getWindowManager().getDefaultDisplay();
 				Point size = new Point();
 				display.getSize(size);
-				width = (int) Math.round(((float)size.x)*0.80);
+				width = (int) (Math.round(((size.x)*0.944)));
 				delete(storage + "width.txt");
 				append_string_to_file(storage + "width.txt", Integer.toString(width) + "\n");
 			}
 			else
 				width = Integer.parseInt(read_file_to_list(storage + "width.txt", 0).get(0));
 
-			if(read_file_to_list(storage + "groups/" + all_string + ".txt", 0).size() > 0)
+			if(count_lines(storage + "groups/" + all_string + ".txt") > 0)
 				new refresh_page(0).execute();
 
 			drawer_toggle.syncState();
@@ -263,6 +259,10 @@ public class main_view extends Activity
 		update_feeds_list();
 		update_manage_feeds();
 		update_manage_groups();
+	}
+
+	public static int get_width(){
+		return width;
 	}
 
 	private void update_manage_feeds()
@@ -1541,7 +1541,7 @@ public class main_view extends Activity
 			while(check_service_running())
 			{
 				try{
-					Thread.sleep(200);
+					Thread.sleep(100);
 				}
 				catch(Exception e){
 				}
@@ -1563,7 +1563,7 @@ public class main_view extends Activity
 			List<String> descriptions 	= contenter.get(3);
 			List<String> links			= contenter.get(4);
 
-			if(titles.get(0).length() < 1)
+			if(links.get(0).length() < 1)
 				return 0L;
 
 			/// Get a set of all the pages items' urls.
@@ -1694,101 +1694,81 @@ public class main_view extends Activity
 		new_items_array[position] = value;
 	}*/
 
-	public static void sort_group_content_by_time(String group)
+	public static Boolean sort_group_content_by_time(String group)
 	{
+		//Debug.startMethodTracing("sort");
 		if(storage.equals(""))
 			storage = read_file_to_list(storage + "storage_location.txt", 0).get(0);
 
-		String last_url = "";
 		final String group_path = storage + "groups/" + group + ".txt.content.txt";
+		String content_path;
+		Time time = new Time();
+		List<String> pubDates, content;
+		Map<Long, String> map = new TreeMap<Long, String>();
+		int size, i;
+
 		final List<String> feeds_array	= read_csv_to_list(new String[]{storage + "groups/" + group + ".txt", "0", "name"}).get(0);
-		Date time = new Date();
-		List<Date> dates 			= new ArrayList<Date>();
-		List<String> links_ordered 	= new ArrayList<String>();
-		List<String> content_all 	= new ArrayList<String>();
-		List<String> links, pubDates, content;
 
 		for(String feed : feeds_array)
 		{
-			final String content_path = storage + "content/" + feed + ".store.txt.content.txt";
+			content_path = storage + "content/" + feed + ".store.txt.content.txt";
 			if(exists(content_path))
 			{
-				List< List<String> > contenter	= read_csv_to_list(new String[]{content_path, "0", "link", "pubDate"});
-				links 							= contenter.get(0);
-				pubDates						= contenter.get(1);
-				content 						= read_file_to_list(content_path, 0);
+				content 		= read_file_to_list(content_path, 0);
+				pubDates		= read_csv_to_list(new String[]{content_path, "0", "published"}).get(0);
 
 				if(pubDates.get(0).length() < 8)
-					pubDates 					= read_csv_to_list(new String[]{content_path, "0", "published"}).get(0);
-				if(pubDates.get(0).length() < 8)
-					pubDates 					= read_csv_to_list(new String[]{content_path, "0", "updated"}).get(0);
+					pubDates 	= read_csv_to_list(new String[]{content_path, "0", "pubDate"}).get(0);
 
-				final int size = pubDates.size();
-				for(int i = 0; i < size; i++)
+				/// size might be 0;
+				size = pubDates.size();
+				for(i = 0; i < size; i++)
 				{
-					content_all.add(content.get(i));
-					Boolean time_format_found = false;
-					for(SimpleDateFormat format : formats)
-					{
-						try{
-							time = format.parse(pubDates.get(i));
-							time_format_found = true;
-						}
-						catch(Exception e){
-						}
+					try{
+						time.parse3339(pubDates.get(i));
+					}
+					catch(Exception e){
+						main_view.log("BUG : Meant to be 3339 but looks like: " + pubDates.get(i));
+						return false;
 					}
 
-					/// If our loop always catched.
-					if(!time_format_found)
-						main_view.log("BUG : Format not found and date looks like: " + pubDates.get(i));
-
-					final int sizer = dates.size();
-					for(int j=0; j<sizer; j++)
-					{
-						if(time.before(dates.get(j)))
-						{
-							dates.add(j, time);
-							links_ordered.add(j, links.get(i));
-							break;
-						}
-						else if((j == dates.size() - 1)&&(time.after(dates.get(j))))
-						{
-							dates.add(time);
-							links_ordered.add(links.get(i));
-							break;
-						}
-					}
-					if(dates.size() == 0)
-					{
-						dates.add(time);
-						links_ordered.add(links.get(i));
-					}
+					map.put(time.toMillis(false), content.get(i));
 				}
 			}
 		}
 
 		delete(group_path);
-
 		try
 		{
 			BufferedWriter out = new BufferedWriter(new FileWriter(group_path, true));
+			for(Map.Entry<Long, String> entry : map.entrySet())
+				out.write(entry.getValue() + "\n");
 
-			if(links_ordered.size()>0)
-			{
-				for(String link : links_ordered)
-					for(String line : content_all)
-						if(line.contains(link))
-							out.write(line + "\n");
-			}
 			out.close();
 		}
 		catch(Exception e){
 		}
+		//Debug.stopMethodTracing();
+		return true;
 	}
 
 	public static void log(String text)
 	{
 		append_string_to_file(storage + "dump.txt", text + "\n");
+	}
+
+	public static void counting_sort(int[] a, int low, int high)
+	{
+		int[] counts = new int[high - low + 1]; // this will hold all possible values, from low to high
+		for (int x : a)
+			counts[x - low]++; // - low so the lowest possible value is always 0
+
+		int current = 0;
+		for (int i = 0; i < counts.length; i++)
+		{
+			Arrays.fill(a, current, current + counts[i], i + low); // fills counts[i] elements of value i + low in current
+			current += counts[i]; // leap forward by counts[i] steps
+		}
 	}
 
 	public static void delete(String file_path)
