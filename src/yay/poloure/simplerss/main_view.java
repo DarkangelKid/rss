@@ -117,6 +117,7 @@ public class main_view extends Activity
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
+		//Debug.startMethodTracing("boot");
 		if (savedInstanceState == null)
 		{
 			feeds_string = getString(R.string.feeds_title);
@@ -223,8 +224,9 @@ public class main_view extends Activity
 			};
 
 			drawer_layout.setDrawerListener(drawer_toggle);
-			getActionBar().setDisplayHomeAsUpEnabled(true);
-			getActionBar().setHomeButtonEnabled(true);
+			ActionBar bar = getActionBar();
+			bar.setDisplayHomeAsUpEnabled(true);
+			bar.setHomeButtonEnabled(true);
 			//set_refresh(check_service_running());
 
 			/// Save the width for compression
@@ -1535,7 +1537,6 @@ public class main_view extends Activity
 
 		@Override
 		protected void onPreExecute(){
-			Debug.startMethodTracing("refresh");
 		}
 
 		@Override
@@ -1679,7 +1680,6 @@ public class main_view extends Activity
 			//if(viewPager.getOffscreenPageLimit() > 1)
 				//viewPager.setOffscreenPageLimit(1);
 			set_refresh(false);
-			Debug.stopMethodTracing();
 		}
 	}
 
