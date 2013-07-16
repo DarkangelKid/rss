@@ -67,12 +67,12 @@ public class service_update extends IntentService
 			main_view.append_string_to_file(storage + "storage_location.txt", storage);
 		}
 
-		List<String> all_groups = main_view.read_file_to_list(storage + "groups/group_list.txt", 0);
+		List<String> all_groups = main_view.read_file_to_list(storage + "groups/group_list.txt");
 		String grouper = all_groups.get(group);
 		String group_file_path 		= storage + "groups/" + grouper + ".txt";
 		String partial_image_path 		= storage + "images/";
 
-		List< List<String> > content 		= main_view.read_csv_to_list(new String[]{group_file_path, "0", "name", "url"});
+		List< List<String> > content 		= main_view.read_csv_to_list(new String[]{group_file_path, "name", "url"});
 		List<String> group_feeds_names 		= content.get(0);
 		List<String> group_feeds_urls 		= content.get(1);
 
@@ -99,7 +99,7 @@ public class service_update extends IntentService
 		}
 
 		String group_content_path 		= storage + "groups/" + grouper + ".txt.content.txt";
-		List< List<String> > contenter 	= main_view.read_csv_to_list(new String[]{group_content_path, "0", "image"});
+		List< List<String> > contenter 	= main_view.read_csv_to_list(new String[]{group_content_path, "image"});
 		List<String> images 			= contenter.get(0);
 
 			/// For each line of the group_content_file

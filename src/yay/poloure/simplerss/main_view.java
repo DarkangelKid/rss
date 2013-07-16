@@ -190,7 +190,7 @@ public class main_view extends Activity
 			viewpager.setOnPageChangeListener(new page_listener());
 
 			/// TODO: check to see if needed.
-			List< List<String> > content 	= read_csv_to_list(new String[]{storage + "groups/"+ all_string + ".txt", "0", "name", "url", "group"});
+			List< List<String> > content 	= read_csv_to_list(new String[]{storage + "groups/"+ all_string + ".txt", "name", "url", "group"});
 			feed_titles 					= content.get(0);
 			feed_urls 						= content.get(1);
 			feed_groups 					= content.get(2);
@@ -238,7 +238,7 @@ public class main_view extends Activity
 				append_string_to_file(storage + "width.txt", Integer.toString(width) + "\n");
 			}
 			else
-				width = Integer.parseInt(read_file_to_list(storage + "width.txt", 0).get(0));
+				width = Integer.parseInt(read_file_to_list(storage + "width.txt").get(0));
 
 			if(count_lines(storage + "groups/" + all_string + ".txt") > 0)
 				new refresh_page(0).execute();
@@ -290,29 +290,32 @@ public class main_view extends Activity
 		}
 		if(manage_adapter != null)
 		{
+			String group, info;
+			int content_size, number, j;
+			List<String> content;
 			manage_adapter.clear_list();
+
 			final int size = current_groups.size();
 			for(int i = 0; i < size; i++)
 			{
-				List<String> content = read_csv_to_list(new String[]{storage + "groups/" + current_groups.get(i) + ".txt", "0", "name"}).get(0);
-				String info = "";
-				int number = 3;
-				if(content.size() < 3)
-					number = content.size();
-				for(int j = 0; j < number - 1; j++)
-					info = info + content.get(j) + ", ";
-				if(content.size() > 0)
-					info = info + content.get(number - 1);
-				if(content.size() > 3)
-					info = info + ", ...";
+				group = current_groups.get(i);
+				content = read_csv_to_list(new String[]{storage + "groups/" + group + ".txt", "name"}).get(0);
+				content_size = content.size();
 				if(i == 0)
+					info = (size == 1) ? "1 group" :  size + " groups";
+				else
 				{
-					if(size == 1)
-						info = "1 group";
-					else
-						info = current_groups.size() + " groups";
+					info = "";
+					number = 3;
+					if(content_size < 3)
+						number = content_size;
+					for(j = 0; j < number - 1; j++)
+						info += content.get(j) + ", ";
+
+					info += (content_size > 3) ? ", ..." : content.get(number - 1);
 				}
-				manage_adapter.add_list(current_groups.get(i), Integer.toString(content.size()) + " feeds • " + info);
+
+				manage_adapter.add_list(group, Integer.toString(content_size) + " feeds • " + info);
 			}
 			manage_adapter.notifyDataSetChanged();
 		}
@@ -368,7 +371,7 @@ public class main_view extends Activity
 
 	private void update_feeds_list()
 	{
-		List< List<String> > content 	= read_csv_to_list(new String[]{storage + "groups/" + all_string + ".txt", "0", "name", "url", "group"});
+		List< List<String> > content 	= read_csv_to_list(new String[]{storage + "groups/" + all_string + ".txt", "name", "url", "group"});
 		feed_titles 		= content.get(0);
 		feed_urls 			= content.get(1);
 		feed_groups 		= content.get(2);
@@ -418,14 +421,14 @@ public class main_view extends Activity
 				if(adapter.getCount() > 0)
 				{
 					/// Read each of the content files from the group and find the line with the url.
-					feeds = read_csv_to_list(new String[]{storage + "groups/" + group + ".txt", "0", "name"}).get(0);
+					feeds = read_csv_to_list(new String[]{storage + "groups/" + group + ".txt", "name"}).get(0);
 					found_url = false;
 					url = adapter.return_latest_url();
 					if(!url.equals(""))
 					{
 						for(String feed: feeds)
 						{
-							lines = read_file_to_list(storage + "content/" + feed + ".store.txt.content.txt", 0);
+							lines = read_file_to_list(storage + "content/" + feed + ".store.txt.content.txt");
 							delete(storage + "content/" + feed + ".store.txt.content.txt");
 
 							out = new BufferedWriter(new FileWriter(storage + "content/" + feed + ".store.txt.content.txt", true));
@@ -475,7 +478,7 @@ public class main_view extends Activity
 			alarm_manager.cancel(pend_intent);
 		}
 
-		List<String> strings = read_file_to_list(storage + "new_items.txt", 0);
+		List<String> strings = read_file_to_list(storage + "new_items.txt");
 		new_items = new ArrayList<Boolean>();
 		for(String string : strings)
 		{
@@ -485,7 +488,7 @@ public class main_view extends Activity
 				new_items.add(false);
 		}
 		storage = this.getExternalFilesDir(null).getAbsolutePath() + "/";
-		current_groups = read_file_to_list(storage + "groups/group_list.txt", 0);
+		current_groups = read_file_to_list(storage + "groups/group_list.txt");
 		if(new_items.size() != current_groups.size())
 		{
 			new_items.clear();
@@ -1283,30 +1286,35 @@ public class main_view extends Activity
 		}
 	}
 
-	/// Relies on read_file_to_list && storage.
 	private void remove_string_from_file(String file_path, String string, Boolean contains)
 	{
-		final List<String> list = read_file_to_list(file_path, 0);
+		final List<String> list = read_file_to_list(file_path);
 		delete(file_path);
-		for(String item : list)
-		{
-			if(contains)
+		try{
+			BufferedWriter out = new BufferedWriter(new FileWriter(file_path, true));
+			for(String item : list)
 			{
-				if(!item.contains(string))
-					append_string_to_file(file_path, item + "\n");
+				if(contains)
+				{
+					if(!item.contains(string))
+						out.write(item + "\n");
+				}
+				else
+				{
+					if(!item.equals(string))
+						out.write(item + "\n");
+				}
 			}
-			else
-			{
-				if(!item.equals(string))
-					append_string_to_file(file_path, item + "\n");
-			}
+			out.close();
+		}
+		catch(Exception e){
 		}
 	}
 
 	private static void update_groups()
 	{
 		final int previous_size = current_groups.size();
-		current_groups = read_file_to_list(storage + "groups/group_list.txt", 0);
+		current_groups = read_file_to_list(storage + "groups/group_list.txt");
 		final int size = current_groups.size();
 		if(size == 0)
 		{
@@ -1320,7 +1328,7 @@ public class main_view extends Activity
 
 		List<String> nav = new ArrayList<String>();
 		nav.addAll(current_groups);
-		nav.addAll(0, Arrays.asList("Feeds", "Manage", "Settings", "Groups")); ///changed this shit
+		nav.addAll(0, Arrays.asList("Feeds", "Manage", "Settings", "Groups"));
 
 		nav_adapter.add_list(nav);
 		nav_adapter.add_count(get_unread_counts());
@@ -1333,7 +1341,7 @@ public class main_view extends Activity
 	private void update_groups_non_static()
 	{
 		final int previous_size = current_groups.size();
-		current_groups = read_file_to_list(storage + "groups/group_list.txt", 0);
+		current_groups = read_file_to_list(storage + "groups/group_list.txt");
 		final int size = current_groups.size();
 		if(size == 0)
 		{
@@ -1362,8 +1370,14 @@ public class main_view extends Activity
 	public static void update_group_order(List<String> new_order)
 	{
 		delete(storage + "groups/group_list.txt");
-		for(String group : new_order)
-			append_string_to_file(storage + "groups/group_list.txt", group + "\n");
+		try{
+			BufferedWriter out = new BufferedWriter(new FileWriter(storage + "groups/group_list.txt", true));
+			for(String group : new_order)
+				out.write(group + "\n");
+			out.close();
+		}
+		catch(Exception e){
+		}
 		update_groups();
 	}
 
@@ -1375,8 +1389,8 @@ public class main_view extends Activity
 	public static List< List<String> > read_csv_to_list(String[] type)
 	{
 		final String feed_path = type[0];
-		final int lines_to_skip = Integer.parseInt(type[1]);
-		final int number_of_items = type.length - 2;
+		final int number_of_items = type.length - 1;
+		int content_start;
 
 		String line;
 		BufferedReader stream;
@@ -1388,21 +1402,16 @@ public class main_view extends Activity
 		try
 		{
 			stream = new BufferedReader(new FileReader(feed_path));
-
-			/// Skip lines.
-			for(int i = 0; i < lines_to_skip; i++)
-				stream.readLine();
-
 			while((line = stream.readLine()) != null)
 			{
 				for(int i = 0; i < number_of_items; i++)
 				{
-					content = type[2 + i] + "|";
+					content = type[1 + i] + "|";
 					if((!line.contains(content))||(line.contains(content + '|')))
 						types.get(i).add("");
 					else
 					{
-						int content_start = line.indexOf(content) + content.length();
+						content_start = line.indexOf(content) + content.length();
 						types.get(i).add(line.substring(content_start, line.indexOf('|', content_start)));
 					}
 				}
@@ -1413,7 +1422,7 @@ public class main_view extends Activity
 		return types;
 	}
 
-	public static List<String> read_file_to_list(String file_path, int lines_to_skip)
+	public static List<String> read_file_to_list(String file_path)
 	{
 		String line;
 		BufferedReader stream;
@@ -1421,8 +1430,6 @@ public class main_view extends Activity
 		try
 		{
 			stream = new BufferedReader(new FileReader(file_path));
-			for(int i=0; i<lines_to_skip; i++)
-				stream.readLine();
 			while((line = stream.readLine()) != null)
 				lines.add(line);
 			stream.close();
@@ -1475,7 +1482,7 @@ public class main_view extends Activity
 			if((ith == null)||(ith.getCount() == 0)||(ith.return_unread_item_count() == -1))
 			{
 				count = 0;
-				count_list = read_file_to_list(storage + "groups/" + current_groups.get(j) + ".txt.content.txt", 0);
+				count_list = read_file_to_list(storage + "groups/" + current_groups.get(j) + ".txt.content.txt");
 				sized = count_list.size();
 				i = 0;
 
@@ -1556,7 +1563,7 @@ public class main_view extends Activity
 			if((!exists(group_file_path))||(!exists(group_content_path)))
 				return 0L;
 
-			List< List<String> > contenter = read_csv_to_list(new String[]{group_content_path, "0", "marker", "title", "image", "description", "link"});
+			List< List<String> > contenter = read_csv_to_list(new String[]{group_content_path, "marker", "title", "image", "description", "link"});
 			List<String> marker			= contenter.get(0);
 			List<String> titles 		= contenter.get(1);
 			List<String> images 		= contenter.get(2);
@@ -1576,7 +1583,7 @@ public class main_view extends Activity
 			}
 
 			/// load the image_dimensions to a list.
-			List<String> dimensions = read_file_to_list(storage + group + ".image_size.cache.txt", 0);
+			List<String> dimensions = read_file_to_list(storage + group + ".image_size.cache.txt");
 
 			/// For each line of the group_content_file
 			final int size = titles.size();
@@ -1694,11 +1701,11 @@ public class main_view extends Activity
 		new_items_array[position] = value;
 	}*/
 
-	public static Boolean sort_group_content_by_time(String group)
+	public static void sort_group_content_by_time(String group)
 	{
 		//Debug.startMethodTracing("sort");
 		if(storage.equals(""))
-			storage = read_file_to_list(storage + "storage_location.txt", 0).get(0);
+			storage = read_file_to_list(storage + "storage_location.txt").get(0);
 
 		final String group_path = storage + "groups/" + group + ".txt.content.txt";
 		String content_path;
@@ -1707,20 +1714,19 @@ public class main_view extends Activity
 		Map<Long, String> map = new TreeMap<Long, String>();
 		int size, i;
 
-		final List<String> feeds_array	= read_csv_to_list(new String[]{storage + "groups/" + group + ".txt", "0", "name"}).get(0);
+		final List<String> feeds_array	= read_csv_to_list(new String[]{storage + "groups/" + group + ".txt", "name"}).get(0);
 
 		for(String feed : feeds_array)
 		{
 			content_path = storage + "content/" + feed + ".store.txt.content.txt";
 			if(exists(content_path))
 			{
-				content 		= read_file_to_list(content_path, 0);
-				pubDates		= read_csv_to_list(new String[]{content_path, "0", "published"}).get(0);
+				content 		= read_file_to_list(content_path);
+				pubDates		= read_csv_to_list(new String[]{content_path, "published"}).get(0);
 
 				if(pubDates.get(0).length() < 8)
-					pubDates 	= read_csv_to_list(new String[]{content_path, "0", "pubDate"}).get(0);
+					pubDates 	= read_csv_to_list(new String[]{content_path, "pubDate"}).get(0);
 
-				/// size might be 0;
 				size = pubDates.size();
 				for(i = 0; i < size; i++)
 				{
@@ -1729,7 +1735,7 @@ public class main_view extends Activity
 					}
 					catch(Exception e){
 						main_view.log("BUG : Meant to be 3339 but looks like: " + pubDates.get(i));
-						return false;
+						return;
 					}
 
 					map.put(time.toMillis(false), content.get(i));
@@ -1743,32 +1749,16 @@ public class main_view extends Activity
 			BufferedWriter out = new BufferedWriter(new FileWriter(group_path, true));
 			for(Map.Entry<Long, String> entry : map.entrySet())
 				out.write(entry.getValue() + "\n");
-
 			out.close();
 		}
 		catch(Exception e){
 		}
 		//Debug.stopMethodTracing();
-		return true;
 	}
 
 	public static void log(String text)
 	{
 		append_string_to_file(storage + "dump.txt", text + "\n");
-	}
-
-	public static void counting_sort(int[] a, int low, int high)
-	{
-		int[] counts = new int[high - low + 1]; // this will hold all possible values, from low to high
-		for (int x : a)
-			counts[x - low]++; // - low so the lowest possible value is always 0
-
-		int current = 0;
-		for (int i = 0; i < counts.length; i++)
-		{
-			Arrays.fill(a, current, current + counts[i], i + low); // fills counts[i] elements of value i + low in current
-			current += counts[i]; // leap forward by counts[i] steps
-		}
 	}
 
 	public static void delete(String file_path)
@@ -1792,12 +1782,9 @@ public class main_view extends Activity
 
 			int width_tmp = o.outWidth;
 			if(width < 2)
-				width = Integer.parseInt(main_view.read_file_to_list(storage + "width.txt", 0).get(0));
+				width = Integer.parseInt(main_view.read_file_to_list(storage + "width.txt").get(0));
 
-			if(width_tmp > width)
-				insample =  Math.round((float) width_tmp / (float) width);
-			else
-				insample = 1;
+			insample = (width_tmp > width) ? (Math.round((float) width_tmp / (float) width)) : 1;
 		}
 		else
 			insample = 1;
