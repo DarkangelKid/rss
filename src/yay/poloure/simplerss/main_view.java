@@ -83,7 +83,7 @@ public class main_view extends Activity
 
 	private static ListView navigation_list;
 	private ActionBarDrawerToggle drawer_toggle;
-	private static Menu optionsMenu;
+	private Menu optionsMenu;
 
 	private static float density;
 
@@ -465,7 +465,7 @@ public class main_view extends Activity
 	protected void onStart()
 	{
 		super.onStart();
-		set_refresh(check_service_running());
+		//set_refresh(check_service_running());
 
 		if((PreferenceManager.getDefaultSharedPreferences(this)).getBoolean("refresh", false))
 		{
@@ -620,9 +620,10 @@ public class main_view extends Activity
 		@Override
 		public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
 		{
-			main_view.optionsMenu = menu;
+			//main_view.optionsMenu = menu;
 			inflater.inflate(R.menu.main_overflow, menu);
 			super.onCreateOptionsMenu(menu, inflater);
+			set_refresh(check_service_running());
 		}
 
 		@Override
@@ -904,6 +905,13 @@ public class main_view extends Activity
 	}
 
 	@Override
+	public boolean onCreateOptionsMenu(Menu menu)
+	{
+		optionsMenu = menu;
+		return true;
+	}
+
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
 		if(drawer_toggle.onOptionsItemSelected(item))
@@ -924,7 +932,11 @@ public class main_view extends Activity
 				else
 					refreshItem.setActionView(null);
 			}
+			else
+				log("refreshItem is null");
 		}
+		else
+			log("optionsMenu is null");
 	}
 
 	public static int return_width()
