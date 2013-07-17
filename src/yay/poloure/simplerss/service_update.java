@@ -36,6 +36,8 @@ import android.support.v4.app.TaskStackBuilder;
 import android.app.NotificationManager;
 import android.content.Intent;
 import android.app.PendingIntent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 public class service_update extends IntentService
 {
@@ -133,7 +135,7 @@ public class service_update extends IntentService
 			}
 		}
 
-		if(total > 0)
+		if((total > 0) && ((PreferenceManager.getDefaultSharedPreferences(getApplicationContext())).getBoolean("notifications", false)))
 		{
 			NotificationCompat.Builder not_builder = new NotificationCompat.Builder(this)
 					.setSmallIcon(R.drawable.rss_icon)

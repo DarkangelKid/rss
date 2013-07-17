@@ -20,5 +20,10 @@
 				simplerss:min="0"
 				simplerss:unitsLeft=""
 				simplerss:unitsRight=""/>
+		<CheckBoxPreference
+				android:key="notifications"
+				android:title="@string/notifications_preferences"
+				android:summary="@string/notifications_summary_preferences"
+				android:defaultValue="false" />
 	</PreferenceCategory>
 </PreferenceScreen>

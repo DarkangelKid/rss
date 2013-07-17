@@ -30,6 +30,8 @@
 	<string name="refresh_summary_preferences">Check to enable auto refresh</string>
 	<string name="refresh_time_preferences">Refresh Time</string>
 	<string name="refresh_time_summary_preferences">Adjust auto refresh interval</string>
+	<string name="notifications_preferences">Notifications</string>
+	<string name="notifications_summary_preferences">Check to enable notifications</string>
 
 	<string name="all_group">All</string>
 
