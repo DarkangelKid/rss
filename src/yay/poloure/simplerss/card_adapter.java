@@ -196,7 +196,7 @@ public class card_adapter extends BaseAdapter
 		}
 		else if(image_exists)
 		{
-			iv.height 					= (int) (((screen_width)/width) * height);
+			iv.height 					= (int) (((screen_width + 0.1)/(width + 0.1)) * (height + 0.1));
 			iv.width 					= LayoutParams.MATCH_PARENT;
 			holder.image_view.setLayoutParams(iv);
 		}

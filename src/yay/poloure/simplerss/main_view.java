@@ -1551,28 +1551,30 @@ public class main_view extends Activity
 			final int size = titles.size();
 			ssize = size;
 			String image_path;
-			for(int m=0; m<size; m++)
+			String image;
+			for(int m = 0; m < size; m++)
 			{
 				thumbnail_path = "";
 				Integer[] dim = {0, 0};
+				image = images.get(m);
 
-				if(!images.get(m).equals(""))
+				if(!image.equals(""))
 				{
-					image_name = images.get(m).substring(images.get(m).lastIndexOf("/") + 1, images.get(m).length());
+					image_name = images.get(m).substring(image.lastIndexOf("/") + 1, image.length());
 					thumbnail_path = storage + "thumbnails/" + image_name;
 
 					if((!exists(thumbnail_path))&&(!check_service_running()))
 					{
 						image_path = storage + "images/" + image_name;
 						if(!exists(image_path))
-							download_file(images.get(m), image_path);
+							download_file(image, image_path);
 						dimensions.add(compress_file(storage, image_name, group, false));
 					}
 
 					dim = get_image_dimensions(dimensions, image_name);
 					if(dim[0] == 0)
 					{
-						dimensions.add(compress_file(storage, image_name, group, false));
+						dimensions.add(compress_file(storage, image_name, group, true));
 						dim = get_image_dimensions(dimensions, image_name);
 					}
 				}
@@ -1754,7 +1756,7 @@ public class main_view extends Activity
 		BitmapFactory.Options o2 = new BitmapFactory.Options();
 		o2.inSampleSize = insample;
 		Bitmap bitmap = BitmapFactory.decodeFile(path + "images/" + image_name, o2);
-		if(o2.outWidth > 9)
+		//if(o2.outWidth > 9)
 			append_string_to_file(path + group + ".image_size.cache.txt", image_name + "|" + o2.outWidth + "|" + o2.outHeight + "\n");
 
 		if(!skip_save)
@@ -1782,7 +1784,7 @@ public class main_view extends Activity
 			if(line.contains(image_name))
 			{
 				int first = line.indexOf('|') + 1;
-				int second = line.indexOf('|', first + 1) + 1;
+				int second = line.lastIndexOf('|') + 1;
 				size[0] = Integer.parseInt(line.substring(first, second - 1));
 				size[1] = Integer.parseInt(line.substring(second, line.length()));
 				dim_list.remove(i);

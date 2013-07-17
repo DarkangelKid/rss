@@ -109,6 +109,8 @@ class parsered
 									c_mode = true;
 							}
 
+							cont = cont.replace("&amp;", "&").replace("&quot;", "\"");
+
 							/// Save the image url from cont.
 							if(current_tag.contains("<description"))
 							{
@@ -167,7 +169,6 @@ class parsered
 							/// Format the final string.
 							cont = cont	.replaceAll("\n", " ")
 										.replace("|", "")
-										.replace("&amp;", "&")
 										.replace("&nbsp;", " ")
 										.replaceAll("\r", " ");
 
