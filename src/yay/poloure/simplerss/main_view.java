@@ -100,7 +100,7 @@ public class main_view extends Activity
 	private static Context context, activity_context;
 	private static ViewPager viewpager;
 
-	private static List<String> current_groups, feed_titles, feed_urls, feed_groups;
+	private static List<String> current_groups;
 
 	private static feed_adapter feed_list_adapter;
 
@@ -112,7 +112,6 @@ public class main_view extends Activity
 	private String feeds_string, manage_string, settings_string, navigation_string;
 	private static String all_string;
 	private static FragmentManager fragment_manager;
-	private static final SimpleDateFormat rfc3339 = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS'Z'");
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -191,12 +190,6 @@ public class main_view extends Activity
 			viewpager.setOffscreenPageLimit(128);
 			viewpager.setOnPageChangeListener(new page_listener());
 
-			/// TODO: check to see if needed.
-			List< List<String> > content 	= read_csv_to_list(new String[]{storage + "groups/"+ all_string + ".txt", "name", "url", "group"});
-			feed_titles 					= content.get(0);
-			feed_urls 						= content.get(1);
-			feed_groups 					= content.get(2);
-
 			ViewPager manage_pager = (ViewPager) findViewById(R.id.manage_viewpager);
 			manage_pager.setAdapter(new manage_pager_adapter(getFragmentManager()));
 
@@ -259,7 +252,6 @@ public class main_view extends Activity
 		append_string_to_file(storage + "groups/" + feed_group + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|\n");
 		append_string_to_file(storage + "groups/" + all_string + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|group|" + feed_group + "|\n");
 
-		update_feeds_list();
 		update_manage_feeds();
 		update_manage_groups();
 	}
@@ -273,7 +265,11 @@ public class main_view extends Activity
 		if(feed_list_adapter != null)
 		{
 			feed_list_adapter.clear_list();
-			final int size = feed_titles.size();
+			final List< List<String> > content 	= read_csv_to_list(new String[]{storage + "groups/"+ all_string + ".txt", "name", "url", "group"});
+			final List<String> feed_titles 		= content.get(0);
+			final List<String> feed_urls 		= content.get(1);
+			final List<String> feed_groups 		= content.get(2);
+			final int size 						= feed_titles.size();
 			for(int i = 0; i < size; i++)
 				feed_list_adapter.add_list(feed_titles.get(i), feed_urls.get(i) + "\n" + feed_groups.get(i) + " • " + Integer.toString(count_lines(storage + "content/" + feed_titles.get(i) + ".store.txt.content.txt") - 1) + " items");
 			feed_list_adapter.notifyDataSetChanged();
@@ -355,7 +351,6 @@ public class main_view extends Activity
 
 		feed_adapter temp = feed_list_adapter;
 
-		update_feeds_list();
 		/// Add the new feeds to the feed_adapter (Manage/Feeds).
 		temp.remove_item(poser);
 		temp.add_list_pos(poser, new_name, new_url + "\n" + new_group + " • " + Integer.toString(count_lines(storage + "content/" + new_name + ".store.txt.content.txt") - 1) + " items");
@@ -372,14 +367,6 @@ public class main_view extends Activity
 			sort_group_content_by_time(new_group);
 	}
 
-	private void update_feeds_list()
-	{
-		List< List<String> > content 	= read_csv_to_list(new String[]{storage + "groups/" + all_string + ".txt", "name", "url", "group"});
-		feed_titles 		= content.get(0);
-		feed_urls 			= content.get(1);
-		feed_groups 		= content.get(2);
-	}
-
 	private void add_group(String group_name)
 	{
 		append_string_to_file(storage + "groups/group_list.txt", group_name + "\n");
@@ -394,7 +381,7 @@ public class main_view extends Activity
 			Intent intent = new Intent(this, service_update.class);
 			intent.putExtra("GROUP_NUMBER", "0");
 			PendingIntent pend_intent = PendingIntent.getService(this, 0, intent, 0);
-			long interval = (long) times[((int)(PreferenceManager.getDefaultSharedPreferences(this)).getInt("refresh_time", 20)/5)]*60000;
+			final long interval = (long) times[((int)(PreferenceManager.getDefaultSharedPreferences(this)).getInt("refresh_time", 20)/5)]*60000;
 			AlarmManager alarm_refresh = (AlarmManager) getSystemService(Activity.ALARM_SERVICE);
 			alarm_refresh.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + interval, interval, pend_intent);
 		}
@@ -644,8 +631,7 @@ public class main_view extends Activity
 			}
 			else if(item.getTitle().equals("refresh"))
 			{
-				update_group(((ViewPager) findViewById(R.id.pager)).getCurrentItem());
-				log("refresh" + Integer.toString(((ViewPager) findViewById(R.id.pager)).getCurrentItem()));
+				update_group(viewpager.getCurrentItem());
 				return true;
 			}
 
@@ -714,7 +700,7 @@ public class main_view extends Activity
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
-			View view = inflater.inflate(R.layout.manage_fragment, container, false);
+			final View view = inflater.inflate(R.layout.manage_fragment, container, false);
 			manage_list = (ListView) view.findViewById(R.id.group_listview);
 			group_list_adapter = new group_adapter(getActivity());
 			manage_list.setAdapter(group_list_adapter);
@@ -755,8 +741,8 @@ public class main_view extends Activity
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
-			View view = inflater.inflate(R.layout.manage_feeds, container, false);
-			ListView feed_list = (ListView) view.findViewById(R.id.feeds_listview);
+			final View view = inflater.inflate(R.layout.manage_feeds, container, false);
+			final ListView feed_list = (ListView) view.findViewById(R.id.feeds_listview);
 
 
 			feed_list.setOnItemClickListener(new OnItemClickListener()
@@ -778,7 +764,7 @@ public class main_view extends Activity
 				public boolean onItemLongClick(AdapterView<?> parent, View view, int pos, long id)
 				{
 					positionrr = pos;
-					AlertDialog.Builder builder = new AlertDialog.Builder(activity_context);
+					final AlertDialog.Builder builder = new AlertDialog.Builder(activity_context);
 					builder.setCancelable(true)
 							.setNegativeButton(getString(R.string.delete_dialog), new DialogInterface.OnClickListener()
 					{
@@ -798,7 +784,7 @@ public class main_view extends Activity
 							{
 								remove_string_from_file(storage + "groups/group_list.txt", group, false);
 								delete(storage + "groups/" + group + ".txt");
-								update_groups_non_static();
+								update_groups();
 							}
 							else
 								sort_group_content_by_time(group);
@@ -1021,14 +1007,16 @@ public class main_view extends Activity
 	private void show_edit_dialog(int position)
 	{
 		poser = position;
-		LayoutInflater inflater = LayoutInflater.from(activity_context);
-		final View edit_rss_dialog = inflater.inflate(R.layout.add_rss_dialog, null);
-		current_group = feed_groups.get(position);
-		current_title = feed_titles.get(position);
+		final LayoutInflater inflater 		= LayoutInflater.from(activity_context);
+		final View edit_rss_dialog 			= inflater.inflate(R.layout.add_rss_dialog, null);
+		final List< List<String> > content 	= read_csv_to_list(new String[]{storage + "groups/"+ all_string + ".txt", "name", "url", "group"});
+		final String current_title			= content.get(0).get(position);
+		final String current_url			= content.get(1).get(position);
+		final String current_group  		= content.get(2).get(position);
 
 		int current_spinner_position = 0;
 
-		Spinner group_spinner = (Spinner) edit_rss_dialog.findViewById(R.id.group_spinner);
+		final Spinner group_spinner = (Spinner) edit_rss_dialog.findViewById(R.id.group_spinner);
 		List<String> spinner_groups = new ArrayList<String>();
 		for(int i = 1; i < current_groups.size(); i++)
 		{
@@ -1036,13 +1024,12 @@ public class main_view extends Activity
 			if((current_groups.get(i)).equals(current_group))
 				current_spinner_position = i - 1;
 		}
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(activity_context, R.layout.group_spinner_text, spinner_groups);
+		final ArrayAdapter<String> adapter = new ArrayAdapter<String>(activity_context, R.layout.group_spinner_text, spinner_groups);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		group_spinner.setAdapter(adapter);
-		group_spinner.setSelection(current_spinner_position);
 
 		((EditText)edit_rss_dialog.findViewById(R.id.name_edit)).setText(current_title);
-		((EditText)edit_rss_dialog.findViewById(R.id.URL_edit)).setText(feed_urls.get(position));
+		((EditText)edit_rss_dialog.findViewById(R.id.URL_edit)).setText(current_url);
 		group_spinner.setSelection(current_spinner_position);
 
 		final AlertDialog edit_dialog = new AlertDialog.Builder(activity_context, 2)
@@ -1129,7 +1116,7 @@ public class main_view extends Activity
 		Boolean rss = false;
 
 		check_finished = -1;
-		if((!URL_check.contains("http"))&&(!URL_check.contains("https")))
+		if(!URL_check.contains("http"))
 		{
 			new check_feed_exists().execute("http://" + URL_check);
 			while(check_finished == -1){
@@ -1165,6 +1152,7 @@ public class main_view extends Activity
 			if(feed_name.equals(""))
 				feed_name = feed_title;
 
+			/// Replace this with a regex pattern
 			feed_name = feed_name.replace("/","")
 								.replace("\\", "")
 								.replace("?", "")
@@ -1199,8 +1187,7 @@ public class main_view extends Activity
 		{
 			try
 			{
-				BufferedInputStream in;
-				in = new BufferedInputStream((new URL(urls[0])).openStream());
+				final BufferedInputStream in = new BufferedInputStream((new URL(urls[0])).openStream());
 				byte data[] = new byte[512], data2[], next[];
 				in.read(data, 0, 512);
 				int length;
@@ -1217,7 +1204,7 @@ public class main_view extends Activity
 						data = concat_byte_arrays(data, data2);
 						line = new String(data);
 					}
-					int ind = line.indexOf(">", line.indexOf("<title")) + 1;
+					final int ind = line.indexOf(">", line.indexOf("<title")) + 1;
 					feed_title = line.substring(ind, line.indexOf("</", ind));
 					check_finished = 1;
 				}
@@ -1280,7 +1267,7 @@ public class main_view extends Activity
 	{
 		try
 		{
-			BufferedWriter out = new BufferedWriter(new FileWriter(file_path, true));
+			final BufferedWriter out = new BufferedWriter(new FileWriter(file_path, true));
 			out.write(string);
 			out.close();
 		}
@@ -1294,7 +1281,7 @@ public class main_view extends Activity
 		final List<String> list = read_file_to_list(file_path);
 		delete(file_path);
 		try{
-			BufferedWriter out = new BufferedWriter(new FileWriter(file_path, true));
+			final BufferedWriter out = new BufferedWriter(new FileWriter(file_path, true));
 			for(String item : list)
 			{
 				if(contains)
@@ -1326,7 +1313,7 @@ public class main_view extends Activity
 		}
 
 		new_items.clear();
-		for(int i = 0; i < size; i++)
+		for(String group : current_groups)
 			new_items.add(false);
 
 		List<String> nav = new ArrayList<String>();
@@ -1337,37 +1324,14 @@ public class main_view extends Activity
 		nav_adapter.add_count(get_unread_counts());
 		nav_adapter.notifyDataSetChanged();
 
+		/// If viewpager exists, fragment_manager != null.
 		if(viewpager != null)
-			viewpager.getAdapter().notifyDataSetChanged();
-	}
-
-	private void update_groups_non_static()
-	{
-		final int previous_size = current_groups.size();
-		current_groups = read_file_to_list(storage + "groups/group_list.txt");
-		final int size = current_groups.size();
-		if(size == 0)
 		{
-			append_string_to_file(storage + "groups/group_list.txt", all_string + "\n");
-			current_groups.add(all_string);
+			if(previous_size != size)
+				viewpager.setAdapter(new viewpager_adapter(fragment_manager));
+			else
+				viewpager.getAdapter().notifyDataSetChanged();
 		}
-
-		new_items.clear();
-		for(int i = 0; i < size; i++)
-			new_items.add(false);
-
-		List<String> nav = new ArrayList<String>();
-		nav.addAll(current_groups);
-		nav.addAll(0, Arrays.asList("Feeds", "Manage", "Settings", "Groups")); ///changed this shit
-
-		nav_adapter.add_list(nav);
-		nav_adapter.add_count(get_unread_counts());
-		nav_adapter.notifyDataSetChanged();
-
-		if(previous_size != size)
-			viewpager.setAdapter(new viewpager_adapter(getFragmentManager()));
-		if(viewpager != null)
-			viewpager.getAdapter().notifyDataSetChanged();
 	}
 
 	public static void update_group_order(List<String> new_order)

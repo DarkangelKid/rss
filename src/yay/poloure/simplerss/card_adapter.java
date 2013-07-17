@@ -59,7 +59,7 @@ public class card_adapter extends BaseAdapter
 	private List<Integer> content_width = new ArrayList<Integer>();
 	private List<Boolean> content_marker = new ArrayList<Boolean>();
 
-	private final LayoutInflater inflater;
+	private LayoutInflater inflater;
 	private Context context;
 	private ListView listview;
 
@@ -194,7 +194,7 @@ public class card_adapter extends BaseAdapter
 			iv.width 					= LayoutParams.WRAP_CONTENT;
 			holder.image_view.setLayoutParams(iv);
 		}
-		if(image_exists)
+		else if(image_exists)
 		{
 			iv.height 					= (int) (((screen_width)/width) * height);
 			iv.width 					= LayoutParams.MATCH_PARENT;
