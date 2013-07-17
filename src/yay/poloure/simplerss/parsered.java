@@ -22,11 +22,13 @@ class parsered
 
 	private static final SimpleDateFormat rss_date = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
 	private static final SimpleDateFormat rfc3339 = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS'Z'");
-	/*private static final SimpleDateFormat atom_date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX", Locale.ENGLISH);
-		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ENGLISH),
-		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX", Locale.ENGLISH),
-		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH)
-	};*/
+	private static final Pattern regex_tags = Pattern.compile("(&lt;).*?(&gt;)");
+	private static final Pattern regex_cdata_tags = Pattern.compile("\\<.*?\\>");
+	private static final String[] start = new String[]{"<name>", "<link>", "<published>", "<pubDate>", "<description>", "<title", "<content"};
+	private static final String[] end = new String[]{"</name>", "</link>", "</published>", "</pubDate>", "</description>", "</title", "</content"};
+	private static final String[] of_types = new String[]{"<name>", "<link>", "<published>", "<pubDate>", "<description>", "<title", "<content",
+				"</name>", "</link>", "</published>", "</pubDate>", "</description>", "</title", "</content", "<entry", "<item", "</entry", "</item"};
+	private static final int start_size = start.length;
 
 	public parsered(String file_path){
 		parse_local_xml(file_path);
@@ -36,33 +38,26 @@ class parsered
 	{
 		try
 		{
-			final Pattern regex_tags = Pattern.compile("(&lt;).*?(&gt;)");
-			final Pattern regex_cdata_tags = Pattern.compile("\\<.*?\\>");
-			final String[] start = new String[]{"<name>", "<link>", "<published>", "<pubDate>", "<description>", "<title", "<content"};
-			final String[] end = new String[]{"</name>", "</link>", "</published>", "</pubDate>", "</description>", "</title", "</content"};
-			String[] of_types = new String[]{"<name>", "<link>", "<published>", "<pubDate>", "<description>", "<title", "<content",
-				"</name>", "</link>", "</published>", "</pubDate>", "</description>", "</title", "</content", "<entry", "<item", "</entry", "</item"};
-
-			File in = new File(file_name), out = new File(file_name + ".content.txt");
-			Set<String> set = new LinkedHashSet<String>();
-			Boolean write_mode = false, c_mode = false;;
-			int pos, tem, tem2, tem3, description_length, take, cont_length;
-			Time time = new Time();
-			final int start_size = start.length;
+			final File in			= new File(file_name);
+			final File out			= new File(file_name + ".content.txt");
+			Set<String> set			= new LinkedHashSet<String>();
+			Boolean write_mode		= false;
+			Boolean c_mode			= false;
+			Time time				= new Time();
+			BufferedReader reader	= new BufferedReader(new FileReader(in));
+			StringBuilder line		= new StringBuilder();
+			String current_tag, temp_line, cont;
+			int pos, tem, tem2, tem3, description_length, take, cont_length, i;
 
 			/// Read the file's lines to a list and make a set from that.
 			if(out.exists())
 			{
 				String liner;
-				BufferedReader stream = new BufferedReader(new FileReader(out));
+				final BufferedReader stream = new BufferedReader(new FileReader(out));
 				while((liner = stream.readLine()) != null)
 					set.add(liner);
 				stream.close();
 			}
-
-			BufferedReader reader = new BufferedReader(new FileReader(in));
-			StringBuilder line = new StringBuilder();
-			String current_tag, temp_line, cont;
 
 			reader.mark(2);
 			while(reader.read() != -1)
@@ -88,7 +83,7 @@ class parsered
 				}
 				else
 				{
-					for(int i=0; i < start_size; i++)
+					for(i = 0; i < start_size; i++)
 					{
 						if(current_tag.contains(start[i]))
 						{
@@ -203,9 +198,9 @@ class parsered
 			in.delete();
 			out.delete();
 
-			String[] feeds = set.toArray(new String[set.size()]);
+			final String[] feeds = set.toArray(new String[set.size()]);
 
-			BufferedWriter write = new BufferedWriter(new FileWriter(file_name + ".content.txt", true));
+			final BufferedWriter write = new BufferedWriter(new FileWriter(file_name + ".content.txt", true));
 			for(String feed : feeds)
 				write.write(feed + "\n");
 			write.close();
@@ -262,8 +257,8 @@ class parsered
 		String popo = "";
 		try
 		{
-			BufferedReader image = new BufferedReader(new FileReader(im));
-			String image_url = image.readLine();
+			final BufferedReader image = new BufferedReader(new FileReader(im));
+			final String image_url = image.readLine();
 			if(image_url.length() > 6)
 				popo = "image|" + image_url + "|";
 		}
@@ -279,8 +274,8 @@ class parsered
 		String momo = "";
 		try
 		{
-			BufferedReader u = new BufferedReader(new FileReader(iu));
-			String url = u.readLine();
+			final BufferedReader u = new BufferedReader(new FileReader(iu));
+			final String url = u.readLine();
 			if(url.length() > 6)
 				momo = "link|" + url + "|";
 		}
@@ -344,10 +339,8 @@ class parsered
 			}
 
 			for(String type : types)
-			{
 				if(tag.contains(type))
 					found = true;
-			}
 		}
 		return tag;
 	}
@@ -355,7 +348,7 @@ class parsered
 	private void to_file(String file_namer, String string, boolean append)
 	{
 		try{
-			BufferedWriter out = new BufferedWriter(new FileWriter(file_namer, append));
+			final BufferedWriter out = new BufferedWriter(new FileWriter(file_namer, append));
 			out.write(string);
 			out.close();
 		}

@@ -39,9 +39,6 @@ import android.app.PendingIntent;
 
 public class service_update extends IntentService
 {
-	int group;
-	private static String storage;
-	private String all_string;
 
 	public service_update()
 	{
@@ -57,29 +54,29 @@ public class service_update extends IntentService
 
 		Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
-		all_string = getString(R.string.all_group);
-
-		group = Integer.parseInt(intent.getStringExtra("GROUP_NUMBER"));
-		storage = this.getExternalFilesDir(null).getAbsolutePath() + "/";
-		if(!storage.equals(""))
+		final int group 						= Integer.parseInt(intent.getStringExtra("GROUP_NUMBER"));
+		final String all_string 				= getString(R.string.all_group);
+		final String storage 					= this.getExternalFilesDir(null).getAbsolutePath() + "/";
+		/*if(!storage.equals(""))
 		{
 			main_view.delete(storage + "storage_location.txt");
 			main_view.append_string_to_file(storage + "storage_location.txt", storage);
-		}
+		}*/
 
-		List<String> all_groups = main_view.read_file_to_list(storage + "groups/group_list.txt");
-		String grouper = all_groups.get(group);
-		String group_file_path 		= storage + "groups/" + grouper + ".txt";
-		String partial_image_path 		= storage + "images/";
+		final List<String> all_groups 			= main_view.read_file_to_list(storage + "groups/group_list.txt");
+		final String grouper					= all_groups.get(group);
+		final String group_file_path 			= storage + "groups/" + grouper + ".txt";
+		final String group_content_path 		= group_file_path + ".content.txt";
 
-		List< List<String> > content 		= main_view.read_csv_to_list(new String[]{group_file_path, "name", "url"});
-		List<String> group_feeds_names 		= content.get(0);
-		List<String> group_feeds_urls 		= content.get(1);
+		final List< List<String> > content 		= main_view.read_csv_to_list(new String[]{group_file_path, "name", "url"});
+		final List<String> group_feeds_names 	= content.get(0);
+		final List<String> group_feeds_urls 	= content.get(1);
 
-		String image_name = "", thumbnail_path = "", feed_path = "";
+		String image_name = "", thumbnail_path = "", feed_path = "", image;
+		int i;
 
 		final int size = group_feeds_names.size();
-		for(int i=0; i<size; i++)
+		for(i = 0; i < size; i++)
 		{
 			feed_path = storage + "content/" + group_feeds_names.get(i); /// mariam_feed.txt
 			main_view.download_file(group_feeds_urls.get(i), feed_path + ".store.txt"); /// Downloads file as mariam_feed.store.txt
@@ -98,21 +95,20 @@ public class service_update extends IntentService
 				main_view.sort_group_content_by_time(gro);
 		}
 
-		String group_content_path 		= storage + "groups/" + grouper + ".txt.content.txt";
-		List< List<String> > contenter 	= main_view.read_csv_to_list(new String[]{group_content_path, "image"});
-		List<String> images 			= contenter.get(0);
+		final List<String> images 	= main_view.read_csv_to_list(new String[]{group_content_path, "image"}).get(0);
 
 			/// For each line of the group_content_file
 		final int sizer = images.size();
-		for(int m = 0; m < sizer; m++)
+		for(i = 0; i < sizer; i++)
 		{
-			if(!images.get(m).equals(""))
+			image = images.get(i);
+			if(!image.equals(""))
 			{
-				image_name = images.get(m).substring(images.get(m).lastIndexOf("/") + 1, images.get(m).length());
+				image_name = image.substring(image.lastIndexOf("/") + 1, image.length());
 
 				/// If the image_name does not exist in images/ then download the file at url (images[m]) to images with name image_name
-				if(!(new File(partial_image_path + image_name)).exists())
-					main_view.download_file(images.get(m), storage + "images/" + image_name);
+				if(!(new File(storage + "images/" + image_name)).exists())
+					main_view.download_file(image, storage + "images/" + image_name);
 				/// If the thumbnail does not exist in thumbnails/, compress the image in images/ to thumbnails with image_name.
 				if(!(new File(storage + "thumbnails/" + image_name)).exists())
 					main_view.compress_file(storage, image_name, grouper, false);
@@ -121,13 +117,13 @@ public class service_update extends IntentService
 
 		/// Read all the group files and how many new items.
 		/// TODO: If new feed, count new set objects and return from parser to add to the total.
-		List<Integer> unread_list = main_view.get_unread_counts();
+		final List<Integer> unread_list = main_view.get_unread_counts();
 
 		int group_items = 1;
 		int total = 0, count = 0;
 		final int sizes = unread_list.size();
 
-		for(int i = 1 ; i < sizes; i++)
+		for(i = 1 ; i < sizes; i++)
 		{
 			count = unread_list.get(i);
 			if(count > 0)
@@ -160,7 +156,6 @@ public class service_update extends IntentService
 			notification_manager.notify(1, not_builder.build());
 		}
 
-		///notification end
 		wakelock.release();
 		stopSelf();
 	}
