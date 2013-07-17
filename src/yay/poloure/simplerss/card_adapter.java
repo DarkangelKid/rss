@@ -182,14 +182,14 @@ public class card_adapter extends BaseAdapter
 			final String image_path = content_images.get(position);
 				load(image_path, holder.image_view);
 		}
-		if(description.contains(title))
+		if((description.contains(title))||(description.length() < 6))
 			description = "";
 
 		ViewGroup.LayoutParams iv = holder.image_view.getLayoutParams();
 		if((image_exists)&&(!description.isEmpty()))
 		{
 			/// The height for this needs to be divided by the shrink ratio.
-			holder.description_view.setPadding(eight, 0, 0, 0);
+			holder.description_view.setPadding(eight, 0, eight, eight);
 			iv.height 					= height;
 			iv.width 					= LayoutParams.WRAP_CONTENT;
 			holder.image_view.setLayoutParams(iv);
@@ -199,11 +199,10 @@ public class card_adapter extends BaseAdapter
 			iv.height 					= (int) (((screen_width)/width) * height);
 			iv.width 					= LayoutParams.MATCH_PARENT;
 			holder.image_view.setLayoutParams(iv);
-			holder.description_view.setPadding(0, 0, 0, 0);
 		}
 		else
 		{
-			holder.description_view.setPadding(0, 0, 0, 0);
+			holder.description_view.setPadding(eight, 0, eight, eight);
 			iv.height 					= 0;
 			iv.width 					= 0;
 			holder.image_view.setLayoutParams(iv);
@@ -265,7 +264,7 @@ public class card_adapter extends BaseAdapter
 			load_image task = new load_image(imageView);
 			DownloadedDrawable downloadedDrawable = new DownloadedDrawable(task);
 			imageView.setImageDrawable(downloadedDrawable);
-			task.execute(url);
+			task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url);
 		}
 	}
 
