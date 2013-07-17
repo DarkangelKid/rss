@@ -265,7 +265,7 @@ public class card_adapter extends BaseAdapter
 			load_image task = new load_image(imageView);
 			DownloadedDrawable downloadedDrawable = new DownloadedDrawable(task);
 			imageView.setImageDrawable(downloadedDrawable);
-			task.execute(url);
+			task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url);
 		}
 	}
 

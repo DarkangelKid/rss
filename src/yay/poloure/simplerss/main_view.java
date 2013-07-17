@@ -237,7 +237,7 @@ public class main_view extends Activity
 				width = Integer.parseInt(read_file_to_list(storage + "width.txt").get(0));
 
 			if(count_lines(storage + "groups/" + all_string + ".txt") > 0)
-				new refresh_page(0).execute();
+				new refresh_page(0).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 			drawer_toggle.syncState();
 			density = getResources().getDisplayMetrics().density;
@@ -577,10 +577,10 @@ public class main_view extends Activity
 		public void onPageSelected(int position)
 		{
 			if(get_card_adapter(position).getCount() == 0)
-				new refresh_page(position).execute();
+				new refresh_page(position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 			else if(new_items.get(position))
 			{
-				new refresh_page(position).execute();
+				new refresh_page(position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 				new_items.set(position, false);
 			}
 		}
@@ -1118,13 +1118,13 @@ public class main_view extends Activity
 		check_finished = -1;
 		if(!URL_check.contains("http"))
 		{
-			new check_feed_exists().execute("http://" + URL_check);
+			new check_feed_exists().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "http://" + URL_check);
 			while(check_finished == -1){
 			}
 			if(check_finished == 0)
 			{
 				check_finished = -1;
-				new check_feed_exists().execute("https://" + URL_check);
+				new check_feed_exists().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "https://" + URL_check);
 				while(check_finished == -1){
 				}
 				if(check_finished == 1)
@@ -1135,7 +1135,7 @@ public class main_view extends Activity
 		}
 		else
 		{
-			new check_feed_exists().execute(URL_check);
+			new check_feed_exists().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
 			while(check_finished == -1){
 			}
 		}
@@ -1485,7 +1485,7 @@ public class main_view extends Activity
 			new_items.set(0, true);
 			new_items.set(page_number, true);
 		}
-		new refresh_page(page_number).execute();
+		new refresh_page(page_number).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 
 	private class refresh_page extends AsyncTask<Void, Object, Long>
@@ -1570,6 +1570,11 @@ public class main_view extends Activity
 					}
 
 					dim = get_image_dimensions(dimensions, image_name);
+					if(dim[0] == 0)
+					{
+						dimensions.add(compress_file(storage, image_name, group, false));
+						dim = get_image_dimensions(dimensions, image_name);
+					}
 				}
 
 				// Checks to see if page has this item.
