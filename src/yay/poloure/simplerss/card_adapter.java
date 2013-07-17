@@ -356,15 +356,16 @@ public class card_adapter extends BaseAdapter
 		}
 	}
 
-	private static final int HARD_CACHE_CAPACITY = 10;
+	private static final int HARD_CACHE_CAPACITY = 8;
 	private static final int DELAY_BEFORE_PURGE = 10 * 1000;
 
 	private final HashMap<String, Bitmap> sHardBitmapCache =
 		new LinkedHashMap<String, Bitmap>(HARD_CACHE_CAPACITY / 2, 0.75f, true)
 		{
 			@Override
-			protected boolean removeEldestEntry(LinkedHashMap.Entry<String, Bitmap> eldest) {
-				if (size() > HARD_CACHE_CAPACITY)
+			protected boolean removeEldestEntry(LinkedHashMap.Entry<String, Bitmap> eldest)
+			{
+				if(size() > HARD_CACHE_CAPACITY)
 				{
 					sSoftBitmapCache.put(eldest.getKey(), new SoftReference<Bitmap>(eldest.getValue()));
 					return true;

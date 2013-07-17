@@ -109,10 +109,10 @@ public class service_update extends IntentService
 				image_name = image.substring(image.lastIndexOf("/") + 1, image.length());
 
 				/// If the image_name does not exist in images/ then download the file at url (images[m]) to images with name image_name
-				if(!(new File(storage + "images/" + image_name)).exists())
+				if(!main_view.exists(storage + "images/" + image_name))
 					main_view.download_file(image, storage + "images/" + image_name);
 				/// If the thumbnail does not exist in thumbnails/, compress the image in images/ to thumbnails with image_name.
-				if(!(new File(storage + "thumbnails/" + image_name)).exists())
+				if(!main_view.exists(storage + "thumbnails/" + image_name))
 					main_view.compress_file(storage, image_name, grouper, false);
 			}
 		}
