@@ -278,12 +278,12 @@ public class main_view extends Activity
 
 	private void update_manage_groups()
 	{
-		fragment_group grp_frag;
+		fragment_group grp_frag = null;
 		group_adapter manage_adapter = null;
 		try
 		{
-			grp_frag = (fragment_group) getFragmentManager().findFragmentByTag("android:switcher:" + ((ViewPager) findViewById(R.id.manage_viewpager)).getId() + ":0");
-			manage_adapter = (group_adapter)((fragment_group) getFragmentManager().findFragmentByTag("android:switcher:" + ((ViewPager) findViewById(R.id.manage_viewpager)).getId() + ":0")).return_listview().getAdapter();
+			grp_frag = (fragment_group) fragment_manager.findFragmentByTag("android:switcher:" + ((ViewPager) findViewById(R.id.manage_viewpager)).getId() + ":0");
+			manage_adapter = (group_adapter) grp_frag.return_listview().getAdapter();
 		}
 		catch(Exception e){
 		}
@@ -1732,7 +1732,22 @@ public class main_view extends Activity
 
 	public static Boolean exists(String file_path)
 	{
-		return (new File(file_path)).exists();
+		final File file = new File(file_path);
+		if (file.exists())
+		{
+			try{
+				FileReader fr = new FileReader(file);
+				if(fr.read() == -1)
+					return false;
+				else
+					return true;
+			}
+			catch(Exception e){
+				return false;
+			}
+		}
+		else
+			return false;
 	}
 
 	public static String compress_file(String path, String image_name, String group, Boolean skip_save)

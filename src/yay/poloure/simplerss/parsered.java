@@ -20,15 +20,18 @@ import java.text.SimpleDateFormat;
 class parsered
 {
 
-	private static final SimpleDateFormat rss_date = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
-	private static final SimpleDateFormat rfc3339 = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS'Z'");
-	private static final Pattern regex_tags = Pattern.compile("(&lt;).*?(&gt;)");
-	private static final Pattern regex_cdata_tags = Pattern.compile("\\<.*?\\>");
-	private static final String[] start = new String[]{"<name>", "<link>", "<published>", "<pubDate>", "<description>", "<title", "<content"};
-	private static final String[] end = new String[]{"</name>", "</link>", "</published>", "</pubDate>", "</description>", "</title", "</content"};
-	private static final String[] of_types = new String[]{"<name>", "<link>", "<published>", "<pubDate>", "<description>", "<title", "<content",
+	private static final SimpleDateFormat rss_date		= new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
+	private static final SimpleDateFormat rfc3339		= new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS'Z'");
+	private static final Pattern regex_tags				= Pattern.compile("(&lt;).*?(&gt;)");
+	private static final Pattern regex_cdata_tags		= Pattern.compile("\\<.*?\\>");
+	private static final Pattern space_tags				= Pattern.compile("(&nbsp;|\r+|\n+|\\|)");
+	private static final String[] start					= new String[]{"<name>", "<link>", "<published>", "<pubDate>", "<description>", "<title", "<content"};
+	private static final String[] end					= new String[]{"</name>", "</link>", "</published>", "</pubDate>", "</description>", "</title", "</content"};
+	private static final String[] of_types				= new String[]{"<name>", "<link>", "<published>", "<pubDate>", "<description>", "<title", "<content",
 				"</name>", "</link>", "</published>", "</pubDate>", "</description>", "</title", "</content", "<entry", "<item", "</entry", "</item"};
-	private static final int start_size = start.length;
+	private static final int start_size 				= start.length;
+	private String dump_path;
+	private String url_path;
 
 	public parsered(String file_path){
 		parse_local_xml(file_path);
@@ -38,8 +41,10 @@ class parsered
 	{
 		try
 		{
+			dump_path				= file_name.concat(".content.dump.txt");
+			url_path				= file_name.concat(".content.url.txt");
 			final File in			= new File(file_name);
-			final File out			= new File(file_name + ".content.txt");
+			final File out			= new File(file_name.concat(".content.txt"));
 			Set<String> set			= new LinkedHashSet<String>();
 			Boolean write_mode		= false;
 			Boolean c_mode			= false;
@@ -78,8 +83,8 @@ class parsered
 				}
 				else if((current_tag.contains("</entry"))||(current_tag.contains("</item")))
 				{
-					line.append(check_for_image(file_name));
-					line.append(check_for_url(file_name));
+					line.append(check_for_image());
+					line.append(check_for_url());
 				}
 				else
 				{
@@ -126,7 +131,7 @@ class parsered
 										if((tem3 != -1)&&(tem3 < tem2))
 												tem2 = tem3;
 									}
-									to_file(file_name + ".content.dump.txt", cont.substring(tem + 9, tem2) + "\n", false);
+									to_file(dump_path, cont.substring(tem + 9, tem2) + "\n", false);
 								}
 							}
 							/// If it follows the rss 2.0 specification for rfc882
@@ -164,13 +169,12 @@ class parsered
 								c_mode = false;
 							}
 							else
+							{
+								main_view.log("about to try regex");
 								cont = regex_tags.matcher(cont).replaceAll("");
-
-							/// Format the final string.
-							cont = cont	.replaceAll("\n", " ")
-										.replace("|", "")
-										.replace("&nbsp;", " ")
-										.replaceAll("\r", " ");
+								cont = space_tags.matcher(cont).replaceAll(" ");
+							}
+							main_view.log("did regex");
 
 							take = description_length;
 							description_length = description_length + cont.length();
@@ -201,6 +205,7 @@ class parsered
 
 			final String[] feeds = set.toArray(new String[set.size()]);
 
+			/// TODO: May already be the out File.
 			final BufferedWriter write = new BufferedWriter(new FileWriter(file_name + ".content.txt", true));
 			for(String feed : feeds)
 				write.write(feed + "\n");
@@ -214,17 +219,20 @@ class parsered
 	{
 		StringBuilder cont = new StringBuilder();
 		Boolean found = false;
-		if(end_tag.length() > 8)
-			end_tag = end_tag.substring(0, 8);
-		char[] test_tag = new char[8];
+		/// <content
+		/// 01234567 -- length 8 -- end_length = 7
+		final int end_length = end_tag.length() - 1;
+		end_tag = end_tag.substring(1, end_length + 1);
+		char[] test_tag = new char[end_length];
 		try
 		{
 			while(!found)
 			{
 				cont.append(read_string_to_next_char(reader, '<'));
-				reader.mark(8);
-				reader.read(test_tag, 0, 8);
-				if(("<" + new String(test_tag)).contains(end_tag))
+				reader.mark(end_length);
+				reader.read(test_tag, 0, end_length);
+				main_view.log(end_tag + " | " + (new String(test_tag)));
+				if((new String(test_tag)).equals(end_tag))
 					found = true;
 				reader.reset();
 			}
@@ -252,9 +260,9 @@ class parsered
 		}
 	}
 
-	private String check_for_image(String file_name)
+	private String check_for_image()
 	{
-		final File im = new File(file_name + ".content.dump.txt");
+		final File im = new File(dump_path);
 		String popo = "";
 		try
 		{
@@ -269,9 +277,9 @@ class parsered
 		return popo;
 	}
 
-	private String check_for_url(String file_name)
+	private String check_for_url()
 	{
-		final File iu = new File(file_name + ".content.url.txt");
+		final File iu = new File(url_path);
 		String momo = "";
 		try
 		{
@@ -318,7 +326,7 @@ class parsered
 					if((tem3 != -1)&&(tem3 < tem2))
 							tem2 = tem3;
 				}
-				to_file(file_name + ".content.dump.txt", tag.substring(tem + 9, tem2) + "\n", false);
+				to_file(dump_path, tag.substring(tem + 9, tem2) + "\n", false);
 			}
 
 			if(tag.contains("type=\"text/html\""))
@@ -335,7 +343,7 @@ class parsered
 						if((tem3 != -1)&&(tem3 < tem2))
 								tem2 = tem3;
 					}
-					to_file(file_name + ".content.url.txt", tag.substring(tem + 6, tem2) + "\n", false);
+					to_file(url_path, tag.substring(tem + 6, tem2) + "\n", false);
 				}
 			}
 
