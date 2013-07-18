@@ -111,7 +111,6 @@ public class main_view extends Activity
 	private static final String[] folders = {"images", "thumbnails", "groups", "content"};
 	private static FragmentManager fragment_manager;
 	private static SharedPreferences pref;
-	private static LayoutInflater inf;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
