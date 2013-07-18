@@ -580,10 +580,7 @@ public class main_view extends Activity
 			if(get_card_adapter(position).getCount() == 0)
 				new refresh_page(position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 			else if(new_items.get(position))
-			{
 				new refresh_page(position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-				new_items.set(position, false);
-			}
 		}
 	}
 
@@ -1538,49 +1535,57 @@ public class main_view extends Activity
 	private class refresh_page extends AsyncTask<Void, Object, Long>
 	{
 		int marker_position = -1, ssize, refresh_count = 0, page_number;
-		ListFragment l;
-		Boolean first;
+		Boolean markerer;
 		final Animation animFadeIn = AnimationUtils.loadAnimation(getApplicationContext(), android.R.anim.fade_in);
+		ListFragment l;
+		card_adapter ith;
+		ListView lv;
 
 		public refresh_page(int page)
 		{
 			//Debug.startMethodTracing("refresh2");
-			log("about to start for page = " + Integer.toString(page));
 			page_number = page;
-			first = true;
 		}
 
 		@Override
 		protected void onPreExecute(){
+			if(l == null)
+				l = (fragment_card) fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_number));
+			if(l != null)
+			{
+				ith = ((card_adapter) l.getListAdapter());
+				lv = l.getListView();
+
+				if((ith != null)&&(lv != null)&&(ith.getCount() == 0))
+					lv.setVisibility(View.INVISIBLE);
+			}
 		}
 
 		@Override
 		protected Long doInBackground(Void... hey)
 		{
-
 			/// while the service is running on new_items and this page is refreshing.
-			while(check_service_running())
+			if(new_items.get(page_number))
 			{
-				try{
-					Thread.sleep(100);
-				}
-				catch(Exception e){
+				while(check_service_running())
+				{
+					try{
+						Thread.sleep(100);
+					}
+					catch(Exception e){
+					}
 				}
 			}
 
-			log("current groups at pos = " + page_number + " is");
-			log(current_groups.get(page_number));
 			String group					= current_groups.get(page_number);
 			final String group_file_path 	= storage + "groups/" + group + ".txt";
 			final String group_content_path = group_file_path + ".content.txt";
-			final Boolean service 			= check_service_running();
 			String image_name, thumbnail_path;
 
 			/// If the group has no feeds  or  the content file does not exist, end.
 			if((!exists(group_file_path))||(!exists(group_content_path)))
 				return 0L;
 
-			log("about to read csv");
 			List< List<String> > contenter 	= read_csv_to_list(new String[]{group_content_path, "marker|", "title|", "description|", "link|" , "image|", "width|", "height|"});
 			List<String> marker				= contenter.get(0);
 			List<String> titles				= contenter.get(1);
@@ -1626,79 +1631,73 @@ public class main_view extends Activity
 						width = 0;
 				}
 
+				markerer = false;
+				/// It should stop at the latest one unless there is not a newest one. So stay at 0 until it finds one.
+				if(marker.get(m).equals("1"))
+				{
+					markerer = true;
+					marker_position = 0;
+				}
+				if(marker_position != -1)
+					marker_position++;
+
+				if(l == null)
+					l = (fragment_card) fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_number));
+				if((l != null)&&((ith == null)||(lv == null)))
+				{
+					ith = ((card_adapter) l.getListAdapter());
+					lv = l.getListView();
+				}
+
 				// Checks to see if page has this item.
 				if(existing_items.add(links.get(m)))
-					publishProgress(page_number, titles.get(m), descriptions.get(m), links.get(m), thumbnail_path, height, width, marker.get(m));
+					publishProgress(titles.get(m), descriptions.get(m), links.get(m), thumbnail_path, height, width, markerer);
 			}
+			new_items.set(page_number, false);
 			return 0L;
 		}
 
 		@Override
 		protected void onProgressUpdate(Object... progress)
 		{
-			if(l == null)
-				l = (fragment_card) fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString((Integer) progress[0]));
-			if(l != null)
+			/*int index = lv.getFirstVisiblePosition() + 1;
+			View v = lv.getChildAt(0);
+			int top = (v == null) ? 0 : v.getTop();
+			if(top == 0)
+				index++;
+			else if (top < 0 && lv.getChildAt(1) != null)
 			{
-				final card_adapter ith = ((card_adapter) l.getListAdapter());
-				final ListView lv = l.getListView();
-				if(first)
-				{
-					if(refresh_count == 0)
-						l.getListView().setVisibility(View.INVISIBLE);
-					first = false;
-				}
-				Boolean marker = false;
-				/// It should stop at the latest one unless there is not a newest one. So stay at 0 until it finds one.
-				if(((String) progress[7]).equals("1"))
-				{
-					marker = true;
-					marker_position = 0;
-				}
-				if(marker_position != -1)
-					marker_position++;
+				index++;
+				v = lv.getChildAt(1);
+				top = v.getTop();
+			}*/
 
-				/*int index = lv.getFirstVisiblePosition() + 1;
-				View v = lv.getChildAt(0);
-				int top = (v == null) ? 0 : v.getTop();
-				if(top == 0)
-					index++;
-				else if (top < 0 && lv.getChildAt(1) != null)
-				{
-					index++;
-					v = lv.getChildAt(1);
-					top = v.getTop();
-				}*/
+			ith.add_list((String) progress[0], (String) progress[1], (String) progress[2], (String) progress[3], (Integer) progress[4], (Integer) progress[5], (Boolean) progress[6]);
+			ith.notifyDataSetChanged();
+			refresh_count++;
 
-				ith.add_list((String) progress[1], (String) progress[2], (String) progress[3], (String) progress[4], (Integer) progress[5], (Integer) progress[6], marker);
-				ith.notifyDataSetChanged();
-				refresh_count++;
-
-				//lv.setSelectionFromTop(index, top - twelve);
-				if(marker_position != -1)
-				{
-					if((refresh_count == ssize)&&(marker_position == 1))
-						lv.setSelection(0);
-					else
-						lv.setSelection(marker_position);
-				}
+			//lv.setSelectionFromTop(index, top - twelve);
+			if(marker_position != -1)
+			{
+				if((refresh_count == ssize)&&(marker_position == 1))
+					lv.setSelection(0);
 				else
-					lv.setSelection(refresh_count);
+					lv.setSelection(marker_position);
 			}
+			else
+				lv.setSelection(refresh_count);
 		}
 
 		@Override
 		protected void onPostExecute(Long tun)
 		{
-			if(l != null)
-			{
-				ListView lv = l.getListView();
-				lv.setAnimation(animFadeIn);
-				lv.setVisibility(View.VISIBLE);
-			}
+			if(lv == null)
+				return;
+			lv.setAnimation(animFadeIn);
+			lv.setVisibility(View.VISIBLE);
+			set_refresh(check_service_running());
 			//if(viewPager.getOffscreenPageLimit() > 1)
 				//viewPager.setOffscreenPageLimit(1);
-			set_refresh(false);
 			//Debug.stopMethodTracing();
 		}
 	}
