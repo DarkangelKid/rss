@@ -8,8 +8,6 @@ import java.io.File;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.List;
-import java.util.ArrayList;
 import java.util.regex.Pattern;
 //import android.os.Debug;
 import android.text.format.Time;
@@ -53,7 +51,7 @@ class parsered
 			BufferedReader reader	= new BufferedReader(new FileReader(in));
 			StringBuilder line		= new StringBuilder();
 			String current_tag, temp_line, cont, image, image_name;
-			int pos, tem, tem2, tem3, description_length, take, cont_length, i;
+			int tem, tem2, tem3, description_length, take, cont_length, i;
 
 			/// Read the file's lines to a list and make a set from that.
 			if(out.exists())
@@ -72,7 +70,7 @@ class parsered
 			while(reader.read() != -1)
 			{
 				reader.reset();
-				current_tag = get_next_tag(reader, of_types, file_name);
+				current_tag = get_next_tag(reader, of_types);
 				if((current_tag.contains("<entry"))||(current_tag.contains("<item")))
 				{
 					/// Add line to set and reset the line.
@@ -152,7 +150,7 @@ class parsered
 										if((tem3 != -1)&&(tem3 < tem2))
 												tem2 = tem3;
 									}
-									to_file(dump_path, cont.substring(tem + 9, tem2) + "\n", false);
+									to_file(dump_path, cont.substring(tem + 9, tem2) + "\n");
 								}
 							}
 							/// If it follows the rss 2.0 specification for rfc882
@@ -310,12 +308,12 @@ class parsered
 		return momo;
 	}
 
-	private String get_next_tag(BufferedReader reader, String[] types, String file_name) throws Exception
+	private String get_next_tag(BufferedReader reader, String[] types) throws Exception
 	{
 		boolean found = false;
 		int tem, tem2, tem3;
 		String tag = "";
-		int eof = 0;
+		int eof;
 		while(!found)
 		{
 			char current = '\0';
@@ -342,7 +340,7 @@ class parsered
 					if((tem3 != -1)&&(tem3 < tem2))
 							tem2 = tem3;
 				}
-				to_file(dump_path, tag.substring(tem + 9, tem2) + "\n", false);
+				to_file(dump_path, tag.substring(tem + 9, tem2) + "\n");
 			}
 
 			if(tag.contains("type=\"text/html\""))
@@ -359,7 +357,7 @@ class parsered
 						if((tem3 != -1)&&(tem3 < tem2))
 								tem2 = tem3;
 					}
-					to_file(url_path, tag.substring(tem + 6, tem2) + "\n", false);
+					to_file(url_path, tag.substring(tem + 6, tem2) + "\n");
 				}
 			}
 
@@ -370,10 +368,10 @@ class parsered
 		return tag;
 	}
 
-	private void to_file(String file_namer, String string, boolean append)
+	private void to_file(String file_namer, String string)
 	{
 		try{
-			final BufferedWriter out = new BufferedWriter(new FileWriter(file_namer, append));
+			final BufferedWriter out = new BufferedWriter(new FileWriter(file_namer));
 			out.write(string);
 			out.close();
 		}

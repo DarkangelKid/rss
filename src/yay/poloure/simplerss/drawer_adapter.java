@@ -8,22 +8,20 @@ import android.widget.TextView;
 import android.content.Context;
 import android.view.LayoutInflater;
 import java.util.List;
-import android.widget.ListView;
 import android.widget.ImageView;
 
 public class drawer_adapter extends BaseAdapter
 {
-	private List<String> menu_list = new ArrayList<String>();
-	private List<Integer> count_list = new ArrayList<Integer>();
+	private static final List<String> menu_list = new ArrayList<String>();
+	private static final List<Integer> count_list = new ArrayList<Integer>();
+	private static int twelve;
 
-	LayoutInflater inflater;
-
-	private final Context context;
+	private static LayoutInflater inflater;
 
 	public drawer_adapter(Context context_main)
 	{
-		context = context_main;
-		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		inflater = (LayoutInflater) context_main.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		twelve = (int) ((12 * main_view.get_pixel_density() + 0.5f));
 	}
 
 	public void add_list(List<String> new_title)
@@ -56,9 +54,7 @@ public class drawer_adapter extends BaseAdapter
 	@Override
 	public boolean isEnabled(int position)
 	{
-		if(position == 3)
-			return false;
-		return true;
+		return position != 3;
 	}
 
 	@Override
@@ -83,16 +79,15 @@ public class drawer_adapter extends BaseAdapter
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
 		int view_type = getItemViewType(position);
+		View view;
 		if(view_type == 0)
 		{
 			StaticViewHolder holder;
-			View view;
 			if(convertView == null)
 			{
-				ViewGroup view_group = (ViewGroup)inflater.inflate(R.layout.static_drawer_item, parent, false);
+				View view_group = (View) inflater.inflate(R.layout.static_drawer_item, parent, false);
 				holder = new StaticViewHolder();
 				holder.title_view = (TextView) view_group.findViewById(R.id.menu_item);
-				holder.icon_view = (ImageView) view_group.findViewById(R.id.icon_item);
 				view_group.setTag(holder);
 				view = view_group;
 			}
@@ -103,20 +98,20 @@ public class drawer_adapter extends BaseAdapter
 			}
 
 			holder.title_view.setText(menu_list.get(position));
-			if(position == 0)
-				holder.icon_view.setImageResource(R.drawable.feeds);
-			else if(position == 1)
-				holder.icon_view.setImageResource(R.drawable.manage);
-			else
-				holder.icon_view.setImageResource(R.drawable.settings);
-			return view;
-		}
 
+			if(position == 0)
+				holder.title_view.setCompoundDrawablesWithIntrinsicBounds(R.drawable.feeds, 0, 0, 0);
+			else if(position == 1)
+				holder.title_view.setCompoundDrawablesWithIntrinsicBounds(R.drawable.manage, 0, 0, 0);
+			else
+				holder.title_view.setCompoundDrawablesWithIntrinsicBounds(R.drawable.settings, 0, 0, 0);
+
+			holder.title_view.setCompoundDrawablePadding(twelve);
+		}
 		else if(view_type == 1)
 		{
 			///return a header view
 			HeaderViewHolder holder;
-			View view;
 			if(convertView == null)
 			{
 				ViewGroup view_group = (ViewGroup)inflater.inflate(R.layout.header_drawer_item, parent, false);
@@ -133,15 +128,11 @@ public class drawer_adapter extends BaseAdapter
 			}
 			holder.title_view.setText(menu_list.get(position));
 			holder.divider_view.setImageResource(R.drawable.drawer_divider);
-
-			return view;
 		}
-
 		else
 		{
 			///return a feed group view
 			TextViewHolder holder;
-			View view;
 			if(convertView == null)
 			{
 				ViewGroup view_group = (ViewGroup)inflater.inflate(R.layout.group_drawer_item, parent, false);
@@ -159,15 +150,13 @@ public class drawer_adapter extends BaseAdapter
 			holder.title_view.setText(menu_list.get(position));
 			String number = Integer.toString(count_list.get(position - 4));
 				holder.unread_view.setText((number.equals("0")) ? "" : number);
-
-			return view;
 		}
+		return view;
 	}
 
 	static class StaticViewHolder
 	{
 		TextView title_view;
-		ImageView icon_view;
 	}
 
 	static class HeaderViewHolder

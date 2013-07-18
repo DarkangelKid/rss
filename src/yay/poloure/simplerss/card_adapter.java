@@ -3,15 +3,10 @@ package yay.poloure.simplerss;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
-import android.widget.RelativeLayout;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.TransitionDrawable;
 import android.graphics.drawable.ColorDrawable;
-import android.content.res.Resources;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -22,23 +17,16 @@ import android.widget.ListView;
 import android.view.ViewGroup.LayoutParams;
 import java.util.List;
 import android.widget.AbsListView;
-import android.widget.AbsListView.OnScrollListener;
 import java.util.ArrayList;
 import android.net.Uri;
-import android.os.Process;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import java.io.File;
-import java.io.StringWriter;
-import java.io.PrintWriter;
-import java.io.FileWriter;
-import java.io.BufferedWriter;
 import java.lang.ref.WeakReference;
 import java.lang.ref.SoftReference;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
 import android.view.animation.DecelerateInterpolator;
 
 import java.util.HashMap;
@@ -51,21 +39,21 @@ import android.os.Debug;
 
 public class card_adapter extends BaseAdapter
 {
-	private List<String> content_titles = new ArrayList<String>();
-	private List<String> content_des = new ArrayList<String>();
-	private List<String> content_links = new ArrayList<String>();
-	private List<String> content_images = new ArrayList<String>();
-	private List<Integer> content_height = new ArrayList<Integer>();
-	private List<Integer> content_width = new ArrayList<Integer>();
-	private List<Boolean> content_marker = new ArrayList<Boolean>();
+	private final List<String> content_titles = new ArrayList<String>();
+	private final List<String> content_des = new ArrayList<String>();
+	private final List<String> content_links = new ArrayList<String>();
+	private final List<String> content_images = new ArrayList<String>();
+	private final List<Integer> content_height = new ArrayList<Integer>();
+	private final List<Integer> content_width = new ArrayList<Integer>();
+	private final List<Boolean> content_marker = new ArrayList<Boolean>();
 
-	private LayoutInflater inflater;
-	private Context context;
+	private static LayoutInflater inflater;
+	private final Context context;
 	private ListView listview;
 
 	private static int eight = 0;
 	private int top_item_position = -1;
-	private int screen_width;
+	private final int screen_width;
 	private int total = 0;
 
 	public card_adapter(Context context_main)
@@ -250,7 +238,7 @@ public class card_adapter extends BaseAdapter
 		return BitmapFactory.decodeFile(filePath, o);
 	}
 
-	public void load(String path, ImageView imageView)
+	private void load(String path, ImageView imageView)
 	{
 		resetPurgeTimer();
 		Bitmap bitmap = getBitmapFromCache(path);
@@ -436,7 +424,7 @@ public class card_adapter extends BaseAdapter
 		return null;
 	}
 
-	public void clearCache()
+	private void clearCache()
 	{
 		sHardBitmapCache.clear();
 		sSoftBitmapCache.clear();
@@ -459,7 +447,7 @@ public class card_adapter extends BaseAdapter
 
 	private class image_call implements View.OnClickListener
 	{
-		private String image_path;
+		private final String image_path;
 		public image_call(String im)
 		{
 			image_path = im;

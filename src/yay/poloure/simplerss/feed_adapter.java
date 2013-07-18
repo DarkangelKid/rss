@@ -8,76 +8,73 @@ import android.widget.TextView;
 import android.content.Context;
 import android.view.LayoutInflater;
 import java.util.List;
-import android.widget.ListView;
 
 public class feed_adapter extends BaseAdapter
 {
-	private List<String> title_list = new ArrayList<String>();
-	private List<String> info_list = new ArrayList<String>();
-	
-	LayoutInflater inflater;
-	
-	private final Context context;
-	
+	private static final List<String> title_list = new ArrayList<String>();
+	private static final List<String> info_list = new ArrayList<String>();
+
+	private static LayoutInflater inflater;
+
 	public feed_adapter(Context context_main)
 	{
-		context = context_main;
-		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		inflater = (LayoutInflater) context_main.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
-	
+
 	public void add_list(String new_title, String new_info)
 	{
 		title_list.add(new_title);
 		info_list.add(new_info);
 	}
-	
+
 	public void add_list_pos(int pos, String new_title, String new_info)
 	{
 		title_list.add(pos, new_title);
 		info_list.add(pos, new_info);
 	}
-	
-	public void clear_list(){
-		title_list = new ArrayList<String>();
-		info_list = new ArrayList<String>();
+
+	public void clear_list()
+	{
+		title_list.clear();
+		info_list.clear();
 	}
-	
-	public List<String> return_titles(){
-		return title_list;
-	}
-	
+
 	@Override
-	public int getCount(){
+	public int getCount()
+	{
 		return title_list.size();
 	}
-	
+
 	@Override
-	public long getItemId(int position){
+	public long getItemId(int position)
+	{
 		return position;
 	}
-	
+
 	public void remove_item(int position)
 	{
 		title_list.remove(position);
 		info_list.remove(position);
 	}
-	
+
 	@Override
-	public String getItem(int position){
+	public String getItem(int position)
+	{
 		return title_list.get(position);
 	}
-	
-	public String get_info(int position){
+
+	public String get_info(int position)
+	{
 			return info_list.get(position);
 	}
-	
+
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
 			ViewHolder holder;
 			if(convertView == null)
 			{
-				
+
 				convertView = inflater.inflate(R.layout.feed_list_item, parent, false);
 				holder = new ViewHolder();
 				holder.title_view = (TextView) convertView.findViewById(R.id.title_item);
@@ -89,9 +86,9 @@ public class feed_adapter extends BaseAdapter
 
 			holder.title_view.setText(title_list.get(position));
 			holder.info_view.setText(info_list.get(position));
-			
+
 			//convertView.setOnLongClickListener(new long_press_listener());
-			
+
 			return convertView;
 	}
 

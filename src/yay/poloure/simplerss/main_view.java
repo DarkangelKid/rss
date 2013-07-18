@@ -62,8 +62,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.Arrays;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Locale;
 
 import java.io.File;
 import java.io.BufferedInputStream;
@@ -73,7 +71,6 @@ import java.io.FileReader;
 import java.io.BufferedWriter;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap;
@@ -114,7 +111,7 @@ public class main_view extends Activity
 	private static final String[] folders = {"images", "thumbnails", "groups", "content"};
 	private static FragmentManager fragment_manager;
 	private static SharedPreferences pref;
-
+	private static LayoutInflater inf;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -133,25 +130,22 @@ public class main_view extends Activity
 			action_bar.setTitle(feeds_string);
 			action_bar.setIcon(R.drawable.rss_icon);
 
-			FrameLayout frame = new FrameLayout(this);
-			frame.setId(CONTENT_VIEW_ID);
-			setContentView(frame, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+			inf = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			setContentView(inf.inflate(R.layout.pager, null), new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
 			fragment_manager = getFragmentManager();
 
-			fragment_manager.beginTransaction()
-						.add(CONTENT_VIEW_ID, new fragment_top())
-						.commit();
 			Fragment feed = new fragment_feed();
-			Fragment pref = new fragment_preferences();
+			Fragment prefs = new fragment_preferences();
 			Fragment man = new fragment_manage();
 			fragment_manager.beginTransaction()
 				.add(R.id.content_frame, feed, feeds_string)
-				.add(R.id.content_frame, pref, settings_string)
+				.add(R.id.content_frame, prefs, settings_string)
 				.add(R.id.content_frame, man, manage_string)
 				.hide(man)
-				.hide(pref)
+				.hide(prefs)
 				.commit();
+			pref = PreferenceManager.getDefaultSharedPreferences(this);
 		}
 	}
 
@@ -184,6 +178,9 @@ public class main_view extends Activity
 
 			navigation_list = (ListView) findViewById(R.id.left_drawer);
 			navigation_list.setOnItemClickListener(new DrawerItemClickListener());
+
+			res = getResources();
+			density = res.getDisplayMetrics().density;
 
 			nav_adapter = new drawer_adapter(context);
 			navigation_list.setAdapter(nav_adapter);
@@ -242,13 +239,9 @@ public class main_view extends Activity
 				width = Integer.parseInt(read_file_to_list(storage + "width.txt").get(0));
 
 			drawer_toggle.syncState();
-			res = getResources();
-			density = res.getDisplayMetrics().density;
 
 			if(exists(storage + "groups/" + all_string + ".txt"))
 				new refresh_page(0).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
-			pref = PreferenceManager.getDefaultSharedPreferences(this);
 		}
 	}
 
@@ -283,21 +276,12 @@ public class main_view extends Activity
 
 	private void update_manage_groups()
 	{
-		fragment_group grp_frag = null;
-		group_adapter manage_adapter = null;
-		try
-		{
-			grp_frag = (fragment_group) fragment_manager.findFragmentByTag("android:switcher:" + ((ViewPager) findViewById(R.id.manage_viewpager)).getId() + ":0");
-			manage_adapter = (group_adapter) grp_frag.return_listview().getAdapter();
-		}
-		catch(Exception e){
-		}
-		if(manage_adapter != null)
+		if(group_list_adapter != null)
 		{
 			String group, info;
 			int content_size, number, j;
 			List<String> content;
-			manage_adapter.clear_list();
+			group_list_adapter.clear_list();
 
 			final int size = current_groups.size();
 			for(int i = 0; i < size; i++)
@@ -319,9 +303,9 @@ public class main_view extends Activity
 					info += (content_size > 3) ? ", ..." : content.get(number - 1);
 				}
 
-				manage_adapter.add_list(group, Integer.toString(content_size) + " feeds • " + info);
+				group_list_adapter.add_list(group, Integer.toString(content_size) + " feeds • " + info);
 			}
-			manage_adapter.notifyDataSetChanged();
+			group_list_adapter.notifyDataSetChanged();
 		}
 	}
 
@@ -354,12 +338,10 @@ public class main_view extends Activity
 			append_string_to_file(storage + "groups/" + old_group + ".txt", "name|" +  new_name + "|url|" + new_url + "|\n");
 		}
 
-		feed_adapter temp = feed_list_adapter;
-
 		/// Add the new feeds to the feed_adapter (Manage/Feeds).
-		temp.remove_item(poser);
-		temp.add_list_pos(poser, new_name, new_url + "\n" + new_group + " • " + Integer.toString(count_lines(storage + "content/" + new_name + ".store.txt.content.txt") - 1) + " items");
-		temp.notifyDataSetChanged();
+		feed_list_adapter.remove_item(poser);
+		feed_list_adapter.add_list_pos(poser, new_name, new_url + "\n" + new_group + " • " + Integer.toString(count_lines(storage + "content/" + new_name + ".store.txt.content.txt") - 1) + " items");
+		feed_list_adapter.notifyDataSetChanged();
 
 		update_groups();
 		update_manage_feeds();
@@ -387,7 +369,7 @@ public class main_view extends Activity
 			intent.putExtra("GROUP_NUMBER", 0);
 			intent.putExtra("NOTIFICATIONS", pref.getBoolean("notifications", false));
 			PendingIntent pend_intent = PendingIntent.getService(this, 0, intent, 0);
-			final long interval = (long) times[((int)pref.getInt("refresh_time", 20)/5)]*60000;
+			final long interval = (long) times[pref.getInt("refresh_time", 20)/5]*60000;
 			AlarmManager alarm_refresh = (AlarmManager) getSystemService(Activity.ALARM_SERVICE);
 			alarm_refresh.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + interval, interval, pend_intent);
 		}
@@ -584,15 +566,6 @@ public class main_view extends Activity
 		}
 	}
 
-	private class fragment_top extends Fragment
-	{
-		@Override
-		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
-		{
-			return inflater.inflate(R.layout.pager, container, false);
-		}
-	}
-
 	private class fragment_feed extends Fragment
 	{
 		@Override
@@ -691,15 +664,13 @@ public class main_view extends Activity
 		}
 	}
 
-	public class fragment_group extends Fragment
+	private class fragment_group extends Fragment
 	{
-		private ListView manage_list;
-
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
 			final View view = inflater.inflate(R.layout.manage_fragment, container, false);
-			manage_list = (ListView) view.findViewById(R.id.group_listview);
+			final ListView manage_list = (ListView) view.findViewById(R.id.group_listview);
 			group_list_adapter = new group_adapter(getActivity());
 			manage_list.setAdapter(group_list_adapter);
 			update_manage_groups();
@@ -728,10 +699,6 @@ public class main_view extends Activity
 			});
 			return view;
 		}
-
-		private ListView return_listview(){
-			return manage_list;
-		}
 	}
 
 	private class feed_manage extends Fragment
@@ -741,8 +708,6 @@ public class main_view extends Activity
 		{
 			final View view = inflater.inflate(R.layout.manage_feeds, container, false);
 			final ListView feed_list = (ListView) view.findViewById(R.id.feeds_listview);
-
-
 			feed_list.setOnItemClickListener(new OnItemClickListener()
 						{
 							public void onItemClick(AdapterView<?> parent, View view, int position, long id)
@@ -825,22 +790,26 @@ public class main_view extends Activity
 
 	public static class viewpager_adapter extends FragmentPagerAdapter
 	{
-		public viewpager_adapter(FragmentManager fm){
+		public viewpager_adapter(FragmentManager fm)
+		{
 			super(fm);
 		}
 
 		@Override
-		public int getCount(){
+		public int getCount()
+		{
 			return current_groups.size();
 		}
 
  		@Override
-		public Fragment getItem(int position){
+		public Fragment getItem(int position)
+		{
 			return fragment_card.newInstance(position);
 		}
 
 		@Override
-		public String getPageTitle(int position){
+		public String getPageTitle(int position)
+		{
 			return current_groups.get(position);
 		}
 	}
@@ -863,7 +832,8 @@ public class main_view extends Activity
 				return new feed_manage();
 		}
 		@Override
-		public String getPageTitle(int position){
+		public String getPageTitle(int position)
+		{
 			if(position == 0)
 				return getString(R.string.groups_manage_sub);
 			else
@@ -883,13 +853,15 @@ public class main_view extends Activity
 		}
 
 		@Override
-		public void onCreate(Bundle savedInstanceState){
+		public void onCreate(Bundle savedInstanceState)
+		{
 			super.onCreate(savedInstanceState);
 			setListAdapter(new card_adapter(getActivity()));
 		}
 
 		@Override
-		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle SavedInstanceState){
+		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle SavedInstanceState)
+		{
 			return inflater.inflate(R.layout.fragment_main_dummy, container, false);
 		}
 	}
@@ -904,10 +876,7 @@ public class main_view extends Activity
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
-		if(drawer_toggle.onOptionsItemSelected(item))
-			return true;
-
-		return super.onOptionsItemSelected(item);
+		return drawer_toggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
 	}
 
 	private void set_refresh(final boolean mode)
@@ -1181,16 +1150,14 @@ public class main_view extends Activity
 			try
 			{
 				final BufferedInputStream in = new BufferedInputStream((new URL(urls[0])).openStream());
-				byte data[] = new byte[512], data2[], next[];
+				byte data[] = new byte[512], data2[];
 				in.read(data, 0, 512);
-				int length;
 
 				String line = new String(data);
 				if((line.contains("rss"))||((line.contains("Atom"))||(line.contains("atom"))))
 				{
 					while((!line.contains("<title"))&&(!line.contains("</title>")))
 					{
-						length = data.length;
 						data2 = new byte[512];
 						in.read(data2, 0, 512);
 
@@ -1464,9 +1431,9 @@ public class main_view extends Activity
 	{
 		List<Integer> unread_list = new ArrayList<Integer>();
 		List<String> count_list;
-		int count, sized, i, total = 0;
+		int sized, i, total = 0;
 		card_adapter ith = null;
-		fragment_card fc = null;
+		fragment_card fc;
 
 		final int size = current_groups.size();
 		for(int j = 1; j < size; j++)
@@ -1480,7 +1447,6 @@ public class main_view extends Activity
 			/// TODO: Or if no items are in the list.
 			if((ith == null)||(ith.getCount() == 0)||(ith.return_unread_item_count() == -1))
 			{
-				count = 0;
 				count_list = read_file_to_list(storage + "groups/" + current_groups.get(j) + ".txt.content.txt");
 				sized = count_list.size();
 
@@ -1574,7 +1540,7 @@ public class main_view extends Activity
 			String group					= current_groups.get(page_number);
 			final String group_file_path 	= storage + "groups/" + group + ".txt";
 			final String group_content_path = group_file_path + ".content.txt";
-			String image_name, thumbnail_path;
+			String thumbnail_path;
 
 			/// If the group has no feeds  or  the content file does not exist, end.
 			if((!exists(group_file_path))||(!exists(group_content_path)))
@@ -1604,7 +1570,7 @@ public class main_view extends Activity
 			final int size = titles.size();
 			int width, height;
 			ssize = size;
-			String image_path, image;
+			String image;
 
 			if(l == null)
 				l = (fragment_card) fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_number));

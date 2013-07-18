@@ -3,41 +3,18 @@ package yay.poloure.simplerss;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
-import android.view.Display;
 
 import java.util.List;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Locale;
-import java.text.SimpleDateFormat;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.FileReader;
-import java.io.BufferedWriter;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.FileOutputStream;
-import java.io.BufferedInputStream;
-import java.net.URL;
 
 import android.os.PowerManager;
-import android.os.PowerManager.WakeLock;
 import android.os.Process;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 
-import android.graphics.BitmapFactory;
-import android.graphics.Bitmap;
-import android.graphics.Point;
-
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.app.NotificationManager;
-import android.content.Intent;
 import android.app.PendingIntent;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 
 public class service_update extends IntentService
 {
@@ -51,7 +28,7 @@ public class service_update extends IntentService
 	protected void onHandleIntent(Intent intent)
 	{
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-		PowerManager.WakeLock wakelock = pm.newWakeLock(pm.PARTIAL_WAKE_LOCK, "SIMPLERSS");
+		PowerManager.WakeLock wakelock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SIMPLERSS");
 		wakelock.acquire();
 
 		Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
@@ -142,7 +119,7 @@ public class service_update extends IntentService
 		stopSelf();
 	}
 
-	private boolean check_activity_running()
+	/*private boolean check_activity_running()
 	{
 		ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
 		List<RunningTaskInfo> tasks = activityManager.getRunningTasks(Integer.MAX_VALUE);
@@ -153,5 +130,5 @@ public class service_update extends IntentService
 				return true;
 		}
 		return false;
-	}
+	}*/
 }
