@@ -113,6 +113,8 @@ public class main_view extends Activity
 	private static String all_string;
 	private static String[] folders = {"images", "thumbnails", "groups", "content"};
 	private static FragmentManager fragment_manager;
+	SharedPreferences pref;
+
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -245,6 +247,8 @@ public class main_view extends Activity
 
 			if(exists(storage + "groups/" + all_string + ".txt"))
 				new refresh_page(0).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+			pref = PreferenceManager.getDefaultSharedPreferences(this);
 		}
 	}
 
@@ -377,12 +381,13 @@ public class main_view extends Activity
 	protected void onStop()
 	{
 		super.onStop();
-		if((PreferenceManager.getDefaultSharedPreferences(this)).getBoolean("refresh", false))
+		if(pref.getBoolean("refresh", false))
 		{
 			Intent intent = new Intent(this, service_update.class);
-			intent.putExtra("GROUP_NUMBER", "0");
+			intent.putExtra("GROUP_NUMBER", 0);
+			intent.putExtra("NOTIFICATIONS", pref.getBoolean("notifications", false));
 			PendingIntent pend_intent = PendingIntent.getService(this, 0, intent, 0);
-			final long interval = (long) times[((int)(PreferenceManager.getDefaultSharedPreferences(this)).getInt("refresh_time", 20)/5)]*60000;
+			final long interval = (long) times[((int)pref.getInt("refresh_time", 20)/5)]*60000;
 			AlarmManager alarm_refresh = (AlarmManager) getSystemService(Activity.ALARM_SERVICE);
 			alarm_refresh.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + interval, interval, pend_intent);
 		}
@@ -408,7 +413,7 @@ public class main_view extends Activity
 			try
 			{
 				group = current_groups.get(i);
-				adapter = (card_adapter)((fragment_card) getFragmentManager().findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(i))).getListView().getAdapter();
+				adapter = (card_adapter)((fragment_card) fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(i))).getListView().getAdapter();
 				if(adapter.getCount() > 0)
 				{
 					/// Read each of the content files from the group and find the line with the url.
@@ -459,9 +464,8 @@ public class main_view extends Activity
 	protected void onStart()
 	{
 		super.onStart();
-		//set_refresh(check_service_running());
 
-		if((PreferenceManager.getDefaultSharedPreferences(this)).getBoolean("refresh", false))
+		if(pref.getBoolean("refresh", false))
 		{
 			Intent intent = new Intent(this, service_update.class);
 			PendingIntent pend_intent = PendingIntent.getService(this, 0, intent, 0);
@@ -1517,7 +1521,8 @@ public class main_view extends Activity
 		save_positions();
 		set_refresh(true);
 		Intent intent = new Intent(this, service_update.class);
-		intent.putExtra("GROUP_NUMBER", Integer.toString(page_number));
+		intent.putExtra("GROUP_NUMBER", page_number);
+		intent.putExtra("NOTIFICATIONS", pref.getBoolean("notifications", false));
 		startService(intent);
 		if(page_number == 0)
 		{
