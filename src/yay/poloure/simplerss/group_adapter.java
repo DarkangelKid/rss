@@ -3,18 +3,14 @@ package yay.poloure.simplerss;
 import android.view.View.OnTouchListener;
 import android.view.MotionEvent;
 import android.content.ClipData;
-import android.view.View.DragShadowBuilder;
 
 import android.view.DragEvent;
 import android.view.View.OnDragListener;
-import android.widget.LinearLayout;
-import android.view.ViewManager;
 
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.graphics.drawable.Drawable;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -22,35 +18,21 @@ import android.widget.ListView;
 import java.util.List;
 import java.util.ArrayList;
 
-import android.graphics.Canvas;
 import android.graphics.Point;
-
-import java.io.FileWriter;
-import java.io.BufferedWriter;
-
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 
 public class group_adapter extends BaseAdapter
 {
-	String old_title = "";
-	String new_title = "";
+	private String old_title = "";
+	private String new_title = "";
 
-	String long_press_title;
+	private static final List<String> group_list = new ArrayList<String>();
+	private static final List<String> info_list = new ArrayList<String>();
 
-	private List<String> group_list = new ArrayList<String>();
-	private List<String> info_list = new ArrayList<String>();
-
-	LayoutInflater inflater;
-
-	private final Context context;
-	private ListView list_view;
+	private static LayoutInflater inflater;
 
 	public group_adapter(Context context)
 	{
-		this.context = context;
 		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		list_view = ((ListView)(inflater.inflate(R.layout.manage_fragment, null)).findViewById(R.id.group_listview));
 	}
 
 	public void add_list(String new_group, String new_info)
@@ -59,26 +41,32 @@ public class group_adapter extends BaseAdapter
 		info_list.add(new_info);
 	}
 
-	public void clear_list(){
-		group_list = new ArrayList<String>();
-		info_list = new ArrayList<String>();
+	public void clear_list()
+	{
+		group_list.clear();
+		info_list.clear();
 	}
-	public List<String> return_titles(){
+
+	public List<String> return_titles()
+	{
 		return group_list;
 	}
 
 	@Override
-	public int getCount(){
+	public int getCount()
+	{
 		return group_list.size();
 	}
 
 	@Override
-	public long getItemId(int position){
+	public long getItemId(int position)
+	{
 		return position;
 	}
 
 	@Override
-	public String getItem(int position){
+	public String getItem(int position)
+	{
 		return group_list.get(position);
 	}
 
@@ -94,7 +82,6 @@ public class group_adapter extends BaseAdapter
 			ViewHolder holder;
 			if(convertView == null)
 			{
-
 				convertView = inflater.inflate(R.layout.manage_list_item, parent, false);
 				holder = new ViewHolder();
 				holder.group_view = (TextView) convertView.findViewById(R.id.group_item);
@@ -104,8 +91,6 @@ public class group_adapter extends BaseAdapter
 			}
 			else
 				holder = (ViewHolder) convertView.getTag();
-
-
 
 			holder.group_view.setText(group_list.get(position));
 			holder.info_view.setText(info_list.get(position));
@@ -127,7 +112,7 @@ public class group_adapter extends BaseAdapter
 		ImageView image_view;
 	}
 
-	public final class MyTouchListener implements OnTouchListener
+	private class MyTouchListener implements OnTouchListener
 	{
 		public boolean onTouch(View view, MotionEvent motionEvent)
 		{
@@ -150,14 +135,12 @@ public class group_adapter extends BaseAdapter
 		notifyDataSetChanged();
 	}
 
-	///Pish starts here
-	class MyDragListener implements OnDragListener
+	private class MyDragListener implements OnDragListener
 	{
 		@Override
 		public boolean onDrag(View v, DragEvent event)
 		{
-			int action = event.getAction();
-			switch (event.getAction())
+			switch(event.getAction())
 			{
 				case DragEvent.ACTION_DRAG_STARTED:
 					break;
@@ -166,15 +149,12 @@ public class group_adapter extends BaseAdapter
 					v.setVisibility(View.INVISIBLE);
 					rearrange_groups(old_title, new_title);
 					refresh_data();
-					/// Save the new order by overwriting the group_list.txt file with group_list, then call the update_groups() function.
 					break;
 				case DragEvent.ACTION_DRAG_EXITED:
 					v.setVisibility(View.VISIBLE);
 					break;
 				case DragEvent.ACTION_DROP:
 					v.setVisibility(View.VISIBLE);
-					//List<String> new_l = group_list;
-					//new_l.add(0, "All");
 					main_view.update_group_order(group_list);
 					break;
 				case DragEvent.ACTION_DRAG_ENDED:
@@ -205,11 +185,12 @@ public class group_adapter extends BaseAdapter
 		group_list.set(j, old);
 	}
 
-	class custom_drag_builder extends View.DragShadowBuilder
+	private class custom_drag_builder extends View.DragShadowBuilder
 	{
-		private View view_store;
+		private final View view_store;
 
-		private custom_drag_builder(View v) {
+		private custom_drag_builder(View v)
+		{
 			super(v);
 			view_store = v;
 		}
@@ -220,8 +201,8 @@ public class group_adapter extends BaseAdapter
 			shadowSize.x = view_store.getWidth();
 			shadowSize.y = view_store.getHeight();
 
-			shadowTouchPoint.x = (int)(shadowSize.x * 19 / 20);
-			shadowTouchPoint.y = (int)(shadowSize.y / 2);
+			shadowTouchPoint.x = (int) (shadowSize.x * 19.0 / 20);
+			shadowTouchPoint.y = (shadowSize.y / 2);
 		}
 	}
 }

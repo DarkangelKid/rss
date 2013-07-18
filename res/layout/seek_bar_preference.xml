@@ -48,5 +48,5 @@
 			android:layout_height="wrap_content"
 			android:layout_below="@android:id/summary">
 	</LinearLayout>
-	
+
 </RelativeLayout>
