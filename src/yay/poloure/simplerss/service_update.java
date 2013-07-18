@@ -56,7 +56,7 @@ public class service_update extends IntentService
 
 		Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
-		final int group 						= Integer.parseInt(intent.getStringExtra("GROUP_NUMBER"));
+		final int group 						= intent.getIntExtra("GROUP_NUMBER", 0);
 		final String all_string 				= getString(R.string.all_group);
 		final String storage 					= this.getExternalFilesDir(null).getAbsolutePath() + "/";
 		/*if(!storage.equals(""))
@@ -115,7 +115,7 @@ public class service_update extends IntentService
 			}
 		}
 
-		if((total > 0) && ((PreferenceManager.getDefaultSharedPreferences(getApplicationContext())).getBoolean("notifications", false)))
+		if((total > 0) && intent.getBooleanExtra("NOTIFICATIONS", false))
 		{
 			NotificationCompat.Builder not_builder = new NotificationCompat.Builder(this)
 					.setSmallIcon(R.drawable.rss_icon)
