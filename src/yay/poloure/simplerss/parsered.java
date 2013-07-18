@@ -191,11 +191,9 @@ class parsered
 							}
 							else
 							{
-								main_view.log("about to try regex");
 								cont = regex_tags.matcher(cont).replaceAll("");
 								cont = space_tags.matcher(cont).replaceAll(" ");
 							}
-							main_view.log("did regex");
 
 							take = description_length;
 							description_length = description_length + cont.length();
@@ -240,8 +238,6 @@ class parsered
 	{
 		StringBuilder cont = new StringBuilder();
 		Boolean found = false;
-		/// <content
-		/// 01234567 -- length 8 -- end_length = 7
 		final int end_length = end_tag.length() - 1;
 		end_tag = end_tag.substring(1, end_length + 1);
 		char[] test_tag = new char[end_length];
@@ -252,7 +248,6 @@ class parsered
 				cont.append(read_string_to_next_char(reader, '<'));
 				reader.mark(end_length);
 				reader.read(test_tag, 0, end_length);
-				main_view.log(end_tag + " | " + (new String(test_tag)));
 				if((new String(test_tag)).equals(end_tag))
 					found = true;
 				reader.reset();
