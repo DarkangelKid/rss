@@ -111,6 +111,7 @@ public class main_view extends Activity
 	private static final int[] times = new int[]{15, 30, 45, 60, 120, 180, 240, 300, 360, 400, 480, 540, 600, 660, 720, 960, 1440, 2880, 10080, 43829};
 	private String feeds_string, manage_string, settings_string, navigation_string;
 	private static String all_string;
+	private static String[] folders = {"images", "thumbnails", "groups", "content"};
 	private static FragmentManager fragment_manager;
 
 	@Override
@@ -126,39 +127,23 @@ public class main_view extends Activity
 			navigation_string = getString(R.string.navigation_title);
 			all_string = getString(R.string.all_group);
 
-			getActionBar().setTitle(feeds_string);
+			ActionBar action_bar = getActionBar();
+			action_bar.setTitle(feeds_string);
+			action_bar.setIcon(R.drawable.rss_icon);
+
 			FrameLayout frame = new FrameLayout(this);
 			frame.setId(CONTENT_VIEW_ID);
 			setContentView(frame, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
-			storage = this.getExternalFilesDir(null).getAbsolutePath() + "/";
-			if(!storage.isEmpty())
-			{
-				delete(storage + "storage_location.txt");
-				append_string_to_file(storage + "storage_location.txt", storage);
-			}
+			fragment_manager = getFragmentManager();
 
-			delete(storage + "dump.txt");
-
-			String[] folders = {"images", "thumbnails", "groups", "content"};
-			File folder_file;
-
-			for(String folder : folders)
-			{
-				folder_file = new File(storage + folder);
-				if(!folder_file.exists())
-					folder_file.mkdir();
-			}
-
-			getActionBar().setIcon(R.drawable.rss_icon);
-
-			getFragmentManager().beginTransaction()
+			fragment_manager.beginTransaction()
 						.add(CONTENT_VIEW_ID, new fragment_top())
 						.commit();
 			Fragment feed = new fragment_feed();
 			Fragment pref = new fragment_preferences();
 			Fragment man = new fragment_manage();
-			getFragmentManager().beginTransaction()
+			fragment_manager.beginTransaction()
 				.add(R.id.content_frame, feed, feeds_string)
 				.add(R.id.content_frame, pref, settings_string)
 				.add(R.id.content_frame, man, manage_string)
@@ -177,21 +162,39 @@ public class main_view extends Activity
 			context = getApplicationContext();
 			activity_context = this;
 
+			storage = this.getExternalFilesDir(null).getAbsolutePath() + "/";
+			if(!storage.isEmpty())
+			{
+				delete(storage + "storage_location.txt");
+				append_string_to_file(storage + "storage_location.txt", storage);
+			}
+
+			delete(storage + "dump.txt");
+
+			File folder_file;
+
+			for(String folder : folders)
+			{
+				folder_file = new File(storage + folder);
+				if(!folder_file.exists())
+					folder_file.mkdir();
+			}
+
 			navigation_list = (ListView) findViewById(R.id.left_drawer);
 			navigation_list.setOnItemClickListener(new DrawerItemClickListener());
 
-			nav_adapter = new drawer_adapter(get_context());
+			nav_adapter = new drawer_adapter(context);
 			navigation_list.setAdapter(nav_adapter);
 
 			update_groups();
 
 			viewpager = (ViewPager) findViewById(R.id.pager);
-			viewpager.setAdapter(new viewpager_adapter(getFragmentManager()));
+			viewpager.setAdapter(new viewpager_adapter(fragment_manager));
 			viewpager.setOffscreenPageLimit(128);
 			viewpager.setOnPageChangeListener(new page_listener());
 
 			ViewPager manage_pager = (ViewPager) findViewById(R.id.manage_viewpager);
-			manage_pager.setAdapter(new manage_pager_adapter(getFragmentManager()));
+			manage_pager.setAdapter(new manage_pager_adapter(fragment_manager));
 
 			PagerTabStrip pager_tab_strip = (PagerTabStrip) findViewById(R.id.pager_title_strip);
 			pager_tab_strip.setDrawFullUnderline(true);
@@ -237,9 +240,8 @@ public class main_view extends Activity
 				width = Integer.parseInt(read_file_to_list(storage + "width.txt").get(0));
 
 			drawer_toggle.syncState();
-			density = getResources().getDisplayMetrics().density;
 			res = getResources();
-			fragment_manager = getFragmentManager();
+			density = res.getDisplayMetrics().density;
 
 			if(exists(storage + "groups/" + all_string + ".txt"))
 				new refresh_page(0).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -517,7 +519,7 @@ public class main_view extends Activity
 		{
 			switch_page(feeds_string, position);
 			int page = position - 4;
-			((ViewPager) findViewById(R.id.pager)).setCurrentItem(page);
+			viewpager.setCurrentItem(page);
 		}
 	}
 
@@ -538,7 +540,7 @@ public class main_view extends Activity
 	{
 		if(!mTitle.equals(page_title))
 		{
-			getFragmentManager().beginTransaction()
+			fragment_manager.beginTransaction()
 						.setTransition(4099)
 						.hide(getFragmentManager().findFragmentByTag(mTitle))
 						.show(getFragmentManager().findFragmentByTag(page_title))
@@ -1540,8 +1542,10 @@ public class main_view extends Activity
 		Boolean first;
 		final Animation animFadeIn = AnimationUtils.loadAnimation(getApplicationContext(), android.R.anim.fade_in);
 
-		public refresh_page(int page){
+		public refresh_page(int page)
+		{
 			//Debug.startMethodTracing("refresh2");
+			log("about to start for page = " + Integer.toString(page));
 			page_number = page;
 			first = true;
 		}
@@ -1553,6 +1557,8 @@ public class main_view extends Activity
 		@Override
 		protected Long doInBackground(Void... hey)
 		{
+
+			/// while the service is running on new_items and this page is refreshing.
 			while(check_service_running())
 			{
 				try{
@@ -1562,7 +1568,9 @@ public class main_view extends Activity
 				}
 			}
 
-			String group 					= current_groups.get(page_number);
+			log("current groups at pos = " + page_number + " is");
+			log(current_groups.get(page_number));
+			String group					= current_groups.get(page_number);
 			final String group_file_path 	= storage + "groups/" + group + ".txt";
 			final String group_content_path = group_file_path + ".content.txt";
 			final Boolean service 			= check_service_running();
@@ -1572,6 +1580,7 @@ public class main_view extends Activity
 			if((!exists(group_file_path))||(!exists(group_content_path)))
 				return 0L;
 
+			log("about to read csv");
 			List< List<String> > contenter 	= read_csv_to_list(new String[]{group_content_path, "marker|", "title|", "description|", "link|" , "image|", "width|", "height|"});
 			List<String> marker				= contenter.get(0);
 			List<String> titles				= contenter.get(1);
@@ -1697,7 +1706,7 @@ public class main_view extends Activity
 	private card_adapter get_card_adapter(int page_index)
 	{
 		return ((card_adapter)((fragment_card) fragment_manager
-						.findFragmentByTag("android:switcher:" + viewpager + ":" + Integer.toString(page_index)))
+						.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_index)))
 						.getListAdapter());
 	}
 
