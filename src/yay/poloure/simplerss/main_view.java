@@ -84,18 +84,18 @@ import android.text.format.Time;
 
 public class main_view extends Activity
 {
-	private DrawerLayout drawer_layout;
+	private static DrawerLayout drawer_layout;
 
 	private static ListView navigation_list;
-	private ActionBarDrawerToggle drawer_toggle;
-	private Menu optionsMenu;
+	private static ActionBarDrawerToggle drawer_toggle;
+	private static Menu optionsMenu;
 
 	private static float density;
 
 	private static Resources res;
 	private static int positionrr, poser, check_finished, width, group_pos;
 	private static List<Boolean> new_items;
-	private String mTitle, feed_title, current_group, current_title;
+	private static String mTitle, feed_title, current_group, current_title;
 	private static String storage;
 	private static Context context, activity_context;
 	private static ViewPager viewpager;
@@ -109,11 +109,11 @@ public class main_view extends Activity
 
 	private static final int CONTENT_VIEW_ID = 10101010;
 	private static final int[] times = new int[]{15, 30, 45, 60, 120, 180, 240, 300, 360, 400, 480, 540, 600, 660, 720, 960, 1440, 2880, 10080, 43829};
-	private String feeds_string, manage_string, settings_string, navigation_string;
+	private static String feeds_string, manage_string, settings_string, navigation_string;
 	private static String all_string;
-	private static String[] folders = {"images", "thumbnails", "groups", "content"};
+	private static final String[] folders = {"images", "thumbnails", "groups", "content"};
 	private static FragmentManager fragment_manager;
-	SharedPreferences pref;
+	private static SharedPreferences pref;
 
 
 	@Override
@@ -490,10 +490,6 @@ public class main_view extends Activity
 			for(String string : current_groups)
 				new_items.add(true);
 		}
-	}
-
-	public static Resources get_resources(){
-		return res;
 	}
 
 	@Override
@@ -933,11 +929,6 @@ public class main_view extends Activity
 			log("optionsMenu is null");
 	}
 
-	public static int return_width()
-	{
-		return width;
-	}
-
 	private void show_add_dialog()
 	{
 		LayoutInflater inflater = LayoutInflater.from(this);
@@ -1265,7 +1256,7 @@ public class main_view extends Activity
 		}
 	}
 
-	public static void append_string_to_file(String file_path, String string)
+	private static void append_string_to_file(String file_path, String string)
 	{
 		try
 		{
@@ -1350,11 +1341,6 @@ public class main_view extends Activity
 		update_groups();
 	}
 
-	private static Context get_context()
-	{
-		return context;
-	}
-
 	public static List< List<String> > read_csv_to_list(String[] type)
 	{
 		final String feed_path = type[0];
@@ -1363,7 +1349,7 @@ public class main_view extends Activity
 
 		int content_start, content_index, i, bar_index;
 		String line;
-		final Boolean marker = (type[1].equals("marker|")) ? true : false;
+		final Boolean marker = type[1].equals("marker|");
 
 		List< List<String> > types = new ArrayList< List<String> >();
 		int[] lengths = new int[number_of_items];
@@ -1794,7 +1780,7 @@ public class main_view extends Activity
 		append_string_to_file(storage + "dump.txt", text + "\n");
 	}
 
-	public static void delete(String file_path)
+	private static void delete(String file_path)
 	{
 		(new File(file_path)).delete();
 	}
