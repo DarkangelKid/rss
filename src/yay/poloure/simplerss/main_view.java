@@ -113,8 +113,7 @@ public class main_view extends Activity
 	private static String all_string;
 	private static String[] folders = {"images", "thumbnails", "groups", "content"};
 	private static FragmentManager fragment_manager;
-	SharedPreferences pref;
-
+	private static SharedPreferences pref;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -143,15 +142,16 @@ public class main_view extends Activity
 						.add(CONTENT_VIEW_ID, new fragment_top())
 						.commit();
 			Fragment feed = new fragment_feed();
-			Fragment pref = new fragment_preferences();
+			Fragment prefs = new fragment_preferences();
 			Fragment man = new fragment_manage();
 			fragment_manager.beginTransaction()
 				.add(R.id.content_frame, feed, feeds_string)
-				.add(R.id.content_frame, pref, settings_string)
+				.add(R.id.content_frame, prefs, settings_string)
 				.add(R.id.content_frame, man, manage_string)
 				.hide(man)
-				.hide(pref)
+				.hide(prefs)
 				.commit();
+			pref = PreferenceManager.getDefaultSharedPreferences(this);
 		}
 	}
 
@@ -247,8 +247,6 @@ public class main_view extends Activity
 
 			if(exists(storage + "groups/" + all_string + ".txt"))
 				new refresh_page(0).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
-			pref = PreferenceManager.getDefaultSharedPreferences(this);
 		}
 	}
 
