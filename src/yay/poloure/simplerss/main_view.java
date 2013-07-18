@@ -1540,7 +1540,7 @@ public class main_view extends Activity
 	private class refresh_page extends AsyncTask<Void, Object, Long>
 	{
 		int marker_position = -1, ssize, refresh_count = 0, page_number;
-		Boolean markerer;
+		Boolean markerer, waited = false;
 		final Animation animFadeIn = AnimationUtils.loadAnimation(getApplicationContext(), android.R.anim.fade_in);
 		ListFragment l;
 		card_adapter ith;
@@ -1562,7 +1562,10 @@ public class main_view extends Activity
 				lv = l.getListView();
 
 				if((ith != null)&&(lv != null)&&(ith.getCount() == 0))
+				{
 					lv.setVisibility(View.INVISIBLE);
+					waited = false;
+				}
 			}
 		}
 
@@ -1617,6 +1620,23 @@ public class main_view extends Activity
 			ssize = size;
 			String image_path, image;
 
+			if(l == null)
+				l = (fragment_card) fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_number));
+			if(l != null)
+			{
+				while((ith == null)||(lv == null))
+				{
+					waited = true;
+					try{
+						Thread.sleep(50);
+						ith = ((card_adapter) l.getListAdapter());
+						lv = l.getListView();
+					}
+					catch(Exception e){
+					}
+				}
+			}
+
 			for(int m = 0; m < size; m++)
 			{
 				thumbnail_path = "";
@@ -1646,14 +1666,6 @@ public class main_view extends Activity
 				if(marker_position != -1)
 					marker_position++;
 
-				if(l == null)
-					l = (fragment_card) fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_number));
-				if((l != null)&&((ith == null)||(lv == null)))
-				{
-					ith = ((card_adapter) l.getListAdapter());
-					lv = l.getListView();
-				}
-
 				// Checks to see if page has this item.
 				if(existing_items.add(links.get(m)))
 					publishProgress(titles.get(m), descriptions.get(m), links.get(m), thumbnail_path, height, width, markerer);
@@ -1676,6 +1688,11 @@ public class main_view extends Activity
 				v = lv.getChildAt(1);
 				top = v.getTop();
 			}*/
+			if(waited)
+			{
+				lv.setVisibility(View.INVISIBLE);
+				waited = false;
+			}
 
 			ith.add_list((String) progress[0], (String) progress[1], (String) progress[2], (String) progress[3], (Integer) progress[4], (Integer) progress[5], (Boolean) progress[6]);
 			ith.notifyDataSetChanged();
