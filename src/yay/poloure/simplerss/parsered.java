@@ -16,6 +16,7 @@ import android.text.format.Time;
 import java.util.Date;
 import java.util.Locale;
 import java.text.SimpleDateFormat;
+import android.graphics.BitmapFactory;
 
 class parsered
 {
@@ -33,11 +34,11 @@ class parsered
 	private String dump_path;
 	private String url_path;
 
-	public parsered(String file_path){
-		parse_local_xml(file_path);
+	public parsered(String file_path, String storage){
+		parse_local_xml(file_path, storage);
 	}
 
-	private void parse_local_xml(String file_name)
+	private void parse_local_xml(String file_name, String storage)
 	{
 		try
 		{
@@ -51,7 +52,7 @@ class parsered
 			Time time				= new Time();
 			BufferedReader reader	= new BufferedReader(new FileReader(in));
 			StringBuilder line		= new StringBuilder();
-			String current_tag, temp_line, cont;
+			String current_tag, temp_line, cont, image, image_name;
 			int pos, tem, tem2, tem3, description_length, take, cont_length, i;
 
 			/// Read the file's lines to a list and make a set from that.
@@ -63,6 +64,9 @@ class parsered
 					set.add(liner);
 				stream.close();
 			}
+
+			BitmapFactory.Options options = new BitmapFactory.Options();
+			options.inJustDecodeBounds = true;
 
 			reader.mark(2);
 			while(reader.read() != -1)
@@ -83,7 +87,24 @@ class parsered
 				}
 				else if((current_tag.contains("</entry"))||(current_tag.contains("</item")))
 				{
-					line.append(check_for_image());
+					image = check_for_image();
+					if(!image.isEmpty())
+					{
+						line.append("image|").append(image).append('|'); /// ends with a |
+						image_name = image.substring(image.lastIndexOf("/") + 1, image.length());
+
+						if(!main_view.exists(storage + "images/" + image_name))
+							main_view.download_file(image, storage + "images/" + image_name);
+						if(!main_view.exists(storage + "thumbnails/" + image_name))
+							main_view.compress_file(storage, image_name);
+
+						/// TODO: If it does exist, skip this next step somehow. (turn write mode to false)
+
+						BitmapFactory.decodeFile(storage + "thumbnails/" + image_name, options);
+						line.append("width|").append(options.outWidth).append('|')
+							.append("height|").append(options.outHeight).append('|');
+					}
+					image = "";
 					line.append(check_for_url());
 				}
 				else
@@ -269,7 +290,7 @@ class parsered
 			final BufferedReader image = new BufferedReader(new FileReader(im));
 			final String image_url = image.readLine();
 			if(image_url.length() > 6)
-				popo = "image|" + image_url + "|";
+				popo = image_url;
 		}
 		catch(Exception e){
 		}

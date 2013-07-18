@@ -66,6 +66,7 @@ public class card_adapter extends BaseAdapter
 	private static int eight = 0;
 	private int top_item_position = -1;
 	private int screen_width;
+	private int total = 0;
 
 	public card_adapter(Context context_main)
 	{
@@ -77,13 +78,14 @@ public class card_adapter extends BaseAdapter
 
 	public void add_list(String new_title, String new_des, String new_link, String new_image, int new_height, int new_width, Boolean new_marker)
 	{
-		content_titles.add(0, new_title);
-		content_des.add(0, new_des.replaceAll("<([^;]*)>", ""));
-		content_links.add(0, new_link);
-		content_images.add(0, new_image);
-		content_height.add(0, new_height);
-		content_width.add(0, new_width);
-		content_marker.add(0, new_marker);
+		content_titles.add(new_title);
+		content_des.add(new_des);
+		content_links.add(new_link);
+		content_images.add(new_image);
+		content_height.add(new_height);
+		content_width.add(new_width);
+		content_marker.add(new_marker);
+		total++;
 	}
 
 	public List<String> return_links(){
@@ -91,21 +93,24 @@ public class card_adapter extends BaseAdapter
 	}
 
 	public int return_unread_item_count(){
-		return top_item_position;
+		/// top_item_position is large, we want the oposite through here.
+		return total - top_item_position - 1;
 	}
 
 	@Override
 	public int getCount(){
-		return content_titles.size();
+		return total;
 	}
 
 	@Override
 	public long getItemId(int position){
+		position = total - position - 1;
 		return position;
 	}
 
 	@Override
 	public String getItem(int position){
+		position = total - position - 1;
 		return content_titles.get(position);
 	}
 
@@ -113,6 +118,7 @@ public class card_adapter extends BaseAdapter
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
 		ViewHolder holder;
+		position = total - position - 1;
 		if(convertView == null)
 		{
 			listview 				= (ListView) parent;
@@ -138,8 +144,9 @@ public class card_adapter extends BaseAdapter
 					{
 						if(top_item_position == - 1)
 						{
-							final int size = content_marker.size();
-							for(int i = 0; i < size; i++)
+							final int size = total;
+							/// Starts at the newest and iterates to the oldest.
+							for(int i = size - 1; i >= 0 ; --i)
 							{
 								if(content_marker.get(i))
 								{
@@ -147,13 +154,20 @@ public class card_adapter extends BaseAdapter
 									break;
 								}
 							}
+							/// If it got all the way back and none were true, no items have been read.
 							if(top_item_position == -1)
-								top_item_position = size - 1;
+								top_item_position = 0;
 						}
 
-						final int firstVisibleItem = listview.getFirstVisiblePosition();
-						if((firstVisibleItem != -1)&&(firstVisibleItem < top_item_position))
-							top_item_position = firstVisibleItem;
+						int firstVisibleItem = listview.getFirstVisiblePosition();
+						/// If firstVisibleItem = 2, that is the second newest item in the list, which is at the end of
+						/// our list.
+						if(firstVisibleItem != -1)
+						{
+							firstVisibleItem = total - firstVisibleItem - 1;
+							if(firstVisibleItem > top_item_position)
+								top_item_position = firstVisibleItem;
+						}
 					}
 					if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
 					{
@@ -211,7 +225,6 @@ public class card_adapter extends BaseAdapter
 		holder.title_view.setText(title);
 		holder.time_view.setText(link);
 		holder.description_view.setText(description);
-
 		return convertView;
 	}
 
