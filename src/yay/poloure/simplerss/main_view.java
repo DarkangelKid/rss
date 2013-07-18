@@ -93,7 +93,7 @@ public class main_view extends Activity
 	private static float density;
 
 	private static Resources res;
-	private static int positionrr, poser, twelve, check_finished, width, group_pos;
+	private static int positionrr, poser, check_finished, width, group_pos;
 	private static List<Boolean> new_items;
 	private String mTitle, feed_title, current_group, current_title;
 	private static String storage;
@@ -111,6 +111,7 @@ public class main_view extends Activity
 	private static final int[] times = new int[]{15, 30, 45, 60, 120, 180, 240, 300, 360, 400, 480, 540, 600, 660, 720, 960, 1440, 2880, 10080, 43829};
 	private String feeds_string, manage_string, settings_string, navigation_string;
 	private static String all_string;
+	private static String[] folders = {"images", "thumbnails", "groups", "content"};
 	private static FragmentManager fragment_manager;
 
 	@Override
@@ -126,39 +127,23 @@ public class main_view extends Activity
 			navigation_string = getString(R.string.navigation_title);
 			all_string = getString(R.string.all_group);
 
-			getActionBar().setTitle(feeds_string);
+			ActionBar action_bar = getActionBar();
+			action_bar.setTitle(feeds_string);
+			action_bar.setIcon(R.drawable.rss_icon);
+
 			FrameLayout frame = new FrameLayout(this);
 			frame.setId(CONTENT_VIEW_ID);
 			setContentView(frame, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
-			storage = this.getExternalFilesDir(null).getAbsolutePath() + "/";
-			if(!storage.equals(""))
-			{
-				delete(storage + "storage_location.txt");
-				append_string_to_file(storage + "storage_location.txt", storage);
-			}
+			fragment_manager = getFragmentManager();
 
-			delete(storage + "dump.txt");
-
-			String[] folders = {"images", "thumbnails", "groups", "content"};
-			File folder_file;
-
-			for(String folder : folders)
-			{
-				folder_file = new File(storage + folder);
-				if(!folder_file.exists())
-					folder_file.mkdir();
-			}
-
-			getActionBar().setIcon(R.drawable.rss_icon);
-
-			getFragmentManager().beginTransaction()
+			fragment_manager.beginTransaction()
 						.add(CONTENT_VIEW_ID, new fragment_top())
 						.commit();
 			Fragment feed = new fragment_feed();
 			Fragment pref = new fragment_preferences();
 			Fragment man = new fragment_manage();
-			getFragmentManager().beginTransaction()
+			fragment_manager.beginTransaction()
 				.add(R.id.content_frame, feed, feeds_string)
 				.add(R.id.content_frame, pref, settings_string)
 				.add(R.id.content_frame, man, manage_string)
@@ -177,21 +162,39 @@ public class main_view extends Activity
 			context = getApplicationContext();
 			activity_context = this;
 
+			storage = this.getExternalFilesDir(null).getAbsolutePath() + "/";
+			if(!storage.isEmpty())
+			{
+				delete(storage + "storage_location.txt");
+				append_string_to_file(storage + "storage_location.txt", storage);
+			}
+
+			delete(storage + "dump.txt");
+
+			File folder_file;
+
+			for(String folder : folders)
+			{
+				folder_file = new File(storage + folder);
+				if(!folder_file.exists())
+					folder_file.mkdir();
+			}
+
 			navigation_list = (ListView) findViewById(R.id.left_drawer);
 			navigation_list.setOnItemClickListener(new DrawerItemClickListener());
 
-			nav_adapter = new drawer_adapter(get_context());
+			nav_adapter = new drawer_adapter(context);
 			navigation_list.setAdapter(nav_adapter);
 
 			update_groups();
 
 			viewpager = (ViewPager) findViewById(R.id.pager);
-			viewpager.setAdapter(new viewpager_adapter(getFragmentManager()));
+			viewpager.setAdapter(new viewpager_adapter(fragment_manager));
 			viewpager.setOffscreenPageLimit(128);
 			viewpager.setOnPageChangeListener(new page_listener());
 
 			ViewPager manage_pager = (ViewPager) findViewById(R.id.manage_viewpager);
-			manage_pager.setAdapter(new manage_pager_adapter(getFragmentManager()));
+			manage_pager.setAdapter(new manage_pager_adapter(fragment_manager));
 
 			PagerTabStrip pager_tab_strip = (PagerTabStrip) findViewById(R.id.pager_title_strip);
 			pager_tab_strip.setDrawFullUnderline(true);
@@ -236,14 +239,12 @@ public class main_view extends Activity
 			else
 				width = Integer.parseInt(read_file_to_list(storage + "width.txt").get(0));
 
-			if(count_lines(storage + "groups/" + all_string + ".txt") > 0)
-				new refresh_page(0).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
 			drawer_toggle.syncState();
-			density = getResources().getDisplayMetrics().density;
-			twelve = (int) ((12 * density + 0.5f));
 			res = getResources();
-			fragment_manager = getFragmentManager();
+			density = res.getDisplayMetrics().density;
+
+			if(exists(storage + "groups/" + all_string + ".txt"))
+				new refresh_page(0).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
 	}
 
@@ -265,7 +266,7 @@ public class main_view extends Activity
 		if(feed_list_adapter != null)
 		{
 			feed_list_adapter.clear_list();
-			final List< List<String> > content 	= read_csv_to_list(new String[]{storage + "groups/"+ all_string + ".txt", "name", "url", "group"});
+			final List< List<String> > content 	= read_csv_to_list(new String[]{storage + "groups/"+ all_string + ".txt", "name|", "url|", "group|"});
 			final List<String> feed_titles 		= content.get(0);
 			final List<String> feed_urls 		= content.get(1);
 			final List<String> feed_groups 		= content.get(2);
@@ -298,7 +299,7 @@ public class main_view extends Activity
 			for(int i = 0; i < size; i++)
 			{
 				group = current_groups.get(i);
-				content = read_csv_to_list(new String[]{storage + "groups/" + group + ".txt", "name"}).get(0);
+				content = read_csv_to_list(new String[]{storage + "groups/" + group + ".txt", "name|"}).get(0);
 				content_size = content.size();
 				if(i == 0)
 					info = (size == 1) ? "1 group" :  size + " groups";
@@ -411,10 +412,10 @@ public class main_view extends Activity
 				if(adapter.getCount() > 0)
 				{
 					/// Read each of the content files from the group and find the line with the url.
-					feeds = read_csv_to_list(new String[]{storage + "groups/" + group + ".txt", "name"}).get(0);
+					feeds = read_csv_to_list(new String[]{storage + "groups/" + group + ".txt", "name|"}).get(0);
 					found_url = false;
 					url = adapter.return_latest_url();
-					if(!url.equals(""))
+					if(!url.isEmpty())
 					{
 						for(String feed: feeds)
 						{
@@ -518,7 +519,7 @@ public class main_view extends Activity
 		{
 			switch_page(feeds_string, position);
 			int page = position - 4;
-			((ViewPager) findViewById(R.id.pager)).setCurrentItem(page);
+			viewpager.setCurrentItem(page);
 		}
 	}
 
@@ -539,7 +540,7 @@ public class main_view extends Activity
 	{
 		if(!mTitle.equals(page_title))
 		{
-			getFragmentManager().beginTransaction()
+			fragment_manager.beginTransaction()
 						.setTransition(4099)
 						.hide(getFragmentManager().findFragmentByTag(mTitle))
 						.show(getFragmentManager().findFragmentByTag(page_title))
@@ -1009,7 +1010,7 @@ public class main_view extends Activity
 		poser = position;
 		final LayoutInflater inflater 		= LayoutInflater.from(activity_context);
 		final View edit_rss_dialog 			= inflater.inflate(R.layout.add_rss_dialog, null);
-		final List< List<String> > content 	= read_csv_to_list(new String[]{storage + "groups/"+ all_string + ".txt", "name", "url", "group"});
+		final List< List<String> > content 	= read_csv_to_list(new String[]{storage + "groups/"+ all_string + ".txt", "name|", "url|", "group|"});
 		final String current_title			= content.get(0).get(position);
 		final String current_url			= content.get(1).get(position);
 		final String current_group  		= content.get(2).get(position);
@@ -1149,7 +1150,7 @@ public class main_view extends Activity
 			if((!found)&&(new_group_mode))
 				add_group(new_group);
 
-			if(feed_name.equals(""))
+			if(feed_name.isEmpty())
 				feed_name = feed_title;
 
 			/// Replace this with a regex pattern
@@ -1356,13 +1357,30 @@ public class main_view extends Activity
 	public static List< List<String> > read_csv_to_list(String[] type)
 	{
 		final String feed_path = type[0];
-		final int number_of_items = type.length - 1;
-		int content_start, content_index, i, bar_index, content_length;
-		String line, content;
+		int number_of_items = type.length - 1;
+		Boolean dimensions = false;
+
+		int content_start, content_index, i, bar_index;
+		String line;
+		final Boolean marker = (type[1].equals("marker|")) ? true : false;
 
 		List< List<String> > types = new ArrayList< List<String> >();
+		int[] lengths = new int[number_of_items];
+
 		for(i = 0; i < number_of_items; i++)
+		{
 			types.add(new ArrayList< String >());
+			lengths[i] = type[i + 1].length();
+		}
+
+		/// TODO: This is hacky, make the input of this fuction (file_path, new String[]{}, true)
+		if(number_of_items > 6)
+		{
+			number_of_items -= 2;
+			dimensions = true;
+		}
+
+		/// Index the pattern of tag occurence.
 
 		try
 		{
@@ -1371,18 +1389,47 @@ public class main_view extends Activity
 			{
 				for(i = 0; i < number_of_items; i++)
 				{
-					content = type[1 + i] + "|";
-					content_length = content.length();
-					content_index = line.indexOf(content);
-					content_start = content_index + content_length;
-					bar_index = line.indexOf('|', content_start);
-
-					if((content_index == -1)||(content_start == bar_index))
-						types.get(i).add("");
+					if((i == 0)&&(marker))
+					{
+						if(line.charAt(0) != 'm')
+							types.get(0).add("");
+						else
+							types.get(0).add("1");
+					}
 					else
-						types.get(i).add(line.substring(content_start, bar_index));
+					{
+						content_index = line.indexOf(type[1 + i]);
+						if(content_index == -1)
+							types.get(i).add("");
+						else
+						{
+							content_start = content_index + lengths[i];
+							bar_index = line.indexOf('|', content_start);
+							if(content_start == bar_index)
+								types.get(i).add("");
+							else
+								types.get(i).add(line.substring(content_start, bar_index));
+						}
+					}
+				}
+				if(dimensions)
+				{
+					content_index = line.lastIndexOf("width|");
+					if(content_index == -1)
+					{
+						types.get(number_of_items).add("");
+						types.get(number_of_items + 1).add("");
+					}
+					else
+					{
+						content_index += 6;
+						bar_index = line.lastIndexOf("|height|");
+						types.get(number_of_items).add(line.substring(content_index, bar_index));
+						types.get(number_of_items + 1).add(line.substring(bar_index + 8, line.lastIndexOf('|')));
+					}
 				}
 			}
+			stream.close();
 		}
 		catch(IOException e){
 		}
@@ -1495,7 +1542,10 @@ public class main_view extends Activity
 		Boolean first;
 		final Animation animFadeIn = AnimationUtils.loadAnimation(getApplicationContext(), android.R.anim.fade_in);
 
-		public refresh_page(int page){
+		public refresh_page(int page)
+		{
+			//Debug.startMethodTracing("refresh2");
+			log("about to start for page = " + Integer.toString(page));
 			page_number = page;
 			first = true;
 		}
@@ -1507,6 +1557,8 @@ public class main_view extends Activity
 		@Override
 		protected Long doInBackground(Void... hey)
 		{
+
+			/// while the service is running on new_items and this page is refreshing.
 			while(check_service_running())
 			{
 				try{
@@ -1516,21 +1568,27 @@ public class main_view extends Activity
 				}
 			}
 
-			String group 					= current_groups.get(page_number);
+			log("current groups at pos = " + page_number + " is");
+			log(current_groups.get(page_number));
+			String group					= current_groups.get(page_number);
 			final String group_file_path 	= storage + "groups/" + group + ".txt";
 			final String group_content_path = group_file_path + ".content.txt";
+			final Boolean service 			= check_service_running();
 			String image_name, thumbnail_path;
 
 			/// If the group has no feeds  or  the content file does not exist, end.
 			if((!exists(group_file_path))||(!exists(group_content_path)))
 				return 0L;
 
-			List< List<String> > contenter = read_csv_to_list(new String[]{group_content_path, "marker", "title", "image", "description", "link"});
-			List<String> marker			= contenter.get(0);
-			List<String> titles 		= contenter.get(1);
-			List<String> images 		= contenter.get(2);
-			List<String> descriptions 	= contenter.get(3);
-			List<String> links			= contenter.get(4);
+			log("about to read csv");
+			List< List<String> > contenter 	= read_csv_to_list(new String[]{group_content_path, "marker|", "title|", "description|", "link|" , "image|", "width|", "height|"});
+			List<String> marker				= contenter.get(0);
+			List<String> titles				= contenter.get(1);
+			List<String> descriptions		= contenter.get(2);
+			List<String> links				= contenter.get(3);
+			List<String> images				= contenter.get(4);
+			List<String> widths				= contenter.get(5);
+			List<String> heights			= contenter.get(6);
 
 			if(links.get(0).length() < 1)
 				return 0L;
@@ -1541,47 +1599,36 @@ public class main_view extends Activity
 				existing_items = new HashSet<String>(get_card_adapter(page_number).return_links());
 			}
 			catch(Exception e){
-				return 0L;
 			}
-
-			/// load the image_dimensions to a list.
-			List<String> dimensions = read_file_to_list(storage + group + ".image_size.cache.txt");
 
 			/// For each line of the group_content_file
 			final int size = titles.size();
+			int width, height;
 			ssize = size;
-			String image_path;
-			String image;
+			String image_path, image;
+
 			for(int m = 0; m < size; m++)
 			{
 				thumbnail_path = "";
-				Integer[] dim = {0, 0};
+				width = 0;
+				height = 0;
 				image = images.get(m);
 
-				if(!image.equals(""))
+				if(!image.isEmpty())
 				{
-					image_name = images.get(m).substring(image.lastIndexOf("/") + 1, image.length());
-					thumbnail_path = storage + "thumbnails/" + image_name;
-
-					if((!exists(thumbnail_path))&&(!check_service_running()))
+					width = Integer.parseInt(widths.get(m));
+					if(width > 32)
 					{
-						image_path = storage + "images/" + image_name;
-						if(!exists(image_path))
-							download_file(image, image_path);
-						dimensions.add(compress_file(storage, image_name, group, false));
+						height = Integer.parseInt(heights.get(m));
+						thumbnail_path = storage + "thumbnails/" + image.substring(image.lastIndexOf("/") + 1, image.length());
 					}
-
-					dim = get_image_dimensions(dimensions, image_name);
-					if(dim[0] == 0)
-					{
-						dimensions.add(compress_file(storage, image_name, group, true));
-						dim = get_image_dimensions(dimensions, image_name);
-					}
+					else
+						width = 0;
 				}
 
 				// Checks to see if page has this item.
 				if(existing_items.add(links.get(m)))
-					publishProgress(page_number, titles.get(m), descriptions.get(m), links.get(m), thumbnail_path, dim[1], dim[0], marker.get(m));
+					publishProgress(page_number, titles.get(m), descriptions.get(m), links.get(m), thumbnail_path, height, width, marker.get(m));
 			}
 			return 0L;
 		}
@@ -1590,11 +1637,11 @@ public class main_view extends Activity
 		protected void onProgressUpdate(Object... progress)
 		{
 			if(l == null)
-				l = (fragment_card) getFragmentManager().findFragmentByTag("android:switcher:" + ((ViewPager) findViewById(R.id.pager)).getId() + ":" + Integer.toString((Integer) progress[0]));
+				l = (fragment_card) fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString((Integer) progress[0]));
 			if(l != null)
 			{
-				card_adapter ith = ((card_adapter) l.getListAdapter());
-				ListView lv = l.getListView();
+				final card_adapter ith = ((card_adapter) l.getListAdapter());
+				final ListView lv = l.getListView();
 				if(first)
 				{
 					if(refresh_count == 0)
@@ -1652,13 +1699,14 @@ public class main_view extends Activity
 			//if(viewPager.getOffscreenPageLimit() > 1)
 				//viewPager.setOffscreenPageLimit(1);
 			set_refresh(false);
+			//Debug.stopMethodTracing();
 		}
 	}
 
 	private card_adapter get_card_adapter(int page_index)
 	{
-		return ((card_adapter)((fragment_card) getFragmentManager()
-						.findFragmentByTag("android:switcher:" + ((ViewPager) findViewById(R.id.pager)).getId() + ":" + Integer.toString(page_index)))
+		return ((card_adapter)((fragment_card) fragment_manager
+						.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_index)))
 						.getListAdapter());
 	}
 
@@ -1669,7 +1717,7 @@ public class main_view extends Activity
 
 	public static void sort_group_content_by_time(String group)
 	{
-		if(storage.equals(""))
+		if(storage.isEmpty())
 			storage = read_file_to_list(storage + "storage_location.txt").get(0);
 
 		final String group_path = storage + "groups/" + group + ".txt.content.txt";
@@ -1679,7 +1727,7 @@ public class main_view extends Activity
 		Map<Long, String> map = new TreeMap<Long, String>();
 		int size, i;
 
-		final List<String> feeds_array	= read_csv_to_list(new String[]{storage + "groups/" + group + ".txt", "name"}).get(0);
+		final List<String> feeds_array	= read_csv_to_list(new String[]{storage + "groups/" + group + ".txt", "name|"}).get(0);
 
 		for(String feed : feeds_array)
 		{
@@ -1687,10 +1735,10 @@ public class main_view extends Activity
 			if(exists(content_path))
 			{
 				content 		= read_file_to_list(content_path);
-				pubDates		= read_csv_to_list(new String[]{content_path, "published"}).get(0);
+				pubDates		= read_csv_to_list(new String[]{content_path, "published|"}).get(0);
 
 				if(pubDates.get(0).length() < 8)
-					pubDates 	= read_csv_to_list(new String[]{content_path, "pubDate"}).get(0);
+					pubDates 	= read_csv_to_list(new String[]{content_path, "pubDate|"}).get(0);
 
 				size = pubDates.size();
 				for(i = 0; i < size; i++)
@@ -1732,80 +1780,33 @@ public class main_view extends Activity
 
 	public static Boolean exists(String file_path)
 	{
-		final File file = new File(file_path);
-		if (file.exists())
-		{
-			try{
-				FileReader fr = new FileReader(file);
-				if(fr.read() == -1)
-					return false;
-				else
-					return true;
-			}
-			catch(Exception e){
-				return false;
-			}
-		}
-		else
-			return false;
+		return (new File(file_path)).exists();
 	}
 
-	public static String compress_file(String path, String image_name, String group, Boolean skip_save)
+	public static void compress_file(String path, String image_name)
 	{
 		int insample;
-		if(!skip_save)
-		{
-			BitmapFactory.Options o = new BitmapFactory.Options();
-			o.inJustDecodeBounds = true;
-			BitmapFactory.decodeFile(path + "images/" + image_name, o);
 
-			int width_tmp = o.outWidth;
-			if(width < 2)
-				width = Integer.parseInt(main_view.read_file_to_list(storage + "width.txt").get(0));
+		BitmapFactory.Options o = new BitmapFactory.Options();
+		o.inJustDecodeBounds = true;
+		BitmapFactory.decodeFile(path + "images/" + image_name, o);
 
-			insample = (width_tmp > width) ? (Math.round((float) width_tmp / (float) width)) : 1;
-		}
-		else
-			insample = 1;
+		int width_tmp = o.outWidth;
+		if(width < 2)
+			width = Integer.parseInt(main_view.read_file_to_list(storage + "width.txt").get(0));
+
+		insample = (width_tmp > width) ? (Math.round((float) width_tmp / (float) width)) : 1;
 
 		BitmapFactory.Options o2 = new BitmapFactory.Options();
 		o2.inSampleSize = insample;
 		Bitmap bitmap = BitmapFactory.decodeFile(path + "images/" + image_name, o2);
-		//if(o2.outWidth > 9)
-			append_string_to_file(path + group + ".image_size.cache.txt", image_name + "|" + o2.outWidth + "|" + o2.outHeight + "\n");
 
-		if(!skip_save)
+		try
 		{
-			try
-			{
-				FileOutputStream out = new FileOutputStream(path + "thumbnails/" + image_name);
-				bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
-			}
-			catch (Exception e){
-			}
+			FileOutputStream out = new FileOutputStream(path + "thumbnails/" + image_name);
+			bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
 		}
-
-		return image_name + "|" + o2.outWidth + "|" + o2.outHeight;
-	}
-
-	private Integer[] get_image_dimensions(List<String> dim_list, final String image_name)
-	{
-		Integer[] size = {0, 0};
-		final int sizer = dim_list.size();
-		String line;
-		for(int i = 0 ; i < sizer; i++)
-		{
-			line = dim_list.get(i);
-			if(line.contains(image_name))
-			{
-				int first = line.indexOf('|') + 1;
-				int second = line.lastIndexOf('|') + 1;
-				size[0] = Integer.parseInt(line.substring(first, second - 1));
-				size[1] = Integer.parseInt(line.substring(second, line.length()));
-				dim_list.remove(i);
-				return size;
-			}
+		catch (Exception e){
 		}
-		return size;
 	}
 }

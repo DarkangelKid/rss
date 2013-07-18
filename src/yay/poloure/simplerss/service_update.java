@@ -70,7 +70,7 @@ public class service_update extends IntentService
 		final String group_file_path 			= storage + "groups/" + grouper + ".txt";
 		final String group_content_path 		= group_file_path + ".content.txt";
 
-		final List< List<String> > content 		= main_view.read_csv_to_list(new String[]{group_file_path, "name", "url"});
+		final List< List<String> > content 		= main_view.read_csv_to_list(new String[]{group_file_path, "name|", "url|"});
 		final List<String> group_feeds_names 	= content.get(0);
 		final List<String> group_feeds_urls 	= content.get(1);
 
@@ -82,7 +82,7 @@ public class service_update extends IntentService
 		{
 			feed_path = storage + "content/" + group_feeds_names.get(i); /// mariam_feed.txt
 			main_view.download_file(group_feeds_urls.get(i), feed_path + ".store.txt"); /// Downloads file as mariam_feed.store.txt
-			new parsered(feed_path + ".store.txt"); /// Parses the file and makes other files like mariam_feed.store.txt.content.txt
+			new parsered(feed_path + ".store.txt", storage); /// Parses the file and makes other files like mariam_feed.store.txt.content.txt
 		}
 
 		/// Sort group order
@@ -95,26 +95,6 @@ public class service_update extends IntentService
 		{
 			for(String gro : all_groups)
 				main_view.sort_group_content_by_time(gro);
-		}
-
-		final List<String> images 	= main_view.read_csv_to_list(new String[]{group_content_path, "image"}).get(0);
-
-			/// For each line of the group_content_file
-		final int sizer = images.size();
-		for(i = 0; i < sizer; i++)
-		{
-			image = images.get(i);
-			if(!image.equals(""))
-			{
-				image_name = image.substring(image.lastIndexOf("/") + 1, image.length());
-
-				/// If the image_name does not exist in images/ then download the file at url (images[m]) to images with name image_name
-				if(!main_view.exists(storage + "images/" + image_name))
-					main_view.download_file(image, storage + "images/" + image_name);
-				/// If the thumbnail does not exist in thumbnails/, compress the image in images/ to thumbnails with image_name.
-				if(!main_view.exists(storage + "thumbnails/" + image_name))
-					main_view.compress_file(storage, image_name, grouper, false);
-			}
 		}
 
 		/// Read all the group files and how many new items.
