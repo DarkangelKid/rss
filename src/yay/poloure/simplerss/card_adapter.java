@@ -32,6 +32,7 @@ import android.view.animation.DecelerateInterpolator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.concurrent.ConcurrentHashMap;
+import android.util.DisplayMetrics;
 import android.os.Handler;
 import android.graphics.Color;
 
@@ -60,8 +61,9 @@ public class card_adapter extends BaseAdapter
 	{
 		context = context_main;
 		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		eight = (int) ((8 * main_view.get_pixel_density() + 0.5f));
-		screen_width = main_view.get_width();
+		DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+		screen_width = metrics.widthPixels;
+		eight = (int) ((8 * (metrics.density) + 0.5f));
 	}
 
 	public void add_list(String new_title, String new_des, String new_link, String new_image, int new_height, int new_width, Boolean new_marker)
@@ -357,7 +359,7 @@ public class card_adapter extends BaseAdapter
 		}
 	}
 
-	private static final int HARD_CACHE_CAPACITY = 8;
+	private static final int HARD_CACHE_CAPACITY = 6;
 	private static final int DELAY_BEFORE_PURGE = 10 * 1000;
 
 	private final HashMap<String, Bitmap> sHardBitmapCache =

@@ -14,11 +14,12 @@ import android.text.format.Time;
 import java.util.Date;
 import java.util.Locale;
 import java.text.SimpleDateFormat;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import java.io.FileOutputStream;
 
 class parsered
 {
-
 	private static final SimpleDateFormat rss_date		= new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
 	private static final SimpleDateFormat rfc3339		= new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS'Z'");
 	private static final Pattern regex_tags				= Pattern.compile("(&lt;).*?(&gt;)");
@@ -31,8 +32,11 @@ class parsered
 	private static final int start_size 				= start.length;
 	private String dump_path;
 	private String url_path;
+	private int width;
 
-	public parsered(String file_path, String storage){
+	public parsered(String file_path, String storage, int widther)
+	{
+		width = widther;
 		parse_local_xml(file_path, storage);
 	}
 
@@ -94,7 +98,7 @@ class parsered
 						if(!main_view.exists(storage + "images/" + image_name))
 							main_view.download_file(image, storage + "images/" + image_name);
 						if(!main_view.exists(storage + "thumbnails/" + image_name))
-							main_view.compress_file(storage, image_name);
+							compress_file(storage, image_name);
 
 						/// TODO: If it does exist, skip this next step somehow. (turn write mode to false)
 
@@ -366,6 +370,31 @@ class parsered
 					found = true;
 		}
 		return tag;
+	}
+
+	private void compress_file(String path, String image_name)
+	{
+		int insample;
+
+		BitmapFactory.Options o = new BitmapFactory.Options();
+		o.inJustDecodeBounds = true;
+		BitmapFactory.decodeFile(path + "images/" + image_name, o);
+
+		int width_tmp = o.outWidth;
+
+		insample = (width_tmp > width) ? (Math.round((float) width_tmp / (float) width)) : 1;
+
+		BitmapFactory.Options o2 = new BitmapFactory.Options();
+		o2.inSampleSize = insample;
+		Bitmap bitmap = BitmapFactory.decodeFile(path + "images/" + image_name, o2);
+
+		try
+		{
+			FileOutputStream out = new FileOutputStream(path + "thumbnails/" + image_name);
+			bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
+		}
+		catch (Exception e){
+		}
 	}
 
 	private void to_file(String file_namer, String string)

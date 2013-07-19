@@ -16,6 +16,10 @@ import android.support.v4.app.TaskStackBuilder;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 
+import android.view.Display;
+import android.graphics.Point;
+import android.view.WindowManager;
+
 public class service_update extends IntentService
 {
 
@@ -36,11 +40,6 @@ public class service_update extends IntentService
 		final int group 						= intent.getIntExtra("GROUP_NUMBER", 0);
 		final String all_string 				= getString(R.string.all_group);
 		final String storage 					= this.getExternalFilesDir(null).getAbsolutePath() + "/";
-		/*if(!storage.equals(""))
-		{
-			main_view.delete(storage + "storage_location.txt");
-			main_view.append_string_to_file(storage + "storage_location.txt", storage);
-		}*/
 
 		final List<String> all_groups 			= main_view.read_file_to_list(storage + "groups/group_list.txt");
 		final String grouper					= all_groups.get(group);
@@ -54,12 +53,16 @@ public class service_update extends IntentService
 		String image_name = "", thumbnail_path = "", feed_path = "", image;
 		int i;
 
+		final Point screen_size = new Point();
+		((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getSize(screen_size);
+		final int width = (int) (Math.round(((screen_size.x)*0.944)));
+
 		final int size = group_feeds_names.size();
 		for(i = 0; i < size; i++)
 		{
 			feed_path = storage + "content/" + group_feeds_names.get(i); /// mariam_feed.txt
 			main_view.download_file(group_feeds_urls.get(i), feed_path + ".store.txt"); /// Downloads file as mariam_feed.store.txt
-			new parsered(feed_path + ".store.txt", storage); /// Parses the file and makes other files like mariam_feed.store.txt.content.txt
+			new parsered(feed_path + ".store.txt", storage, width); /// Parses the file and makes other files like mariam_feed.store.txt.content.txt
 		}
 
 		/// Sort group order
