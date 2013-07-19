@@ -559,7 +559,7 @@ public class main_view extends Activity
 		}
 	}
 
-	private class fragment_preferences extends PreferenceFragment
+	public class fragment_preferences extends PreferenceFragment
 	{
 
 		@Override
