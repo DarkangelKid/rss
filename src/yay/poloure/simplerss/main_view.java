@@ -1511,7 +1511,7 @@ public class main_view extends Activity
 			String image;
 			String tag;
 
-			while((l == null)||(ith == null)||(lv == null))
+			while(lv == null)
 			{
 				try{
 					Thread.sleep(50);
@@ -1519,12 +1519,11 @@ public class main_view extends Activity
 				catch(Exception e){
 				}
 				if(viewpager != null)
-				{
-					tag = "android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_number);
-					l = (fragment_card) fragment_manager.findFragmentByTag(tag);
+					l = (fragment_card) fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_number));
+				if(l != null)
 					ith = ((card_adapter) l.getListAdapter());
+				if(ith != null)
 					lv = l.getListView();
-				}
 			}
 
 			for(int m = 0; m < size; m++)
