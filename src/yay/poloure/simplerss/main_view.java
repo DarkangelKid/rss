@@ -1518,11 +1518,11 @@ public class main_view extends Activity
 				}
 				catch(Exception e){
 				}
-				if(viewpager != null)
+				if((viewpager != null)&&(l == null))
 					l = (fragment_card) fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_number));
-				if(l != null)
+				if((l != null)&&(ith == null))
 					ith = ((card_adapter) l.getListAdapter());
-				if(ith != null)
+				if((l != null)&&(ith == null)
 					lv = l.getListView();
 			}
 
