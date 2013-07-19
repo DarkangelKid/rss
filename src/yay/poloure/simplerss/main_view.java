@@ -1473,7 +1473,6 @@ public class main_view extends Activity
 					catch(Exception e){
 					}
 				}
-				log("stuck1");
 			}
 
 			String group					= current_groups.get(page_number);
