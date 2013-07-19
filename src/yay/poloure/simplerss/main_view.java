@@ -107,14 +107,18 @@ public class main_view extends Activity
 	private static SharedPreferences pref;
 	private static LayoutInflater inf;
 
+	private static Menu men;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 		//Debug.startMethodTracing("boot");
-		if (savedInstanceState == null)
+
+		setContentView(R.layout.pager);
+
+		//if (savedInstanceState == null)
 		{
-			setContentView(R.layout.pager);
 			perform_initial_operations();
 
 			final ActionBar action_bar = getActionBar();
@@ -418,12 +422,23 @@ public class main_view extends Activity
 		}
 	}
 
-	@Override
+	/*@Override
+	public boolean onCreateOptionsMenu(Menu menu)
+	{
+		//main_view.optionsMenu = menu;
+		menu.clear();
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.empty, menu);
+		men = menu;
+		return true;
+	}*/
+
+	/*@Override
 	public void onConfigurationChanged(Configuration newConfig)
 	{
 		super.onConfigurationChanged(newConfig);
 		drawer_toggle.onConfigurationChanged(newConfig);
-	}
+	}*/
 
 	private class DrawerItemClickListener implements ListView.OnItemClickListener
 	{
@@ -511,7 +526,7 @@ public class main_view extends Activity
 		@Override
 		public void onCreate(Bundle savedInstanceState){
 			super.onCreate(savedInstanceState);
-			setRetainInstance(true);
+			setRetainInstance(false);
 			setHasOptionsMenu(true);
 		}
 
@@ -536,8 +551,13 @@ public class main_view extends Activity
 		public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
 		{
 			//main_view.optionsMenu = menu;
+			men = menu;
+			menu.clear();
+
 			inflater.inflate(R.menu.main_overflow, menu);
 			super.onCreateOptionsMenu(menu, inflater);
+
+			set_refresh(check_service_running());
 		}
 
 		@Override
@@ -567,6 +587,8 @@ public class main_view extends Activity
 		public void onCreate(Bundle savedInstanceState)
 		{
 			super.onCreate(savedInstanceState);
+			setRetainInstance(false);
+			setHasOptionsMenu(true);
 			addPreferencesFromResource(R.layout.preferences);
 		}
 		@Override
@@ -576,6 +598,14 @@ public class main_view extends Activity
 			view.setBackgroundColor(Color.WHITE);
 			return view;
 		}
+
+		@Override
+		public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
+		{
+			menu.clear();
+
+			super.onCreateOptionsMenu(menu, inflater);
+		}
 	}
 
 	public static class fragment_manage extends Fragment
@@ -584,6 +614,7 @@ public class main_view extends Activity
 		public void onCreate(Bundle savedInstanceState)
 		{
 			super.onCreate(savedInstanceState);
+			setRetainInstance(false);
 			setHasOptionsMenu(true);
 		}
 
@@ -605,6 +636,9 @@ public class main_view extends Activity
 		@Override
 		public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
 		{
+			men = menu;
+			menu.clear();
+
 			inflater.inflate(R.menu.manage_overflow, menu);
 			super.onCreateOptionsMenu(menu, inflater);
 		}
@@ -825,12 +859,12 @@ public class main_view extends Activity
 		}
 	}
 
-	@Override
+	/*@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
 		optionsMenu = menu;
 		return true;
-	}
+	}*/
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
