@@ -105,6 +105,7 @@ public class main_view extends Activity
 
 	private static FragmentManager fragment_manager;
 	private static SharedPreferences pref;
+	private static LayoutInflater inf;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -189,9 +190,10 @@ public class main_view extends Activity
 		pref				= PreferenceManager.getDefaultSharedPreferences(this);
 		application_context	= getApplicationContext();
 		activity_context	= this;
+		inf					= getLayoutInflater();
 	}
 
-	private void add_feed(String feed_name, String feed_url, String feed_group)
+	private static void add_feed(String feed_name, String feed_url, String feed_group)
 	{
 		append_string_to_file(storage + "groups/" + feed_group + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|\n");
 		append_string_to_file(storage + "groups/" + all_string + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|group|" + feed_group + "|\n");
@@ -200,7 +202,7 @@ public class main_view extends Activity
 		update_manage_groups();
 	}
 
-	private void update_manage_feeds()
+	private static void update_manage_feeds()
 	{
 		if(feed_list_adapter != null)
 		{
@@ -216,7 +218,7 @@ public class main_view extends Activity
 		}
 	}
 
-	private void update_manage_groups()
+	private static void update_manage_groups()
 	{
 		if(group_list_adapter != null)
 		{
@@ -251,7 +253,7 @@ public class main_view extends Activity
 		}
 	}
 
-	private void edit_feed(String old_name, String new_name, String new_url, String old_group, String new_group)
+	private static void edit_feed(String old_name, String new_name, String new_url, String old_group, String new_group)
 	{
 		/// Delete the feed info from the all group and add the new group info to the end of the all content file.
 		remove_string_from_file(storage + "groups/" + all_string + ".txt", old_name, true);
@@ -296,7 +298,7 @@ public class main_view extends Activity
 			sort_group_content_by_time(new_group);
 	}
 
-	private void add_group(String group_name)
+	private static void add_group(String group_name)
 	{
 		append_string_to_file(storage + "groups/group_list.txt", group_name + "\n");
 		update_groups();
@@ -323,7 +325,7 @@ public class main_view extends Activity
 			append_string_to_file(storage + "new_items.txt", Boolean.toString(state) + "\n");
 	}
 
-	private void save_positions()
+	private static void save_positions()
 	{
 		card_adapter adapter;
 		BufferedWriter out;
@@ -447,9 +449,9 @@ public class main_view extends Activity
 		}
 	}
 
-	private boolean check_service_running()
+	private static boolean check_service_running()
 	{
-		ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+		ActivityManager manager = (ActivityManager) activity_context.getSystemService(Context.ACTIVITY_SERVICE);
 		for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE))
 			if(service_update.class.getName().equals(service.service.getClassName()))
 				return true;
@@ -482,7 +484,7 @@ public class main_view extends Activity
 		getActionBar().setTitle(title);
 	}
 
-	private final class page_listener implements ViewPager.OnPageChangeListener
+	private static class page_listener implements ViewPager.OnPageChangeListener
 	{
 		@Override
 		public void onPageScrollStateChanged(int state)
@@ -504,7 +506,7 @@ public class main_view extends Activity
 		}
 	}
 
-	private class fragment_feed extends Fragment
+	public static class fragment_feed extends Fragment
 	{
 		@Override
 		public void onCreate(Bundle savedInstanceState){
@@ -536,7 +538,6 @@ public class main_view extends Activity
 			//main_view.optionsMenu = menu;
 			inflater.inflate(R.menu.main_overflow, menu);
 			super.onCreateOptionsMenu(menu, inflater);
-			set_refresh(check_service_running());
 		}
 
 		@Override
@@ -559,7 +560,7 @@ public class main_view extends Activity
 		}
 	}
 
-	public class fragment_preferences extends PreferenceFragment
+	public static class fragment_preferences extends PreferenceFragment
 	{
 
 		@Override
@@ -577,7 +578,7 @@ public class main_view extends Activity
 		}
 	}
 
-	private class fragment_manage extends Fragment
+	public static class fragment_manage extends Fragment
 	{
 		@Override
 		public void onCreate(Bundle savedInstanceState)
@@ -622,7 +623,7 @@ public class main_view extends Activity
 		}
 	}
 
-	private class fragment_group extends Fragment
+	public static class fragment_group extends Fragment
 	{
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -659,7 +660,7 @@ public class main_view extends Activity
 		}
 	}
 
-	private class feed_manage extends Fragment
+	public static class feed_manage extends Fragment
 	{
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -772,7 +773,7 @@ public class main_view extends Activity
 		}
 	}
 
-	public class manage_pager_adapter extends FragmentPagerAdapter
+	public static class manage_pager_adapter extends FragmentPagerAdapter
 	{
 		public manage_pager_adapter(FragmentManager fm){
 			super(fm);
@@ -793,9 +794,9 @@ public class main_view extends Activity
 		public String getPageTitle(int position)
 		{
 			if(position == 0)
-				return getString(R.string.groups_manage_sub);
+				return activity_context.getString(R.string.groups_manage_sub);
 			else
-				return getString(R.string.feeds_manage_sub);
+				return activity_context.getString(R.string.feeds_manage_sub);
 		}
 	}
 
@@ -837,7 +838,7 @@ public class main_view extends Activity
 		return drawer_toggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
 	}
 
-	private void set_refresh(final boolean mode)
+	private static void set_refresh(final boolean mode)
 	{
 		if(optionsMenu != null)
 		{
@@ -856,10 +857,9 @@ public class main_view extends Activity
 			log("optionsMenu is null");
 	}
 
-	private void show_add_dialog()
+	private static void show_add_dialog()
 	{
-		LayoutInflater inflater = LayoutInflater.from(this);
-		final View add_rss_dialog = inflater.inflate(R.layout.add_rss_dialog, null);
+		final View add_rss_dialog = inf.inflate(R.layout.add_rss_dialog, null);
 
 		Spinner group_spinner = (Spinner) add_rss_dialog.findViewById(R.id.group_spinner);
 		List<String> spinner_groups = new ArrayList<String>();
@@ -867,16 +867,16 @@ public class main_view extends Activity
 		{
 			spinner_groups.add(current_groups.get(i));
 		}
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.group_spinner_text, spinner_groups);
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(activity_context, R.layout.group_spinner_text, spinner_groups);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		group_spinner.setAdapter(adapter);
 
-		final AlertDialog alertDialog = new AlertDialog.Builder(this, 2)
+		final AlertDialog alertDialog = new AlertDialog.Builder(activity_context, 2)
 				.setTitle("Add Feed")
 				.setView(add_rss_dialog)
 				.setCancelable(true)
 				.setPositiveButton
-				(getString(R.string.add_dialog),new DialogInterface.OnClickListener()
+				(activity_context.getString(R.string.add_dialog),new DialogInterface.OnClickListener()
 					{
 						@Override
 						public void onClick(DialogInterface dialog,int id)
@@ -885,7 +885,7 @@ public class main_view extends Activity
 					}
 				)
 				.setNegativeButton
-				(getString(R.string.cancel_dialog),new DialogInterface.OnClickListener()
+				(activity_context.getString(R.string.cancel_dialog),new DialogInterface.OnClickListener()
 					{
 						@Override
 						public void onClick(DialogInterface dialog,int id)
@@ -924,7 +924,7 @@ public class main_view extends Activity
 	}
 
 	///cock
-	private void show_edit_dialog(int position)
+	private static void show_edit_dialog(int position)
 	{
 		poser = position;
 		final LayoutInflater inflater 		= LayoutInflater.from(activity_context);
@@ -953,11 +953,11 @@ public class main_view extends Activity
 		group_spinner.setSelection(current_spinner_position);
 
 		final AlertDialog edit_dialog = new AlertDialog.Builder(activity_context, 2)
-				.setTitle(getString(R.string.edit_dialog_title))
+				.setTitle(activity_context.getString(R.string.edit_dialog_title))
 				.setView(edit_rss_dialog)
 				.setCancelable(true)
 				.setPositiveButton
-				(getString(R.string.accept_dialog), new DialogInterface.OnClickListener()
+				(activity_context.getString(R.string.accept_dialog), new DialogInterface.OnClickListener()
 					{
 						@Override
 						public void onClick(DialogInterface dialog,int id)
@@ -966,7 +966,7 @@ public class main_view extends Activity
 					}
 				)
 				.setNegativeButton
-				(getString(R.string.cancel_dialog),new DialogInterface.OnClickListener()
+				(activity_context.getString(R.string.cancel_dialog),new DialogInterface.OnClickListener()
 					{
 						@Override
 						public void onClick(DialogInterface dialog,int id)
@@ -999,7 +999,7 @@ public class main_view extends Activity
 		edit_dialog.show();
 	}
 
-	private void process_user_feed(AlertDialog edit_dialog, String new_group, String URL_check, String feed_name, String spinner_group, String mode)
+	private static void process_user_feed(AlertDialog edit_dialog, String new_group, String URL_check, String feed_name, String spinner_group, String mode)
 	{
 		boolean found = false, new_group_mode = false;
 		if(new_group.length()>0)
@@ -1092,7 +1092,7 @@ public class main_view extends Activity
 		message_toast.show();
 	}
 
-	private class check_feed_exists extends AsyncTask<String, Void, Integer>
+	private static class check_feed_exists extends AsyncTask<String, Void, Integer>
 	{
 		@Override
 		protected Integer doInBackground(String... urls)
@@ -1132,7 +1132,7 @@ public class main_view extends Activity
 		}
 	}
 
-	private byte[] concat_byte_arrays(byte[] a, byte[] b)
+	private static byte[] concat_byte_arrays(byte[] a, byte[] b)
 	{
 		final int a_length = a.length;
 		final int b_length = b.length;
@@ -1186,7 +1186,7 @@ public class main_view extends Activity
 		}
 	}
 
-	private void remove_string_from_file(String file_path, String string, Boolean contains)
+	private static void remove_string_from_file(String file_path, String string, Boolean contains)
 	{
 		final List<String> list = read_file_to_list(file_path);
 		delete(file_path);
@@ -1419,14 +1419,14 @@ public class main_view extends Activity
 		return unread_list;
 	}
 
-	private void update_group(int page_number)
+	private static void update_group(int page_number)
 	{
 		save_positions();
 		set_refresh(true);
-		Intent intent = new Intent(this, service_update.class);
+		Intent intent = new Intent(activity_context, service_update.class);
 		intent.putExtra("GROUP_NUMBER", page_number);
 		intent.putExtra("NOTIFICATIONS", pref.getBoolean("notifications", false));
-		startService(intent);
+		activity_context.startService(intent);
 		if(page_number == 0)
 		{
 			for(int i = 0; i < new_items.size(); i++)
@@ -1440,11 +1440,11 @@ public class main_view extends Activity
 		new refresh_page(page_number).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 
-	private class refresh_page extends AsyncTask<Void, Object, Long>
+	private static class refresh_page extends AsyncTask<Void, Object, Long>
 	{
 		int marker_position = -1, ssize, refresh_count = 0, page_number;
 		Boolean markerer, waited = true;
-		final Animation animFadeIn = AnimationUtils.loadAnimation(getApplicationContext(), android.R.anim.fade_in);
+		final Animation animFadeIn = AnimationUtils.loadAnimation(activity_context, android.R.anim.fade_in);
 		ListFragment l;
 		card_adapter ith;
 		ListView lv;
@@ -1511,20 +1511,19 @@ public class main_view extends Activity
 			String image;
 			String tag;
 
-			while((l == null)||(ith == null)||(lv == null))
+			while(lv == null)
 			{
 				try{
 					Thread.sleep(50);
 				}
 				catch(Exception e){
 				}
-				if(viewpager != null)
-				{
-					tag = "android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_number);
-					l = (fragment_card) fragment_manager.findFragmentByTag(tag);
+				if((viewpager != null)&&(l == null))
+					l = (fragment_card) fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_number));
+				if((l != null)&&(ith == null))
 					ith = ((card_adapter) l.getListAdapter());
+				if((l != null)&&(lv == null))
 					lv = l.getListView();
-				}
 			}
 
 			for(int m = 0; m < size; m++)
@@ -1614,7 +1613,7 @@ public class main_view extends Activity
 		}
 	}
 
-	private card_adapter get_card_adapter(int page_index)
+	private static card_adapter get_card_adapter(int page_index)
 	{
 		return ((card_adapter)((fragment_card) fragment_manager
 						.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_index)))
