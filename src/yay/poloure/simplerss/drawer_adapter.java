@@ -21,7 +21,7 @@ public class drawer_adapter extends BaseAdapter
 	public drawer_adapter(Context context_main)
 	{
 		inflater = (LayoutInflater) context_main.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		twelve = (int) ((12 * main_view.get_pixel_density() + 0.5f));
+		twelve = (int) ((12 * (context_main.getResources().getDisplayMetrics().density) + 0.5f));
 	}
 
 	public void add_list(List<String> new_title)

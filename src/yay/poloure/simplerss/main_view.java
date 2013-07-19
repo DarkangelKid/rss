@@ -31,7 +31,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.view.PagerTabStrip;
 import android.support.v4.widget.DrawerLayout;
 
-import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuInflater;
@@ -62,6 +61,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 import java.io.File;
 import java.io.BufferedInputStream;
@@ -72,9 +72,6 @@ import java.io.BufferedWriter;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-import android.graphics.BitmapFactory;
-import android.graphics.Bitmap;
-import android.graphics.Point;
 import android.graphics.Color;
 import android.os.Debug;
 import android.text.format.Time;
@@ -87,28 +84,25 @@ public class main_view extends Activity
 	private static ActionBarDrawerToggle drawer_toggle;
 	private static Menu optionsMenu;
 
-	private static float density;
-
-	private static Resources res;
-	private static int positionrr, poser, check_finished, width, group_pos;
-	private static List<Boolean> new_items;
+	private static int positionrr, poser, check_finished, group_pos;
 	private static String mTitle, feed_title, current_group, current_title;
 	private static String storage;
-	private static Context context, activity_context;
+	private static Context application_context, activity_context;
 	private static ViewPager viewpager;
 
-	private static List<String> current_groups;
-
 	private static feed_adapter feed_list_adapter;
-
 	private static group_adapter group_list_adapter;
 	private static drawer_adapter nav_adapter;
 
-	private static final int CONTENT_VIEW_ID = 10101010;
-	private static final int[] times = new int[]{15, 30, 45, 60, 120, 180, 240, 300, 360, 400, 480, 540, 600, 660, 720, 960, 1440, 2880, 10080, 43829};
+	private static List<String> current_groups 			= new ArrayList<String>();
+	private static List<Boolean> new_items 				= new ArrayList<Boolean>();
+	private static final int[] times 					= new int[]{15, 30, 45, 60, 120, 180, 240, 300, 360, 400, 480, 540, 600, 660, 720, 960, 1440, 2880, 10080, 43829};
+	private static final String[] folders 				= {"images", "thumbnails", "groups", "content"};
+	private static final Pattern illegal_file_chars		= Pattern.compile("[/\\?%*|<>:]");
+
 	private static String feeds_string, manage_string, settings_string, navigation_string;
 	private static String all_string;
-	private static final String[] folders = {"images", "thumbnails", "groups", "content"};
+
 	private static FragmentManager fragment_manager;
 	private static SharedPreferences pref;
 
@@ -119,24 +113,20 @@ public class main_view extends Activity
 		//Debug.startMethodTracing("boot");
 		if (savedInstanceState == null)
 		{
-			feeds_string = getString(R.string.feeds_title);
-			manage_string = getString(R.string.manage_title);
-			settings_string = getString(R.string.settings_title);
-			navigation_string = getString(R.string.navigation_title);
-			all_string = getString(R.string.all_group);
+			setContentView(R.layout.pager);
+			perform_initial_operations();
 
-			ActionBar action_bar = getActionBar();
+			final ActionBar action_bar = getActionBar();
 			action_bar.setTitle(feeds_string);
 			action_bar.setIcon(R.drawable.rss_icon);
+			action_bar.setDisplayHomeAsUpEnabled(true);
+			action_bar.setHomeButtonEnabled(true);
 
-			inf = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			setContentView(inf.inflate(R.layout.pager, null), new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+			final Fragment feed		= new fragment_feed();
+			final Fragment prefs	= new fragment_preferences();
+			final Fragment man		= new fragment_manage();
 
 			fragment_manager = getFragmentManager();
-
-			Fragment feed = new fragment_feed();
-			Fragment prefs = new fragment_preferences();
-			Fragment man = new fragment_manage();
 			fragment_manager.beginTransaction()
 				.add(R.id.content_frame, feed, feeds_string)
 				.add(R.id.content_frame, prefs, settings_string)
@@ -144,104 +134,61 @@ public class main_view extends Activity
 				.hide(man)
 				.hide(prefs)
 				.commit();
-			pref = PreferenceManager.getDefaultSharedPreferences(this);
-		}
-	}
 
-	@Override
-	protected void onPostCreate(Bundle savedInstanceState)
-	{
-		super.onPostCreate(savedInstanceState);
-		if (savedInstanceState == null)
-		{
-			context = getApplicationContext();
-			activity_context = this;
-
-			storage = this.getExternalFilesDir(null).getAbsolutePath() + "/";
-			if(!storage.isEmpty())
-			{
-				delete(storage + "storage_location.txt");
-				append_string_to_file(storage + "storage_location.txt", storage);
-			}
-
-			delete(storage + "dump.txt");
-
-			File folder_file;
-
-			for(String folder : folders)
-			{
-				folder_file = new File(storage + folder);
-				if(!folder_file.exists())
-					folder_file.mkdir();
-			}
-
-			navigation_list = (ListView) findViewById(R.id.left_drawer);
+			nav_adapter		= new drawer_adapter(this);
+			navigation_list	= (ListView) findViewById(R.id.left_drawer);
 			navigation_list.setOnItemClickListener(new DrawerItemClickListener());
-
-			res = getResources();
-			density = res.getDisplayMetrics().density;
-
-			nav_adapter = new drawer_adapter(context);
 			navigation_list.setAdapter(nav_adapter);
 
-			update_groups();
-
-			viewpager = (ViewPager) findViewById(R.id.pager);
-			viewpager.setAdapter(new viewpager_adapter(fragment_manager));
-			viewpager.setOffscreenPageLimit(128);
-			viewpager.setOnPageChangeListener(new page_listener());
-
-			ViewPager manage_pager = (ViewPager) findViewById(R.id.manage_viewpager);
-			manage_pager.setAdapter(new manage_pager_adapter(fragment_manager));
-
-			PagerTabStrip pager_tab_strip = (PagerTabStrip) findViewById(R.id.pager_title_strip);
-			pager_tab_strip.setDrawFullUnderline(true);
-			pager_tab_strip.setTabIndicatorColor(Color.argb(0, 51, 181, 229));
-
-			PagerTabStrip manage_strip = (PagerTabStrip) findViewById(R.id.manage_title_strip);
-			manage_strip.setDrawFullUnderline(true);
-			manage_strip.setTabIndicatorColor(Color.argb(0, 51, 181, 229));
-
-			mTitle = feeds_string;
 			drawer_layout = (DrawerLayout) findViewById(R.id.drawer_layout);
 			drawer_layout.setDrawerShadow(R.drawable.drawer_shadow, 8388611);
-			drawer_toggle = new ActionBarDrawerToggle(this, drawer_layout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
+			drawer_toggle	= new ActionBarDrawerToggle(this, drawer_layout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
 			{
 				@Override
-				public void onDrawerClosed(View view){
-					getActionBar().setTitle(mTitle);
+				public void onDrawerClosed(View view)
+				{
+					action_bar.setTitle(mTitle);
 				}
 
 				@Override
-				public void onDrawerOpened(View drawerView){
-					getActionBar().setTitle(navigation_string);
+				public void onDrawerOpened(View drawerView)
+				{
+					action_bar.setTitle(navigation_string);
 				}
 			};
 
 			drawer_layout.setDrawerListener(drawer_toggle);
-			ActionBar bar = getActionBar();
-			bar.setDisplayHomeAsUpEnabled(true);
-			bar.setHomeButtonEnabled(true);
-			//set_refresh(check_service_running());
-
-			/// Save the width for compression
-			if(!exists(storage + "width.txt"))
-			{
-				Display display = getWindowManager().getDefaultDisplay();
-				Point size = new Point();
-				display.getSize(size);
-				width = (int) (Math.round(((size.x)*0.944)));
-				delete(storage + "width.txt");
-				append_string_to_file(storage + "width.txt", Integer.toString(width) + "\n");
-			}
-			else
-				width = Integer.parseInt(read_file_to_list(storage + "width.txt").get(0));
-
 			drawer_toggle.syncState();
+
+			update_groups();
 
 			if(exists(storage + "groups/" + all_string + ".txt"))
 				new refresh_page(0).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
+	}
+
+	private void perform_initial_operations()
+	{
+		storage				= getExternalFilesDir(null).getAbsolutePath() + "/";
+		delete(storage + "dump.txt");
+
+		File folder_file;
+		for(String folder : folders)
+		{
+			folder_file = new File(storage.concat(folder));
+			if(!folder_file.exists())
+				folder_file.mkdir();
+		}
+
+		feeds_string		= getString(R.string.feeds_title);
+		manage_string		= getString(R.string.manage_title);
+		settings_string		= getString(R.string.settings_title);
+		navigation_string	= getString(R.string.navigation_title);
+		all_string			= getString(R.string.all_group);
+		mTitle				= feeds_string;
+		pref				= PreferenceManager.getDefaultSharedPreferences(this);
+		application_context	= getApplicationContext();
+		activity_context	= this;
 	}
 
 	private void add_feed(String feed_name, String feed_url, String feed_group)
@@ -251,10 +198,6 @@ public class main_view extends Activity
 
 		update_manage_feeds();
 		update_manage_groups();
-	}
-
-	public static int get_width(){
-		return width;
 	}
 
 	private void update_manage_feeds()
@@ -513,10 +456,6 @@ public class main_view extends Activity
 		return false;
 	}
 
-	public static float get_pixel_density(){
-		return density;
-	}
-
 	private void switch_page(String page_title, int position)
 	{
 		if(!mTitle.equals(page_title))
@@ -577,7 +516,18 @@ public class main_view extends Activity
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
-			return inflater.inflate(R.layout.feed_fragment, container, false);
+			View feed_view = inflater.inflate(R.layout.feed_fragment, container, false);
+
+			viewpager = (ViewPager) feed_view.findViewById(R.id.pager);
+			viewpager.setAdapter(new viewpager_adapter(fragment_manager));
+			viewpager.setOffscreenPageLimit(128);
+			viewpager.setOnPageChangeListener(new page_listener());
+
+			PagerTabStrip pager_tab_strip = (PagerTabStrip) feed_view.findViewById(R.id.pager_title_strip);
+			pager_tab_strip.setDrawFullUnderline(true);
+			pager_tab_strip.setTabIndicatorColor(Color.argb(0, 51, 181, 229));
+
+			return feed_view;
 		}
 
 		@Override
@@ -609,7 +559,7 @@ public class main_view extends Activity
 		}
 	}
 
-	private static class fragment_preferences extends PreferenceFragment
+	private class fragment_preferences extends PreferenceFragment
 	{
 
 		@Override
@@ -639,7 +589,16 @@ public class main_view extends Activity
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
-			return inflater.inflate(R.layout.manage_pager, container, false);
+			View manage_view = inflater.inflate(R.layout.manage_pager, container, false);
+
+			ViewPager manage_pager = (ViewPager) manage_view.findViewById(R.id.manage_viewpager);
+			manage_pager.setAdapter(new manage_pager_adapter(fragment_manager));
+
+			final PagerTabStrip manage_strip = (PagerTabStrip) manage_view.findViewById(R.id.manage_title_strip);
+			manage_strip.setDrawFullUnderline(true);
+			manage_strip.setTabIndicatorColor(Color.argb(0, 51, 181, 229));
+
+			return manage_view;
 		}
 
 		@Override
@@ -1113,16 +1072,8 @@ public class main_view extends Activity
 			if(feed_name.isEmpty())
 				feed_name = feed_title;
 
-			/// Replace this with a regex pattern
-			feed_name = feed_name.replace("/","")
-								.replace("\\", "")
-								.replace("?", "")
-								.replace("%", "")
-								.replace("*", "")
-								.replace("|", "")
-								.replace("<", "")
-								.replace(">", "")
-								.replace(":", "");
+			feed_name = illegal_file_chars.matcher(feed_name).replaceAll("");
+
 			if(mode.equals("edit"))
 				edit_feed(current_title, feed_name, URL_check, current_group, new_group);
 			else
@@ -1135,9 +1086,9 @@ public class main_view extends Activity
 	{
 		Toast message_toast;
 		if(short_long)
-			message_toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
+			message_toast = Toast.makeText(activity_context, message, Toast.LENGTH_SHORT);
 		else
-			message_toast = Toast.makeText(context, message, Toast.LENGTH_LONG);
+			message_toast = Toast.makeText(activity_context, message, Toast.LENGTH_LONG);
 		message_toast.show();
 	}
 
@@ -1263,6 +1214,7 @@ public class main_view extends Activity
 	private static void update_groups()
 	{
 		final int previous_size = current_groups.size();
+
 		current_groups = read_file_to_list(storage + "groups/group_list.txt");
 		final int size = current_groups.size();
 		if(size == 0)
@@ -1491,7 +1443,7 @@ public class main_view extends Activity
 	private class refresh_page extends AsyncTask<Void, Object, Long>
 	{
 		int marker_position = -1, ssize, refresh_count = 0, page_number;
-		Boolean markerer, waited = false;
+		Boolean markerer, waited = true;
 		final Animation animFadeIn = AnimationUtils.loadAnimation(getApplicationContext(), android.R.anim.fade_in);
 		ListFragment l;
 		card_adapter ith;
@@ -1505,19 +1457,6 @@ public class main_view extends Activity
 
 		@Override
 		protected void onPreExecute(){
-			if(l == null)
-				l = (fragment_card) fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_number));
-			if(l != null)
-			{
-				ith = ((card_adapter) l.getListAdapter());
-				lv = l.getListView();
-
-				if((ith != null)&&(lv != null)&&(ith.getCount() == 0))
-				{
-					lv.setVisibility(View.INVISIBLE);
-					waited = false;
-				}
-			}
 		}
 
 		@Override
@@ -1570,21 +1509,21 @@ public class main_view extends Activity
 			int width, height;
 			ssize = size;
 			String image;
+			String tag;
 
-			if(l == null)
-				l = (fragment_card) fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_number));
-			if(l != null)
+			while((l == null)||(ith == null)||(lv == null))
 			{
-				while((ith == null)||(lv == null))
+				try{
+					Thread.sleep(50);
+				}
+				catch(Exception e){
+				}
+				if(viewpager != null)
 				{
-					waited = true;
-					try{
-						Thread.sleep(50);
-						ith = ((card_adapter) l.getListAdapter());
-						lv = l.getListView();
-					}
-					catch(Exception e){
-					}
+					tag = "android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_number);
+					l = (fragment_card) fragment_manager.findFragmentByTag(tag);
+					ith = ((card_adapter) l.getListAdapter());
+					lv = l.getListView();
 				}
 			}
 
@@ -1753,32 +1692,5 @@ public class main_view extends Activity
 	public static Boolean exists(String file_path)
 	{
 		return (new File(file_path)).exists();
-	}
-
-	public static void compress_file(String path, String image_name)
-	{
-		int insample;
-
-		BitmapFactory.Options o = new BitmapFactory.Options();
-		o.inJustDecodeBounds = true;
-		BitmapFactory.decodeFile(path + "images/" + image_name, o);
-
-		int width_tmp = o.outWidth;
-		if(width < 2)
-			width = Integer.parseInt(main_view.read_file_to_list(storage + "width.txt").get(0));
-
-		insample = (width_tmp > width) ? (Math.round((float) width_tmp / (float) width)) : 1;
-
-		BitmapFactory.Options o2 = new BitmapFactory.Options();
-		o2.inSampleSize = insample;
-		Bitmap bitmap = BitmapFactory.decodeFile(path + "images/" + image_name, o2);
-
-		try
-		{
-			FileOutputStream out = new FileOutputStream(path + "thumbnails/" + image_name);
-			bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
-		}
-		catch (Exception e){
-		}
 	}
 }
