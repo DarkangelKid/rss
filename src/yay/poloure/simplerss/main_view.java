@@ -94,6 +94,11 @@ public class main_view extends Activity
 	private static group_adapter group_list_adapter;
 	private static drawer_adapter nav_adapter;
 
+	private static final Fragment feed		= new fragment_feed();
+	private static final Fragment prefs		= new fragment_preferences();
+	private static final Fragment man		= new fragment_manage();
+
+
 	private static List<String> current_groups 			= new ArrayList<String>();
 	private static List<Boolean> new_items 				= new ArrayList<Boolean>();
 	private static final int[] times 					= new int[]{15, 30, 45, 60, 120, 180, 240, 300, 360, 400, 480, 540, 600, 660, 720, 960, 1440, 2880, 10080, 43829};
@@ -123,10 +128,6 @@ public class main_view extends Activity
 			action_bar.setDisplayHomeAsUpEnabled(true);
 			action_bar.setHomeButtonEnabled(true);
 
-			final Fragment feed		= new fragment_feed();
-			final Fragment prefs	= new fragment_preferences();
-			final Fragment man		= new fragment_manage();
-
 			fragment_manager = getFragmentManager();
 			fragment_manager.beginTransaction()
 				.add(R.id.content_frame, feed, feeds_string)
@@ -138,7 +139,16 @@ public class main_view extends Activity
 
 			nav_adapter		= new drawer_adapter(this);
 			navigation_list	= (ListView) findViewById(R.id.left_drawer);
-			navigation_list.setOnItemClickListener(new DrawerItemClickListener());
+			navigation_list.setOnItemClickListener
+			(
+				new ListView.OnItemClickListener()
+				{
+					@Override
+					public void onItemClick(AdapterView parent, View view, int position, long id){
+						selectItem(position);
+					}
+				}
+			);
 			navigation_list.setAdapter(nav_adapter);
 
 			drawer_layout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -425,14 +435,6 @@ public class main_view extends Activity
 		drawer_toggle.onConfigurationChanged(newConfig);
 	}
 
-	private class DrawerItemClickListener implements ListView.OnItemClickListener
-	{
-		@Override
-		public void onItemClick(AdapterView parent, View view, int position, long id){
-			selectItem(position);
-		}
-	}
-
 	private void selectItem(int position)
 	{
 		if(position == 2)
@@ -484,28 +486,6 @@ public class main_view extends Activity
 		getActionBar().setTitle(title);
 	}
 
-	private static class page_listener implements ViewPager.OnPageChangeListener
-	{
-		@Override
-		public void onPageScrollStateChanged(int state)
-		{
-		}
-
-		@Override
-		public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels)
-		{
-		}
-
-		@Override
-		public void onPageSelected(int position)
-		{
-			if(get_card_adapter(position).getCount() == 0)
-				new refresh_page(position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-			else if(new_items.get(position))
-				new refresh_page(position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-		}
-	}
-
 	public static class fragment_feed extends Fragment
 	{
 		@Override
@@ -523,7 +503,30 @@ public class main_view extends Activity
 			viewpager = (ViewPager) feed_view.findViewById(R.id.pager);
 			viewpager.setAdapter(new viewpager_adapter(fragment_manager));
 			viewpager.setOffscreenPageLimit(128);
-			viewpager.setOnPageChangeListener(new page_listener());
+			viewpager.setOnPageChangeListener
+			(
+				new ViewPager.OnPageChangeListener()
+				{
+					@Override
+					public void onPageScrollStateChanged(int state)
+					{
+					}
+
+					@Override
+					public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels)
+					{
+					}
+
+					@Override
+					public void onPageSelected(int position)
+					{
+						if(get_card_adapter(position).getCount() == 0)
+							new refresh_page(position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+						else if(new_items.get(position))
+							new refresh_page(position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+					}
+				}
+			);
 
 			PagerTabStrip pager_tab_strip = (PagerTabStrip) feed_view.findViewById(R.id.pager_title_strip);
 			pager_tab_strip.setDrawFullUnderline(true);
@@ -850,11 +853,7 @@ public class main_view extends Activity
 				else
 					refreshItem.setActionView(null);
 			}
-			else
-				log("refreshItem is null");
 		}
-		else
-			log("optionsMenu is null");
 	}
 
 	private static void show_add_dialog()
@@ -915,7 +914,8 @@ public class main_view extends Activity
 						catch(Exception e){
 							spinner_group = "Unsorted";
 						}
-						process_user_feed(alertDialog, new_group, URL_check, feed_name, spinner_group, "add");
+
+						new check_feed_exists(alertDialog, new_group, feed_name, "add", spinner_group).execute(URL_check);
 					}
 				});
 			}
@@ -991,95 +991,12 @@ public class main_view extends Activity
 						String feed_name 		= ((EditText) edit_rss_dialog.findViewById(R.id.name_edit)).getText().toString().trim();
 						String spinner_group 	= ((Spinner) edit_rss_dialog.findViewById(R.id.group_spinner)).getSelectedItem().toString();
 
-						process_user_feed(edit_dialog, new_group, URL_check, feed_name, spinner_group, "edit");
+						new check_feed_exists(edit_dialog, new_group, feed_name, "edit", spinner_group).execute(URL_check);
 					}
 				});
 			}
 		});
 		edit_dialog.show();
-	}
-
-	private static void process_user_feed(AlertDialog edit_dialog, String new_group, String URL_check, String feed_name, String spinner_group, String mode)
-	{
-		boolean found = false, new_group_mode = false;
-		if(new_group.length()>0)
-		{
-			new_group_mode = true;
-			for(String group : current_groups)
-			{
-				if((group.toLowerCase()).equals(new_group))
-					found = true;
-			}
-
-			String[] words = new_group.split("\\s");
-			new_group = "";
-
-			if(words.length == 1)
-			{
-				char cap = Character.toUpperCase(words[0].charAt(0));
-				new_group +=  cap + words[0].substring(1, words[0].length());
-			}
-			else
-			{
-				for(int i = 0; i < words.length - 1; i++)
-				{
-					char cap = Character.toUpperCase(words[i].charAt(0));
-					new_group +=  cap + words[i].substring(1, words[i].length()) + " ";
-				}
-				char cap = Character.toUpperCase(words[words.length - 1].charAt(0));
-				new_group +=  cap + words[words.length - 1].substring(1, words[words.length - 1].length());
-			}
-		}
-		else
-			new_group = spinner_group;
-
-		Boolean rss = false;
-
-		check_finished = -1;
-		if(!URL_check.contains("http"))
-		{
-			new check_feed_exists().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "http://" + URL_check);
-			while(check_finished == -1){
-			}
-			if(check_finished == 0)
-			{
-				check_finished = -1;
-				new check_feed_exists().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "https://" + URL_check);
-				while(check_finished == -1){
-				}
-				if(check_finished == 1)
-					URL_check = "https://" + URL_check;
-			}
-			else if(check_finished == 1)
-				URL_check = "http://" + URL_check;
-		}
-		else
-		{
-			new check_feed_exists().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
-			while(check_finished == -1){
-			}
-		}
-		if(check_finished == 1)
-			rss = true;
-
-		if(rss!= null && !rss)
-			toast_message("Invalid RSS URL", false);
-		else
-		{
-			if((!found)&&(new_group_mode))
-				add_group(new_group);
-
-			if(feed_name.isEmpty())
-				feed_name = feed_title;
-
-			feed_name = illegal_file_chars.matcher(feed_name).replaceAll("");
-
-			if(mode.equals("edit"))
-				edit_feed(current_title, feed_name, URL_check, current_group, new_group);
-			else
-				add_feed(feed_name, URL_check, new_group);
-			edit_dialog.dismiss();
-		}
 	}
 
 	private static void toast_message(String message, final Boolean short_long)
@@ -1094,41 +1011,117 @@ public class main_view extends Activity
 
 	private static class check_feed_exists extends AsyncTask<String, Void, Integer>
 	{
-		@Override
-		protected Integer doInBackground(String... urls)
+		private Boolean found = false, real = false, new_group_mode = false;
+		AlertDialog dialog;
+		String group, name, mode, url, feed_title, spinner_group;
+
+		public check_feed_exists(AlertDialog edit_dialog, String new_group, String feed_name, String moder, String spin_group)
 		{
-			try
+			dialog			= edit_dialog;
+			group			= new_group;
+			name			= feed_name;
+			mode			= moder;
+			spinner_group	= spin_group;
+		}
+
+		@Override
+		protected Integer doInBackground(String... urler)
+		{
+			if(group.length()>0)
 			{
-				final BufferedInputStream in = new BufferedInputStream((new URL(urls[0])).openStream());
-				byte data[] = new byte[512], data2[];
-				in.read(data, 0, 512);
-
-				String line = new String(data);
-				if((line.contains("rss"))||((line.contains("Atom"))||(line.contains("atom"))))
+				new_group_mode = true;
+				for(String gro : current_groups)
 				{
-					while((!line.contains("<title"))&&(!line.contains("</title>")))
-					{
-						data2 = new byte[512];
-						in.read(data2, 0, 512);
+					if((gro.toLowerCase()).equals(group))
+						found = true;
+				}
 
-						data = concat_byte_arrays(data, data2);
-						line = new String(data);
-					}
-					final int ind = line.indexOf(">", line.indexOf("<title")) + 1;
-					feed_title = line.substring(ind, line.indexOf("</", ind));
-					check_finished = 1;
+				String[] words = group.split("\\s");
+				group = "";
+
+				if(words.length == 1)
+				{
+					char cap = Character.toUpperCase(words[0].charAt(0));
+					group +=  cap + words[0].substring(1, words[0].length());
 				}
 				else
-					check_finished = 0;
+				{
+					for(int i = 0; i < words.length - 1; i++)
+					{
+						char cap = Character.toUpperCase(words[i].charAt(0));
+						group +=  cap + words[i].substring(1, words[i].length()) + " ";
+					}
+					char cap = Character.toUpperCase(words[words.length - 1].charAt(0));
+					group +=  cap + words[words.length - 1].substring(1, words[words.length - 1].length());
+				}
+			}
+			else
+				group = spinner_group;
+
+			List<String> check_list = new ArrayList<String>();
+			if(!urler[0].contains("http"))
+			{
+				check_list.add("http://" + urler[0]);
+				check_list.add("https://" + urler[0]);
+			}
+			else
+				check_list.add(urler[0]);
+
+			try
+			{
+				for(String check : check_list)
+				{
+					final BufferedInputStream in = new BufferedInputStream((new URL(check)).openStream());
+					byte data[] = new byte[512], data2[];
+					in.read(data, 0, 512);
+
+					String line = new String(data);
+					if((line.contains("rss"))||((line.contains("Atom"))||(line.contains("atom"))))
+					{
+						while((!line.contains("<title"))&&(!line.contains("</title>")))
+						{
+							data2 = new byte[512];
+							in.read(data2, 0, 512);
+
+							data = concat_byte_arrays(data, data2);
+							line = new String(data);
+						}
+						final int ind = line.indexOf(">", line.indexOf("<title")) + 1;
+						feed_title = line.substring(ind, line.indexOf("</", ind));
+						real = true;
+						url = check;
+						break;
+					}
+				}
 			}
 			catch(Exception e){
-				check_finished = 0;
 			}
 			return 0;
 		}
 
 		@Override
-		protected void onPostExecute(Integer end){
+		protected void onPostExecute(Integer end)
+		{
+			if(!real)
+				toast_message("Invalid RSS URL", false);
+			else
+			{
+				if((!found)&&(new_group_mode))
+					add_group(group);
+
+				if(name.isEmpty())
+					name = feed_title;
+
+				name = illegal_file_chars.matcher(name).replaceAll("");
+
+				if(mode.equals("edit"))
+					/// current title and group are pulled from the air.
+					edit_feed(current_title, name, url, current_group, group);
+				else
+					add_feed(name, url, group);
+
+				dialog.dismiss();
+			}
 		}
 	}
 
