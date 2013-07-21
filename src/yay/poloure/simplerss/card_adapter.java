@@ -144,20 +144,14 @@ public class card_adapter extends BaseAdapter
 					if((scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)||(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL))
 					{
 						int firstVisibleItem = listview.getFirstVisiblePosition();
-						/// If firstVisibleItem = 2, that is the second newest item in the list, which is at the end of
-						/// our list.
+
 						firstVisibleItem = total - firstVisibleItem;
 						if(firstVisibleItem == total)
 						{
 							if(listview.getChildAt(0).getTop() == twelve)
-							{
-								main_view.log("first");
 								top_item_position = total - 1;
-							}
-							else{
-								main_view.log("second");
+							else if(top_item_position != total - 1)
 								top_item_position = total - 2;
-							}
 						}
 						else if(firstVisibleItem - 2 > top_item_position){
 							main_view.log("third");

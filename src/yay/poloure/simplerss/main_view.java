@@ -202,6 +202,16 @@ public class main_view extends Activity
 		inf					= getLayoutInflater();
 	}
 
+	/// This is so the feeds is selected too.
+
+	@Override
+	public void onConfigurationChanged(Configuration newConfig)
+	{
+		super.onConfigurationChanged(newConfig);
+		drawer_toggle.onConfigurationChanged(newConfig);
+	}
+	///
+
 	private static void add_feed(String feed_name, String feed_url, String feed_group)
 	{
 		append_string_to_file(storage + "groups/" + feed_group + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|\n");
@@ -533,7 +543,6 @@ public class main_view extends Activity
 		@Override
 		public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
 		{
-			//main_view.optionsMenu = menu;
 			optionsMenu = menu;
 			optionsMenu.clear();
 
@@ -1030,7 +1039,7 @@ public class main_view extends Activity
 			current_group	= current_grop;
 			current_title	= current_tit;
 			button			= dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-            button.setEnabled(false);
+			button.setEnabled(false);
 		}
 
 		@Override
