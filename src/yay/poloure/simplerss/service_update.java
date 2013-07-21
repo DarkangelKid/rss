@@ -41,12 +41,12 @@ public class service_update extends IntentService
 		final String all_string 				= getString(R.string.all_group);
 		final String storage 					= this.getExternalFilesDir(null).getAbsolutePath() + "/";
 
-		final List<String> all_groups 			= main_view.read_file_to_list(storage + "groups/group_list.txt");
+		final List<String> all_groups 			= utilities.read_file_to_list(storage + "groups/group_list.txt");
 		final String grouper					= all_groups.get(group);
 		final String group_file_path 			= storage + "groups/" + grouper + ".txt";
 		final String group_content_path 		= group_file_path + ".content.txt";
 
-		final List< List<String> > content 		= main_view.read_csv_to_list(new String[]{group_file_path, "name|", "url|"});
+		final List< List<String> > content 		= utilities.read_csv_to_list(new String[]{group_file_path, "name|", "url|"});
 		final List<String> group_feeds_names 	= content.get(0);
 		final List<String> group_feeds_urls 	= content.get(1);
 
@@ -61,25 +61,25 @@ public class service_update extends IntentService
 		for(i = 0; i < size; i++)
 		{
 			feed_path = storage + "content/" + group_feeds_names.get(i); /// mariam_feed.txt
-			main_view.download_file(group_feeds_urls.get(i), feed_path + ".store.txt"); /// Downloads file as mariam_feed.store.txt
+			utilities.download_file(group_feeds_urls.get(i), feed_path + ".store.txt"); /// Downloads file as mariam_feed.store.txt
 			new parsered(feed_path + ".store.txt", storage, width); /// Parses the file and makes other files like mariam_feed.store.txt.content.txt
 		}
 
 		/// Sort group order
 		if(!grouper.equals(all_string))
 		{
-			main_view.sort_group_content_by_time(all_string);
-			main_view.sort_group_content_by_time(grouper);
+			utilities.sort_group_content_by_time(storage, all_string);
+			utilities.sort_group_content_by_time(storage, grouper);
 		}
 		else
 		{
 			for(String gro : all_groups)
-				main_view.sort_group_content_by_time(gro);
+				utilities.sort_group_content_by_time(storage, gro);
 		}
 
 		/// Read all the group files and how many new items.
 		/// TODO: If new feed, count new set objects and return from parser to add to the total.
-		final List<Integer> unread_list = main_view.get_unread_counts();
+		final List<Integer> unread_list = utilities.get_unread_counts(null, null, storage);
 
 		int group_items = 1;
 		int total = 0, count = 0;

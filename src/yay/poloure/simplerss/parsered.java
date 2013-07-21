@@ -95,9 +95,9 @@ class parsered
 						line.append("image|").append(image).append('|'); /// ends with a |
 						image_name = image.substring(image.lastIndexOf("/") + 1, image.length());
 
-						if(!main_view.exists(storage + "images/" + image_name))
-							main_view.download_file(image, storage + "images/" + image_name);
-						if(!main_view.exists(storage + "thumbnails/" + image_name))
+						if(!utilities.exists(storage + "images/" + image_name))
+							utilities.download_file(image, storage + "images/" + image_name);
+						if(!utilities.exists(storage + "thumbnails/" + image_name))
 							compress_file(storage, image_name);
 
 						/// TODO: If it does exist, skip this next step somehow. (turn write mode to false)
@@ -164,7 +164,7 @@ class parsered
 									cont = rfc3339.format(rss_date.parse(cont));
 								}
 								catch(Exception e){
-									main_view.log("BUG : Meant to be rss-882 but looks like: " + cont);
+									utilities.log(storage, "BUG : Meant to be rss-882 but looks like: " + cont);
 									cont = rfc3339.format(new Date());
 								}
 								line.append(cont).append("|");
@@ -178,7 +178,7 @@ class parsered
 									cont = time.format3339(false);
 								}
 								catch(Exception e){
-									main_view.log("BUG : Meant to be atom-3339 but looks like: " + cont);
+									utilities.log(storage, "BUG : Meant to be atom-3339 but looks like: " + cont);
 									cont = rfc3339.format(new Date());
 								}
 								line.append(cont).append("|");
