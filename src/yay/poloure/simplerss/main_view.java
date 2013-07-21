@@ -122,12 +122,6 @@ public class main_view extends Activity
 
 		perform_initial_operations();
 
-		final ActionBar action_bar = getActionBar();
-		action_bar.setTitle(feeds_string);
-		action_bar.setIcon(R.drawable.rss_icon);
-		action_bar.setDisplayHomeAsUpEnabled(true);
-		action_bar.setHomeButtonEnabled(true);
-
 		fragment_manager = getFragmentManager();
 		fragment_manager.beginTransaction()
 			.add(R.id.content_frame, feed, feeds_string)
@@ -158,13 +152,13 @@ public class main_view extends Activity
 			@Override
 			public void onDrawerClosed(View view)
 			{
-				action_bar.setTitle(mTitle);
+				getActionBar().setTitle(mTitle);
 			}
 
 			@Override
 			public void onDrawerOpened(View drawerView)
 			{
-				action_bar.setTitle(navigation_string);
+				getActionBar().setTitle(navigation_string);
 			}
 		};
 
@@ -201,6 +195,16 @@ public class main_view extends Activity
 		activity_context	= this;
 		inf					= getLayoutInflater();
 	}
+
+	/// This is so the feeds is selected too.
+
+	@Override
+	public void onConfigurationChanged(Configuration newConfig)
+	{
+		super.onConfigurationChanged(newConfig);
+		drawer_toggle.onConfigurationChanged(newConfig);
+	}
+	///
 
 	private static void add_feed(String feed_name, String feed_url, String feed_group)
 	{
@@ -533,7 +537,6 @@ public class main_view extends Activity
 		@Override
 		public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
 		{
-			//main_view.optionsMenu = menu;
 			optionsMenu = menu;
 			optionsMenu.clear();
 
@@ -1030,7 +1033,7 @@ public class main_view extends Activity
 			current_group	= current_grop;
 			current_title	= current_tit;
 			button			= dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-            button.setEnabled(false);
+			button.setEnabled(false);
 		}
 
 		@Override
