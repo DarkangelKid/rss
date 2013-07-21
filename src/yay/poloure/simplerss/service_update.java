@@ -46,7 +46,7 @@ public class service_update extends IntentService
 		final String group_file_path 			= storage + "groups/" + grouper + ".txt";
 		final String group_content_path 		= group_file_path + ".content.txt";
 
-		final List< List<String> > content 		= utilities.read_csv_to_list(new String[]{group_file_path, "name|", "url|"});
+		final List< List<String> > content 		= utilities.read_csv_to_list(group_file_path, new String[]{"name|", "url|"}, false);
 		final List<String> group_feeds_names 	= content.get(0);
 		final List<String> group_feeds_urls 	= content.get(1);
 
