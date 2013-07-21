@@ -153,15 +153,13 @@ public class card_adapter extends BaseAdapter
 							else if(top_item_position != total - 1)
 								top_item_position = total - 2;
 						}
-						else if(firstVisibleItem - 2 > top_item_position){
-							main_view.log("third");
+						else if(firstVisibleItem - 2 > top_item_position)
 							top_item_position = firstVisibleItem - 2;
-						}
 					}
 					if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
 					{
-						drawer_adapter nav_adapter = main_view.return_nav_adapter();
-						nav_adapter.add_count(main_view.get_unread_counts());
+						drawer_adapter nav_adapter = main_view.get_nav_adapter();
+						nav_adapter.add_count(utilities.get_unread_counts(main_view.get_fragment_manager(), main_view.get_viewpager(), main_view.get_storage()));
 						nav_adapter.notifyDataSetChanged();
 					}
 				}
