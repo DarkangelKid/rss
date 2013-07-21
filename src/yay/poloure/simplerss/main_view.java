@@ -112,8 +112,6 @@ public class main_view extends Activity
 	private static SharedPreferences pref;
 	private static LayoutInflater inf;
 
-	private static Menu men;
-
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -432,24 +430,6 @@ public class main_view extends Activity
 		}
 	}
 
-	/*@Override
-	public boolean onCreateOptionsMenu(Menu menu)
-	{
-		//main_view.optionsMenu = menu;
-		menu.clear();
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.empty, menu);
-		men = menu;
-		return true;
-	}*/
-
-	/*@Override
-	public void onConfigurationChanged(Configuration newConfig)
-	{
-		super.onConfigurationChanged(newConfig);
-		drawer_toggle.onConfigurationChanged(newConfig);
-	}*/
-
 	private void selectItem(int position)
 	{
 		if(position == 2)
@@ -554,11 +534,11 @@ public class main_view extends Activity
 		public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
 		{
 			//main_view.optionsMenu = menu;
-			men = menu;
-			menu.clear();
+			optionsMenu = menu;
+			optionsMenu.clear();
 
-			inflater.inflate(R.menu.main_overflow, menu);
-			super.onCreateOptionsMenu(menu, inflater);
+			inflater.inflate(R.menu.main_overflow, optionsMenu);
+			super.onCreateOptionsMenu(optionsMenu, inflater);
 
 			set_refresh(check_service_running());
 		}
@@ -605,9 +585,10 @@ public class main_view extends Activity
 		@Override
 		public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
 		{
-			menu.clear();
+			optionsMenu = menu;
+			optionsMenu.clear();
 
-			super.onCreateOptionsMenu(menu, inflater);
+			super.onCreateOptionsMenu(optionsMenu, inflater);
 		}
 	}
 
@@ -639,11 +620,11 @@ public class main_view extends Activity
 		@Override
 		public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
 		{
-			men = menu;
-			menu.clear();
+			optionsMenu = menu;
+			optionsMenu.clear();
 
-			inflater.inflate(R.menu.manage_overflow, menu);
-			super.onCreateOptionsMenu(menu, inflater);
+			inflater.inflate(R.menu.manage_overflow, optionsMenu);
+			super.onCreateOptionsMenu(optionsMenu, inflater);
 		}
 
 		@Override
@@ -875,13 +856,6 @@ public class main_view extends Activity
 			return inflater.inflate(R.layout.fragment_main_dummy, container, false);
 		}
 	}
-
-	/*@Override
-	public boolean onCreateOptionsMenu(Menu menu)
-	{
-		optionsMenu = menu;
-		return true;
-	}*/
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
