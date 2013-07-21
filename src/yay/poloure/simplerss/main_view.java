@@ -220,7 +220,7 @@ public class main_view extends Activity
 		if(feed_list_adapter != null)
 		{
 			feed_list_adapter.clear_list();
-			final List< List<String> > content 	= utilities.read_csv_to_list(new String[]{storage + "groups/"+ all_string + ".txt", "name|", "url|", "group|"});
+			final List< List<String> > content 	= utilities.read_csv_to_list(storage + "groups/"+ all_string + ".txt", new String[]{"name|", "url|", "group|"}, false);
 			final List<String> feed_titles 		= content.get(0);
 			final List<String> feed_urls 		= content.get(1);
 			final List<String> feed_groups 		= content.get(2);
@@ -244,7 +244,7 @@ public class main_view extends Activity
 			for(int i = 0; i < size; i++)
 			{
 				group = current_groups.get(i);
-				content = utilities.read_csv_to_list(new String[]{storage + "groups/" + group + ".txt", "name|"}).get(0);
+				content = utilities.read_csv_to_list(storage + "groups/" + group + ".txt", new String[]{"name|"}, false).get(0);
 				content_size = content.size();
 				if(i == 0)
 					info = (size == 1) ? "1 group" :  size + " groups";
@@ -876,7 +876,7 @@ public class main_view extends Activity
 	{
 		final LayoutInflater inflater 		= LayoutInflater.from(activity_context);
 		final View edit_rss_dialog 			= inflater.inflate(R.layout.add_rss_dialog, null);
-		final List< List<String> > content 	= utilities.read_csv_to_list(new String[]{storage + "groups/"+ all_string + ".txt", "name|", "url|", "group|"});
+		final List< List<String> > content 	= utilities.read_csv_to_list(storage + "groups/"+ all_string + ".txt", new String[]{"name|", "url|", "group|"}, false);
 		final String current_title			= content.get(0).get(position);
 		final String current_url			= content.get(1).get(position);
 		final String current_group  		= content.get(2).get(position);
@@ -1196,7 +1196,7 @@ public class main_view extends Activity
 			if((!utilities.exists(group_file_path))||(!utilities.exists(group_content_path)))
 				return 0L;
 
-			List< List<String> > contenter 	= utilities.read_csv_to_list(new String[]{group_content_path, "marker|", "title|", "description|", "link|" , "image|", "width|", "height|"});
+			List< List<String> > contenter 	= utilities.read_csv_to_list(group_content_path, new String[]{"marker|", "title|", "description|", "link|" , "image|"}, true);
 			List<String> marker				= contenter.get(0);
 			List<String> titles				= contenter.get(1);
 			List<String> descriptions		= contenter.get(2);

@@ -75,6 +75,7 @@ import java.io.IOException;
 import android.graphics.Color;
 import android.os.Debug;
 import android.text.format.Time;
+import android.util.Log;
 
 public class utilities
 {
@@ -93,11 +94,11 @@ public class utilities
 			try
 			{
 				group = current_groups.get(i);
-				adapter = (card_adapter)((main_view.fragment_card) fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(i))).getListView().getAdapter();
+				adapter = get_card_adapter(fragment_manager, viewpager, i);
 				if(adapter.getCount() > 0)
 				{
 					/// Read each of the content files from the group and find the line with the url.
-					feeds = read_csv_to_list(new String[]{storage + "groups/" + group + ".txt", "name|"}).get(0);
+					feeds = read_csv_to_list(storage + "groups/" + group + ".txt", new String[]{"name|"}, false).get(0);
 					found_url = false;
 					url = adapter.return_latest_url();
 					if(!url.isEmpty())
@@ -191,6 +192,20 @@ public class utilities
 		}
 	}
 
+	public static void dump(String storage, Exception e)
+	{
+		try
+		{
+			FileWriter fstream = new FileWriter(storage + "Exception -" + (new Time()).format3339(false) + ".txt", false);
+			BufferedWriter out = new BufferedWriter(fstream);
+			out.write(e.toString());
+			out.close();
+		}
+		catch(Exception ee)
+		{
+		}
+	}
+
 	public static void append_string_to_file(String file_path, String string)
 	{
 		try
@@ -229,40 +244,33 @@ public class utilities
 		}
 	}
 
-	public static List< List<String> > read_csv_to_list(String[] type)
+	public static List< List<String> > read_csv_to_list(String file_path, String[] type, Boolean dimensions)
 	{
-		final String feed_path = type[0];
-		int number_of_items = type.length - 1;
-		Boolean dimensions = false;
-
 		int content_start, content_index, i, bar_index;
 		String line;
-		final Boolean marker = type[1].equals("marker|");
+		final Boolean marker = type[0].equals("marker|");
 
 		List< List<String> > types = new ArrayList< List<String> >();
-		int[] lengths = new int[number_of_items];
+		int[] lengths = new int[type.length];
 
-		for(i = 0; i < number_of_items; i++)
+		for(i = 0; i < type.length; i++)
 		{
-			types.add(new ArrayList< String >());
-			lengths[i] = type[i + 1].length();
+			types.add(new ArrayList<String>());
+			lengths[i] = type[i].length();
 		}
-
-		/// TODO: This is hacky, make the input of this fuction (file_path, new String[]{}, true)
-		if(number_of_items > 6)
+		if(dimensions)
 		{
-			number_of_items -= 2;
-			dimensions = true;
+			types.add(new ArrayList<String>());
+			types.add(new ArrayList<String>());
 		}
 
 		/// Index the pattern of tag occurence.
-
 		try
 		{
-			BufferedReader stream = new BufferedReader(new FileReader(feed_path));
+			BufferedReader stream = new BufferedReader(new FileReader(file_path));
 			while((line = stream.readLine()) != null)
 			{
-				for(i = 0; i < number_of_items; i++)
+				for(i = 0; i < type.length; i++)
 				{
 					if((i == 0)&&(marker))
 					{
@@ -273,7 +281,7 @@ public class utilities
 					}
 					else
 					{
-						content_index = line.indexOf(type[1 + i]);
+						content_index = line.indexOf(type[i]);
 						if(content_index == -1)
 							types.get(i).add("");
 						else
@@ -292,21 +300,21 @@ public class utilities
 					content_index = line.lastIndexOf("width|");
 					if(content_index == -1)
 					{
-						types.get(number_of_items).add("");
-						types.get(number_of_items + 1).add("");
+						types.get(type.length).add("");
+						types.get(type.length + 1).add("");
 					}
 					else
 					{
 						content_index += 6;
 						bar_index = line.lastIndexOf("|height|");
-						types.get(number_of_items).add(line.substring(content_index, bar_index));
-						types.get(number_of_items + 1).add(line.substring(bar_index + 8, line.lastIndexOf('|')));
+						types.get(type.length).add(line.substring(content_index, bar_index));
+						types.get(type.length + 1).add(line.substring(bar_index + 8, line.lastIndexOf('|')));
 					}
 				}
 			}
 			stream.close();
 		}
-		catch(IOException e){
+		catch(Exception e){
 		}
 		return types;
 	}
@@ -396,7 +404,7 @@ public class utilities
 		Map<Long, String> map = new TreeMap<Long, String>();
 		int size, i;
 
-		final List<String> feeds_array	= read_csv_to_list(new String[]{storage + "groups/" + group + ".txt", "name|"}).get(0);
+		final List<String> feeds_array	= read_csv_to_list(storage + "groups/" + group + ".txt", new String[]{"name|"}, false).get(0);
 
 		for(String feed : feeds_array)
 		{
@@ -404,10 +412,10 @@ public class utilities
 			if(exists(content_path))
 			{
 				content 		= read_file_to_list(content_path);
-				pubDates		= read_csv_to_list(new String[]{content_path, "published|"}).get(0);
+				pubDates		= read_csv_to_list(content_path, new String[]{"published|"}, false).get(0);
 
 				if(pubDates.get(0).length() < 8)
-					pubDates 	= read_csv_to_list(new String[]{content_path, "pubDate|"}).get(0);
+					pubDates 	= read_csv_to_list(content_path, new String[]{"pubDate|"}, false).get(0);
 
 				size = pubDates.size();
 				for(i = 0; i < size; i++)
