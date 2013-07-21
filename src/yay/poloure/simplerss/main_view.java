@@ -84,7 +84,6 @@ public class main_view extends Activity
 	private static ActionBarDrawerToggle drawer_toggle;
 	private static Menu optionsMenu;
 
-	private static int positionrr, poser, check_finished, group_pos;
 	private static String mTitle, feed_title;
 	private static String storage;
 	private static Context application_context, activity_context;
@@ -98,15 +97,13 @@ public class main_view extends Activity
 	private static final Fragment prefs		= new fragment_preferences();
 	private static final Fragment man		= new fragment_manage();
 
-
 	private static List<String> current_groups 			= new ArrayList<String>();
 	private static List<Boolean> new_items 				= new ArrayList<Boolean>();
 	private static final int[] times 					= new int[]{15, 30, 45, 60, 120, 180, 240, 300, 360, 400, 480, 540, 600, 660, 720, 960, 1440, 2880, 10080, 43829};
 	private static final String[] folders 				= {"images", "thumbnails", "groups", "content"};
 	private static final Pattern illegal_file_chars		= Pattern.compile("[/\\?%*|<>:]");
 
-	private static String feeds_string, manage_string, settings_string, navigation_string;
-	private static String all_string;
+	private static String feeds_string, manage_string, settings_string, navigation_string, all_string;
 
 	private static FragmentManager fragment_manager;
 	private static SharedPreferences pref;
@@ -299,9 +296,11 @@ public class main_view extends Activity
 		}
 
 		/// Add the new feeds to the feed_adapter (Manage/Feeds).
-		feed_list_adapter.remove_item(poser);
-		feed_list_adapter.add_list_pos(poser, new_name, new_url + "\n" + new_group + " • " + Integer.toString(utilities.count_lines(storage + "content/" + new_name + ".store.txt.content.txt") - 1) + " items");
-		feed_list_adapter.notifyDataSetChanged();
+
+		/// TODO: get this position.
+		/*feed_list_adapter.remove_item(position);
+		feed_list_adapter.add_list_pos(position, new_name, new_url + "\n" + new_group + " • " + Integer.toString(utilities.count_lines(storage + "content/" + new_name + ".store.txt.content.txt") - 1) + " items");
+		feed_list_adapter.notifyDataSetChanged();*/
 
 		update_groups();
 		update_manage_feeds();
@@ -596,18 +595,17 @@ public class main_view extends Activity
 			manage_list.setOnItemLongClickListener(new OnItemLongClickListener()
 			{
 				@Override
-				public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id)
+				public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id)
 				{
 					if(position == 0)
 						return false;
-					group_pos = position;
 					AlertDialog.Builder builder = new AlertDialog.Builder(activity_context);
 					builder.setCancelable(true)
 							.setPositiveButton(getString(R.string.delete_dialog), new DialogInterface.OnClickListener()
 					{
 						public void onClick(DialogInterface dialog, int id)
 						{
-							group_list_adapter.remove_item(group_pos);
+							group_list_adapter.remove_item(position);
 							group_list_adapter.notifyDataSetChanged();
 						}
 					});
@@ -643,9 +641,8 @@ public class main_view extends Activity
 			feed_list.setOnItemLongClickListener(new OnItemLongClickListener()
 			{
 				@Override
-				public boolean onItemLongClick(AdapterView<?> parent, View view, int pos, long id)
+				public boolean onItemLongClick(AdapterView<?> parent, View view, final int pos, long id)
 				{
-					positionrr = pos;
 					final AlertDialog.Builder builder = new AlertDialog.Builder(activity_context);
 					builder.setCancelable(true)
 							.setNegativeButton(getString(R.string.delete_dialog), new DialogInterface.OnClickListener()
@@ -653,9 +650,9 @@ public class main_view extends Activity
 						/// Delete the feed.
 						public void onClick(DialogInterface dialog, int id)
 						{
-							String group = feed_list_adapter.get_info(positionrr);
+							String group = feed_list_adapter.get_info(pos);
 							group = group.substring(group.indexOf('\n') + 1, group.indexOf(' '));
-							String name = feed_list_adapter.getItem(positionrr);
+							String name = feed_list_adapter.getItem(pos);
 							utilities.delete(storage + group + ".image_size.cache.txt");
 
 							utilities.remove_string_from_file(storage + "groups/" + group + ".txt", name, true);
@@ -674,7 +671,7 @@ public class main_view extends Activity
 							utilities.sort_group_content_by_time(storage, all_string);
 
 							/// remove deleted files content from groups that it was in
-							feed_list_adapter.remove_item(positionrr);
+							feed_list_adapter.remove_item(pos);
 							feed_list_adapter.notifyDataSetChanged();
 							update_manage_groups();
 						}
@@ -684,9 +681,9 @@ public class main_view extends Activity
 						/// Delete the feed.
 						public void onClick(DialogInterface dialog, int id)
 						{
-							String group = feed_list_adapter.get_info(positionrr);
+							String group = feed_list_adapter.get_info(pos);
 							group = group.substring(group.indexOf('\n') + 1, group.indexOf(' '));
-							String name = feed_list_adapter.getItem(positionrr);
+							String name = feed_list_adapter.getItem(pos);
 							utilities.delete(storage + "content/" + name + ".store.txt.content.txt");
 							utilities.delete(storage + "groups/" + group + ".txt.content.txt");
 							utilities.delete(storage + group + ".image_size.cache.txt");
@@ -884,8 +881,9 @@ public class main_view extends Activity
 		int current_spinner_position = 0;
 
 		final Spinner group_spinner = (Spinner) edit_rss_dialog.findViewById(R.id.group_spinner);
-		List<String> spinner_groups = new ArrayList<String>();
-		for(int i = 1; i < current_groups.size(); i++)
+		final List<String> spinner_groups = new ArrayList<String>();
+		final int size = current_groups.size();
+		for(int i = 1; i < size; i++)
 		{
 			spinner_groups.add(current_groups.get(i));
 			if((current_groups.get(i)).equals(current_group))
@@ -903,15 +901,6 @@ public class main_view extends Activity
 				.setTitle(activity_context.getString(R.string.edit_dialog_title))
 				.setView(edit_rss_dialog)
 				.setCancelable(true)
-				.setPositiveButton
-				(activity_context.getString(R.string.accept_dialog), new DialogInterface.OnClickListener()
-					{
-						@Override
-						public void onClick(DialogInterface dialog,int id)
-						{
-						}
-					}
-				)
 				.setNegativeButton
 				(activity_context.getString(R.string.cancel_dialog),new DialogInterface.OnClickListener()
 					{
@@ -921,28 +910,24 @@ public class main_view extends Activity
 						}
 					}
 				)
-				.show();
-		edit_dialog.setOnShowListener(new DialogInterface.OnShowListener()
-		{
-			@Override
-			public void onShow(DialogInterface dialog)
-			{
-				Button b = edit_dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-				b.setOnClickListener(new View.OnClickListener()
+				.create();
+
+				edit_dialog.setButton(edit_dialog.BUTTON_POSITIVE, (activity_context.getString(R.string.accept_dialog)),
+				new DialogInterface.OnClickListener()
 				{
 					@Override
-					public void onClick(View view)
+					public void onClick(DialogInterface dialog, int which)
 					{
-						String new_group 		= ((EditText) edit_rss_dialog.findViewById(R.id.group_edit)).getText().toString().trim().toLowerCase();
-						String URL_check 		= ((EditText) edit_rss_dialog.findViewById(R.id.URL_edit)).getText().toString().trim();
-						String feed_name 		= ((EditText) edit_rss_dialog.findViewById(R.id.name_edit)).getText().toString().trim();
-						String spinner_group 	= ((Spinner) edit_rss_dialog.findViewById(R.id.group_spinner)).getSelectedItem().toString();
+							String new_group 		= ((EditText) edit_rss_dialog.findViewById(R.id.group_edit)).getText().toString().trim().toLowerCase();
+							String URL_check 		= ((EditText) edit_rss_dialog.findViewById(R.id.URL_edit)).getText().toString().trim();
+							String feed_name 		= ((EditText) edit_rss_dialog.findViewById(R.id.name_edit)).getText().toString().trim();
+							String spinner_group 	= ((Spinner) edit_rss_dialog.findViewById(R.id.group_spinner)).getSelectedItem().toString();
 
-						new check_feed_exists(edit_dialog, new_group, feed_name, "edit", spinner_group, current_group, current_title).execute(URL_check);
+							new check_feed_exists(edit_dialog, new_group, feed_name, "edit", spinner_group, current_group, current_title).execute(URL_check);
 					}
 				});
-			}
-		});
+
+				edit_dialog.show();
 	}
 
 	private static class check_feed_exists extends AsyncTask<String, Void, Integer>
