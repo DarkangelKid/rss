@@ -122,12 +122,6 @@ public class main_view extends Activity
 
 		perform_initial_operations();
 
-		final ActionBar action_bar = getActionBar();
-		action_bar.setTitle(feeds_string);
-		action_bar.setIcon(R.drawable.rss_icon);
-		action_bar.setDisplayHomeAsUpEnabled(true);
-		action_bar.setHomeButtonEnabled(true);
-
 		fragment_manager = getFragmentManager();
 		fragment_manager.beginTransaction()
 			.add(R.id.content_frame, feed, feeds_string)
@@ -158,13 +152,13 @@ public class main_view extends Activity
 			@Override
 			public void onDrawerClosed(View view)
 			{
-				action_bar.setTitle(mTitle);
+				getActionBar().setTitle(mTitle);
 			}
 
 			@Override
 			public void onDrawerOpened(View drawerView)
 			{
-				action_bar.setTitle(navigation_string);
+				getActionBar().setTitle(navigation_string);
 			}
 		};
 
