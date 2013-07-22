@@ -86,7 +86,7 @@ public class main_view extends Activity
 
 	private static String mTitle, feed_title;
 	private static String storage;
-	private static Context application_context, activity_context;
+	public static Context application_context, activity_context;
 	private static ViewPager viewpager;
 
 	private static feed_adapter feed_list_adapter;
