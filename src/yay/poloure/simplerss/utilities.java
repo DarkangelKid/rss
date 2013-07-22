@@ -1,67 +1,17 @@
 package yay.poloure.simplerss;
 
-import android.preference.PreferenceFragment;
-import android.preference.PreferenceManager;
-
 import android.content.Context;
-import android.content.res.Resources;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.res.Configuration;
-import android.content.SharedPreferences;
-
-import android.app.AlertDialog;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.app.Fragment;
-import android.app.ListFragment;
 import android.app.FragmentManager;
-import android.app.Activity;
-import android.app.ActivityManager;
-import android.app.ActivityManager.RunningServiceInfo;
-import android.app.ActionBar;
-
-import android.os.Bundle;
 import android.os.AsyncTask;
 import android.os.Environment;
-
-import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v4.view.PagerTabStrip;
-import android.support.v4.widget.DrawerLayout;
-
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.MenuInflater;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-
-import android.widget.FrameLayout;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.Toast;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Spinner;
 
 import java.net.URL;
-
 import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.Arrays;
 import java.util.ArrayList;
-import java.util.regex.Pattern;
 
 import java.io.File;
 import java.io.BufferedInputStream;
@@ -72,7 +22,6 @@ import java.io.BufferedWriter;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-import android.graphics.Color;
 import android.os.Debug;
 import android.text.format.Time;
 import android.util.Log;

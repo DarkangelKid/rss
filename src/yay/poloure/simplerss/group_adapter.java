@@ -17,7 +17,6 @@ import android.widget.TextView;
 import android.widget.ListView;
 import java.util.List;
 import java.util.ArrayList;
-import 	android.widget.LinearLayout;
 
 import android.graphics.Point;
 

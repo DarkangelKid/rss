@@ -85,15 +85,15 @@ public class main_view extends Activity
 	private static Menu optionsMenu;
 
 	private static String mTitle, feed_title;
-	private static String storage;
+	public static String storage;
 	public static Context application_context, activity_context;
-	private static ViewPager viewpager;
+	public static ViewPager viewpager;
 
 	private static feed_adapter feed_list_adapter;
 	private static group_adapter group_list_adapter;
 	private static fragment_group fragment_group_store;
 	private static feed_manage fragment_feed_store;
-	private static drawer_adapter nav_adapter;
+	public static drawer_adapter nav_adapter;
 
 	private static final Fragment feed		= new fragment_feed();
 	private static final Fragment prefs		= new fragment_preferences();
@@ -107,7 +107,7 @@ public class main_view extends Activity
 
 	private static String feeds_string, manage_string, settings_string, navigation_string, all_string;
 
-	private static FragmentManager fragment_manager;
+	public static FragmentManager fragment_manager;
 	private static SharedPreferences pref;
 	private static LayoutInflater inf;
 
@@ -1190,26 +1190,6 @@ public class main_view extends Activity
 		catch(Exception e){
 		}
 		update_groups();
-	}
-
-	public static drawer_adapter get_nav_adapter()
-	{
-		return nav_adapter;
-	}
-
-	public static FragmentManager get_fragment_manager()
-	{
-		return fragment_manager;
-	}
-
-	public static ViewPager get_viewpager()
-	{
-		return viewpager;
-	}
-
-	public static String get_storage()
-	{
-		return storage;
 	}
 
 	private static void update_group(int page_number)

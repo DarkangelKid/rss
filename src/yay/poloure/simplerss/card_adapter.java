@@ -148,8 +148,8 @@ public class card_adapter extends BaseAdapter
 					}
 					if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
 					{
-						drawer_adapter nav_adapter = main_view.get_nav_adapter();
-						nav_adapter.add_count(utilities.get_unread_counts(main_view.get_fragment_manager(), main_view.get_viewpager(), main_view.get_storage()));
+						drawer_adapter nav_adapter = main_view.nav_adapter;
+						nav_adapter.add_count(utilities.get_unread_counts(main_view.fragment_manager, main_view.viewpager, main_view.storage));
 						nav_adapter.notifyDataSetChanged();
 					}
 				}
