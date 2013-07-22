@@ -16,6 +16,7 @@ import android.app.PendingIntent;
 import android.app.Fragment;
 import android.app.ListFragment;
 import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
@@ -458,12 +459,14 @@ public class main_view extends Activity
 
 	private void switch_page(String page_title, int position)
 	{
+		drawer_layout.closeDrawer(navigation_list);
 		if(!mTitle.equals(page_title))
 		{
 			fragment_manager.beginTransaction()
-						.setTransition(4099)
-						.hide(getFragmentManager().findFragmentByTag(mTitle))
-						.show(getFragmentManager().findFragmentByTag(page_title))
+						.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+						.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out)
+						.hide(fragment_manager.findFragmentByTag(mTitle))
+						.show(fragment_manager.findFragmentByTag(page_title))
 						.commit();
 
 			navigation_list.setItemChecked(position, true);
@@ -472,7 +475,6 @@ public class main_view extends Activity
 			else
 				set_title(feeds_string);
 		}
-		drawer_layout.closeDrawer(navigation_list);
 		mTitle = page_title;
 	}
 
