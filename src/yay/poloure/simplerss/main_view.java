@@ -91,6 +91,8 @@ public class main_view extends Activity
 
 	private static feed_adapter feed_list_adapter;
 	private static group_adapter group_list_adapter;
+	private static fragment_group fragment_group_store;
+	private static feed_manage fragment_feed_store;
 	private static drawer_adapter nav_adapter;
 
 	private static final Fragment feed		= new fragment_feed();
@@ -208,61 +210,117 @@ public class main_view extends Activity
 		utilities.append_string_to_file(storage + "groups/" + feed_group + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|\n");
 		utilities.append_string_to_file(storage + "groups/" + all_string + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|group|" + feed_group + "|\n");
 
-		update_manage_feeds();
-		update_manage_groups();
+		new refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		new refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 
-	private static void update_manage_feeds()
+	private static class refresh_manage_feeds extends AsyncTask<Void, String, Long>
 	{
-		if(feed_list_adapter != null)
+		final Animation animFadeIn = AnimationUtils.loadAnimation(activity_context, android.R.anim.fade_in);
+		private ListView listview;
+
+		public refresh_manage_feeds()
 		{
-			feed_list_adapter.clear_list();
-			final List< List<String> > content 	= utilities.read_csv_to_list(storage + "groups/"+ all_string + ".txt", new String[]{"name|", "url|", "group|"}, false);
-			final List<String> feed_titles 		= content.get(0);
-			final List<String> feed_urls 		= content.get(1);
-			final List<String> feed_groups 		= content.get(2);
-			final int size 						= feed_titles.size();
-			for(int i = 0; i < size; i++)
-				feed_list_adapter.add_list(feed_titles.get(i), feed_urls.get(i) + "\n" + feed_groups.get(i) + " • " + Integer.toString(utilities.count_lines(storage + "content/" + feed_titles.get(i) + ".store.txt.content.txt")) + " items");
+			listview = fragment_feed_store.getListView();
+			if(feed_list_adapter.getCount() == 0)
+				listview.setVisibility(View.INVISIBLE);
+		}
+
+		@Override
+		protected Long doInBackground(Void... hey)
+		{
+			if(feed_list_adapter != null)
+			{
+				feed_list_adapter.clear_list();
+				final List< List<String> > content 	= utilities.read_csv_to_list(storage + "groups/"+ all_string + ".txt", new String[]{"name|", "url|", "group|"}, false);
+				final List<String> feed_titles 		= content.get(0);
+				final List<String> feed_urls 		= content.get(1);
+				final List<String> feed_groups 		= content.get(2);
+				final int size 						= feed_titles.size();
+				for(int i = 0; i < size; i++)
+					publishProgress(feed_titles.get(i), feed_urls.get(i) + "\n" + feed_groups.get(i) + " • " + Integer.toString(utilities.count_lines(storage + "content/" + feed_titles.get(i) + ".store.txt.content.txt")) + " items");
+			}
+			return 0L;
+		}
+
+		@Override
+		protected void onProgressUpdate(String... progress)
+		{
+			feed_list_adapter.add_list(progress[0], progress[1]);
 			feed_list_adapter.notifyDataSetChanged();
+		}
+
+		@Override
+		protected void onPostExecute(Long tun)
+		{
+			listview.setAnimation(animFadeIn);
+			listview.setVisibility(View.VISIBLE);
 		}
 	}
 
-	private static void update_manage_groups()
+	private static class refresh_manage_groups extends AsyncTask<Void, String, Long>
 	{
-		if(group_list_adapter != null)
+		final Animation animFadeIn = AnimationUtils.loadAnimation(activity_context, android.R.anim.fade_in);
+		private ListView listview;
+
+		public refresh_manage_groups()
 		{
-			String group, info;
-			int content_size, number, j;
-			List<String> content;
-			group_list_adapter.clear_list();
+			listview = fragment_group_store.getListView();
+			if(group_list_adapter.getCount() == 0)
+				listview.setVisibility(View.INVISIBLE);
 
-			final int size = current_groups.size();
-			for(int i = 0; i < size; i++)
+		}
+
+		@Override
+		protected Long doInBackground(Void... hey)
+		{
+			if(group_list_adapter != null)
 			{
-				group = current_groups.get(i);
-				content = utilities.read_csv_to_list(storage + "groups/" + group + ".txt", new String[]{"name|"}, false).get(0);
-				content_size = content.size();
-				if(i == 0)
-					info = (size == 1) ? "1 group" :  size + " groups";
-				else
+				String group, info;
+				int content_size, number, j;
+				List<String> content;
+				group_list_adapter.clear_list();
+
+				final int size = current_groups.size();
+				for(int i = 0; i < size; i++)
 				{
-					info = "";
-					number = 3;
-					if(content_size < 3)
-						number = content_size;
-					for(j = 0; j < number - 1; j++)
-						info += content.get(j) + ", ";
+					group = current_groups.get(i);
+					content = utilities.read_csv_to_list(storage + "groups/" + group + ".txt", new String[]{"name|"}, false).get(0);
+					content_size = content.size();
+					if(i == 0)
+						info = (size == 1) ? "1 group" :  size + " groups";
+					else
+					{
+						info = "";
+						number = 3;
+						if(content_size < 3)
+							number = content_size;
+						for(j = 0; j < number - 1; j++)
+							info += content.get(j) + ", ";
 
-					if(content_size > 3)
-						info += "...";
-					else if(number > 0)
-						info += content.get(number - 1);
+						if(content_size > 3)
+							info += "...";
+						else if(number > 0)
+							info += content.get(number - 1);
+					}
+					publishProgress(group, Integer.toString(content_size) + " feeds • " + info);
 				}
-
-				group_list_adapter.add_list(group, Integer.toString(content_size) + " feeds • " + info);
 			}
+			return 0L;
+		}
+
+		@Override
+		protected void onProgressUpdate(String... progress)
+		{
+			group_list_adapter.add_list(progress[0], progress[1]);
 			group_list_adapter.notifyDataSetChanged();
+		}
+
+		@Override
+		protected void onPostExecute(Long tun)
+		{
+			listview.setAnimation(animFadeIn);
+			listview.setVisibility(View.VISIBLE);
 		}
 	}
 
@@ -303,8 +361,8 @@ public class main_view extends Activity
 		feed_list_adapter.notifyDataSetChanged();*/
 
 		update_groups();
-		update_manage_feeds();
-		update_manage_groups();
+		new refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		new refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 		utilities.sort_group_content_by_time(storage, all_string);
 		if(utilities.exists("groups/" + old_group + ".txt"))
@@ -584,14 +642,21 @@ public class main_view extends Activity
 
 	public static class fragment_group extends Fragment
 	{
+		private static ListView manage_list;
+
+		public static ListView getListView()
+		{
+			return manage_list;
+		}
+
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
 			final View view = inflater.inflate(R.layout.manage_fragment, container, false);
-			final ListView manage_list = (ListView) view.findViewById(R.id.group_listview);
+			manage_list = (ListView) view.findViewById(R.id.group_listview);
 			group_list_adapter = new group_adapter(getActivity());
 			manage_list.setAdapter(group_list_adapter);
-			update_manage_groups();
+			new refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 			manage_list.setOnItemLongClickListener(new OnItemLongClickListener()
 			{
 				@Override
@@ -620,11 +685,18 @@ public class main_view extends Activity
 
 	public static class feed_manage extends Fragment
 	{
+		private static ListView feed_list;
+
+		public static ListView getListView()
+		{
+			return feed_list;
+		}
+
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
 			final View view = inflater.inflate(R.layout.manage_feeds, container, false);
-			final ListView feed_list = (ListView) view.findViewById(R.id.feeds_listview);
+			feed_list = (ListView) view.findViewById(R.id.feeds_listview);
 			feed_list.setOnItemClickListener(new OnItemClickListener()
 						{
 							public void onItemClick(AdapterView<?> parent, View view, int position, long id)
@@ -636,7 +708,7 @@ public class main_view extends Activity
 			feed_list_adapter = new feed_adapter(getActivity());
 			feed_list.setAdapter(feed_list_adapter);
 
-			update_manage_feeds();
+			new refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 			feed_list.setOnItemLongClickListener(new OnItemLongClickListener()
 			{
@@ -673,7 +745,7 @@ public class main_view extends Activity
 							/// remove deleted files content from groups that it was in
 							feed_list_adapter.remove_item(pos);
 							feed_list_adapter.notifyDataSetChanged();
-							update_manage_groups();
+							new refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 						}
 					})
 					.setPositiveButton(getString(R.string.clear_dialog), new DialogInterface.OnClickListener()
@@ -688,7 +760,7 @@ public class main_view extends Activity
 							utilities.delete(storage + "groups/" + group + ".txt.content.txt");
 							utilities.delete(storage + group + ".image_size.cache.txt");
 
-							update_manage_feeds();
+							new refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 							utilities.sort_group_content_by_time(storage, all_string);
 
 							/// remove deleted files content from groups that it was in
@@ -744,9 +816,15 @@ public class main_view extends Activity
 		@Override
 		public Fragment getItem(int position){
 			if(position == 0)
-				return new fragment_group();
+			{
+				fragment_group_store	= new fragment_group();
+				return fragment_group_store;
+			}
 			else
-				return new feed_manage();
+			{
+				fragment_feed_store		= new feed_manage();
+				return fragment_feed_store;
+			}
 		}
 		@Override
 		public String getPageTitle(int position)
@@ -773,7 +851,7 @@ public class main_view extends Activity
 		public void onCreate(Bundle savedInstanceState)
 		{
 			super.onCreate(savedInstanceState);
-			card_adapter adapter = new card_adapter(getActivity());
+			card_adapter adapter = new card_adapter(getActivity(), getListView());
 			setListAdapter(adapter);
 			final List<String> count_list = utilities.read_file_to_list(storage + "groups/" + current_groups.get(getArguments().getInt("num", 0)) + ".txt.content.txt");
 			final int sized = count_list.size();
@@ -863,7 +941,7 @@ public class main_view extends Activity
 						catch(Exception e){
 							spinner_group = "Unsorted";
 						}
-						new check_feed_exists(alertDialog, new_group, feed_name, "add", spinner_group, "", "").execute(URL_check);
+						new check_feed_exists(alertDialog, new_group, feed_name, "add", spinner_group, "", "").executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
 					}
 				});
 				alertDialog.show();
@@ -923,7 +1001,7 @@ public class main_view extends Activity
 							String feed_name 		= ((EditText) edit_rss_dialog.findViewById(R.id.name_edit)).getText().toString().trim();
 							String spinner_group 	= ((Spinner) edit_rss_dialog.findViewById(R.id.group_spinner)).getSelectedItem().toString();
 
-							new check_feed_exists(edit_dialog, new_group, feed_name, "edit", spinner_group, current_group, current_title).execute(URL_check);
+							new check_feed_exists(edit_dialog, new_group, feed_name, "edit", spinner_group, current_group, current_title).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
 					}
 				});
 
@@ -1136,28 +1214,24 @@ public class main_view extends Activity
 		new refresh_page(page_number).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 
-	private static class refresh_page extends AsyncTask<Void, Object, Long>
+	private static class refresh_page extends AsyncTask<Void, Object, Void>
 	{
 		int marker_position = -1, ssize, refresh_count = 0, page_number;
 		Boolean markerer, waited = true;
-		final Animation animFadeIn = AnimationUtils.loadAnimation(activity_context, android.R.anim.fade_in);
+		Animation animFadeIn;
 		ListFragment l;
 		card_adapter ith;
 		ListView lv;
+		List<String> nav;
+		List<Integer> counts;
 
 		public refresh_page(int page)
 		{
-			//Debug.startMethodTracing("refresh2");
 			page_number = page;
 		}
 
 		@Override
-		protected void onPreExecute()
-		{
-		}
-
-		@Override
-		protected Long doInBackground(Void... hey)
+		protected Void doInBackground(Void... hey)
 		{
 			/// while the service is running on new_items and this page is refreshing.
 			if(new_items.get(page_number))
@@ -1174,12 +1248,12 @@ public class main_view extends Activity
 
 			String group					= current_groups.get(page_number);
 			final String group_file_path 	= storage + "groups/" + group + ".txt";
-			final String group_content_path = group_file_path + ".content.txt";
+			final String group_content_path = group_file_path.concat(".content.txt");
 			String thumbnail_path;
 
 			/// If the group has no feeds  or  the content file does not exist, end.
 			if((!utilities.exists(group_file_path))||(!utilities.exists(group_content_path)))
-				return 0L;
+				return null;
 
 			List< List<String> > contenter 	= utilities.read_csv_to_list(group_content_path, new String[]{"marker|", "title|", "description|", "link|" , "image|"}, true);
 			List<String> marker				= contenter.get(0);
@@ -1191,7 +1265,7 @@ public class main_view extends Activity
 			List<String> heights			= contenter.get(6);
 
 			if((links.size() == 0)||(links.get(0).isEmpty()))
-				return 0L;
+				return null;
 
 			/// Get a set of all the pages items' urls.
 			Set<String> existing_items = new HashSet<String>();
@@ -1202,26 +1276,19 @@ public class main_view extends Activity
 			}
 
 			/// For each line of the group_content_file
+			animFadeIn = AnimationUtils.loadAnimation(activity_context, android.R.anim.fade_in);
 			final int size = titles.size();
+			final List<Boolean> new_markers		= new ArrayList<Boolean>();
+			final List<String> new_titles		= new ArrayList<String>();
+			final List<String> new_descriptions = new ArrayList<String>();
+			final List<String> new_links		= new ArrayList<String>();
+			final List<String> new_images		= new ArrayList<String>();
+			final List<Integer> new_widths		= new ArrayList<Integer>();
+			final List<Integer> new_heights		= new ArrayList<Integer>();
+
 			int width, height;
 			ssize = size;
-			String image;
-			String tag;
-
-			while(lv == null)
-			{
-				try{
-					Thread.sleep(50);
-				}
-				catch(Exception e){
-				}
-				if((viewpager != null)&&(l == null))
-					l = (fragment_card) fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_number));
-				if((l != null)&&(ith == null))
-					ith = ((card_adapter) l.getListAdapter());
-				if((l != null)&&(lv == null))
-					lv = l.getListView();
-			}
+			String image, link, tag;
 
 			for(int m = 0; m < size; m++)
 			{
@@ -1253,11 +1320,46 @@ public class main_view extends Activity
 					marker_position++;
 
 				// Checks to see if page has this item.
-				if(existing_items.add(links.get(m)))
-					publishProgress(titles.get(m), descriptions.get(m), links.get(m), thumbnail_path, height, width, markerer);
+				link = links.get(m);
+				if(existing_items.add(link))
+				{
+					new_markers		.add(markerer);
+					new_titles		.add(titles.get(m));
+					new_links		.add(link);
+					new_descriptions.add(descriptions.get(m));
+					new_images		.add(thumbnail_path);
+					new_heights		.add(height);
+					new_widths		.add(width);
+					refresh_count++;
+				}
 			}
 			new_items.set(page_number, false);
-			return 0L;
+
+			nav = new ArrayList<String>();
+			nav.addAll(Arrays.asList("Feeds", "Manage", "Settings", "Groups"));
+			nav.addAll(current_groups);
+
+			/// Force to read from files because the other method requires the pages to be refreshed by now.
+			counts = utilities.get_unread_counts(null, null, storage);
+
+			while(lv == null)
+			{
+				try{
+					Thread.sleep(5);
+				}
+				catch(Exception e){
+				}
+				if((viewpager != null)&&(l == null))
+					l = (fragment_card) fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_number));
+				if((l != null)&&(ith == null))
+					ith = ((card_adapter) l.getListAdapter());
+				if((l != null)&&(lv == null))
+					lv = l.getListView();
+			}
+
+			publishProgress(new_titles, new_descriptions, new_links, new_images, new_heights, new_widths, new_markers);
+
+			return null;
 		}
 
 		@Override
@@ -1281,35 +1383,30 @@ public class main_view extends Activity
 				waited = false;
 			}
 
-			ith.add_list((String) progress[0], (String) progress[1], (String) progress[2], (String) progress[3], (Integer) progress[4], (Integer) progress[5], (Boolean) progress[6]);
+			ith.add_list((List<String>) progress[0], (List<String>) progress[1], (List<String>) progress[2], (List<String>) progress[3], (List<Integer>) progress[4], (List<Integer>) progress[5], (List<Boolean>) progress[6]);
 			ith.notifyDataSetChanged();
-			refresh_count++;
 
 			//lv.setSelectionFromTop(index, top - twelve);
-			if(marker_position != -1)
-					lv.setSelection(marker_position);
-			else
-				lv.setSelection(refresh_count);
 		}
 
 		@Override
-		protected void onPostExecute(Long tun)
+		protected void onPostExecute(Void tun)
 		{
 			if(lv == null)
 				return;
-			lv.setAnimation(animFadeIn);
-			lv.setVisibility(View.VISIBLE);
+			if(marker_position != -1)
+				lv.setSelection(marker_position);
+			else
+				lv.setSelection(refresh_count);
+
 			set_refresh(check_service_running());
 
-			List<String> nav = new ArrayList<String>();
-			nav.addAll(Arrays.asList("Feeds", "Manage", "Settings", "Groups"));
-			nav.addAll(current_groups);
 			nav_adapter.add_list(nav);
-			nav_adapter.add_count(utilities.get_unread_counts(fragment_manager, viewpager, storage));
+			nav_adapter.add_count(counts);
 			nav_adapter.notifyDataSetChanged();
-			//if(viewPager.getOffscreenPageLimit() > 1)
-				//viewPager.setOffscreenPageLimit(1);
-			//Debug.stopMethodTracing();
+
+			lv.setAnimation(animFadeIn);
+			lv.setVisibility(View.VISIBLE);
 		}
 	}
 }
