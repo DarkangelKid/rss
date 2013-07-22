@@ -210,8 +210,10 @@ public class main_view extends Activity
 		utilities.append_string_to_file(storage + "groups/" + feed_group + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|\n");
 		utilities.append_string_to_file(storage + "groups/" + all_string + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|group|" + feed_group + "|\n");
 
-		new refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-		new refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		if(feed_list_adapter != null)
+			new refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		if(group_list_adapter != null)
+			new refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 
 	private static class refresh_manage_feeds extends AsyncTask<Void, String, Long>
@@ -716,8 +718,8 @@ public class main_view extends Activity
 				public boolean onItemLongClick(AdapterView<?> parent, View view, final int pos, long id)
 				{
 					final AlertDialog.Builder builder = new AlertDialog.Builder(activity_context);
-					builder.setCancelable(true)
-							.setNegativeButton(getString(R.string.delete_dialog), new DialogInterface.OnClickListener()
+					builder.setCancelable(true).setNegativeButton(getString(R.string.delete_dialog),
+					new DialogInterface.OnClickListener()
 					{
 						/// Delete the feed.
 						public void onClick(DialogInterface dialog, int id)
@@ -1339,9 +1341,6 @@ public class main_view extends Activity
 			nav.addAll(Arrays.asList("Feeds", "Manage", "Settings", "Groups"));
 			nav.addAll(current_groups);
 
-			/// Force to read from files because the other method requires the pages to be refreshed by now.
-			counts = utilities.get_unread_counts(null, null, storage);
-
 			while(lv == null)
 			{
 				try{
@@ -1364,6 +1363,7 @@ public class main_view extends Activity
 						lv = null;
 					}
 				}
+				counts = utilities.get_unread_counts(fragment_manager, viewpager, storage);
 			}
 
 			publishProgress(new_titles, new_descriptions, new_links, new_images, new_heights, new_widths, new_markers);
