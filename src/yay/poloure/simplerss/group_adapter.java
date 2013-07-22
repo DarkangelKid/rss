@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.ListView;
 import java.util.List;
 import java.util.ArrayList;
+import 	android.widget.LinearLayout;
 
 import android.graphics.Point;
 
@@ -137,29 +138,47 @@ public class group_adapter extends BaseAdapter
 
 	private class MyDragListener implements OnDragListener
 	{
+		int[] position = new int[2];
+		final int height = (int) (main_view.activity_context.getResources().getDisplayMetrics().heightPixels);
+		View old_view;
 		@Override
 		public boolean onDrag(View v, DragEvent event)
 		{
-			switch(event.getAction())
+			final int action = event.getAction();
+			if(action == DragEvent.ACTION_DRAG_STARTED)
 			{
-				case DragEvent.ACTION_DRAG_STARTED:
-					break;
-				case DragEvent.ACTION_DRAG_ENTERED:
-					new_title = ((TextView) v.findViewById(R.id.group_item)).getText().toString();
-					v.setVisibility(View.INVISIBLE);
-					rearrange_groups(old_title, new_title);
-					refresh_data();
-					break;
-				case DragEvent.ACTION_DRAG_EXITED:
-					v.setVisibility(View.VISIBLE);
-					break;
-				case DragEvent.ACTION_DROP:
-					v.setVisibility(View.VISIBLE);
-					main_view.update_group_order(group_list);
-					break;
-				case DragEvent.ACTION_DRAG_ENDED:
-					default:
-					break;
+			}
+			else if(action == DragEvent.ACTION_DRAG_ENTERED)
+			{
+				v.getLocationOnScreen(position);
+				ListView listview = ((ListView) v.getParent());
+				int first = listview.getFirstVisiblePosition();
+
+				if(position[1] > (4/5.0)*height)/*&&(listview.getLastVisiblePosition() != listview.getCount() - 1))*/
+					listview.smoothScrollBy(v.getHeight(), 400);
+				else if(position[1] < (1/5.0)*height)/*&&(first != 0))*/
+					listview.smoothScrollBy((int)((-1.0)* v.getHeight()), 400);
+
+				new_title = ((TextView) v.findViewById(R.id.group_item)).getText().toString();
+				v.setVisibility(View.INVISIBLE);
+				rearrange_groups(old_title, new_title);
+				refresh_data();
+			}
+			else if(action == DragEvent.ACTION_DRAG_LOCATION)
+			{
+			}
+			else if(action == DragEvent.ACTION_DRAG_EXITED)
+			{
+				v.setVisibility(View.VISIBLE);
+			}
+			else if(action == DragEvent.ACTION_DROP)
+			{
+				v.setVisibility(View.VISIBLE);
+				main_view.update_group_order(group_list);
+			}
+			else if(action == DragEvent.ACTION_DRAG_ENDED)
+			{
+				//default:
 			}
 			return true;
 		}
