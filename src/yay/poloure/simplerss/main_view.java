@@ -146,7 +146,7 @@ public class main_view extends Activity
 
 		drawer_layout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		drawer_layout.setDrawerShadow(R.drawable.drawer_shadow, 8388611);
-		drawer_toggle	= new ActionBarDrawerToggle(this, drawer_layout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
+		drawer_toggle = new ActionBarDrawerToggle(this, drawer_layout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
 		{
 			@Override
 			public void onDrawerClosed(View view)
@@ -195,8 +195,7 @@ public class main_view extends Activity
 		inf					= getLayoutInflater();
 	}
 
-	/// This is so the feeds is selected too.
-
+	/// This is so the icon and text in the actionbar are selected.
 	@Override
 	public void onConfigurationChanged(Configuration newConfig)
 	{
@@ -659,28 +658,31 @@ public class main_view extends Activity
 			group_list_adapter = new group_adapter(getActivity());
 			manage_list.setAdapter(group_list_adapter);
 			new refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-			manage_list.setOnItemLongClickListener(new OnItemLongClickListener()
-			{
-				@Override
-				public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id)
+			manage_list.setOnItemLongClickListener
+			(
+				new OnItemLongClickListener()
 				{
-					if(position == 0)
-						return false;
-					AlertDialog.Builder builder = new AlertDialog.Builder(activity_context);
-					builder.setCancelable(true)
-							.setPositiveButton(getString(R.string.delete_dialog), new DialogInterface.OnClickListener()
+					@Override
+					public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id)
 					{
-						public void onClick(DialogInterface dialog, int id)
+						if(position == 0)
+							return false;
+						AlertDialog.Builder builder = new AlertDialog.Builder(activity_context);
+						builder.setCancelable(true)
+								.setPositiveButton(getString(R.string.delete_dialog), new DialogInterface.OnClickListener()
 						{
-							group_list_adapter.remove_item(position);
-							group_list_adapter.notifyDataSetChanged();
-						}
-					});
-					AlertDialog alert = builder.create();
-					alert.show();
-					return true;
+							public void onClick(DialogInterface dialog, int id)
+							{
+								group_list_adapter.remove_item(position);
+								group_list_adapter.notifyDataSetChanged();
+							}
+						});
+						AlertDialog alert = builder.create();
+						alert.show();
+						return true;
+					}
 				}
-			});
+			);
 			return view;
 		}
 	}
@@ -699,82 +701,94 @@ public class main_view extends Activity
 		{
 			final View view = inflater.inflate(R.layout.manage_feeds, container, false);
 			feed_list = (ListView) view.findViewById(R.id.feeds_listview);
-			feed_list.setOnItemClickListener(new OnItemClickListener()
-						{
-							public void onItemClick(AdapterView<?> parent, View view, int position, long id)
-							{
-								show_edit_dialog(position);
-							}
-						});
+			feed_list.setOnItemClickListener
+			(
+				new OnItemClickListener()
+				{
+					public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+					{
+						show_edit_dialog(position);
+					}
+				}
+			);
 
 			feed_list_adapter = new feed_adapter(getActivity());
 			feed_list.setAdapter(feed_list_adapter);
 
 			new refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-			feed_list.setOnItemLongClickListener(new OnItemLongClickListener()
-			{
-				@Override
-				public boolean onItemLongClick(AdapterView<?> parent, View view, final int pos, long id)
+			feed_list.setOnItemLongClickListener
+			(
+				new OnItemLongClickListener()
 				{
-					final AlertDialog.Builder builder = new AlertDialog.Builder(activity_context);
-					builder.setCancelable(true).setNegativeButton(getString(R.string.delete_dialog),
-					new DialogInterface.OnClickListener()
+					@Override
+					public boolean onItemLongClick(AdapterView<?> parent, View view, final int pos, long id)
 					{
-						/// Delete the feed.
-						public void onClick(DialogInterface dialog, int id)
-						{
-							String group = feed_list_adapter.get_info(pos);
-							group = group.substring(group.indexOf('\n') + 1, group.indexOf(' '));
-							String name = feed_list_adapter.getItem(pos);
-							utilities.delete(storage + group + ".image_size.cache.txt");
-
-							utilities.remove_string_from_file(storage + "groups/" + group + ".txt", name, true);
-							utilities.remove_string_from_file(storage + "groups/" + all_string + ".txt", name, true);
-
-							/// If the group file no longer exists because it was the last feed in it, delete the group from the group_list.
-							if(!utilities.exists(storage + "groups/" + group + ".txt"))
+						AlertDialog alert = new AlertDialog.Builder(activity_context)
+						.setCancelable(true)
+						.setNegativeButton
+						(
+							getString(R.string.delete_dialog),
+							new DialogInterface.OnClickListener()
 							{
-								utilities.remove_string_from_file(storage + "groups/group_list.txt", group, false);
-								utilities.delete(storage + "groups/" + group + ".txt");
-								update_groups();
+								/// Delete the feed.
+								public void onClick(DialogInterface dialog, int id)
+								{
+									String group = feed_list_adapter.get_info(pos);
+									group = group.substring(group.indexOf('\n') + 1, group.indexOf(' '));
+									final String name = feed_list_adapter.getItem(pos);
+									utilities.delete(storage + group + ".image_size.cache.txt");
+
+									utilities.remove_string_from_file(storage + "groups/" + group + ".txt", name, true);
+									utilities.remove_string_from_file(storage + "groups/" + all_string + ".txt", name, true);
+
+									/// If the group file no longer exists because it was the last feed in it, delete the group from the group_list.
+									if(!utilities.exists(storage + "groups/" + group + ".txt"))
+									{
+										utilities.remove_string_from_file(storage + "groups/group_list.txt", group, false);
+										utilities.delete(storage + "groups/" + group + ".txt");
+										update_groups();
+									}
+									else
+										utilities.sort_group_content_by_time(storage, group);
+
+									utilities.sort_group_content_by_time(storage, all_string);
+
+									/// remove deleted files content from groups that it was in
+									feed_list_adapter.remove_item(pos);
+									feed_list_adapter.notifyDataSetChanged();
+									new refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+								}
 							}
-							else
-								utilities.sort_group_content_by_time(storage, group);
+						)
+						.setPositiveButton
+						(
+							getString(R.string.clear_dialog),
+							new DialogInterface.OnClickListener()
+							{
+								/// Delete the feed.
+								public void onClick(DialogInterface dialog, int id)
+								{
+									String group = feed_list_adapter.get_info(pos);
+									group = group.substring(group.indexOf('\n') + 1, group.indexOf(' '));
+									String name = feed_list_adapter.getItem(pos);
+									utilities.delete(storage + "content/" + name + ".store.txt.content.txt");
+									utilities.delete(storage + "groups/" + group + ".txt.content.txt");
+									utilities.delete(storage + group + ".image_size.cache.txt");
 
-							utilities.sort_group_content_by_time(storage, all_string);
+									new refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+									utilities.sort_group_content_by_time(storage, all_string);
 
-							/// remove deleted files content from groups that it was in
-							feed_list_adapter.remove_item(pos);
-							feed_list_adapter.notifyDataSetChanged();
-							new refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-						}
-					})
-					.setPositiveButton(getString(R.string.clear_dialog), new DialogInterface.OnClickListener()
-					{
-						/// Delete the feed.
-						public void onClick(DialogInterface dialog, int id)
-						{
-							String group = feed_list_adapter.get_info(pos);
-							group = group.substring(group.indexOf('\n') + 1, group.indexOf(' '));
-							String name = feed_list_adapter.getItem(pos);
-							utilities.delete(storage + "content/" + name + ".store.txt.content.txt");
-							utilities.delete(storage + "groups/" + group + ".txt.content.txt");
-							utilities.delete(storage + group + ".image_size.cache.txt");
-
-							new refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-							utilities.sort_group_content_by_time(storage, all_string);
-
-							/// remove deleted files content from groups that it was in
-							/// TODO: update item info
-							//feed_list_adapter.notifyDataSetChanged();
-						}
-					});
-					AlertDialog alert = builder.create();
-					alert.show();
-					return true;
+									/// remove deleted files content from groups that it was in
+									/// TODO: update item info
+									//feed_list_adapter.notifyDataSetChanged();
+								}
+							}
+						).show();
+						return true;
+					}
 				}
-			});
+			);
 			return view;
 		}
 	}
@@ -1056,7 +1070,10 @@ public class main_view extends Activity
 
 			}
 			else
+			{
 				group = spinner_group;
+				existing_group = true;
+			}
 
 			List<String> check_list = new ArrayList<String>();
 			if(!urler[0].contains("http"))
