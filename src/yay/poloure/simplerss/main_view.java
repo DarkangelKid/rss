@@ -851,7 +851,7 @@ public class main_view extends Activity
 		public void onCreate(Bundle savedInstanceState)
 		{
 			super.onCreate(savedInstanceState);
-			card_adapter adapter = new card_adapter(getActivity(), getListView());
+			card_adapter adapter = new card_adapter(getActivity());
 			setListAdapter(adapter);
 			final List<String> count_list = utilities.read_file_to_list(storage + "groups/" + current_groups.get(getArguments().getInt("num", 0)) + ".txt.content.txt");
 			final int sized = count_list.size();
@@ -1354,7 +1354,16 @@ public class main_view extends Activity
 				if((l != null)&&(ith == null))
 					ith = ((card_adapter) l.getListAdapter());
 				if((l != null)&&(lv == null))
-					lv = l.getListView();
+				{
+					try
+					{
+						lv = l.getListView();
+					}
+					catch(IllegalStateException e)
+					{
+						lv = null;
+					}
+				}
 			}
 
 			publishProgress(new_titles, new_descriptions, new_links, new_images, new_heights, new_widths, new_markers);

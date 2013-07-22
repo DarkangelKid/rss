@@ -56,8 +56,9 @@ public class card_adapter extends BaseAdapter
 	private int top_item_position = -1;
 	private final int screen_width;
 	private int total = 0;
+	private Boolean first = true;
 
-	public card_adapter(Context context_main, ListView list)
+	public card_adapter(Context context_main)
 	{
 		context = context_main;
 		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -65,41 +66,6 @@ public class card_adapter extends BaseAdapter
 		screen_width = metrics.widthPixels;
 		eight = (int) ((8 * (metrics.density) + 0.5f));
 		twelve = (int) ((12 * (metrics.density) + 0.5f));
-
-		//listview = list;
-
-		/*listview.setOnScrollListener(new AbsListView.OnScrollListener()
-		{
-			@Override
-			public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount){
-			}
-
-			@Override
-			public void onScrollStateChanged(AbsListView view, int scrollState)
-			{
-				if((scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)||(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL))
-				{
-					int firstVisibleItem = listview.getFirstVisiblePosition();
-
-					firstVisibleItem = total - firstVisibleItem;
-					if(firstVisibleItem == total)
-					{
-						if(listview.getChildAt(0).getTop() == twelve)
-							top_item_position = total - 1;
-						else if(top_item_position != total - 1)
-							top_item_position = total - 2;
-					}
-					else if(firstVisibleItem - 2 > top_item_position)
-						top_item_position = firstVisibleItem - 2;
-				}
-				if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
-				{
-					drawer_adapter nav_adapter = main_view.get_nav_adapter();
-					nav_adapter.add_count(utilities.get_unread_counts(main_view.get_fragment_manager(), main_view.get_viewpager(), main_view.get_storage()));
-					nav_adapter.notifyDataSetChanged();
-				}
-			}
-		});*/
 	}
 
 	public void add_list(List<String> new_title, List<String> new_des, List<String> new_link, List<String> new_image, List<Integer> new_height, List<Integer> new_width, List<Boolean> new_marker)
@@ -153,11 +119,48 @@ public class card_adapter extends BaseAdapter
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
+		if(first)
+		{
+			listview	= (ListView) parent;
+			listview.setOnScrollListener(new AbsListView.OnScrollListener()
+			{
+				@Override
+				public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount){
+				}
+
+				@Override
+				public void onScrollStateChanged(AbsListView view, int scrollState)
+				{
+					if((scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)||(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL))
+					{
+						int firstVisibleItem = listview.getFirstVisiblePosition();
+
+						firstVisibleItem = total - firstVisibleItem;
+						if(firstVisibleItem == total)
+						{
+							if(listview.getChildAt(0).getTop() == twelve)
+								top_item_position = total - 1;
+							else if(top_item_position != total - 1)
+								top_item_position = total - 2;
+						}
+						else if(firstVisibleItem - 2 > top_item_position)
+							top_item_position = firstVisibleItem - 2;
+					}
+					if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
+					{
+						drawer_adapter nav_adapter = main_view.get_nav_adapter();
+						nav_adapter.add_count(utilities.get_unread_counts(main_view.get_fragment_manager(), main_view.get_viewpager(), main_view.get_storage()));
+						nav_adapter.notifyDataSetChanged();
+					}
+				}
+			});
+			first = false;
+		}
+
 		ViewHolder holder;
 		position = total - position - 1;
 		if(convertView == null)
 		{
-			listview				= (ListView) parent;
 			convertView 			= inflater.inflate(R.layout.card_layout, parent, false);
 			holder 					= new ViewHolder();
 			holder.title_view 		= (TextView) convertView.findViewById(R.id.title);
