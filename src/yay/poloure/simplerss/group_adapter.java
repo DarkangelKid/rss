@@ -124,19 +124,12 @@ public class group_adapter extends BaseAdapter
 			{
 				View view_parent = (View) view.getParent();
 				old_title = ((TextView)view_parent.findViewById(R.id.group_item)).getText().toString();
-				ClipData data = ClipData.newPlainText("", "");
 				custom_drag_builder shadowBuilder = new custom_drag_builder(view_parent);
-				view_parent.startDrag(data, shadowBuilder, view_parent, 0);
+				view_parent.startDrag(null, shadowBuilder, view_parent, 0);
 				return true;
 			}
-			else
-				return false;
+			return false;
 		}
-	}
-
-	private void refresh_data()
-	{
-		notifyDataSetChanged();
 	}
 
 	private class MyDragListener implements OnDragListener
@@ -148,15 +141,12 @@ public class group_adapter extends BaseAdapter
 		public boolean onDrag(View v, DragEvent event)
 		{
 			final int action = event.getAction();
-			if(action == DragEvent.ACTION_DRAG_STARTED)
-			{
-			}
-			else if(action == DragEvent.ACTION_DRAG_ENTERED)
+			if(action == DragEvent.ACTION_DRAG_ENTERED)
 			{
 				final ListView listview = ((ListView) v.getParent());
 				new_title = ((TextView) v.findViewById(R.id.group_item)).getText().toString();
 				rearrange_groups(old_title, new_title);
-				refresh_data();
+				notifyDataSetChanged();
 				for(int i = 0; i < listview.getChildCount();  i++)
 				{
 					View temp = listview.getChildAt(i);
@@ -191,12 +181,6 @@ public class group_adapter extends BaseAdapter
 				else if(position[1] < (1/5.0)*height)
 					listview.smoothScrollBy((int)((-1.0)* v.getHeight()), 400);
 			}
-			else if(action == DragEvent.ACTION_DRAG_LOCATION)
-			{
-			}
-			else if(action == DragEvent.ACTION_DRAG_EXITED)
-			{
-			}
 			else if(action == DragEvent.ACTION_DROP)
 			{
 				Animation fadeIn2 = new AlphaAnimation(0, 1);
@@ -205,10 +189,6 @@ public class group_adapter extends BaseAdapter
 				v.setAnimation(fadeIn2);
 				v.setVisibility(View.VISIBLE);
 				main_view.update_group_order(group_list);
-			}
-			else if(action == DragEvent.ACTION_DRAG_ENDED)
-			{
-				//default:
 			}
 			return true;
 		}

@@ -193,6 +193,150 @@ public class utilities
 		}
 	}
 
+	public static String[][] read_csv_to_array(String file_path, char[] type, Boolean dimensions)
+	{
+		int next, offset, line_length, k, j;
+		String line, one;
+		char ch;
+		int start = (type[0] == 'm') ? 1 : 0;
+
+		List<String> lines = new ArrayList<String>();
+
+		try
+		{
+			BufferedReader stream = new BufferedReader(new FileReader(file_path));
+			while((line = stream.readLine()) != null)
+				lines.add(line);
+			stream.close();
+		}
+		catch(Exception e)
+		{
+		}
+		final int total_size = lines.size();
+
+		final int type_size = (dimensions) ? type.length + 2 : type.length;
+		String[][] types = new String[type_size][total_size];
+
+		for(j = 0; j < total_size; j++)
+		{
+			next = 0;
+			offset = 0;
+			line = lines.get(j);
+			line_length = line.length();
+			while((next = line.indexOf('|', offset)) != -1)
+			{
+				//one = line.substring(offset, next);
+				if(offset == line_length)
+					break;
+
+				ch = line.charAt(offset);
+				offset = next + 1;
+				switch(ch)
+				{
+					case 'm':
+						next = line.indexOf('|', offset);
+						types[0][j] = "1";
+						break;
+					case 'w':
+						next = line.indexOf('|', offset);
+						types[type.length][j]		= line.substring(offset, next);
+						break;
+					case 'h':
+						next = line.indexOf('|', offset);
+						types[type.length + 1][j]	= line.substring(offset, next);
+						break;
+					default:
+						for(k = start; k < type.length; k++)
+						{
+							if(ch == type[k])
+							{
+								next = line.indexOf('|', offset);
+								types[k][j] = line.substring(offset, next);
+								break;
+							}
+						}
+						break;
+				}
+				offset = line.indexOf('|', offset) + 1;
+			}
+		}
+
+		return types;
+	}
+
+	public static String[][] load_csv_to_array(String file_path)
+	{
+		int next, offset, line_length, k, j;
+		String line;
+		char ch;
+
+		List<String> lines = new ArrayList<String>();
+
+		try
+		{
+			BufferedReader stream = new BufferedReader(new FileReader(file_path));
+			while((line = stream.readLine()) != null)
+				lines.add(line);
+			stream.close();
+		}
+		catch(Exception e)
+		{
+		}
+		final int total_size = lines.size();
+
+		String[][] types = new String[7][total_size];
+
+		for(j = 0; j < total_size; j++)
+		{
+			next = 0;
+			offset = 0;
+			line = lines.get(j);
+			line_length = line.length();
+			while((next = line.indexOf('|', offset)) != -1)
+			{
+				if(offset == line_length)
+					break;
+
+				ch = line.charAt(offset);
+				offset = next + 1;
+				switch(ch)
+				{
+					case 'm':
+						next = line.indexOf('|', offset);
+						types[0][j] = "1";
+						break;
+					case 't':
+						next = line.indexOf('|', offset);
+						types[1][j]		= line.substring(offset, next);
+						break;
+					case 'd':
+						next = line.indexOf('|', offset);
+						types[2][j]		= line.substring(offset, next);
+						break;
+					case 'l':
+						next = line.indexOf('|', offset);
+						types[3][j]		= line.substring(offset, next);
+						break;
+					case 'i':
+						next = line.indexOf('|', offset);
+						types[4][j]		= line.substring(offset, next);
+						break;
+					case 'w':
+						next = line.indexOf('|', offset);
+						types[5][j]		= line.substring(offset, next);
+						break;
+					case 'h':
+						next = line.indexOf('|', offset);
+						types[6][j]		= line.substring(offset, next);
+						break;
+				}
+				offset = line.indexOf('|', offset) + 1;
+			}
+		}
+
+		return types;
+	}
+
 	public static List< List<String> > read_csv_to_list(String file_path, String[] type, Boolean dimensions)
 	{
 		int content_start, content_index, i, bar_index;

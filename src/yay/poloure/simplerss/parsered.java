@@ -25,10 +25,10 @@ class parsered
 	private static final Pattern regex_tags				= Pattern.compile("(&lt;).*?(&gt;)");
 	private static final Pattern regex_cdata_tags		= Pattern.compile("\\<.*?\\>");
 	private static final Pattern space_tags				= Pattern.compile("(&nbsp;|\r+|\n+|\\|)");
-	private static final String[] start					= new String[]{"<name>", "<link>", "<published>", "<pubDate>", "<description>", "<title", "<content"};
-	private static final String[] end					= new String[]{"</name>", "</link>", "</published>", "</pubDate>", "</description>", "</title", "</content"};
-	private static final String[] of_types				= new String[]{"<name>", "<link>", "<published>", "<pubDate>", "<description>", "<title", "<content",
-				"</name>", "</link>", "</published>", "</pubDate>", "</description>", "</title", "</content", "<entry", "<item", "</entry", "</item"};
+	private static final String[] start					= new String[]{"<link>", "<published>", "<pubDate>", "<description>", "<title", "<content"};
+	private static final String[] end					= new String[]{"</link>", "</published>", "</pubDate>", "</description>", "</title", "</content"};
+	private static final String[] of_types				= new String[]{"<link>", "<published>", "<pubDate>", "<description>", "<title", "<content",
+				"</link>", "</published>", "</pubDate>", "</description>", "</title", "</content", "<entry", "<item", "</entry", "</item"};
 	private static final int start_size 				= start.length;
 	private String dump_path;
 	private String url_path;

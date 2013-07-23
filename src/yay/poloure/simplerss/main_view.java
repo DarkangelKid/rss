@@ -85,7 +85,7 @@ public class main_view extends Activity
 	private static ActionBarDrawerToggle drawer_toggle;
 	private static Menu optionsMenu;
 
-	private static String mTitle, feed_title;
+	private static String current_title, feed_title;
 	public static String storage;
 	public static Context application_context, activity_context;
 	public static ViewPager viewpager;
@@ -116,7 +116,6 @@ public class main_view extends Activity
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		//Debug.startMethodTracing("boot");
 
 		setContentView(R.layout.pager);
 
@@ -152,7 +151,7 @@ public class main_view extends Activity
 			@Override
 			public void onDrawerClosed(View view)
 			{
-				getActionBar().setTitle(mTitle);
+				getActionBar().setTitle(current_title);
 			}
 
 			@Override
@@ -189,7 +188,7 @@ public class main_view extends Activity
 		settings_string		= getString(R.string.settings_title);
 		navigation_string	= getString(R.string.navigation_title);
 		all_string			= getString(R.string.all_group);
-		mTitle				= feeds_string;
+		current_title				= feeds_string;
 		pref				= PreferenceManager.getDefaultSharedPreferences(this);
 		application_context	= getApplicationContext();
 		activity_context	= this;
@@ -434,17 +433,21 @@ public class main_view extends Activity
 
 	private void selectItem(int position)
 	{
-		if(position == 2)
-			switch_page(settings_string, position);
-		else if(position == 1)
-			switch_page(manage_string, position);
-		else if(position == 0)
-			switch_page(feeds_string, position);
-		else if(position > 3)
+		switch(position)
 		{
-			switch_page(feeds_string, position);
-			int page = position - 4;
-			viewpager.setCurrentItem(page);
+			case 0:
+				switch_page(feeds_string, 0);
+				break;
+			case 1:
+				switch_page(manage_string, 1);
+				break;
+			case 2:
+				switch_page(settings_string, 2);
+				break;
+			default:
+				switch_page(feeds_string, position);
+				viewpager.setCurrentItem(position - 4);
+				break;
 		}
 	}
 
@@ -460,12 +463,12 @@ public class main_view extends Activity
 	private void switch_page(String page_title, int position)
 	{
 		drawer_layout.closeDrawer(navigation_list);
-		if(!mTitle.equals(page_title))
+		if(!current_title.equals(page_title))
 		{
 			fragment_manager.beginTransaction()
 						.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
 						.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out)
-						.hide(fragment_manager.findFragmentByTag(mTitle))
+						.hide(fragment_manager.findFragmentByTag(current_title))
 						.show(fragment_manager.findFragmentByTag(page_title))
 						.commit();
 
@@ -475,12 +478,12 @@ public class main_view extends Activity
 			else
 				set_title(feeds_string);
 		}
-		mTitle = page_title;
+		current_title = page_title;
 	}
 
 	private void set_title(String title)
 	{
-		mTitle = title;
+		current_title = title;
 		getActionBar().setTitle(title);
 	}
 
@@ -1256,16 +1259,20 @@ public class main_view extends Activity
 			if((!utilities.exists(group_file_path))||(!utilities.exists(group_content_path)))
 				return null;
 
-			List< List<String> > contenter 	= utilities.read_csv_to_list(group_content_path, new String[]{"marker|", "title|", "description|", "link|" , "image|"}, true);
-			List<String> marker				= contenter.get(0);
-			List<String> titles				= contenter.get(1);
-			List<String> descriptions		= contenter.get(2);
-			List<String> links				= contenter.get(3);
-			List<String> images				= contenter.get(4);
-			List<String> widths				= contenter.get(5);
-			List<String> heights			= contenter.get(6);
+			Debug.startMethodTracing("csv");
 
-			if((links.size() == 0)||(links.get(0).isEmpty()))
+			String[][] contenter		= utilities.load_csv_to_array(group_content_path);
+			String[] marker				= contenter[0];
+			String[] titles				= contenter[1];
+			String[] descriptions		= contenter[2];
+			String[] links				= contenter[3];
+			String[] images				= contenter[4];
+			String[] widths				= contenter[5];
+			String[] heights			= contenter[6];
+
+			Debug.stopMethodTracing();
+
+			if((links.length == 0)||(links[0].isEmpty()))
 				return null;
 
 			/// Get a set of all the pages items' urls.
@@ -1278,7 +1285,7 @@ public class main_view extends Activity
 
 			/// For each line of the group_content_file
 			animFadeIn = AnimationUtils.loadAnimation(activity_context, android.R.anim.fade_in);
-			final int size = titles.size();
+			final int size = titles.length;
 			final List<Boolean> new_markers		= new ArrayList<Boolean>();
 			final List<String> new_titles		= new ArrayList<String>();
 			final List<String> new_descriptions = new ArrayList<String>();
@@ -1296,14 +1303,14 @@ public class main_view extends Activity
 				thumbnail_path = "";
 				width = 0;
 				height = 0;
-				image = images.get(m);
+				image = images[m];
 
-				if(!image.isEmpty())
+				if(image != null)
 				{
-					width = Integer.parseInt(widths.get(m));
+					width = Integer.parseInt(widths[m]);
 					if(width > 32)
 					{
-						height = Integer.parseInt(heights.get(m));
+						height = Integer.parseInt(heights[m]);
 						thumbnail_path = storage + "thumbnails/" + image.substring(image.lastIndexOf("/") + 1, image.length());
 					}
 					else
@@ -1312,7 +1319,7 @@ public class main_view extends Activity
 
 				markerer = false;
 				/// It should stop at the latest one unless there is not a newest one. So stay at 0 until it finds one.
-				if(marker.get(m).equals("1"))
+				if(marker[m] != null)
 				{
 					markerer = true;
 					marker_position = 0;
@@ -1321,13 +1328,13 @@ public class main_view extends Activity
 					marker_position++;
 
 				// Checks to see if page has this item.
-				link = links.get(m);
+				link = links[m];
 				if(existing_items.add(link))
 				{
 					new_markers		.add(markerer);
-					new_titles		.add(titles.get(m));
+					new_titles		.add(titles[m]);
 					new_links		.add(link);
-					new_descriptions.add(descriptions.get(m));
+					new_descriptions.add(descriptions[m]);
 					new_images		.add(thumbnail_path);
 					new_heights		.add(height);
 					new_widths		.add(width);

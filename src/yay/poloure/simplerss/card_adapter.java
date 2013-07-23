@@ -121,7 +121,7 @@ public class card_adapter extends BaseAdapter
 	{
 		if(first)
 		{
-			listview	= (ListView) parent;
+			listview = (ListView) parent;
 			listview.setOnScrollListener(new AbsListView.OnScrollListener()
 			{
 				@Override
@@ -189,7 +189,7 @@ public class card_adapter extends BaseAdapter
 			final String image_path = content_images.get(position);
 				load(image_path, holder.image_view);
 		}
-		if((description.contains(title))||(description.length() < 6))
+		if((description == null)||(description.contains(title))||(description.length() < 6))
 			description = "";
 
 		ViewGroup.LayoutParams iv = holder.image_view.getLayoutParams();
