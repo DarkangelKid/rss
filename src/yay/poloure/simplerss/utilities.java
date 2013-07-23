@@ -151,20 +151,6 @@ public class utilities
 		}
 	}
 
-	public static void dump(String storage, Exception e)
-	{
-		try
-		{
-			FileWriter fstream = new FileWriter(storage + "Exception -" + (new Time()).format3339(false) + ".txt", false);
-			BufferedWriter out = new BufferedWriter(fstream);
-			out.write(e.toString());
-			out.close();
-		}
-		catch(Exception ee)
-		{
-		}
-	}
-
 	public static void append_string_to_file(String file_path, String string)
 	{
 		try
@@ -431,7 +417,7 @@ public class utilities
 				unread_list.add(0);
 			else
 			{
-				int most = count_lines(storage + "groups/" + current_groups.get(j) + ".txt.content.txt");
+				int most = Integer.parseInt(read_file_to_list(storage + "groups/" + current_groups.get(j) + ".txt.content.txt.count.txt").get(0));
 				unread_list.add(most - ith.return_unread_item_count() - 1);
 			}
 		}
@@ -458,9 +444,10 @@ public class utilities
 		String[] pubDates;
 		List<String> content;
 		Map<Long, String> map = new TreeMap<Long, String>();
-		int size, i;
+		int i;
 
 		final String[] feeds_array = read_single_to_array(storage + "groups/" + group + ".txt", "name|");
+		log(storage, "size of feeds array is: " + Integer.toString(feeds_array.length));
 
 		for(String feed : feeds_array)
 		{
@@ -478,15 +465,17 @@ public class utilities
 					try{
 						time.parse3339(pubDates[i]);
 					}
-					catch(Exception e){
+					catch(Exception e)
+					{
 						log(storage, "BUG : Meant to be 3339 but looks like: " + pubDates[i]);
-						return;
+						time = new Time();
 					}
-
 					map.put(time.toMillis(false), content.get(i));
 				}
 			}
 		}
+
+		log(storage, "About to print to group content file.");
 
 		delete(group_path);
 		try
@@ -495,6 +484,9 @@ public class utilities
 			for(Map.Entry<Long, String> entry : map.entrySet())
 				out.write(entry.getValue() + "\n");
 			out.close();
+			BufferedWriter out2 = new BufferedWriter(new FileWriter(group_path.concat(".count.txt"), false));
+			out2.write(Integer.toString(map.size()));
+			out2.close();
 		}
 		catch(Exception e){
 		}
