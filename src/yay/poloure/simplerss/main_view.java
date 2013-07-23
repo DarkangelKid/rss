@@ -1259,8 +1259,6 @@ public class main_view extends Activity
 			if((!utilities.exists(group_file_path))||(!utilities.exists(group_content_path)))
 				return null;
 
-			Debug.startMethodTracing("csv");
-
 			String[][] contenter		= utilities.load_csv_to_array(group_content_path);
 			String[] marker				= contenter[0];
 			String[] titles				= contenter[1];
@@ -1269,8 +1267,6 @@ public class main_view extends Activity
 			String[] images				= contenter[4];
 			String[] widths				= contenter[5];
 			String[] heights			= contenter[6];
-
-			Debug.stopMethodTracing();
 
 			if((links.length == 0)||(links[0].isEmpty()))
 				return null;
