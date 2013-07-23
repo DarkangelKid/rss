@@ -1165,7 +1165,16 @@ public class main_view extends Activity
 
 		new_items.clear();
 		for(String group : current_groups)
+		{
+			if(!utilities.exists(storage + "groups/" + group + ".txt.content.txt.count.txt"))
+				utilities.append_string_to_file
+				(
+					storage + "groups/" + group + ".txt.content.txt.count.txt",
+					Integer.toString(utilities.count_lines(storage + "groups/" + group + ".txt.content.txt"))
+				);
+
 			new_items.add(false);
+		}
 
 		/// If viewpager exists, fragment_manager != null. This must come before the nav_adapter.
 		if(viewpager != null)
@@ -1294,44 +1303,41 @@ public class main_view extends Activity
 
 			int width, height;
 			ssize = size;
-			String image, link, tag;
+			String tag;
 
 			for(int m = 0; m < size; m++)
 			{
-				thumbnail_path = "";
-				width = 0;
-				height = 0;
-				image = images[m];
-
-				if(image != null)
+				if(existing_items.add(links[m]))
 				{
-					width = Integer.parseInt(widths[m]);
-					if(width > 32)
+					thumbnail_path = "";
+					width = 0;
+					height = 0;
+
+					if(images[m] != null)
 					{
-						height = Integer.parseInt(heights[m]);
-						thumbnail_path = storage + "thumbnails/" + image.substring(image.lastIndexOf("/") + 1, image.length());
+						width = Integer.parseInt(widths[m]);
+						if(width > 32)
+						{
+							height = Integer.parseInt(heights[m]);
+							thumbnail_path = storage.concat("thumbnails/".concat(images[m].substring(images[m].lastIndexOf("/") + 1, images[m].length())));
+						}
+						else
+							width = 0;
 					}
-					else
-						width = 0;
-				}
 
-				markerer = false;
-				/// It should stop at the latest one unless there is not a newest one. So stay at 0 until it finds one.
-				if(marker[m] != null)
-				{
-					markerer = true;
-					marker_position = 0;
-				}
-				else if(marker_position != -1)
-					marker_position++;
+					markerer = false;
+					/// It should stop at the latest one unless there is not a newest one. So stay at 0 until it finds one.
+					if(marker[m] != null)
+					{
+						markerer = true;
+						marker_position = 0;
+					}
+					else if(marker_position != -1)
+						marker_position++;
 
-				// Checks to see if page has this item.
-				link = links[m];
-				if(existing_items.add(link))
-				{
 					new_markers		.add(markerer);
 					new_titles		.add(titles[m]);
-					new_links		.add(link);
+					new_links		.add(links[m]);
 					new_descriptions.add(descriptions[m]);
 					new_images		.add(thumbnail_path);
 					new_heights		.add(height);
