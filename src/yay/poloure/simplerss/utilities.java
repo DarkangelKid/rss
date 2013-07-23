@@ -33,7 +33,8 @@ public class utilities
 		card_adapter adapter;
 		BufferedWriter out;
 		String url, group;
-		List<String> feeds, lines;
+		String[] feeds;
+		List<String> lines;
 		Boolean found_url = false;
 		List<String> current_groups = read_file_to_list(storage + "groups/group_list.txt");
 		final int size = current_groups.size();
@@ -47,7 +48,7 @@ public class utilities
 				if(adapter.getCount() > 0)
 				{
 					/// Read each of the content files from the group and find the line with the url.
-					feeds = read_csv_to_list(storage + "groups/" + group + ".txt", new String[]{"name|"}, false).get(0);
+					feeds = read_single_to_array(storage + "groups/" + group + ".txt", "name|");
 					found_url = false;
 					url = adapter.return_latest_url();
 					if(!url.isEmpty())
@@ -108,6 +109,15 @@ public class utilities
 		System.arraycopy(a, 0, c, 0, a_length);
 		System.arraycopy(b, 0, c, a_length, b_length);
 		return c;
+	}
+
+	public static String[] remove_element(String[] a, int index)
+	{
+		String[] b = new String[a.length - 1];
+		System.arraycopy(a, 0, b, 0, index);
+		if(a.length != index)
+			System.arraycopy(a, index + 1, b, index, a.length - index - 1);
+		return b;
 	}
 
 	public static void download_file(String urler, String file_path)
@@ -193,77 +203,173 @@ public class utilities
 		}
 	}
 
-	public static List< List<String> > read_csv_to_list(String file_path, String[] type, Boolean dimensions)
+	public static String[] read_single_to_array(String file_path, String type)
 	{
-		int content_start, content_index, i, bar_index;
+		int next, offset, k, j;
 		String line;
-		final Boolean marker = type[0].equals("marker|");
+		char ch;
+		List<String> lines = new ArrayList<String>();
 
-		List< List<String> > types = new ArrayList< List<String> >();
-		int[] lengths = new int[type.length];
-
-		for(i = 0; i < type.length; i++)
-		{
-			types.add(new ArrayList<String>());
-			lengths[i] = type[i].length();
-		}
-		if(dimensions)
-		{
-			types.add(new ArrayList<String>());
-			types.add(new ArrayList<String>());
-		}
-
-		/// Index the pattern of tag occurence.
 		try
 		{
 			BufferedReader stream = new BufferedReader(new FileReader(file_path));
 			while((line = stream.readLine()) != null)
-			{
-				for(i = 0; i < type.length; i++)
-				{
-					if((i == 0)&&(marker))
-					{
-						if(line.charAt(0) != 'm')
-							types.get(0).add("");
-						else
-							types.get(0).add("1");
-					}
-					else
-					{
-						content_index = line.indexOf(type[i]);
-						if(content_index == -1)
-							types.get(i).add("");
-						else
-						{
-							content_start = content_index + lengths[i];
-							bar_index = line.indexOf('|', content_start);
-							if(content_start == bar_index)
-								types.get(i).add("");
-							else
-								types.get(i).add(line.substring(content_start, bar_index));
-						}
-					}
-				}
-				if(dimensions)
-				{
-					content_index = line.lastIndexOf("width|");
-					if(content_index == -1)
-					{
-						types.get(type.length).add("");
-						types.get(type.length + 1).add("");
-					}
-					else
-					{
-						content_index += 6;
-						bar_index = line.lastIndexOf("|height|");
-						types.get(type.length).add(line.substring(content_index, bar_index));
-						types.get(type.length + 1).add(line.substring(bar_index + 8, line.lastIndexOf('|')));
-					}
-				}
-			}
+				lines.add(line);
 			stream.close();
 		}
-		catch(Exception e){
+		catch(Exception e)
+		{
+		}
+
+		String[] types = new String[lines.size()];
+
+		for(j = 0; j < lines.size(); j++)
+		{
+			next = 0;
+			offset = 0;
+			line = lines.get(j);
+			if((next = line.indexOf(type, offset)) != -1)
+			{
+				ch = line.charAt(offset);
+				offset = next + 1;
+				switch(ch)
+				{
+					case 'm':
+						types[j] = "1";
+						break;
+					default:
+						next = line.indexOf('|', offset);
+						offset = next + 1;
+						types[j] = line.substring(offset, line.indexOf('|', offset));
+						break;
+				}
+			}
+		}
+		return types;
+	}
+
+	public static String[][] read_csv_to_array(String file_path, char[] type)
+	{
+		int next, offset, k, j;
+		String line;
+		char ch;
+		int start = (type[0] == 'm') ? 1 : 0;
+		List<String> lines = new ArrayList<String>();
+
+		try
+		{
+			BufferedReader stream = new BufferedReader(new FileReader(file_path));
+			while((line = stream.readLine()) != null)
+				lines.add(line);
+			stream.close();
+		}
+		catch(Exception e)
+		{
+		}
+		String[][] types = new String[type.length][lines.size()];
+
+		for(j = 0; j < lines.size(); j++)
+		{
+			next = 0;
+			offset = 0;
+			line = lines.get(j);
+			while((next = line.indexOf('|', offset)) != -1)
+			{
+				//one = line.substring(offset, next);
+				if(offset == line.length())
+					break;
+
+				ch = line.charAt(offset);
+				offset = next + 1;
+				switch(ch)
+				{
+					case 'm':
+						next = line.indexOf('|', offset);
+						types[0][j] = "1";
+						break;
+					default:
+						for(k = start; k < type.length; k++)
+						{
+							if(ch == type[k])
+							{
+								next = line.indexOf('|', offset);
+								types[k][j] = line.substring(offset, next);
+								break;
+							}
+						}
+						break;
+				}
+				offset = line.indexOf('|', offset) + 1;
+			}
+		}
+		return types;
+	}
+
+	public static String[][] load_csv_to_array(String file_path)
+	{
+		int next, offset, k, j;
+		String line;
+		char ch;
+
+		List<String> lines = new ArrayList<String>();
+		try
+		{
+			BufferedReader stream = new BufferedReader(new FileReader(file_path));
+			while((line = stream.readLine()) != null)
+				lines.add(line);
+			stream.close();
+		}
+		catch(Exception e)
+		{
+		}
+
+		String[][] types = new String[7][lines.size()];
+
+		for(j = 0; j < lines.size(); j++)
+		{
+			next = 0;
+			offset = 0;
+			line = lines.get(j);
+			while((next = line.indexOf('|', offset)) != -1)
+			{
+				if(offset == line.length())
+					break;
+
+				ch = line.charAt(offset);
+				offset = next + 1;
+				switch(ch)
+				{
+					case 'm':
+						next = line.indexOf('|', offset);
+						types[0][j] = "1";
+						break;
+					case 't':
+						next = line.indexOf('|', offset);
+						types[1][j]		= line.substring(offset, next);
+						break;
+					case 'd':
+						next = line.indexOf('|', offset);
+						types[2][j]		= line.substring(offset, next);
+						break;
+					case 'l':
+						next = line.indexOf('|', offset);
+						types[3][j]		= line.substring(offset, next);
+						break;
+					case 'i':
+						next = line.indexOf('|', offset);
+						types[4][j]		= line.substring(offset, next);
+						break;
+					case 'w':
+						next = line.indexOf('|', offset);
+						types[5][j]		= line.substring(offset, next);
+						break;
+					case 'h':
+						next = line.indexOf('|', offset);
+						types[6][j]		= line.substring(offset, next);
+						break;
+				}
+				offset = line.indexOf('|', offset) + 1;
+			}
 		}
 		return types;
 	}
@@ -349,11 +455,12 @@ public class utilities
 		final String group_path = storage + "groups/" + group + ".txt.content.txt";
 		String content_path;
 		Time time = new Time();
-		List<String> pubDates, content;
+		String[] pubDates;
+		List<String> content;
 		Map<Long, String> map = new TreeMap<Long, String>();
 		int size, i;
 
-		final List<String> feeds_array	= read_csv_to_list(storage + "groups/" + group + ".txt", new String[]{"name|"}, false).get(0);
+		final String[] feeds_array = read_single_to_array(storage + "groups/" + group + ".txt", "name|");
 
 		for(String feed : feeds_array)
 		{
@@ -361,19 +468,18 @@ public class utilities
 			if(exists(content_path))
 			{
 				content 		= read_file_to_list(content_path);
-				pubDates		= read_csv_to_list(content_path, new String[]{"published|"}, false).get(0);
+				pubDates		= read_single_to_array(content_path, "pubDate|");
 
-				if(pubDates.get(0).length() < 8)
-					pubDates 	= read_csv_to_list(content_path, new String[]{"pubDate|"}, false).get(0);
+				if(pubDates[0].length() < 8)
+					pubDates 	= read_single_to_array(content_path, "published|");
 
-				size = pubDates.size();
-				for(i = 0; i < size; i++)
+				for(i = 0; i < pubDates.length; i++)
 				{
 					try{
-						time.parse3339(pubDates.get(i));
+						time.parse3339(pubDates[i]);
 					}
 					catch(Exception e){
-						log(storage, "BUG : Meant to be 3339 but looks like: " + pubDates.get(i));
+						log(storage, "BUG : Meant to be 3339 but looks like: " + pubDates[i]);
 						return;
 					}
 
