@@ -1,24 +1,28 @@
 package yay.poloure.simplerss;
 
-import android.view.View.OnTouchListener;
-import android.view.MotionEvent;
 import android.content.ClipData;
+import android.content.Context;
+
+import android.graphics.Point;
 
 import android.view.DragEvent;
+import android.view.MotionEvent;
 import android.view.View.OnDragListener;
-
-import android.content.Context;
+import android.view.View.OnTouchListener;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.DecelerateInterpolator;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ListView;
+
 import java.util.List;
 import java.util.ArrayList;
-
-import android.graphics.Point;
 
 public class group_adapter extends BaseAdapter
 {
@@ -137,29 +141,74 @@ public class group_adapter extends BaseAdapter
 
 	private class MyDragListener implements OnDragListener
 	{
+		int[] position = new int[2];
+		int old_view;
+		final int height = (int) (main_view.activity_context.getResources().getDisplayMetrics().heightPixels);
 		@Override
 		public boolean onDrag(View v, DragEvent event)
 		{
-			switch(event.getAction())
+			final int action = event.getAction();
+			if(action == DragEvent.ACTION_DRAG_STARTED)
 			{
-				case DragEvent.ACTION_DRAG_STARTED:
-					break;
-				case DragEvent.ACTION_DRAG_ENTERED:
-					new_title = ((TextView) v.findViewById(R.id.group_item)).getText().toString();
-					v.setVisibility(View.INVISIBLE);
-					rearrange_groups(old_title, new_title);
-					refresh_data();
-					break;
-				case DragEvent.ACTION_DRAG_EXITED:
-					v.setVisibility(View.VISIBLE);
-					break;
-				case DragEvent.ACTION_DROP:
-					v.setVisibility(View.VISIBLE);
-					main_view.update_group_order(group_list);
-					break;
-				case DragEvent.ACTION_DRAG_ENDED:
-					default:
-					break;
+			}
+			else if(action == DragEvent.ACTION_DRAG_ENTERED)
+			{
+				final ListView listview = ((ListView) v.getParent());
+				new_title = ((TextView) v.findViewById(R.id.group_item)).getText().toString();
+				rearrange_groups(old_title, new_title);
+				refresh_data();
+				for(int i = 0; i < listview.getChildCount();  i++)
+				{
+					View temp = listview.getChildAt(i);
+					if(temp != null)
+					{
+						if(temp == v)
+						{
+							Animation fadeOut = new AlphaAnimation(1, 0);
+							fadeOut.setDuration(210);
+							fadeOut.setInterpolator(new DecelerateInterpolator());
+							temp.setAnimation(fadeOut);
+							temp.setVisibility(View.INVISIBLE);
+							old_view = temp.hashCode();
+						}
+						else if(temp.hashCode() == old_view)
+						{
+							Animation fadeIn = new AlphaAnimation(0, 1);
+							fadeIn.setDuration(210);
+							fadeIn.setInterpolator(new DecelerateInterpolator());
+							temp.setAnimation(fadeIn);
+							temp.setVisibility(View.VISIBLE);
+						}
+						else
+							temp.setVisibility(View.VISIBLE);
+					}
+				}
+				v.getLocationOnScreen(position);
+				int first = listview.getFirstVisiblePosition();
+
+				if(position[1] > (4/5.0)*height)
+					listview.smoothScrollBy(v.getHeight(), 400);
+				else if(position[1] < (1/5.0)*height)
+					listview.smoothScrollBy((int)((-1.0)* v.getHeight()), 400);
+			}
+			else if(action == DragEvent.ACTION_DRAG_LOCATION)
+			{
+			}
+			else if(action == DragEvent.ACTION_DRAG_EXITED)
+			{
+			}
+			else if(action == DragEvent.ACTION_DROP)
+			{
+				Animation fadeIn2 = new AlphaAnimation(0, 1);
+				fadeIn2.setDuration(210);
+				fadeIn2.setInterpolator(new DecelerateInterpolator());
+				v.setAnimation(fadeIn2);
+				v.setVisibility(View.VISIBLE);
+				main_view.update_group_order(group_list);
+			}
+			else if(action == DragEvent.ACTION_DRAG_ENDED)
+			{
+				//default:
 			}
 			return true;
 		}

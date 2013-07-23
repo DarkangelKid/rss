@@ -52,10 +52,11 @@ public class card_adapter extends BaseAdapter
 	private final Context context;
 	private ListView listview;
 
-	private static int eight = 0;
+	private static int eight = 0, twelve = 0;
 	private int top_item_position = -1;
 	private final int screen_width;
 	private int total = 0;
+	private Boolean first = true;
 
 	public card_adapter(Context context_main)
 	{
@@ -64,42 +65,53 @@ public class card_adapter extends BaseAdapter
 		DisplayMetrics metrics = context.getResources().getDisplayMetrics();
 		screen_width = metrics.widthPixels;
 		eight = (int) ((8 * (metrics.density) + 0.5f));
+		twelve = (int) ((12 * (metrics.density) + 0.5f));
 	}
 
-	public void add_list(String new_title, String new_des, String new_link, String new_image, int new_height, int new_width, Boolean new_marker)
+	public void add_list(List<String> new_title, List<String> new_des, List<String> new_link, List<String> new_image, List<Integer> new_height, List<Integer> new_width, List<Boolean> new_marker)
 	{
-		content_titles.add(new_title);
-		content_des.add(new_des);
-		content_links.add(new_link);
-		content_images.add(new_image);
-		content_height.add(new_height);
-		content_width.add(new_width);
-		content_marker.add(new_marker);
-		total++;
+		content_titles.addAll(new_title);
+		content_des.addAll(new_des);
+		content_links.addAll(new_link);
+		content_images.addAll(new_image);
+		content_height.addAll(new_height);
+		content_width.addAll(new_width);
+		content_marker.addAll(new_marker);
+		total = content_titles.size();
 	}
 
-	public List<String> return_links(){
+	public void set_latest_item(int position)
+	{
+		top_item_position = position;
+	}
+
+	public List<String> return_links()
+	{
 		return content_links;
 	}
 
-	public int return_unread_item_count(){
-		/// top_item_position is large, we want the oposite through here.
-		return total - top_item_position - 1;
+	public int return_unread_item_count()
+	{
+		/// oldest = 0, newest = 20;
+		return top_item_position;
 	}
 
 	@Override
-	public int getCount(){
+	public int getCount()
+	{
 		return total;
 	}
 
 	@Override
-	public long getItemId(int position){
+	public long getItemId(int position)
+	{
 		position = total - position - 1;
 		return position;
 	}
 
 	@Override
-	public String getItem(int position){
+	public String getItem(int position)
+	{
 		position = total - position - 1;
 		return content_titles.get(position);
 	}
@@ -107,21 +119,10 @@ public class card_adapter extends BaseAdapter
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
-		ViewHolder holder;
-		position = total - position - 1;
-		if(convertView == null)
+		if(first)
 		{
-			listview 				= (ListView) parent;
-			convertView 			= inflater.inflate(R.layout.card_layout, parent, false);
-			holder 					= new ViewHolder();
-			holder.title_view 		= (TextView) convertView.findViewById(R.id.title);
-			holder.time_view 		= (TextView) convertView.findViewById(R.id.time);
-			holder.description_view = (TextView) convertView.findViewById(R.id.description);
-			holder.image_view 		= (ImageView) convertView.findViewById(R.id.image);
-			convertView			.setTag(holder);
-			convertView			.setOnClickListener(new browser_call());
-			convertView			.setOnLongClickListener(new long_press());
-			((ListView) parent)	.setOnScrollListener(new AbsListView.OnScrollListener()
+			listview	= (ListView) parent;
+			listview.setOnScrollListener(new AbsListView.OnScrollListener()
 			{
 				@Override
 				public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount){
@@ -132,41 +133,43 @@ public class card_adapter extends BaseAdapter
 				{
 					if((scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)||(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL))
 					{
-						if(top_item_position == - 1)
-						{
-							final int size = total;
-							/// Starts at the newest and iterates to the oldest.
-							for(int i = size - 1; i >= 0 ; --i)
-							{
-								if(content_marker.get(i))
-								{
-									top_item_position = i;
-									break;
-								}
-							}
-							/// If it got all the way back and none were true, no items have been read.
-							if(top_item_position == -1)
-								top_item_position = 0;
-						}
-
 						int firstVisibleItem = listview.getFirstVisiblePosition();
-						/// If firstVisibleItem = 2, that is the second newest item in the list, which is at the end of
-						/// our list.
-						if(firstVisibleItem != -1)
+
+						firstVisibleItem = total - firstVisibleItem;
+						if(firstVisibleItem == total)
 						{
-							firstVisibleItem = total - firstVisibleItem - 1;
-							if(firstVisibleItem > top_item_position)
-								top_item_position = firstVisibleItem;
+							if(listview.getChildAt(0).getTop() == twelve)
+								top_item_position = total - 1;
+							else if(top_item_position != total - 1)
+								top_item_position = total - 2;
 						}
+						else if(firstVisibleItem - 2 > top_item_position)
+							top_item_position = firstVisibleItem - 2;
 					}
 					if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
 					{
-						drawer_adapter nav_adapter = main_view.return_nav_adapter();
-						nav_adapter.add_count(main_view.get_unread_counts());
+						drawer_adapter nav_adapter = main_view.nav_adapter;
+						nav_adapter.add_count(utilities.get_unread_counts(main_view.fragment_manager, main_view.viewpager, main_view.storage));
 						nav_adapter.notifyDataSetChanged();
 					}
 				}
 			});
+			first = false;
+		}
+
+		ViewHolder holder;
+		position = total - position - 1;
+		if(convertView == null)
+		{
+			convertView 			= inflater.inflate(R.layout.card_layout, parent, false);
+			holder 					= new ViewHolder();
+			holder.title_view 		= (TextView) convertView.findViewById(R.id.title);
+			holder.time_view 		= (TextView) convertView.findViewById(R.id.time);
+			holder.description_view = (TextView) convertView.findViewById(R.id.description);
+			holder.image_view 		= (ImageView) convertView.findViewById(R.id.image);
+			convertView			.setOnClickListener(new browser_call());
+			convertView			.setOnLongClickListener(new long_press());
+			convertView			.setTag(holder);
 		}
 		else
 			holder = (ViewHolder) convertView.getTag();
@@ -220,8 +223,6 @@ public class card_adapter extends BaseAdapter
 
 	public String return_latest_url()
 	{
-		if(top_item_position == -1)
-			return "";
 		return content_links.get(top_item_position);
 	}
 

@@ -16,7 +16,7 @@
 			android:hardwareAccelerated="true">
 		<activity
 			android:name="main_view"
-			android:label="Simple RSS">
+			android:label="@string/feeds_title">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
 				<category android:name="android.intent.category.LAUNCHER" />
