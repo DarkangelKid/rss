@@ -29,8 +29,8 @@ public class group_adapter extends BaseAdapter
 	private String old_title = "";
 	private String new_title = "";
 
-	private String[] group_array = new String[0];
-	private String[] info_array = new String[0];
+	private static String[] group_array = new String[0];
+	private static String[] info_array = new String[0];
 
 	private static LayoutInflater inflater;
 
@@ -70,8 +70,8 @@ public class group_adapter extends BaseAdapter
 
 	public void remove_item(int position)
 	{
-		utilities.remove_element(group_array, position);
-		utilities.remove_element(info_array, position);
+		group_array	= utilities.remove_element(group_array, position);
+		info_array	= utilities.remove_element(info_array, position);
 	}
 
 	@Override

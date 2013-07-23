@@ -111,9 +111,13 @@ public class utilities
 		return c;
 	}
 
-	public static void remove_element(Object[] a, int del)
+	public static String[] remove_element(String[] a, int index)
 	{
-		System.arraycopy(a,del+1,a,del,a.length-1-del);
+		String[] b = new String[a.length - 1];
+		System.arraycopy(a, 0, b, 0, index);
+		if(a.length != index)
+			System.arraycopy(a, index + 1, b, index, a.length - index - 1);
+		return b;
 	}
 
 	public static void download_file(String urler, String file_path)

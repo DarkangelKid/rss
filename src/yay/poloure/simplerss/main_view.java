@@ -215,7 +215,7 @@ public class main_view extends Activity
 			new refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 
-	private static class refresh_manage_feeds extends AsyncTask<Void, String, Long>
+	private static class refresh_manage_feeds extends AsyncTask<Void, String[], Long>
 	{
 		final Animation animFadeIn = AnimationUtils.loadAnimation(activity_context, android.R.anim.fade_in);
 		private ListView listview;
@@ -232,22 +232,23 @@ public class main_view extends Activity
 		{
 			if(feed_list_adapter != null)
 			{
-				feed_list_adapter.clear_list();
 				final String[][] content 	= utilities.read_csv_to_array(storage + "groups/"+ all_string + ".txt", new char[]{'n', 'u', 'g'});
 				final String[] feed_titles 	= content[0];
 				final String[] feed_urls 	= content[1];
 				final String[] feed_groups 	= content[2];
 				final int size 				= feed_titles.length;
+				String[] info_array			= new String[size];
 				for(int i = 0; i < size; i++)
-					publishProgress(feed_titles[i], feed_urls[i] + "\n" + feed_groups[i] + " • " + Integer.toString(utilities.count_lines(storage + "content/" + feed_titles[i] + ".store.txt.content.txt")) + " items");
+					info_array[i] = feed_urls[i] + "\n" + feed_groups[i] + " • " + Integer.toString(utilities.count_lines(storage + "content/" + feed_titles[i] + ".store.txt.content.txt")) + " items";
+				publishProgress(feed_titles, info_array);
 			}
 			return 0L;
 		}
 
 		@Override
-		protected void onProgressUpdate(String... progress)
+		protected void onProgressUpdate(String[]... progress)
 		{
-			feed_list_adapter.add_list(progress[0], progress[1]);
+			feed_list_adapter.set_items(progress[0], progress[1]);
 			feed_list_adapter.notifyDataSetChanged();
 		}
 
@@ -327,7 +328,7 @@ public class main_view extends Activity
 		}
 	}
 
-	private static void edit_feed(String old_name, String new_name, String new_url, String old_group, String new_group)
+	private static void edit_feed(String old_name, String new_name, String new_url, String old_group, String new_group, int position)
 	{
 		/// Delete the feed info from the all group and add the new group info to the end of the all content file.
 		utilities.remove_string_from_file(storage + "groups/" + all_string + ".txt", old_name, true);
@@ -357,11 +358,8 @@ public class main_view extends Activity
 		}
 
 		/// Add the new feeds to the feed_adapter (Manage/Feeds).
-
-		/// TODO: get this position.
-		/*feed_list_adapter.remove_item(position);
-		feed_list_adapter.add_list_pos(position, new_name, new_url + "\n" + new_group + " • " + Integer.toString(utilities.count_lines(storage + "content/" + new_name + ".store.txt.content.txt") - 1) + " items");
-		feed_list_adapter.notifyDataSetChanged();*/
+		feed_list_adapter.set_position(position, new_name, new_url + "\n" + new_group + " • " + Integer.toString(utilities.count_lines(storage + "content/" + new_name + ".store.txt.content.txt") - 1) + " items");
+		feed_list_adapter.notifyDataSetChanged();
 
 		update_groups();
 		new refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -964,7 +962,7 @@ public class main_view extends Activity
 						catch(Exception e){
 							spinner_group = "Unsorted";
 						}
-						new check_feed_exists(alertDialog, new_group, feed_name, "add", spinner_group, "", "").executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
+						new check_feed_exists(alertDialog, new_group, feed_name, "add", spinner_group, "", "", 0).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
 					}
 				});
 				alertDialog.show();
@@ -1024,7 +1022,7 @@ public class main_view extends Activity
 							String feed_name 		= ((EditText) edit_rss_dialog.findViewById(R.id.name_edit)).getText().toString().trim();
 							String spinner_group 	= ((Spinner) edit_rss_dialog.findViewById(R.id.group_spinner)).getSelectedItem().toString();
 
-							new check_feed_exists(edit_dialog, new_group, feed_name, "edit", spinner_group, current_group, current_title).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
+							new check_feed_exists(edit_dialog, new_group, feed_name, "edit", spinner_group, current_group, current_title, position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
 					}
 				});
 
@@ -1037,8 +1035,9 @@ public class main_view extends Activity
 		AlertDialog dialog;
 		String group, name, mode, url, feed_title, spinner_group, current_group, current_title;
 		Button button;
+		int pos;
 
-		public check_feed_exists(AlertDialog edit_dialog, String new_group, String feed_name, String moder, String spin_group, String current_tit, String current_grop)
+		public check_feed_exists(AlertDialog edit_dialog, String new_group, String feed_name, String moder, String spin_group, String current_tit, String current_grop, int position)
 		{
 			dialog			= edit_dialog;
 			group			= new_group;
@@ -1048,6 +1047,7 @@ public class main_view extends Activity
 			current_group	= current_grop;
 			current_title	= current_tit;
 			button			= dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+			pos				= position;
 			button.setEnabled(false);
 		}
 
@@ -1142,7 +1142,7 @@ public class main_view extends Activity
 
 				if(mode.equals("edit"))
 					/// current title and group are pulled from the air.
-					edit_feed(current_title, name, url, current_group, group);
+					edit_feed(current_title, name, url, current_group, group, pos);
 				else
 					add_feed(name, url, group);
 
