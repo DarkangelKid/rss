@@ -233,13 +233,13 @@ public class main_view extends Activity
 			if(feed_list_adapter != null)
 			{
 				feed_list_adapter.clear_list();
-				final List< List<String> > content 	= utilities.read_csv_to_list(storage + "groups/"+ all_string + ".txt", new String[]{"name|", "url|", "group|"}, false);
-				final List<String> feed_titles 		= content.get(0);
-				final List<String> feed_urls 		= content.get(1);
-				final List<String> feed_groups 		= content.get(2);
-				final int size 						= feed_titles.size();
+				final String[][] content 	= utilities.read_csv_to_array(storage + "groups/"+ all_string + ".txt", new char[]{'n', 'u', 'g'});
+				final String[] feed_titles 	= content[0];
+				final String[] feed_urls 	= content[1];
+				final String[] feed_groups 	= content[2];
+				final int size 				= feed_titles.length;
 				for(int i = 0; i < size; i++)
-					publishProgress(feed_titles.get(i), feed_urls.get(i) + "\n" + feed_groups.get(i) + " • " + Integer.toString(utilities.count_lines(storage + "content/" + feed_titles.get(i) + ".store.txt.content.txt")) + " items");
+					publishProgress(feed_titles[i], feed_urls[i] + "\n" + feed_groups[i] + " • " + Integer.toString(utilities.count_lines(storage + "content/" + feed_titles[i] + ".store.txt.content.txt")) + " items");
 			}
 			return 0L;
 		}
@@ -259,7 +259,7 @@ public class main_view extends Activity
 		}
 	}
 
-	private static class refresh_manage_groups extends AsyncTask<Void, String, Long>
+	private static class refresh_manage_groups extends AsyncTask<Void, String[], Long>
 	{
 		final Animation animFadeIn = AnimationUtils.loadAnimation(activity_context, android.R.anim.fade_in);
 		private ListView listview;
@@ -277,43 +277,45 @@ public class main_view extends Activity
 		{
 			if(group_list_adapter != null)
 			{
-				String group, info;
-				int content_size, number, j;
-				List<String> content;
-				group_list_adapter.clear_list();
+				String info;
+				int number, j;
+				String[] content;
 
 				final int size = current_groups.size();
+				String[] group_array = new String[size];
+				String[] info_array = new String[size];
+
 				for(int i = 0; i < size; i++)
 				{
-					group = current_groups.get(i);
-					content = utilities.read_csv_to_list(storage + "groups/" + group + ".txt", new String[]{"name|"}, false).get(0);
-					content_size = content.size();
+					group_array[i] = current_groups.get(i);
+					content = utilities.read_single_to_array(storage + "groups/" + group_array[i] + ".txt", "name|");
 					if(i == 0)
 						info = (size == 1) ? "1 group" :  size + " groups";
 					else
 					{
 						info = "";
 						number = 3;
-						if(content_size < 3)
-							number = content_size;
+						if(content.length < 3)
+							number = content.length;
 						for(j = 0; j < number - 1; j++)
-							info += content.get(j) + ", ";
+							info += content[j] + ", ";
 
-						if(content_size > 3)
+						if(content.length > 3)
 							info += "...";
 						else if(number > 0)
-							info += content.get(number - 1);
+							info += content[number - 1];
 					}
-					publishProgress(group, Integer.toString(content_size) + " feeds • " + info);
+					info_array[i] = Integer.toString(content.length) + " feeds • " + info;
 				}
+				publishProgress(group_array, info_array);
 			}
 			return 0L;
 		}
 
 		@Override
-		protected void onProgressUpdate(String... progress)
+		protected void onProgressUpdate(String[]... progress)
 		{
-			group_list_adapter.add_list(progress[0], progress[1]);
+			group_list_adapter.set_items(progress[0], progress[1]);
 			group_list_adapter.notifyDataSetChanged();
 		}
 
@@ -972,10 +974,10 @@ public class main_view extends Activity
 	{
 		final LayoutInflater inflater 		= LayoutInflater.from(activity_context);
 		final View edit_rss_dialog 			= inflater.inflate(R.layout.add_rss_dialog, null);
-		final List< List<String> > content 	= utilities.read_csv_to_list(storage + "groups/"+ all_string + ".txt", new String[]{"name|", "url|", "group|"}, false);
-		final String current_title			= content.get(0).get(position);
-		final String current_url			= content.get(1).get(position);
-		final String current_group  		= content.get(2).get(position);
+		final String[][] content 			= utilities.read_csv_to_array(storage + "groups/"+ all_string + ".txt", new char[]{'n', 'u', 'g'});
+		final String current_title			= content[0][position];
+		final String current_url			= content[1][position];
+		final String current_group  		= content[2][position];
 
 		int current_spinner_position = 0;
 
@@ -1183,7 +1185,7 @@ public class main_view extends Activity
 		nav_adapter.notifyDataSetChanged();
 	}
 
-	public static void update_group_order(List<String> new_order)
+	public static void update_group_order(String[] new_order)
 	{
 		utilities.delete(storage + "groups/group_list.txt");
 		try{
