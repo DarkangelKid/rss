@@ -346,6 +346,7 @@ public class main_view extends Activity
 			utilities.append_string_to_file(storage + "groups/" + new_group + ".txt", "name|" +  new_name + "|url|" + new_url + "|\n");
 
 			/// If the above group file no longer exists because there are no lines left, remove the group from the group list.
+			utilities.delete_if_empty("groups/" + old_group + ".txt");
 			if(!utilities.exists("groups/" + old_group + ".txt"))
 				utilities.remove_string_from_file(storage + "groups/group_list.txt", old_group, false);
 		}
@@ -673,11 +674,14 @@ public class main_view extends Activity
 							return false;
 						AlertDialog.Builder builder = new AlertDialog.Builder(activity_context);
 						builder.setCancelable(true)
-								.setPositiveButton(getString(R.string.delete_dialog), new DialogInterface.OnClickListener()
+						.setPositiveButton(getString(R.string.delete_dialog), new DialogInterface.OnClickListener()
 						{
 							public void onClick(DialogInterface dialog, int id)
 							{
 								group_list_adapter.remove_item(position);
+								/// delete the group
+								String group = current_groups.get(position);
+								utilities.delete_group(storage, group);
 								group_list_adapter.notifyDataSetChanged();
 							}
 						});
@@ -741,16 +745,17 @@ public class main_view extends Activity
 									String group = feed_list_adapter.get_info(pos);
 									group = group.substring(group.indexOf('\n') + 1, group.indexOf(' '));
 									final String name = feed_list_adapter.getItem(pos);
-									utilities.delete(storage + group + ".image_size.cache.txt");
 
 									utilities.remove_string_from_file(storage + "groups/" + group + ".txt", name, true);
 									utilities.remove_string_from_file(storage + "groups/" + all_string + ".txt", name, true);
 
 									/// If the group file no longer exists because it was the last feed in it, delete the group from the group_list.
+									utilities.delete_if_empty(storage + "groups/" + group + ".txt");
 									if(!utilities.exists(storage + "groups/" + group + ".txt"))
 									{
+										utilities.delete(storage + "groups/" + group + ".txt.content.txt");
+										utilities.delete(storage + "groups/" + group + ".txt.content.txt.count.txt");
 										utilities.remove_string_from_file(storage + "groups/group_list.txt", group, false);
-										utilities.delete(storage + "groups/" + group + ".txt");
 										update_groups();
 									}
 									else
