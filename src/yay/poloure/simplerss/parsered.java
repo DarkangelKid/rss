@@ -347,7 +347,7 @@ class parsered
 				to_file(dump_path, tag.substring(tem + 9, tem2) + "\n");
 			}
 
-			if(tag.contains("type=\"text/html\""))
+			if((tag.contains("type=\"text/html"))||(tag.contains("type=\'text/html")))
 			{
 				tem = tag.indexOf("href=");
 				if(tem != -1)
@@ -364,7 +364,7 @@ class parsered
 					to_file(url_path, tag.substring(tem + 6, tem2) + "\n");
 				}
 			}
-			else if(tag.contains("type=\"image/jpeg\""))
+			else if((tag.contains("type=\"image/jpeg"))||(tag.contains("type=\'image/jpeg")))
 			{
 				tem = tag.indexOf("href=");
 				if(tem != -1)
