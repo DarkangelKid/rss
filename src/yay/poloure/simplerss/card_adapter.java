@@ -174,12 +174,12 @@ public class card_adapter extends BaseAdapter
 		else
 			holder = (ViewHolder) convertView.getTag();
 
-		final String title 					= content_titles.get(position);
-		String description 					= content_des.get(position);
-		final String link					= content_links.get(position);
-		final int height 					= content_height.get(position);
-		final int width						= content_width.get(position);
-		boolean image_exists 				= false;
+		String title 				= content_titles.get(position);
+		String description 			= content_des.get(position);
+		final String link			= content_links.get(position);
+		final int height 			= content_height.get(position);
+		final int width				= content_width.get(position);
+		boolean image_exists 		= false;
 
 		if(width > 32)
 			image_exists = true;
@@ -189,8 +189,6 @@ public class card_adapter extends BaseAdapter
 			final String image_path = content_images.get(position);
 				load(image_path, holder.image_view);
 		}
-		if((description == null)||(description.contains(title))||(description.length() < 6))
-			description = "";
 
 		ViewGroup.LayoutParams iv = holder.image_view.getLayoutParams();
 		if((image_exists)&&(!description.isEmpty()))
@@ -232,13 +230,6 @@ public class card_adapter extends BaseAdapter
 		TextView time_view;
 		TextView description_view;
 		ImageView image_view;
-	}
-
-	private static Bitmap decodeFile(String filePath)
-	{
-		BitmapFactory.Options o = new BitmapFactory.Options();
-		o.inSampleSize = 1;
-		return BitmapFactory.decodeFile(filePath, o);
 	}
 
 	private void load(String path, ImageView imageView)
@@ -316,7 +307,9 @@ public class card_adapter extends BaseAdapter
 		protected Bitmap doInBackground(String... ton)
 		{
 			url = ton[0];
-			return decodeFile(url);
+			BitmapFactory.Options o = new BitmapFactory.Options();
+			o.inSampleSize = 1;
+			return BitmapFactory.decodeFile(url, o);
 		}
 
 		@Override

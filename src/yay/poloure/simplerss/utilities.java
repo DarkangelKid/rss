@@ -2,16 +2,19 @@ package yay.poloure.simplerss;
 
 import android.content.Context;
 import android.app.FragmentManager;
+import android.app.AlertDialog;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.v4.view.ViewPager;
 import android.widget.Toast;
+import android.widget.Button;
 
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 import java.io.File;
 import java.io.BufferedInputStream;
@@ -492,6 +495,130 @@ public class utilities
 			out2.close();
 		}
 		catch(Exception e){
+		}
+	}
+
+	public static class check_feed_exists extends AsyncTask<String, Void, Integer>
+	{
+		private Boolean existing_group = false, real = false;
+		AlertDialog dialog;
+		String group, name, mode, url, feed_title, spinner_group, current_group, current_title;
+		Button button;
+		int pos;
+		private static final Pattern illegal_file_chars = Pattern.compile("[/\\?%*|<>:]");
+
+		public check_feed_exists(AlertDialog edit_dialog, String new_group, String feed_name, String moder, String spin_group, String current_tit, String current_grop, int position)
+		{
+			dialog			= edit_dialog;
+			group			= new_group;
+			name			= feed_name;
+			mode			= moder;
+			spinner_group	= spin_group;
+			current_group	= current_grop;
+			current_title	= current_tit;
+			button			= dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+			pos				= position;
+			button.setEnabled(false);
+		}
+
+		@Override
+		protected Integer doInBackground(String... urler)
+		{
+			/// If the group entry has text, check to see if it is an old group or if it is new.
+			if(group.length()>0)
+			{
+				final List<String> current_groups = read_file_to_list(main_view.storage + "groups/group_list.txt");
+				for(String gro : current_groups)
+				{
+					if((gro.toLowerCase()).equals(group.toLowerCase()))
+					{
+						group = gro;
+						existing_group = true;
+					}
+				}
+				if(!existing_group)
+				{
+					String[] words = group.split(" ");
+					group = "";
+
+					for(String word: words)
+						group += (word.substring(0, 1).toUpperCase()).concat(word.substring(1).toLowerCase()) + " ";
+					group = group.substring(0, group.length() - 1);
+				}
+
+			}
+			else
+			{
+				group = spinner_group;
+				existing_group = true;
+			}
+
+			List<String> check_list = new ArrayList<String>();
+			if(!urler[0].contains("http"))
+			{
+				check_list.add("http://" + urler[0]);
+				check_list.add("https://" + urler[0]);
+			}
+			else
+				check_list.add(urler[0]);
+
+			try
+			{
+				for(String check : check_list)
+				{
+					final BufferedInputStream in = new BufferedInputStream((new URL(check)).openStream());
+					byte data[] = new byte[512], data2[];
+					in.read(data, 0, 512);
+
+					String line = new String(data);
+					if((line.contains("rss"))||((line.contains("Atom"))||(line.contains("atom"))))
+					{
+						while((!line.contains("<title"))&&(!line.contains("</title>")))
+						{
+							data2 = new byte[512];
+							in.read(data2, 0, 512);
+
+							data = utilities.concat_byte_arrays(data, data2);
+							line = new String(data);
+						}
+						final int ind = line.indexOf(">", line.indexOf("<title")) + 1;
+						feed_title = line.substring(ind, line.indexOf("</", ind));
+						real = true;
+						url = check;
+						break;
+					}
+				}
+			}
+			catch(Exception e){
+			}
+			return 0;
+		}
+
+		@Override
+		protected void onPostExecute(Integer end)
+		{
+			if(!real)
+			{
+				utilities.toast_message(main_view.activity_context, "Invalid RSS URL", false);
+				button.setEnabled(true);
+			}
+			else
+			{
+				if(!existing_group)
+					main_view.add_group(group);
+				if(name.isEmpty())
+					name = feed_title;
+
+				name = illegal_file_chars.matcher(name).replaceAll("");
+
+				if(mode.equals("edit"))
+					/// current title and group are pulled from the air.
+					main_view.edit_feed(current_title, name, url, current_group, group, pos);
+				else
+					main_view.add_feed(name, url, group);
+
+				dialog.dismiss();
+			}
 		}
 	}
 

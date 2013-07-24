@@ -104,7 +104,6 @@ public class main_view extends Activity
 	private static List<Boolean> new_items 				= new ArrayList<Boolean>();
 	private static final int[] times 					= new int[]{15, 30, 45, 60, 120, 180, 240, 300, 360, 400, 480, 540, 600, 660, 720, 960, 1440, 2880, 10080, 43829};
 	private static final String[] folders 				= {"images", "thumbnails", "groups", "content"};
-	private static final Pattern illegal_file_chars		= Pattern.compile("[/\\?%*|<>:]");
 
 	private static String feeds_string, manage_string, settings_string, navigation_string, all_string;
 
@@ -204,7 +203,7 @@ public class main_view extends Activity
 	}
 	///
 
-	private static void add_feed(String feed_name, String feed_url, String feed_group)
+	public static void add_feed(String feed_name, String feed_url, String feed_group)
 	{
 		utilities.append_string_to_file(storage + "groups/" + feed_group + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|\n");
 		utilities.append_string_to_file(storage + "groups/" + all_string + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|group|" + feed_group + "|\n");
@@ -328,7 +327,7 @@ public class main_view extends Activity
 		}
 	}
 
-	private static void edit_feed(String old_name, String new_name, String new_url, String old_group, String new_group, int position)
+	public static void edit_feed(String old_name, String new_name, String new_url, String old_group, String new_group, int position)
 	{
 		/// Delete the feed info from the all group and add the new group info to the end of the all content file.
 		utilities.remove_string_from_file(storage + "groups/" + all_string + ".txt", old_name, true);
@@ -372,7 +371,7 @@ public class main_view extends Activity
 			utilities.sort_group_content_by_time(storage, new_group);
 	}
 
-	private static void add_group(String group_name)
+	public static void add_group(String group_name)
 	{
 		utilities.append_string_to_file(storage + "groups/group_list.txt", group_name + "\n");
 		update_groups();
@@ -962,7 +961,7 @@ public class main_view extends Activity
 						catch(Exception e){
 							spinner_group = "Unsorted";
 						}
-						new check_feed_exists(alertDialog, new_group, feed_name, "add", spinner_group, "", "", 0).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
+						new utilities.check_feed_exists(alertDialog, new_group, feed_name, "add", spinner_group, "", "", 0).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
 					}
 				});
 				alertDialog.show();
@@ -1022,133 +1021,11 @@ public class main_view extends Activity
 							String feed_name 		= ((EditText) edit_rss_dialog.findViewById(R.id.name_edit)).getText().toString().trim();
 							String spinner_group 	= ((Spinner) edit_rss_dialog.findViewById(R.id.group_spinner)).getSelectedItem().toString();
 
-							new check_feed_exists(edit_dialog, new_group, feed_name, "edit", spinner_group, current_group, current_title, position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
+							new utilities.check_feed_exists(edit_dialog, new_group, feed_name, "edit", spinner_group, current_group, current_title, position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
 					}
 				});
 
 				edit_dialog.show();
-	}
-
-	private static class check_feed_exists extends AsyncTask<String, Void, Integer>
-	{
-		private Boolean existing_group = false, real = false;
-		AlertDialog dialog;
-		String group, name, mode, url, feed_title, spinner_group, current_group, current_title;
-		Button button;
-		int pos;
-
-		public check_feed_exists(AlertDialog edit_dialog, String new_group, String feed_name, String moder, String spin_group, String current_tit, String current_grop, int position)
-		{
-			dialog			= edit_dialog;
-			group			= new_group;
-			name			= feed_name;
-			mode			= moder;
-			spinner_group	= spin_group;
-			current_group	= current_grop;
-			current_title	= current_tit;
-			button			= dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-			pos				= position;
-			button.setEnabled(false);
-		}
-
-		@Override
-		protected Integer doInBackground(String... urler)
-		{
-			/// If the group entry has text, check to see if it is an old group or if it is new.
-			if(group.length()>0)
-			{
-				for(String gro : current_groups)
-				{
-					if((gro.toLowerCase()).equals(group.toLowerCase()))
-					{
-						group = gro;
-						existing_group = true;
-					}
-				}
-				if(!existing_group)
-				{
-					String[] words = group.split(" ");
-					group = "";
-
-					for(String word: words)
-						group += (word.substring(0, 1).toUpperCase()).concat(word.substring(1).toLowerCase()) + " ";
-					group = group.substring(0, group.length() - 1);
-				}
-
-			}
-			else
-			{
-				group = spinner_group;
-				existing_group = true;
-			}
-
-			List<String> check_list = new ArrayList<String>();
-			if(!urler[0].contains("http"))
-			{
-				check_list.add("http://" + urler[0]);
-				check_list.add("https://" + urler[0]);
-			}
-			else
-				check_list.add(urler[0]);
-
-			try
-			{
-				for(String check : check_list)
-				{
-					final BufferedInputStream in = new BufferedInputStream((new URL(check)).openStream());
-					byte data[] = new byte[512], data2[];
-					in.read(data, 0, 512);
-
-					String line = new String(data);
-					if((line.contains("rss"))||((line.contains("Atom"))||(line.contains("atom"))))
-					{
-						while((!line.contains("<title"))&&(!line.contains("</title>")))
-						{
-							data2 = new byte[512];
-							in.read(data2, 0, 512);
-
-							data = utilities.concat_byte_arrays(data, data2);
-							line = new String(data);
-						}
-						final int ind = line.indexOf(">", line.indexOf("<title")) + 1;
-						feed_title = line.substring(ind, line.indexOf("</", ind));
-						real = true;
-						url = check;
-						break;
-					}
-				}
-			}
-			catch(Exception e){
-			}
-			return 0;
-		}
-
-		@Override
-		protected void onPostExecute(Integer end)
-		{
-			if(!real)
-			{
-				utilities.toast_message(activity_context, "Invalid RSS URL", false);
-				button.setEnabled(true);
-			}
-			else
-			{
-				if(!existing_group)
-					add_group(group);
-				if(name.isEmpty())
-					name = feed_title;
-
-				name = illegal_file_chars.matcher(name).replaceAll("");
-
-				if(mode.equals("edit"))
-					/// current title and group are pulled from the air.
-					edit_feed(current_title, name, url, current_group, group, pos);
-				else
-					add_feed(name, url, group);
-
-				dialog.dismiss();
-			}
-		}
 	}
 
 	private static void update_groups()
@@ -1325,6 +1202,16 @@ public class main_view extends Activity
 						else
 							width = 0;
 					}
+
+					if((titles[m] != null)&&(descriptions[m] != null))
+					{
+						if(descriptions[m].contains(titles[m]))
+							descriptions[m] = "";
+					}
+					else if((descriptions[m] == null)||(descriptions[m].length() < 6))
+						descriptions[m] = "";
+					if(titles[m] == null)
+						titles[m] = "";
 
 					new_markers		.add(markerer);
 					new_titles		.add(titles[m]);
