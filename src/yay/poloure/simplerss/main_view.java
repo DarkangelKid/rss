@@ -1153,7 +1153,7 @@ public class main_view extends Activity
 			String[] widths				= contenter[5];
 			String[] heights			= contenter[6];
 
-			if((links.length == 0)||(links[0].isEmpty()))
+			if((links[0] == null)||(links.length == 0)||(links[0].isEmpty()))
 				return null;
 
 			/// Get a set of all the pages items' urls.
