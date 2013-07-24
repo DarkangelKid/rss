@@ -214,9 +214,9 @@ public class utilities
 			next = 0;
 			offset = 0;
 			line = lines.get(j);
-			if((next = line.indexOf(type, offset)) != -1)
+			if((next = line.indexOf(type, 0)) != -1)
 			{
-				ch = line.charAt(offset);
+				ch = type.charAt(0);
 				offset = next + 1;
 				switch(ch)
 				{
@@ -417,7 +417,11 @@ public class utilities
 				unread_list.add(0);
 			else
 			{
-				int most = Integer.parseInt(read_file_to_list(storage + "groups/" + current_groups.get(j) + ".txt.content.txt.count.txt").get(0));
+				int most;
+				if(exists(storage + "groups/" + current_groups.get(j) + ".txt.content.txt.count.txt"))
+					most = Integer.parseInt(read_file_to_list(storage + "groups/" + current_groups.get(j) + ".txt.content.txt.count.txt").get(0));
+				else
+					most = count_lines(storage + "groups/" + current_groups.get(j) + ".txt.content.txt");
 				unread_list.add(most - ith.return_unread_item_count() - 1);
 			}
 		}
@@ -447,7 +451,6 @@ public class utilities
 		int i;
 
 		final String[] feeds_array = read_single_to_array(storage + "groups/" + group + ".txt", "name|");
-		log(storage, "size of feeds array is: " + Integer.toString(feeds_array.length));
 
 		for(String feed : feeds_array)
 		{
@@ -462,20 +465,19 @@ public class utilities
 
 				for(i = 0; i < pubDates.length; i++)
 				{
-					try{
+					try
+					{
 						time.parse3339(pubDates[i]);
 					}
 					catch(Exception e)
 					{
 						log(storage, "BUG : Meant to be 3339 but looks like: " + pubDates[i]);
-						time = new Time();
+						break;
 					}
 					map.put(time.toMillis(false), content.get(i));
 				}
 			}
 		}
-
-		log(storage, "About to print to group content file.");
 
 		delete(group_path);
 		try
@@ -484,6 +486,7 @@ public class utilities
 			for(Map.Entry<Long, String> entry : map.entrySet())
 				out.write(entry.getValue() + "\n");
 			out.close();
+
 			BufferedWriter out2 = new BufferedWriter(new FileWriter(group_path.concat(".count.txt"), false));
 			out2.write(Integer.toString(map.size()));
 			out2.close();

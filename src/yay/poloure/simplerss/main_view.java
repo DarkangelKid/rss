@@ -1165,16 +1165,7 @@ public class main_view extends Activity
 
 		new_items.clear();
 		for(String group : current_groups)
-		{
-			if(!utilities.exists(storage + "groups/" + group + ".txt.content.txt.count.txt"))
-				utilities.append_string_to_file
-				(
-					storage + "groups/" + group + ".txt.content.txt.count.txt",
-					Integer.toString(utilities.count_lines(storage + "groups/" + group + ".txt.content.txt"))
-				);
-
 			new_items.add(false);
-		}
 
 		/// If viewpager exists, fragment_manager != null. This must come before the nav_adapter.
 		if(viewpager != null)
@@ -1307,6 +1298,16 @@ public class main_view extends Activity
 
 			for(int m = 0; m < size; m++)
 			{
+				markerer = false;
+				/// It should stop at the latest one unless there is not a newest one. So stay at 0 until it finds one.
+				if(marker[m] != null)
+				{
+					markerer = true;
+					marker_position = 0;
+				}
+				else if(marker_position != -1)
+					marker_position++;
+
 				if(existing_items.add(links[m]))
 				{
 					thumbnail_path = "";
@@ -1324,16 +1325,6 @@ public class main_view extends Activity
 						else
 							width = 0;
 					}
-
-					markerer = false;
-					/// It should stop at the latest one unless there is not a newest one. So stay at 0 until it finds one.
-					if(marker[m] != null)
-					{
-						markerer = true;
-						marker_position = 0;
-					}
-					else if(marker_position != -1)
-						marker_position++;
 
 					new_markers		.add(markerer);
 					new_titles		.add(titles[m]);
