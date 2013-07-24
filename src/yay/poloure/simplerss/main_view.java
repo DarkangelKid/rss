@@ -104,6 +104,7 @@ public class main_view extends Activity
 	private static List<Boolean> new_items 				= new ArrayList<Boolean>();
 	private static final int[] times 					= new int[]{15, 30, 45, 60, 120, 180, 240, 300, 360, 400, 480, 540, 600, 660, 720, 960, 1440, 2880, 10080, 43829};
 	private static final String[] folders 				= {"images", "thumbnails", "groups", "content"};
+	private static final Pattern whitespace				= Pattern.compile("\\s+");
 
 	private static String feeds_string, manage_string, settings_string, navigation_string, all_string;
 
@@ -1210,10 +1211,10 @@ public class main_view extends Activity
 
 					if((titles[m] != null)&&(descriptions[m] != null))
 					{
-						if(descriptions[m].contains(titles[m]))
+						if((descriptions[m].contains(titles[m]))||(whitespace.matcher(descriptions[m]).replaceAll("").length() < 8))
 							descriptions[m] = "";
 					}
-					else if((descriptions[m] == null)||(descriptions[m].length() < 6))
+					else if((descriptions[m] == null)||(whitespace.matcher(descriptions[m]).replaceAll("").length() < 8))
 						descriptions[m] = "";
 					if(titles[m] == null)
 						titles[m] = "";
@@ -1298,8 +1299,11 @@ public class main_view extends Activity
 				return;
 			if(marker_position != -1)
 				lv.setSelection(marker_position);
+				/// If no "marker|" s were found in the new content fall through to else,
 			else
+				/// refresh_count is how many new items are added.
 				lv.setSelection(refresh_count);
+				/// Should work.
 
 			set_refresh(check_service_running());
 

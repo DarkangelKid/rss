@@ -180,42 +180,37 @@ public class card_adapter extends BaseAdapter
 		final int height 			= content_height.get(position);
 		final int width				= content_width.get(position);
 		boolean image_exists 		= false;
-		ViewGroup.LayoutParams iv = holder.image_view.getLayoutParams();
 
 		if(width > 32)
 			image_exists = true;
 
 		if(image_exists)
 		{
-			final String image_path = content_images.get(position);
-				load(image_path, holder.image_view);
+			holder.image_view.setVisibility(View.VISIBLE);
+			ViewGroup.LayoutParams iv = holder.image_view.getLayoutParams();
+			iv.height	= (int) ((((double) screen_width)/(width)) * (height));
+			iv.width	= LayoutParams.MATCH_PARENT;
+			holder.image_view.setLayoutParams(iv);
 
-			if(!description.isEmpty())
-			{
-				/// The height for this needs to be divided by the shrink ratio.
-				holder.description_view.setPadding(eight, 0, eight, eight);
-				iv.height 					= height;
-				iv.width 					= LayoutParams.WRAP_CONTENT;
-				holder.image_view.setLayoutParams(iv);
-			}
-			else
-			{
-				iv.height 					= (int) ((((double) screen_width)/(width)) * (height));
-				iv.width 					= LayoutParams.MATCH_PARENT;
-				holder.image_view.setLayoutParams(iv);
-			}
+			load(content_images.get(position), holder.image_view);
 		}
 		else
+			holder.image_view.setVisibility(View.GONE);
+
+		if(!description.equals(""))
 		{
-			holder.description_view.setPadding(eight, 0, eight, eight);
-			iv.height 					= 0;
-			iv.width 					= 0;
-			holder.image_view.setLayoutParams(iv);
+			holder.description_view.setVisibility(View.VISIBLE);
+			if(image_exists)
+				holder.description_view.setPadding(eight, eight, eight, eight);
+			else
+				holder.description_view.setPadding(eight, 0, eight, eight);
+			holder.description_view.setText(description);
 		}
+		else
+			holder.description_view.setVisibility(View.GONE);
 
 		holder.title_view.setText(title);
 		holder.time_view.setText(link);
-		holder.description_view.setText(description);
 		return convertView;
 	}
 
