@@ -364,6 +364,24 @@ class parsered
 					to_file(url_path, tag.substring(tem + 6, tem2) + "\n");
 				}
 			}
+			else if(tag.contains("type=\"image/jpeg\""))
+			{
+				tem = tag.indexOf("href=");
+				if(tem != -1)
+				{
+					tem2 = tag.indexOf("\"", tem + 7);
+					if(tem2 == -1)
+						tem2 = tag.indexOf("\'", tem + 7);
+					else
+					{
+						tem3 = tag.indexOf("\'", tem + 7);
+						if((tem3 != -1)&&(tem3 < tem2))
+								tem2 = tem3;
+					}
+					utilities.delete(dump_path);
+					to_file(dump_path, tag.substring(tem + 6, tem2) + "\n");
+				}
+			}
 
 			for(String type : types)
 				if(tag.contains(type))
