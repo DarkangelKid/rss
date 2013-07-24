@@ -31,6 +31,13 @@ import android.util.Log;
 
 public class utilities
 {
+	public static void delete_group(String storage, String group)
+	{
+		/// Move all feeds to an unsorted group.
+		//delete(storage + "groups/" + group + ".txt");
+		//delete(storage + "groups/" + group + ".txt.content.txt");
+	}
+
 	public static void save_positions(FragmentManager fragment_manager, ViewPager viewpager, String storage)
 	{
 		card_adapter adapter;
@@ -635,5 +642,12 @@ public class utilities
 	public static Boolean exists(String file_path)
 	{
 		return (new File(file_path)).exists();
+	}
+
+	public static void delete_if_empty(String file_path)
+	{
+		File file = new File(file_path);
+		if(file.exists() && file.length() == 0)
+			file.delete();
 	}
 }

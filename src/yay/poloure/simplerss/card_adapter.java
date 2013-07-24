@@ -180,6 +180,7 @@ public class card_adapter extends BaseAdapter
 		final int height 			= content_height.get(position);
 		final int width				= content_width.get(position);
 		boolean image_exists 		= false;
+		ViewGroup.LayoutParams iv = holder.image_view.getLayoutParams();
 
 		if(width > 32)
 			image_exists = true;
@@ -188,22 +189,21 @@ public class card_adapter extends BaseAdapter
 		{
 			final String image_path = content_images.get(position);
 				load(image_path, holder.image_view);
-		}
 
-		ViewGroup.LayoutParams iv = holder.image_view.getLayoutParams();
-		if((image_exists)&&(!description.isEmpty()))
-		{
-			/// The height for this needs to be divided by the shrink ratio.
-			holder.description_view.setPadding(eight, 0, eight, eight);
-			iv.height 					= height;
-			iv.width 					= LayoutParams.WRAP_CONTENT;
-			holder.image_view.setLayoutParams(iv);
-		}
-		else if(image_exists)
-		{
-			iv.height 					= (int) (((screen_width + 0.1)/(width + 0.1)) * (height + 0.1));
-			iv.width 					= LayoutParams.MATCH_PARENT;
-			holder.image_view.setLayoutParams(iv);
+			if(!description.isEmpty())
+			{
+				/// The height for this needs to be divided by the shrink ratio.
+				holder.description_view.setPadding(eight, 0, eight, eight);
+				iv.height 					= height;
+				iv.width 					= LayoutParams.WRAP_CONTENT;
+				holder.image_view.setLayoutParams(iv);
+			}
+			else
+			{
+				iv.height 					= (int) ((((double) screen_width)/(width)) * (height));
+				iv.width 					= LayoutParams.MATCH_PARENT;
+				holder.image_view.setLayoutParams(iv);
+			}
 		}
 		else
 		{
@@ -309,16 +309,19 @@ public class card_adapter extends BaseAdapter
 			url = ton[0];
 			BitmapFactory.Options o = new BitmapFactory.Options();
 			o.inSampleSize = 1;
-			return BitmapFactory.decodeFile(url, o);
+			Bitmap bit = BitmapFactory.decodeFile(url, o);
+			addBitmapToCache(url, bit);
+			return bit;
 		}
 
 		@Override
 		protected void onPostExecute(Bitmap im)
 		{
-			if (isCancelled())
+			if(isCancelled())
+			{
 				im = null;
-
-			addBitmapToCache(url, im);
+				return;
+			}
 
 			if (imageViewReference != null)
 			{
