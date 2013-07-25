@@ -92,10 +92,10 @@ class parsered
 				if((line.length() > 1)&&(write_mode))
 				{
 					temp_line = line.toString();
-					if(!temp_line.contains("published|")&&(!temp_line.contains("pubDate|")))
+					Boolean already = set.contains("marker|1|" + temp_line);
+					if(!temp_line.contains("published|")&&(!temp_line.contains("pubDate|"))&&(!set.contains(temp_line))&&(!already))
 						temp_line = temp_line.concat(("pubDate|").concat(rfc3339.format(new Date()).concat("|")));
-
-					if(!set.contains("marker|1|" + temp_line))
+					if(!already)
 						set.add(temp_line);
 				}
 				line.setLength(0);
@@ -245,9 +245,10 @@ class parsered
 		if(write_mode)
 		{
 			temp_line = line.toString();
-			if(!temp_line.contains("published|")&&(!temp_line.contains("pubDate|")))
+			Boolean already = set.contains("marker|1|" + temp_line);
+			if(!temp_line.contains("published|")&&(!temp_line.contains("pubDate|"))&&(!set.contains(temp_line))&&(!already))
 				temp_line = temp_line.concat(("pubDate|").concat(rfc3339.format(new Date()).concat("|")));
-			if(!set.contains("marker|1|" + temp_line))
+			if(!already)
 				set.add(temp_line);
 		}
 		/// Write the new content to the file.
