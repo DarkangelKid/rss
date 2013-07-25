@@ -278,8 +278,8 @@ public class main_view extends Activity
 		{
 			if(group_list_adapter != null)
 			{
-				String info;
-				int number, j;
+				String info, count_path;
+				int number, j, total = 0;
 				String[] content;
 
 				final int size = current_groups.size();
@@ -290,6 +290,9 @@ public class main_view extends Activity
 				{
 					group_array[i] = current_groups.get(i);
 					content = utilities.read_single_to_array(storage + "groups/" + group_array[i] + ".txt", "name|");
+					count_path = storage + "groups/" + group_array[i] + ".txt.content.txt.count.txt";
+					if(utilities.exists(count_path))
+						total += Integer.parseInt(utilities.read_file_to_list(count_path).get(0));
 					if(i == 0)
 						info = (size == 1) ? "1 group" :  size + " groups";
 					else
@@ -299,7 +302,7 @@ public class main_view extends Activity
 						if(content.length < 3)
 							number = content.length;
 						for(j = 0; j < number - 1; j++)
-							info += content[j] + ", ";
+							info += content[j].concat(", ");
 
 						if(content.length > 3)
 							info += "...";
@@ -308,6 +311,7 @@ public class main_view extends Activity
 					}
 					info_array[i] = Integer.toString(content.length) + " feeds • " + info;
 				}
+				info_array[0] =  total + " items • " + info_array[0];
 				publishProgress(group_array, info_array);
 			}
 			return 0L;

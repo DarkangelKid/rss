@@ -494,7 +494,6 @@ public class utilities
 			BufferedWriter out = new BufferedWriter(new FileWriter(group_path, true));
 			for(Map.Entry<Long, String> entry : map.entrySet())
 			{
-				log(storage, entry.getValue());
 				out.write(entry.getValue() + "\n");
 			}
 			out.close();
