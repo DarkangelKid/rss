@@ -470,9 +470,8 @@ public class utilities
 				content 		= read_file_to_list(content_path);
 				pubDates		= read_single_to_array(content_path, "pubDate|");
 
-				if((pubDates[0] == null)||(pubDates[0].length() < 8)){
+				if((pubDates[0] == null)||(pubDates[0].length() < 8))
 					pubDates 	= read_single_to_array(content_path, "published|");
-				}
 
 				for(i = 0; i < pubDates.length; i++)
 				{
@@ -482,10 +481,9 @@ public class utilities
 					}
 					catch(Exception e)
 					{
-						log(storage, "BUG : Meant to be 3339 but looks like: " + pubDates[i]);
 						break;
 					}
-					map.put(time.toMillis(false), content.get(i));
+					map.put(time.toMillis(false) - i, content.get(i));
 				}
 			}
 		}
@@ -495,7 +493,10 @@ public class utilities
 		{
 			BufferedWriter out = new BufferedWriter(new FileWriter(group_path, true));
 			for(Map.Entry<Long, String> entry : map.entrySet())
+			{
+				log(storage, entry.getValue());
 				out.write(entry.getValue() + "\n");
+			}
 			out.close();
 
 			BufferedWriter out2 = new BufferedWriter(new FileWriter(group_path.concat(".count.txt"), false));
@@ -503,6 +504,7 @@ public class utilities
 			out2.close();
 		}
 		catch(Exception e){
+			log(storage, "Failed to write the group content file.");
 		}
 	}
 

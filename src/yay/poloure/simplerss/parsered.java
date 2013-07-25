@@ -81,6 +81,9 @@ class parsered
 					if((line.length() > 1)&&(write_mode))
 					{
 						temp_line = line.toString();
+						if(!temp_line.contains("published|")&&(!temp_line.contains("pubDate|")))
+							temp_line = temp_line.concat(("pubDate|").concat(rfc3339.format(new Date()).concat("|")));
+
 						if(!set.contains("marker|1|" + temp_line))
 							set.add(temp_line);
 					}
@@ -160,11 +163,13 @@ class parsered
 							/// If it follows the rss 2.0 specification for rfc882
 							else if(current_tag.equals("<pubDate>"))
 							{
-								try{
+								try
+								{
 									cont = rfc3339.format(rss_date.parse(cont));
 								}
-								catch(Exception e){
-									utilities.log(storage, "BUG : Meant to be rss-882 but looks like: " + cont);
+								catch(Exception e)
+								{
+									utilities.append_string_to_file(file_name + ".time_bug.txt", "BUG : Meant to be atom-3339 but looks like: " + cont + "\n");
 									cont = rfc3339.format(new Date());
 								}
 								line.append(cont).append("|");
@@ -173,12 +178,14 @@ class parsered
 							/// If it is an atom feed it will be one of four rfc3339 formats.
 							else if(current_tag.equals("<published>"))
 							{
-								try{
+								try
+								{
 									time.parse3339(cont);
 									cont = time.format3339(false);
 								}
-								catch(Exception e){
-									utilities.log(storage, "BUG : Meant to be atom-3339 but looks like: " + cont);
+								catch(Exception e)
+								{
+									utilities.append_string_to_file(file_name + ".time_bug.txt", "BUG : Meant to be atom-3339 but looks like: " + cont + "\n");
 									cont = rfc3339.format(new Date());
 								}
 								line.append(cont).append("|");
@@ -217,6 +224,8 @@ class parsered
 			if(write_mode)
 			{
 				temp_line = line.toString();
+				if(!temp_line.contains("published|")&&(!temp_line.contains("pubDate|")))
+					temp_line = temp_line.concat(("pubDate|").concat(rfc3339.format(new Date()).concat("|")));
 				if(!set.contains("marker|1|" + temp_line))
 					set.add(temp_line);
 			}
