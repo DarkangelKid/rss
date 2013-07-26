@@ -8,15 +8,12 @@ import java.util.List;
 
 import android.os.PowerManager;
 import android.os.Process;
-import android.app.ActivityManager;
-import android.app.ActivityManager.RunningTaskInfo;
 
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 
-import android.view.Display;
 import android.graphics.Point;
 import android.view.WindowManager;
 
@@ -39,18 +36,23 @@ public class service_update extends IntentService
 
 		final int group						= intent.getIntExtra("GROUP_NUMBER", 0);
 		final String all_string				= getString(R.string.all_group);
-		final String storage				= this.getExternalFilesDir(null).getAbsolutePath() + "/";
 
-		final List<String> all_groups		= utilities.read_file_to_list(storage + "groups/group_list.txt");
+		final String stor;
+		final String storage;
+		if((stor = this.getExternalFilesDir(null).getAbsolutePath()) == null)
+			return;
+		else
+			storage							= stor + "/";
+
+		final List<String> all_groups		= utilities.read_file_to_list(storage + main_view.GROUP_LIST);
 		final String grouper				= all_groups.get(group);
 		final String group_file_path		= storage + "groups/" + grouper + ".txt";
-		final String group_content_path		= group_file_path + ".content.txt";
 
-		final String[][] content			= utilities.read_csv_to_array(group_file_path, new char[]{'n', 'u'});
+		final String[][] content			= utilities.read_csv_to_array(group_file_path, 'n', 'u');
 		final String[] group_feeds_names	= content[0];
 		final String[] group_feeds_urls		= content[1];
 
-		String image_name = "", thumbnail_path = "", feed_path = "", image;
+		String feed_path;
 		int i;
 
 		final Point screen_size = new Point();
@@ -80,7 +82,7 @@ public class service_update extends IntentService
 		final List<Integer> unread_list = main_view.get_unread_counts();
 
 		int group_items = 1;
-		int total = 0, count = 0;
+		int total = 0, count;
 		final int sizes = unread_list.size();
 
 		for(i = 1 ; i < sizes; i++)

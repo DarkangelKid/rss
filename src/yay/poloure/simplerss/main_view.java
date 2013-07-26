@@ -60,21 +60,19 @@ import java.io.BufferedWriter;
 
 public class main_view extends Activity
 {
-	private static DrawerLayout drawer_layout;
+	private DrawerLayout drawer_layout;
 
-	private static ListView navigation_list;
+	private ListView navigation_list;
 	private static ActionBarDrawerToggle drawer_toggle;
 	private static Menu optionsMenu;
 
 	public static String storage;
 	private String current_title;
 	public static Context activity_context;
-	public static ViewPager viewpager;
+	private static ViewPager viewpager;
 
 	public static adapter_manage_feeds feed_list_adapter;
 	public static adapter_manage_groups group_list_adapter;
-	private static fragment_manage_group fragment_manage_group_store;
-	private static fragment_manage_feed fragment_feeds_store;
 	public static adapter_navigation_drawer nav_adapter;
 
 	private static List<String> current_groups 			= new ArrayList<String>();
@@ -82,8 +80,9 @@ public class main_view extends Activity
 	private static final int[] times 					= new int[]{15, 30, 45, 60, 120, 180, 240, 300, 360, 400, 480, 540, 600, 660, 720, 960, 1440, 2880, 10080, 43829};
 	private static final String[] folders 				= {"images", "thumbnails", "groups", "content"};
 	private static final Pattern whitespace				= Pattern.compile("\\s+");
+	public static final String GROUP_LIST				= "groups/group_list.txt";
 
-	public static FragmentManager fragment_manager;
+	private static FragmentManager fragment_manager;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -93,6 +92,7 @@ public class main_view extends Activity
 		setContentView(R.layout.pager);
 
 		perform_initial_operations();
+		current_title = getString(R.string.feeds_title);
 
 		fragment_manager = getFragmentManager();
 
@@ -215,7 +215,7 @@ public class main_view extends Activity
 		{
 			if(feed_list_adapter != null)
 			{
-				final String[][] content 	= utilities.read_csv_to_array(storage + "groups/"+ current_groups.get(0) + ".txt", new char[]{'n', 'u', 'g'});
+				final String[][] content 	= utilities.read_csv_to_array(storage + "groups/"+ current_groups.get(0) + ".txt", 'n', 'u', 'g');
 				final String[] feed_titles 	= content[0];
 				final String[] feed_urls 	= content[1];
 				final String[] feed_groups 	= content[2];
@@ -246,11 +246,11 @@ public class main_view extends Activity
 	public static class refresh_manage_groups extends AsyncTask<Void, String[], Long>
 	{
 		final Animation animFadeIn = AnimationUtils.loadAnimation(activity_context, android.R.anim.fade_in);
-		private ListView listview;
+		private final ListView listview;
 
 		public refresh_manage_groups()
 		{
-			listview = fragment_manage_group_store.manage_list;
+			listview = fragment_manage_group.manage_list;
 			if(group_list_adapter.getCount() == 0)
 				listview.setVisibility(View.INVISIBLE);
 
@@ -360,7 +360,7 @@ public class main_view extends Activity
 				new_items.add(false);
 		}
 		storage = this.getExternalFilesDir(null).getAbsolutePath() + "/";
-		current_groups = utilities.read_file_to_list(storage + "groups/group_list.txt");
+		current_groups = utilities.read_file_to_list(storage + GROUP_LIST);
 		if(new_items.size() != current_groups.size())
 		{
 			new_items.clear();
@@ -585,12 +585,7 @@ public class main_view extends Activity
 
 	public static class fragment_manage_filters extends Fragment
 	{
-		private static ListView filter_list;
-
-		public static ListView getListView()
-		{
-			return filter_list;
-		}
+		public static ListView filter_list;
 
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -635,7 +630,7 @@ public class main_view extends Activity
 
 	public static class fragment_manage_group extends Fragment
 	{
-		private static ListView manage_list;
+		public static ListView manage_list;
 
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -802,7 +797,11 @@ public class main_view extends Activity
  		@Override
 		public Fragment getItem(int position)
 		{
-			return fragment_card.newInstance(position);
+			fragment_card f = new fragment_card();
+			Bundle args = new Bundle();
+			args.putInt("num", position);
+			f.setArguments(args);
+			return f;
 		}
 
 		@Override
@@ -828,16 +827,16 @@ public class main_view extends Activity
 		@Override
 		public Fragment getItem(int position)
 		{
-			if(position == 0)
+			switch(position)
 			{
-				fragment_manage_group_store	= new fragment_manage_group();
-				return fragment_manage_group_store;
+				case(0):
+					return new fragment_manage_group();
+				case(1):
+					return new fragment_manage_feed();
+				case(2):
+					return new fragment_manage_filters();
 			}
-			else
-			{
-				fragment_feeds_store		= new fragment_manage_feed();
-				return fragment_feeds_store;
-			}
+			return null;
 		}
 
 		@Override
@@ -852,15 +851,6 @@ public class main_view extends Activity
 
 	public static class fragment_card extends ListFragment
 	{
-		static fragment_card newInstance(int num)
-		{
-			fragment_card f = new fragment_card();
-			Bundle args = new Bundle();
-			args.putInt("num", num);
-			f.setArguments(args);
-			return f;
-		}
-
 		@Override
 		public void onCreate(Bundle savedInstanceState)
 		{
@@ -877,8 +867,6 @@ public class main_view extends Activity
 				if(count_list.get(i).substring(0, 9).equals("marker|1|"))
 					break;
 			}
-			/// Min = 0, max = sized - 1 but it should be sized
-			/// If I have read three, i = 2;
 			adapter.set_latest_item(i);
 		}
 
@@ -942,20 +930,6 @@ public class main_view extends Activity
 		nav_adapter.add_list(nav);
 		nav_adapter.add_count(get_unread_counts());
 		nav_adapter.notifyDataSetChanged();
-	}
-
-	public static void update_group_order(String... new_order)
-	{
-		utilities.delete(storage + "groups/group_list.txt");
-		try{
-			BufferedWriter out = new BufferedWriter(new FileWriter(storage + "groups/group_list.txt", true));
-			for(String group : new_order)
-				out.write(group + "\n");
-			out.close();
-		}
-		catch(Exception e){
-		}
-		update_groups(current_groups.get(0));
 	}
 
 	private static class refresh_page extends AsyncTask<Void, Object, Void>
@@ -1097,7 +1071,7 @@ public class main_view extends Activity
 				catch(Exception e){
 				}
 				if((viewpager != null)&&(l == null))
-					l = (fragment_card) fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_number));
+					l = (ListFragment) fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_number));
 				if((l != null)&&(ith == null))
 					ith = ((adapter_feeds_cards) l.getListAdapter());
 				if((l != null)&&(lv == null))

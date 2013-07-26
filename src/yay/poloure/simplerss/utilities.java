@@ -30,7 +30,6 @@ import android.os.Debug;
 import android.text.format.Time;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.SpinnerAdapter;
 import android.widget.AdapterView;
@@ -64,7 +63,7 @@ public class utilities
 
 			delete_if_empty("groups/" + old_group + ".txt");
 			if(!exists("groups/" + old_group + ".txt"))
-				remove_string_from_file(storage + "groups/group_list.txt", old_group, false);
+				remove_string_from_file(storage + main_view.GROUP_LIST, old_group, false);
 		}
 		else
 		{
@@ -88,7 +87,7 @@ public class utilities
 
 	public static void add_group(String storage, String group_name)
 	{
-		append_string_to_file(storage + "groups/group_list.txt", group_name + "\n");
+		append_string_to_file(storage + main_view.GROUP_LIST, group_name + "\n");
 		main_view.update_groups("");
 	}
 
@@ -107,7 +106,7 @@ public class utilities
 		String[] feeds;
 		List<String> lines;
 		Boolean found_url = false;
-		List<String> current_groups = read_file_to_list(storage + "groups/group_list.txt");
+		List<String> current_groups = read_file_to_list(storage + main_view.GROUP_LIST);
 		final int size = current_groups.size();
 
 		for(int i = 1; i < size; i++)
@@ -572,7 +571,7 @@ public class utilities
 	{
 		final LayoutInflater inflater		= LayoutInflater.from(activity_context);
 		final View edit_rss_dialog			= inflater.inflate(R.layout.add_rss_dialog, null);
-		final String[][] content			= utilities.read_csv_to_array(storage + "groups/"+ current_groups.get(0) + ".txt", new char[]{'n', 'u', 'g'});
+		final String[][] content			= utilities.read_csv_to_array(storage + "groups/"+ current_groups.get(0) + ".txt", 'n', 'u', 'g');
 		final String current_title			= content[0][position];
 		final String current_url			= content[1][position];
 		final String current_group			= content[2][position];

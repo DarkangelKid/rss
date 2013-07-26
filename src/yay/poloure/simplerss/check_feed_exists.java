@@ -12,13 +12,12 @@ import java.util.regex.Pattern;
 
 public class check_feed_exists extends AsyncTask<String, Void, String[]>
 {
-	private static Boolean existing_group = false, real = false;
-	private static AlertDialog dialog;
-	private static String group, name, mode, all_string;
-	private static String spinner_group, current_group, current_title;
-	private static Button button;
-	private static int pos;
-	private static final Pattern illegal_file_chars = Pattern.compile("[/\\?%*|<>:]");
+	private Boolean existing_group = false, real = false;
+	private AlertDialog dialog;
+	private String group, name, mode, all_string;
+	private String spinner_group, current_group, current_title;
+	private int pos;
+	private static final Pattern illegal_file_chars	= Pattern.compile("[/\\?%*|<>:]");
 
 	public check_feed_exists(AlertDialog edit_dialog, String new_group, String feed_name, String moder, String spin_group, String current_tit, String current_grop, int position, String all_str)
 	{
@@ -29,21 +28,21 @@ public class check_feed_exists extends AsyncTask<String, Void, String[]>
 		spinner_group	= spin_group;
 		current_group	= current_grop;
 		current_title	= current_tit;
-		button			= dialog.getButton(AlertDialog.BUTTON_POSITIVE);
 		pos				= position;
 		all_string		= all_str;
+		Button button	= dialog.getButton(AlertDialog.BUTTON_POSITIVE);
 		if(button != null)
 			button.setEnabled(false);
 	}
 
 	@Override
-	protected String[] doInBackground(String... urler)
+	protected String[] doInBackground(String... passed_url)
 	{
 		/// If the group entry has text, check to see if it is an old group or if it is new.
 		String url = "", feed_title = "";
 		if(group.length()>0)
 		{
-			final List<String> current_groups = utilities.read_file_to_list(main_view.storage + "groups/group_list.txt");
+			final List<String> current_groups = utilities.read_file_to_list(main_view.storage + main_view.GROUP_LIST);
 			for(String gro : current_groups)
 			{
 				if((gro.toLowerCase(Locale.getDefault())).equals(group.toLowerCase(Locale.getDefault())))
@@ -70,10 +69,10 @@ public class check_feed_exists extends AsyncTask<String, Void, String[]>
 		}
 
 		String[] check_list;
-		if(!urler[0].contains("http"))
-			check_list = new String[]{"http://" + urler[0], "https://" + urler[0]};
+		if(!passed_url[0].contains("http"))
+			check_list = new String[]{"http://" + passed_url[0], "https://" + passed_url[0]};
 		else
-			check_list = new String[]{urler[0]};
+			check_list = new String[]{passed_url[0]};
 
 		try
 		{
@@ -113,6 +112,7 @@ public class check_feed_exists extends AsyncTask<String, Void, String[]>
 		if(!real)
 		{
 			utilities.toast_message(main_view.activity_context, main_view.activity_context.getString(R.string.feed_invalid), false);
+			Button button	= dialog.getButton(AlertDialog.BUTTON_POSITIVE);
 			if(button != null)
 				button.setEnabled(true);
 		}

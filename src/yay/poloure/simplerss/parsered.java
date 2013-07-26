@@ -32,7 +32,7 @@ class parsered
 				"</link>", "</published>", "</pubDate>", "</description>", "</title", "</content", "<entry", "<item", "</entry", "</item"};
 	private String dump_path;
 	private String url_path;
-	private int width;
+	private final int width;
 
 	public parsered(String file_path, String storage, int widther)
 	{
@@ -120,7 +120,6 @@ class parsered
 					line.append("width|").append(options.outWidth).append('|')
 						.append("height|").append(options.outHeight).append('|');
 				}
-				image = "";
 				line.append(check_for_url());
 			}
 			else
@@ -226,7 +225,7 @@ class parsered
 						cont = space_tags.matcher(cont).replaceAll(" ");
 
 						take = description_length;
-						description_length = description_length + cont.length();
+						description_length += cont.length();
 
 						if((description_length > 512)&&(take < 512))
 							line.append(cont.substring(0, 512 - take));
@@ -264,8 +263,9 @@ class parsered
 		write.close();
 	}
 
-	private String get_content_to_end_tag(BufferedReader reader, String end_tag)
+	private String get_content_to_end_tag(BufferedReader reader, String tag)
 	{
+		String end_tag = tag;
 		StringBuilder cont = new StringBuilder();
 		Boolean found = false;
 		final int end_length = end_tag.length() - 1;
@@ -340,7 +340,7 @@ class parsered
 		return momo;
 	}
 
-	private String get_next_tag(BufferedReader reader, String[] types) throws Exception
+	private String get_next_tag(BufferedReader reader, String... types) throws Exception
 	{
 		boolean found = false;
 		int tem, tem2, tem3;
