@@ -90,11 +90,11 @@ public class main_view extends Activity
 	public static Context application_context, activity_context;
 	public static ViewPager viewpager;
 
-	private static feed_adapter feed_list_adapter;
-	private static group_adapter group_list_adapter;
-	private static fragment_group fragment_group_store;
-	private static feed_manage fragment_feed_store;
-	public static drawer_adapter nav_adapter;
+	private static adapter_manage_feeds feed_list_adapter;
+	private static adapter_manage_groups group_list_adapter;
+	private static fragment_manage_group fragment_manage_group_store;
+	private static fragment_manage_feed fragment_feeds_store;
+	public static adapter_navigation_drawer nav_adapter;
 
 	private static List<String> current_groups 			= new ArrayList<String>();
 	private static List<Boolean> new_items 				= new ArrayList<Boolean>();
@@ -121,7 +121,7 @@ public class main_view extends Activity
 
 		if(savedInstanceState == null)
 		{
-			Fragment feed		= new fragment_feed();
+			Fragment feed		= new fragment_feeds();
 			Fragment prefs		= new fragment_preferences();
 			Fragment man			= new fragment_manage();
 			fragment_manager.beginTransaction()
@@ -141,7 +141,7 @@ public class main_view extends Activity
 				.commit();
 		}
 
-		nav_adapter		= new drawer_adapter(this);
+		nav_adapter		= new adapter_navigation_drawer(this);
 		navigation_list	= (ListView) findViewById(R.id.left_drawer);
 		navigation_list.setOnItemClickListener
 		(
@@ -234,7 +234,7 @@ public class main_view extends Activity
 
 		public refresh_manage_feeds()
 		{
-			listview = fragment_feed_store.getListView();
+			listview = fragment_feeds_store.getListView();
 			if(feed_list_adapter.getCount() == 0)
 				listview.setVisibility(View.INVISIBLE);
 		}
@@ -279,7 +279,7 @@ public class main_view extends Activity
 
 		public refresh_manage_groups()
 		{
-			listview = fragment_group_store.getListView();
+			listview = fragment_manage_group_store.getListView();
 			if(group_list_adapter.getCount() == 0)
 				listview.setVisibility(View.INVISIBLE);
 
@@ -374,7 +374,7 @@ public class main_view extends Activity
 			utilities.append_string_to_file(storage + "groups/" + old_group + ".txt", "name|" +  new_name + "|url|" + new_url + "|\n");
 		}
 
-		/// Add the new feeds to the feed_adapter (Manage/Feeds).
+		/// Add the new feeds to the adapter_manage_feeds (Manage/Feeds).
 		feed_list_adapter.set_position(position, new_name, new_url + "\n" + new_group + " • " + Integer.toString(utilities.count_lines(storage + "content/" + new_name + ".store.txt.content.txt") - 1) + " items");
 		feed_list_adapter.notifyDataSetChanged();
 
@@ -504,7 +504,7 @@ public class main_view extends Activity
 		getActionBar().setTitle(title);
 	}
 
-	public static class fragment_feed extends Fragment
+	public static class fragment_feeds extends Fragment
 	{
 		@Override
 		public void onCreate(Bundle savedInstanceState)
@@ -520,7 +520,7 @@ public class main_view extends Activity
 			View feed_view = inflater.inflate(R.layout.feed_fragment, container, false);
 
 			viewpager = (ViewPager) feed_view.findViewById(R.id.pager);
-			viewpager.setAdapter(new viewpager_adapter(fragment_manager));
+			viewpager.setAdapter(new pageradapter_feeds(fragment_manager));
 			viewpager.setOffscreenPageLimit(128);
 			viewpager.setOnPageChangeListener
 			(
@@ -539,7 +539,7 @@ public class main_view extends Activity
 					@Override
 					public void onPageSelected(int position)
 					{
-						if(utilities.get_card_adapter(fragment_manager, viewpager, position).getCount() == 0)
+						if(utilities.get_adapter_feeds_cards(fragment_manager, viewpager, position).getCount() == 0)
 							new refresh_page(position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 						else if(new_items.get(position))
 							new refresh_page(position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -631,7 +631,7 @@ public class main_view extends Activity
 			View manage_view = inflater.inflate(R.layout.manage_pager, container, false);
 
 			ViewPager manage_pager = (ViewPager) manage_view.findViewById(R.id.manage_viewpager);
-			manage_pager.setAdapter(new manage_pager_adapter(fragment_manager));
+			manage_pager.setAdapter(new pageradapter_manage(fragment_manager));
 
 			final PagerTabStrip manage_strip = (PagerTabStrip) manage_view.findViewById(R.id.manage_title_strip);
 			manage_strip.setDrawFullUnderline(true);
@@ -715,7 +715,7 @@ public class main_view extends Activity
 
 ///LIES
 
-	public static class fragment_group extends Fragment
+	public static class fragment_manage_group extends Fragment
 	{
 		private static ListView manage_list;
 
@@ -729,7 +729,7 @@ public class main_view extends Activity
 		{
 			final View view = inflater.inflate(R.layout.manage_fragment, container, false);
 			manage_list = (ListView) view.findViewById(R.id.group_listview);
-			group_list_adapter = new group_adapter(getActivity());
+			group_list_adapter = new adapter_manage_groups(getActivity());
 			manage_list.setAdapter(group_list_adapter);
 			new refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 			manage_list.setOnItemLongClickListener
@@ -764,7 +764,7 @@ public class main_view extends Activity
 		}
 	}
 
-	public static class feed_manage extends Fragment
+	public static class fragment_manage_feed extends Fragment
 	{
 		private static ListView feed_list;
 
@@ -796,7 +796,7 @@ public class main_view extends Activity
 				}
 			);
 
-			feed_list_adapter = new feed_adapter(getActivity());
+			feed_list_adapter = new adapter_manage_feeds(getActivity());
 			feed_list.setAdapter(feed_list_adapter);
 
 			new refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -878,9 +878,9 @@ public class main_view extends Activity
 		}
 	}
 
-	public static class viewpager_adapter extends FragmentPagerAdapter
+	public static class pageradapter_feeds extends FragmentPagerAdapter
 	{
-		public viewpager_adapter(FragmentManager fm)
+		public pageradapter_feeds(FragmentManager fm)
 		{
 			super(fm);
 		}
@@ -904,9 +904,9 @@ public class main_view extends Activity
 		}
 	}
 
-	public static class manage_pager_adapter extends FragmentPagerAdapter
+	public static class pageradapter_manage extends FragmentPagerAdapter
 	{
-		public manage_pager_adapter(FragmentManager fm)
+		public pageradapter_manage(FragmentManager fm)
 		{
 			super(fm);
 		}
@@ -922,13 +922,13 @@ public class main_view extends Activity
 		{
 			if(position == 0)
 			{
-				fragment_group_store	= new fragment_group();
-				return fragment_group_store;
+				fragment_manage_group_store	= new fragment_manage_group();
+				return fragment_manage_group_store;
 			}
 			else
 			{
-				fragment_feed_store		= new feed_manage();
-				return fragment_feed_store;
+				fragment_feeds_store		= new fragment_manage_feed();
+				return fragment_feeds_store;
 			}
 		}
 
@@ -957,7 +957,7 @@ public class main_view extends Activity
 		public void onCreate(Bundle savedInstanceState)
 		{
 			super.onCreate(savedInstanceState);
-			card_adapter adapter = new card_adapter(getActivity());
+			adapter_feeds_cards adapter = new adapter_feeds_cards(getActivity());
 			setRetainInstance(false);
 			setListAdapter(adapter);
 			final List<String> count_list = utilities.read_file_to_list(storage + "groups/" + current_groups.get(getArguments().getInt("num", 0)) + ".txt.content.txt");
@@ -1135,7 +1135,7 @@ public class main_view extends Activity
 		if(viewpager != null)
 		{
 			if(previous_size != size)
-				viewpager.setAdapter(new viewpager_adapter(fragment_manager));
+				viewpager.setAdapter(new pageradapter_feeds(fragment_manager));
 			else
 				viewpager.getAdapter().notifyDataSetChanged();
 		}
@@ -1190,7 +1190,7 @@ public class main_view extends Activity
 		Boolean markerer, waited = true;
 		Animation animFadeIn;
 		ListFragment l;
-		card_adapter ith;
+		adapter_feeds_cards ith;
 		ListView lv;
 		List<String> nav;
 		List<Integer> counts;
@@ -1240,7 +1240,7 @@ public class main_view extends Activity
 			/// Get a set of all the pages items' urls.
 			Set<String> existing_items = new HashSet<String>();
 			try{
-				existing_items = new HashSet<String>(utilities.get_card_adapter(fragment_manager, viewpager, page_number).return_links());
+				existing_items = new HashSet<String>(utilities.get_adapter_feeds_cards(fragment_manager, viewpager, page_number).return_links());
 			}
 			catch(Exception e){
 			}
@@ -1326,7 +1326,7 @@ public class main_view extends Activity
 				if((viewpager != null)&&(l == null))
 					l = (fragment_card) fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_number));
 				if((l != null)&&(ith == null))
-					ith = ((card_adapter) l.getListAdapter());
+					ith = ((adapter_feeds_cards) l.getListAdapter());
 				if((l != null)&&(lv == null))
 				{
 					try

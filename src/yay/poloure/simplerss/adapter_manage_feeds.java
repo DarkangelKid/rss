@@ -9,14 +9,14 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import java.util.List;
 
-public class feed_adapter extends BaseAdapter
+public class adapter_manage_feeds extends BaseAdapter
 {
 	private static String[] title_array = new String[0];
 	private static String[] info_array = new String[0];
 
 	private static LayoutInflater inflater;
 
-	public feed_adapter(Context context_main)
+	public adapter_manage_feeds(Context context_main)
 	{
 		inflater = (LayoutInflater) context_main.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}

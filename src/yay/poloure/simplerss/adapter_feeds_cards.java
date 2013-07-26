@@ -38,7 +38,7 @@ import android.graphics.Color;
 
 import android.os.Debug;
 
-public class card_adapter extends BaseAdapter
+public class adapter_feeds_cards extends BaseAdapter
 {
 	private final List<String> content_titles = new ArrayList<String>();
 	private final List<String> content_des = new ArrayList<String>();
@@ -58,7 +58,7 @@ public class card_adapter extends BaseAdapter
 	private int total = 0;
 	private Boolean first = true;
 
-	public card_adapter(Context context_main)
+	public adapter_feeds_cards(Context context_main)
 	{
 		context = context_main;
 		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -148,7 +148,7 @@ public class card_adapter extends BaseAdapter
 					}
 					if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
 					{
-						drawer_adapter nav_adapter = main_view.nav_adapter;
+						adapter_navigation_drawer nav_adapter = main_view.nav_adapter;
 						nav_adapter.add_count(utilities.get_unread_counts(main_view.fragment_manager, main_view.viewpager, main_view.storage));
 						nav_adapter.notifyDataSetChanged();
 					}

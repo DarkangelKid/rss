@@ -10,7 +10,7 @@ import android.view.LayoutInflater;
 import java.util.List;
 import android.widget.ImageView;
 
-public class drawer_adapter extends BaseAdapter
+public class adapter_navigation_drawer extends BaseAdapter
 {
 	private static final List<String> menu_list = new ArrayList<String>();
 	private static final List<Integer> count_list = new ArrayList<Integer>();
@@ -18,7 +18,7 @@ public class drawer_adapter extends BaseAdapter
 
 	private static LayoutInflater inflater;
 
-	public drawer_adapter(Context context_main)
+	public adapter_navigation_drawer(Context context_main)
 	{
 		inflater = (LayoutInflater) context_main.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		twelve = (int) ((12 * (context_main.getResources().getDisplayMetrics().density) + 0.5f));
