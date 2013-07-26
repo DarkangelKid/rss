@@ -96,10 +96,6 @@ public class main_view extends Activity
 	private static feed_manage fragment_feed_store;
 	public static drawer_adapter nav_adapter;
 
-	private static final Fragment feed		= new fragment_feed();
-	private static final Fragment prefs		= new fragment_preferences();
-	private static final Fragment man		= new fragment_manage();
-
 	private static List<String> current_groups 			= new ArrayList<String>();
 	private static List<Boolean> new_items 				= new ArrayList<Boolean>();
 	private static final int[] times 					= new int[]{15, 30, 45, 60, 120, 180, 240, 300, 360, 400, 480, 540, 600, 660, 720, 960, 1440, 2880, 10080, 43829};
@@ -122,13 +118,28 @@ public class main_view extends Activity
 		perform_initial_operations();
 
 		fragment_manager = getFragmentManager();
-		fragment_manager.beginTransaction()
-			.add(R.id.content_frame, feed, feeds_string)
-			.add(R.id.content_frame, prefs, settings_string)
-			.add(R.id.content_frame, man, manage_string)
-			.hide(man)
-			.hide(prefs)
-			.commit();
+
+		if(savedInstanceState == null)
+		{
+			Fragment feed		= new fragment_feed();
+			Fragment prefs		= new fragment_preferences();
+			Fragment man			= new fragment_manage();
+			fragment_manager.beginTransaction()
+				.add(R.id.content_frame, feed, feeds_string)
+				.add(R.id.content_frame, prefs, settings_string)
+				.add(R.id.content_frame, man, manage_string)
+				.hide(man)
+				.hide(prefs)
+				.commit();
+		}
+		else
+		{
+			fragment_manager.beginTransaction()
+				.show(fragment_manager.findFragmentByTag(feeds_string))
+				.hide(fragment_manager.findFragmentByTag(settings_string))
+				.hide(fragment_manager.findFragmentByTag(manage_string))
+				.commit();
+		}
 
 		nav_adapter		= new drawer_adapter(this);
 		navigation_list	= (ListView) findViewById(R.id.left_drawer);
@@ -137,7 +148,8 @@ public class main_view extends Activity
 			new ListView.OnItemClickListener()
 			{
 				@Override
-				public void onItemClick(AdapterView parent, View view, int position, long id){
+				public void onItemClick(AdapterView parent, View view, int position, long id)
+				{
 					selectItem(position);
 				}
 			}
@@ -495,7 +507,8 @@ public class main_view extends Activity
 	public static class fragment_feed extends Fragment
 	{
 		@Override
-		public void onCreate(Bundle savedInstanceState){
+		public void onCreate(Bundle savedInstanceState)
+		{
 			super.onCreate(savedInstanceState);
 			setRetainInstance(false);
 			setHasOptionsMenu(true);
