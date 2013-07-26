@@ -13,8 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.ArrayList;
-import java.util.regex.Pattern;
-import java.util.Locale;
 
 import java.io.File;
 import java.io.BufferedInputStream;
@@ -33,13 +31,9 @@ import android.text.format.Time;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.SpinnerAdapter;
-import android.widget.Spinner;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
 
 public class utilities
 {
@@ -81,7 +75,7 @@ public class utilities
 		main_view.feed_list_adapter.set_position(position, new_name, new_url + "\n" + new_group + " • " + Integer.toString(count_lines(storage + "content/" + new_name + ".store.txt.content.txt") - 1) + " items");
 		main_view.feed_list_adapter.notifyDataSetChanged();
 
-		main_view.update_groups();
+		main_view.update_groups("");
 		new main_view.refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		new main_view.refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
@@ -95,7 +89,7 @@ public class utilities
 	public static void add_group(String storage, String group_name)
 	{
 		append_string_to_file(storage + "groups/group_list.txt", group_name + "\n");
-		main_view.update_groups();
+		main_view.update_groups("");
 	}
 
 	public static void delete_group(String storage, String group)
@@ -178,7 +172,7 @@ public class utilities
 		message_toast.show();
 	}
 
-	public static byte[] concat_byte_arrays(byte[] a, byte[] b)
+	public static byte[] concat_byte_arrays(byte[] a, byte... b)
 	{
 		final int a_length = a.length;
 		final int b_length = b.length;
@@ -309,7 +303,7 @@ public class utilities
 		return types;
 	}
 
-	public static String[][] read_csv_to_array(String file_path, char[] type)
+	public static String[][] read_csv_to_array(String file_path, char... type)
 	{
 		int next, offset, k, j;
 		String line;
@@ -344,7 +338,6 @@ public class utilities
 				switch(ch)
 				{
 					case 'm':
-						next = line.indexOf('|', offset);
 						types[0][j] = "1";
 						break;
 					default:
@@ -399,7 +392,6 @@ public class utilities
 				switch(ch)
 				{
 					case 'm':
-						next = line.indexOf('|', offset);
 						types[0][j] = "1";
 						break;
 					case 't':
@@ -466,45 +458,6 @@ public class utilities
 		return i;
 	}
 
-	public static List<Integer> get_unread_counts(FragmentManager fragment_manager, ViewPager viewpager, String storage)
-	{
-		List<String> current_groups = read_file_to_list(storage + "groups/group_list.txt");
-		List<Integer> unread_list = new ArrayList<Integer>();
-		int total = 0;
-		adapter_feeds_cards ith = null;
-		main_view.fragment_card fc;
-		final int size = current_groups.size();
-
-		for(int j = 1; j < size; j++)
-		{
-			try
-			{
-				fc = (main_view.fragment_card) (fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(j)));
-				ith = (adapter_feeds_cards) fc.getListAdapter();
-			}
-			catch(Exception e){
-			}
-
-			if(ith == null)
-				unread_list.add(0);
-			else
-			{
-				int most;
-				if(exists(storage + "groups/" + current_groups.get(j) + ".txt.content.txt.count.txt"))
-					most = Integer.parseInt(read_file_to_list(storage + "groups/" + current_groups.get(j) + ".txt.content.txt.count.txt").get(0));
-				else
-					most = count_lines(storage + "groups/" + current_groups.get(j) + ".txt.content.txt");
-				unread_list.add(most - ith.return_unread_item_count() - 1);
-			}
-		}
-
-		for(Integer un : unread_list)
-			total += un;
-		unread_list.add(0, total);
-
-		return unread_list;
-	}
-
 	public static adapter_feeds_cards get_adapter_feeds_cards(FragmentManager fragment_manager, ViewPager viewpager, int page_index)
 	{
 		return ((adapter_feeds_cards)((main_view.fragment_card) fragment_manager
@@ -567,134 +520,6 @@ public class utilities
 		catch(Exception e)
 		{
 			log(storage, "Failed to write the group content file.");
-		}
-	}
-
-	public static class check_feed_exists extends AsyncTask<String, Void, String[]>
-	{
-		private static Boolean existing_group = false, real = false;
-		private static AlertDialog dialog;
-		private static String group, name, mode, all_string;
-		private static String spinner_group, current_group, current_title;
-		private static Button button;
-		private static int pos;
-		private static Pattern illegal_file_chars = Pattern.compile("[/\\?%*|<>:]");
-
-		public check_feed_exists(AlertDialog edit_dialog, String new_group, String feed_name, String moder, String spin_group, String current_tit, String current_grop, int position, String all_str)
-		{
-			dialog			= edit_dialog;
-			group			= new_group;
-			name			= feed_name;
-			mode			= moder;
-			spinner_group	= spin_group;
-			current_group	= current_grop;
-			current_title	= current_tit;
-			button			= dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-			pos				= position;
-			all_string		= all_str;
-			if(button != null)
-				button.setEnabled(false);
-		}
-
-		@Override
-		protected String[] doInBackground(String[] urler)
-		{
-			/// If the group entry has text, check to see if it is an old group or if it is new.
-			String url = "", feed_title = "";
-			if(group.length()>0)
-			{
-				final List<String> current_groups = read_file_to_list(main_view.storage + "groups/group_list.txt");
-				for(String gro : current_groups)
-				{
-					if((gro.toLowerCase(Locale.getDefault())).equals(group.toLowerCase(Locale.getDefault())))
-					{
-						group = gro;
-						existing_group = true;
-					}
-				}
-				if(!existing_group)
-				{
-					String[] words = group.split(" ");
-					group = "";
-
-					for(String word: words)
-						group += (word.substring(0, 1).toUpperCase(Locale.getDefault())).concat(word.substring(1).toLowerCase(Locale.getDefault())) + " ";
-					group = group.substring(0, group.length() - 1);
-				}
-
-			}
-			else
-			{
-				group = spinner_group;
-				existing_group = true;
-			}
-
-			String[] check_list;
-			if(!urler[0].contains("http"))
-				check_list = new String[]{"http://" + urler[0], "https://" + urler[0]};
-			else
-				check_list = new String[]{urler[0]};
-
-			try
-			{
-				for(String check : check_list)
-				{
-					final BufferedInputStream in = new BufferedInputStream((new URL(check)).openStream());
-					byte data[] = new byte[512], data2[];
-					in.read(data, 0, 512);
-
-					String line = new String(data);
-					if((line.contains("rss"))||((line.contains("Atom"))||(line.contains("atom"))))
-					{
-						while((!line.contains("<title"))&&(!line.contains("</title>")))
-						{
-							data2 = new byte[512];
-							in.read(data2, 0, 512);
-
-							data = concat_byte_arrays(data, data2);
-							line = new String(data);
-						}
-						final int ind = line.indexOf(">", line.indexOf("<title")) + 1;
-						feed_title = line.substring(ind, line.indexOf("</", ind));
-						real = true;
-						url = check;
-						break;
-					}
-				}
-			}
-			catch(Exception e)
-			{
-			}
-			return new String[]{url, feed_title};
-		}
-
-		@Override
-		protected void onPostExecute(String[] ton)
-		{
-			if(!real)
-			{
-				toast_message(main_view.activity_context, main_view.activity_context.getString(R.string.feed_invalid), false);
-				if(button != null)
-					button.setEnabled(true);
-			}
-			else
-			{
-				String storage = main_view.storage;
-				if(!existing_group)
-					add_group(storage, group);
-				if(name.isEmpty())
-					name = ton[1];
-
-				name = illegal_file_chars.matcher(name).replaceAll("");
-
-				if(mode.equals("edit"))
-					/// current title and group are pulled from the air.
-					edit_feed(storage, current_title, name, ton[0], current_group, group, pos, all_string);
-				else
-					add_feed(storage, name, ton[0], group, all_string);
-
-				dialog.dismiss();
-			}
 		}
 	}
 
@@ -781,7 +606,7 @@ public class utilities
 				)
 				.create();
 
-				edit_dialog.setButton(edit_dialog.BUTTON_POSITIVE, (activity_context.getString(R.string.accept_dialog)),
+				edit_dialog.setButton(AlertDialog.BUTTON_POSITIVE, (activity_context.getString(R.string.accept_dialog)),
 				new DialogInterface.OnClickListener()
 				{
 					@Override

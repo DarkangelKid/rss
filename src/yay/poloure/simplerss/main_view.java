@@ -2,9 +2,12 @@ package yay.poloure.simplerss;
 
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.graphics.Color;
+import android.os.Debug;
+import android.os.Bundle;
+import android.os.AsyncTask;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -20,11 +23,6 @@ import android.app.FragmentTransaction;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
-import android.app.ActionBar;
-
-import android.os.Bundle;
-import android.os.AsyncTask;
-import android.os.Environment;
 
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v13.app.FragmentPagerAdapter;
@@ -37,15 +35,12 @@ import android.view.MenuItem;
 import android.view.MenuInflater;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Gravity;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
-import android.widget.FrameLayout;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -55,24 +50,13 @@ import java.net.URL;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 import java.io.File;
-import java.io.BufferedInputStream;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
-import java.io.FileReader;
 import java.io.BufferedWriter;
-import java.io.BufferedReader;
-import java.io.IOException;
-
-import android.graphics.Color;
-import android.os.Debug;
-import android.text.format.Time;
 
 public class main_view extends Activity
 {
@@ -82,9 +66,9 @@ public class main_view extends Activity
 	private static ActionBarDrawerToggle drawer_toggle;
 	private static Menu optionsMenu;
 
-	private static String current_title, feed_title;
 	public static String storage;
-	public static Context application_context, activity_context;
+	private String current_title;
+	public static Context activity_context;
 	public static ViewPager viewpager;
 
 	public static adapter_manage_feeds feed_list_adapter;
@@ -99,11 +83,7 @@ public class main_view extends Activity
 	private static final String[] folders 				= {"images", "thumbnails", "groups", "content"};
 	private static final Pattern whitespace				= Pattern.compile("\\s+");
 
-	private static String feeds_string, manage_string, settings_string, navigation_string, all_string;
-
 	public static FragmentManager fragment_manager;
-	private static SharedPreferences pref;
-	private static LayoutInflater inf;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -122,9 +102,9 @@ public class main_view extends Activity
 			Fragment prefs		= new fragment_preferences();
 			Fragment man			= new fragment_manage();
 			fragment_manager.beginTransaction()
-				.add(R.id.content_frame, feed, feeds_string)
-				.add(R.id.content_frame, prefs, settings_string)
-				.add(R.id.content_frame, man, manage_string)
+				.add(R.id.content_frame, feed, getString(R.string.feeds_title))
+				.add(R.id.content_frame, prefs, getString(R.string.settings_title))
+				.add(R.id.content_frame, man, getString(R.string.manage_title))
 				.hide(man)
 				.hide(prefs)
 				.commit();
@@ -132,9 +112,9 @@ public class main_view extends Activity
 		else
 		{
 			fragment_manager.beginTransaction()
-				.show(fragment_manager.findFragmentByTag(feeds_string))
-				.hide(fragment_manager.findFragmentByTag(settings_string))
-				.hide(fragment_manager.findFragmentByTag(manage_string))
+				.show(fragment_manager.findFragmentByTag(getString(R.string.feeds_title)))
+				.hide(fragment_manager.findFragmentByTag(getString(R.string.settings_title)))
+				.hide(fragment_manager.findFragmentByTag(getString(R.string.manage_title)))
 				.commit();
 		}
 
@@ -147,35 +127,50 @@ public class main_view extends Activity
 				@Override
 				public void onItemClick(AdapterView parent, View view, int position, long id)
 				{
-					selectItem(position);
+					switch(position)
+					{
+						case 0:
+							switch_page(getString(R.string.feeds_title), 0);
+							break;
+						case 1:
+							switch_page(getString(R.string.manage_title), 1);
+							break;
+						case 2:
+							switch_page(getString(R.string.settings_title), 2);
+							break;
+						default:
+							switch_page(getString(R.string.feeds_title), position);
+							viewpager.setCurrentItem(position - 4);
+							break;
+					}
 				}
 			}
 		);
 		navigation_list.setAdapter(nav_adapter);
 
 		drawer_layout = (DrawerLayout) findViewById(R.id.drawer_layout);
-		drawer_layout.setDrawerShadow(R.drawable.drawer_shadow, 8388611);
+		drawer_layout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.END);
 		drawer_toggle = new ActionBarDrawerToggle(this, drawer_layout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
 		{
 			@Override
 			public void onDrawerClosed(View view)
 			{
-				getActionBar().setTitle(current_title);
+				getActionBar().setTitle(getString(R.string.feeds_title));
 			}
 
 			@Override
 			public void onDrawerOpened(View drawerView)
 			{
-				getActionBar().setTitle(navigation_string);
+				getActionBar().setTitle(getString(R.string.navigation_title));
 			}
 		};
 
 		drawer_layout.setDrawerListener(drawer_toggle);
 		drawer_toggle.syncState();
 
-		update_groups();
+		update_groups(getString(R.string.all_group));
 
-		if(utilities.exists(storage + "groups/" + all_string + ".txt"))
+		if(utilities.exists(storage + "groups/" + getString(R.string.all_group) + ".txt"))
 			new refresh_page(0).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 
@@ -192,16 +187,7 @@ public class main_view extends Activity
 				folder_file.mkdir();
 		}
 
-		feeds_string		= getString(R.string.feeds_title);
-		manage_string		= getString(R.string.manage_title);
-		settings_string		= getString(R.string.settings_title);
-		navigation_string	= getString(R.string.navigation_title);
-		all_string			= getString(R.string.all_group);
-		current_title		= feeds_string;
-		pref				= PreferenceManager.getDefaultSharedPreferences(this);
-		application_context	= getApplicationContext();
 		activity_context	= this;
-		inf					= getLayoutInflater();
 	}
 
 	/// This is so the icon and text in the actionbar are selected.
@@ -214,12 +200,12 @@ public class main_view extends Activity
 
 	public static class refresh_manage_feeds extends AsyncTask<Void, String[], Long>
 	{
-		final Animation animFadeIn = AnimationUtils.loadAnimation(activity_context, android.R.anim.fade_in);
-		private ListView listview;
+		private final Animation animFadeIn = AnimationUtils.loadAnimation(activity_context, android.R.anim.fade_in);
+		private final ListView listview;
 
 		public refresh_manage_feeds()
 		{
-			listview = fragment_feeds_store.getListView();
+			listview = fragment_manage_feed.feed_list;
 			if(feed_list_adapter.getCount() == 0)
 				listview.setVisibility(View.INVISIBLE);
 		}
@@ -229,7 +215,7 @@ public class main_view extends Activity
 		{
 			if(feed_list_adapter != null)
 			{
-				final String[][] content 	= utilities.read_csv_to_array(storage + "groups/"+ all_string + ".txt", new char[]{'n', 'u', 'g'});
+				final String[][] content 	= utilities.read_csv_to_array(storage + "groups/"+ current_groups.get(0) + ".txt", new char[]{'n', 'u', 'g'});
 				final String[] feed_titles 	= content[0];
 				final String[] feed_urls 	= content[1];
 				final String[] feed_groups 	= content[2];
@@ -264,7 +250,7 @@ public class main_view extends Activity
 
 		public refresh_manage_groups()
 		{
-			listview = fragment_manage_group_store.getListView();
+			listview = fragment_manage_group_store.manage_list;
 			if(group_list_adapter.getCount() == 0)
 				listview.setVisibility(View.INVISIBLE);
 
@@ -332,6 +318,7 @@ public class main_view extends Activity
 	protected void onStop()
 	{
 		super.onStop();
+		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
 		if(pref.getBoolean("refresh", false))
 		{
 			Intent intent = new Intent(this, service_update.class);
@@ -354,7 +341,7 @@ public class main_view extends Activity
 	protected void onStart()
 	{
 		super.onStart();
-
+		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
 		if(pref.getBoolean("refresh", false))
 		{
 			Intent intent = new Intent(this, service_update.class);
@@ -379,26 +366,6 @@ public class main_view extends Activity
 			new_items.clear();
 			for(String string : current_groups)
 				new_items.add(true);
-		}
-	}
-
-	private void selectItem(int position)
-	{
-		switch(position)
-		{
-			case 0:
-				switch_page(feeds_string, 0);
-				break;
-			case 1:
-				switch_page(manage_string, 1);
-				break;
-			case 2:
-				switch_page(settings_string, 2);
-				break;
-			default:
-				switch_page(feeds_string, position);
-				viewpager.setCurrentItem(position - 4);
-				break;
 		}
 	}
 
@@ -427,7 +394,7 @@ public class main_view extends Activity
 			if(position < 3)
 				set_title(page_title);
 			else
-				set_title(feeds_string);
+				set_title(getString(R.string.feeds_title));
 		}
 		current_title = page_title;
 	}
@@ -512,7 +479,25 @@ public class main_view extends Activity
 			}
 			else if(item.getTitle().equals("refresh"))
 			{
-				update_group(viewpager.getCurrentItem());
+				set_refresh(true);
+				SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(activity_context);
+				utilities.save_positions(fragment_manager, viewpager, storage);
+				final int page_number = viewpager.getCurrentItem();
+				final Intent intent = new Intent(activity_context, service_update.class);
+				intent.putExtra("GROUP_NUMBER", page_number);
+				intent.putExtra("NOTIFICATIONS", pref.getBoolean("notifications", false));
+				activity_context.startService(intent);
+				if(page_number == 0)
+				{
+					for(int i = 0; i < new_items.size(); i++)
+						new_items.set(i, true);
+				}
+				else
+				{
+					new_items.set(0, true);
+					new_items.set(page_number, true);
+				}
+				new refresh_page(page_number).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 				return true;
 			}
 
@@ -628,6 +613,7 @@ public class main_view extends Activity
 						builder.setCancelable(true)
 						.setPositiveButton(getString(R.string.delete_dialog), new DialogInterface.OnClickListener()
 						{
+							@Override
 							public void onClick(DialogInterface dialog, int id)
 							{
 								group_list_adapter.remove_item(position);
@@ -647,16 +633,9 @@ public class main_view extends Activity
 		}
 	}
 
-///LIES
-
 	public static class fragment_manage_group extends Fragment
 	{
 		private static ListView manage_list;
-
-		public static ListView getListView()
-		{
-			return manage_list;
-		}
 
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -700,12 +679,7 @@ public class main_view extends Activity
 
 	public static class fragment_manage_feed extends Fragment
 	{
-		private static ListView feed_list;
-
-		public static ListView getListView()
-		{
-			return feed_list;
-		}
+		public static ListView feed_list;
 
 		@Override
 		public void onCreate(Bundle savedInstanceState)
@@ -757,7 +731,7 @@ public class main_view extends Activity
 									final String name = feed_list_adapter.getItem(pos);
 
 									utilities.remove_string_from_file(storage + "groups/" + group + ".txt", name, true);
-									utilities.remove_string_from_file(storage + "groups/" + all_string + ".txt", name, true);
+									utilities.remove_string_from_file(storage + "groups/" + getString(R.string.all_group) + ".txt", name, true);
 
 									/// If the group file no longer exists because it was the last feed in it, delete the group from the group_list.
 									utilities.delete_if_empty(storage + "groups/" + group + ".txt");
@@ -766,12 +740,12 @@ public class main_view extends Activity
 										utilities.delete(storage + "groups/" + group + ".txt.content.txt");
 										utilities.delete(storage + "groups/" + group + ".txt.content.txt.count.txt");
 										utilities.remove_string_from_file(storage + "groups/group_list.txt", group, false);
-										update_groups();
+										update_groups(current_groups.get(0));
 									}
 									else
 										utilities.sort_group_content_by_time(storage, group);
 
-									utilities.sort_group_content_by_time(storage, all_string);
+									utilities.sort_group_content_by_time(storage, getString(R.string.all_group));
 
 									/// remove deleted files content from groups that it was in
 									feed_list_adapter.remove_item(pos);
@@ -796,10 +770,10 @@ public class main_view extends Activity
 									utilities.delete(storage + group + ".image_size.cache.txt");
 
 									new refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-									utilities.sort_group_content_by_time(storage, all_string);
+									utilities.sort_group_content_by_time(storage, getString(R.string.all_group));
 
 									/// remove deleted files content from groups that it was in
-									/// TODO: update item info
+									/// TODO update item info
 									//feed_list_adapter.notifyDataSetChanged();
 								}
 							}
@@ -936,7 +910,7 @@ public class main_view extends Activity
 		}
 	}
 
-	public static void update_groups()
+	public static void update_groups(String all_string)
 	{
 		final int previous_size = current_groups.size();
 
@@ -966,7 +940,7 @@ public class main_view extends Activity
 		nav.addAll(current_groups);
 
 		nav_adapter.add_list(nav);
-		nav_adapter.add_count(utilities.get_unread_counts(fragment_manager, viewpager, storage));
+		nav_adapter.add_count(get_unread_counts());
 		nav_adapter.notifyDataSetChanged();
 	}
 
@@ -981,33 +955,13 @@ public class main_view extends Activity
 		}
 		catch(Exception e){
 		}
-		update_groups();
-	}
-
-	private static void update_group(int page_number)
-	{
-		utilities.save_positions(fragment_manager, viewpager, storage);
-		set_refresh(true);
-		Intent intent = new Intent(activity_context, service_update.class);
-		intent.putExtra("GROUP_NUMBER", page_number);
-		intent.putExtra("NOTIFICATIONS", pref.getBoolean("notifications", false));
-		activity_context.startService(intent);
-		if(page_number == 0)
-		{
-			for(int i = 0; i < new_items.size(); i++)
-				new_items.set(i, true);
-		}
-		else
-		{
-			new_items.set(0, true);
-			new_items.set(page_number, true);
-		}
-		new refresh_page(page_number).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		update_groups(current_groups.get(0));
 	}
 
 	private static class refresh_page extends AsyncTask<Void, Object, Void>
 	{
-		int marker_position = -1, ssize, refresh_count = 0, page_number;
+		int marker_position = -1, refresh_count = 0;
+		final int page_number;
 		Boolean markerer, waited = true;
 		Animation animFadeIn;
 		ListFragment l;
@@ -1078,7 +1032,6 @@ public class main_view extends Activity
 			final List<Integer> new_heights		= new ArrayList<Integer>();
 
 			int width, height;
-			ssize = size;
 
 			for(int m = 0; m < size; m++)
 			{
@@ -1158,7 +1111,7 @@ public class main_view extends Activity
 						lv = null;
 					}
 				}
-				counts = utilities.get_unread_counts(fragment_manager, viewpager, storage);
+				counts = get_unread_counts();
 			}
 
 			publishProgress(new_titles, new_descriptions, new_links, new_images, new_heights, new_widths, new_markers);
@@ -1215,5 +1168,43 @@ public class main_view extends Activity
 			lv.setAnimation(animFadeIn);
 			lv.setVisibility(View.VISIBLE);
 		}
+	}
+
+	public static List<Integer> get_unread_counts()
+	{
+		List<Integer> unread_list = new ArrayList<Integer>();
+		int total = 0;
+		adapter_feeds_cards ith = null;
+		fragment_card fc;
+		final int size = current_groups.size();
+
+		for(int j = 1; j < size; j++)
+		{
+			try
+			{
+				fc = (fragment_card) (fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(j)));
+				ith = (adapter_feeds_cards) fc.getListAdapter();
+			}
+			catch(Exception e){
+			}
+
+			if(ith == null)
+				unread_list.add(0);
+			else
+			{
+				int most;
+				if(utilities.exists(storage + "groups/" + current_groups.get(j) + ".txt.content.txt.count.txt"))
+					most = Integer.parseInt(utilities.read_file_to_list(storage + "groups/" + current_groups.get(j) + ".txt.content.txt.count.txt").get(0));
+				else
+					most = utilities.count_lines(storage + "groups/" + current_groups.get(j) + ".txt.content.txt");
+				unread_list.add(most - ith.return_unread_item_count() - 1);
+			}
+		}
+
+		for(Integer un : unread_list)
+			total += un;
+		unread_list.add(0, total);
+
+		return unread_list;
 	}
 }

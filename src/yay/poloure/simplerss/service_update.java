@@ -77,9 +77,7 @@ public class service_update extends IntentService
 				utilities.sort_group_content_by_time(storage, gro);
 		}
 
-		/// Read all the group files and how many new items.
-		/// TODO: If new feed, count new set objects and return from parser to add to the total.
-		final List<Integer> unread_list = utilities.get_unread_counts(null, null, storage);
+		final List<Integer> unread_list = main_view.get_unread_counts();
 
 		int group_items = 1;
 		int total = 0, count = 0;
