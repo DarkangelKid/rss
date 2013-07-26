@@ -90,8 +90,8 @@ public class main_view extends Activity
 	public static Context application_context, activity_context;
 	public static ViewPager viewpager;
 
-	private static adapter_manage_feeds feed_list_adapter;
-	private static adapter_manage_groups group_list_adapter;
+	public static adapter_manage_feeds feed_list_adapter;
+	public static adapter_manage_groups group_list_adapter;
 	private static fragment_manage_group fragment_manage_group_store;
 	private static fragment_manage_feed fragment_feeds_store;
 	public static adapter_navigation_drawer nav_adapter;
@@ -214,20 +214,8 @@ public class main_view extends Activity
 		super.onConfigurationChanged(newConfig);
 		drawer_toggle.onConfigurationChanged(newConfig);
 	}
-	///
 
-	public static void add_feed(String feed_name, String feed_url, String feed_group)
-	{
-		utilities.append_string_to_file(storage + "groups/" + feed_group + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|\n");
-		utilities.append_string_to_file(storage + "groups/" + all_string + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|group|" + feed_group + "|\n");
-
-		if(feed_list_adapter != null)
-			new refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-		if(group_list_adapter != null)
-			new refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-	}
-
-	private static class refresh_manage_feeds extends AsyncTask<Void, String[], Long>
+	public static class refresh_manage_feeds extends AsyncTask<Void, String[], Long>
 	{
 		final Animation animFadeIn = AnimationUtils.loadAnimation(activity_context, android.R.anim.fade_in);
 		private ListView listview;
@@ -240,7 +228,7 @@ public class main_view extends Activity
 		}
 
 		@Override
-		protected Long doInBackground(Void... hey)
+		protected Long doInBackground(Void[] hey)
 		{
 			if(feed_list_adapter != null)
 			{
@@ -258,7 +246,7 @@ public class main_view extends Activity
 		}
 
 		@Override
-		protected void onProgressUpdate(String[]... progress)
+		protected void onProgressUpdate(String[][] progress)
 		{
 			feed_list_adapter.set_items(progress[0], progress[1]);
 			feed_list_adapter.notifyDataSetChanged();
@@ -272,7 +260,7 @@ public class main_view extends Activity
 		}
 	}
 
-	private static class refresh_manage_groups extends AsyncTask<Void, String[], Long>
+	public static class refresh_manage_groups extends AsyncTask<Void, String[], Long>
 	{
 		final Animation animFadeIn = AnimationUtils.loadAnimation(activity_context, android.R.anim.fade_in);
 		private ListView listview;
@@ -286,7 +274,7 @@ public class main_view extends Activity
 		}
 
 		@Override
-		protected Long doInBackground(Void... hey)
+		protected Long doInBackground(Void[] hey)
 		{
 			if(group_list_adapter != null)
 			{
@@ -317,7 +305,7 @@ public class main_view extends Activity
 							info += content[j].concat(", ");
 
 						if(content.length > 3)
-							info += "...";
+							info += "[]";
 						else if(number > 0)
 							info += content[number - 1];
 					}
@@ -330,7 +318,7 @@ public class main_view extends Activity
 		}
 
 		@Override
-		protected void onProgressUpdate(String[]... progress)
+		protected void onProgressUpdate(String[][] progress)
 		{
 			group_list_adapter.set_items(progress[0], progress[1]);
 			group_list_adapter.notifyDataSetChanged();
@@ -342,57 +330,6 @@ public class main_view extends Activity
 			listview.setAnimation(animFadeIn);
 			listview.setVisibility(View.VISIBLE);
 		}
-	}
-
-	public static void edit_feed(String old_name, String new_name, String new_url, String old_group, String new_group, int position)
-	{
-		/// Delete the feed info from the all group and add the new group info to the end of the all content file.
-		utilities.remove_string_from_file(storage + "groups/" + all_string + ".txt", old_name, true);
-		utilities.append_string_to_file(storage + "groups/" + all_string + ".txt", "name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|\n");
-
-		/// If we have renamed the title, rename the content/title.txt file.
-		if(!old_name.equals(new_name))
-			(new File(storage + "content/" + old_name + ".store.txt.content.txt"))
-			.renameTo((new File(storage + "content/" + new_name + ".store.txt.content.txt")));
-
-		/// If we moved to a new group, delete the old cache file, force a refresh, and refresh the new one.
-		if(!old_group.equals(new_group))
-		{
-			/// Remove the line from the old group file containing the old_feed_name and add to the new group file.
-			utilities.remove_string_from_file(storage + "groups/" + old_group + ".txt", old_name, true);
-			utilities.append_string_to_file(storage + "groups/" + new_group + ".txt", "name|" +  new_name + "|url|" + new_url + "|\n");
-
-			/// If the above group file no longer exists because there are no lines left, remove the group from the group list.
-			utilities.delete_if_empty("groups/" + old_group + ".txt");
-			if(!utilities.exists("groups/" + old_group + ".txt"))
-				utilities.remove_string_from_file(storage + "groups/group_list.txt", old_group, false);
-		}
-		/// The group is the same but the titles and urls may have changed.
-		else
-		{
-			utilities.remove_string_from_file(storage + "groups/" + old_group + ".txt", old_name, true);
-			utilities.append_string_to_file(storage + "groups/" + old_group + ".txt", "name|" +  new_name + "|url|" + new_url + "|\n");
-		}
-
-		/// Add the new feeds to the adapter_manage_feeds (Manage/Feeds).
-		feed_list_adapter.set_position(position, new_name, new_url + "\n" + new_group + " • " + Integer.toString(utilities.count_lines(storage + "content/" + new_name + ".store.txt.content.txt") - 1) + " items");
-		feed_list_adapter.notifyDataSetChanged();
-
-		update_groups();
-		new refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-		new refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
-		utilities.sort_group_content_by_time(storage, all_string);
-		if(utilities.exists("groups/" + old_group + ".txt"))
-			utilities.sort_group_content_by_time(storage, old_group);
-		if(utilities.exists("groups/" + new_group + ".txt"))
-			utilities.sort_group_content_by_time(storage, new_group);
-	}
-
-	public static void add_group(String group_name)
-	{
-		utilities.append_string_to_file(storage + "groups/group_list.txt", group_name + "\n");
-		update_groups();
 	}
 
 	protected void onStop()
@@ -680,6 +617,7 @@ public class main_view extends Activity
 			filter_list = (ListView) view.findViewById(R.id.filter_listview);
 			filter_list_adapter = new adapter_manage_filter(getActivity());
 			filter_list.setAdapter(filter_list_adapter);
+
 			filter_list.setOnItemLongClickListener
 			(
 				new OnItemLongClickListener()
@@ -1045,7 +983,7 @@ public class main_view extends Activity
 						catch(Exception e){
 							spinner_group = "Unsorted";
 						}
-						new utilities.check_feed_exists(alertDialog, new_group, feed_name, "add", spinner_group, "", "", 0).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
+						new utilities.check_feed_exists(alertDialog, new_group, feed_name, "add", spinner_group, "", "", 0, all_string).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
 					}
 				});
 				alertDialog.show();
@@ -1105,14 +1043,14 @@ public class main_view extends Activity
 							String feed_name 		= ((EditText) edit_rss_dialog.findViewById(R.id.name_edit)).getText().toString().trim();
 							String spinner_group 	= ((Spinner) edit_rss_dialog.findViewById(R.id.group_spinner)).getSelectedItem().toString();
 
-							new utilities.check_feed_exists(edit_dialog, new_group, feed_name, "edit", spinner_group, current_group, current_title, position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
+							new utilities.check_feed_exists(edit_dialog, new_group, feed_name, "edit", spinner_group, current_group, current_title, position, all_string).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
 					}
 				});
 
 				edit_dialog.show();
 	}
 
-	private static void update_groups()
+	public static void update_groups()
 	{
 		final int previous_size = current_groups.size();
 
@@ -1198,7 +1136,7 @@ public class main_view extends Activity
 		}
 
 		@Override
-		protected Void doInBackground(Void... hey)
+		protected Void doInBackground(Void[] hey)
 		{
 			/// while the service is running on new_items and this page is refreshing.
 			if(new_items.get(page_number))
@@ -1344,7 +1282,7 @@ public class main_view extends Activity
 		}
 
 		@Override
-		protected void onProgressUpdate(Object... progress)
+		protected void onProgressUpdate(Object[] progress)
 		{
 			/*int index = lv.getFirstVisiblePosition() + 1;
 			View v = lv.getChildAt(0);
