@@ -55,8 +55,6 @@ import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.BufferedWriter;
 
 public class main_view extends Activity
 {
