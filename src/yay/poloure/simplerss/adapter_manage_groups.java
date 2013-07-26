@@ -24,7 +24,7 @@ import android.widget.ListView;
 import java.util.List;
 import java.util.ArrayList;
 
-public class group_adapter extends BaseAdapter
+public class adapter_manage_groups extends BaseAdapter
 {
 	private String old_title = "";
 	private String new_title = "";
@@ -34,7 +34,7 @@ public class group_adapter extends BaseAdapter
 
 	private static LayoutInflater inflater;
 
-	public group_adapter(Context context)
+	public adapter_manage_groups(Context context)
 	{
 		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}

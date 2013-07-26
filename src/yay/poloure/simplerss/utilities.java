@@ -40,7 +40,7 @@ public class utilities
 
 	public static void save_positions(FragmentManager fragment_manager, ViewPager viewpager, String storage)
 	{
-		card_adapter adapter;
+		adapter_feeds_cards adapter;
 		BufferedWriter out;
 		String url, group;
 		String[] feeds;
@@ -54,7 +54,7 @@ public class utilities
 			try
 			{
 				group = current_groups.get(i);
-				adapter = get_card_adapter(fragment_manager, viewpager, i);
+				adapter = get_adapter_feeds_cards(fragment_manager, viewpager, i);
 				if(adapter.getCount() > 0)
 				{
 					/// Read each of the content files from the group and find the line with the url.
@@ -409,7 +409,7 @@ public class utilities
 		List<Integer> unread_list = new ArrayList<Integer>();
 		List<String> count_list;
 		int sized, i, total = 0;
-		card_adapter ith = null;
+		adapter_feeds_cards ith = null;
 		main_view.fragment_card fc;
 		final int size = current_groups.size();
 
@@ -418,7 +418,7 @@ public class utilities
 			try
 			{
 				fc = (main_view.fragment_card) (fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(j)));
-				ith = (card_adapter) fc.getListAdapter();
+				ith = (adapter_feeds_cards) fc.getListAdapter();
 			}
 			catch(Exception e){
 			}
@@ -443,9 +443,9 @@ public class utilities
 		return unread_list;
 	}
 
-	public static card_adapter get_card_adapter(FragmentManager fragment_manager, ViewPager viewpager, int page_index)
+	public static adapter_feeds_cards get_adapter_feeds_cards(FragmentManager fragment_manager, ViewPager viewpager, int page_index)
 	{
-		return ((card_adapter)((main_view.fragment_card) fragment_manager
+		return ((adapter_feeds_cards)((main_view.fragment_card) fragment_manager
 						.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_index)))
 						.getListAdapter());
 	}
