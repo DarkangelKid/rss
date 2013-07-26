@@ -710,6 +710,13 @@ public class main_view extends Activity
 		}
 
 		@Override
+		public void onCreate(Bundle savedInstanceState)
+		{
+			super.onCreate(savedInstanceState);
+			setRetainInstance(false);
+		}
+
+		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
 			final View view = inflater.inflate(R.layout.manage_feeds, container, false);
@@ -835,16 +842,20 @@ public class main_view extends Activity
 
 	public static class manage_pager_adapter extends FragmentPagerAdapter
 	{
-		public manage_pager_adapter(FragmentManager fm){
+		public manage_pager_adapter(FragmentManager fm)
+		{
 			super(fm);
 		}
 
 		@Override
-		public int getCount(){
+		public int getCount()
+		{
 			return 2;
 		}
+
 		@Override
-		public Fragment getItem(int position){
+		public Fragment getItem(int position)
+		{
 			if(position == 0)
 			{
 				fragment_group_store	= new fragment_group();
@@ -856,6 +867,7 @@ public class main_view extends Activity
 				return fragment_feed_store;
 			}
 		}
+
 		@Override
 		public String getPageTitle(int position)
 		{
@@ -882,6 +894,7 @@ public class main_view extends Activity
 		{
 			super.onCreate(savedInstanceState);
 			card_adapter adapter = new card_adapter(getActivity());
+			setRetainInstance(false);
 			setListAdapter(adapter);
 			final List<String> count_list = utilities.read_file_to_list(storage + "groups/" + current_groups.get(getArguments().getInt("num", 0)) + ".txt.content.txt");
 			final int sized = count_list.size();
