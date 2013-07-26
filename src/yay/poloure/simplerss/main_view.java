@@ -49,9 +49,6 @@ import android.widget.Toast;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Spinner;
 
 import java.net.URL;
 
@@ -200,7 +197,7 @@ public class main_view extends Activity
 		settings_string		= getString(R.string.settings_title);
 		navigation_string	= getString(R.string.navigation_title);
 		all_string			= getString(R.string.all_group);
-		current_title				= feeds_string;
+		current_title		= feeds_string;
 		pref				= PreferenceManager.getDefaultSharedPreferences(this);
 		application_context	= getApplicationContext();
 		activity_context	= this;
@@ -510,7 +507,7 @@ public class main_view extends Activity
 				return true;
 			else if(item.getTitle().equals("add"))
 			{
-				show_add_dialog();
+				utilities.show_add_dialog(current_groups, activity_context);
 				return true;
 			}
 			else if(item.getTitle().equals("refresh"))
@@ -594,13 +591,13 @@ public class main_view extends Activity
 				return true;
 			else if(item.getTitle().equals("add"))
 			{
-				show_add_dialog();
+				utilities.show_add_dialog(current_groups, activity_context);
 				return true;
 			}
 			return super.onOptionsItemSelected(item);
 		}
 	}
-///LIES
+
 	public static class fragment_manage_filters extends Fragment
 	{
 		private static ListView filter_list;
@@ -728,7 +725,7 @@ public class main_view extends Activity
 				{
 					public void onItemClick(AdapterView<?> parent, View view, int position, long id)
 					{
-						show_edit_dialog(position);
+						utilities.show_edit_dialog(current_groups, activity_context, storage, position);
 					}
 				}
 			);
@@ -745,7 +742,7 @@ public class main_view extends Activity
 					@Override
 					public boolean onItemLongClick(AdapterView<?> parent, View view, final int pos, long id)
 					{
-						AlertDialog alert = new AlertDialog.Builder(activity_context)
+						new AlertDialog.Builder(activity_context)
 						.setCancelable(true)
 						.setNegativeButton
 						(
@@ -939,119 +936,6 @@ public class main_view extends Activity
 		}
 	}
 
-	private static void show_add_dialog()
-	{
-		final View add_rss_dialog = inf.inflate(R.layout.add_rss_dialog, null);
-		final Spinner group_spinner = (Spinner) add_rss_dialog.findViewById(R.id.group_spinner);
-
-		/// TODO: This is a manual array copy.
-		final int size = current_groups.size();
-		String[] spinner_groups = new String[size - 1];
-		for(int i = 0; i < size - 1; i++)
-			spinner_groups[i] = current_groups.get(i + 1);
-
-		final ArrayAdapter<String> adapter = new ArrayAdapter<String>(activity_context, R.layout.group_spinner_text, spinner_groups);
-		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		group_spinner.setAdapter(adapter);
-
-		final AlertDialog alertDialog = new AlertDialog.Builder(activity_context, 2)
-				.setTitle("Add Feed")
-				.setView(add_rss_dialog)
-				.setCancelable(true)
-				.setNegativeButton
-				(activity_context.getString(R.string.cancel_dialog), new DialogInterface.OnClickListener()
-					{
-						@Override
-						public void onClick(DialogInterface dialog,int id)
-						{
-						}
-					}
-				)
-				.create();
-
-				alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, (activity_context.getString(R.string.add_dialog)),
-				new DialogInterface.OnClickListener()
-				{
-					@Override
-					public void onClick(DialogInterface dialog, int which)
-					{
-						final String new_group = ((EditText) add_rss_dialog.findViewById(R.id.group_edit)).getText().toString().trim().toLowerCase();
-						final String URL_check = ((EditText) add_rss_dialog.findViewById(R.id.URL_edit)).getText().toString().trim();
-						final String feed_name = ((EditText) add_rss_dialog.findViewById(R.id.name_edit)).getText().toString().trim();
-						String spinner_group;
-						try{
-							spinner_group = ((Spinner) add_rss_dialog.findViewById(R.id.group_spinner)).getSelectedItem().toString();
-						}
-						catch(Exception e){
-							spinner_group = "Unsorted";
-						}
-						new utilities.check_feed_exists(alertDialog, new_group, feed_name, "add", spinner_group, "", "", 0, all_string).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
-					}
-				});
-				alertDialog.show();
-	}
-
-	private static void show_edit_dialog(final int position)
-	{
-		final LayoutInflater inflater 		= LayoutInflater.from(activity_context);
-		final View edit_rss_dialog 			= inflater.inflate(R.layout.add_rss_dialog, null);
-		final String[][] content 			= utilities.read_csv_to_array(storage + "groups/"+ all_string + ".txt", new char[]{'n', 'u', 'g'});
-		final String current_title			= content[0][position];
-		final String current_url			= content[1][position];
-		final String current_group  		= content[2][position];
-
-		int current_spinner_position = 0;
-
-		final Spinner group_spinner = (Spinner) edit_rss_dialog.findViewById(R.id.group_spinner);
-		final List<String> spinner_groups = new ArrayList<String>();
-		final int size = current_groups.size();
-		for(int i = 1; i < size; i++)
-		{
-			spinner_groups.add(current_groups.get(i));
-			if((current_groups.get(i)).equals(current_group))
-				current_spinner_position = i - 1;
-		}
-		final ArrayAdapter<String> adapter = new ArrayAdapter<String>(activity_context, R.layout.group_spinner_text, spinner_groups);
-		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		group_spinner.setAdapter(adapter);
-
-		((EditText)edit_rss_dialog.findViewById(R.id.name_edit)).setText(current_title);
-		((EditText)edit_rss_dialog.findViewById(R.id.URL_edit)).setText(current_url);
-		group_spinner.setSelection(current_spinner_position);
-
-		final AlertDialog edit_dialog = new AlertDialog.Builder(activity_context, 2)
-				.setTitle(activity_context.getString(R.string.edit_dialog_title))
-				.setView(edit_rss_dialog)
-				.setCancelable(true)
-				.setNegativeButton
-				(activity_context.getString(R.string.cancel_dialog),new DialogInterface.OnClickListener()
-					{
-						@Override
-						public void onClick(DialogInterface dialog,int id)
-						{
-						}
-					}
-				)
-				.create();
-
-				edit_dialog.setButton(edit_dialog.BUTTON_POSITIVE, (activity_context.getString(R.string.accept_dialog)),
-				new DialogInterface.OnClickListener()
-				{
-					@Override
-					public void onClick(DialogInterface dialog, int which)
-					{
-							String new_group 		= ((EditText) edit_rss_dialog.findViewById(R.id.group_edit)).getText().toString().trim().toLowerCase();
-							String URL_check 		= ((EditText) edit_rss_dialog.findViewById(R.id.URL_edit)).getText().toString().trim();
-							String feed_name 		= ((EditText) edit_rss_dialog.findViewById(R.id.name_edit)).getText().toString().trim();
-							String spinner_group 	= ((Spinner) edit_rss_dialog.findViewById(R.id.group_spinner)).getSelectedItem().toString();
-
-							new utilities.check_feed_exists(edit_dialog, new_group, feed_name, "edit", spinner_group, current_group, current_title, position, all_string).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
-					}
-				});
-
-				edit_dialog.show();
-	}
-
 	public static void update_groups()
 	{
 		final int previous_size = current_groups.size();
@@ -1086,7 +970,7 @@ public class main_view extends Activity
 		nav_adapter.notifyDataSetChanged();
 	}
 
-	public static void update_group_order(String[] new_order)
+	public static void update_group_order(String... new_order)
 	{
 		utilities.delete(storage + "groups/group_list.txt");
 		try{
@@ -1195,7 +1079,6 @@ public class main_view extends Activity
 
 			int width, height;
 			ssize = size;
-			String tag;
 
 			for(int m = 0; m < size; m++)
 			{

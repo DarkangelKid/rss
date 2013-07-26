@@ -1,13 +1,12 @@
 package yay.poloure.simplerss;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.app.FragmentManager;
 import android.app.AlertDialog;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.v4.view.ViewPager;
-import android.widget.Toast;
-import android.widget.Button;
 
 import java.net.URL;
 import java.util.List;
@@ -26,8 +25,21 @@ import java.io.BufferedWriter;
 import java.io.BufferedReader;
 import java.io.IOException;
 
+import android.view.LayoutInflater;
+import android.view.View;
+
 import android.os.Debug;
 import android.text.format.Time;
+import android.widget.ArrayAdapter;
+import android.widget.Toast;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.SpinnerAdapter;
+import android.widget.Spinner;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 
 public class utilities
 {
@@ -684,6 +696,106 @@ public class utilities
 				dialog.dismiss();
 			}
 		}
+	}
+
+	public static void show_add_dialog(final List<String> current_groups, Context activity_context)
+	{
+		final LayoutInflater inflater		= LayoutInflater.from(activity_context);
+		final View add_rss_dialog			= inflater.inflate(R.layout.add_rss_dialog, null);
+		final List<String> spinner_groups	= current_groups.subList(1, current_groups.size());
+		final TextView group_edit			= (TextView) add_rss_dialog.findViewById(R.id.group_edit);
+		final TextView URL_edit				= (TextView) add_rss_dialog.findViewById(R.id.URL_edit);
+		final TextView name_edit			= (TextView) add_rss_dialog.findViewById(R.id.name_edit);
+		final AdapterView<SpinnerAdapter> group_spinner	= (AdapterView<SpinnerAdapter>) add_rss_dialog.findViewById(R.id.group_spinner);
+
+		final ArrayAdapter<String> adapter	= new ArrayAdapter<String>(activity_context, R.layout.group_spinner_text, spinner_groups);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		group_spinner.setAdapter(adapter);
+
+		final AlertDialog alertDialog = new AlertDialog.Builder(activity_context, 2)
+				.setTitle("Add Feed")
+				.setView(add_rss_dialog)
+				.setCancelable(true)
+				.setNegativeButton
+				(activity_context.getString(R.string.cancel_dialog), new DialogInterface.OnClickListener()
+					{
+						@Override
+						public void onClick(DialogInterface dialog,int id)
+						{
+						}
+					}
+				)
+				.create();
+
+				alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, (activity_context.getString(R.string.add_dialog)),
+				new DialogInterface.OnClickListener()
+				{
+					@Override
+					public void onClick(DialogInterface dialog, int which)
+					{
+						final String new_group		= group_edit	.getText().toString().trim().toLowerCase();
+						final String URL_check		= URL_edit		.getText().toString().trim();
+						final String feed_name		= name_edit		.getText().toString().trim();
+						final String spinner_group	= group_spinner	.getSelectedItem().toString();
+						new check_feed_exists(alertDialog, new_group, feed_name, "add", spinner_group, "", "", 0, current_groups.get(0)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
+					}
+				});
+				alertDialog.show();
+	}
+
+	public static void show_edit_dialog(final List<String> current_groups, Context activity_context, String storage, final int position)
+	{
+		final LayoutInflater inflater		= LayoutInflater.from(activity_context);
+		final View edit_rss_dialog			= inflater.inflate(R.layout.add_rss_dialog, null);
+		final String[][] content			= utilities.read_csv_to_array(storage + "groups/"+ current_groups.get(0) + ".txt", new char[]{'n', 'u', 'g'});
+		final String current_title			= content[0][position];
+		final String current_url			= content[1][position];
+		final String current_group			= content[2][position];
+
+		final TextView group_edit			= (TextView) edit_rss_dialog.findViewById(R.id.group_edit);
+		final TextView URL_edit				= (TextView) edit_rss_dialog.findViewById(R.id.URL_edit);
+		final TextView name_edit			= (TextView) edit_rss_dialog.findViewById(R.id.name_edit);
+		final AdapterView<SpinnerAdapter> group_spinner	= (AdapterView<SpinnerAdapter>) edit_rss_dialog.findViewById(R.id.group_spinner);
+
+		final List<String> spinner_groups	= current_groups.subList(1, current_groups.size());
+
+		final ArrayAdapter<String> adapter	= new ArrayAdapter<String>(activity_context, R.layout.group_spinner_text, spinner_groups);
+		adapter			.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		group_spinner	.setAdapter(adapter);
+		URL_edit		.setText(current_url);
+		name_edit		.setText(current_title);
+		group_spinner	.setSelection(spinner_groups.indexOf(current_group));
+
+		final AlertDialog edit_dialog = new AlertDialog.Builder(activity_context, 2)
+				.setTitle(activity_context.getString(R.string.edit_dialog_title))
+				.setView(edit_rss_dialog)
+				.setCancelable(true)
+				.setNegativeButton
+				(activity_context.getString(R.string.cancel_dialog),new DialogInterface.OnClickListener()
+					{
+						@Override
+						public void onClick(DialogInterface dialog,int id)
+						{
+						}
+					}
+				)
+				.create();
+
+				edit_dialog.setButton(edit_dialog.BUTTON_POSITIVE, (activity_context.getString(R.string.accept_dialog)),
+				new DialogInterface.OnClickListener()
+				{
+					@Override
+					public void onClick(DialogInterface dialog, int which)
+					{
+							String new_group 		= group_edit	.getText().toString().trim().toLowerCase();
+							String URL_check 		= URL_edit		.getText().toString().trim();
+							String feed_name 		= name_edit		.getText().toString().trim();
+							String spinner_group 	= group_spinner	.getSelectedItem().toString();
+							new check_feed_exists(edit_dialog, new_group, feed_name, "edit", spinner_group, current_group, current_title, position, current_groups.get(0)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
+					}
+				});
+
+				edit_dialog.show();
 	}
 
 	public static void log(String storage, String text)
