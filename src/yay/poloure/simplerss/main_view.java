@@ -663,6 +663,57 @@ public class main_view extends Activity
 			return super.onOptionsItemSelected(item);
 		}
 	}
+///LIES
+	public static class fragment_manage_filters extends Fragment
+	{
+		private static ListView filter_list;
+
+		public static ListView getListView()
+		{
+			return filter_list;
+		}
+
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+		{
+			final View view = inflater.inflate(R.layout.manage_filters, container, false);
+			filter_list = (ListView) view.findViewById(R.id.filter_listview);
+			group_list_adapter = new group_adapter(getActivity());
+			filter_list.setAdapter(group_list_adapter);
+			new refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+			filter_list.setOnItemLongClickListener
+			(
+				new OnItemLongClickListener()
+				{
+					@Override
+					public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id)
+					{
+						if(position == 0)
+							return false;
+						AlertDialog.Builder builder = new AlertDialog.Builder(activity_context);
+						builder.setCancelable(true)
+						.setPositiveButton(getString(R.string.delete_dialog), new DialogInterface.OnClickListener()
+						{
+							public void onClick(DialogInterface dialog, int id)
+							{
+								group_list_adapter.remove_item(position);
+								/// delete the group
+								String group = current_groups.get(position);
+								utilities.delete_group(storage, group);
+								group_list_adapter.notifyDataSetChanged();
+							}
+						});
+						AlertDialog alert = builder.create();
+						alert.show();
+						return true;
+					}
+				}
+			);
+			return view;
+		}
+	}
+
+///LIES
 
 	public static class fragment_group extends Fragment
 	{
