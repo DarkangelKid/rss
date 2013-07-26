@@ -22,6 +22,7 @@
 	<string name="cancel_dialog">Cancel</string>
 	<string name="add_dialog">Add</string>
 	<string name="accept_dialog">Accept</string>
+	<string name="feed_invalid">Invalid Feed URL</string>
 
 	<string name="groups_manage_sub">Groups</string>
 	<string name="feeds_manage_sub">Feeds</string>

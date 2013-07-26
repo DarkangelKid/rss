@@ -23,6 +23,8 @@ import android.widget.ListView;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
 
 public class adapter_manage_groups extends BaseAdapter
 {
@@ -182,7 +184,17 @@ public class adapter_manage_groups extends BaseAdapter
 				fadeIn2.setInterpolator(new DecelerateInterpolator());
 				v.setAnimation(fadeIn2);
 				v.setVisibility(View.VISIBLE);
-				main_view.update_group_order(group_array);
+				final String path = main_view.storage + main_view.GROUP_LIST;
+				utilities.delete(path);
+				try{
+					BufferedWriter out = new BufferedWriter(new FileWriter(path, true));
+					for(String group : group_array)
+						out.write(group + "\n");
+					out.close();
+				}
+				catch(Exception e){
+				}
+				main_view.update_groups("");
 			}
 			return true;
 		}
