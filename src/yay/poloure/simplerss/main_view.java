@@ -663,7 +663,7 @@ public class main_view extends Activity
 			return super.onOptionsItemSelected(item);
 		}
 	}
-///LIES
+
 	public static class fragment_manage_filters extends Fragment
 	{
 		private static ListView filter_list;
@@ -678,9 +678,8 @@ public class main_view extends Activity
 		{
 			final View view = inflater.inflate(R.layout.manage_filters, container, false);
 			filter_list = (ListView) view.findViewById(R.id.filter_listview);
-			group_list_adapter = new group_adapter(getActivity());
-			filter_list.setAdapter(group_list_adapter);
-			new refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+			filter_list_adapter = new adapter_manage_filter(getActivity());
+			filter_list.setAdapter(filter_list_adapter);
 			filter_list.setOnItemLongClickListener
 			(
 				new OnItemLongClickListener()
@@ -712,8 +711,6 @@ public class main_view extends Activity
 			return view;
 		}
 	}
-
-///LIES
 
 	public static class fragment_manage_group extends Fragment
 	{

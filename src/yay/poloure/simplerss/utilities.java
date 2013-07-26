@@ -445,7 +445,7 @@ public class utilities
 
 	public static adapter_feeds_cards get_adapter_feeds_cards(FragmentManager fragment_manager, ViewPager viewpager, int page_index)
 	{
-		return ((adapter_feeds_cards)((main_view.fragment_card) fragment_manager
+		return ((adapter_feeds_cards)((ListFragment) fragment_manager
 						.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_index)))
 						.getListAdapter());
 	}
