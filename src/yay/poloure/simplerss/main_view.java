@@ -85,7 +85,7 @@ public class main_view extends Activity
 	private static ActionBarDrawerToggle drawer_toggle;
 	private static Menu optionsMenu;
 
-	private static String mTitle, feed_title;
+	private static String current_title, feed_title;
 	public static String storage;
 	public static Context application_context, activity_context;
 	public static ViewPager viewpager;
@@ -104,7 +104,7 @@ public class main_view extends Activity
 	private static List<Boolean> new_items 				= new ArrayList<Boolean>();
 	private static final int[] times 					= new int[]{15, 30, 45, 60, 120, 180, 240, 300, 360, 400, 480, 540, 600, 660, 720, 960, 1440, 2880, 10080, 43829};
 	private static final String[] folders 				= {"images", "thumbnails", "groups", "content"};
-	private static final Pattern illegal_file_chars		= Pattern.compile("[/\\?%*|<>:]");
+	private static final Pattern whitespace				= Pattern.compile("\\s+");
 
 	private static String feeds_string, manage_string, settings_string, navigation_string, all_string;
 
@@ -116,7 +116,6 @@ public class main_view extends Activity
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		//Debug.startMethodTracing("boot");
 
 		setContentView(R.layout.pager);
 
@@ -152,7 +151,7 @@ public class main_view extends Activity
 			@Override
 			public void onDrawerClosed(View view)
 			{
-				getActionBar().setTitle(mTitle);
+				getActionBar().setTitle(current_title);
 			}
 
 			@Override
@@ -189,7 +188,7 @@ public class main_view extends Activity
 		settings_string		= getString(R.string.settings_title);
 		navigation_string	= getString(R.string.navigation_title);
 		all_string			= getString(R.string.all_group);
-		mTitle				= feeds_string;
+		current_title				= feeds_string;
 		pref				= PreferenceManager.getDefaultSharedPreferences(this);
 		application_context	= getApplicationContext();
 		activity_context	= this;
@@ -205,7 +204,7 @@ public class main_view extends Activity
 	}
 	///
 
-	private static void add_feed(String feed_name, String feed_url, String feed_group)
+	public static void add_feed(String feed_name, String feed_url, String feed_group)
 	{
 		utilities.append_string_to_file(storage + "groups/" + feed_group + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|\n");
 		utilities.append_string_to_file(storage + "groups/" + all_string + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|group|" + feed_group + "|\n");
@@ -216,7 +215,7 @@ public class main_view extends Activity
 			new refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 
-	private static class refresh_manage_feeds extends AsyncTask<Void, String, Long>
+	private static class refresh_manage_feeds extends AsyncTask<Void, String[], Long>
 	{
 		final Animation animFadeIn = AnimationUtils.loadAnimation(activity_context, android.R.anim.fade_in);
 		private ListView listview;
@@ -233,22 +232,23 @@ public class main_view extends Activity
 		{
 			if(feed_list_adapter != null)
 			{
-				feed_list_adapter.clear_list();
-				final List< List<String> > content 	= utilities.read_csv_to_list(storage + "groups/"+ all_string + ".txt", new String[]{"name|", "url|", "group|"}, false);
-				final List<String> feed_titles 		= content.get(0);
-				final List<String> feed_urls 		= content.get(1);
-				final List<String> feed_groups 		= content.get(2);
-				final int size 						= feed_titles.size();
+				final String[][] content 	= utilities.read_csv_to_array(storage + "groups/"+ all_string + ".txt", new char[]{'n', 'u', 'g'});
+				final String[] feed_titles 	= content[0];
+				final String[] feed_urls 	= content[1];
+				final String[] feed_groups 	= content[2];
+				final int size 				= feed_titles.length;
+				String[] info_array			= new String[size];
 				for(int i = 0; i < size; i++)
-					publishProgress(feed_titles.get(i), feed_urls.get(i) + "\n" + feed_groups.get(i) + " • " + Integer.toString(utilities.count_lines(storage + "content/" + feed_titles.get(i) + ".store.txt.content.txt")) + " items");
+					info_array[i] = feed_urls[i] + "\n" + feed_groups[i] + " • " + Integer.toString(utilities.count_lines(storage + "content/" + feed_titles[i] + ".store.txt.content.txt")) + " items";
+				publishProgress(feed_titles, info_array);
 			}
 			return 0L;
 		}
 
 		@Override
-		protected void onProgressUpdate(String... progress)
+		protected void onProgressUpdate(String[]... progress)
 		{
-			feed_list_adapter.add_list(progress[0], progress[1]);
+			feed_list_adapter.set_items(progress[0], progress[1]);
 			feed_list_adapter.notifyDataSetChanged();
 		}
 
@@ -260,7 +260,7 @@ public class main_view extends Activity
 		}
 	}
 
-	private static class refresh_manage_groups extends AsyncTask<Void, String, Long>
+	private static class refresh_manage_groups extends AsyncTask<Void, String[], Long>
 	{
 		final Animation animFadeIn = AnimationUtils.loadAnimation(activity_context, android.R.anim.fade_in);
 		private ListView listview;
@@ -278,43 +278,49 @@ public class main_view extends Activity
 		{
 			if(group_list_adapter != null)
 			{
-				String group, info;
-				int content_size, number, j;
-				List<String> content;
-				group_list_adapter.clear_list();
+				String info, count_path;
+				int number, j, total = 0;
+				String[] content;
 
 				final int size = current_groups.size();
+				String[] group_array = new String[size];
+				String[] info_array = new String[size];
+
 				for(int i = 0; i < size; i++)
 				{
-					group = current_groups.get(i);
-					content = utilities.read_csv_to_list(storage + "groups/" + group + ".txt", new String[]{"name|"}, false).get(0);
-					content_size = content.size();
+					group_array[i] = current_groups.get(i);
+					content = utilities.read_single_to_array(storage + "groups/" + group_array[i] + ".txt", "name|");
+					count_path = storage + "groups/" + group_array[i] + ".txt.content.txt.count.txt";
+					if(utilities.exists(count_path))
+						total += Integer.parseInt(utilities.read_file_to_list(count_path).get(0));
 					if(i == 0)
 						info = (size == 1) ? "1 group" :  size + " groups";
 					else
 					{
 						info = "";
 						number = 3;
-						if(content_size < 3)
-							number = content_size;
+						if(content.length < 3)
+							number = content.length;
 						for(j = 0; j < number - 1; j++)
-							info += content.get(j) + ", ";
+							info += content[j].concat(", ");
 
-						if(content_size > 3)
+						if(content.length > 3)
 							info += "...";
 						else if(number > 0)
-							info += content.get(number - 1);
+							info += content[number - 1];
 					}
-					publishProgress(group, Integer.toString(content_size) + " feeds • " + info);
+					info_array[i] = Integer.toString(content.length) + " feeds • " + info;
 				}
+				info_array[0] =  total + " items • " + info_array[0];
+				publishProgress(group_array, info_array);
 			}
 			return 0L;
 		}
 
 		@Override
-		protected void onProgressUpdate(String... progress)
+		protected void onProgressUpdate(String[]... progress)
 		{
-			group_list_adapter.add_list(progress[0], progress[1]);
+			group_list_adapter.set_items(progress[0], progress[1]);
 			group_list_adapter.notifyDataSetChanged();
 		}
 
@@ -326,7 +332,7 @@ public class main_view extends Activity
 		}
 	}
 
-	private static void edit_feed(String old_name, String new_name, String new_url, String old_group, String new_group)
+	public static void edit_feed(String old_name, String new_name, String new_url, String old_group, String new_group, int position)
 	{
 		/// Delete the feed info from the all group and add the new group info to the end of the all content file.
 		utilities.remove_string_from_file(storage + "groups/" + all_string + ".txt", old_name, true);
@@ -345,6 +351,7 @@ public class main_view extends Activity
 			utilities.append_string_to_file(storage + "groups/" + new_group + ".txt", "name|" +  new_name + "|url|" + new_url + "|\n");
 
 			/// If the above group file no longer exists because there are no lines left, remove the group from the group list.
+			utilities.delete_if_empty("groups/" + old_group + ".txt");
 			if(!utilities.exists("groups/" + old_group + ".txt"))
 				utilities.remove_string_from_file(storage + "groups/group_list.txt", old_group, false);
 		}
@@ -356,11 +363,8 @@ public class main_view extends Activity
 		}
 
 		/// Add the new feeds to the feed_adapter (Manage/Feeds).
-
-		/// TODO: get this position.
-		/*feed_list_adapter.remove_item(position);
-		feed_list_adapter.add_list_pos(position, new_name, new_url + "\n" + new_group + " • " + Integer.toString(utilities.count_lines(storage + "content/" + new_name + ".store.txt.content.txt") - 1) + " items");
-		feed_list_adapter.notifyDataSetChanged();*/
+		feed_list_adapter.set_position(position, new_name, new_url + "\n" + new_group + " • " + Integer.toString(utilities.count_lines(storage + "content/" + new_name + ".store.txt.content.txt") - 1) + " items");
+		feed_list_adapter.notifyDataSetChanged();
 
 		update_groups();
 		new refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -373,7 +377,7 @@ public class main_view extends Activity
 			utilities.sort_group_content_by_time(storage, new_group);
 	}
 
-	private static void add_group(String group_name)
+	public static void add_group(String group_name)
 	{
 		utilities.append_string_to_file(storage + "groups/group_list.txt", group_name + "\n");
 		update_groups();
@@ -434,17 +438,21 @@ public class main_view extends Activity
 
 	private void selectItem(int position)
 	{
-		if(position == 2)
-			switch_page(settings_string, position);
-		else if(position == 1)
-			switch_page(manage_string, position);
-		else if(position == 0)
-			switch_page(feeds_string, position);
-		else if(position > 3)
+		switch(position)
 		{
-			switch_page(feeds_string, position);
-			int page = position - 4;
-			viewpager.setCurrentItem(page);
+			case 0:
+				switch_page(feeds_string, 0);
+				break;
+			case 1:
+				switch_page(manage_string, 1);
+				break;
+			case 2:
+				switch_page(settings_string, 2);
+				break;
+			default:
+				switch_page(feeds_string, position);
+				viewpager.setCurrentItem(position - 4);
+				break;
 		}
 	}
 
@@ -460,12 +468,12 @@ public class main_view extends Activity
 	private void switch_page(String page_title, int position)
 	{
 		drawer_layout.closeDrawer(navigation_list);
-		if(!mTitle.equals(page_title))
+		if(!current_title.equals(page_title))
 		{
 			fragment_manager.beginTransaction()
 						.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
 						.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out)
-						.hide(fragment_manager.findFragmentByTag(mTitle))
+						.hide(fragment_manager.findFragmentByTag(current_title))
 						.show(fragment_manager.findFragmentByTag(page_title))
 						.commit();
 
@@ -475,12 +483,12 @@ public class main_view extends Activity
 			else
 				set_title(feeds_string);
 		}
-		mTitle = page_title;
+		current_title = page_title;
 	}
 
 	private void set_title(String title)
 	{
-		mTitle = title;
+		current_title = title;
 		getActionBar().setTitle(title);
 	}
 
@@ -671,11 +679,14 @@ public class main_view extends Activity
 							return false;
 						AlertDialog.Builder builder = new AlertDialog.Builder(activity_context);
 						builder.setCancelable(true)
-								.setPositiveButton(getString(R.string.delete_dialog), new DialogInterface.OnClickListener()
+						.setPositiveButton(getString(R.string.delete_dialog), new DialogInterface.OnClickListener()
 						{
 							public void onClick(DialogInterface dialog, int id)
 							{
 								group_list_adapter.remove_item(position);
+								/// delete the group
+								String group = current_groups.get(position);
+								utilities.delete_group(storage, group);
 								group_list_adapter.notifyDataSetChanged();
 							}
 						});
@@ -739,16 +750,17 @@ public class main_view extends Activity
 									String group = feed_list_adapter.get_info(pos);
 									group = group.substring(group.indexOf('\n') + 1, group.indexOf(' '));
 									final String name = feed_list_adapter.getItem(pos);
-									utilities.delete(storage + group + ".image_size.cache.txt");
 
 									utilities.remove_string_from_file(storage + "groups/" + group + ".txt", name, true);
 									utilities.remove_string_from_file(storage + "groups/" + all_string + ".txt", name, true);
 
 									/// If the group file no longer exists because it was the last feed in it, delete the group from the group_list.
+									utilities.delete_if_empty(storage + "groups/" + group + ".txt");
 									if(!utilities.exists(storage + "groups/" + group + ".txt"))
 									{
+										utilities.delete(storage + "groups/" + group + ".txt.content.txt");
+										utilities.delete(storage + "groups/" + group + ".txt.content.txt.count.txt");
 										utilities.remove_string_from_file(storage + "groups/group_list.txt", group, false);
-										utilities.delete(storage + "groups/" + group + ".txt");
 										update_groups();
 									}
 									else
@@ -959,7 +971,7 @@ public class main_view extends Activity
 						catch(Exception e){
 							spinner_group = "Unsorted";
 						}
-						new check_feed_exists(alertDialog, new_group, feed_name, "add", spinner_group, "", "").executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
+						new utilities.check_feed_exists(alertDialog, new_group, feed_name, "add", spinner_group, "", "", 0).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
 					}
 				});
 				alertDialog.show();
@@ -969,10 +981,10 @@ public class main_view extends Activity
 	{
 		final LayoutInflater inflater 		= LayoutInflater.from(activity_context);
 		final View edit_rss_dialog 			= inflater.inflate(R.layout.add_rss_dialog, null);
-		final List< List<String> > content 	= utilities.read_csv_to_list(storage + "groups/"+ all_string + ".txt", new String[]{"name|", "url|", "group|"}, false);
-		final String current_title			= content.get(0).get(position);
-		final String current_url			= content.get(1).get(position);
-		final String current_group  		= content.get(2).get(position);
+		final String[][] content 			= utilities.read_csv_to_array(storage + "groups/"+ all_string + ".txt", new char[]{'n', 'u', 'g'});
+		final String current_title			= content[0][position];
+		final String current_url			= content[1][position];
+		final String current_group  		= content[2][position];
 
 		int current_spinner_position = 0;
 
@@ -1019,131 +1031,11 @@ public class main_view extends Activity
 							String feed_name 		= ((EditText) edit_rss_dialog.findViewById(R.id.name_edit)).getText().toString().trim();
 							String spinner_group 	= ((Spinner) edit_rss_dialog.findViewById(R.id.group_spinner)).getSelectedItem().toString();
 
-							new check_feed_exists(edit_dialog, new_group, feed_name, "edit", spinner_group, current_group, current_title).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
+							new utilities.check_feed_exists(edit_dialog, new_group, feed_name, "edit", spinner_group, current_group, current_title, position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
 					}
 				});
 
 				edit_dialog.show();
-	}
-
-	private static class check_feed_exists extends AsyncTask<String, Void, Integer>
-	{
-		private Boolean existing_group = false, real = false;
-		AlertDialog dialog;
-		String group, name, mode, url, feed_title, spinner_group, current_group, current_title;
-		Button button;
-
-		public check_feed_exists(AlertDialog edit_dialog, String new_group, String feed_name, String moder, String spin_group, String current_tit, String current_grop)
-		{
-			dialog			= edit_dialog;
-			group			= new_group;
-			name			= feed_name;
-			mode			= moder;
-			spinner_group	= spin_group;
-			current_group	= current_grop;
-			current_title	= current_tit;
-			button			= dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-			button.setEnabled(false);
-		}
-
-		@Override
-		protected Integer doInBackground(String... urler)
-		{
-			/// If the group entry has text, check to see if it is an old group or if it is new.
-			if(group.length()>0)
-			{
-				for(String gro : current_groups)
-				{
-					if((gro.toLowerCase()).equals(group.toLowerCase()))
-					{
-						group = gro;
-						existing_group = true;
-					}
-				}
-				if(!existing_group)
-				{
-					String[] words = group.split(" ");
-					group = "";
-
-					for(String word: words)
-						group += (word.substring(0, 1).toUpperCase()).concat(word.substring(1).toLowerCase()) + " ";
-					group = group.substring(0, group.length() - 1);
-				}
-
-			}
-			else
-			{
-				group = spinner_group;
-				existing_group = true;
-			}
-
-			List<String> check_list = new ArrayList<String>();
-			if(!urler[0].contains("http"))
-			{
-				check_list.add("http://" + urler[0]);
-				check_list.add("https://" + urler[0]);
-			}
-			else
-				check_list.add(urler[0]);
-
-			try
-			{
-				for(String check : check_list)
-				{
-					final BufferedInputStream in = new BufferedInputStream((new URL(check)).openStream());
-					byte data[] = new byte[512], data2[];
-					in.read(data, 0, 512);
-
-					String line = new String(data);
-					if((line.contains("rss"))||((line.contains("Atom"))||(line.contains("atom"))))
-					{
-						while((!line.contains("<title"))&&(!line.contains("</title>")))
-						{
-							data2 = new byte[512];
-							in.read(data2, 0, 512);
-
-							data = utilities.concat_byte_arrays(data, data2);
-							line = new String(data);
-						}
-						final int ind = line.indexOf(">", line.indexOf("<title")) + 1;
-						feed_title = line.substring(ind, line.indexOf("</", ind));
-						real = true;
-						url = check;
-						break;
-					}
-				}
-			}
-			catch(Exception e){
-			}
-			return 0;
-		}
-
-		@Override
-		protected void onPostExecute(Integer end)
-		{
-			if(!real)
-			{
-				utilities.toast_message(activity_context, "Invalid RSS URL", false);
-				button.setEnabled(true);
-			}
-			else
-			{
-				if(!existing_group)
-					add_group(group);
-				if(name.isEmpty())
-					name = feed_title;
-
-				name = illegal_file_chars.matcher(name).replaceAll("");
-
-				if(mode.equals("edit"))
-					/// current title and group are pulled from the air.
-					edit_feed(current_title, name, url, current_group, group);
-				else
-					add_feed(name, url, group);
-
-				dialog.dismiss();
-			}
-		}
 	}
 
 	private static void update_groups()
@@ -1180,7 +1072,7 @@ public class main_view extends Activity
 		nav_adapter.notifyDataSetChanged();
 	}
 
-	public static void update_group_order(List<String> new_order)
+	public static void update_group_order(String[] new_order)
 	{
 		utilities.delete(storage + "groups/group_list.txt");
 		try{
@@ -1256,16 +1148,16 @@ public class main_view extends Activity
 			if((!utilities.exists(group_file_path))||(!utilities.exists(group_content_path)))
 				return null;
 
-			List< List<String> > contenter 	= utilities.read_csv_to_list(group_content_path, new String[]{"marker|", "title|", "description|", "link|" , "image|"}, true);
-			List<String> marker				= contenter.get(0);
-			List<String> titles				= contenter.get(1);
-			List<String> descriptions		= contenter.get(2);
-			List<String> links				= contenter.get(3);
-			List<String> images				= contenter.get(4);
-			List<String> widths				= contenter.get(5);
-			List<String> heights			= contenter.get(6);
+			String[][] contenter		= utilities.load_csv_to_array(group_content_path);
+			String[] marker				= contenter[0];
+			String[] titles				= contenter[1];
+			String[] descriptions		= contenter[2];
+			String[] links				= contenter[3];
+			String[] images				= contenter[4];
+			String[] widths				= contenter[5];
+			String[] heights			= contenter[6];
 
-			if((links.size() == 0)||(links.get(0).isEmpty()))
+			if((links[0] == null)||(links.length == 0)||(links[0].isEmpty()))
 				return null;
 
 			/// Get a set of all the pages items' urls.
@@ -1278,7 +1170,7 @@ public class main_view extends Activity
 
 			/// For each line of the group_content_file
 			animFadeIn = AnimationUtils.loadAnimation(activity_context, android.R.anim.fade_in);
-			final int size = titles.size();
+			final int size = titles.length;
 			final List<Boolean> new_markers		= new ArrayList<Boolean>();
 			final List<String> new_titles		= new ArrayList<String>();
 			final List<String> new_descriptions = new ArrayList<String>();
@@ -1289,30 +1181,13 @@ public class main_view extends Activity
 
 			int width, height;
 			ssize = size;
-			String image, link, tag;
+			String tag;
 
 			for(int m = 0; m < size; m++)
 			{
-				thumbnail_path = "";
-				width = 0;
-				height = 0;
-				image = images.get(m);
-
-				if(!image.isEmpty())
-				{
-					width = Integer.parseInt(widths.get(m));
-					if(width > 32)
-					{
-						height = Integer.parseInt(heights.get(m));
-						thumbnail_path = storage + "thumbnails/" + image.substring(image.lastIndexOf("/") + 1, image.length());
-					}
-					else
-						width = 0;
-				}
-
 				markerer = false;
 				/// It should stop at the latest one unless there is not a newest one. So stay at 0 until it finds one.
-				if(marker.get(m).equals("1"))
+				if(marker[m] != null)
 				{
 					markerer = true;
 					marker_position = 0;
@@ -1320,14 +1195,38 @@ public class main_view extends Activity
 				else if(marker_position != -1)
 					marker_position++;
 
-				// Checks to see if page has this item.
-				link = links.get(m);
-				if(existing_items.add(link))
+				if(existing_items.add(links[m]))
 				{
+					thumbnail_path = "";
+					width = 0;
+					height = 0;
+
+					if(images[m] != null)
+					{
+						width = Integer.parseInt(widths[m]);
+						if(width > 32)
+						{
+							height = Integer.parseInt(heights[m]);
+							thumbnail_path = storage.concat("thumbnails/".concat(images[m].substring(images[m].lastIndexOf("/") + 1, images[m].length())));
+						}
+						else
+							width = 0;
+					}
+
+					if((titles[m] != null)&&(descriptions[m] != null))
+					{
+						if((descriptions[m].contains(titles[m]))||(whitespace.matcher(descriptions[m]).replaceAll("").length() < 8))
+							descriptions[m] = "";
+					}
+					else if((descriptions[m] == null)||(whitespace.matcher(descriptions[m]).replaceAll("").length() < 8))
+						descriptions[m] = "";
+					if(titles[m] == null)
+						titles[m] = "";
+
 					new_markers		.add(markerer);
-					new_titles		.add(titles.get(m));
-					new_links		.add(link);
-					new_descriptions.add(descriptions.get(m));
+					new_titles		.add(titles[m]);
+					new_links		.add(links[m]);
+					new_descriptions.add(descriptions[m]);
 					new_images		.add(thumbnail_path);
 					new_heights		.add(height);
 					new_widths		.add(width);
@@ -1404,8 +1303,11 @@ public class main_view extends Activity
 				return;
 			if(marker_position != -1)
 				lv.setSelection(marker_position);
+				/// If no "marker|" s were found in the new content fall through to else,
 			else
+				/// refresh_count is how many new items are added.
 				lv.setSelection(refresh_count);
+				/// Should work.
 
 			set_refresh(check_service_running());
 

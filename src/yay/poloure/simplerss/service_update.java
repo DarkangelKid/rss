@@ -37,18 +37,18 @@ public class service_update extends IntentService
 
 		Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
-		final int group 						= intent.getIntExtra("GROUP_NUMBER", 0);
-		final String all_string 				= getString(R.string.all_group);
-		final String storage 					= this.getExternalFilesDir(null).getAbsolutePath() + "/";
+		final int group						= intent.getIntExtra("GROUP_NUMBER", 0);
+		final String all_string				= getString(R.string.all_group);
+		final String storage				= this.getExternalFilesDir(null).getAbsolutePath() + "/";
 
-		final List<String> all_groups 			= utilities.read_file_to_list(storage + "groups/group_list.txt");
-		final String grouper					= all_groups.get(group);
-		final String group_file_path 			= storage + "groups/" + grouper + ".txt";
-		final String group_content_path 		= group_file_path + ".content.txt";
+		final List<String> all_groups		= utilities.read_file_to_list(storage + "groups/group_list.txt");
+		final String grouper				= all_groups.get(group);
+		final String group_file_path		= storage + "groups/" + grouper + ".txt";
+		final String group_content_path		= group_file_path + ".content.txt";
 
-		final List< List<String> > content 		= utilities.read_csv_to_list(group_file_path, new String[]{"name|", "url|"}, false);
-		final List<String> group_feeds_names 	= content.get(0);
-		final List<String> group_feeds_urls 	= content.get(1);
+		final String[][] content			= utilities.read_csv_to_array(group_file_path, new char[]{'n', 'u'});
+		final String[] group_feeds_names	= content[0];
+		final String[] group_feeds_urls		= content[1];
 
 		String image_name = "", thumbnail_path = "", feed_path = "", image;
 		int i;
@@ -57,11 +57,11 @@ public class service_update extends IntentService
 		((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getSize(screen_size);
 		final int width = (int) (Math.round(((screen_size.x)*0.944)));
 
-		final int size = group_feeds_names.size();
+		final int size = group_feeds_names.length;
 		for(i = 0; i < size; i++)
 		{
-			feed_path = storage + "content/" + group_feeds_names.get(i); /// mariam_feed.txt
-			utilities.download_file(group_feeds_urls.get(i), feed_path + ".store.txt"); /// Downloads file as mariam_feed.store.txt
+			feed_path = storage + "content/" + group_feeds_names[i]; /// mariam_feed.txt
+			utilities.download_file(group_feeds_urls[i], feed_path + ".store.txt"); /// Downloads file as mariam_feed.store.txt
 			new parsered(feed_path + ".store.txt", storage, width); /// Parses the file and makes other files like mariam_feed.store.txt.content.txt
 		}
 

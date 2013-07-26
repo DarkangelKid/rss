@@ -29,8 +29,8 @@ public class group_adapter extends BaseAdapter
 	private String old_title = "";
 	private String new_title = "";
 
-	private static final List<String> group_list = new ArrayList<String>();
-	private static final List<String> info_list = new ArrayList<String>();
+	private static String[] group_array = new String[0];
+	private static String[] info_array = new String[0];
 
 	private static LayoutInflater inflater;
 
@@ -39,27 +39,21 @@ public class group_adapter extends BaseAdapter
 		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 
-	public void add_list(String new_group, String new_info)
+	public void set_items(String[] new_groups, String[] new_infos)
 	{
-		group_list.add(new_group);
-		info_list.add(new_info);
+		group_array = new_groups;
+		info_array = new_infos;
 	}
 
-	public void clear_list()
+	public String[] return_titles()
 	{
-		group_list.clear();
-		info_list.clear();
-	}
-
-	public List<String> return_titles()
-	{
-		return group_list;
+		return group_array;
 	}
 
 	@Override
 	public int getCount()
 	{
-		return group_list.size();
+		return group_array.length;
 	}
 
 	@Override
@@ -71,13 +65,13 @@ public class group_adapter extends BaseAdapter
 	@Override
 	public String getItem(int position)
 	{
-		return group_list.get(position);
+		return group_array[position];
 	}
 
 	public void remove_item(int position)
 	{
-		group_list.remove(position);
-		info_list.remove(position);
+		group_array	= utilities.remove_element(group_array, position);
+		info_array	= utilities.remove_element(info_array, position);
 	}
 
 	@Override
@@ -96,8 +90,8 @@ public class group_adapter extends BaseAdapter
 			else
 				holder = (ViewHolder) convertView.getTag();
 
-			holder.group_view.setText(group_list.get(position));
-			holder.info_view.setText(info_list.get(position));
+			holder.group_view.setText(group_array[position]);
+			holder.info_view.setText(info_array[position]);
 			if(position != 0)
 			{
 				holder.image_view.setOnTouchListener(new MyTouchListener());
@@ -124,19 +118,12 @@ public class group_adapter extends BaseAdapter
 			{
 				View view_parent = (View) view.getParent();
 				old_title = ((TextView)view_parent.findViewById(R.id.group_item)).getText().toString();
-				ClipData data = ClipData.newPlainText("", "");
 				custom_drag_builder shadowBuilder = new custom_drag_builder(view_parent);
-				view_parent.startDrag(data, shadowBuilder, view_parent, 0);
+				view_parent.startDrag(null, shadowBuilder, view_parent, 0);
 				return true;
 			}
-			else
-				return false;
+			return false;
 		}
-	}
-
-	private void refresh_data()
-	{
-		notifyDataSetChanged();
 	}
 
 	private class MyDragListener implements OnDragListener
@@ -148,15 +135,12 @@ public class group_adapter extends BaseAdapter
 		public boolean onDrag(View v, DragEvent event)
 		{
 			final int action = event.getAction();
-			if(action == DragEvent.ACTION_DRAG_STARTED)
-			{
-			}
-			else if(action == DragEvent.ACTION_DRAG_ENTERED)
+			if(action == DragEvent.ACTION_DRAG_ENTERED)
 			{
 				final ListView listview = ((ListView) v.getParent());
 				new_title = ((TextView) v.findViewById(R.id.group_item)).getText().toString();
 				rearrange_groups(old_title, new_title);
-				refresh_data();
+				notifyDataSetChanged();
 				for(int i = 0; i < listview.getChildCount();  i++)
 				{
 					View temp = listview.getChildAt(i);
@@ -191,12 +175,6 @@ public class group_adapter extends BaseAdapter
 				else if(position[1] < (1/5.0)*height)
 					listview.smoothScrollBy((int)((-1.0)* v.getHeight()), 400);
 			}
-			else if(action == DragEvent.ACTION_DRAG_LOCATION)
-			{
-			}
-			else if(action == DragEvent.ACTION_DRAG_EXITED)
-			{
-			}
 			else if(action == DragEvent.ACTION_DROP)
 			{
 				Animation fadeIn2 = new AlphaAnimation(0, 1);
@@ -204,11 +182,7 @@ public class group_adapter extends BaseAdapter
 				fadeIn2.setInterpolator(new DecelerateInterpolator());
 				v.setAnimation(fadeIn2);
 				v.setVisibility(View.VISIBLE);
-				main_view.update_group_order(group_list);
-			}
-			else if(action == DragEvent.ACTION_DRAG_ENDED)
-			{
-				//default:
+				main_view.update_group_order(group_array);
 			}
 			return true;
 		}
@@ -217,21 +191,21 @@ public class group_adapter extends BaseAdapter
 	private void rearrange_groups(String previous, String next)
 	{
 		int i = 0;
-		while(!previous.equals(group_list.get(i))){
+		while(!previous.equals(group_array[i])){
 			i++;
 		}
 		int j = 0;
-		while(!next.equals(group_list.get(j))){
+		while(!next.equals(group_array[j])){
 			j++;
 		}
-		String old_info = info_list.get(i);
-		String old = group_list.get(i);
+		String old_info = info_array[i];
+		String old 		= group_array[i];
 
-		info_list.set(i, info_list.get(j));
-		group_list.set(i, group_list.get(j));
+		info_array[i] 	= info_array[j];
+		group_array[i] 	= group_array[j];
 
-		info_list.set(j, old_info);
-		group_list.set(j, old);
+		info_array[j]	= old_info;
+		group_array[j]	= old;
 	}
 
 	private class custom_drag_builder extends View.DragShadowBuilder

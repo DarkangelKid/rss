@@ -11,8 +11,8 @@ import java.util.List;
 
 public class feed_adapter extends BaseAdapter
 {
-	private static final List<String> title_list = new ArrayList<String>();
-	private static final List<String> info_list = new ArrayList<String>();
+	private static String[] title_array = new String[0];
+	private static String[] info_array = new String[0];
 
 	private static LayoutInflater inflater;
 
@@ -21,28 +21,22 @@ public class feed_adapter extends BaseAdapter
 		inflater = (LayoutInflater) context_main.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 
-	public void add_list(String new_title, String new_info)
+	public void set_items(String[] new_titles, String[] new_infos)
 	{
-		title_list.add(new_title);
-		info_list.add(new_info);
+		title_array = new_titles;
+		info_array = new_infos;
 	}
 
-	public void add_list_pos(int pos, String new_title, String new_info)
+	public void set_position(int pos, String new_title, String new_info)
 	{
-		title_list.add(pos, new_title);
-		info_list.add(pos, new_info);
-	}
-
-	public void clear_list()
-	{
-		title_list.clear();
-		info_list.clear();
+		title_array[pos]	= new_title;
+		info_array[pos]		= new_info;
 	}
 
 	@Override
 	public int getCount()
 	{
-		return title_list.size();
+		return title_array.length;
 	}
 
 	@Override
@@ -53,19 +47,19 @@ public class feed_adapter extends BaseAdapter
 
 	public void remove_item(int position)
 	{
-		title_list.remove(position);
-		info_list.remove(position);
+		title_array	= utilities.remove_element(title_array, position);
+		info_array	= utilities.remove_element(info_array, position);
 	}
 
 	@Override
 	public String getItem(int position)
 	{
-		return title_list.get(position);
+		return title_array[position];
 	}
 
 	public String get_info(int position)
 	{
-			return info_list.get(position);
+		return info_array[position];
 	}
 
 	@Override
@@ -84,10 +78,8 @@ public class feed_adapter extends BaseAdapter
 			else
 				holder = (ViewHolder) convertView.getTag();
 
-			holder.title_view.setText(title_list.get(position));
-			holder.info_view.setText(info_list.get(position));
-
-			//convertView.setOnLongClickListener(new long_press_listener());
+			holder.title_view.setText(title_array[position]);
+			holder.info_view.setText(info_array[position]);
 
 			return convertView;
 	}

@@ -121,7 +121,7 @@ public class card_adapter extends BaseAdapter
 	{
 		if(first)
 		{
-			listview	= (ListView) parent;
+			listview = (ListView) parent;
 			listview.setOnScrollListener(new AbsListView.OnScrollListener()
 			{
 				@Override
@@ -174,50 +174,43 @@ public class card_adapter extends BaseAdapter
 		else
 			holder = (ViewHolder) convertView.getTag();
 
-		final String title 					= content_titles.get(position);
-		String description 					= content_des.get(position);
-		final String link					= content_links.get(position);
-		final int height 					= content_height.get(position);
-		final int width						= content_width.get(position);
-		boolean image_exists 				= false;
+		String title 				= content_titles.get(position);
+		String description 			= content_des.get(position);
+		final String link			= content_links.get(position);
+		final int height 			= content_height.get(position);
+		final int width				= content_width.get(position);
+		boolean image_exists 		= false;
 
 		if(width > 32)
 			image_exists = true;
 
 		if(image_exists)
 		{
-			final String image_path = content_images.get(position);
-				load(image_path, holder.image_view);
-		}
-		if((description.contains(title))||(description.length() < 6))
-			description = "";
+			holder.image_view.setVisibility(View.VISIBLE);
+			ViewGroup.LayoutParams iv = holder.image_view.getLayoutParams();
+			iv.height	= (int) ((((double) screen_width)/(width)) * (height));
+			iv.width	= LayoutParams.MATCH_PARENT;
+			holder.image_view.setLayoutParams(iv);
 
-		ViewGroup.LayoutParams iv = holder.image_view.getLayoutParams();
-		if((image_exists)&&(!description.isEmpty()))
-		{
-			/// The height for this needs to be divided by the shrink ratio.
-			holder.description_view.setPadding(eight, 0, eight, eight);
-			iv.height 					= height;
-			iv.width 					= LayoutParams.WRAP_CONTENT;
-			holder.image_view.setLayoutParams(iv);
-		}
-		else if(image_exists)
-		{
-			iv.height 					= (int) (((screen_width + 0.1)/(width + 0.1)) * (height + 0.1));
-			iv.width 					= LayoutParams.MATCH_PARENT;
-			holder.image_view.setLayoutParams(iv);
+			load(content_images.get(position), holder.image_view);
 		}
 		else
+			holder.image_view.setVisibility(View.GONE);
+
+		if(!description.equals(""))
 		{
-			holder.description_view.setPadding(eight, 0, eight, eight);
-			iv.height 					= 0;
-			iv.width 					= 0;
-			holder.image_view.setLayoutParams(iv);
+			holder.description_view.setVisibility(View.VISIBLE);
+			if(image_exists)
+				holder.description_view.setPadding(eight, eight, eight, eight);
+			else
+				holder.description_view.setPadding(eight, 0, eight, eight);
+			holder.description_view.setText(description);
 		}
+		else
+			holder.description_view.setVisibility(View.GONE);
 
 		holder.title_view.setText(title);
 		holder.time_view.setText(link);
-		holder.description_view.setText(description);
 		return convertView;
 	}
 
@@ -232,13 +225,6 @@ public class card_adapter extends BaseAdapter
 		TextView time_view;
 		TextView description_view;
 		ImageView image_view;
-	}
-
-	private static Bitmap decodeFile(String filePath)
-	{
-		BitmapFactory.Options o = new BitmapFactory.Options();
-		o.inSampleSize = 1;
-		return BitmapFactory.decodeFile(filePath, o);
 	}
 
 	private void load(String path, ImageView imageView)
@@ -316,16 +302,21 @@ public class card_adapter extends BaseAdapter
 		protected Bitmap doInBackground(String... ton)
 		{
 			url = ton[0];
-			return decodeFile(url);
+			BitmapFactory.Options o = new BitmapFactory.Options();
+			o.inSampleSize = 1;
+			Bitmap bit = BitmapFactory.decodeFile(url, o);
+			addBitmapToCache(url, bit);
+			return bit;
 		}
 
 		@Override
 		protected void onPostExecute(Bitmap im)
 		{
-			if (isCancelled())
+			if(isCancelled())
+			{
 				im = null;
-
-			addBitmapToCache(url, im);
+				return;
+			}
 
 			if (imageViewReference != null)
 			{
