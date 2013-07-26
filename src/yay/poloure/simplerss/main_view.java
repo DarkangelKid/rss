@@ -90,8 +90,8 @@ public class main_view extends Activity
 	public static Context application_context, activity_context;
 	public static ViewPager viewpager;
 
-	private static adapter_manage_feeds feed_list_adapter;
-	private static adapter_manage_groups group_list_adapter;
+	public static adapter_manage_feeds feed_list_adapter;
+	public static adapter_manage_groups group_list_adapter;
 	private static fragment_manage_group fragment_manage_group_store;
 	private static fragment_manage_feed fragment_feeds_store;
 	public static adapter_navigation_drawer nav_adapter;
@@ -214,20 +214,8 @@ public class main_view extends Activity
 		super.onConfigurationChanged(newConfig);
 		drawer_toggle.onConfigurationChanged(newConfig);
 	}
-	///
 
-	public static void add_feed(String feed_name, String feed_url, String feed_group)
-	{
-		utilities.append_string_to_file(storage + "groups/" + feed_group + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|\n");
-		utilities.append_string_to_file(storage + "groups/" + all_string + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|group|" + feed_group + "|\n");
-
-		if(feed_list_adapter != null)
-			new refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-		if(group_list_adapter != null)
-			new refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-	}
-
-	private static class refresh_manage_feeds extends AsyncTask<Void, String[], Long>
+	public static class refresh_manage_feeds extends AsyncTask<Void, String[], Long>
 	{
 		final Animation animFadeIn = AnimationUtils.loadAnimation(activity_context, android.R.anim.fade_in);
 		private ListView listview;
@@ -272,7 +260,7 @@ public class main_view extends Activity
 		}
 	}
 
-	private static class refresh_manage_groups extends AsyncTask<Void, String[], Long>
+	public static class refresh_manage_groups extends AsyncTask<Void, String[], Long>
 	{
 		final Animation animFadeIn = AnimationUtils.loadAnimation(activity_context, android.R.anim.fade_in);
 		private ListView listview;
@@ -342,57 +330,6 @@ public class main_view extends Activity
 			listview.setAnimation(animFadeIn);
 			listview.setVisibility(View.VISIBLE);
 		}
-	}
-
-	public static void edit_feed(String old_name, String new_name, String new_url, String old_group, String new_group, int position)
-	{
-		/// Delete the feed info from the all group and add the new group info to the end of the all content file.
-		utilities.remove_string_from_file(storage + "groups/" + all_string + ".txt", old_name, true);
-		utilities.append_string_to_file(storage + "groups/" + all_string + ".txt", "name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|\n");
-
-		/// If we have renamed the title, rename the content/title.txt file.
-		if(!old_name.equals(new_name))
-			(new File(storage + "content/" + old_name + ".store.txt.content.txt"))
-			.renameTo((new File(storage + "content/" + new_name + ".store.txt.content.txt")));
-
-		/// If we moved to a new group, delete the old cache file, force a refresh, and refresh the new one.
-		if(!old_group.equals(new_group))
-		{
-			/// Remove the line from the old group file containing the old_feed_name and add to the new group file.
-			utilities.remove_string_from_file(storage + "groups/" + old_group + ".txt", old_name, true);
-			utilities.append_string_to_file(storage + "groups/" + new_group + ".txt", "name|" +  new_name + "|url|" + new_url + "|\n");
-
-			/// If the above group file no longer exists because there are no lines left, remove the group from the group list.
-			utilities.delete_if_empty("groups/" + old_group + ".txt");
-			if(!utilities.exists("groups/" + old_group + ".txt"))
-				utilities.remove_string_from_file(storage + "groups/group_list.txt", old_group, false);
-		}
-		/// The group is the same but the titles and urls may have changed.
-		else
-		{
-			utilities.remove_string_from_file(storage + "groups/" + old_group + ".txt", old_name, true);
-			utilities.append_string_to_file(storage + "groups/" + old_group + ".txt", "name|" +  new_name + "|url|" + new_url + "|\n");
-		}
-
-		/// Add the new feeds to the adapter_manage_feeds (Manage/Feeds).
-		feed_list_adapter.set_position(position, new_name, new_url + "\n" + new_group + " • " + Integer.toString(utilities.count_lines(storage + "content/" + new_name + ".store.txt.content.txt") - 1) + " items");
-		feed_list_adapter.notifyDataSetChanged();
-
-		update_groups();
-		new refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-		new refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
-		utilities.sort_group_content_by_time(storage, all_string);
-		if(utilities.exists("groups/" + old_group + ".txt"))
-			utilities.sort_group_content_by_time(storage, old_group);
-		if(utilities.exists("groups/" + new_group + ".txt"))
-			utilities.sort_group_content_by_time(storage, new_group);
-	}
-
-	public static void add_group(String group_name)
-	{
-		utilities.append_string_to_file(storage + "groups/group_list.txt", group_name + "\n");
-		update_groups();
 	}
 
 	protected void onStop()
@@ -1115,7 +1052,7 @@ public class main_view extends Activity
 				edit_dialog.show();
 	}
 
-	private static void update_groups()
+	public static void update_groups()
 	{
 		final int previous_size = current_groups.size();
 

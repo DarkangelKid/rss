@@ -27,10 +27,64 @@ import java.io.IOException;
 
 import android.os.Debug;
 import android.text.format.Time;
-import android.util.Log;
 
 public class utilities
 {
+	public static void add_feed(String storage, String feed_name, String feed_url, String feed_group, String all_string)
+	{
+		append_string_to_file(storage + "groups/" + feed_group + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|\n");
+		append_string_to_file(storage + "groups/" + all_string + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|group|" + feed_group + "|\n");
+
+		if(main_view.feed_list_adapter != null)
+			new main_view.refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		if(main_view.group_list_adapter != null)
+			new main_view.refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+	}
+
+	public static void edit_feed(String storage, String old_name, String new_name, String new_url, String old_group, String new_group, int position, String all_string)
+	{
+		remove_string_from_file(storage + "groups/" + all_string + ".txt", old_name, true);
+		append_string_to_file(storage + "groups/" + all_string + ".txt", "name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|\n");
+
+		if(!old_name.equals(new_name))
+			(new File(storage + "content/" + old_name + ".store.txt.content.txt"))
+			.renameTo((new File(storage + "content/" + new_name + ".store.txt.content.txt")));
+
+		if(!old_group.equals(new_group))
+		{
+			remove_string_from_file(storage + "groups/" + old_group + ".txt", old_name, true);
+			append_string_to_file(storage + "groups/" + new_group + ".txt", "name|" +  new_name + "|url|" + new_url + "|\n");
+
+			delete_if_empty("groups/" + old_group + ".txt");
+			if(!exists("groups/" + old_group + ".txt"))
+				remove_string_from_file(storage + "groups/group_list.txt", old_group, false);
+		}
+		else
+		{
+			remove_string_from_file(storage + "groups/" + old_group + ".txt", old_name, true);
+			append_string_to_file(storage + "groups/" + old_group + ".txt", "name|" +  new_name + "|url|" + new_url + "|\n");
+		}
+
+		main_view.feed_list_adapter.set_position(position, new_name, new_url + "\n" + new_group + " • " + Integer.toString(count_lines(storage + "content/" + new_name + ".store.txt.content.txt") - 1) + " items");
+		main_view.feed_list_adapter.notifyDataSetChanged();
+
+		main_view.update_groups();
+		new main_view.refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		new main_view.refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+		sort_group_content_by_time(storage, all_string);
+		if(exists("groups/" + old_group + ".txt"))
+			sort_group_content_by_time(storage, old_group);
+		if(exists("groups/" + new_group + ".txt"))
+			sort_group_content_by_time(storage, new_group);
+	}
+
+	public static void add_group(String storage, String group_name)
+	{
+		append_string_to_file(storage + "groups/group_list.txt", group_name + "\n");
+		main_view.update_groups();
+	}
+
 	public static void delete_group(String storage, String group)
 	{
 		/// Move all feeds to an unsorted group.
@@ -587,7 +641,7 @@ public class utilities
 							data2 = new byte[512];
 							in.read(data2, 0, 512);
 
-							data = utilities.concat_byte_arrays(data, data2);
+							data = concat_byte_arrays(data, data2);
 							line = new String(data);
 						}
 						final int ind = line.indexOf(">", line.indexOf("<title")) + 1;
@@ -608,13 +662,13 @@ public class utilities
 		{
 			if(!real)
 			{
-				utilities.toast_message(main_view.activity_context, "Invalid RSS URL", false);
+				toast_message(main_view.activity_context, "Invalid RSS URL", false);
 				button.setEnabled(true);
 			}
 			else
 			{
 				if(!existing_group)
-					main_view.add_group(group);
+					main_view.add_group(storage, group);
 				if(name.isEmpty())
 					name = feed_title;
 
@@ -622,9 +676,9 @@ public class utilities
 
 				if(mode.equals("edit"))
 					/// current title and group are pulled from the air.
-					main_view.edit_feed(current_title, name, url, current_group, group, pos);
+					main_view.edit_feed(storage, current_title, name, url, current_group, group, pos);
 				else
-					main_view.add_feed(name, url, group);
+					main_view.add_feed(storage, name, url, group);
 
 				dialog.dismiss();
 			}
