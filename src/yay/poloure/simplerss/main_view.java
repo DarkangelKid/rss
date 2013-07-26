@@ -228,7 +228,7 @@ public class main_view extends Activity
 		}
 
 		@Override
-		protected Long doInBackground(Void... hey)
+		protected Long doInBackground(Void[] hey)
 		{
 			if(feed_list_adapter != null)
 			{
@@ -246,7 +246,7 @@ public class main_view extends Activity
 		}
 
 		@Override
-		protected void onProgressUpdate(String[]... progress)
+		protected void onProgressUpdate(String[][] progress)
 		{
 			feed_list_adapter.set_items(progress[0], progress[1]);
 			feed_list_adapter.notifyDataSetChanged();
@@ -274,7 +274,7 @@ public class main_view extends Activity
 		}
 
 		@Override
-		protected Long doInBackground(Void... hey)
+		protected Long doInBackground(Void[] hey)
 		{
 			if(group_list_adapter != null)
 			{
@@ -305,7 +305,7 @@ public class main_view extends Activity
 							info += content[j].concat(", ");
 
 						if(content.length > 3)
-							info += "...";
+							info += "[]";
 						else if(number > 0)
 							info += content[number - 1];
 					}
@@ -318,7 +318,7 @@ public class main_view extends Activity
 		}
 
 		@Override
-		protected void onProgressUpdate(String[]... progress)
+		protected void onProgressUpdate(String[][] progress)
 		{
 			group_list_adapter.set_items(progress[0], progress[1]);
 			group_list_adapter.notifyDataSetChanged();
@@ -615,7 +615,7 @@ public class main_view extends Activity
 		{
 			final View view = inflater.inflate(R.layout.manage_filters, container, false);
 			filter_list = (ListView) view.findViewById(R.id.filter_listview);
-			group_list_adapter = new group_adapter(getActivity());
+			group_list_adapter = new adapter_manage_groups(getActivity());
 			filter_list.setAdapter(group_list_adapter);
 			new refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 			filter_list.setOnItemLongClickListener
@@ -985,7 +985,7 @@ public class main_view extends Activity
 						catch(Exception e){
 							spinner_group = "Unsorted";
 						}
-						new utilities.check_feed_exists(alertDialog, new_group, feed_name, "add", spinner_group, "", "", 0).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
+						new utilities.check_feed_exists(alertDialog, new_group, feed_name, "add", spinner_group, "", "", 0, all_string).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
 					}
 				});
 				alertDialog.show();
@@ -1045,7 +1045,7 @@ public class main_view extends Activity
 							String feed_name 		= ((EditText) edit_rss_dialog.findViewById(R.id.name_edit)).getText().toString().trim();
 							String spinner_group 	= ((Spinner) edit_rss_dialog.findViewById(R.id.group_spinner)).getSelectedItem().toString();
 
-							new utilities.check_feed_exists(edit_dialog, new_group, feed_name, "edit", spinner_group, current_group, current_title, position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
+							new utilities.check_feed_exists(edit_dialog, new_group, feed_name, "edit", spinner_group, current_group, current_title, position, all_string).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
 					}
 				});
 
@@ -1138,7 +1138,7 @@ public class main_view extends Activity
 		}
 
 		@Override
-		protected Void doInBackground(Void... hey)
+		protected Void doInBackground(Void[] hey)
 		{
 			/// while the service is running on new_items and this page is refreshing.
 			if(new_items.get(page_number))
@@ -1284,7 +1284,7 @@ public class main_view extends Activity
 		}
 
 		@Override
-		protected void onProgressUpdate(Object... progress)
+		protected void onProgressUpdate(Object[] progress)
 		{
 			/*int index = lv.getFirstVisiblePosition() + 1;
 			View v = lv.getChildAt(0);

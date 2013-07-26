@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
+import java.util.Locale;
 
 import java.io.File;
 import java.io.BufferedInputStream;
@@ -155,7 +156,7 @@ public class utilities
 			sort_group_content_by_time(storage, current_groups.get(0));
 	}
 
-	public static void toast_message(Context activity_context, String message, final Boolean short_long)
+	public static void toast_message(Context activity_context, CharSequence message, final Boolean short_long)
 	{
 		Toast message_toast;
 		if(short_long)
@@ -255,7 +256,7 @@ public class utilities
 
 	public static String[] read_single_to_array(String file_path, String type)
 	{
-		int next, offset, k, j;
+		int next, offset, j;
 		String line;
 		char ch;
 		List<String> lines = new ArrayList<String>();
@@ -275,8 +276,6 @@ public class utilities
 
 		for(j = 0; j < lines.size(); j++)
 		{
-			next = 0;
-			offset = 0;
 			line = lines.get(j);
 			if((next = line.indexOf(type, 0)) != -1)
 			{
@@ -320,7 +319,6 @@ public class utilities
 
 		for(j = 0; j < lines.size(); j++)
 		{
-			next = 0;
 			offset = 0;
 			line = lines.get(j);
 			while((next = line.indexOf('|', offset)) != -1)
@@ -357,7 +355,7 @@ public class utilities
 
 	public static String[][] load_csv_to_array(String file_path)
 	{
-		int next, offset, k, j;
+		int next, offset, j;
 		String line;
 		char ch;
 
@@ -377,7 +375,6 @@ public class utilities
 
 		for(j = 0; j < lines.size(); j++)
 		{
-			next = 0;
 			offset = 0;
 			line = lines.get(j);
 			while((next = line.indexOf('|', offset)) != -1)
@@ -461,8 +458,7 @@ public class utilities
 	{
 		List<String> current_groups = read_file_to_list(storage + "groups/group_list.txt");
 		List<Integer> unread_list = new ArrayList<Integer>();
-		List<String> count_list;
-		int sized, i, total = 0;
+		int total = 0;
 		adapter_feeds_cards ith = null;
 		main_view.fragment_card fc;
 		final int size = current_groups.size();
@@ -476,7 +472,7 @@ public class utilities
 			}
 			catch(Exception e){
 			}
-			/// TODO: Or if no items are in the list.
+
 			if(ith == null)
 				unread_list.add(0);
 			else
@@ -556,21 +552,23 @@ public class utilities
 			out2.write(Integer.toString(map.size()));
 			out2.close();
 		}
-		catch(Exception e){
+		catch(Exception e)
+		{
 			log(storage, "Failed to write the group content file.");
 		}
 	}
 
-	public static class check_feed_exists extends AsyncTask<String, Void, Integer>
+	public static class check_feed_exists extends AsyncTask<String, Void, String[]>
 	{
-		private Boolean existing_group = false, real = false;
-		AlertDialog dialog;
-		String group, name, mode, url, feed_title, spinner_group, current_group, current_title;
-		Button button;
-		int pos;
-		private static final Pattern illegal_file_chars = Pattern.compile("[/\\?%*|<>:]");
+		private static Boolean existing_group = false, real = false;
+		private static AlertDialog dialog;
+		private static String group, name, mode, all_string;
+		private static String spinner_group, current_group, current_title;
+		private static Button button;
+		private static int pos;
+		private static Pattern illegal_file_chars = Pattern.compile("[/\\?%*|<>:]");
 
-		public check_feed_exists(AlertDialog edit_dialog, String new_group, String feed_name, String moder, String spin_group, String current_tit, String current_grop, int position)
+		public check_feed_exists(AlertDialog edit_dialog, String new_group, String feed_name, String moder, String spin_group, String current_tit, String current_grop, int position, String all_str)
 		{
 			dialog			= edit_dialog;
 			group			= new_group;
@@ -581,19 +579,22 @@ public class utilities
 			current_title	= current_tit;
 			button			= dialog.getButton(AlertDialog.BUTTON_POSITIVE);
 			pos				= position;
-			button.setEnabled(false);
+			all_string		= all_str;
+			if(button != null)
+				button.setEnabled(false);
 		}
 
 		@Override
-		protected Integer doInBackground(String... urler)
+		protected String[] doInBackground(String[] urler)
 		{
 			/// If the group entry has text, check to see if it is an old group or if it is new.
+			String url = "", feed_title = "";
 			if(group.length()>0)
 			{
 				final List<String> current_groups = read_file_to_list(main_view.storage + "groups/group_list.txt");
 				for(String gro : current_groups)
 				{
-					if((gro.toLowerCase()).equals(group.toLowerCase()))
+					if((gro.toLowerCase(Locale.getDefault())).equals(group.toLowerCase(Locale.getDefault())))
 					{
 						group = gro;
 						existing_group = true;
@@ -605,7 +606,7 @@ public class utilities
 					group = "";
 
 					for(String word: words)
-						group += (word.substring(0, 1).toUpperCase()).concat(word.substring(1).toLowerCase()) + " ";
+						group += (word.substring(0, 1).toUpperCase(Locale.getDefault())).concat(word.substring(1).toLowerCase(Locale.getDefault())) + " ";
 					group = group.substring(0, group.length() - 1);
 				}
 
@@ -616,14 +617,11 @@ public class utilities
 				existing_group = true;
 			}
 
-			List<String> check_list = new ArrayList<String>();
+			String[] check_list;
 			if(!urler[0].contains("http"))
-			{
-				check_list.add("http://" + urler[0]);
-				check_list.add("https://" + urler[0]);
-			}
+				check_list = new String[]{"http://" + urler[0], "https://" + urler[0]};
 			else
-				check_list.add(urler[0]);
+				check_list = new String[]{urler[0]};
 
 			try
 			{
@@ -652,33 +650,36 @@ public class utilities
 					}
 				}
 			}
-			catch(Exception e){
+			catch(Exception e)
+			{
 			}
-			return 0;
+			return new String[]{url, feed_title};
 		}
 
 		@Override
-		protected void onPostExecute(Integer end)
+		protected void onPostExecute(String[] ton)
 		{
 			if(!real)
 			{
-				toast_message(main_view.activity_context, "Invalid RSS URL", false);
-				button.setEnabled(true);
+				toast_message(main_view.activity_context, main_view.activity_context.getString(R.string.feed_invalid), false);
+				if(button != null)
+					button.setEnabled(true);
 			}
 			else
 			{
+				String storage = main_view.storage;
 				if(!existing_group)
-					main_view.add_group(storage, group);
+					add_group(storage, group);
 				if(name.isEmpty())
-					name = feed_title;
+					name = ton[1];
 
 				name = illegal_file_chars.matcher(name).replaceAll("");
 
 				if(mode.equals("edit"))
 					/// current title and group are pulled from the air.
-					main_view.edit_feed(storage, current_title, name, url, current_group, group, pos);
+					edit_feed(storage, current_title, name, ton[0], current_group, group, pos, all_string);
 				else
-					main_view.add_feed(storage, name, url, group);
+					add_feed(storage, name, ton[0], group, all_string);
 
 				dialog.dismiss();
 			}
