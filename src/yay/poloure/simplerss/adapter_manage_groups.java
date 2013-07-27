@@ -186,7 +186,7 @@ public class adapter_manage_groups extends BaseAdapter
 				v.setVisibility(View.VISIBLE);
 
 				utilities.write_array_to_file(main_view.storage + main_view.GROUP_LIST, group_array);
-				main_view.update_groups("");
+				main_view.update_groups();
 			}
 			return true;
 		}

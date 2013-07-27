@@ -51,7 +51,7 @@ class parsered
 		dump_path				= file_name.concat(".content.dump.txt");
 		url_path				= file_name.concat(".content.url.txt");
 		final File in			= new File(file_name);
-		final File out			= new File(file_name.concat(".content.txt"));
+		final File out			= new File(file_name.concat(main_view.CONTENT_APPENDIX));
 		Set<String> set			= new LinkedHashSet<String>();
 		Boolean write_mode		= false;
 		Boolean c_mode			= false;
@@ -107,16 +107,16 @@ class parsered
 				if(!image.isEmpty())
 				{
 					line.append("image|").append(image).append('|'); /// ends with a |
-					image_name = image.substring(image.lastIndexOf("/") + 1, image.length());
+					image_name = image.substring(image.lastIndexOf(main_view.SEPAR) + 1, image.length());
 
-					if(!utilities.exists(storage + "images/" + image_name))
-						utilities.download_file(image, storage + "images/" + image_name);
-					if(!utilities.exists(storage + "thumbnails/" + image_name))
+					if(!utilities.exists(storage + main_view.IMAGE_DIRECTORY + image_name))
+						utilities.download_file(image, storage + main_view.IMAGE_DIRECTORY + image_name);
+					if(!utilities.exists(storage + main_view.THUMBNAIL_DIRECTORY + image_name))
 						compress_file(storage, image_name);
 
 					/// TODO: If it does exist, skip this next step somehow. (turn write mode to false)
 
-					BitmapFactory.decodeFile(storage + "thumbnails/" + image_name, options);
+					BitmapFactory.decodeFile(storage + main_view.THUMBNAIL_DIRECTORY + image_name, options);
 					line.append("width|").append(options.outWidth).append('|')
 						.append("height|").append(options.outHeight).append('|');
 				}
@@ -257,7 +257,7 @@ class parsered
 		final String[] feeds = set.toArray(new String[set.size()]);
 
 		/// TODO: May already be the out File.
-		final BufferedWriter write = new BufferedWriter(new FileWriter(file_name + ".content.txt", true));
+		final BufferedWriter write = new BufferedWriter(new FileWriter(file_name + main_view.CONTENT_APPENDIX, true));
 		for(String feed : feeds)
 			write.write(feed + "\n");
 		write.close();
@@ -424,7 +424,7 @@ class parsered
 
 		BitmapFactory.Options o = new BitmapFactory.Options();
 		o.inJustDecodeBounds = true;
-		BitmapFactory.decodeFile(path + "images/" + image_name, o);
+		BitmapFactory.decodeFile(path + main_view.IMAGE_DIRECTORY + image_name, o);
 
 		int width_tmp = o.outWidth;
 
@@ -432,11 +432,11 @@ class parsered
 
 		BitmapFactory.Options o2 = new BitmapFactory.Options();
 		o2.inSampleSize = insample;
-		Bitmap bitmap = BitmapFactory.decodeFile(path + "images/" + image_name, o2);
+		Bitmap bitmap = BitmapFactory.decodeFile(path + main_view.IMAGE_DIRECTORY + image_name, o2);
 
 		try
 		{
-			FileOutputStream out = new FileOutputStream(path + "thumbnails/" + image_name);
+			FileOutputStream out = new FileOutputStream(path + main_view.THUMBNAIL_DIRECTORY + image_name);
 			bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
 		}
 		catch (Exception e){

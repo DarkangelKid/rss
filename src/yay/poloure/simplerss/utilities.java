@@ -39,8 +39,8 @@ public class utilities
 {
 	public static void add_feed(String storage, String feed_name, String feed_url, String feed_group, String all_string)
 	{
-		append_string_to_file(storage + "groups/" + feed_group + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|\n");
-		append_string_to_file(storage + "groups/" + all_string + ".txt", "name|" +  feed_name + "|url|" + feed_url + "|group|" + feed_group + "|\n");
+		append_string_to_file(storage + main_view.GROUPS_DIRECTORY + feed_group + main_view.TXT, "name|" +  feed_name + "|url|" + feed_url + "|\n");
+		append_string_to_file(storage + main_view.ALL_FILE, "name|" +  feed_name + "|url|" + feed_url + "|group|" + feed_group + "|\n");
 
 		if(main_view.feed_list_adapter != null)
 			new main_view.refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -50,60 +50,66 @@ public class utilities
 
 	public static void edit_feed(String storage, String old_name, String new_name, String new_url, String old_group, String new_group, int position, String all_string)
 	{
-		remove_string_from_file(storage + "groups/" + all_string + ".txt", old_name, true);
-		append_string_to_file(storage + "groups/" + all_string + ".txt", "name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|\n");
+		String all_group_file	= storage + main_view.ALL_FILE;
+		String old_group_file	= storage + main_view.GROUPS_DIRECTORY + old_group + main_view.TXT;
+		String new_group_file	= storage + main_view.GROUPS_DIRECTORY + new_group + main_view.TXT;
+		String old_content_file	= storage + main_view.CONTENT_DIRECTORY + old_name + main_view.PARSED_APPENDIX;
+		String new_content_file = storage + main_view.CONTENT_DIRECTORY + new_name + main_view.PARSED_APPENDIX;
+
+		remove_string_from_file(all_group_file, old_name, true);
+		append_string_to_file(all_group_file, "name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|\n");
 
 		if(!old_name.equals(new_name))
-			(new File(storage + "content/" + old_name + ".store.txt.content.txt"))
-			.renameTo((new File(storage + "content/" + new_name + ".store.txt.content.txt")));
+			(new File(old_content_file))
+			.renameTo((new File(new_content_file)));
 
 		if(!old_group.equals(new_group))
 		{
-			remove_string_from_file(storage + "groups/" + old_group + ".txt", old_name, true);
-			append_string_to_file(storage + "groups/" + new_group + ".txt", "name|" +  new_name + "|url|" + new_url + "|\n");
+			remove_string_from_file(old_group_file, old_name, true);
+			append_string_to_file(new_group_file, "name|" +  new_name + "|url|" + new_url + "|\n");
 
-			delete_if_empty("groups/" + old_group + ".txt");
-			if(!exists("groups/" + old_group + ".txt"))
+			delete_if_empty(old_group_file);
+			if(!exists(old_group_file))
 				remove_string_from_file(storage + main_view.GROUP_LIST, old_group, false);
 		}
 		else
 		{
-			remove_string_from_file(storage + "groups/" + old_group + ".txt", old_name, true);
-			append_string_to_file(storage + "groups/" + old_group + ".txt", "name|" +  new_name + "|url|" + new_url + "|\n");
+			remove_string_from_file(old_group_file, old_name, true);
+			append_string_to_file(old_group_file, "name|" +  new_name + "|url|" + new_url + "|\n");
 		}
 
-		main_view.feed_list_adapter.set_position(position, new_name, new_url + "\n" + new_group + " • " + Integer.toString(count_lines(storage + "content/" + new_name + ".store.txt.content.txt") - 1) + " items");
+		main_view.feed_list_adapter.set_position(position, new_name, new_url + "\n" + new_group + " • " + Integer.toString(count_lines(storage + main_view.CONTENT_DIRECTORY + new_name + main_view.PARSED_APPENDIX) - 1) + " items");
 		main_view.feed_list_adapter.notifyDataSetChanged();
 
-		main_view.update_groups("");
+		main_view.update_groups();
 		new main_view.refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		new main_view.refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 		sort_group_content_by_time(storage, all_string);
-		if(exists("groups/" + old_group + ".txt"))
+		if(exists(old_group_file))
 			sort_group_content_by_time(storage, old_group);
-		if(exists("groups/" + new_group + ".txt"))
+		if(exists(new_group_file))
 			sort_group_content_by_time(storage, new_group);
 	}
 
 	public static void add_group(String storage, String group_name)
 	{
 		append_string_to_file(storage + main_view.GROUP_LIST, group_name + "\n");
-		main_view.update_groups("");
+		main_view.update_groups();
 	}
 
 	public static void delete_group(String storage, String group)
 	{
 		/// Move all feeds to an unsorted group.
-		//delete(storage + "groups/" + group + ".txt");
-		//delete(storage + "groups/" + group + ".txt.content.txt");
+		//delete(storage + main_view.GROUPS_DIRECTORY + group + main_view.TXT);
+		//delete(storage + main_view.GROUPS_DIRECTORY + group + main_view.GROUP_CONTENT_APPENDIX);
 	}
 
 	public static void save_positions(FragmentManager fragment_manager, ViewPager viewpager, String storage)
 	{
 		adapter_feeds_cards adapter;
 		BufferedWriter out;
-		String url, group;
+		String url, group, feed_content_file;
 		String[] feeds;
 		List<String> lines;
 		Boolean found_url = false;
@@ -119,17 +125,18 @@ public class utilities
 				if(adapter.getCount() > 0)
 				{
 					/// Read each of the content files from the group and find the line with the url.
-					feeds = read_single_to_array(storage + "groups/" + group + ".txt", "name|");
+					feeds = read_single_to_array(storage + main_view.GROUPS_DIRECTORY + group + main_view.TXT, "name|");
 					found_url = false;
 					url = adapter.return_latest_url();
 					if(!url.isEmpty())
 					{
 						for(String feed: feeds)
 						{
-							lines = read_file_to_list(storage + "content/" + feed + ".store.txt.content.txt");
-							delete(storage + "content/" + feed + ".store.txt.content.txt");
+							feed_content_file = storage + main_view.CONTENT_DIRECTORY + feed + main_view.PARSED_APPENDIX;
+							lines = read_file_to_list(feed_content_file);
+							delete(feed_content_file);
 
-							out = new BufferedWriter(new FileWriter(storage + "content/" + feed + ".store.txt.content.txt", true));
+							out = new BufferedWriter(new FileWriter(feed_content_file, true));
 							for(String line : lines)
 							{
 								if(!found_url)
@@ -229,13 +236,16 @@ public class utilities
 		String[] group_array	= new String[size];
 		String[] info_array		= new String[size];
 
+		count_path = storage + main_view.GROUPS_DIRECTORY + current_groups.get(0) + main_view.FULL_COUNT_APPENDIX;
+			if(exists(count_path))
+				total = Integer.parseInt(read_file_to_list(count_path).get(0));
+			else
+				total = count_lines(count_path);
+
 		for(i = 0; i < size; i++)
 		{
 			group_array[i] = current_groups.get(i);
-			content = utilities.read_single_to_array(storage + "groups/" + group_array[i] + ".txt", "name|");
-			count_path = storage + "groups/" + group_array[i] + ".txt.content.txt.count.txt";
-			if(utilities.exists(count_path))
-				total += Integer.parseInt(utilities.read_file_to_list(count_path).get(0));
+			content = read_single_to_array(storage + main_view.GROUPS_DIRECTORY + group_array[i] + main_view.TXT, "name|");
 			if(i == 0)
 				info = (size == 1) ? "1 group" :  size + " groups";
 			else
@@ -396,7 +406,6 @@ public class utilities
 			line = lines.get(j);
 			while((next = line.indexOf('|', offset)) != -1)
 			{
-				//one = line.substring(offset, next);
 				if(offset == line.length())
 					break;
 
@@ -534,7 +543,7 @@ public class utilities
 
 	public static void sort_group_content_by_time(String storage, String group)
 	{
-		final String group_path = storage + "groups/" + group + ".txt.content.txt";
+		final String group_path = storage + main_view.GROUPS_DIRECTORY + group + main_view.GROUP_CONTENT_APPENDIX;
 		String content_path;
 		Time time = new Time();
 		String[] pubDates;
@@ -542,11 +551,11 @@ public class utilities
 		Map<Long, String> map = new TreeMap<Long, String>();
 		int i;
 
-		final String[] feeds_array = read_single_to_array(storage + "groups/" + group + ".txt", "name|");
+		final String[] feeds_array = read_single_to_array(storage + main_view.GROUPS_DIRECTORY + group + main_view.TXT, "name|");
 
 		for(String feed : feeds_array)
 		{
-			content_path = storage + "content/" + feed + ".store.txt.content.txt";
+			content_path = storage + main_view.CONTENT_DIRECTORY + feed + main_view.PARSED_APPENDIX;
 			if(exists(content_path))
 			{
 				content 		= read_file_to_list(content_path);
@@ -639,7 +648,7 @@ public class utilities
 	{
 		final LayoutInflater inflater		= LayoutInflater.from(activity_context);
 		final View edit_rss_dialog			= inflater.inflate(R.layout.add_rss_dialog, null);
-		final String[][] content			= utilities.read_csv_to_array(storage + "groups/"+ current_groups.get(0) + ".txt", 'n', 'u', 'g');
+		final String[][] content			= utilities.read_csv_to_array(storage + main_view.GROUPS_DIRECTORY+ current_groups.get(0) + main_view.TXT, 'n', 'u', 'g');
 		final String current_title			= content[0][position];
 		final String current_url			= content[1][position];
 		final String current_group			= content[2][position];
@@ -692,7 +701,7 @@ public class utilities
 
 	public static void log(String storage, String text)
 	{
-		append_string_to_file(storage + "dump.txt", text + "\n");
+		append_string_to_file(storage + main_view.DUMP_FILE, text + "\n");
 	}
 
 	public static void delete(String file_path)
