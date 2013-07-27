@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.ArrayList;
+import java.util.Collection;
 
 import java.io.File;
 import java.io.BufferedInputStream;
@@ -188,6 +189,73 @@ public class utilities
 		if(a.length != index)
 			System.arraycopy(a, index + 1, b, index, a.length - index - 1);
 		return b;
+	}
+
+	public static void write_collection_to_file(String path, Collection<?> content)
+	{
+		utilities.delete(path);
+		try
+		{
+			BufferedWriter out = new BufferedWriter(new FileWriter(path, true));
+			for(Object item : content)
+				out.write(item.toString() + "\n");
+			out.close();
+		}
+		catch(Exception e)
+		{
+		}
+	}
+
+	public static void write_array_to_file(String path, String[] content)
+	{
+		utilities.delete(path);
+		try
+		{
+			BufferedWriter out = new BufferedWriter(new FileWriter(path, true));
+			for(String item : content)
+				out.write(item + "\n");
+			out.close();
+		}
+		catch(Exception e)
+		{
+		}
+	}
+
+	public static String[][] create_info_arrays(List<String> current_groups, int size, String storage)
+	{
+		String info, count_path;
+		int number, i, j, total = 0;
+		String[] content;
+		String[] group_array	= new String[size];
+		String[] info_array		= new String[size];
+
+		for(i = 0; i < size; i++)
+		{
+			group_array[i] = current_groups.get(i);
+			content = utilities.read_single_to_array(storage + "groups/" + group_array[i] + ".txt", "name|");
+			count_path = storage + "groups/" + group_array[i] + ".txt.content.txt.count.txt";
+			if(utilities.exists(count_path))
+				total += Integer.parseInt(utilities.read_file_to_list(count_path).get(0));
+			if(i == 0)
+				info = (size == 1) ? "1 group" :  size + " groups";
+			else
+			{
+				info = "";
+				number = 3;
+				if(content.length < 3)
+					number = content.length;
+				for(j = 0; j < number - 1; j++)
+					info += content[j].concat(", ");
+
+				if(content.length > 3)
+					info += "...";
+				else if(number > 0)
+					info += content[number - 1];
+			}
+			info_array[i] = Integer.toString(content.length) + " feeds • " + info;
+		}
+		info_array[0] =  total + " items • " + info_array[0];
+		return (new String[][]{info_array, group_array});
 	}
 
 	public static void download_file(String urler, String file_path)
