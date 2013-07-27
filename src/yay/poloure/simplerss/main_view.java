@@ -72,6 +72,7 @@ public class main_view extends Activity
 	private static FragmentManager fragment_manager;
 	public static adapter_manage_feeds feed_list_adapter;
 	public static adapter_manage_groups group_list_adapter;
+	public static adapter_manage_filter filter_list_adapter;
 	public static adapter_navigation_drawer nav_adapter;
 	private static List<String> current_groups 			= new ArrayList<String>();
 	private static List<Boolean> new_items 				= new ArrayList<Boolean>();
@@ -96,6 +97,7 @@ public class main_view extends Activity
 	public static final String COUNT_APPENDIX			= ".count" + TXT;
 	public static final String FULL_COUNT_APPENDIX		= TXT + CONTENT_APPENDIX + COUNT_APPENDIX;
 	public static final String GROUP_LIST				= GROUPS_DIRECTORY + "group_list" + TXT;
+	public static final String FILTER_LIST				= "filter_list" + TXT;
 	public static final String PARSED_APPENDIX			= STORE_APPENDIX + CONTENT_APPENDIX;
 	public static final String GROUP_CONTENT_APPENDIX	= TXT + CONTENT_APPENDIX;
 
@@ -458,7 +460,7 @@ public class main_view extends Activity
 				return true;
 			else if(item.getTitle().equals("add"))
 			{
-				utilities.show_add_dialog(current_groups, activity_context);
+				utilities.show_add_feed_dialog(current_groups, activity_context);
 				return true;
 			}
 			else if(item.getTitle().equals("refresh"))
@@ -525,7 +527,7 @@ public class main_view extends Activity
 		{
 			super.onCreate(savedInstanceState);
 			setRetainInstance(false);
-			setHasOptionsMenu(true);
+			setHasOptionsMenu(false);
 		}
 
 		@Override
@@ -543,7 +545,7 @@ public class main_view extends Activity
 			return manage_view;
 		}
 
-		@Override
+		/*@Override
 		public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
 		{
 			optionsMenu = menu;
@@ -560,16 +562,22 @@ public class main_view extends Activity
 				return true;
 			else if(item.getTitle().equals("add"))
 			{
-				utilities.show_add_dialog(current_groups, activity_context);
+				utilities.show_add_feed_dialog(current_groups, activity_context);
 				return true;
 			}
 			return super.onOptionsItemSelected(item);
-		}
+		}*/
 	}
 
 	public static class fragment_manage_filters extends Fragment
 	{
 		public static ListView filter_list;
+
+		public void onCreate(Bundle savedInstanceState)
+		{
+			super.onCreate(savedInstanceState);
+			setHasOptionsMenu(true);
+		}
 
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -610,11 +618,41 @@ public class main_view extends Activity
 			);
 			return view;
 		}
+		///wank begin
+		@Override
+		public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
+		{
+			optionsMenu = menu;
+			optionsMenu.clear();
+
+			inflater.inflate(R.menu.manage_overflow, optionsMenu);
+			super.onCreateOptionsMenu(optionsMenu, inflater);
+		}
+
+		@Override
+		public boolean onOptionsItemSelected(MenuItem item)
+		{
+			if(drawer_toggle.onOptionsItemSelected(item))
+				return true;
+			else if(item.getTitle().equals("add"))
+			{
+				utilities.show_add_filter_dialog(activity_context, storage);
+				return true;
+			}
+			return super.onOptionsItemSelected(item);
+		}
+		///end
 	}
 
 	public static class fragment_manage_group extends Fragment
 	{
 		public static ListView manage_list;
+
+		public void onCreate(Bundle savedInstanceState)
+		{
+			super.onCreate(savedInstanceState);
+			setHasOptionsMenu(true);
+		}
 
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -652,6 +690,29 @@ public class main_view extends Activity
 			);
 			return view;
 		}
+
+		@Override
+		public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
+		{
+			optionsMenu = menu;
+			optionsMenu.clear();
+
+			inflater.inflate(R.menu.manage_overflow, optionsMenu);
+			super.onCreateOptionsMenu(optionsMenu, inflater);
+		}
+
+		@Override
+		public boolean onOptionsItemSelected(MenuItem item)
+		{
+			if(drawer_toggle.onOptionsItemSelected(item))
+				return true;
+			else if(item.getTitle().equals("add"))
+			{
+				utilities.show_add_feed_dialog(current_groups, activity_context);
+				return true;
+			}
+			return super.onOptionsItemSelected(item);
+		}
 	}
 
 	public static class fragment_manage_feed extends Fragment
@@ -662,6 +723,7 @@ public class main_view extends Activity
 		public void onCreate(Bundle savedInstanceState)
 		{
 			super.onCreate(savedInstanceState);
+			setHasOptionsMenu(true);
 			setRetainInstance(false);
 		}
 
@@ -674,9 +736,10 @@ public class main_view extends Activity
 			(
 				new OnItemClickListener()
 				{
+					@Override
 					public void onItemClick(AdapterView<?> parent, View view, int position, long id)
 					{
-						utilities.show_edit_dialog(current_groups, activity_context, storage, position);
+						utilities.show_edit_feed_dialog(current_groups, activity_context, storage, position);
 					}
 				}
 			);
@@ -701,6 +764,7 @@ public class main_view extends Activity
 							new DialogInterface.OnClickListener()
 							{
 								/// Delete the feed.
+								@Override
 								public void onClick(DialogInterface dialog, int id)
 								{
 									String group = feed_list_adapter.get_info(pos);
@@ -737,6 +801,7 @@ public class main_view extends Activity
 							new DialogInterface.OnClickListener()
 							{
 								/// Delete the feed.
+								@Override
 								public void onClick(DialogInterface dialog, int id)
 								{
 									String group = feed_list_adapter.get_info(pos);
@@ -760,6 +825,30 @@ public class main_view extends Activity
 			);
 			return view;
 		}
+		///shite begin
+		@Override
+		public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
+		{
+			optionsMenu = menu;
+			optionsMenu.clear();
+
+			inflater.inflate(R.menu.manage_overflow, optionsMenu);
+			super.onCreateOptionsMenu(optionsMenu, inflater);
+		}
+
+		@Override
+		public boolean onOptionsItemSelected(MenuItem item)
+		{
+			if(drawer_toggle.onOptionsItemSelected(item))
+				return true;
+			else if(item.getTitle().equals("add"))
+			{
+				utilities.show_add_feed_dialog(current_groups, activity_context);
+				return true;
+			}
+			return super.onOptionsItemSelected(item);
+		}
+		///end
 	}
 
 	public static class pageradapter_feeds extends FragmentPagerAdapter
@@ -802,7 +891,7 @@ public class main_view extends Activity
 		@Override
 		public int getCount()
 		{
-			return 2;
+			return 3;
 		}
 
 		@Override
@@ -823,10 +912,16 @@ public class main_view extends Activity
 		@Override
 		public String getPageTitle(int position)
 		{
-			if(position == 0)
-				return activity_context.getString(R.string.groups_manage_sub);
-			else
-				return activity_context.getString(R.string.feeds_manage_sub);
+			switch(position)
+			{
+				case(0):
+					return activity_context.getString(R.string.groups_manage_sub);
+				case(1):
+					return activity_context.getString(R.string.feeds_manage_sub);
+				case(2):
+					return activity_context.getString(R.string.filters_manage_sub);
+			}
+			return "";
 		}
 	}
 

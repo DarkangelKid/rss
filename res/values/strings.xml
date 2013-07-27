@@ -26,6 +26,7 @@
 
 	<string name="groups_manage_sub">Groups</string>
 	<string name="feeds_manage_sub">Feeds</string>
+	<string name="filters_manage_sub">Filters</string>
 
 	<string name="refresh_cat_preferences">Auto Refresh</string>
 	<string name="refresh_summary_preferences">Check to enable auto refresh</string>
