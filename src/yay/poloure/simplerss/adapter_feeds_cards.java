@@ -147,11 +147,7 @@ public class adapter_feeds_cards extends BaseAdapter
 							top_item_position = firstVisibleItem - 2;
 					}
 					if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
-					{
-						adapter_navigation_drawer nav_adapter = main_view.nav_adapter;
-						nav_adapter.add_count(main_view.get_unread_counts());
-						nav_adapter.notifyDataSetChanged();
-					}
+						main_view.update_navigation_data(null, false);
 				}
 			});
 			first = false;

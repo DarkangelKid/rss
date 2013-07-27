@@ -184,16 +184,8 @@ public class adapter_manage_groups extends BaseAdapter
 				fadeIn2.setInterpolator(new DecelerateInterpolator());
 				v.setAnimation(fadeIn2);
 				v.setVisibility(View.VISIBLE);
-				final String path = main_view.storage + main_view.GROUP_LIST;
-				utilities.delete(path);
-				try{
-					BufferedWriter out = new BufferedWriter(new FileWriter(path, true));
-					for(String group : group_array)
-						out.write(group + "\n");
-					out.close();
-				}
-				catch(Exception e){
-				}
+
+				utilities.write_array_to_file(main_view.storage + main_view.GROUP_LIST, group_array);
 				main_view.update_groups("");
 			}
 			return true;

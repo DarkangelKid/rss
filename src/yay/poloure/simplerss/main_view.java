@@ -196,7 +196,7 @@ public class main_view extends Activity
 		drawer_toggle.onConfigurationChanged(newConfig);
 	}
 
-	public static class refresh_manage_feeds extends AsyncTask<Void, String[], Long>
+	public static class refresh_manage_feeds extends AsyncTask<Void, String[], Void>
 	{
 		private final Animation animFadeIn = AnimationUtils.loadAnimation(activity_context, android.R.anim.fade_in);
 		private final ListView listview;
@@ -209,21 +209,18 @@ public class main_view extends Activity
 		}
 
 		@Override
-		protected Long doInBackground(Void[] hey)
+		protected Void doInBackground(Void... hey)
 		{
 			if(feed_list_adapter != null)
 			{
-				final String[][] content 	= utilities.read_csv_to_array(storage + "groups/"+ current_groups.get(0) + ".txt", 'n', 'u', 'g');
-				final String[] feed_titles 	= content[0];
-				final String[] feed_urls 	= content[1];
-				final String[] feed_groups 	= content[2];
-				final int size 				= feed_titles.length;
+				final String[][] content	= utilities.read_csv_to_array(storage + "groups/"+ current_groups.get(0) + ".txt", 'n', 'u', 'g');
+				final int size				= content[0].length;
 				String[] info_array			= new String[size];
 				for(int i = 0; i < size; i++)
-					info_array[i] = feed_urls[i] + "\n" + feed_groups[i] + " • " + Integer.toString(utilities.count_lines(storage + "content/" + feed_titles[i] + ".store.txt.content.txt")) + " items";
-				publishProgress(feed_titles, info_array);
+					info_array[i] = content[1][i] + "\n" + content[2][i] + " • " + Integer.toString(utilities.count_lines(storage + "content/" + content[0][i] + ".store.txt.content.txt")) + " items";
+				publishProgress(content[0], info_array);
 			}
-			return 0L;
+			return null;
 		}
 
 		@Override
@@ -234,14 +231,14 @@ public class main_view extends Activity
 		}
 
 		@Override
-		protected void onPostExecute(Long tun)
+		protected void onPostExecute(Void tun)
 		{
 			listview.setAnimation(animFadeIn);
 			listview.setVisibility(View.VISIBLE);
 		}
 	}
 
-	public static class refresh_manage_groups extends AsyncTask<Void, String[], Long>
+	public static class refresh_manage_groups extends AsyncTask<Void, String[], Void>
 	{
 		final Animation animFadeIn = AnimationUtils.loadAnimation(activity_context, android.R.anim.fade_in);
 		private final ListView listview;
@@ -255,58 +252,25 @@ public class main_view extends Activity
 		}
 
 		@Override
-		protected Long doInBackground(Void[] hey)
+		protected Void doInBackground(Void... nothing)
 		{
-			if(group_list_adapter != null)
-			{
-				String info, count_path;
-				int number, j, total = 0;
-				String[] content;
-
-				final int size = current_groups.size();
-				String[] group_array = new String[size];
-				String[] info_array = new String[size];
-
-				for(int i = 0; i < size; i++)
-				{
-					group_array[i] = current_groups.get(i);
-					content = utilities.read_single_to_array(storage + "groups/" + group_array[i] + ".txt", "name|");
-					count_path = storage + "groups/" + group_array[i] + ".txt.content.txt.count.txt";
-					if(utilities.exists(count_path))
-						total += Integer.parseInt(utilities.read_file_to_list(count_path).get(0));
-					if(i == 0)
-						info = (size == 1) ? "1 group" :  size + " groups";
-					else
-					{
-						info = "";
-						number = 3;
-						if(content.length < 3)
-							number = content.length;
-						for(j = 0; j < number - 1; j++)
-							info += content[j].concat(", ");
-
-						if(content.length > 3)
-							info += "[]";
-						else if(number > 0)
-							info += content[number - 1];
-					}
-					info_array[i] = Integer.toString(content.length) + " feeds • " + info;
-				}
-				info_array[0] =  total + " items • " + info_array[0];
-				publishProgress(group_array, info_array);
-			}
-			return 0L;
+			String[][] content		= utilities.create_info_arrays(current_groups, current_groups.size(), storage);
+			publishProgress(content[1], content[0]);
+			return null;
 		}
 
 		@Override
 		protected void onProgressUpdate(String[][] progress)
 		{
-			group_list_adapter.set_items(progress[0], progress[1]);
-			group_list_adapter.notifyDataSetChanged();
+			if(group_list_adapter != null)
+			{
+				group_list_adapter.set_items(progress[0], progress[1]);
+				group_list_adapter.notifyDataSetChanged();
+			}
 		}
 
 		@Override
-		protected void onPostExecute(Long tun)
+		protected void onPostExecute(Void nothing)
 		{
 			listview.setAnimation(animFadeIn);
 			listview.setVisibility(View.VISIBLE);
@@ -329,10 +293,7 @@ public class main_view extends Activity
 		}
 		utilities.save_positions(fragment_manager, viewpager, storage);
 
-		/// Save the new_items array to file
-		utilities.delete(storage + "new_items.txt");
-		for(Boolean state : new_items)
-			utilities.append_string_to_file(storage + "new_items.txt", Boolean.toString(state) + "\n");
+		utilities.write_collection_to_file(storage + "new_items.txt", new_items);
 	}
 
 	@Override
@@ -654,9 +615,7 @@ public class main_view extends Activity
 							public void onClick(DialogInterface dialog, int id)
 							{
 								group_list_adapter.remove_item(position);
-								/// delete the group
-								String group = current_groups.get(position);
-								utilities.delete_group(storage, group);
+								utilities.delete_group(storage, current_groups.get(position));
 								group_list_adapter.notifyDataSetChanged();
 							}
 						});
@@ -920,14 +879,7 @@ public class main_view extends Activity
 			else
 				viewpager.getAdapter().notifyDataSetChanged();
 		}
-
-		List<String> nav = new ArrayList<String>();
-		nav.addAll(Arrays.asList("Feeds", "Manage", "Settings", "Groups"));
-		nav.addAll(current_groups);
-
-		nav_adapter.add_list(nav);
-		nav_adapter.add_count(get_unread_counts());
-		nav_adapter.notifyDataSetChanged();
+		update_navigation_data(null, true);
 	}
 
 	private static class refresh_page extends AsyncTask<Void, Object, Void>
@@ -939,7 +891,6 @@ public class main_view extends Activity
 		ListFragment l;
 		adapter_feeds_cards ith;
 		ListView lv;
-		List<String> nav;
 		List<Integer> counts;
 
 		public refresh_page(int page)
@@ -986,10 +937,12 @@ public class main_view extends Activity
 
 			/// Get a set of all the pages items' urls.
 			Set<String> existing_items = new HashSet<String>();
-			try{
+			try
+			{
 				existing_items = new HashSet<String>(utilities.get_adapter_feeds_cards(fragment_manager, viewpager, page_number).return_links());
 			}
-			catch(Exception e){
+			catch(Exception e)
+			{
 			}
 
 			/// For each line of the group_content_file
@@ -1056,10 +1009,6 @@ public class main_view extends Activity
 				}
 			}
 			new_items.set(page_number, false);
-
-			nav = new ArrayList<String>();
-			nav.addAll(Arrays.asList("Feeds", "Manage", "Settings", "Groups"));
-			nav.addAll(current_groups);
 
 			while(lv == null)
 			{
@@ -1133,13 +1082,27 @@ public class main_view extends Activity
 
 			set_refresh(check_service_running());
 
-			nav_adapter.add_list(nav);
-			nav_adapter.add_count(counts);
-			nav_adapter.notifyDataSetChanged();
+			update_navigation_data(counts, false);
 
 			lv.setAnimation(animFadeIn);
 			lv.setVisibility(View.VISIBLE);
 		}
+	}
+
+	public static void update_navigation_data(List<Integer> counts, Boolean update_names)
+	{
+		if(counts == null)
+			counts = get_unread_counts();
+
+		if(update_names)
+		{
+			List<String> nav = new ArrayList<String>();
+			nav.addAll(Arrays.asList("Feeds", "Manage", "Settings", "Groups"));
+			nav.addAll(current_groups);
+			nav_adapter.add_list(nav);
+		}
+		nav_adapter.add_count(counts);
+		nav_adapter.notifyDataSetChanged();
 	}
 
 	public static List<Integer> get_unread_counts()
