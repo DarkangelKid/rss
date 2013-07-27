@@ -30,34 +30,39 @@ class parsered
 	private String[] end								= new String[]{"</link>", "</published>", "</pubDate>", "</description>", "</title", "</content"};
 	private String[] of_types							= new String[]{"<link>", "<published>", "<pubDate>", "<description>", "<title", "<content",
 				"</link>", "</published>", "</pubDate>", "</description>", "</title", "</content", "<entry", "<item", "</entry", "</item"};
-	private String dump_path;
-	private String url_path;
+	private String dump_path, url_path;
 	private final int width;
 
-	public parsered(String file_path, String storage, int widther)
+	public parsered(String storage, String group, String feed, int widther)
 	{
 		width = widther;
 		try
 		{
-			parse_local_xml(file_path, storage);
+			parse_local_xml(storage, group, feed);
 		}
 		catch(IOException e)
 		{
 		}
 	}
 
-	private void parse_local_xml(String file_name, String storage) throws IOException
+	private void parse_local_xml(String storage, String group, String feed) throws IOException
 	{
-		dump_path				= file_name.concat(".content.dump.txt");
-		url_path				= file_name.concat(".content.url.txt");
-		final File in			= new File(file_name);
-		final File out			= new File(file_name.concat(main_view.CONTENT_APPENDIX));
-		Set<String> set			= new LinkedHashSet<String>();
-		Boolean write_mode		= false;
-		Boolean c_mode			= false;
-		Time time				= new Time();
-		BufferedReader reader	= new BufferedReader(new FileReader(in));
-		StringBuilder line		= new StringBuilder();
+		dump_path					= storage + "content.dump" + main_view.TXT;
+		url_path					= storage + "content.url" + main_view.TXT;
+		final String store_file		= storage + feed + main_view.STORE_APPENDIX;
+		final String feed_folder	= storage + main_view.GROUPS_DIRECTORY + group + main_view.SEPAR + feed + main_view.SEPAR;
+		final String content_file	= feed_folder + feed + main_view.CONTENT_APPENDIX;
+		final String image_dir		= feed_folder + main_view.IMAGE_DIRECTORY;
+		final String thumbnail_dir	= feed_folder + main_view.THUMBNAIL_DIRECTORY;
+		final File in				= new File(store_file);
+		final File out				= new File(content_file);
+
+		Set<String> set				= new LinkedHashSet<String>();
+		Boolean write_mode			= false;
+		Boolean c_mode				= false;
+		Time time					= new Time();
+		BufferedReader reader		= new BufferedReader(new FileReader(in));
+		StringBuilder line			= new StringBuilder();
 		String current_tag, temp_line, cont, image, image_name;
 		int tem, tem2, tem3, description_length, take, cont_length, i;
 
@@ -100,6 +105,7 @@ class parsered
 				}
 				line.setLength(0);
 				write_mode = true;
+				line.append("group").append("|").append(group).append("|").append("feed").append("|").append(feed).append("|");
 			}
 			else if((current_tag.contains("</entry"))||(current_tag.contains("</item")))
 			{
@@ -109,14 +115,14 @@ class parsered
 					line.append("image|").append(image).append('|'); /// ends with a |
 					image_name = image.substring(image.lastIndexOf(main_view.SEPAR) + 1, image.length());
 
-					if(!utilities.exists(storage + main_view.IMAGE_DIRECTORY + image_name))
-						utilities.download_file(image, storage + main_view.IMAGE_DIRECTORY + image_name);
-					if(!utilities.exists(storage + main_view.THUMBNAIL_DIRECTORY + image_name))
-						compress_file(storage, image_name);
+					if(!utilities.exists(image_dir + image_name))
+						utilities.download_file(image, image_dir + image_name);
+					if(!utilities.exists(thumbnail_dir + image_name))
+						compress_file(image_dir, thumbnail_dir, image_name);
 
 					/// TODO: If it does exist, skip this next step somehow. (turn write mode to false)
 
-					BitmapFactory.decodeFile(storage + main_view.THUMBNAIL_DIRECTORY + image_name, options);
+					BitmapFactory.decodeFile(thumbnail_dir + image_name, options);
 					line.append("width|").append(options.outWidth).append('|')
 						.append("height|").append(options.outHeight).append('|');
 				}
@@ -189,7 +195,7 @@ class parsered
 							}
 							catch(Exception e)
 							{
-								utilities.append_string_to_file(file_name + ".time_bug.txt", "BUG : Meant to be atom-3339 but looks like: " + cont + "\n");
+								utilities.append_string_to_file(storage + "time_bug.txt", "BUG : Meant to be atom-3339 but looks like: " + cont + "\n");
 								cont = rfc3339.format(new Date());
 							}
 							line.append(cont).append("|");
@@ -205,7 +211,7 @@ class parsered
 							}
 							catch(Exception e)
 							{
-								utilities.append_string_to_file(file_name + ".time_bug.txt", "BUG : Meant to be atom-3339 but looks like: " + cont + "\n");
+								utilities.append_string_to_file(storage + "time_bug.txt", "BUG : Meant to be atom-3339 but looks like: " + cont + "\n");
 								cont = rfc3339.format(new Date());
 							}
 							line.append(cont).append("|");
@@ -257,9 +263,9 @@ class parsered
 		final String[] feeds = set.toArray(new String[set.size()]);
 
 		/// TODO: May already be the out File.
-		final BufferedWriter write = new BufferedWriter(new FileWriter(file_name + main_view.CONTENT_APPENDIX, true));
-		for(String feed : feeds)
-			write.write(feed + "\n");
+		final BufferedWriter write = new BufferedWriter(new FileWriter(content_file, true));
+		for(String fed : feeds)
+			write.write(fed + "\n");
 		write.close();
 	}
 
@@ -418,13 +424,13 @@ class parsered
 		return tag;
 	}
 
-	private void compress_file(String path, String image_name)
+	private void compress_file(String image_dir, String thumbnail_dir, String image_name)
 	{
 		int insample;
 
 		BitmapFactory.Options o = new BitmapFactory.Options();
 		o.inJustDecodeBounds = true;
-		BitmapFactory.decodeFile(path + main_view.IMAGE_DIRECTORY + image_name, o);
+		BitmapFactory.decodeFile(image_dir + image_name, o);
 
 		int width_tmp = o.outWidth;
 
@@ -432,11 +438,11 @@ class parsered
 
 		BitmapFactory.Options o2 = new BitmapFactory.Options();
 		o2.inSampleSize = insample;
-		Bitmap bitmap = BitmapFactory.decodeFile(path + main_view.IMAGE_DIRECTORY + image_name, o2);
+		Bitmap bitmap = BitmapFactory.decodeFile(image_dir + image_name, o2);
 
 		try
 		{
-			FileOutputStream out = new FileOutputStream(path + main_view.THUMBNAIL_DIRECTORY + image_name);
+			FileOutputStream out = new FileOutputStream(thumbnail_dir + image_name);
 			bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
 		}
 		catch (Exception e){
