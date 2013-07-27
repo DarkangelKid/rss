@@ -607,11 +607,9 @@ public class main_view extends Activity
 							@Override
 							public void onClick(DialogInterface dialog, int id)
 							{
-								group_list_adapter.remove_item(position);
-								/// delete the group
-								String group = current_groups.get(position);
-								utilities.delete_group(storage, group);
-								group_list_adapter.notifyDataSetChanged();
+								utilities.remove_string_from_file(storage + FILTER_LIST, filter_list_adapter.getItem(position), false);
+								filter_list_adapter.remove_item(position);
+								filter_list_adapter.notifyDataSetChanged();
 							}
 						});
 						AlertDialog alert = builder.create();

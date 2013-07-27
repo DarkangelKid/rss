@@ -27,6 +27,7 @@ import java.io.IOException;
 
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 
 import android.os.Debug;
 import android.text.format.Time;
@@ -621,13 +622,16 @@ public class utilities
 				)
 				.create();
 
+				add_filter_dialog.getWindow()
+						.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+
 				add_filter_dialog.setButton(AlertDialog.BUTTON_POSITIVE, (activity_context.getString(R.string.add_dialog)),
 				new DialogInterface.OnClickListener()
 				{
 					@Override
 					public void onClick(DialogInterface dialog, int which)
 					{
-						final String feed_name	= ((EditText) add_filter_layout).getText().toString().trim().toLowerCase();
+						final String feed_name	= ((EditText) add_filter_layout).getText().toString().trim();
 						String filter_path		= storage.concat(main_view.FILTER_LIST);
 						List<String> filters	= read_file_to_list(filter_path);
 						if(!filters.contains(feed_name))
