@@ -632,6 +632,8 @@ public class utilities
 						List<String> filters	= read_file_to_list(filter_path);
 						if(!filters.contains(feed_name))
 							append_string_to_file(filter_path, feed_name + "\n");
+						main_view.filter_list_adapter.set_items(read_file_to_list(filter_path));
+						main_view.filter_list_adapter.notifyDataSetChanged();
 						add_filter_dialog.hide();
 					}
 				});

@@ -11,8 +11,8 @@ import java.util.List;
 
 public class adapter_manage_filter extends BaseAdapter
 {
-	private static String[] title_array = new String[0];
-	private static String[] info_array = new String[0];
+	private static List<String> title_list = new ArrayList<String>();
+	//private static String[] info_array = new String[0];
 
 	private static LayoutInflater inflater;
 
@@ -21,22 +21,22 @@ public class adapter_manage_filter extends BaseAdapter
 		inflater = (LayoutInflater) context_main.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 
-	public void set_items(String[] new_titles, String[] new_infos)
+	public void set_items(List<String> new_titles)
 	{
-		title_array = new_titles;
-		info_array = new_infos;
+		title_list = new_titles;
+		//info_array = new_infos;
 	}
 
-	public void set_position(int pos, String new_title, String new_info)
+	/*public void set_position(int pos, String new_title)
 	{
-		title_array[pos]	= new_title;
-		info_array[pos]		= new_info;
-	}
+		title_list[pos]	= new_title;
+		//info_array[pos]		= new_info;
+	}*/
 
 	@Override
 	public int getCount()
 	{
-		return title_array.length;
+		return title_list.size();
 	}
 
 	@Override
@@ -47,20 +47,19 @@ public class adapter_manage_filter extends BaseAdapter
 
 	public void remove_item(int position)
 	{
-		title_array	= utilities.remove_element(title_array, position);
-		info_array	= utilities.remove_element(info_array, position);
+		title_list.remove(position);
 	}
 
 	@Override
 	public String getItem(int position)
 	{
-		return title_array[position];
+		return title_list.get(position);
 	}
 
-	public String get_info(int position)
+	/*public String get_info(int position)
 	{
 		return info_array[position];
-	}
+	}*/
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
@@ -72,14 +71,14 @@ public class adapter_manage_filter extends BaseAdapter
 				convertView = inflater.inflate(R.layout.feed_list_item, parent, false);
 				holder = new ViewHolder();
 				holder.title_view = (TextView) convertView.findViewById(R.id.title_item);
-				holder.info_view = (TextView) convertView.findViewById(R.id.info_item);
+				//holder.info_view = (TextView) convertView.findViewById(R.id.info_item);
 				convertView.setTag(holder);
 			}
 			else
 				holder = (ViewHolder) convertView.getTag();
 
-			holder.title_view.setText(title_array[position]);
-			holder.info_view.setText(info_array[position]);
+			holder.title_view.setText(title_list.get(position));
+			//holder.info_view.setText(info_array.get(position));
 
 			return convertView;
 	}
@@ -87,7 +86,7 @@ public class adapter_manage_filter extends BaseAdapter
 	static class ViewHolder
 	{
 		TextView title_view;
-		TextView info_view;
+		//TextView info_view;
 	}
 
 }

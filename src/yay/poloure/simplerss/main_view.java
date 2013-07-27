@@ -148,15 +148,19 @@ public class main_view extends Activity
 					{
 						case 0:
 							switch_page(FEEDS, 0);
+							invalidateOptionsMenu();
 							break;
 						case 1:
 							switch_page(MANAGE, 1);
+							invalidateOptionsMenu();
 							break;
 						case 2:
 							switch_page(SETTINGS, 2);
+							invalidateOptionsMenu();
 							break;
 						default:
 							switch_page(FEEDS, position);
+							invalidateOptionsMenu();
 							viewpager.setCurrentItem(position - 4);
 							break;
 					}
@@ -527,7 +531,7 @@ public class main_view extends Activity
 		{
 			super.onCreate(savedInstanceState);
 			setRetainInstance(false);
-			setHasOptionsMenu(false);
+			setHasOptionsMenu(true);
 		}
 
 		@Override
@@ -545,7 +549,7 @@ public class main_view extends Activity
 			return manage_view;
 		}
 
-		/*@Override
+		@Override
 		public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
 		{
 			optionsMenu = menu;
@@ -558,15 +562,15 @@ public class main_view extends Activity
 		@Override
 		public boolean onOptionsItemSelected(MenuItem item)
 		{
-			if(drawer_toggle.onOptionsItemSelected(item))
+			/*if(drawer_toggle.onOptionsItemSelected(item))
 				return true;
 			else if(item.getTitle().equals("add"))
 			{
 				utilities.show_add_feed_dialog(current_groups, activity_context);
 				return true;
-			}
+			}*/
 			return super.onOptionsItemSelected(item);
-		}*/
+		}
 	}
 
 	public static class fragment_manage_filters extends Fragment
@@ -587,6 +591,8 @@ public class main_view extends Activity
 			filter_list_adapter = new adapter_manage_filter(getActivity());
 			filter_list.setAdapter(filter_list_adapter);
 
+			filter_list_adapter.set_items(utilities.read_file_to_list(storage + FILTER_LIST));
+
 			filter_list.setOnItemLongClickListener
 			(
 				new OnItemLongClickListener()
@@ -594,8 +600,6 @@ public class main_view extends Activity
 					@Override
 					public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id)
 					{
-						if(position == 0)
-							return false;
 						AlertDialog.Builder builder = new AlertDialog.Builder(activity_context);
 						builder.setCancelable(true)
 						.setPositiveButton(DELETE_DIALOG, new DialogInterface.OnClickListener()
@@ -618,16 +622,6 @@ public class main_view extends Activity
 			);
 			return view;
 		}
-		///wank begin
-		@Override
-		public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
-		{
-			optionsMenu = menu;
-			optionsMenu.clear();
-
-			inflater.inflate(R.menu.manage_overflow, optionsMenu);
-			super.onCreateOptionsMenu(optionsMenu, inflater);
-		}
 
 		@Override
 		public boolean onOptionsItemSelected(MenuItem item)
@@ -641,7 +635,6 @@ public class main_view extends Activity
 			}
 			return super.onOptionsItemSelected(item);
 		}
-		///end
 	}
 
 	public static class fragment_manage_group extends Fragment
@@ -689,16 +682,6 @@ public class main_view extends Activity
 				}
 			);
 			return view;
-		}
-
-		@Override
-		public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
-		{
-			optionsMenu = menu;
-			optionsMenu.clear();
-
-			inflater.inflate(R.menu.manage_overflow, optionsMenu);
-			super.onCreateOptionsMenu(optionsMenu, inflater);
 		}
 
 		@Override
@@ -824,16 +807,6 @@ public class main_view extends Activity
 				}
 			);
 			return view;
-		}
-		///shite begin
-		@Override
-		public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
-		{
-			optionsMenu = menu;
-			optionsMenu.clear();
-
-			inflater.inflate(R.menu.manage_overflow, optionsMenu);
-			super.onCreateOptionsMenu(optionsMenu, inflater);
 		}
 
 		@Override
