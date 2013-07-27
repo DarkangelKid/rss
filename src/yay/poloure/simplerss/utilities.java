@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.app.FragmentManager;
 import android.app.AlertDialog;
+import android.app.ListFragment;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.v4.view.ViewPager;
@@ -26,12 +27,14 @@ import java.io.IOException;
 
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 
 import android.os.Debug;
 import android.text.format.Time;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 import android.widget.TextView;
+import android.widget.EditText;
 import android.widget.SpinnerAdapter;
 import android.widget.AdapterView;
 
@@ -536,7 +539,7 @@ public class utilities
 
 	public static adapter_feeds_cards get_adapter_feeds_cards(FragmentManager fragment_manager, ViewPager viewpager, int page_index)
 	{
-		return ((adapter_feeds_cards)((main_view.fragment_card) fragment_manager
+		return ((adapter_feeds_cards)((ListFragment) fragment_manager
 						.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_index)))
 						.getListAdapter());
 	}
@@ -604,7 +607,49 @@ public class utilities
 		}
 	}
 
-	public static void show_add_dialog(final List<String> current_groups, Context activity_context)
+	public static void show_add_filter_dialog(Context activity_context, final String storage)
+	{
+		final LayoutInflater inflater		= LayoutInflater.from(activity_context);
+		final View add_filter_layout		= inflater.inflate(R.layout.add_filter_dialog, null);
+
+		final AlertDialog add_filter_dialog = new AlertDialog.Builder(activity_context, 2)
+				.setTitle("Add Filter")
+				.setView(add_filter_layout)
+				.setCancelable(true)
+				.setNegativeButton
+				(activity_context.getString(R.string.cancel_dialog), new DialogInterface.OnClickListener()
+					{
+						@Override
+						public void onClick(DialogInterface dialog,int id)
+						{
+						}
+					}
+				)
+				.create();
+
+				add_filter_dialog.getWindow()
+						.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+
+				add_filter_dialog.setButton(AlertDialog.BUTTON_POSITIVE, (activity_context.getString(R.string.add_dialog)),
+				new DialogInterface.OnClickListener()
+				{
+					@Override
+					public void onClick(DialogInterface dialog, int which)
+					{
+						final String feed_name	= ((EditText) add_filter_layout).getText().toString().trim();
+						String filter_path		= storage.concat(main_view.FILTER_LIST);
+						List<String> filters	= read_file_to_list(filter_path);
+						if(!filters.contains(feed_name))
+							append_string_to_file(filter_path, feed_name + "\n");
+						main_view.filter_list_adapter.set_items(read_file_to_list(filter_path));
+						main_view.filter_list_adapter.notifyDataSetChanged();
+						add_filter_dialog.hide();
+					}
+				});
+		add_filter_dialog.show();
+	}
+
+	public static void show_add_feed_dialog(final List<String> current_groups, Context activity_context)
 	{
 		final LayoutInflater inflater		= LayoutInflater.from(activity_context);
 		final View add_rss_dialog			= inflater.inflate(R.layout.add_rss_dialog, null);
@@ -618,7 +663,7 @@ public class utilities
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		group_spinner.setAdapter(adapter);
 
-		final AlertDialog alertDialog = new AlertDialog.Builder(activity_context, 2)
+		final AlertDialog add_feed_dialog = new AlertDialog.Builder(activity_context, 2)
 				.setTitle("Add Feed")
 				.setView(add_rss_dialog)
 				.setCancelable(true)
@@ -633,7 +678,7 @@ public class utilities
 				)
 				.create();
 
-				alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, (activity_context.getString(R.string.add_dialog)),
+				add_feed_dialog.setButton(AlertDialog.BUTTON_POSITIVE, (activity_context.getString(R.string.add_dialog)),
 				new DialogInterface.OnClickListener()
 				{
 					@Override
@@ -651,13 +696,13 @@ public class utilities
 						{
 							spinner_group = "unsorted";
 						}
-						new check_feed_exists(alertDialog, new_group, feed_name, "add", spinner_group, "", "", 0, current_groups.get(0)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
+						new check_feed_exists(add_feed_dialog, new_group, feed_name, "add", spinner_group, "", "", 0, current_groups.get(0)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
 					}
 				});
-				alertDialog.show();
+				add_feed_dialog.show();
 	}
 
-	public static void show_edit_dialog(final List<String> current_groups, Context activity_context, String storage, final int position)
+	public static void show_edit_feed_dialog(final List<String> current_groups, Context activity_context, String storage, final int position)
 	{
 		final LayoutInflater inflater		= LayoutInflater.from(activity_context);
 		final View edit_rss_dialog			= inflater.inflate(R.layout.add_rss_dialog, null);
@@ -680,7 +725,7 @@ public class utilities
 		name_edit		.setText(current_title);
 		group_spinner	.setSelection(spinner_groups.indexOf(current_group));
 
-		final AlertDialog edit_dialog = new AlertDialog.Builder(activity_context, 2)
+		final AlertDialog edit_feed_dialog = new AlertDialog.Builder(activity_context, 2)
 				.setTitle(activity_context.getString(R.string.edit_dialog_title))
 				.setView(edit_rss_dialog)
 				.setCancelable(true)
@@ -695,21 +740,21 @@ public class utilities
 				)
 				.create();
 
-				edit_dialog.setButton(AlertDialog.BUTTON_POSITIVE, (activity_context.getString(R.string.accept_dialog)),
+				edit_feed_dialog.setButton(AlertDialog.BUTTON_POSITIVE, (activity_context.getString(R.string.accept_dialog)),
 				new DialogInterface.OnClickListener()
 				{
 					@Override
 					public void onClick(DialogInterface dialog, int which)
 					{
-							String new_group		= group_edit	.getText().toString().trim().toLowerCase();
-							String URL_check		= URL_edit		.getText().toString().trim();
-							String feed_name		= name_edit		.getText().toString().trim();
-							String spinner_group	= group_spinner	.getSelectedItem().toString();
-							new check_feed_exists(edit_dialog, new_group, feed_name, "edit", spinner_group, current_group, current_title, position, current_groups.get(0)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
+							String new_group 		= group_edit	.getText().toString().trim().toLowerCase();
+							String URL_check 		= URL_edit		.getText().toString().trim();
+							String feed_name 		= name_edit		.getText().toString().trim();
+							String spinner_group 	= group_spinner	.getSelectedItem().toString();
+							new check_feed_exists(edit_feed_dialog, new_group, feed_name, "edit", spinner_group, current_group, current_title, position, current_groups.get(0)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
 					}
 				});
 
-				edit_dialog.show();
+				edit_feed_dialog.show();
 	}
 
 	public static void log(String storage, String text)

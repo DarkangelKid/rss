@@ -72,6 +72,7 @@ public class main_view extends Activity
 	private static FragmentManager fragment_manager;
 	public static adapter_manage_feeds feed_list_adapter;
 	public static adapter_manage_groups group_list_adapter;
+	public static adapter_manage_filter filter_list_adapter;
 	public static adapter_navigation_drawer nav_adapter;
 	private static List<String> current_groups 			= new ArrayList<String>();
 	private static List<Boolean> new_items 				= new ArrayList<Boolean>();
@@ -94,6 +95,8 @@ public class main_view extends Activity
 	public static final String CONTENT_APPENDIX			= ".content" + TXT;
 	public static final String COUNT_APPENDIX			= ".count" + TXT;
 	public static final String GROUP_LIST				= "group_list" + TXT;
+	public static final String FILTER_LIST				= "filter_list" + TXT;
+
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -142,15 +145,19 @@ public class main_view extends Activity
 					{
 						case 0:
 							switch_page(FEEDS, 0);
+							invalidateOptionsMenu();
 							break;
 						case 1:
 							switch_page(MANAGE, 1);
+							invalidateOptionsMenu();
 							break;
 						case 2:
 							switch_page(SETTINGS, 2);
+							invalidateOptionsMenu();
 							break;
 						default:
 							switch_page(FEEDS, position);
+							invalidateOptionsMenu();
 							viewpager.setCurrentItem(position - 4);
 							break;
 					}
@@ -451,7 +458,7 @@ public class main_view extends Activity
 				return true;
 			else if(item.getTitle().equals("add"))
 			{
-				utilities.show_add_dialog(current_groups, activity_context);
+				utilities.show_add_feed_dialog(current_groups, activity_context);
 				return true;
 			}
 			else if(item.getTitle().equals("refresh"))
@@ -549,13 +556,13 @@ public class main_view extends Activity
 		@Override
 		public boolean onOptionsItemSelected(MenuItem item)
 		{
-			if(drawer_toggle.onOptionsItemSelected(item))
+			/*if(drawer_toggle.onOptionsItemSelected(item))
 				return true;
 			else if(item.getTitle().equals("add"))
 			{
-				utilities.show_add_dialog(current_groups, activity_context);
+				utilities.show_add_feed_dialog(current_groups, activity_context);
 				return true;
-			}
+			}*/
 			return super.onOptionsItemSelected(item);
 		}
 	}
@@ -564,14 +571,22 @@ public class main_view extends Activity
 	{
 		public static ListView filter_list;
 
+		public void onCreate(Bundle savedInstanceState)
+		{
+			super.onCreate(savedInstanceState);
+			setHasOptionsMenu(true);
+		}
+
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
 			final View view = inflater.inflate(R.layout.manage_filters, container, false);
 			filter_list = (ListView) view.findViewById(R.id.filter_listview);
-			group_list_adapter = new adapter_manage_groups(getActivity());
-			filter_list.setAdapter(group_list_adapter);
-			new refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+			filter_list_adapter = new adapter_manage_filter(getActivity());
+			filter_list.setAdapter(filter_list_adapter);
+
+			filter_list_adapter.set_items(utilities.read_file_to_list(storage + FILTER_LIST));
+
 			filter_list.setOnItemLongClickListener
 			(
 				new OnItemLongClickListener()
@@ -579,8 +594,6 @@ public class main_view extends Activity
 					@Override
 					public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id)
 					{
-						if(position == 0)
-							return false;
 						AlertDialog.Builder builder = new AlertDialog.Builder(activity_context);
 						builder.setCancelable(true)
 						.setPositiveButton(DELETE_DIALOG, new DialogInterface.OnClickListener()
@@ -588,11 +601,9 @@ public class main_view extends Activity
 							@Override
 							public void onClick(DialogInterface dialog, int id)
 							{
-								group_list_adapter.remove_item(position);
-								/// delete the group
-								String group = current_groups.get(position);
-								utilities.delete_group(storage, group);
-								group_list_adapter.notifyDataSetChanged();
+								utilities.remove_string_from_file(storage + FILTER_LIST, filter_list_adapter.getItem(position), false);
+								filter_list_adapter.remove_item(position);
+								filter_list_adapter.notifyDataSetChanged();
 							}
 						});
 						AlertDialog alert = builder.create();
@@ -603,11 +614,30 @@ public class main_view extends Activity
 			);
 			return view;
 		}
+
+		@Override
+		public boolean onOptionsItemSelected(MenuItem item)
+		{
+			if(drawer_toggle.onOptionsItemSelected(item))
+				return true;
+			else if(item.getTitle().equals("add"))
+			{
+				utilities.show_add_filter_dialog(activity_context, storage);
+				return true;
+			}
+			return super.onOptionsItemSelected(item);
+		}
 	}
 
 	public static class fragment_manage_group extends Fragment
 	{
 		public static ListView manage_list;
+
+		public void onCreate(Bundle savedInstanceState)
+		{
+			super.onCreate(savedInstanceState);
+			setHasOptionsMenu(true);
+		}
 
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -645,6 +675,19 @@ public class main_view extends Activity
 			);
 			return view;
 		}
+
+		@Override
+		public boolean onOptionsItemSelected(MenuItem item)
+		{
+			if(drawer_toggle.onOptionsItemSelected(item))
+				return true;
+			else if(item.getTitle().equals("add"))
+			{
+				utilities.show_add_feed_dialog(current_groups, activity_context);
+				return true;
+			}
+			return super.onOptionsItemSelected(item);
+		}
 	}
 
 	public static class fragment_manage_feed extends Fragment
@@ -655,6 +698,7 @@ public class main_view extends Activity
 		public void onCreate(Bundle savedInstanceState)
 		{
 			super.onCreate(savedInstanceState);
+			setHasOptionsMenu(true);
 			setRetainInstance(false);
 		}
 
@@ -667,9 +711,10 @@ public class main_view extends Activity
 			(
 				new OnItemClickListener()
 				{
+					@Override
 					public void onItemClick(AdapterView<?> parent, View view, int position, long id)
 					{
-						utilities.show_edit_dialog(current_groups, activity_context, storage, position);
+						utilities.show_edit_feed_dialog(current_groups, activity_context, storage, position);
 					}
 				}
 			);
@@ -694,6 +739,7 @@ public class main_view extends Activity
 							new DialogInterface.OnClickListener()
 							{
 								/// Delete the feed.
+								@Override
 								public void onClick(DialogInterface dialog, int id)
 								{
 									/*String group = feed_list_adapter.get_info(pos);
@@ -730,6 +776,7 @@ public class main_view extends Activity
 							new DialogInterface.OnClickListener()
 							{
 								/// Delete the cache.
+								@Override
 								public void onClick(DialogInterface dialog, int id)
 								{
 									/*String group = feed_list_adapter.get_info(pos);
@@ -754,6 +801,20 @@ public class main_view extends Activity
 			);
 			return view;
 		}
+
+		@Override
+		public boolean onOptionsItemSelected(MenuItem item)
+		{
+			if(drawer_toggle.onOptionsItemSelected(item))
+				return true;
+			else if(item.getTitle().equals("add"))
+			{
+				utilities.show_add_feed_dialog(current_groups, activity_context);
+				return true;
+			}
+			return super.onOptionsItemSelected(item);
+		}
+		///end
 	}
 
 	public static class pageradapter_feeds extends FragmentPagerAdapter
@@ -796,7 +857,7 @@ public class main_view extends Activity
 		@Override
 		public int getCount()
 		{
-			return 2;
+			return 3;
 		}
 
 		@Override
@@ -817,10 +878,16 @@ public class main_view extends Activity
 		@Override
 		public String getPageTitle(int position)
 		{
-			if(position == 0)
-				return activity_context.getString(R.string.groups_manage_sub);
-			else
-				return activity_context.getString(R.string.feeds_manage_sub);
+			switch(position)
+			{
+				case(0):
+					return activity_context.getString(R.string.groups_manage_sub);
+				case(1):
+					return activity_context.getString(R.string.feeds_manage_sub);
+				case(2):
+					return activity_context.getString(R.string.filters_manage_sub);
+			}
+			return "";
 		}
 	}
 
