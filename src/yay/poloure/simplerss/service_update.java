@@ -45,7 +45,7 @@ public class service_update extends IntentService
 
 		final List<String> all_groups		= utilities.read_file_to_list(storage + main_view.GROUP_LIST);
 		final String grouper				= all_groups.get(group);
-		final String group_file_path		= storage + main_view.GROUPS_DIRECTORY + grouper + main_view.TXT;
+		final String group_file_path		= storage + main_view.GROUPS_DIRECTORY + grouper + main_view.SEPAR + grouper + main_view.TXT;
 
 		final String[][] content			= utilities.read_csv_to_array(group_file_path, 'n', 'u');
 		final String[] group_feeds_names	= content[0];
@@ -61,9 +61,8 @@ public class service_update extends IntentService
 		final int size = group_feeds_names.length;
 		for(i = 0; i < size; i++)
 		{
-			feed_path = storage + main_view.CONTENT_DIRECTORY + group_feeds_names[i]; /// mariam_feed.txt
-			utilities.download_file(group_feeds_urls[i], feed_path + main_view.STORE_APPENDIX); /// Downloads file as mariam_feed.store.txt
-			new parsered(feed_path + main_view.STORE_APPENDIX, storage, width); /// Parses the file and makes other files like mariam_feed.store.txt.content.txt
+			utilities.download_file(group_feeds_urls[i], storage + group_feeds_names[i] + main_view.STORE_APPENDIX);
+			new parsered(storage, grouper, group_feeds_names[i], width);
 		}
 
 		/// Sort group order

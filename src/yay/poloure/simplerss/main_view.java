@@ -79,7 +79,6 @@ public class main_view extends Activity
 
 	/// Private static final are good.
 	private static final int[] times 					= new int[]{15, 30, 45, 60, 120, 180, 240, 300, 360, 400, 480, 540, 600, 660, 720, 960, 1440, 2880, 10080, 43829};
-	private static final String[] folders 				= {"images", "thumbnails", "groups", "content"};
 	private static final Pattern whitespace				= Pattern.compile("\\s+");
 
 	/// Public static final are the holy grail.
@@ -94,10 +93,7 @@ public class main_view extends Activity
 	public static final String STORE_APPENDIX			= ".store" + TXT;
 	public static final String CONTENT_APPENDIX			= ".content" + TXT;
 	public static final String COUNT_APPENDIX			= ".count" + TXT;
-	public static final String FULL_COUNT_APPENDIX		= TXT + CONTENT_APPENDIX + COUNT_APPENDIX;
-	public static final String GROUP_LIST				= GROUPS_DIRECTORY + "group_list" + TXT;
-	public static final String PARSED_APPENDIX			= STORE_APPENDIX + CONTENT_APPENDIX;
-	public static final String GROUP_CONTENT_APPENDIX	= TXT + CONTENT_APPENDIX;
+	public static final String GROUP_LIST				= "group_list" + TXT;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -194,13 +190,9 @@ public class main_view extends Activity
 		storage				= getExternalFilesDir(null).getAbsolutePath() + SEPAR;
 		utilities.delete(storage + DUMP_FILE);
 
-		File folder_file;
-		for(String folder : folders)
-		{
-			folder_file = new File(storage.concat(folder));
-			if(!folder_file.exists())
-				folder_file.mkdir();
-		}
+		File folder_file = new File(storage + "groups");
+		if(!folder_file.exists())
+			folder_file.mkdir();
 
 		activity_context	= this;
 		ALL					= getString(R.string.all_group);
@@ -210,7 +202,8 @@ public class main_view extends Activity
 		NAVIGATION			= getString(R.string.navigation_title);
 		DELETE_DIALOG		= getString(R.string.delete_dialog);
 		CLEAR_DIALOG		= getString(R.string.clear_dialog);
-		ALL_FILE			= GROUPS_DIRECTORY + ALL + TXT;
+		///					"/storage/groups/all/all.txt"
+		ALL_FILE			= GROUPS_DIRECTORY + ALL + SEPAR + ALL + TXT;
 	}
 
 	/// This is so the icon and text in the actionbar are selected.
@@ -238,11 +231,11 @@ public class main_view extends Activity
 		{
 			if(feed_list_adapter != null)
 			{
-				final String[][] content	= utilities.read_csv_to_array(storage + GROUPS_DIRECTORY+ current_groups.get(0) + TXT, 'n', 'u', 'g');
+				final String[][] content	= utilities.read_csv_to_array(storage + GROUPS_DIRECTORY + current_groups.get(0) + SEPAR + current_groups.get(0) + TXT, 'n', 'u', 'g');
 				final int size				= content[0].length;
 				String[] info_array			= new String[size];
 				for(int i = 0; i < size; i++)
-					info_array[i] = content[1][i] + "\n" + content[2][i] + " • " + Integer.toString(utilities.count_lines(storage + CONTENT_DIRECTORY + content[0][i] + PARSED_APPENDIX)) + " items";
+					info_array[i] = content[1][i] + "\n" + content[2][i] + " • "/* + Integer.toString(utilities.count_lines(storage + GROUPS_DIRECTORY + current_groups.get(0) + content[0][i] + CONTENT_APPENDIX)) + " items"*/;
 				publishProgress(content[0], info_array);
 			}
 			return null;
@@ -703,7 +696,7 @@ public class main_view extends Activity
 								/// Delete the feed.
 								public void onClick(DialogInterface dialog, int id)
 								{
-									String group = feed_list_adapter.get_info(pos);
+									/*String group = feed_list_adapter.get_info(pos);
 									group = group.substring(group.indexOf('\n') + 1, group.indexOf(' '));
 									final String name = feed_list_adapter.getItem(pos);
 
@@ -727,7 +720,7 @@ public class main_view extends Activity
 									/// remove deleted files content from groups that it was in
 									feed_list_adapter.remove_item(pos);
 									feed_list_adapter.notifyDataSetChanged();
-									new refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+									new refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);*/
 								}
 							}
 						)
@@ -736,10 +729,10 @@ public class main_view extends Activity
 							CLEAR_DIALOG,
 							new DialogInterface.OnClickListener()
 							{
-								/// Delete the feed.
+								/// Delete the cache.
 								public void onClick(DialogInterface dialog, int id)
 								{
-									String group = feed_list_adapter.get_info(pos);
+									/*String group = feed_list_adapter.get_info(pos);
 									group = group.substring(group.indexOf('\n') + 1, group.indexOf(' '));
 									String name = feed_list_adapter.getItem(pos);
 									utilities.delete(storage + CONTENT_DIRECTORY + name + PARSED_APPENDIX);
@@ -751,6 +744,7 @@ public class main_view extends Activity
 									/// remove deleted files content from groups that it was in
 									/// TODO update item info
 									//feed_list_adapter.notifyDataSetChanged();
+									*/
 								}
 							}
 						).show();
@@ -839,7 +833,8 @@ public class main_view extends Activity
 			adapter_feeds_cards adapter = new adapter_feeds_cards(getActivity());
 			setRetainInstance(false);
 			setListAdapter(adapter);
-			final List<String> count_list = utilities.read_file_to_list(storage + GROUPS_DIRECTORY + current_groups.get(getArguments().getInt("num", 0)) + GROUP_CONTENT_APPENDIX);
+			String group = current_groups.get(getArguments().getInt("num", 0));
+			final List<String> count_list = utilities.read_file_to_list(storage + GROUPS_DIRECTORY + group + SEPAR + group + CONTENT_APPENDIX);
 			final int sized = count_list.size();
 			int i;
 
@@ -939,8 +934,9 @@ public class main_view extends Activity
 			}
 
 			String group					= current_groups.get(page_number);
-			final String group_file_path 	= storage + GROUPS_DIRECTORY + group + TXT;
-			final String group_content_path = group_file_path.concat(CONTENT_APPENDIX);
+			final String group_path			= storage + GROUPS_DIRECTORY + group + SEPAR;
+			final String group_file_path 	= group_path + group + TXT;
+			final String group_content_path = group_path + group + CONTENT_APPENDIX;
 			String thumbnail_path;
 
 			/// If the group has no feeds  or  the content file does not exist, end.
@@ -955,6 +951,8 @@ public class main_view extends Activity
 			String[] images				= contenter[4];
 			String[] widths				= contenter[5];
 			String[] heights			= contenter[6];
+			String[] groups				= contenter[7];
+			String[] sources			= contenter[8];
 
 			if((links[0] == null)||(links.length == 0)||(links[0].isEmpty()))
 				return null;
@@ -1006,7 +1004,7 @@ public class main_view extends Activity
 						if(width > 32)
 						{
 							height = Integer.parseInt(heights[m]);
-							thumbnail_path = storage.concat(THUMBNAIL_DIRECTORY.concat(images[m].substring(images[m].lastIndexOf(SEPAR) + 1, images[m].length())));
+							thumbnail_path = storage + GROUPS_DIRECTORY + groups[m] + SEPAR + sources[m] + SEPAR + THUMBNAIL_DIRECTORY + images[m].substring(images[m].lastIndexOf(SEPAR) + 1, images[m].length());
 						}
 						else
 							width = 0;
@@ -1152,10 +1150,11 @@ public class main_view extends Activity
 			else
 			{
 				int most;
-				if(utilities.exists(storage + GROUPS_DIRECTORY + current_groups.get(j) + main_view.FULL_COUNT_APPENDIX))
-					most = Integer.parseInt(utilities.read_file_to_list(storage + GROUPS_DIRECTORY + current_groups.get(j) + main_view.FULL_COUNT_APPENDIX).get(0));
+				String count_file = storage + GROUPS_DIRECTORY + current_groups.get(j) + SEPAR + current_groups.get(j) + COUNT_APPENDIX;
+				if(utilities.exists(count_file))
+					most = Integer.parseInt(utilities.read_file_to_list(count_file).get(0));
 				else
-					most = utilities.count_lines(storage + GROUPS_DIRECTORY + current_groups.get(j) + GROUP_CONTENT_APPENDIX);
+					most = utilities.count_lines(storage + GROUPS_DIRECTORY + current_groups.get(j) + SEPAR + current_groups.get(j) + CONTENT_APPENDIX);
 				unread_list.add(most - ith.return_unread_item_count() - 1);
 			}
 		}
