@@ -458,7 +458,7 @@ public class main_view extends Activity
 				return true;
 			else if(item.getTitle().equals("add"))
 			{
-				utilities.show_add_feed_dialog(current_groups, activity_context);
+				add_edit_feeds.show_add_feed_dialog(current_groups, activity_context);
 				return true;
 			}
 			else if(item.getTitle().equals("refresh"))
@@ -622,7 +622,7 @@ public class main_view extends Activity
 				return true;
 			else if(item.getTitle().equals("add"))
 			{
-				utilities.show_add_filter_dialog(activity_context, storage);
+				add_edit_feeds.show_add_filter_dialog(activity_context, storage);
 				return true;
 			}
 			return super.onOptionsItemSelected(item);
@@ -683,7 +683,7 @@ public class main_view extends Activity
 				return true;
 			else if(item.getTitle().equals("add"))
 			{
-				utilities.show_add_feed_dialog(current_groups, activity_context);
+				add_edit_feeds.show_add_feed_dialog(current_groups, activity_context);
 				return true;
 			}
 			return super.onOptionsItemSelected(item);
@@ -714,7 +714,7 @@ public class main_view extends Activity
 					@Override
 					public void onItemClick(AdapterView<?> parent, View view, int position, long id)
 					{
-						utilities.show_edit_feed_dialog(current_groups, activity_context, storage, position);
+						add_edit_feeds.show_edit_feed_dialog(current_groups, activity_context, storage, position);
 					}
 				}
 			);
@@ -809,7 +809,7 @@ public class main_view extends Activity
 				return true;
 			else if(item.getTitle().equals("add"))
 			{
-				utilities.show_add_feed_dialog(current_groups, activity_context);
+				add_edit_feeds.show_add_feed_dialog(current_groups, activity_context);
 				return true;
 			}
 			return super.onOptionsItemSelected(item);
