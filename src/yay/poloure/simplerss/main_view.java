@@ -241,7 +241,7 @@ public class main_view extends Activity
 				final int size				= content[0].length;
 				String[] info_array			= new String[size];
 				for(int i = 0; i < size; i++)
-					info_array[i] = content[1][i] + NL + content[2][i] + " • "/* + Integer.toString(utilities.count_lines(storage + GROUPS_DIRECTORY + current_groups.get(0) + content[0][i] + CONTENT_APPENDIX)) + " items"*/;
+					info_array[i] = content[1][i] + NL + content[2][i] + " • " + Integer.toString(utilities.count_lines(storage + GROUPS_DIRECTORY + content[2][i] + SEPAR + content[0][i] + SEPAR + content[0][i] + CONTENT_APPENDIX)) + " items";
 				publishProgress(content[0], info_array);
 			}
 			return null;
@@ -745,20 +745,44 @@ public class main_view extends Activity
 									group = group.substring(group.indexOf('\n') + 1, group.indexOf(' '));
 									final String name = feed_list_adapter.getItem(pos);
 
-									final String group_file = storage + GROUPS_DIRECTORY + group + SEPAR + group + TXT;
+									final String group_file		= storage + GROUPS_DIRECTORY + group + SEPAR + group + TXT;
+									final String group_prepend	= storage + GROUPS_DIRECTORY + group + SEPAR + group;
+									final String all_file		= storage + GROUPS_DIRECTORY + ALL + SEPAR + ALL;
+
 									utilities.delete_directory(new File(storage + GROUPS_DIRECTORY + group + SEPAR + name));
 									utilities.remove_string_from_file(group_file, name, true);
-									utilities.remove_string_from_file(storage + GROUPS_DIRECTORY + ALL + SEPAR + ALL + TXT, name, true);
+									utilities.remove_string_from_file(all_file + TXT, name, true);
 
 									utilities.delete_if_empty(group_file);
 									if(!(new File(group_file).exists()))
 									{
 										utilities.delete_directory(new File(storage + GROUPS_DIRECTORY + group));
 										utilities.remove_string_from_file(storage + GROUP_LIST, group, false);
+										new_items.set(pos, true);
 									}
 									else
+									{
 										utilities.sort_group_content_by_time(storage, group);
-									utilities.sort_group_content_by_time(storage, ALL);
+										utilities.delete_if_empty(group_prepend + CONTENT_APPENDIX);
+										utilities.delete_if_empty(group_prepend + COUNT_APPENDIX);
+										if((new File(group_prepend + CONTENT_APPENDIX)).exists())
+											new_items.set(pos, true);
+									}
+
+									List<String> all_groups = utilities.read_file_to_list(storage + GROUP_LIST);
+									if(all_groups.size() == 1)
+									{
+										utilities.delete_directory(new File(storage + GROUPS_DIRECTORY + ALL));
+										new_items.set(0, true);
+									}
+									else if(all_groups.size() != 0)
+									{
+										utilities.sort_group_content_by_time(storage, ALL);
+										utilities.delete_if_empty(all_file + CONTENT_APPENDIX);
+										utilities.delete_if_empty(all_file + COUNT_APPENDIX);
+										if((new File(all_file + CONTENT_APPENDIX)).exists())
+											new_items.set(0, true);
+									}
 
 									update_groups();
 									feed_list_adapter.remove_item(pos);
@@ -776,7 +800,28 @@ public class main_view extends Activity
 								@Override
 								public void onClick(DialogInterface dialog, int id)
 								{
+									String group			= feed_list_adapter.get_info(pos);
+									group					= group.substring(group.indexOf('\n') + 1, group.indexOf(' '));
+									final String name		= feed_list_adapter.getItem(pos);
+									final String path		= storage + GROUPS_DIRECTORY + group + SEPAR + name;
+									final File feed_folder	= new File(path);
+									utilities.delete_directory(feed_folder);
+									/// make the image and thumnail folders.
+									(new File(path + SEPAR + IMAGE_DIRECTORY))		.mkdir();
+									(new File(path + SEPAR + THUMBNAIL_DIRECTORY))	.mkdir();
+
+									/// Delete the all content files.
+									(new File(storage + GROUPS_DIRECTORY + ALL + SEPAR + ALL + CONTENT_APPENDIX)).delete();
+									(new File(storage + GROUPS_DIRECTORY + ALL + SEPAR + ALL + COUNT_APPENDIX)).delete();
+
 									//feed_list_adapter.notifyDataSetChanged();
+									/// Refresh pages and update groups and stuff
+									update_groups();
+									new refresh_manage_feeds()	.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+									new refresh_manage_groups()	.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+									new_items.set(0, true);
+									new_items.set(pos, true);
+
 								}
 							}
 						).show();
