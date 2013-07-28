@@ -2,7 +2,8 @@
 <resources>
 	<string-array
 		name="card_menu">
-		<item>Copy URL to clipboard</item>
-		<item>Open link in browser</item>
+		<item>Copy to clipboard</item>
+		<item>Save image to storage</item>
+		<item>Open in browser</item>
     </string-array>
 </resources>
