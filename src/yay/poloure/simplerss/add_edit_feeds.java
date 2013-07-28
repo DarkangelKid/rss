@@ -16,6 +16,8 @@ import android.widget.ArrayAdapter;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -302,6 +304,32 @@ public class add_edit_feeds
 				});
 
 				edit_feed_dialog.show();
+	}
+
+	public static void show_card_dialog(final Context activity_context, final String URL)
+	{
+		final LayoutInflater inflater		= LayoutInflater.from(activity_context);
+
+		final AlertDialog card_dialog = new AlertDialog.Builder(activity_context, 2)
+				.setCancelable(true)
+				.setItems(R.array.card_menu, new DialogInterface.OnClickListener()
+				{
+					public void onClick(DialogInterface dialog, int which)
+					{
+						switch(which)
+						{
+							case(0):
+								ClipboardManager clipboard = (ClipboardManager) activity_context.getSystemService(Context.CLIPBOARD_SERVICE);
+								ClipData clip = ClipData.newPlainText("label", URL);
+								clipboard.setPrimaryClip(clip);
+							case(1):
+
+						}
+					}
+				})
+				.create();
+
+				card_dialog.show();
 	}
 
 	private static void add_feed(String storage, String feed_name, String feed_url, String feed_group, String all_string)

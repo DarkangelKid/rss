@@ -34,6 +34,8 @@
 	<string name="refresh_time_summary_preferences">Adjust auto refresh interval</string>
 	<string name="notifications_preferences">Notifications</string>
 	<string name="notifications_summary_preferences">Check to enable notifications</string>
+	<string name="offline_cat_preferences">Offline Mode</string>
+	<string name="offline_summary_preferences">Check to enable offline mode</string>
 
 	<string name="all_group">All</string>
 
