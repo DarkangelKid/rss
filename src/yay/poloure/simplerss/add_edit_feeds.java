@@ -314,9 +314,10 @@ public class add_edit_feeds
 				.setCancelable(true)
 				.setItems(R.array.card_menu, new DialogInterface.OnClickListener()
 				{
-					public void onClick(DialogInterface dialog, int which)
+					@Override
+					public void onClick(DialogInterface dialog, int position)
 					{
-						switch(which)
+						switch(position)
 						{
 							case(0):
 								ClipboardManager clipboard = (ClipboardManager) activity_context.getSystemService(Context.CLIPBOARD_SERVICE);
@@ -324,6 +325,7 @@ public class add_edit_feeds
 								clipboard.setPrimaryClip(clip);
 							case(1):
 
+							case(2):
 						}
 					}
 				})
