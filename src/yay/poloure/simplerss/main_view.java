@@ -46,8 +46,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 
-import java.net.URL;
-
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
@@ -84,6 +82,7 @@ public class main_view extends Activity
 
 	/// Public static final are the holy grail.
 	public static final String SEPAR					= System.getProperty("file.separator");
+	public static final String NL						= System.getProperty("line.separator");
 	public static final String TXT						= ".txt";
 	public static final String GROUPS_DIRECTORY			= "groups" + SEPAR;
 	public static final String CONTENT_DIRECTORY		= "content" + SEPAR;
@@ -242,7 +241,7 @@ public class main_view extends Activity
 				final int size				= content[0].length;
 				String[] info_array			= new String[size];
 				for(int i = 0; i < size; i++)
-					info_array[i] = content[1][i] + "\n" + content[2][i] + " • "/* + Integer.toString(utilities.count_lines(storage + GROUPS_DIRECTORY + current_groups.get(0) + content[0][i] + CONTENT_APPENDIX)) + " items"*/;
+					info_array[i] = content[1][i] + NL + content[2][i] + " • "/* + Integer.toString(utilities.count_lines(storage + GROUPS_DIRECTORY + current_groups.get(0) + content[0][i] + CONTENT_APPENDIX)) + " items"*/;
 				publishProgress(content[0], info_array);
 			}
 			return null;
@@ -742,29 +741,8 @@ public class main_view extends Activity
 								@Override
 								public void onClick(DialogInterface dialog, int id)
 								{
-									/*String group = feed_list_adapter.get_info(pos);
-									group = group.substring(group.indexOf('\n') + 1, group.indexOf(' '));
-									final String name = feed_list_adapter.getItem(pos);
-
-									utilities.remove_string_from_file(storage + GROUPS_DIRECTORY + group + TXT, name, true);
-									utilities.remove_string_from_file(storage + ALL_FILE, name, true);
-
-									/// If the group file no longer exists because it was the last feed in it, delete the group from the group_list.
-									utilities.delete_if_empty(storage + GROUPS_DIRECTORY + group + TXT);
-									if(!utilities.exists(storage + GROUPS_DIRECTORY + group + TXT))
-									{
-										utilities.delete(storage + GROUPS_DIRECTORY + group + GROUP_CONTENT_APPENDIX);
-										utilities.delete(storage + GROUPS_DIRECTORY + group + main_view.FULL_COUNT_APPENDIX);
-										utilities.remove_string_from_file(storage + GROUP_LIST, group, false);
-										update_groups();
-									}
-									else
-										utilities.sort_group_content_by_time(storage, group);
-
-									utilities.sort_group_content_by_time(storage, ALL);
-
 									/// remove deleted files content from groups that it was in
-									feed_list_adapter.remove_item(pos);
+									/*feed_list_adapter.remove_item(pos);
 									feed_list_adapter.notifyDataSetChanged();
 									new refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);*/
 								}
@@ -779,19 +757,7 @@ public class main_view extends Activity
 								@Override
 								public void onClick(DialogInterface dialog, int id)
 								{
-									/*String group = feed_list_adapter.get_info(pos);
-									group = group.substring(group.indexOf('\n') + 1, group.indexOf(' '));
-									String name = feed_list_adapter.getItem(pos);
-									utilities.delete(storage + CONTENT_DIRECTORY + name + PARSED_APPENDIX);
-									utilities.delete(storage + GROUPS_DIRECTORY + group + GROUP_CONTENT_APPENDIX);
-
-									new refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-									utilities.sort_group_content_by_time(storage, ALL);
-
-									/// remove deleted files content from groups that it was in
-									/// TODO update item info
 									//feed_list_adapter.notifyDataSetChanged();
-									*/
 								}
 							}
 						).show();
@@ -949,7 +915,7 @@ public class main_view extends Activity
 		final int size = current_groups.size();
 		if(size == 0)
 		{
-			utilities.append_string_to_file(storage + GROUP_LIST, ALL + "\n");
+			utilities.append_string_to_file(storage + GROUP_LIST, ALL + NL);
 			current_groups.add(ALL);
 		}
 
@@ -987,7 +953,6 @@ public class main_view extends Activity
 		@Override
 		protected Void doInBackground(Void[] hey)
 		{
-			/// while the service is running on new_items and this page is refreshing.
 			if(new_items.get(page_number))
 			{
 				while(check_service_running())
@@ -1006,7 +971,6 @@ public class main_view extends Activity
 			final String group_content_path = group_path + group + CONTENT_APPENDIX;
 			String thumbnail_path;
 
-			/// If the group has no feeds  or  the content file does not exist, end.
 			if((!utilities.exists(group_file_path))||(!utilities.exists(group_content_path)))
 				return null;
 
@@ -1024,7 +988,6 @@ public class main_view extends Activity
 			if((links[0] == null)||(links.length == 0)||(links[0].isEmpty()))
 				return null;
 
-			/// Get a set of all the pages items' urls.
 			Set<String> existing_items = new HashSet<String>();
 			try
 			{
@@ -1034,7 +997,6 @@ public class main_view extends Activity
 			{
 			}
 
-			/// For each line of the group_content_file
 			animFadeIn = AnimationUtils.loadAnimation(activity_context, android.R.anim.fade_in);
 			final int size = titles.length;
 			final List<Boolean> new_markers		= new ArrayList<Boolean>();

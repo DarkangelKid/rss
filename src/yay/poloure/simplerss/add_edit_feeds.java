@@ -1,68 +1,41 @@
 package yay.poloure.simplerss;
 
 import java.net.URL;
-import java.io.BufferedInputStream;
-import android.app.AlertDialog;
-import android.widget.Button;
-import android.os.AsyncTask;
 
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
-import java.io.File;
-import java.io.BufferedInputStream;
-
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.EditText;
 import android.widget.SpinnerAdapter;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 
-
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.app.FragmentManager;
-import android.app.AlertDialog;
-import android.app.ListFragment;
 import android.os.AsyncTask;
-import android.os.Environment;
-import android.support.v4.view.ViewPager;
-
-import java.net.URL;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.ArrayList;
-import java.util.Collection;
-
-import java.io.File;
-import java.io.BufferedInputStream;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.FileReader;
-import java.io.BufferedWriter;
-import java.io.BufferedReader;
-import java.io.IOException;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 
-import android.os.Debug;
-import android.text.format.Time;
-import android.widget.ArrayAdapter;
-import android.widget.Toast;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
+import java.io.BufferedInputStream;
 
 public class add_edit_feeds
 {
 	private static class check_feed_exists extends AsyncTask<String, Void, String[]>
 	{
 		private Boolean existing_group = false, real = false;
-		private AlertDialog dialog;
-		private String group, name, mode, all_string;
-		private String spinner_group, current_group, current_title;
-		private int pos;
-		private final Pattern illegal_file_chars	= Pattern.compile("[/\\?%*|<>:]");
+		private final AlertDialog dialog;
+		private String group, name;
+		private final String mode, all_string, spinner_group, current_group, current_title;
+		private final int pos;
+		private final Pattern illegal_file_chars = Pattern.compile("[/\\?%*|<>:]");
 
 		public check_feed_exists(AlertDialog edit_dialog, String new_group, String feed_name, String moder, String current_tit, String current_grop, String spin_group, int position, String all_str)
 		{
@@ -210,11 +183,11 @@ public class add_edit_feeds
 					@Override
 					public void onClick(DialogInterface dialog, int which)
 					{
-						final String feed_name	= ((EditText) add_filter_layout).getText().toString().trim();
+						final String feed_name	= ((TextView) add_filter_layout).getText().toString().trim();
 						String filter_path		= storage.concat(main_view.FILTER_LIST);
 						List<String> filters	= utilities.read_file_to_list(filter_path);
 						if(!filters.contains(feed_name))
-							utilities.append_string_to_file(filter_path, feed_name + "\n");
+							utilities.append_string_to_file(filter_path, feed_name + main_view.NL);
 						main_view.filter_list_adapter.set_items(utilities.read_file_to_list(filter_path));
 						main_view.filter_list_adapter.notifyDataSetChanged();
 						add_filter_dialog.hide();
@@ -258,7 +231,7 @@ public class add_edit_feeds
 					@Override
 					public void onClick(DialogInterface dialog, int which)
 					{
-						final String new_group		= group_edit	.getText().toString().trim().toLowerCase();
+						final String new_group		= group_edit	.getText().toString().trim().toLowerCase(Locale.getDefault());
 						final String URL_check		= URL_edit		.getText().toString().trim();
 						final String feed_name		= name_edit		.getText().toString().trim();
 						String spinner_group;
@@ -320,7 +293,7 @@ public class add_edit_feeds
 					@Override
 					public void onClick(DialogInterface dialog, int which)
 					{
-							String new_group 		= group_edit	.getText().toString().trim().toLowerCase();
+							String new_group 		= group_edit	.getText().toString().trim().toLowerCase(Locale.getDefault());
 							String URL_check 		= URL_edit		.getText().toString().trim();
 							String feed_name 		= name_edit		.getText().toString().trim();
 							String spinner_group 	= group_spinner	.getSelectedItem().toString();
@@ -346,7 +319,7 @@ public class add_edit_feeds
 		if(!folder.exists())
 			folder.mkdir();
 
-		String feed_info = "name|" +  feed_name + "|url|" + feed_url + "|group|" + feed_group + "|\n";
+		String feed_info = "name|" +  feed_name + "|url|" + feed_url + "|group|" + feed_group + "|" + main_view.NL;
 		utilities.append_string_to_file(storage + main_view.GROUPS_DIRECTORY + feed_group + main_view.SEPAR + feed_group + main_view.TXT, feed_info);
 		utilities.append_string_to_file(storage + main_view.ALL_FILE, feed_info);
 
@@ -386,7 +359,7 @@ public class add_edit_feeds
 			(new File(old_feed_folder)).renameTo(new File(new_feed_folder));
 
 			utilities.remove_string_from_file(old_group_file, old_name, true);
-			utilities.append_string_to_file(new_group_file, "name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|\n");
+			utilities.append_string_to_file(new_group_file, "name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|" + main_view.NL);
 
 			utilities.delete_if_empty(old_group_file);
 			if(!(new File(old_group_file).exists()))
@@ -407,9 +380,9 @@ public class add_edit_feeds
 			for(String item : list)
 			{
 				if(item.contains(old_name))
-					out.write("name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|\n");
+					out.write("name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|" + main_view.NL);
 				else
-					out.write(item + "\n");
+					out.write(item + main_view.NL);
 			}
 			out.close();
 		}
@@ -425,9 +398,9 @@ public class add_edit_feeds
 			for(String item : list)
 			{
 				if(item.contains(old_name))
-					out2.write("name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|\n");
+					out2.write("name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|" + main_view.NL);
 				else
-					out2.write(item + "\n");
+					out2.write(item + main_view.NL);
 			}
 			out2.close();
 		}
@@ -449,7 +422,7 @@ public class add_edit_feeds
 			utilities.sort_group_content_by_time(storage, new_group);
 		utilities.sort_group_content_by_time(storage, all_string);
 
-		main_view.feed_list_adapter.set_position(position, new_name, new_url + "\n" + new_group + " • " + Integer.toString(utilities.count_lines(storage + main_view.GROUPS_DIRECTORY + new_group + main_view.SEPAR + new_name + main_view.SEPAR + new_name + main_view.CONTENT_APPENDIX) - 1) + " items");
+		main_view.feed_list_adapter.set_position(position, new_name, new_url + main_view.NL + new_group + " • " + Integer.toString(utilities.count_lines(storage + main_view.GROUPS_DIRECTORY + new_group + main_view.SEPAR + new_name + main_view.SEPAR + new_name + main_view.CONTENT_APPENDIX) - 1) + " items");
 		main_view.feed_list_adapter.notifyDataSetChanged();
 
 		/// To refresh the counts and the order of the groups.
@@ -473,7 +446,7 @@ public class add_edit_feeds
 
 	private static void add_group(String storage, String group_name)
 	{
-		utilities.append_string_to_file(storage + main_view.GROUP_LIST, group_name + "\n");
+		utilities.append_string_to_file(storage + main_view.GROUP_LIST, group_name + main_view.NL);
 		final File folder = new File(storage + main_view.GROUPS_DIRECTORY + group_name);
 		if(!folder.exists())
 			folder.mkdir();

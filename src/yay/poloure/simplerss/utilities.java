@@ -1,11 +1,8 @@
 package yay.poloure.simplerss;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.app.FragmentManager;
-import android.app.AlertDialog;
 import android.app.ListFragment;
-import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.v4.view.ViewPager;
 
@@ -25,13 +22,8 @@ import java.io.BufferedWriter;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.WindowManager;
-
 import android.os.Debug;
 import android.text.format.Time;
-import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 public class utilities
@@ -95,17 +87,17 @@ public class utilities
 								if(!found_url)
 								{
 									if(!line.contains(url))
-										out.write(line + "\n");
+										out.write(line + main_view.NL);
 									else if(!line.substring(0, 9).equals("marker|1|"))
 									{
-										out.write("marker|1|" + line + "\n");
+										out.write("marker|1|" + line + main_view.NL);
 										found_url = true;
 									}
 									else
-										out.write(line + "\n");
+										out.write(line + main_view.NL);
 								}
 								else
-									out.write(line + "\n");
+									out.write(line + main_view.NL);
 							}
 							out.close();
 							if(found_url)
@@ -151,14 +143,14 @@ public class utilities
 		return b;
 	}
 
-	public static void write_collection_to_file(String path, Collection<?> content)
+	public static void write_collection_to_file(String path, Iterable<?> content)
 	{
-		utilities.delete(path);
+		delete(path);
 		try
 		{
 			BufferedWriter out = new BufferedWriter(new FileWriter(path, true));
 			for(Object item : content)
-				out.write(item.toString() + "\n");
+				out.write(item.toString() + main_view.NL);
 			out.close();
 		}
 		catch(Exception e)
@@ -166,14 +158,14 @@ public class utilities
 		}
 	}
 
-	public static void write_array_to_file(String path, String[] content)
+	public static void write_array_to_file(String path, String... content)
 	{
-		utilities.delete(path);
+		delete(path);
 		try
 		{
 			BufferedWriter out = new BufferedWriter(new FileWriter(path, true));
 			for(String item : content)
-				out.write(item + "\n");
+				out.write(item + main_view.NL);
 			out.close();
 		}
 		catch(Exception e)
@@ -184,7 +176,7 @@ public class utilities
 	public static String[][] create_info_arrays(List<String> current_groups, int size, String storage)
 	{
 		String info, count_path;
-		int number, i, j, total = 0;
+		int number, i, j, total;
 		String[] content;
 		String[] group_array	= new String[size];
 		String[] info_array		= new String[size];
@@ -265,7 +257,7 @@ public class utilities
 		}
 	}
 
-	public static void remove_string_from_file(String file_path, String string, Boolean contains)
+	public static void remove_string_from_file(String file_path, CharSequence string, Boolean contains)
 	{
 		final List<String> list = read_file_to_list(file_path);
 		delete(file_path);
@@ -276,12 +268,12 @@ public class utilities
 				if(contains)
 				{
 					if(!item.contains(string))
-						out.write(item + "\n");
+						out.write(item + main_view.NL);
 				}
 				else
 				{
 					if(!item.equals(string))
-						out.write(item + "\n");
+						out.write(item + main_view.NL);
 				}
 			}
 			out.close();
@@ -290,7 +282,7 @@ public class utilities
 		}
 	}
 
-	public static String[] read_single_to_array(String file_path, String type)
+	private static String[] read_single_to_array(String file_path, String type)
 	{
 		int next, offset, j;
 		String line;
@@ -551,7 +543,7 @@ public class utilities
 			BufferedWriter out = new BufferedWriter(new FileWriter(group_content_path, true));
 			for(Map.Entry<Long, String> entry : map.entrySet())
 			{
-				out.write(entry.getValue() + "\n");
+				out.write(entry.getValue() + main_view.NL);
 			}
 			out.close();
 
@@ -567,7 +559,7 @@ public class utilities
 
 	public static void log(String storage, String text)
 	{
-		append_string_to_file(storage + main_view.DUMP_FILE, text + "\n");
+		append_string_to_file(storage + main_view.DUMP_FILE, text + main_view.NL);
 	}
 
 	public static void delete(String file_path)

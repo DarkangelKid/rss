@@ -182,7 +182,7 @@ class parsered
 									if((tem3 != -1)&&(tem3 < tem2))
 											tem2 = tem3;
 								}
-								to_file(dump_path, cont.substring(tem + 9, tem2) + "\n");
+								to_file(dump_path, cont.substring(tem + 9, tem2) + main_view.NL);
 							}
 						}
 						/// If it follows the rss 2.0 specification for rfc882
@@ -194,7 +194,7 @@ class parsered
 							}
 							catch(Exception e)
 							{
-								utilities.append_string_to_file(storage + "time_bug.txt", "BUG : Meant to be atom-3339 but looks like: " + cont + "\n");
+								utilities.append_string_to_file(storage + "time_bug.txt", "BUG : Meant to be atom-3339 but looks like: " + cont + main_view.NL);
 								cont = rfc3339.format(new Date());
 							}
 							line.append(cont).append("|");
@@ -210,7 +210,7 @@ class parsered
 							}
 							catch(Exception e)
 							{
-								utilities.append_string_to_file(storage + "time_bug.txt", "BUG : Meant to be atom-3339 but looks like: " + cont + "\n");
+								utilities.append_string_to_file(storage + "time_bug.txt", "BUG : Meant to be atom-3339 but looks like: " + cont + main_view.NL);
 								cont = rfc3339.format(new Date());
 							}
 							line.append(cont).append("|");
@@ -264,7 +264,7 @@ class parsered
 		/// TODO: May already be the out File.
 		final BufferedWriter write = new BufferedWriter(new FileWriter(content_file, true));
 		for(String fed : feeds)
-			write.write(fed + "\n");
+			write.write(fed + main_view.NL);
 		write.close();
 	}
 
@@ -377,7 +377,7 @@ class parsered
 					if((tem3 != -1)&&(tem3 < tem2))
 							tem2 = tem3;
 				}
-				to_file(dump_path, tag.substring(tem + 9, tem2) + "\n");
+				to_file(dump_path, tag.substring(tem + 9, tem2) + main_view.NL);
 			}
 
 			if((tag.contains("type=\"text/html"))||(tag.contains("type=\'text/html")))
@@ -394,7 +394,7 @@ class parsered
 						if((tem3 != -1)&&(tem3 < tem2))
 								tem2 = tem3;
 					}
-					to_file(url_path, tag.substring(tem + 6, tem2) + "\n");
+					to_file(url_path, tag.substring(tem + 6, tem2) + main_view.NL);
 				}
 			}
 			else if((tag.contains("type=\"image/jpeg"))||(tag.contains("type=\'image/jpeg")))
@@ -412,7 +412,7 @@ class parsered
 								tem2 = tem3;
 					}
 					utilities.delete(dump_path);
-					to_file(dump_path, tag.substring(tem + 6, tem2) + "\n");
+					to_file(dump_path, tag.substring(tem + 6, tem2) + main_view.NL);
 				}
 			}
 
