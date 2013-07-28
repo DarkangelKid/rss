@@ -758,7 +758,7 @@ public class main_view extends Activity
 									{
 										utilities.delete_directory(new File(storage + GROUPS_DIRECTORY + group));
 										utilities.remove_string_from_file(storage + GROUP_LIST, group, false);
-										new_items.set(group, true);
+										new_items.set(pos, true);
 									}
 									else
 									{
