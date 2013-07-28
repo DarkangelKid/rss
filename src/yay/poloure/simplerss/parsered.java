@@ -105,7 +105,6 @@ class parsered
 				}
 				line.setLength(0);
 				write_mode = true;
-				line.append("group").append("|").append(group).append("|").append("feed").append("|").append(feed).append("|");
 			}
 			else if((current_tag.contains("</entry"))||(current_tag.contains("</item")))
 			{

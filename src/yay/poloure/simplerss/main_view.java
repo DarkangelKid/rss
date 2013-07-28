@@ -74,8 +74,8 @@ public class main_view extends Activity
 	public static adapter_manage_groups group_list_adapter;
 	public static adapter_manage_filter filter_list_adapter;
 	public static adapter_navigation_drawer nav_adapter;
-	private static List<String> current_groups 			= new ArrayList<String>();
-	private static List<Boolean> new_items 				= new ArrayList<Boolean>();
+	public static List<String> current_groups 			= new ArrayList<String>();
+	public static List<Boolean> new_items 				= new ArrayList<Boolean>();
 	public static String storage, ALL, FEEDS, SETTINGS, MANAGE, NAVIGATION, DELETE_DIALOG, CLEAR_DIALOG, ALL_FILE;
 
 	/// Private static final are good.

@@ -19,7 +19,7 @@ public class check_feed_exists extends AsyncTask<String, Void, String[]>
 	private int pos;
 	private static final Pattern illegal_file_chars	= Pattern.compile("[/\\?%*|<>:]");
 
-	public check_feed_exists(AlertDialog edit_dialog, String new_group, String feed_name, String moder, String spin_group, String current_tit, String current_grop, int position, String all_str)
+	public check_feed_exists(AlertDialog edit_dialog, String new_group, String feed_name, String moder, String current_tit, String current_grop, String spin_group, int position, String all_str)
 	{
 		dialog			= edit_dialog;
 		group			= new_group;
