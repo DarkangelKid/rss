@@ -1,11 +1,8 @@
 package yay.poloure.simplerss;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.app.FragmentManager;
-import android.app.AlertDialog;
 import android.app.ListFragment;
-import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.v4.view.ViewPager;
 
@@ -25,170 +22,12 @@ import java.io.BufferedWriter;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.WindowManager;
-
 import android.os.Debug;
 import android.text.format.Time;
-import android.widget.ArrayAdapter;
 import android.widget.Toast;
-import android.widget.TextView;
-import android.widget.EditText;
-import android.widget.SpinnerAdapter;
-import android.widget.AdapterView;
 
 public class utilities
 {
-	public static void add_feed(String storage, String feed_name, String feed_url, String feed_group, String all_string)
-	{
-		String feed_path	= storage + main_view.GROUPS_DIRECTORY + feed_group + main_view.SEPAR + feed_name;
-		File folder		= new File(feed_path);
-		if(!folder.exists())
-		{
-			folder.mkdir();
-			(new File(feed_path + main_view.SEPAR + "images")).mkdir();
-			(new File(feed_path + main_view.SEPAR + "thumbnails")).mkdir();
-		}
-		feed_path	= storage + main_view.GROUPS_DIRECTORY + all_string;
-		folder		= new File(feed_path);
-		if(!folder.exists())
-			folder.mkdir();
-
-		String feed_info = "name|" +  feed_name + "|url|" + feed_url + "|group|" + feed_group + "|\n";
-		append_string_to_file(storage + main_view.GROUPS_DIRECTORY + feed_group + main_view.SEPAR + feed_group + main_view.TXT, feed_info);
-		append_string_to_file(storage + main_view.ALL_FILE, feed_info);
-
-		if(main_view.feed_list_adapter != null)
-			new main_view.refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-		if(main_view.group_list_adapter != null)
-			new main_view.refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-	}
-
-	public static void edit_feed(String storage, String old_name, String new_name, String new_url, String old_group, String new_group, int position, String all_string)
-	{
-		final String sep					= main_view.SEPAR;
-		final String txt					= main_view.TXT;
-		final String count					= main_view.COUNT_APPENDIX;
-		final String con					= main_view.CONTENT_APPENDIX;
-		final String all_group_file			= storage + main_view.ALL_FILE;
-		final String old_group_folder		= storage + main_view.GROUPS_DIRECTORY + old_group;
-		final String new_group_folder		= storage + main_view.GROUPS_DIRECTORY + new_group;
-		final String old_group_file			= old_group_folder + sep + old_group + txt;
-		final String new_group_file			= new_group_folder + sep + new_group + txt;
-		final String old_feed_folder		= old_group_folder + sep + old_name;
-		final String new_feed_folder		= new_group_folder + sep + new_name;
-		final String old_feed_folder_post	= new_group_folder + sep + old_name;
-		final String new_feed_folder_post	= new_group_folder + sep + new_name;
-
-		/// TEST 1: Did not copy the folder, did add the new name, left the old name and did not delete the folder.
-		if(!old_name.equals(new_name))
-		{
-			(new File(old_feed_folder + sep + old_name + txt)).renameTo(new File(old_feed_folder + sep + new_name + txt));
-			(new File(old_feed_folder + sep + old_name + con)).renameTo(new File(old_feed_folder + sep + new_name + con));
-		}
-		if(!old_group.equals(new_group))
-		{
-			/// Java 1.7 nio
-			///	Files.move(old_feed_folder, new_feed_folder, Files.REPLACE_EXISTING);
-
-			(new File(old_feed_folder)).renameTo(new File(new_feed_folder));
-
-			remove_string_from_file(old_group_file, old_name, true);
-			append_string_to_file(new_group_file, "name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|\n");
-
-			delete_if_empty(old_group_file);
-			if(!exists(old_group_file))
-			{
-				delete_directory(new File(old_group_folder));
-				remove_string_from_file(storage + main_view.GROUP_LIST, old_group, false);
-			}
-		}
-		if(!old_name.equals(new_name))
-			(new File(old_feed_folder_post)).renameTo(new File(new_feed_folder_post));
-
-		/// Replace the new_group file with the new data.
-		List<String> list = read_file_to_list(new_group_file);
-		delete(new_group_file);
-		try
-		{
-			BufferedWriter out = new BufferedWriter(new FileWriter(new_group_file, true));
-			for(String item : list)
-			{
-				if(item.contains(old_name))
-					out.write("name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|\n");
-				else
-					out.write(item + "\n");
-			}
-			out.close();
-		}
-		catch(Exception e)
-		{
-		}
-		/// Replace the all_group file with the new group and data.
-		list = read_file_to_list(all_group_file);
-		delete(all_group_file);
-		try
-		{
-			BufferedWriter out2 = new BufferedWriter(new FileWriter(all_group_file, true));
-			for(String item : list)
-			{
-				if(item.contains(old_name))
-					out2.write("name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|\n");
-				else
-					out2.write(item + "\n");
-			}
-			out2.close();
-		}
-		catch(Exception e)
-		{
-		}
-		/// Delete the group count file and delete the group_content_file
-		delete(new_group_folder + sep + new_group + con);
-		delete(new_group_folder + sep + new_group + con + count);
-		delete(old_group_folder + sep + old_group + con);
-		delete(old_group_folder + sep + old_group + con + count);
-		delete(storage + main_view.GROUPS_DIRECTORY + all_string + sep + all_string + con);
-		delete(storage + main_view.GROUPS_DIRECTORY + all_string + sep + all_string + con + count);
-		/// This is because the group file contains the feed name and feed group (for location of images).
-		if(exists(old_group_file))
-			sort_group_content_by_time(storage, old_group);
-		if(!old_group.equals(new_group))
-			sort_group_content_by_time(storage, new_group);
-		sort_group_content_by_time(storage, all_string);
-
-		main_view.feed_list_adapter.set_position(position, new_name, new_url + "\n" + new_group + " • " + Integer.toString(count_lines(storage + main_view.GROUPS_DIRECTORY + new_group + main_view.SEPAR + new_name + main_view.SEPAR + new_name + main_view.CONTENT_APPENDIX) - 1) + " items");
-		main_view.feed_list_adapter.notifyDataSetChanged();
-
-		/// To refresh the counts and the order of the groups.
-		main_view.update_groups();
-		//new main_view.refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-		new main_view.refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-		/// Force a refresh of the page.
-		int index;
-		if(exists(old_group_file))
-		{
-			index = main_view.current_groups.indexOf(old_group);
-			main_view.new_items.set(index, true);
-		}
-		if(!old_group.equals(new_group))
-		{
-			index = main_view.current_groups.indexOf(new_group);
-			main_view.new_items.set(index, true);
-		}
-		main_view.new_items.set(0, true);
-	}
-
-	public static void add_group(String storage, String group_name)
-	{
-		append_string_to_file(storage + main_view.GROUP_LIST, group_name + "\n");
-		final File folder = new File(storage + main_view.GROUPS_DIRECTORY + group_name);
-		if(!folder.exists())
-			folder.mkdir();
-
-		main_view.update_groups();
-	}
-
 	public static void delete_group(String storage, String group)
 	{
 		/// Move all feeds to an unsorted group.
@@ -248,17 +87,17 @@ public class utilities
 								if(!found_url)
 								{
 									if(!line.contains(url))
-										out.write(line + "\n");
+										out.write(line + main_view.NL);
 									else if(!line.substring(0, 9).equals("marker|1|"))
 									{
-										out.write("marker|1|" + line + "\n");
+										out.write("marker|1|" + line + main_view.NL);
 										found_url = true;
 									}
 									else
-										out.write(line + "\n");
+										out.write(line + main_view.NL);
 								}
 								else
-									out.write(line + "\n");
+									out.write(line + main_view.NL);
 							}
 							out.close();
 							if(found_url)
@@ -304,14 +143,14 @@ public class utilities
 		return b;
 	}
 
-	public static void write_collection_to_file(String path, Collection<?> content)
+	public static void write_collection_to_file(String path, Iterable<?> content)
 	{
-		utilities.delete(path);
+		delete(path);
 		try
 		{
 			BufferedWriter out = new BufferedWriter(new FileWriter(path, true));
 			for(Object item : content)
-				out.write(item.toString() + "\n");
+				out.write(item.toString() + main_view.NL);
 			out.close();
 		}
 		catch(Exception e)
@@ -319,14 +158,14 @@ public class utilities
 		}
 	}
 
-	public static void write_array_to_file(String path, String[] content)
+	public static void write_array_to_file(String path, String... content)
 	{
-		utilities.delete(path);
+		delete(path);
 		try
 		{
 			BufferedWriter out = new BufferedWriter(new FileWriter(path, true));
 			for(String item : content)
-				out.write(item + "\n");
+				out.write(item + main_view.NL);
 			out.close();
 		}
 		catch(Exception e)
@@ -337,7 +176,7 @@ public class utilities
 	public static String[][] create_info_arrays(List<String> current_groups, int size, String storage)
 	{
 		String info, count_path;
-		int number, i, j, total = 0;
+		int number, i, j, total;
 		String[] content;
 		String[] group_array	= new String[size];
 		String[] info_array		= new String[size];
@@ -418,7 +257,7 @@ public class utilities
 		}
 	}
 
-	public static void remove_string_from_file(String file_path, String string, Boolean contains)
+	public static void remove_string_from_file(String file_path, CharSequence string, Boolean contains)
 	{
 		final List<String> list = read_file_to_list(file_path);
 		delete(file_path);
@@ -429,12 +268,12 @@ public class utilities
 				if(contains)
 				{
 					if(!item.contains(string))
-						out.write(item + "\n");
+						out.write(item + main_view.NL);
 				}
 				else
 				{
 					if(!item.equals(string))
-						out.write(item + "\n");
+						out.write(item + main_view.NL);
 				}
 			}
 			out.close();
@@ -443,7 +282,7 @@ public class utilities
 		}
 	}
 
-	public static String[] read_single_to_array(String file_path, String type)
+	private static String[] read_single_to_array(String file_path, String type)
 	{
 		int next, offset, j;
 		String line;
@@ -704,7 +543,7 @@ public class utilities
 			BufferedWriter out = new BufferedWriter(new FileWriter(group_content_path, true));
 			for(Map.Entry<Long, String> entry : map.entrySet())
 			{
-				out.write(entry.getValue() + "\n");
+				out.write(entry.getValue() + main_view.NL);
 			}
 			out.close();
 
@@ -718,159 +557,9 @@ public class utilities
 		}
 	}
 
-	public static void show_add_filter_dialog(Context activity_context, final String storage)
-	{
-		final LayoutInflater inflater		= LayoutInflater.from(activity_context);
-		final View add_filter_layout		= inflater.inflate(R.layout.add_filter_dialog, null);
-
-		final AlertDialog add_filter_dialog = new AlertDialog.Builder(activity_context, 2)
-				.setTitle("Add Filter")
-				.setView(add_filter_layout)
-				.setCancelable(true)
-				.setNegativeButton
-				(activity_context.getString(R.string.cancel_dialog), new DialogInterface.OnClickListener()
-					{
-						@Override
-						public void onClick(DialogInterface dialog,int id)
-						{
-						}
-					}
-				)
-				.create();
-
-				add_filter_dialog.getWindow()
-						.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-
-				add_filter_dialog.setButton(AlertDialog.BUTTON_POSITIVE, (activity_context.getString(R.string.add_dialog)),
-				new DialogInterface.OnClickListener()
-				{
-					@Override
-					public void onClick(DialogInterface dialog, int which)
-					{
-						final String feed_name	= ((EditText) add_filter_layout).getText().toString().trim();
-						String filter_path		= storage.concat(main_view.FILTER_LIST);
-						List<String> filters	= read_file_to_list(filter_path);
-						if(!filters.contains(feed_name))
-							append_string_to_file(filter_path, feed_name + "\n");
-						main_view.filter_list_adapter.set_items(read_file_to_list(filter_path));
-						main_view.filter_list_adapter.notifyDataSetChanged();
-						add_filter_dialog.hide();
-					}
-				});
-		add_filter_dialog.show();
-	}
-
-	public static void show_add_feed_dialog(final List<String> current_groups, Context activity_context)
-	{
-		final LayoutInflater inflater		= LayoutInflater.from(activity_context);
-		final View add_rss_dialog			= inflater.inflate(R.layout.add_rss_dialog, null);
-		final List<String> spinner_groups	= current_groups.subList(1, current_groups.size());
-		final TextView group_edit			= (TextView) add_rss_dialog.findViewById(R.id.group_edit);
-		final TextView URL_edit				= (TextView) add_rss_dialog.findViewById(R.id.URL_edit);
-		final TextView name_edit			= (TextView) add_rss_dialog.findViewById(R.id.name_edit);
-		final AdapterView<SpinnerAdapter> group_spinner	= (AdapterView<SpinnerAdapter>) add_rss_dialog.findViewById(R.id.group_spinner);
-
-		final ArrayAdapter<String> adapter	= new ArrayAdapter<String>(activity_context, R.layout.group_spinner_text, spinner_groups);
-		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		group_spinner.setAdapter(adapter);
-
-		final AlertDialog add_feed_dialog = new AlertDialog.Builder(activity_context, 2)
-				.setTitle("Add Feed")
-				.setView(add_rss_dialog)
-				.setCancelable(true)
-				.setNegativeButton
-				(activity_context.getString(R.string.cancel_dialog), new DialogInterface.OnClickListener()
-					{
-						@Override
-						public void onClick(DialogInterface dialog,int id)
-						{
-						}
-					}
-				)
-				.create();
-
-				add_feed_dialog.setButton(AlertDialog.BUTTON_POSITIVE, (activity_context.getString(R.string.add_dialog)),
-				new DialogInterface.OnClickListener()
-				{
-					@Override
-					public void onClick(DialogInterface dialog, int which)
-					{
-						final String new_group		= group_edit	.getText().toString().trim().toLowerCase();
-						final String URL_check		= URL_edit		.getText().toString().trim();
-						final String feed_name		= name_edit		.getText().toString().trim();
-						String spinner_group;
-						try
-						{
-							spinner_group	= group_spinner	.getSelectedItem().toString();
-						}
-						catch(Exception e)
-						{
-							spinner_group = "unsorted";
-						}
-						new check_feed_exists(add_feed_dialog, new_group, feed_name, "add", "", "", spinner_group, 0, current_groups.get(0)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
-					}
-				});
-				add_feed_dialog.show();
-	}
-
-	public static void show_edit_feed_dialog(final List<String> current_groups, Context activity_context, String storage, final int position)
-	{
-		final LayoutInflater inflater		= LayoutInflater.from(activity_context);
-		final View edit_rss_dialog			= inflater.inflate(R.layout.add_rss_dialog, null);
-		final String[][] content			= utilities.read_csv_to_array(storage + main_view.GROUPS_DIRECTORY+ current_groups.get(0) + main_view.SEPAR + current_groups.get(0) + main_view.TXT, 'n', 'u', 'g');
-		final String current_title			= content[0][position];
-		final String current_url			= content[1][position];
-		final String current_group			= content[2][position];
-
-		final TextView group_edit			= (TextView) edit_rss_dialog.findViewById(R.id.group_edit);
-		final TextView URL_edit				= (TextView) edit_rss_dialog.findViewById(R.id.URL_edit);
-		final TextView name_edit			= (TextView) edit_rss_dialog.findViewById(R.id.name_edit);
-		final AdapterView<SpinnerAdapter> group_spinner	= (AdapterView<SpinnerAdapter>) edit_rss_dialog.findViewById(R.id.group_spinner);
-
-		final List<String> spinner_groups	= current_groups.subList(1, current_groups.size());
-
-		final ArrayAdapter<String> adapter	= new ArrayAdapter<String>(activity_context, R.layout.group_spinner_text, spinner_groups);
-		adapter			.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		group_spinner	.setAdapter(adapter);
-		URL_edit		.setText(current_url);
-		name_edit		.setText(current_title);
-		group_spinner	.setSelection(spinner_groups.indexOf(current_group));
-
-		final AlertDialog edit_feed_dialog = new AlertDialog.Builder(activity_context, 2)
-				.setTitle(activity_context.getString(R.string.edit_dialog_title))
-				.setView(edit_rss_dialog)
-				.setCancelable(true)
-				.setNegativeButton
-				(activity_context.getString(R.string.cancel_dialog),new DialogInterface.OnClickListener()
-					{
-						@Override
-						public void onClick(DialogInterface dialog,int id)
-						{
-						}
-					}
-				)
-				.create();
-
-				edit_feed_dialog.setButton(AlertDialog.BUTTON_POSITIVE, (activity_context.getString(R.string.accept_dialog)),
-				new DialogInterface.OnClickListener()
-				{
-					@Override
-					public void onClick(DialogInterface dialog, int which)
-					{
-							String new_group 		= group_edit	.getText().toString().trim().toLowerCase();
-							String URL_check 		= URL_edit		.getText().toString().trim();
-							String feed_name 		= name_edit		.getText().toString().trim();
-							String spinner_group 	= group_spinner	.getSelectedItem().toString();
-							new check_feed_exists(edit_feed_dialog, new_group, feed_name, "edit", current_title, current_group, spinner_group, position, current_groups.get(0)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
-					}
-				});
-
-				edit_feed_dialog.show();
-	}
-
 	public static void log(String storage, String text)
 	{
-		append_string_to_file(storage + main_view.DUMP_FILE, text + "\n");
+		append_string_to_file(storage + main_view.DUMP_FILE, text + main_view.NL);
 	}
 
 	public static void delete(String file_path)
