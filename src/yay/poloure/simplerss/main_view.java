@@ -741,10 +741,29 @@ public class main_view extends Activity
 								@Override
 								public void onClick(DialogInterface dialog, int id)
 								{
-									/// remove deleted files content from groups that it was in
-									/*feed_list_adapter.remove_item(pos);
+									String group = feed_list_adapter.get_info(pos);
+									group = group.substring(group.indexOf('\n') + 1, group.indexOf(' '));
+									final String name = feed_list_adapter.getItem(pos);
+
+									final String group_file = storage + GROUPS_DIRECTORY + group + SEPAR + group + TXT;
+									utilities.delete_directory(new File(storage + GROUPS_DIRECTORY + group + SEPAR + name));
+									utilities.remove_string_from_file(group_file, name, true);
+									utilities.remove_string_from_file(storage + GROUPS_DIRECTORY + ALL + SEPAR + ALL + TXT, name, true);
+
+									utilities.delete_if_empty(group_file);
+									if(!(new File(group_file).exists()))
+									{
+										utilities.delete_directory(new File(storage + GROUPS_DIRECTORY + group));
+										utilities.remove_string_from_file(storage + GROUP_LIST, group, false);
+									}
+									else
+										utilities.sort_group_content_by_time(storage, group);
+									utilities.sort_group_content_by_time(storage, ALL);
+
+									update_groups();
+									feed_list_adapter.remove_item(pos);
 									feed_list_adapter.notifyDataSetChanged();
-									new refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);*/
+									new refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 								}
 							}
 						)
