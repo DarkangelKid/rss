@@ -9,6 +9,7 @@ import java.io.IOException;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.List;
 import java.util.regex.Pattern;
 //import android.os.Debug;
 import android.text.format.Time;
@@ -56,6 +57,7 @@ class parsered
 		final String thumbnail_dir	= feed_folder + main_view.THUMBNAIL_DIRECTORY;
 		final File in				= new File(store_file);
 		final File out				= new File(content_file);
+		final List<String> filters	= utilities.read_file_to_list(storage + main_view.FILTER_LIST);
 
 		Set<String> set				= new LinkedHashSet<String>();
 		Boolean write_mode			= false;
@@ -228,6 +230,19 @@ class parsered
 							cont = regex_tags.matcher(cont).replaceAll("");
 						}
 						cont = space_tags.matcher(cont).replaceAll(" ");
+
+						if(current_tag.contains("<title>"))
+						{
+							String cont2 = cont.toLowerCase();
+							for(String filter : filters)
+							{
+								if(cont2.contains(filter.toLowerCase()))
+								{
+									write_mode = false;
+									break;
+								}
+							}
+						}
 
 						take = description_length;
 						description_length += cont.length();
