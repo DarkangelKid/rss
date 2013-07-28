@@ -67,20 +67,116 @@ public class utilities
 
 	public static void edit_feed(String storage, String old_name, String new_name, String new_url, String old_group, String new_group, int position, String all_string)
 	{
-		String all_group_file	= storage + main_view.ALL_FILE;
+		final String sep					= main_view.SEPAR;
+		final String txt					= main_view.TXT;
+		final String count					= main_view.COUNT_APPENDIX;
+		final String con					= main_view.CONTENT_APPENDIX;
+		final String all_group_file			= storage + main_view.ALL_FILE;
+		final String old_group_folder		= storage + main_view.GROUPS_DIRECTORY + old_group;
+		final String new_group_folder		= storage + main_view.GROUPS_DIRECTORY + new_group;
+		final String old_group_file			= old_group_folder + sep + old_group + txt;
+		final String new_group_file			= new_group_folder + sep + new_group + txt;
+		final String old_feed_folder		= old_group_folder + sep + old_name;
+		final String new_feed_folder		= new_group_folder + sep + new_name;
+		final String old_feed_folder_post	= new_group_folder + sep + old_name;
+		final String new_feed_folder_post	= new_group_folder + sep + new_name;
 
-		/*main_view.feed_list_adapter.set_position(position, new_name, new_url + "\n" + new_group + " • " + Integer.toString(count_lines(storage + main_view.CONTENT_DIRECTORY + new_name + main_view.PARSED_APPENDIX) - 1) + " items");
-		main_view.feed_list_adapter.notifyDataSetChanged();
+		/// TEST 1: Did not copy the folder, did add the new name, left the old name and did not delete the folder.
+		if(!old_name.equals(new_name))
+		{
+			(new File(old_feed_folder + sep + old_name + txt)).renameTo(new File(old_feed_folder + sep + new_name + txt));
+			(new File(old_feed_folder + sep + old_name + con)).renameTo(new File(old_feed_folder + sep + new_name + con));
+		}
+		if(!old_group.equals(new_group))
+		{
+			/// Java 1.7 nio
+			///	Files.move(old_feed_folder, new_feed_folder, Files.REPLACE_EXISTING);
 
-		main_view.update_groups();
-		new main_view.refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-		new main_view.refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+			(new File(old_feed_folder)).renameTo(new File(new_feed_folder));
 
-		sort_group_content_by_time(storage, all_string);
+			remove_string_from_file(old_group_file, old_name, true);
+			append_string_to_file(new_group_file, "name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|\n");
+
+			delete_if_empty(old_group_file);
+			if(!exists(old_group_file))
+			{
+				delete_directory(new File(old_group_folder));
+				remove_string_from_file(storage + main_view.GROUP_LIST, old_group, false);
+			}
+		}
+		if(!old_name.equals(new_name))
+			(new File(old_feed_folder_post)).renameTo(new File(new_feed_folder_post));
+
+		/// Replace the new_group file with the new data.
+		List<String> list = read_file_to_list(new_group_file);
+		delete(new_group_file);
+		try
+		{
+			BufferedWriter out = new BufferedWriter(new FileWriter(new_group_file, true));
+			for(String item : list)
+			{
+				if(item.contains(old_name))
+					out.write("name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|\n");
+				else
+					out.write(item + "\n");
+			}
+			out.close();
+		}
+		catch(Exception e)
+		{
+		}
+		/// Replace the all_group file with the new group and data.
+		list = read_file_to_list(all_group_file);
+		delete(all_group_file);
+		try
+		{
+			BufferedWriter out2 = new BufferedWriter(new FileWriter(all_group_file, true));
+			for(String item : list)
+			{
+				if(item.contains(old_name))
+					out2.write("name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|\n");
+				else
+					out2.write(item + "\n");
+			}
+			out2.close();
+		}
+		catch(Exception e)
+		{
+		}
+		/// Delete the group count file and delete the group_content_file
+		delete(new_group_folder + sep + new_group + con);
+		delete(new_group_folder + sep + new_group + con + count);
+		delete(old_group_folder + sep + old_group + con);
+		delete(old_group_folder + sep + old_group + con + count);
+		delete(storage + main_view.GROUPS_DIRECTORY + all_string + sep + all_string + con);
+		delete(storage + main_view.GROUPS_DIRECTORY + all_string + sep + all_string + con + count);
+		/// This is because the group file contains the feed name and feed group (for location of images).
 		if(exists(old_group_file))
 			sort_group_content_by_time(storage, old_group);
-		if(exists(new_group_file))
-			sort_group_content_by_time(storage, new_group);*/
+		if(!old_group.equals(new_group))
+			sort_group_content_by_time(storage, new_group);
+		sort_group_content_by_time(storage, all_string);
+
+		main_view.feed_list_adapter.set_position(position, new_name, new_url + "\n" + new_group + " • " + Integer.toString(count_lines(storage + main_view.GROUPS_DIRECTORY + new_group + main_view.SEPAR + new_name + main_view.SEPAR + new_name + main_view.CONTENT_APPENDIX) - 1) + " items");
+		main_view.feed_list_adapter.notifyDataSetChanged();
+
+		/// To refresh the counts and the order of the groups.
+		main_view.update_groups();
+		//new main_view.refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		new main_view.refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		/// Force a refresh of the page.
+		int index;
+		if(exists(old_group_file))
+		{
+			index = main_view.current_groups.indexOf(old_group);
+			main_view.new_items.set(index, true);
+		}
+		if(!old_group.equals(new_group))
+		{
+			index = main_view.current_groups.indexOf(new_group);
+			main_view.new_items.set(index, true);
+		}
+		main_view.new_items.set(0, true);
 	}
 
 	public static void add_group(String storage, String group_name)
@@ -98,6 +194,21 @@ public class utilities
 		/// Move all feeds to an unsorted group.
 		//delete(storage + main_view.GROUPS_DIRECTORY + group + main_view.TXT);
 		//delete(storage + main_view.GROUPS_DIRECTORY + group + main_view.GROUP_CONTENT_APPENDIX);
+	}
+
+	public static boolean delete_directory(File directory)
+	{
+		if(directory.isDirectory())
+		{
+			String[] children = directory.list();
+			for (String child : children)
+			{
+				boolean success = delete_directory(new File(directory, child));
+				if(!success)
+					return false;
+			}
+		}
+		return directory.delete();
 	}
 
 	public static void save_positions(FragmentManager fragment_manager, ViewPager viewpager, String storage)
@@ -582,7 +693,7 @@ public class utilities
 					{
 						break;
 					}
-					map.put(time.toMillis(false) - i, content.get(i));
+					map.put(time.toMillis(false) - i, "group|" + groups_array[k] + "|feed|" + feeds_array[k] + "|" + content.get(i));
 				}
 			}
 		}
@@ -696,7 +807,7 @@ public class utilities
 						{
 							spinner_group = "unsorted";
 						}
-						new check_feed_exists(add_feed_dialog, new_group, feed_name, "add", spinner_group, "", "", 0, current_groups.get(0)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
+						new check_feed_exists(add_feed_dialog, new_group, feed_name, "add", "", "", spinner_group, 0, current_groups.get(0)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
 					}
 				});
 				add_feed_dialog.show();
@@ -750,7 +861,7 @@ public class utilities
 							String URL_check 		= URL_edit		.getText().toString().trim();
 							String feed_name 		= name_edit		.getText().toString().trim();
 							String spinner_group 	= group_spinner	.getSelectedItem().toString();
-							new check_feed_exists(edit_feed_dialog, new_group, feed_name, "edit", spinner_group, current_group, current_title, position, current_groups.get(0)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
+							new check_feed_exists(edit_feed_dialog, new_group, feed_name, "edit", current_title, current_group, spinner_group, position, current_groups.get(0)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
 					}
 				});
 
