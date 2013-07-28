@@ -26,4 +26,12 @@
 				android:summary="@string/notifications_summary_preferences"
 				android:defaultValue="false" />
 	</PreferenceCategory>
+	<PreferenceCategory
+			android:title="@string/offline_cat_preferences">
+		<CheckBoxPreference
+				android:key="offline"
+				android:title="@string/offline_cat_preferences"
+				android:summary="@string/offline_summary_preferences"
+				android:defaultValue="false" />
+	</PreferenceCategory>
 </PreferenceScreen>

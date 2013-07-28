@@ -460,11 +460,7 @@ public class adapter_feeds_cards extends BaseAdapter
 		public boolean onLongClick(View v)
 		{
 			String long_press_url = ((TextView) v.findViewById(R.id.time)).getText().toString();
-			ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-			ClipData clip = ClipData.newPlainText("label", long_press_url);
-			clipboard.setPrimaryClip(clip);
-			Toast message_toast = Toast.makeText(context, "Copied link url to clipboard.", Toast.LENGTH_SHORT);
-			message_toast.show();
+			add_edit_feeds.show_card_dialog(context, long_press_url);
 			return true;
 		}
 	}
