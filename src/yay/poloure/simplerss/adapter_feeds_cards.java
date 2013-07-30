@@ -187,6 +187,7 @@ public class adapter_feeds_cards extends BaseAdapter
 			iv.height	= (int) ((((double) screen_width)/(width)) * (height));
 			iv.width	= LayoutParams.MATCH_PARENT;
 			holder.image_view.setLayoutParams(iv);
+			holder.image_view		.setPadding(0, eight/2, 0, 0);
 
 			load(content_images.get(position), holder.image_view);
 		}
@@ -197,9 +198,12 @@ public class adapter_feeds_cards extends BaseAdapter
 		{
 			holder.description_view.setVisibility(View.VISIBLE);
 			if(image_exists)
-				holder.description_view.setPadding(eight, eight, eight, eight);
+			{
+				holder.description_view	.setPadding(eight	, eight/2	, eight	, eight);
+				holder.image_view		.setPadding(0		, eight/2	, 0		, eight/2);
+			}
 			else
-				holder.description_view.setPadding(eight, 0, eight, eight);
+				holder.description_view.setPadding(eight, eight/2, eight, eight);
 			holder.description_view.setText(description);
 		}
 		else

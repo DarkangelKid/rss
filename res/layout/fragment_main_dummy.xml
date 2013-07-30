@@ -4,7 +4,7 @@
 		android:layout_height="match_parent"
 		android:scrollbars="none"
 		android:divider="#00000000"
-		android:dividerHeight="12dp"
+		android:dividerHeight="8dp"
 		android:drawSelectorOnTop="true"
-		android:padding="12dip"
+		android:padding="16dp"
 		android:clipToPadding="false"/>
