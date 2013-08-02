@@ -10,6 +10,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.support.v4.widget.DrawerLayout;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.widget.Toast;
@@ -440,7 +441,16 @@ public class adapter_feeds_cards extends BaseAdapter
 		@Override
 		public void onClick(View v)
 		{
-			context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(((TextView) v.findViewById(R.id.time)).getText().toString())));
+			main_view.drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+			main_view.drawer_toggle.setDrawerIndicatorEnabled(false);
+			main_view.action_bar.setDisplayHomeAsUpEnabled(true);
+			main_view.fragment_manager.beginTransaction()
+					.hide(main_view.fragment_manager.findFragmentByTag(main_view.FEEDS))
+					.add(R.id.drawer_layout, new main_view.fragment_offline(), "OFFLINE")
+					.addToBackStack("BACK")
+					.commit();
+
+			//context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(((TextView) v.findViewById(R.id.time)).getText().toString())));
 		}
 	}
 

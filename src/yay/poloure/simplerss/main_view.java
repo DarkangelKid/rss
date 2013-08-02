@@ -24,6 +24,7 @@ import android.app.FragmentTransaction;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
+import android.app.ActionBar;
 
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v13.app.FragmentPagerAdapter;
@@ -60,16 +61,17 @@ import java.io.File;
 public class main_view extends Activity
 {
 	/// These are fine.
-	private DrawerLayout drawer_layout;
+	public static DrawerLayout drawer_layout;
 	private ListView navigation_list;
 	private String current_title;
 
 	/// Statics without final intilisations are generally unsafe.
-	private static ActionBarDrawerToggle drawer_toggle;
+	public static ActionBarDrawerToggle drawer_toggle;
 	private static Menu optionsMenu;
 	public static Context activity_context;
 	private static ViewPager viewpager;
-	private static FragmentManager fragment_manager;
+	public static FragmentManager fragment_manager;
+	public static ActionBar action_bar;
 	public static adapter_manage_feeds feed_list_adapter;
 	public static adapter_manage_groups group_list_adapter;
 	public static adapter_manage_filter filter_list_adapter;
@@ -127,10 +129,10 @@ public class main_view extends Activity
 		else
 		{
 			fragment_manager.beginTransaction()
-				.show(fragment_manager.findFragmentByTag(FEEDS))
-				.hide(fragment_manager.findFragmentByTag(SETTINGS))
-				.hide(fragment_manager.findFragmentByTag(MANAGE))
-				.commit();
+					.show(fragment_manager.findFragmentByTag(FEEDS))
+					.hide(fragment_manager.findFragmentByTag(SETTINGS))
+					.hide(fragment_manager.findFragmentByTag(MANAGE))
+					.commit();
 		}
 
 		nav_adapter		= new adapter_navigation_drawer(this);
@@ -188,6 +190,7 @@ public class main_view extends Activity
 		drawer_toggle.syncState();
 
 		update_groups();
+		action_bar = getActionBar();
 
 		if(utilities.exists(storage + ALL_FILE))
 			new refresh_page(0).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -220,6 +223,18 @@ public class main_view extends Activity
 	{
 		super.onConfigurationChanged(newConfig);
 		drawer_toggle.onConfigurationChanged(newConfig);
+	}
+
+	@Override
+	public void onBackPressed()
+	{
+		super.onBackPressed();
+		//if(fragment_manager.getBackStackEntryAt(0).equals("BACK"))
+		{
+			drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+			drawer_toggle.setDrawerIndicatorEnabled(true);
+			action_bar.setDisplayHomeAsUpEnabled(true);
+		}
 	}
 
 	public static class refresh_manage_feeds extends AsyncTask<Void, String[], Void>
@@ -493,13 +508,11 @@ public class main_view extends Activity
 
 	public static class fragment_offline extends WebViewFragment
 	{
-		@Override
+		/*@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
-
-		}
-
-
+			return inflater.inflate(R.layout.offline_content_layout, container, false);
+		}*/
 	}
 
 	public static class fragment_preferences extends PreferenceFragment
