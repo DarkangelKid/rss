@@ -46,6 +46,8 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 
+import android.webkit.WebViewFragment;
+
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
@@ -488,6 +490,17 @@ public class main_view extends Activity
 		}
 	}
 
+	public static class fragment_offline extends WebViewFragment
+	{
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+		{
+
+		}
+
+
+	}
+
 	public static class fragment_preferences extends PreferenceFragment
 	{
 
@@ -758,6 +771,8 @@ public class main_view extends Activity
 									{
 										utilities.delete_directory(new File(storage + GROUPS_DIRECTORY + group));
 										utilities.remove_string_from_file(storage + GROUP_LIST, group, false);
+										//getFragmentManager().beginTransaction().remove(((ListFragment) fragment_manager
+										//		.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(pos))));
 										new_items.set(pos, true);
 									}
 									else
@@ -863,11 +878,15 @@ public class main_view extends Activity
  		@Override
 		public Fragment getItem(int position)
 		{
-			fragment_card f = new fragment_card();
-			Bundle args = new Bundle();
-			args.putInt("num", position);
-			f.setArguments(args);
-			return f;
+			if(position < current_groups.size())
+			{
+				fragment_card f = new fragment_card();
+				Bundle args = new Bundle();
+				args.putInt("num", position);
+				f.setArguments(args);
+				return f;
+			}
+			return null;
 		}
 
 		@Override
