@@ -360,7 +360,7 @@ class parsered
 		return momo;
 	}
 
-	private String get_next_tag(BufferedReader reader, String... types) throws Exception
+	private String get_next_tag(BufferedReader reader, String... types) throws IOException
 	{
 		boolean found = false;
 		int tem, tem2, tem3;

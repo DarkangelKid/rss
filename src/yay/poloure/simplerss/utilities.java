@@ -532,7 +532,7 @@ public class utilities
 					{
 						break;
 					}
-					map.put(time.toMillis(false) - i, "group|" + groups_array[k] + "|feed|" + feeds_array[k] + "|" + content.get(i));
+					map.put(time.toMillis(false) - i, content.get(i) + "group|" + groups_array[k] + "|feed|" + feeds_array[k] + "|");
 				}
 			}
 		}
