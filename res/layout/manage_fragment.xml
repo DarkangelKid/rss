@@ -4,8 +4,8 @@
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
 			android:divider="#00000000"
-			android:dividerHeight="6dp"
+			android:dividerHeight="8dp"
 			android:scrollbars="none"
 			android:drawSelectorOnTop="false"
-			android:padding="12dip"
+			android:padding="8dp"
 			android:clipToPadding="false"/>

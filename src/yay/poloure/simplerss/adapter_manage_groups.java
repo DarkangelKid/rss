@@ -96,11 +96,12 @@ public class adapter_manage_groups extends BaseAdapter
 			holder.info_view.setText(info_array[position]);
 			if(position != 0)
 			{
+				holder.image_view.setVisibility(View.VISIBLE);
 				holder.image_view.setOnTouchListener(new MyTouchListener());
 				convertView.setOnDragListener(new MyDragListener());
 			}
 			else
-				holder.image_view.setVisibility(View.INVISIBLE);
+				holder.image_view.setVisibility(View.GONE);
 
 			return convertView;
 	}
