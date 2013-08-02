@@ -52,7 +52,7 @@ public class adapter_feeds_cards extends BaseAdapter
 	private final Context context;
 	private ListView listview;
 
-	private static int eight = 0, twelve = 0;
+	private static int eight = 0;
 	private int top_item_position = -1;
 	private final int screen_width;
 	private int total = 0;
@@ -65,7 +65,6 @@ public class adapter_feeds_cards extends BaseAdapter
 		DisplayMetrics metrics = context.getResources().getDisplayMetrics();
 		screen_width = metrics.widthPixels;
 		eight = (int) ((8 * (metrics.density) + 0.5f));
-		twelve = (int) ((12 * (metrics.density) + 0.5f));
 	}
 
 	public void add_list(List<String> new_title, List<String> new_des, List<String> new_link, List<String> new_image, List<Integer> new_height, List<Integer> new_width, List<Boolean> new_marker)
@@ -138,7 +137,7 @@ public class adapter_feeds_cards extends BaseAdapter
 						firstVisibleItem = total - firstVisibleItem;
 						if(firstVisibleItem == total)
 						{
-							if(listview.getChildAt(0).getTop() == twelve)
+							if(listview.getChildAt(0).getTop() == eight)
 								top_item_position = total - 1;
 							else if(top_item_position != total - 1)
 								top_item_position = total - 2;
@@ -187,6 +186,7 @@ public class adapter_feeds_cards extends BaseAdapter
 			iv.height	= (int) ((((double) screen_width)/(width)) * (height));
 			iv.width	= LayoutParams.MATCH_PARENT;
 			holder.image_view.setLayoutParams(iv);
+			holder.image_view		.setPadding(0, eight/2, 0, 0);
 
 			load(content_images.get(position), holder.image_view);
 		}
@@ -197,13 +197,22 @@ public class adapter_feeds_cards extends BaseAdapter
 		{
 			holder.description_view.setVisibility(View.VISIBLE);
 			if(image_exists)
-				holder.description_view.setPadding(eight, eight, eight, eight);
+			{
+				holder.description_view	.setPadding(eight	, eight/2	, eight	, eight);
+				holder.image_view		.setPadding(0		, eight/2	, 0		, eight/2);
+			}
 			else
-				holder.description_view.setPadding(eight, 0, eight, eight);
+				holder.description_view.setPadding(eight, eight/4, eight, eight);
 			holder.description_view.setText(description);
 		}
 		else
+		{
 			holder.description_view.setVisibility(View.GONE);
+			if(!image_exists)
+			{
+				holder.time_view.setPadding(eight, 0, eight, eight);
+			}
+		}
 
 		holder.title_view.setText(title);
 		holder.time_view.setText(link);

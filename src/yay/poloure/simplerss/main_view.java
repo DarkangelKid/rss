@@ -480,6 +480,7 @@ public class main_view extends Activity
 					new_items.set(0, true);
 					new_items.set(page_number, true);
 				}
+				/// Maybe do not refresh the page.
 				new refresh_page(page_number).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 				return true;
 			}
