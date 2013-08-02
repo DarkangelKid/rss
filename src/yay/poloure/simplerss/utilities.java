@@ -175,17 +175,19 @@ public class utilities
 
 	public static String[][] create_info_arrays(List<String> current_groups, int size, String storage)
 	{
-		String info, count_path;
+		String info;
 		int number, i, j, total;
 		String[] content;
 		String[] group_array	= new String[size];
 		String[] info_array		= new String[size];
 
-		count_path = storage + main_view.GROUPS_DIRECTORY + current_groups.get(0) + main_view.SEPAR + current_groups.get(0) + main_view.COUNT_APPENDIX;
-			if(exists(count_path))
-				total = Integer.parseInt(read_file_to_list(count_path).get(0));
-			else
-				total = count_lines(count_path);
+		final String content_path = storage + main_view.GROUPS_DIRECTORY + current_groups.get(0) + main_view.SEPAR + current_groups.get(0) + main_view.CONTENT_APPENDIX;
+		final String count_path = content_path + main_view.COUNT_APPENDIX;
+
+		if(exists(count_path))
+			total = Integer.parseInt(read_file_to_list(count_path).get(0));
+		else
+			total = count_lines(content_path);
 
 		for(i = 0; i < size; i++)
 		{
@@ -497,11 +499,14 @@ public class utilities
 	public static void sort_group_content_by_time(String storage, String group)
 	{
 		/// "/storage/groups/Tumblr/Tumbler.content.txt"
-		final String group_dir			= storage + main_view.GROUPS_DIRECTORY + group + main_view.SEPAR;
+		final String sep				= main_view.SEPAR;
+		final String group_dir			= storage + main_view.GROUPS_DIRECTORY + group + sep;
 		final String group_content_path	= group_dir + group + main_view.CONTENT_APPENDIX;
 		final String group_count_file	= group_content_path + main_view.COUNT_APPENDIX;
-		final String[] feeds_array		= read_single_to_array(group_dir + group + main_view.TXT, "name|");
-		final String[] groups_array		= read_single_to_array(group_dir + group + main_view.TXT, "group|");
+
+		final String[][] contents	= utilities.read_csv_to_array(group_dir + group + main_view.TXT, 'n', 'g');
+		final String[] names		= contents[0];
+		final String[] groups		= contents[1];
 
 		String content_path;
 		Time time = new Time();
@@ -510,10 +515,10 @@ public class utilities
 		Map<Long, String> map = new TreeMap<Long, String>();
 		int i;
 
-		for(int k = 0; k < feeds_array.length; k++)
+		for(int k = 0; k < names.length; k++)
 		{
 			/// "/storage/groups/Tumblr/mariam/mariam.content.txt"
-			content_path = storage + main_view.GROUPS_DIRECTORY + groups_array[k] + main_view.SEPAR + feeds_array[k] + main_view.SEPAR + feeds_array[k] + main_view.CONTENT_APPENDIX;
+			content_path = storage + main_view.GROUPS_DIRECTORY + groups[k] + sep + names[k] + sep + names[k] + main_view.CONTENT_APPENDIX;
 			if(exists(content_path))
 			{
 				content 		= read_file_to_list(content_path);
@@ -532,7 +537,7 @@ public class utilities
 					{
 						break;
 					}
-					map.put(time.toMillis(false) - i, content.get(i) + "group|" + groups_array[k] + "|feed|" + feeds_array[k] + "|");
+					map.put(time.toMillis(false) - i, content.get(i) + "group|" + groups[k] + "|feed|" + names[k] + "|");
 				}
 			}
 		}
@@ -542,9 +547,8 @@ public class utilities
 		{
 			BufferedWriter out = new BufferedWriter(new FileWriter(group_content_path, true));
 			for(Map.Entry<Long, String> entry : map.entrySet())
-			{
 				out.write(entry.getValue() + main_view.NL);
-			}
+
 			out.close();
 
 			BufferedWriter out2 = new BufferedWriter(new FileWriter(group_count_file, false));

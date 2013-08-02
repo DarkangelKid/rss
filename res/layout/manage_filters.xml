@@ -6,5 +6,5 @@
 		android:dividerHeight="8dp"
 		android:scrollbars="none"
 		android:drawSelectorOnTop="false"
-		android:padding="12dip"
+		android:padding="8dip"
 		android:clipToPadding="false"/>

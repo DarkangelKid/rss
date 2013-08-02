@@ -48,9 +48,9 @@ public class service_update extends IntentService
 		final String group_file_path		= storage + main_view.GROUPS_DIRECTORY + grouper + main_view.SEPAR + grouper + main_view.TXT;
 
 		final String[][] content			= utilities.read_csv_to_array(group_file_path, 'n', 'u', 'g');
-		final String[] group_feeds_names	= content[0];
-		final String[] group_feeds_urls		= content[1];
-		final String[] belongs_to_group		= content[2];
+		final String[] names				= content[0];
+		final String[] urls					= content[1];
+		final String[] groups				= content[2];
 
 		String feed_path;
 		int i;
@@ -59,12 +59,12 @@ public class service_update extends IntentService
 		((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getSize(screen_size);
 		final int width = (int) (Math.round(((screen_size.x)*0.944)));
 
-		final int size = group_feeds_names.length;
+		final int size = names.length;
 		/// For each feed you must do this.
 		for(i = 0; i < size; i++)
 		{
-			utilities.download_file(group_feeds_urls[i], storage + group_feeds_names[i] + main_view.STORE_APPENDIX);
-			new parsered(storage, belongs_to_group[i], group_feeds_names[i], width);
+			utilities.download_file(urls[i], storage + names[i] + main_view.STORE_APPENDIX);
+			new parsered(storage, groups[i], names[i], width);
 		}
 
 		/// Sort group order
@@ -74,10 +74,8 @@ public class service_update extends IntentService
 			utilities.sort_group_content_by_time(storage, grouper);
 		}
 		else
-		{
 			for(String gro : all_groups)
 				utilities.sort_group_content_by_time(storage, gro);
-		}
 
 		final List<Integer> unread_list = main_view.get_unread_counts();
 
