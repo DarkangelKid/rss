@@ -266,7 +266,10 @@ public class adapter_feeds_cards extends BaseAdapter
 			load_image task = new load_image(imageView);
 			DownloadedDrawable downloadedDrawable = new DownloadedDrawable(task);
 			imageView.setImageDrawable(downloadedDrawable);
-			task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url);
+			if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
+				task.execute(url);
+			else
+				task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url);
 		}
 	}
 
@@ -475,7 +478,12 @@ public class adapter_feeds_cards extends BaseAdapter
 			Intent intent = new Intent();
 			intent.setAction(Intent.ACTION_VIEW);
 			String type = image_path.substring(image_path.lastIndexOf('.') + 1, image_path.length());
-			intent.setDataAndTypeAndNormalize(Uri.fromFile(new File(image_path)), "image/" + type);
+
+			if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN)
+				intent.setDataAndType(Uri.fromFile(new File(image_path)), "image/" + type);
+			else
+				intent.setDataAndTypeAndNormalize(Uri.fromFile(new File(image_path)), "image/" + type);
+
 			context.startActivity(intent);
 		}
 	}

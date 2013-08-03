@@ -141,7 +141,7 @@ public class add_edit_feeds
 				String storage = main_view.storage;
 				if(!existing_group)
 					add_group(storage, group);
-				if(name.isEmpty())
+				if(name.equals(""))
 					name = ton[1];
 
 				name = illegal_file_chars.matcher(name).replaceAll("");
@@ -161,7 +161,7 @@ public class add_edit_feeds
 		final LayoutInflater inflater		= LayoutInflater.from(activity_context);
 		final View add_filter_layout		= inflater.inflate(R.layout.add_filter_dialog, null);
 
-		final AlertDialog add_filter_dialog = new AlertDialog.Builder(activity_context, 2)
+		final AlertDialog add_filter_dialog = new AlertDialog.Builder(activity_context)
 				.setTitle("Add Filter")
 				.setView(add_filter_layout)
 				.setCancelable(true)
@@ -212,43 +212,44 @@ public class add_edit_feeds
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		group_spinner.setAdapter(adapter);
 
-		final AlertDialog add_feed_dialog = new AlertDialog.Builder(activity_context, 2)
-				.setTitle("Add Feed")
-				.setView(add_rss_dialog)
-				.setCancelable(true)
-				.setNegativeButton
-				(activity_context.getString(R.string.cancel_dialog), new DialogInterface.OnClickListener()
-					{
-						@Override
-						public void onClick(DialogInterface dialog,int id)
-						{
-						}
-					}
-				)
-				.create();
+		final AlertDialog add_feed_dialog = new AlertDialog.Builder(activity_context).create();
+		add_feed_dialog.setTitle("Add Feed");
+		add_feed_dialog.setView(add_rss_dialog);
+		add_feed_dialog.setCancelable(true);
+		add_feed_dialog.setButton(AlertDialog.BUTTON_NEGATIVE, activity_context.getString(R.string.cancel_dialog),
+		new DialogInterface.OnClickListener()
+		{
+			@Override
+			public void onClick(DialogInterface dialog,int id)
+			{
+			}
+		});
 
-				add_feed_dialog.setButton(AlertDialog.BUTTON_POSITIVE, (activity_context.getString(R.string.add_dialog)),
-				new DialogInterface.OnClickListener()
+		add_feed_dialog.setButton(AlertDialog.BUTTON_POSITIVE, activity_context.getString(R.string.add_dialog),
+		new DialogInterface.OnClickListener()
+		{
+			@Override
+			public void onClick(DialogInterface dialog, int which)
+			{
+				final String new_group		= group_edit	.getText().toString().trim().toLowerCase(Locale.getDefault());
+				final String URL_check		= URL_edit		.getText().toString().trim();
+				final String feed_name		= name_edit		.getText().toString().trim();
+				String spinner_group;
+				try
 				{
-					@Override
-					public void onClick(DialogInterface dialog, int which)
-					{
-						final String new_group		= group_edit	.getText().toString().trim().toLowerCase(Locale.getDefault());
-						final String URL_check		= URL_edit		.getText().toString().trim();
-						final String feed_name		= name_edit		.getText().toString().trim();
-						String spinner_group;
-						try
-						{
-							spinner_group	= group_spinner	.getSelectedItem().toString();
-						}
-						catch(Exception e)
-						{
-							spinner_group = "unsorted";
-						}
-						new check_feed_exists(add_feed_dialog, new_group, feed_name, "add", "", "", spinner_group, 0, current_groups.get(0)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
-					}
-				});
-				add_feed_dialog.show();
+					spinner_group	= group_spinner	.getSelectedItem().toString();
+				}
+				catch(Exception e)
+				{
+					spinner_group = "unsorted";
+				}
+				if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
+					new check_feed_exists(add_feed_dialog, new_group, feed_name, "add", "", "", spinner_group, 0, current_groups.get(0)).execute(URL_check);
+				else
+					new check_feed_exists(add_feed_dialog, new_group, feed_name, "add", "", "", spinner_group, 0, current_groups.get(0)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
+			}
+		});
+		add_feed_dialog.show();
 	}
 
 	public static void show_edit_feed_dialog(final List<String> current_groups, Context activity_context, String storage, final int position)
@@ -274,7 +275,7 @@ public class add_edit_feeds
 		name_edit		.setText(current_title);
 		group_spinner	.setSelection(spinner_groups.indexOf(current_group));
 
-		final AlertDialog edit_feed_dialog = new AlertDialog.Builder(activity_context, 2)
+		final AlertDialog edit_feed_dialog = new AlertDialog.Builder(activity_context)
 				.setTitle(activity_context.getString(R.string.edit_dialog_title))
 				.setView(edit_rss_dialog)
 				.setCancelable(true)
@@ -299,7 +300,10 @@ public class add_edit_feeds
 							String URL_check 		= URL_edit		.getText().toString().trim();
 							String feed_name 		= name_edit		.getText().toString().trim();
 							String spinner_group 	= group_spinner	.getSelectedItem().toString();
-							new check_feed_exists(edit_feed_dialog, new_group, feed_name, "edit", current_title, current_group, spinner_group, position, current_groups.get(0)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
+							if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
+								new check_feed_exists(edit_feed_dialog, new_group, feed_name, "edit", current_title, current_group, spinner_group, position, current_groups.get(0)).execute(URL_check);
+							else
+								new check_feed_exists(edit_feed_dialog, new_group, feed_name, "edit", current_title, current_group, spinner_group, position, current_groups.get(0)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
 					}
 				});
 
@@ -356,9 +360,19 @@ public class add_edit_feeds
 		utilities.append_string_to_file(storage + main_view.ALL_FILE, feed_info);
 
 		if(main_view.feed_list_adapter != null)
-			new main_view.refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		{
+			if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
+				new main_view.refresh_manage_feeds().execute();
+			else
+				new main_view.refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		}
 		if(main_view.group_list_adapter != null)
-			new main_view.refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		{
+			if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
+				new main_view.refresh_manage_groups().execute();
+			else
+				new main_view.refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		}
 	}
 
 	private static void edit_feed(String storage, String old_name, String new_name, String new_url, String old_group, String new_group, int position, String all_string)
@@ -459,8 +473,12 @@ public class add_edit_feeds
 
 		/// To refresh the counts and the order of the groups.
 		main_view.update_groups();
-		//new main_view.refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-		new main_view.refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+		if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
+			new main_view.refresh_manage_groups().execute();
+		else
+			new main_view.refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
 		/// Force a refresh of the page.
 		int index;
 		if((new File(old_group_file)).exists())

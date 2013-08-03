@@ -7,4 +7,5 @@
 		android:dividerHeight="8dp"
 		android:drawSelectorOnTop="true"
 		android:padding="8dp"
-		android:clipToPadding="false"/>
+		android:clipToPadding="false"
+		android:fadingEdgeLength="0dp"/>
