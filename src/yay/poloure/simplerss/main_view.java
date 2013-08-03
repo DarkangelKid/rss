@@ -58,11 +58,11 @@ import java.io.File;
 public class main_view extends ActionBarActivity
 {
 	/// These are fine.
-	public static DrawerLayout drawer_layout;
 	private ListView navigation_list;
-	private String current_title;
 
 	/// Statics without final intilisations are generally unsafe.
+	public static DrawerLayout drawer_layout;
+	private static String current_title;
 	public static ActionBarDrawerToggle drawer_toggle;
 	private static Menu optionsMenu;
 	public static Context activity_context;
@@ -107,6 +107,8 @@ public class main_view extends ActionBarActivity
 
 		perform_initial_operations();
 		current_title = FEEDS;
+		action_bar = getActionBar();
+
 
 		fragment_manager = getSupportFragmentManager();
 
@@ -145,19 +147,15 @@ public class main_view extends ActionBarActivity
 					{
 						case 0:
 							switch_page(FEEDS, 0);
-							invalidateOptionsMenu();
 							break;
 						case 1:
 							switch_page(MANAGE, 1);
-							invalidateOptionsMenu();
 							break;
 						case 2:
 							switch_page(SETTINGS, 2);
-							invalidateOptionsMenu();
 							break;
 						default:
 							switch_page(FEEDS, position);
-							invalidateOptionsMenu();
 							viewpager.setCurrentItem(position - 4);
 							break;
 					}
@@ -173,7 +171,7 @@ public class main_view extends ActionBarActivity
 			@Override
 			public void onDrawerClosed(View view)
 			{
-				getSupportActionBar().setTitle(FEEDS);
+				getSupportActionBar().setTitle(current_title);
 			}
 
 			@Override
@@ -237,8 +235,9 @@ public class main_view extends ActionBarActivity
 	public void onBackPressed()
 	{
 		super.onBackPressed();
-		//if(fragment_manager.getBackStackEntryAt(0).equals("BACK"))
+		//if(fragment_manager.getBackStackEntryAt(0).getName().equals("BACK"))
 		{
+			action_bar.setTitle(FEEDS);
 			drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
 			drawer_toggle.setDrawerIndicatorEnabled(true);
 			action_bar.setDisplayHomeAsUpEnabled(true);
@@ -407,7 +406,7 @@ public class main_view extends ActionBarActivity
 		current_title = page_title;
 	}
 
-	private void set_title(String title)
+	public static void set_title(String title)
 	{
 		current_title = title;
 		getSupportActionBar().setTitle(title);
@@ -985,7 +984,26 @@ public class main_view extends ActionBarActivity
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
-		return drawer_toggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
+		String title = action_bar.getTitle().toString();
+
+		if(title.equals(FEEDS) || title.equals(SETTINGS) || title.equals(MANAGE) || title.equals(NAVIGATION))
+		{
+			return drawer_toggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
+		}
+		else
+		{
+			onBackPressed();
+			return true;
+		}
+		/*if((item.getItemId() == android.R.id.home) && ())
+		{
+			drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+			drawer_toggle.setDrawerIndicatorEnabled(true);
+			action_bar.setDisplayHomeAsUpEnabled(true);
+			onBackPressed();
+			return true;
+		}
+		return drawer_toggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);*/
 	}
 
 	private static void set_refresh(final boolean mode)

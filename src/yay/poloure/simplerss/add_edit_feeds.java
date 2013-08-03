@@ -323,9 +323,11 @@ public class add_edit_feeds
 								ClipboardManager clipboard = (ClipboardManager) activity_context.getSystemService(Context.CLIPBOARD_SERVICE);
 								ClipData clip = ClipData.newPlainText("label", URL);
 								clipboard.setPrimaryClip(clip);
+								break;
 							case(1):
 
 							case(2):
+
 						}
 					}
 				})

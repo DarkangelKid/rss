@@ -447,6 +447,7 @@ public class adapter_feeds_cards extends BaseAdapter
 		@Override
 		public void onClick(View v)
 		{
+			main_view.action_bar.setTitle("Offline");
 			main_view.drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 			main_view.drawer_toggle.setDrawerIndicatorEnabled(false);
 			main_view.action_bar.setDisplayHomeAsUpEnabled(true);
