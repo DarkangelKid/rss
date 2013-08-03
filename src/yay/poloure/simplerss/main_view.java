@@ -61,11 +61,11 @@ import java.io.File;
 public class main_view extends Activity
 {
 	/// These are fine.
-	public static DrawerLayout drawer_layout;
 	private ListView navigation_list;
-	private String current_title;
 
 	/// Statics without final intilisations are generally unsafe.
+	public static DrawerLayout drawer_layout;
+	private static String current_title;
 	public static ActionBarDrawerToggle drawer_toggle;
 	private static Menu optionsMenu;
 	public static Context activity_context;
@@ -110,6 +110,8 @@ public class main_view extends Activity
 
 		perform_initial_operations();
 		current_title = FEEDS;
+		action_bar = getActionBar();
+
 
 		fragment_manager = getFragmentManager();
 
@@ -148,19 +150,15 @@ public class main_view extends Activity
 					{
 						case 0:
 							switch_page(FEEDS, 0);
-							invalidateOptionsMenu();
 							break;
 						case 1:
 							switch_page(MANAGE, 1);
-							invalidateOptionsMenu();
 							break;
 						case 2:
 							switch_page(SETTINGS, 2);
-							invalidateOptionsMenu();
 							break;
 						default:
 							switch_page(FEEDS, position);
-							invalidateOptionsMenu();
 							viewpager.setCurrentItem(position - 4);
 							break;
 					}
@@ -176,7 +174,7 @@ public class main_view extends Activity
 			@Override
 			public void onDrawerClosed(View view)
 			{
-				getActionBar().setTitle(FEEDS);
+				getActionBar().setTitle(current_title);
 			}
 
 			@Override
@@ -190,7 +188,6 @@ public class main_view extends Activity
 		drawer_toggle.syncState();
 
 		update_groups();
-		action_bar = getActionBar();
 
 		if(utilities.exists(storage + ALL_FILE))
 			new refresh_page(0).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -229,8 +226,9 @@ public class main_view extends Activity
 	public void onBackPressed()
 	{
 		super.onBackPressed();
-		//if(fragment_manager.getBackStackEntryAt(0).equals("BACK"))
+		//if(fragment_manager.getBackStackEntryAt(0).getName().equals("BACK"))
 		{
+			action_bar.setTitle(FEEDS);
 			drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
 			drawer_toggle.setDrawerIndicatorEnabled(true);
 			action_bar.setDisplayHomeAsUpEnabled(true);
@@ -399,10 +397,10 @@ public class main_view extends Activity
 		current_title = page_title;
 	}
 
-	private void set_title(String title)
+	public static void set_title(String title)
 	{
 		current_title = title;
-		getActionBar().setTitle(title);
+		action_bar.setTitle(title);
 	}
 
 	public static class fragment_feeds extends Fragment
@@ -986,7 +984,26 @@ public class main_view extends Activity
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
-		return drawer_toggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
+		String title = action_bar.getTitle().toString();
+
+		if(title.equals(FEEDS) || title.equals(SETTINGS) || title.equals(MANAGE) || title.equals(NAVIGATION))
+		{
+			return drawer_toggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
+		}
+		else
+		{
+			onBackPressed();
+			return true;
+		}
+		/*if((item.getItemId() == android.R.id.home) && ())
+		{
+			drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+			drawer_toggle.setDrawerIndicatorEnabled(true);
+			action_bar.setDisplayHomeAsUpEnabled(true);
+			onBackPressed();
+			return true;
+		}
+		return drawer_toggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);*/
 	}
 
 	private static void set_refresh(final boolean mode)
