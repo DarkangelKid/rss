@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string-array
+		name="card_menu">
+		<item>Copy to clipboard</item>
+		<item>Save image to storage</item>
+		<item>Open in browser</item>
+    </string-array>
+</resources>
