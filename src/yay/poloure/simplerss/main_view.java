@@ -33,6 +33,7 @@ import android.support.v4.widget.DrawerLayout;
 
 import android.view.Menu;
 import android.view.MenuItem;
+import android.support.v4.view.MenuItemCompat;
 import android.view.MenuInflater;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -107,7 +108,7 @@ public class main_view extends ActionBarActivity
 
 		perform_initial_operations();
 		current_title = FEEDS;
-		action_bar = getActionBar();
+		action_bar = getSupportActionBar();
 
 
 		fragment_manager = getSupportFragmentManager();
@@ -193,16 +194,16 @@ public class main_view extends ActionBarActivity
 
 	private void perform_initial_operations()
 	{
-		if(android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.ECLAIR)
+		if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.FROYO)
 			storage				= getExternalFilesDir(null).getAbsolutePath() + SEPAR;
 		else
 		{
 			String packageName	= getPackageName();
 			File externalPath	= Environment.getExternalStorageDirectory();
-			storage				= externalPath.getAbsolutePath() + "/Android/data/" + packageName + "/files";
-			File storage_file	= new File(externalPath.getAbsolutePath() + "/Android/data/" + packageName + "/files");
+			storage				= externalPath.getAbsolutePath() + SEPAR + "Android" + SEPAR + "data" + SEPAR + packageName + SEPAR + "files" + SEPAR;
+			File storage_file	= new File(storage);
 			if(!storage_file.exists())
-				storage_file.mkdir();
+				storage_file.mkdirs();
 		}
 
 		utilities.delete(storage + DUMP_FILE);
@@ -366,7 +367,19 @@ public class main_view extends ActionBarActivity
 			else if(string.equals("false"))
 				new_items.add(false);
 		}
-		storage = this.getExternalFilesDir(null).getAbsolutePath() + SEPAR;
+
+		if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.FROYO)
+			storage				= getExternalFilesDir(null).getAbsolutePath() + SEPAR;
+		else
+		{
+			String packageName	= getPackageName();
+			File externalPath	= Environment.getExternalStorageDirectory();
+			storage				= externalPath.getAbsolutePath() + SEPAR + "Android" + SEPAR + "data" + SEPAR + packageName + SEPAR + "files" + SEPAR;
+			File storage_file	= new File(storage);
+			if(!storage_file.exists())
+				storage_file.mkdirs();
+		}
+
 		current_groups = utilities.read_file_to_list(storage + GROUP_LIST);
 		if(new_items.size() != current_groups.size())
 		{
@@ -409,7 +422,7 @@ public class main_view extends ActionBarActivity
 	public static void set_title(String title)
 	{
 		current_title = title;
-		getSupportActionBar().setTitle(title);
+		action_bar.setTitle(title);
 	}
 
 	public static class fragment_feeds extends Fragment
@@ -477,7 +490,7 @@ public class main_view extends ActionBarActivity
 		@Override
 		public boolean onOptionsItemSelected(MenuItem item)
 		{
-			if(drawer_toggle.onOptionsItemSelected(item))
+			if(drawer_toggle.onOptionsItemSelected((MenuItem)item))
 				return true;
 			else if(item.getTitle().equals("add"))
 			{
@@ -890,15 +903,15 @@ public class main_view extends ActionBarActivity
  		@Override
 		public Fragment getItem(int position)
 		{
-			if(position < current_groups.size())
+			//if(position < current_groups.size())
 			{
-				Fragment f = (Fragment) new fragment_card();
+				fragment_card f = new fragment_card();
 				Bundle args = new Bundle();
 				args.putInt("num", position);
 				f.setArguments(args);
 				return f;
 			}
-			return null;
+			//return null;
 		}
 
 		@Override
@@ -1014,9 +1027,9 @@ public class main_view extends ActionBarActivity
 			if(refreshItem != null)
 			{
 				if (mode)
-					refreshItem.setActionView(R.layout.progress_circle);
+					MenuItemCompat.setActionView(refreshItem, R.layout.progress_circle);
 				else
-					refreshItem.setActionView(null);
+					MenuItemCompat.setActionView(refreshItem, null);
 			}
 		}
 	}
