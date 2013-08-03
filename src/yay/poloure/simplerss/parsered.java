@@ -111,7 +111,7 @@ class parsered
 			else if((current_tag.contains("</entry"))||(current_tag.contains("</item")))
 			{
 				image = check_for_image();
-				if(!image.isEmpty())
+				if(!image.equals(""))
 				{
 					line.append("image|").append(image).append('|'); /// ends with a |
 					image_name = image.substring(image.lastIndexOf(main_view.SEPAR) + 1, image.length());

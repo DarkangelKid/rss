@@ -94,7 +94,7 @@ public class adapter_manage_groups extends BaseAdapter
 
 			holder.group_view.setText(group_array[position]);
 			holder.info_view.setText(info_array[position]);
-			if(position != 0)
+			if((position != 0)&&(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB))
 			{
 				holder.image_view.setVisibility(View.VISIBLE);
 				holder.image_view.setOnTouchListener(new MyTouchListener());

@@ -110,6 +110,11 @@ public class main_view extends ActionBarActivity
 		current_title = FEEDS;
 		action_bar = getSupportActionBar();
 
+		action_bar.setDisplayShowHomeEnabled(true);
+		action_bar.setDisplayHomeAsUpEnabled(true);
+		action_bar.setHomeButtonEnabled(true);
+		action_bar.setIcon(R.drawable.rss_icon);
+
 		fragment_manager = getSupportFragmentManager();
 
 		if(savedInstanceState == null)
@@ -188,7 +193,12 @@ public class main_view extends ActionBarActivity
 		action_bar = getSupportActionBar();
 
 		if(utilities.exists(storage + ALL_FILE))
-			new refresh_page(0).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		{
+			if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
+				new refresh_page(0).execute();
+			else
+				new refresh_page(0).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		}
 	}
 
 	private void perform_initial_operations()
@@ -404,7 +414,7 @@ public class main_view extends ActionBarActivity
 		{
 			fragment_manager.beginTransaction()
 						.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-						.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out)
+						.setCustomAnimations(android.R.anim.fade_in,android.R.anim.fade_out,android.R.anim.fade_in,android.R.anim.fade_out)
 						.hide(fragment_manager.findFragmentByTag(current_title))
 						.show(fragment_manager.findFragmentByTag(page_title))
 						.commit();
@@ -460,9 +470,19 @@ public class main_view extends ActionBarActivity
 					public void onPageSelected(int position)
 					{
 						if(utilities.get_adapter_feeds_cards(fragment_manager, viewpager, position).getCount() == 0)
-							new refresh_page(position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+						{
+							if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
+								new refresh_page(position).execute();
+							else
+								new refresh_page(position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+						}
 						else if(new_items.get(position))
-							new refresh_page(position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+						{
+							if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
+								new refresh_page(position).execute();
+							else
+								new refresh_page(position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+						}
 					}
 				}
 			);
@@ -517,7 +537,10 @@ public class main_view extends ActionBarActivity
 					new_items.set(page_number, true);
 				}
 				/// Maybe do not refresh the page.
-				new refresh_page(page_number).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+				if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
+					new refresh_page(page_number).execute();
+				else
+					new refresh_page(page_number).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 				return true;
 			}
 
@@ -682,7 +705,12 @@ public class main_view extends ActionBarActivity
 			manage_list = (ListView) view.findViewById(R.id.group_listview);
 			group_list_adapter = new adapter_manage_groups(getActivity());
 			manage_list.setAdapter(group_list_adapter);
-			new refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+			if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
+				new refresh_manage_groups().execute();
+			else
+				new refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
 			manage_list.setOnItemLongClickListener
 			(
 				new OnItemLongClickListener()
@@ -758,7 +786,10 @@ public class main_view extends ActionBarActivity
 			feed_list_adapter = new adapter_manage_feeds(getActivity());
 			feed_list.setAdapter(feed_list_adapter);
 
-			new refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+			if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
+				new refresh_manage_feeds().execute();
+			else
+				new refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 			feed_list.setOnItemLongClickListener
 			(
@@ -826,7 +857,11 @@ public class main_view extends ActionBarActivity
 									update_groups();
 									feed_list_adapter.remove_item(pos);
 									feed_list_adapter.notifyDataSetChanged();
-									new refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+									if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
+										new refresh_manage_groups().execute();
+									else
+										new refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 								}
 							}
 						)
@@ -856,8 +891,16 @@ public class main_view extends ActionBarActivity
 									//feed_list_adapter.notifyDataSetChanged();
 									/// Refresh pages and update groups and stuff
 									update_groups();
-									new refresh_manage_feeds()	.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-									new refresh_manage_groups()	.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+									if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
+									{
+										new refresh_manage_feeds()	.execute();
+										new refresh_manage_groups()	.execute();
+									}
+									else
+									{
+										new refresh_manage_feeds()	.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+										new refresh_manage_groups()	.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+									}
 									new_items.set(0, true);
 									new_items.set(pos, true);
 
@@ -1111,7 +1154,7 @@ public class main_view extends ActionBarActivity
 			String[] groups				= contenter[7];
 			String[] sources			= contenter[8];
 
-			if((links[0] == null)||(links.length == 0)||(links[0].isEmpty()))
+			if((links[0] == null)||(links.length == 0)||(links[0].equals("")))
 				return null;
 
 			Set<String> existing_items = new HashSet<String>();

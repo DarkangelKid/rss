@@ -72,6 +72,8 @@
 			android:layout_width="3px"
 			android:layout_height="4px"
 			android:src="@drawable/left_grey"
+			android:layout_below="@+id/description"
+			android:layout_toLeftOf="@+id/grey_centre_shadow"
 			android:layout_alignParentLeft="true"
 			android:layout_alignParentBottom="true"/>
 
@@ -80,6 +82,7 @@
 			android:layout_width="3px"
 			android:layout_height="4px"
 			android:src="@drawable/right_grey"
+			android:layout_below="@+id/description"
 			android:layout_alignParentRight="true"
 			android:layout_alignParentBottom="true"/>
 
@@ -88,8 +91,8 @@
 			android:layout_width="fill_parent"
 			android:layout_height="4px"
 			android:src="@drawable/bottom_grey"
+			android:layout_below="@+id/description"
 			android:layout_toLeftOf="@+id/grey_right_shadow"
-			android:layout_toRightOf="@+id/grey_left_shadow"
 			android:layout_alignParentBottom="true"
 			android:scaleType="fitXY"/>
 

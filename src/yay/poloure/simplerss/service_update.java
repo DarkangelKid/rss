@@ -3,6 +3,8 @@ package yay.poloure.simplerss;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
+import android.os.Environment;
+
 
 import java.util.List;
 
@@ -38,10 +40,15 @@ public class service_update extends IntentService
 
 		final String stor;
 		final String storage;
-		if((stor = this.getExternalFilesDir(null).getAbsolutePath()) == null)
-			return;
+		final String SEPAR = main_view.SEPAR;
+
+		if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.FROYO)
+			storage				= getExternalFilesDir(null).getAbsolutePath() + SEPAR;
 		else
-			storage							= stor + main_view.SEPAR;
+		{
+			String packageName	= getPackageName();
+			storage				= Environment.getExternalStorageDirectory().getAbsolutePath() + SEPAR + "Android" + SEPAR + "data" + SEPAR + packageName + SEPAR + "files" + SEPAR;
+		}
 
 		final List<String> all_groups		= utilities.read_file_to_list(storage + main_view.GROUP_LIST);
 		final String grouper				= all_groups.get(group);
@@ -53,11 +60,16 @@ public class service_update extends IntentService
 		final String[] groups				= content[2];
 
 		String feed_path;
-		int i;
+		int i, width;
 
-		final Point screen_size = new Point();
-		((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getSize(screen_size);
-		final int width = (int) (Math.round(((screen_size.x)*0.944)));
+		if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB_MR2)
+			width = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getWidth();
+		else
+		{
+			final Point screen_size = new Point();
+			((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getSize(screen_size);
+			width = (int) (Math.round(((screen_size.x)*0.944)));
+		}
 
 		final int size = names.length;
 		/// For each feed you must do this.

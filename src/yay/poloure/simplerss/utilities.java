@@ -73,7 +73,7 @@ public class utilities
 					feeds = read_single_to_array(storage + main_view.GROUPS_DIRECTORY + group + main_view.SEPAR + group + main_view.TXT, "name|");
 					found_url = false;
 					url = adapter.return_latest_url();
-					if(!url.isEmpty())
+					if(!url.equals(""))
 					{
 						for(String feed: feeds)
 						{
