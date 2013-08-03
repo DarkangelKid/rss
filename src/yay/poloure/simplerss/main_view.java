@@ -107,8 +107,7 @@ public class main_view extends ActionBarActivity
 
 		perform_initial_operations();
 		current_title = FEEDS;
-		action_bar = getActionBar();
-
+		action_bar = getSupportActionBar();
 
 		fragment_manager = getSupportFragmentManager();
 
@@ -409,7 +408,7 @@ public class main_view extends ActionBarActivity
 	public static void set_title(String title)
 	{
 		current_title = title;
-		getSupportActionBar().setTitle(title);
+		action_bar.setTitle(title);
 	}
 
 	public static class fragment_feeds extends Fragment
