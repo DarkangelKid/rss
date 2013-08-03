@@ -1,33 +1,32 @@
 package yay.poloure.simplerss;
 
-import android.preference.PreferenceFragment;
-import android.preference.PreferenceManager;
 import android.graphics.Color;
 import android.os.Debug;
 import android.os.Bundle;
 import android.os.AsyncTask;
+import android.os.Environment;
 
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.content.SharedPreferences;
 import android.content.res.Resources;
 
 import android.app.AlertDialog;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
-import android.app.Fragment;
-import android.app.ListFragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
-import android.app.ActionBar;
 
+import android.support.v4.app.Fragment;
+import android.support.v4.app.ListFragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v13.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.PagerTabStrip;
 import android.support.v4.widget.DrawerLayout;
@@ -47,8 +46,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 
-import android.webkit.WebViewFragment;
-
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
@@ -58,7 +55,7 @@ import java.util.regex.Pattern;
 
 import java.io.File;
 
-public class main_view extends Activity
+public class main_view extends ActionBarActivity
 {
 	/// These are fine.
 	public static DrawerLayout drawer_layout;
@@ -111,12 +108,12 @@ public class main_view extends Activity
 		perform_initial_operations();
 		current_title = FEEDS;
 
-		fragment_manager = getFragmentManager();
+		fragment_manager = getSupportFragmentManager();
 
 		if(savedInstanceState == null)
 		{
 			Fragment feed		= new fragment_feeds();
-			Fragment prefs		= new fragment_preferences();
+			Fragment prefs		= new Fragment();
 			Fragment man		= new fragment_manage();
 			fragment_manager.beginTransaction()
 				.add(R.id.content_frame, feed, FEEDS)
@@ -176,13 +173,13 @@ public class main_view extends Activity
 			@Override
 			public void onDrawerClosed(View view)
 			{
-				getActionBar().setTitle(FEEDS);
+				getSupportActionBar().setTitle(FEEDS);
 			}
 
 			@Override
 			public void onDrawerOpened(View drawerView)
 			{
-				getActionBar().setTitle(NAVIGATION);
+				getSupportActionBar().setTitle(NAVIGATION);
 			}
 		};
 
@@ -190,7 +187,7 @@ public class main_view extends Activity
 		drawer_toggle.syncState();
 
 		update_groups();
-		action_bar = getActionBar();
+		action_bar = getSupportActionBar();
 
 		if(utilities.exists(storage + ALL_FILE))
 			new refresh_page(0).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -198,7 +195,18 @@ public class main_view extends Activity
 
 	private void perform_initial_operations()
 	{
-		storage				= getExternalFilesDir(null).getAbsolutePath() + SEPAR;
+		if(android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.ECLAIR)
+			storage				= getExternalFilesDir(null).getAbsolutePath() + SEPAR;
+		else
+		{
+			String packageName	= getPackageName();
+			File externalPath	= Environment.getExternalStorageDirectory();
+			storage				= externalPath.getAbsolutePath() + "/Android/data/" + packageName + "/files";
+			File storage_file	= new File(externalPath.getAbsolutePath() + "/Android/data/" + packageName + "/files");
+			if(!storage_file.exists())
+				storage_file.mkdir();
+		}
+
 		utilities.delete(storage + DUMP_FILE);
 
 		File folder_file = new File(storage + "groups");
@@ -321,14 +329,14 @@ public class main_view extends Activity
 	protected void onStop()
 	{
 		super.onStop();
-		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-		if(pref.getBoolean("refresh", false))
+		//SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+		if(/*pref.getBoolean("refresh", false)*/true)
 		{
 			Intent intent = new Intent(this, service_update.class);
 			intent.putExtra("GROUP_NUMBER", 0);
-			intent.putExtra("NOTIFICATIONS", pref.getBoolean("notifications", false));
+			intent.putExtra("NOTIFICATIONS", /*pref.getBoolean("notifications", false)*/ true);
 			PendingIntent pend_intent = PendingIntent.getService(this, 0, intent, 0);
-			final long interval = (long) times[pref.getInt("refresh_time", 20)/5]*60000;
+			final long interval = (long) times[/*pref.getInt("refresh_time", 20)/5*/2]*60000;
 			AlarmManager alarm_refresh = (AlarmManager) getSystemService(Activity.ALARM_SERVICE);
 			alarm_refresh.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + interval, interval, pend_intent);
 		}
@@ -341,8 +349,8 @@ public class main_view extends Activity
 	protected void onStart()
 	{
 		super.onStart();
-		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-		if(pref.getBoolean("refresh", false))
+		/*SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);*/
+		if(/*pref.getBoolean("refresh", false)*/ true)
 		{
 			Intent intent = new Intent(this, service_update.class);
 			PendingIntent pend_intent = PendingIntent.getService(this, 0, intent, 0);
@@ -402,7 +410,7 @@ public class main_view extends Activity
 	private void set_title(String title)
 	{
 		current_title = title;
-		getActionBar().setTitle(title);
+		getSupportActionBar().setTitle(title);
 	}
 
 	public static class fragment_feeds extends Fragment
@@ -480,12 +488,12 @@ public class main_view extends Activity
 			else if(item.getTitle().equals("refresh"))
 			{
 				set_refresh(true);
-				SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(activity_context);
+				/*SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(activity_context);*/
 				utilities.save_positions(fragment_manager, viewpager, storage);
 				final int page_number = viewpager.getCurrentItem();
 				final Intent intent = new Intent(activity_context, service_update.class);
 				intent.putExtra("GROUP_NUMBER", page_number);
-				intent.putExtra("NOTIFICATIONS", pref.getBoolean("notifications", false));
+				intent.putExtra("NOTIFICATIONS", /*pref.getBoolean("notifications", false)*/true);
 				activity_context.startService(intent);
 				if(page_number == 0)
 				{
@@ -506,16 +514,7 @@ public class main_view extends Activity
 		}
 	}
 
-	public static class fragment_offline extends WebViewFragment
-	{
-		/*@Override
-		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
-		{
-			return inflater.inflate(R.layout.offline_content_layout, container, false);
-		}*/
-	}
-
-	public static class fragment_preferences extends PreferenceFragment
+	/*public static class fragment_preferences extends PreferenceFragment
 	{
 
 		@Override
@@ -542,7 +541,7 @@ public class main_view extends Activity
 
 			super.onCreateOptionsMenu(optionsMenu, inflater);
 		}
-	}
+	}*/
 
 	public static class fragment_manage extends Fragment
 	{
@@ -894,7 +893,7 @@ public class main_view extends Activity
 		{
 			if(position < current_groups.size())
 			{
-				fragment_card f = new fragment_card();
+				Fragment f = (Fragment) new fragment_card();
 				Bundle args = new Bundle();
 				args.putInt("num", position);
 				f.setArguments(args);

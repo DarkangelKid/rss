@@ -1,10 +1,10 @@
 package yay.poloure.simplerss;
 
 import android.content.Context;
-import android.app.FragmentManager;
-import android.app.ListFragment;
-import android.os.Environment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.ListFragment;
 import android.support.v4.view.ViewPager;
+import android.os.Environment;
 
 import java.net.URL;
 import java.util.List;

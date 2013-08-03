@@ -29,6 +29,12 @@ import java.lang.ref.SoftReference;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.FrameLayout;
+import android.widget.TextView;
+import android.support.v4.app.Fragment;
+import android.view.Gravity;
+import android.webkit.WebView;
+import android.os.Bundle;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -446,7 +452,7 @@ public class adapter_feeds_cards extends BaseAdapter
 			main_view.action_bar.setDisplayHomeAsUpEnabled(true);
 			main_view.fragment_manager.beginTransaction()
 					.hide(main_view.fragment_manager.findFragmentByTag(main_view.FEEDS))
-					.add(R.id.drawer_layout, new main_view.fragment_offline(), "OFFLINE")
+					.add(R.id.drawer_layout, new fragment_webview(), "OFFLINE")
 					.addToBackStack("BACK")
 					.commit();
 
@@ -481,6 +487,75 @@ public class adapter_feeds_cards extends BaseAdapter
 			String long_press_url = ((TextView) v.findViewById(R.id.time)).getText().toString();
 			add_edit_feeds.show_card_dialog(context, long_press_url);
 			return true;
+		}
+	}
+
+	private class fragment_webview extends Fragment
+	{
+		private WebView web_view;
+		private FrameLayout view;
+		private TextView text;
+
+		public fragment_webview()
+		{
+		}
+
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+		{
+			if(web_view != null)
+				web_view.destroy();
+
+			view = new FrameLayout(getActivity());
+			web_view = new WebView(getActivity());
+			view.addView(web_view, LayoutParams.MATCH_PARENT);
+
+			text = new TextView(getActivity());
+			text.setText("webview");
+			text.setGravity(Gravity.CENTER);
+			text.setVisibility(View.GONE);
+			view.addView(text, android.widget.FrameLayout.LayoutParams.WRAP_CONTENT);
+
+			return view;
+		}
+
+		@Override
+		public void onPause()
+		{
+			super.onPause();
+			web_view.onPause();
+		}
+
+		@Override
+		public void onResume()
+		{
+			web_view.onResume();
+			super.onResume();
+		}
+
+		@Override
+		public void onDestroyView()
+		{
+			super.onDestroyView();
+		}
+
+		@Override
+		public void onDestroy()
+		{
+			if(web_view != null)
+			{
+				view.removeAllViews();
+				web_view.removeAllViews();
+				web_view.destroy();
+				web_view = null;
+				view = null;
+			}
+			super.onDestroy();
+		}
+
+		public WebView get_webview()
+		{
+			return web_view;
 		}
 	}
 }

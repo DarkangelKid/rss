@@ -8,7 +8,7 @@
 	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 	<uses-permission android:name="android.permission.WAKE_LOCK"/>
-	<uses-sdk android:minSdkVersion="14" android:targetSdkVersion="17" />
+	<uses-sdk android:minSdkVersion="7" android:targetSdkVersion="18" />
 	<application
 			android:label="Simple RSS"
 			android:icon="@drawable/ic_launcher"
