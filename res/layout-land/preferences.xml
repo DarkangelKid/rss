@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:simplerss="http://robobunny.com"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
+	<PreferenceCategory
+			android:title="@string/refresh_cat_preferences">
+		<CheckBoxPreference
+				android:key="refresh"
+				android:title="@string/refresh_cat_preferences"
+				android:summary="@string/refresh_summary_preferences"
+				android:defaultValue="false" />
+		<yay.poloure.simplerss.SeekBarPreference
+				android:key="refresh_time"
+				android:title="@string/refresh_time_preferences"
+				android:summary="@string/refresh_time_summary_preferences"
+				android:defaultValue="20"
+				android:max="100"
+				simplerss:min="0"
+				simplerss:unitsLeft=""
+				simplerss:unitsRight=""/>
+		<CheckBoxPreference
+				android:key="notifications"
+				android:title="@string/notifications_preferences"
+				android:summary="@string/notifications_summary_preferences"
+				android:defaultValue="false" />
+	</PreferenceCategory>
+</PreferenceScreen>
