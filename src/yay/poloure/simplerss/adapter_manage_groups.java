@@ -77,6 +77,15 @@ public class adapter_manage_groups extends BaseAdapter
 	}
 
 	@Override
+	public boolean isEnabled(int position)
+	{
+		if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB)
+			return true;
+		else
+			return false;
+	}
+
+	@Override
 	public int getViewTypeCount(){
 		return 2;
 	}
@@ -146,7 +155,9 @@ public class adapter_manage_groups extends BaseAdapter
 			if(position != 0)
 			{
 				holder.up_image_view.setVisibility(View.VISIBLE);
+				holder.up_image_view.setOnClickListener(new up_click_listener());
 				holder.down_image_view.setVisibility(View.VISIBLE);
+
 			}
 			else
 			{
@@ -170,6 +181,52 @@ public class adapter_manage_groups extends BaseAdapter
 		TextView info_view;
 		ImageView up_image_view;
 		ImageView down_image_view;
+	}
+
+	private class up_click_listener implements View.OnClickListener
+	{
+		@Override
+		public void onClick(View v)
+		{
+			View card = (View)v.getParent();
+			ListView list = (ListView)card.getParent();
+
+			Animation fadeOut = new AlphaAnimation(1, 0);
+			fadeOut.setDuration(210);
+			fadeOut.setInterpolator(new DecelerateInterpolator());
+			card.setAnimation(fadeOut);
+			card.setVisibility(View.INVISIBLE);
+
+			String new_title = ((TextView) card.findViewById(R.id.group_item)).getText().toString();
+			String old_title = null;
+			int pos = 0;
+			for(int i = 0; i < group_array.length; i++)
+			{
+				if(group_array[i].equals(new_title))
+				{
+					pos = i - 1;
+					old_title = group_array[pos];
+					break;
+				}
+			}
+
+			View up_card = list.getChildAt(pos);
+			up_card.setAnimation(fadeOut);
+			up_card.setVisibility(View.INVISIBLE);
+			rearrange_groups(old_title, new_title);
+			notifyDataSetChanged();
+
+			Animation fadeIn = new AlphaAnimation(0, 1);
+			fadeIn.setDuration(210);
+			fadeIn.setInterpolator(new DecelerateInterpolator());
+			card.setAnimation(fadeIn);
+			up_card.setAnimation(fadeIn);
+			card.setVisibility(View.VISIBLE);
+			up_card.setVisibility(View.VISIBLE);
+
+			utilities.write_array_to_file(main_view.storage + main_view.GROUP_LIST, group_array);
+			main_view.update_groups();
+		}
 	}
 
 	private class MyTouchListener implements OnTouchListener
