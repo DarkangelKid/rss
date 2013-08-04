@@ -519,11 +519,11 @@ public class adapter_feeds_cards extends BaseAdapter
 			web_view = new WebView(getActivity());
 			view.addView(web_view, LayoutParams.MATCH_PARENT);
 
-			text = new TextView(getActivity());
+			/*text = new TextView(getActivity());
 			text.setText("webview");
 			text.setGravity(Gravity.CENTER);
 			text.setVisibility(View.GONE);
-			view.addView(text, android.widget.FrameLayout.LayoutParams.WRAP_CONTENT);
+			view.addView(text, android.widget.FrameLayout.LayoutParams.WRAP_CONTENT);*/
 
 			return view;
 		}
