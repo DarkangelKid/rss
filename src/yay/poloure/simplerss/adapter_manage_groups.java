@@ -77,8 +77,27 @@ public class adapter_manage_groups extends BaseAdapter
 	}
 
 	@Override
+	public int getViewTypeCount(){
+		return 2;
+	}
+
+	@Override
+	public int getItemViewType(int position)
+	{
+		if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB)
+			return 0;
+
+		else
+			return 1;
+	}
+
+
+	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
+		int view_type = getItemViewType(position);
+		if(view_type == 0)
+		{
 			ViewHolder holder;
 			if(convertView == null)
 			{
@@ -103,7 +122,39 @@ public class adapter_manage_groups extends BaseAdapter
 			else
 				holder.image_view.setVisibility(View.GONE);
 
+
 			return convertView;
+		}
+		else
+		{
+			OldViewHolder holder;
+			if(convertView == null)
+			{
+				convertView = inflater.inflate(R.layout.old_manage_list_item, parent, false);
+				holder = new OldViewHolder();
+				holder.group_view = (TextView) convertView.findViewById(R.id.group_item);
+				holder.info_view = (TextView) convertView.findViewById(R.id.group_feeds);
+				holder.up_image_view = (ImageView) convertView.findViewById(R.id.up_drag_image);
+				holder.down_image_view = (ImageView) convertView.findViewById(R.id.down_drag_image);
+				convertView.setTag(holder);
+			}
+			else
+				holder = (OldViewHolder) convertView.getTag();
+
+			holder.group_view.setText(group_array[position]);
+			holder.info_view.setText(info_array[position]);
+			if(position != 0)
+			{
+				holder.up_image_view.setVisibility(View.VISIBLE);
+				holder.down_image_view.setVisibility(View.VISIBLE);
+			}
+			else
+			{
+				holder.up_image_view.setVisibility(View.GONE);
+				holder.down_image_view.setVisibility(View.GONE);
+			}
+			return convertView;
+		}
 	}
 
 	static class ViewHolder
@@ -111,6 +162,14 @@ public class adapter_manage_groups extends BaseAdapter
 		TextView group_view;
 		TextView info_view;
 		ImageView image_view;
+	}
+
+	static class OldViewHolder
+	{
+		TextView group_view;
+		TextView info_view;
+		ImageView up_image_view;
+		ImageView down_image_view;
 	}
 
 	private class MyTouchListener implements OnTouchListener
