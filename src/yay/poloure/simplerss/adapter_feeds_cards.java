@@ -169,8 +169,8 @@ public class adapter_feeds_cards extends BaseAdapter
 			holder.time_view 		= (TextView) convertView.findViewById(R.id.time);
 			holder.description_view = (TextView) convertView.findViewById(R.id.description);
 			holder.image_view 		= (ImageView) convertView.findViewById(R.id.image);
-			convertView				.setOnClickListener(new browser_call());
-			convertView				.setOnLongClickListener(new long_press());
+			//convertView				.setOnClickListener(new browser_call());
+			//convertView				.setOnLongClickListener(new long_press());
 			convertView				.setTag(holder);
 		}
 		else

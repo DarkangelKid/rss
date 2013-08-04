@@ -314,7 +314,7 @@ public class add_edit_feeds
 	{
 		final LayoutInflater inflater		= LayoutInflater.from(activity_context);
 
-		final AlertDialog card_dialog = new AlertDialog.Builder(activity_context, 2)
+		final AlertDialog card_dialog = new AlertDialog.Builder(activity_context)
 				.setCancelable(true)
 				.setItems(R.array.card_menu, new DialogInterface.OnClickListener()
 				{

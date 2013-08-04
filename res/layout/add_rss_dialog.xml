@@ -11,8 +11,7 @@
 			android:layout_marginTop="8dp"
 			android:layout_alignParentTop="true"
 			android:text="@string/feed_name_dialog"
-			android:gravity="left"
-			android:textSize="14sp"/>
+			android:gravity="left"/>
 
 	<EditText
 			android:id="@+id/name_edit"
@@ -27,8 +26,7 @@
 			android:autoText="true"
 			android:capitalize="words"
 			android:gravity="fill_horizontal"
-			android:hint="@string/feed_name_hint"
-			android:textSize="18sp"/>
+			android:hint="@string/feed_name_hint"/>
 
 	<TextView
 			android:id="@+id/password_view"
@@ -38,8 +36,7 @@
 			android:layout_marginTop="8dp"
 			android:layout_below="@+id/name_edit"
 			android:text="@string/feed_url_dialog"
-			android:gravity="left"
-			android:textSize="14sp"/>
+			android:gravity="left"/>
 
 	<EditText
 			android:id="@+id/URL_edit"
@@ -55,8 +52,7 @@
 			android:capitalize="none"
 			android:gravity="fill_horizontal"
 			android:hint="@string/feed_url_hint"
-			android:inputType="textUri"
-			android:textSize="18sp"/>
+			android:inputType="textUri"/>
 
 	<TextView
 			android:id="@+id/group_title"
@@ -66,8 +62,7 @@
 			android:layout_marginTop="8dp"
 			android:layout_below="@+id/URL_edit"
 			android:text="@string/feed_group_dialog"
-			android:gravity="left"
-			android:textSize="14sp"/>
+			android:gravity="left"/>
 	<EditText
 			android:id="@+id/group_edit"
 			android:layout_height="wrap_content"
@@ -81,8 +76,7 @@
 			android:scrollHorizontally="true"
 			android:layout_toLeftOf="@+id/group_spinner"
 			android:autoText="false"
-			android:hint="@string/feed_group_hint"
-			android:textSize="18sp"/>
+			android:hint="@string/feed_group_hint"/>
 	<Spinner
 			android:id="@+id/group_spinner"
 			android:layout_width="120dp"
