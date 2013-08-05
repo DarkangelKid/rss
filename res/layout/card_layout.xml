@@ -51,7 +51,7 @@
 			android:maxLines="8"
 			android:ellipsize="end"/>
 
-	<!--<ImageView
+	<ImageView
 			android:id="@+id/white_left_shadow"
 			android:layout_width="3px"
 			android:layout_height="4px"
@@ -65,7 +65,7 @@
 			android:layout_height="4px"
 			android:src="@drawable/right_white"
 			android:layout_alignParentRight="true"
-			android:layout_above="@+id/grey_right_shadow"/>-->
+			android:layout_above="@+id/grey_right_shadow"/>
 
 	<ImageView
 			android:id="@+id/grey_left_shadow"

@@ -41,11 +41,13 @@ import android.view.Gravity;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.graphics.drawable.ColorDrawable;
 
 import android.widget.ListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.AbsListView.MultiChoiceModeListener;
 
 import java.util.List;
 import java.util.Set;
@@ -53,6 +55,9 @@ import java.util.HashSet;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
+
+/// 11 only
+import android.view.ActionMode;
 
 import java.io.File;
 
@@ -66,10 +71,12 @@ public class main_view extends ActionBarActivity
 	private static String current_title;
 	public static ActionBarDrawerToggle drawer_toggle;
 	private static Menu optionsMenu;
+	private static MenuInflater menu_inf;
 	public static Context activity_context;
 	private static ViewPager viewpager;
 	public static FragmentManager fragment_manager;
 	public static ActionBar action_bar;
+	public static Activity activity;
 	public static adapter_manage_feeds feed_list_adapter;
 	public static adapter_manage_groups group_list_adapter;
 	public static adapter_manage_filter filter_list_adapter;
@@ -107,8 +114,10 @@ public class main_view extends ActionBarActivity
 		setContentView(R.layout.pager);
 
 		perform_initial_operations();
-		current_title = FEEDS;
-		action_bar = getSupportActionBar();
+		current_title	= FEEDS;
+		action_bar		= getSupportActionBar();
+		menu_inf		= getMenuInflater();
+		activity		= this;
 
 		action_bar.setDisplayShowHomeEnabled(true);
 		action_bar.setDisplayHomeAsUpEnabled(true);
@@ -548,35 +557,6 @@ public class main_view extends ActionBarActivity
 		}
 	}
 
-	/*public static class fragment_preferences extends PreferenceFragment
-	{
-
-		@Override
-		public void onCreate(Bundle savedInstanceState)
-		{
-			super.onCreate(savedInstanceState);
-			setRetainInstance(false);
-			setHasOptionsMenu(true);
-			addPreferencesFromResource(R.layout.preferences);
-		}
-		@Override
-		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
-		{
-			View view = super.onCreateView(inflater, container, savedInstanceState);
-			view.setBackgroundColor(Color.WHITE);
-			return view;
-		}
-
-		@Override
-		public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
-		{
-			optionsMenu = menu;
-			optionsMenu.clear();
-
-			super.onCreateOptionsMenu(optionsMenu, inflater);
-		}
-	}*/
-
 	public static class fragment_manage extends Fragment
 	{
 		@Override
@@ -691,6 +671,9 @@ public class main_view extends ActionBarActivity
 	public static class fragment_manage_group extends Fragment
 	{
 		public static ListView manage_list;
+		private static boolean multi_mode = false;
+		private static ActionMode actionmode;
+		private static ActionMode.Callback actionmode_callback;
 
 		public void onCreate(Bundle savedInstanceState)
 		{
@@ -703,7 +686,10 @@ public class main_view extends ActionBarActivity
 		{
 			final View view = inflater.inflate(R.layout.manage_fragment, container, false);
 			manage_list = (ListView) view.findViewById(R.id.group_listview);
+
 			group_list_adapter = new adapter_manage_groups(getActivity());
+			manage_list.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+			manage_list.setItemsCanFocus(false);
 			manage_list.setAdapter(group_list_adapter);
 
 			if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
@@ -711,29 +697,111 @@ public class main_view extends ActionBarActivity
 			else
 				new refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
+			if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
+				registerForContextMenu(manage_list);
+			else
+			{
+
+				actionmode_callback = new ActionMode.Callback()
+				{
+					@Override
+					public boolean onCreateActionMode(ActionMode mode, Menu menu)
+					{
+						menu_inf.inflate(R.menu.context_menu, menu);
+						return true;
+					}
+
+					@Override
+					public boolean onPrepareActionMode(ActionMode mode, Menu menu)
+					{
+						/// false only if nothing.
+						return false;
+					}
+
+					// Called when the user selects a contextual menu item
+					@Override
+					public boolean onActionItemClicked(ActionMode mode, MenuItem item)
+					{
+						switch (item.getItemId())
+						{
+							default:
+								return false;
+						}
+					}
+
+					@Override
+					public void onDestroyActionMode(ActionMode mode)
+					{
+						for(int i = 0; i < manage_list.getAdapter().getCount(); i++)
+						{
+							manage_list.setItemChecked(i, false);
+							manage_list.getChildAt(i).setBackgroundColor(Color.WHITE);
+						}
+
+						multi_mode = false;
+						actionmode = null;
+					}
+				};
+			}
+
 			manage_list.setOnItemLongClickListener
 			(
 				new OnItemLongClickListener()
 				{
 					@Override
-					public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id)
+					public boolean onItemLongClick(AdapterView<?> parent, View view, final int pos, long id)
+					{
+						if(pos == 0)
+						{
+							manage_list.setItemChecked(pos, false);
+							return false;
+						}
+
+						if(!manage_list.isItemChecked(pos))
+							manage_list.setItemChecked(pos, true);
+
+						if(!multi_mode)
+						{
+							multi_mode = true;
+							actionmode = activity.startActionMode(actionmode_callback);
+						}
+						view.setBackgroundResource(R.drawable.selector);
+
+						return true;
+					}
+				}
+			);
+
+			manage_list.setOnItemClickListener
+			(
+				new OnItemClickListener()
+				{
+					@Override
+					public void onItemClick(AdapterView<?> parent, View view, final int position, long id)
 					{
 						if(position == 0)
-							return false;
-						AlertDialog.Builder builder = new AlertDialog.Builder(activity_context);
-						builder.setCancelable(true)
-						.setPositiveButton(DELETE_DIALOG, new DialogInterface.OnClickListener()
 						{
-							public void onClick(DialogInterface dialog, int id)
+							/// Override default onclick method
+							manage_list.setItemChecked(position, false);
+							return;
+						}
+
+						if(multi_mode)
+						{
+							if(!manage_list.isItemChecked(position))
 							{
-								group_list_adapter.remove_item(position);
-								utilities.delete_group(storage, current_groups.get(position));
-								group_list_adapter.notifyDataSetChanged();
+								view.setBackgroundColor(Color.WHITE);
+								if(manage_list.getCheckedItemCount() == 0)
+								{
+									actionmode.finish();
+									multi_mode = false;
+								}
 							}
-						});
-						AlertDialog alert = builder.create();
-						alert.show();
-						return true;
+							else
+							{
+								view.setBackgroundResource(R.drawable.selector);
+							}
+						}
 					}
 				}
 			);

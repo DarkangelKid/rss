@@ -8,6 +8,7 @@
 			android:scrollbars="none"
 			android:drawSelectorOnTop="true"
 			android:listSelector="@drawable/selector"
+			android:checkMark="?android:attr/listChoiceIndicatorMultiple"
 			android:padding="8dp"
 			android:clipToPadding="false"
 			android:fadingEdgeLength="0dp"/>
