@@ -79,15 +79,6 @@ public class adapter_manage_groups extends BaseAdapter
 	}
 
 	@Override
-	public boolean isEnabled(int position)
-	{
-		if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB)
-			return true;
-		else
-			return false;
-	}
-
-	@Override
 	public int getViewTypeCount(){
 		return 2;
 	}
