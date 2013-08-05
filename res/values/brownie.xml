@@ -2,6 +2,7 @@
 <resources>
 	<color name="custom_theme_color">#00000000</color>
 	<color name="action_bar_colour">#ff212021</color>
+	<color name="cab">#ff002c36</color>
 	<style name="Brownie.Net" parent="@style/Theme.AppCompat.Light.DarkActionBar">
 		<item name="android:windowBackground">@color/custom_theme_color</item>
 	</style>

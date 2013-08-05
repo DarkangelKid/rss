@@ -23,6 +23,8 @@ import android.widget.ListView;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Set;
 import java.io.FileWriter;
 import java.io.BufferedWriter;
 
@@ -349,4 +351,38 @@ public class adapter_manage_groups extends BaseAdapter
 			shadowTouchPoint.y = (shadowSize.y / 2);
 		}
 	}
+
+	//// NEW \\\\
+
+	private HashMap<Integer, Boolean> mSelection = new HashMap<Integer, Boolean>();
+
+    public void setNewSelection(int position, boolean value)
+    {
+        mSelection.put(position, value);
+        notifyDataSetChanged();
+    }
+
+    public boolean isPositionChecked(int position)
+    {
+        Boolean result = mSelection.get(position);
+        return result == null ? false : result;
+    }
+
+    public Set<Integer> getCurrentCheckedPosition()
+    {
+        return mSelection.keySet();
+    }
+
+    public void removeSelection(int position)
+    {
+        mSelection.remove(position);
+        notifyDataSetChanged();
+    }
+
+    public void clearSelection()
+    {
+        mSelection = new HashMap<Integer, Boolean>();
+        notifyDataSetChanged();
+    }
+
 }

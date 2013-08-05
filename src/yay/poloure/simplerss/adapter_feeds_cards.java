@@ -169,6 +169,8 @@ public class adapter_feeds_cards extends BaseAdapter
 			holder.time_view 		= (TextView) convertView.findViewById(R.id.time);
 			holder.description_view = (TextView) convertView.findViewById(R.id.description);
 			holder.image_view 		= (ImageView) convertView.findViewById(R.id.image);
+			holder.left				= (ImageView) convertView.findViewById(R.id.white_left_shadow);
+			holder.right			= (ImageView) convertView.findViewById(R.id.white_right_shadow);
 			//convertView				.setOnClickListener(new browser_call());
 			//convertView				.setOnLongClickListener(new long_press());
 			convertView				.setTag(holder);
@@ -188,7 +190,9 @@ public class adapter_feeds_cards extends BaseAdapter
 
 		if(image_exists)
 		{
-			holder.image_view.setVisibility(View.VISIBLE);
+			holder.left				.setVisibility(View.GONE);
+			holder.right			.setVisibility(View.GONE);
+			holder.image_view		.setVisibility(View.VISIBLE);
 			ViewGroup.LayoutParams iv = holder.image_view.getLayoutParams();
 			iv.height	= (int) ((((double) screen_width)/(width)) * (height));
 			iv.width	= LayoutParams.MATCH_PARENT;
@@ -205,6 +209,8 @@ public class adapter_feeds_cards extends BaseAdapter
 			holder.description_view.setVisibility(View.VISIBLE);
 			if(image_exists)
 			{
+				holder.left				.setVisibility(View.VISIBLE);
+				holder.right			.setVisibility(View.VISIBLE);
 				holder.description_view	.setPadding(eight	, eight/2	, eight	, eight);
 				holder.image_view		.setPadding(0		, eight/2	, 0		, eight/2);
 			}
@@ -237,6 +243,8 @@ public class adapter_feeds_cards extends BaseAdapter
 		TextView time_view;
 		TextView description_view;
 		ImageView image_view;
+		ImageView left;
+		ImageView right;
 	}
 
 	private void load(String path, ImageView imageView)

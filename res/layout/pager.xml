@@ -16,6 +16,8 @@
 			android:layout_gravity="start"
 			android:choiceMode="singleChoice"
 			android:scrollbars="none"
+			android:drawSelectorOnTop="false"
+			android:listSelector="@drawable/selector"
 			android:divider="#00000000"
 			android:dividerHeight="0dp"
 			android:background="#1f1f1f"/>
