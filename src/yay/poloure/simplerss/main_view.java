@@ -254,6 +254,7 @@ public class main_view extends ActionBarActivity
 	public void onBackPressed()
 	{
 		super.onBackPressed();
+
 		//if(fragment_manager.getBackStackEntryAt(0).getName().equals("BACK"))
 		{
 			action_bar.setTitle(FEEDS);
