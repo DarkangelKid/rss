@@ -83,7 +83,7 @@ public class adapter_manage_groups extends BaseAdapter
 		return 2;
 	}
 
-	@Override
+	/*@Override
 	public int getItemViewType(int position)
 	{
 		if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB)
@@ -91,19 +91,19 @@ public class adapter_manage_groups extends BaseAdapter
 
 		else
 			return 1;
-	}
+	}*/
 
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
-		int view_type = getItemViewType(position);
-		if(view_type == 0)
+		/*int view_type = getItemViewType(position);
+		if(view_type == 0)*/
 		{
 			ViewHolder holder;
 			if(convertView == null)
 			{
-				convertView = inflater.inflate(R.layout.manage_list_item, parent, false);
+				convertView = inflater.inflate(R.layout.manage_group_item, parent, false);
 				holder = new ViewHolder();
 				holder.group_view = (TextView) convertView.findViewById(R.id.group_item);
 				holder.info_view = (TextView) convertView.findViewById(R.id.group_feeds);
@@ -127,7 +127,7 @@ public class adapter_manage_groups extends BaseAdapter
 
 			return convertView;
 		}
-		else
+		/*else
 		{
 			OldViewHolder holder;
 			if(convertView == null)
@@ -158,7 +158,7 @@ public class adapter_manage_groups extends BaseAdapter
 				holder.down_image_view.setVisibility(View.GONE);
 			}
 			return convertView;
-		}
+		}*/
 	}
 
 	static class ViewHolder
@@ -168,15 +168,15 @@ public class adapter_manage_groups extends BaseAdapter
 		ImageView image_view;
 	}
 
-	static class OldViewHolder
+	/*static class OldViewHolder
 	{
 		TextView group_view;
 		TextView info_view;
 		ImageView up_image_view;
 		ImageView down_image_view;
-	}
+	}*/
 
-	private class up_click_listener implements View.OnClickListener
+	/*private class up_click_listener implements View.OnClickListener
 	{
 		@Override
 		public void onClick(View v)
@@ -217,10 +217,10 @@ public class adapter_manage_groups extends BaseAdapter
 			card.setVisibility(View.VISIBLE);
 			up_card.setVisibility(View.VISIBLE);
 
-			utilities.write_array_to_file(main_view.storage + main_view.GROUP_LIST, group_array);
-			main_view.update_groups();
+			utilities.write_array_to_file(main.storage + main.GROUP_LIST, group_array);
+			main.update_groups();
 		}
-	}
+	}*/
 
 	private class MyTouchListener implements OnTouchListener
 	{
@@ -242,7 +242,7 @@ public class adapter_manage_groups extends BaseAdapter
 	{
 		int[] position = new int[2];
 		int old_view;
-		final int height = (int) (main_view.activity_context.getResources().getDisplayMetrics().heightPixels);
+		final int height = (int) (main.activity_context.getResources().getDisplayMetrics().heightPixels);
 		@Override
 		public boolean onDrag(View v, DragEvent event)
 		{
@@ -295,8 +295,8 @@ public class adapter_manage_groups extends BaseAdapter
 				v.setAnimation(fadeIn2);
 				v.setVisibility(View.VISIBLE);
 
-				utilities.write_array_to_file(main_view.storage + main_view.GROUP_LIST, group_array);
-				main_view.update_groups();
+				utilities.write_array_to_file(main.storage + main.GROUP_LIST, group_array);
+				main.update_groups();
 			}
 			return true;
 		}
@@ -342,38 +342,4 @@ public class adapter_manage_groups extends BaseAdapter
 			shadowTouchPoint.y = (shadowSize.y / 2);
 		}
 	}
-
-	//// NEW \\\\
-
-	private HashMap<Integer, Boolean> mSelection = new HashMap<Integer, Boolean>();
-
-    public void setNewSelection(int position, boolean value)
-    {
-        mSelection.put(position, value);
-        notifyDataSetChanged();
-    }
-
-    public boolean isPositionChecked(int position)
-    {
-        Boolean result = mSelection.get(position);
-        return result == null ? false : result;
-    }
-
-    public Set<Integer> getCurrentCheckedPosition()
-    {
-        return mSelection.keySet();
-    }
-
-    public void removeSelection(int position)
-    {
-        mSelection.remove(position);
-        notifyDataSetChanged();
-    }
-
-    public void clearSelection()
-    {
-        mSelection = new HashMap<Integer, Boolean>();
-        notifyDataSetChanged();
-    }
-
 }

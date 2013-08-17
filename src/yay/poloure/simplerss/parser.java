@@ -20,7 +20,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import java.io.FileOutputStream;
 
-class parsered
+class parser
 {
 	private static final SimpleDateFormat rss_date		= new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
 	private static final SimpleDateFormat rfc3339		= new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS'Z'");
@@ -34,7 +34,7 @@ class parsered
 	private String dump_path, url_path;
 	private final int width;
 
-	public parsered(String storage, String group, String feed, int widther)
+	public parser(String storage, String group, String feed, int widther)
 	{
 		width = widther;
 		try
@@ -48,16 +48,16 @@ class parsered
 
 	private void parse_local_xml(String storage, String group, String feed) throws IOException
 	{
-		dump_path					= storage + "content.dump" + main_view.TXT;
-		url_path					= storage + "content.url" + main_view.TXT;
-		final String store_file		= storage + feed + main_view.STORE_APPENDIX;
-		final String feed_folder	= storage + main_view.GROUPS_DIRECTORY + group + main_view.SEPAR + feed + main_view.SEPAR;
-		final String content_file	= feed_folder + feed + main_view.CONTENT_APPENDIX;
-		final String image_dir		= feed_folder + main_view.IMAGE_DIRECTORY;
-		final String thumbnail_dir	= feed_folder + main_view.THUMBNAIL_DIRECTORY;
+		dump_path					= storage + "content.dump" + main.TXT;
+		url_path					= storage + "content.url" + main.TXT;
+		final String store_file		= storage + feed + main.STORE_APPENDIX;
+		final String feed_folder	= storage + main.GROUPS_DIRECTORY + group + main.SEPAR + feed + main.SEPAR;
+		final String content_file	= feed_folder + feed + main.CONTENT_APPENDIX;
+		final String image_dir		= feed_folder + main.IMAGE_DIRECTORY;
+		final String thumbnail_dir	= feed_folder + main.THUMBNAIL_DIRECTORY;
 		final File in				= new File(store_file);
 		final File out				= new File(content_file);
-		final List<String> filters	= utilities.read_file_to_list(storage + main_view.FILTER_LIST);
+		final List<String> filters	= utilities.read_file_to_list(storage + main.FILTER_LIST);
 
 		Set<String> set				= new LinkedHashSet<String>();
 		Boolean write_mode			= false;
@@ -114,7 +114,7 @@ class parsered
 				if(!image.equals(""))
 				{
 					line.append("image|").append(image).append('|'); /// ends with a |
-					image_name = image.substring(image.lastIndexOf(main_view.SEPAR) + 1, image.length());
+					image_name = image.substring(image.lastIndexOf(main.SEPAR) + 1, image.length());
 
 					if(!utilities.exists(image_dir + image_name))
 						utilities.download_file(image, image_dir + image_name);
@@ -184,7 +184,7 @@ class parsered
 									if((tem3 != -1)&&(tem3 < tem2))
 											tem2 = tem3;
 								}
-								to_file(dump_path, cont.substring(tem + 9, tem2) + main_view.NL);
+								to_file(dump_path, cont.substring(tem + 9, tem2) + main.NL);
 							}
 						}
 						/// If it follows the rss 2.0 specification for rfc882
@@ -196,7 +196,7 @@ class parsered
 							}
 							catch(Exception e)
 							{
-								utilities.append_string_to_file(storage + "time_bug.txt", "BUG : Meant to be atom-3339 but looks like: " + cont + main_view.NL);
+								utilities.append_string_to_file(storage + "time_bug.txt", "BUG : Meant to be atom-3339 but looks like: " + cont + main.NL);
 								cont = rfc3339.format(new Date());
 							}
 							line.append(cont).append("|");
@@ -212,7 +212,7 @@ class parsered
 							}
 							catch(Exception e)
 							{
-								utilities.append_string_to_file(storage + "time_bug.txt", "BUG : Meant to be atom-3339 but looks like: " + cont + main_view.NL);
+								utilities.append_string_to_file(storage + "time_bug.txt", "BUG : Meant to be atom-3339 but looks like: " + cont + main.NL);
 								cont = rfc3339.format(new Date());
 							}
 							line.append(cont).append("|");
@@ -279,7 +279,7 @@ class parsered
 		/// TODO: May already be the out File.
 		final BufferedWriter write = new BufferedWriter(new FileWriter(content_file, true));
 		for(String fed : feeds)
-			write.write(fed + main_view.NL);
+			write.write(fed + main.NL);
 		write.close();
 	}
 
@@ -392,7 +392,7 @@ class parsered
 					if((tem3 != -1)&&(tem3 < tem2))
 							tem2 = tem3;
 				}
-				to_file(dump_path, tag.substring(tem + 9, tem2) + main_view.NL);
+				to_file(dump_path, tag.substring(tem + 9, tem2) + main.NL);
 			}
 
 			if((tag.contains("type=\"text/html"))||(tag.contains("type=\'text/html")))
@@ -409,7 +409,7 @@ class parsered
 						if((tem3 != -1)&&(tem3 < tem2))
 								tem2 = tem3;
 					}
-					to_file(url_path, tag.substring(tem + 6, tem2) + main_view.NL);
+					to_file(url_path, tag.substring(tem + 6, tem2) + main.NL);
 				}
 			}
 			else if((tag.contains("type=\"image/jpeg"))||(tag.contains("type=\'image/jpeg")))
@@ -427,7 +427,7 @@ class parsered
 								tem2 = tem3;
 					}
 					utilities.delete(dump_path);
-					to_file(dump_path, tag.substring(tem + 6, tem2) + main_view.NL);
+					to_file(dump_path, tag.substring(tem + 6, tem2) + main.NL);
 				}
 			}
 

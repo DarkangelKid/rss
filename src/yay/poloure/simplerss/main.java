@@ -56,34 +56,37 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
+import android.telephony.TelephonyManager;
+import android.provider.Settings;
+
 /// 11 only
 import android.view.ActionMode;
 
 import java.io.File;
 
-public class main_view extends ActionBarActivity
+public class main extends ActionBarActivity
 {
 	/// These are fine.
 	private ListView navigation_list;
 
 	/// Statics without final intilisations are generally unsafe.
-	public static DrawerLayout drawer_layout;
-	private static String current_title;
-	public static ActionBarDrawerToggle drawer_toggle;
-	private static Menu optionsMenu;
-	private static MenuInflater menu_inf;
-	public static Context activity_context;
-	private static ViewPager viewpager;
-	public static FragmentManager fragment_manager;
-	public static ActionBar action_bar;
-	public static Activity activity;
-	public static adapter_manage_feeds feed_list_adapter;
-	public static adapter_manage_groups group_list_adapter;
-	public static adapter_manage_filter filter_list_adapter;
+	private static String				current_title;
+	private static Menu					optionsMenu;
+	private static MenuInflater			menu_inf;
+	private static ViewPager			viewpager;
+	public static DrawerLayout			drawer_layout;
+	public static ActionBarDrawerToggle	drawer_toggle;
+	public static Context				activity_context;
+	public static FragmentManager		fragment_manager;
+	public static ActionBar				action_bar;
+	public static Activity				activity;
+	public static adapter_manage_feeds	feed_list_adapter;
+	public static adapter_manage_groups	group_list_adapter;
+	public static adapter_manage_filter	filter_list_adapter;
 	public static adapter_navigation_drawer nav_adapter;
 	public static List<String> current_groups 			= new ArrayList<String>();
 	public static List<Boolean> new_items 				= new ArrayList<Boolean>();
-	public static String storage, ALL, FEEDS, SETTINGS, MANAGE, NAVIGATION, DELETE_DIALOG, CLEAR_DIALOG, ALL_FILE;
+	public static String storage, ALL, NAVIGATION, DELETE_DIALOG, CLEAR_DIALOG, ALL_FILE;
 
 	/// Private static final are good.
 	private static final int[] times 					= new int[]{15, 30, 45, 60, 120, 180, 240, 300, 360, 400, 480, 540, 600, 660, 720, 960, 1440, 2880, 10080, 43829};
@@ -104,17 +107,17 @@ public class main_view extends ActionBarActivity
 	public static final String COUNT_APPENDIX			= ".count" + TXT;
 	public static final String GROUP_LIST				= "group_list" + TXT;
 	public static final String FILTER_LIST				= "filter_list" + TXT;
-
+	public static final String[] NAVIGATION_TITLES		= new String[3];
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 
-		setContentView(R.layout.pager);
+		setContentView(R.layout.navigation_drawer_and_content_frame);
 
 		perform_initial_operations();
-		current_title	= FEEDS;
+		current_title	= NAVIGATION_TITLES[0];
 		action_bar		= getSupportActionBar();
 		menu_inf		= getMenuInflater();
 		activity		= this;
@@ -132,9 +135,9 @@ public class main_view extends ActionBarActivity
 			Fragment prefs		= new Fragment();
 			Fragment man		= new fragment_manage();
 			fragment_manager.beginTransaction()
-				.add(R.id.content_frame, feed, FEEDS)
-				.add(R.id.content_frame, prefs, SETTINGS)
-				.add(R.id.content_frame, man, MANAGE)
+				.add(R.id.content_frame, feed, NAVIGATION_TITLES[0])
+				.add(R.id.content_frame, prefs, NAVIGATION_TITLES[2])
+				.add(R.id.content_frame, man, NAVIGATION_TITLES[1])
 				.hide(man)
 				.hide(prefs)
 				.commit();
@@ -142,9 +145,9 @@ public class main_view extends ActionBarActivity
 		else
 		{
 			fragment_manager.beginTransaction()
-					.show(fragment_manager.findFragmentByTag(FEEDS))
-					.hide(fragment_manager.findFragmentByTag(SETTINGS))
-					.hide(fragment_manager.findFragmentByTag(MANAGE))
+					.show(fragment_manager.findFragmentByTag(NAVIGATION_TITLES[0]))
+					.hide(fragment_manager.findFragmentByTag(NAVIGATION_TITLES[2]))
+					.hide(fragment_manager.findFragmentByTag(NAVIGATION_TITLES[1]))
 					.commit();
 		}
 
@@ -160,16 +163,16 @@ public class main_view extends ActionBarActivity
 					switch(position)
 					{
 						case 0:
-							switch_page(FEEDS, 0);
+							switch_page(NAVIGATION_TITLES[0], 0);
 							break;
 						case 1:
-							switch_page(MANAGE, 1);
+							switch_page(NAVIGATION_TITLES[1], 1);
 							break;
 						case 2:
-							switch_page(SETTINGS, 2);
+							switch_page(NAVIGATION_TITLES[2], 2);
 							break;
 						default:
-							switch_page(FEEDS, position);
+							switch_page(NAVIGATION_TITLES[0], position);
 							viewpager.setCurrentItem(position - 4);
 							break;
 					}
@@ -208,6 +211,8 @@ public class main_view extends ActionBarActivity
 			else
 				new refresh_page(0).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
+
+		utilities.log(storage, Settings.Secure.getString(getContentResolver(),Settings.Secure.ANDROID_ID));
 	}
 
 	private void perform_initial_operations()
@@ -232,13 +237,12 @@ public class main_view extends ActionBarActivity
 
 		activity_context	= this;
 		ALL					= getString(R.string.all_group);
-		FEEDS				= getString(R.string.feeds_title);
-		SETTINGS			= getString(R.string.settings_title);
-		MANAGE				= getString(R.string.manage_title);
 		NAVIGATION			= getString(R.string.navigation_title);
 		DELETE_DIALOG		= getString(R.string.delete_dialog);
 		CLEAR_DIALOG		= getString(R.string.clear_dialog);
-		///					"/storage/groups/all/all.txt"
+		NAVIGATION_TITLES[0]	= getString(R.string.feeds_title);
+		NAVIGATION_TITLES[1]	= getString(R.string.manage_title);
+		NAVIGATION_TITLES[2]	= getString(R.string.settings_title);
 		ALL_FILE			= GROUPS_DIRECTORY + ALL + SEPAR + ALL + TXT;
 	}
 
@@ -257,7 +261,7 @@ public class main_view extends ActionBarActivity
 
 		//if(fragment_manager.getBackStackEntryAt(0).getName().equals("BACK"))
 		{
-			action_bar.setTitle(FEEDS);
+			action_bar.setTitle(NAVIGATION_TITLES[0]);
 			drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
 			drawer_toggle.setDrawerIndicatorEnabled(true);
 			action_bar.setDisplayHomeAsUpEnabled(true);
@@ -433,7 +437,7 @@ public class main_view extends ActionBarActivity
 			if(position < 3)
 				set_title(page_title);
 			else
-				set_title(FEEDS);
+				set_title(NAVIGATION_TITLES[0]);
 		}
 		current_title = page_title;
 	}
@@ -457,7 +461,7 @@ public class main_view extends ActionBarActivity
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
-			View feed_view = inflater.inflate(R.layout.feed_fragment, container, false);
+			View feed_view = inflater.inflate(R.layout.viewpager_feeds, container, false);
 
 			viewpager = (ViewPager) feed_view.findViewById(R.id.pager);
 			viewpager.setAdapter(new pageradapter_feeds(fragment_manager));
@@ -523,7 +527,7 @@ public class main_view extends ActionBarActivity
 				return true;
 			else if(item.getTitle().equals("add"))
 			{
-				add_edit_feeds.show_add_feed_dialog(current_groups, activity_context);
+				add_edit_dialog.show_add_feed_dialog(current_groups, activity_context);
 				return true;
 			}
 			else if(item.getTitle().equals("refresh"))
@@ -571,7 +575,7 @@ public class main_view extends ActionBarActivity
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
-			View manage_view = inflater.inflate(R.layout.manage_pager, container, false);
+			View manage_view = inflater.inflate(R.layout.viewpager_manage, container, false);
 
 			ViewPager manage_pager = (ViewPager) manage_view.findViewById(R.id.manage_viewpager);
 			manage_pager.setAdapter(new pageradapter_manage(fragment_manager));
@@ -620,8 +624,8 @@ public class main_view extends ActionBarActivity
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
-			final View view = inflater.inflate(R.layout.manage_filters, container, false);
-			filter_list = (ListView) view.findViewById(R.id.filter_listview);
+			final View view = inflater.inflate(R.layout.manage_listviews, container, false);
+			filter_list = (ListView) view.findViewById(R.id.manage_listview);
 			filter_list_adapter = new adapter_manage_filter(getActivity());
 			filter_list.setAdapter(filter_list_adapter);
 
@@ -662,7 +666,7 @@ public class main_view extends ActionBarActivity
 				return true;
 			else if(item.getTitle().equals("add"))
 			{
-				add_edit_feeds.show_add_filter_dialog(activity_context, storage);
+				add_edit_dialog.show_add_filter_dialog(activity_context, storage);
 				return true;
 			}
 			return super.onOptionsItemSelected(item);
@@ -685,8 +689,8 @@ public class main_view extends ActionBarActivity
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
-			final View view = inflater.inflate(R.layout.manage_fragment, container, false);
-			manage_list = (ListView) view.findViewById(R.id.group_listview);
+			final View view = inflater.inflate(R.layout.manage_listviews, container, false);
+			manage_list = (ListView) view.findViewById(R.id.manage_listview);
 
 			group_list_adapter = new adapter_manage_groups(getActivity());
 			manage_list.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
@@ -757,6 +761,7 @@ public class main_view extends ActionBarActivity
 							manage_list.setItemChecked(pos, false);
 							return false;
 						}
+						view = manage_list.getChildAt(pos);
 
 						if(!manage_list.isItemChecked(pos))
 							manage_list.setItemChecked(pos, true);
@@ -764,9 +769,15 @@ public class main_view extends ActionBarActivity
 						if(!multi_mode)
 						{
 							multi_mode = true;
-							actionmode = activity.startActionMode(actionmode_callback);
+							if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB){
+							}
+							else
+								actionmode = activity.startActionMode(actionmode_callback);
 						}
-						view.setBackgroundResource(R.drawable.selector);
+						if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN)
+							view.setBackground(new ColorDrawable(Color.parseColor("#8033b5e5")));
+						else
+							view.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#8033b5e5")));
 
 						return true;
 					}
@@ -786,21 +797,41 @@ public class main_view extends ActionBarActivity
 							manage_list.setItemChecked(position, false);
 							return;
 						}
+						view = manage_list.getChildAt(position);
 
 						if(multi_mode)
 						{
-							if(!manage_list.isItemChecked(position))
+							if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN)
 							{
-								view.setBackgroundColor(Color.WHITE);
-								if(manage_list.getCheckedItemCount() == 0)
+								if(!manage_list.isItemChecked(position))
 								{
-									actionmode.finish();
-									multi_mode = false;
+									view.setBackground(new ColorDrawable(Color.parseColor("#ffffffff")));
+
+									if(manage_list.getCheckedItemPositions().indexOfValue(true) < 0)
+									{
+										actionmode.finish();
+										multi_mode = false;
+									}
 								}
+								else
+									view.setBackground(new ColorDrawable(Color.parseColor("#8033b5e5")));
 							}
+							/// < 11
 							else
 							{
-								view.setBackgroundResource(R.drawable.selector);
+								if(!manage_list.isItemChecked(position))
+								{
+									view.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#ffffffff")));
+
+									if(manage_list.getCheckedItemPositions().indexOfValue(true) < 0)
+									{
+										if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB)
+											actionmode.finish();
+										multi_mode = false;
+									}
+								}
+								else
+									view.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#8033b5e5")));
 							}
 						}
 					}
@@ -816,7 +847,7 @@ public class main_view extends ActionBarActivity
 				return true;
 			else if(item.getTitle().equals("add"))
 			{
-				add_edit_feeds.show_add_feed_dialog(current_groups, activity_context);
+				add_edit_dialog.show_add_feed_dialog(current_groups, activity_context);
 				return true;
 			}
 			return super.onOptionsItemSelected(item);
@@ -838,8 +869,8 @@ public class main_view extends ActionBarActivity
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
-			final View view = inflater.inflate(R.layout.manage_feeds, container, false);
-			feed_list = (ListView) view.findViewById(R.id.feeds_listview);
+			final View view = inflater.inflate(R.layout.manage_listviews, container, false);
+			feed_list = (ListView) view.findViewById(R.id.manage_listview);
 			feed_list.setOnItemClickListener
 			(
 				new OnItemClickListener()
@@ -847,7 +878,7 @@ public class main_view extends ActionBarActivity
 					@Override
 					public void onItemClick(AdapterView<?> parent, View view, int position, long id)
 					{
-						add_edit_feeds.show_edit_feed_dialog(current_groups, activity_context, storage, position);
+						add_edit_dialog.show_edit_feed_dialog(current_groups, activity_context, storage, position);
 					}
 				}
 			);
@@ -990,7 +1021,7 @@ public class main_view extends ActionBarActivity
 				return true;
 			else if(item.getTitle().equals("add"))
 			{
-				add_edit_feeds.show_add_feed_dialog(current_groups, activity_context);
+				add_edit_dialog.show_add_feed_dialog(current_groups, activity_context);
 				return true;
 			}
 			return super.onOptionsItemSelected(item);
@@ -1101,7 +1132,7 @@ public class main_view extends ActionBarActivity
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle SavedInstanceState)
 		{
-			return inflater.inflate(R.layout.fragment_main_dummy, container, false);
+			return inflater.inflate(R.layout.listview_feed, container, false);
 		}
 	}
 
@@ -1110,10 +1141,9 @@ public class main_view extends ActionBarActivity
 	{
 		String title = action_bar.getTitle().toString();
 
-		if(title.equals(FEEDS) || title.equals(SETTINGS) || title.equals(MANAGE) || title.equals(NAVIGATION))
-		{
+		if(title.equals(NAVIGATION_TITLES[0]) || title.equals(NAVIGATION_TITLES[1]) || title.equals(NAVIGATION_TITLES[2]) || title.equals(NAVIGATION))
 			return drawer_toggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
-		}
+
 		else
 		{
 			onBackPressed();
@@ -1384,12 +1414,8 @@ public class main_view extends ActionBarActivity
 			counts = get_unread_counts();
 
 		if(update_names)
-		{
-			List<String> nav = new ArrayList<String>();
-			nav.addAll(Arrays.asList(FEEDS, MANAGE, SETTINGS, "Groups"));
-			nav.addAll(current_groups);
-			nav_adapter.add_list(nav);
-		}
+			nav_adapter.add_list(current_groups);
+
 		nav_adapter.add_count(counts);
 		nav_adapter.notifyDataSetChanged();
 	}

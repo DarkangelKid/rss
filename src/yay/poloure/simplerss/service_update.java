@@ -40,7 +40,7 @@ public class service_update extends IntentService
 
 		final String stor;
 		final String storage;
-		final String SEPAR = main_view.SEPAR;
+		final String SEPAR = main.SEPAR;
 
 		if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.FROYO)
 			storage				= getExternalFilesDir(null).getAbsolutePath() + SEPAR;
@@ -50,9 +50,9 @@ public class service_update extends IntentService
 			storage				= Environment.getExternalStorageDirectory().getAbsolutePath() + SEPAR + "Android" + SEPAR + "data" + SEPAR + packageName + SEPAR + "files" + SEPAR;
 		}
 
-		final List<String> all_groups		= utilities.read_file_to_list(storage + main_view.GROUP_LIST);
+		final List<String> all_groups		= utilities.read_file_to_list(storage + main.GROUP_LIST);
 		final String grouper				= all_groups.get(group);
-		final String group_file_path		= storage + main_view.GROUPS_DIRECTORY + grouper + main_view.SEPAR + grouper + main_view.TXT;
+		final String group_file_path		= storage + main.GROUPS_DIRECTORY + grouper + main.SEPAR + grouper + main.TXT;
 
 		final String[][] content			= utilities.read_csv_to_array(group_file_path, 'n', 'u', 'g');
 		final String[] names				= content[0];
@@ -75,21 +75,21 @@ public class service_update extends IntentService
 		/// For each feed you must do this.
 		for(i = 0; i < size; i++)
 		{
-			utilities.download_file(urls[i], storage + names[i] + main_view.STORE_APPENDIX);
-			new parsered(storage, groups[i], names[i], width);
+			utilities.download_file(urls[i], storage + names[i] + main.STORE_APPENDIX);
+			new parser(storage, groups[i], names[i], width);
 		}
 
 		/// Sort group order
-		if(!grouper.equals(main_view.ALL))
+		if(!grouper.equals(main.ALL))
 		{
-			utilities.sort_group_content_by_time(storage, main_view.ALL);
+			utilities.sort_group_content_by_time(storage, main.ALL);
 			utilities.sort_group_content_by_time(storage, grouper);
 		}
 		else
 			for(String gro : all_groups)
 				utilities.sort_group_content_by_time(storage, gro);
 
-		final List<Integer> unread_list = main_view.get_unread_counts();
+		final List<Integer> unread_list = main.get_unread_counts();
 
 		int group_items = 1;
 		int total = 0, count;
@@ -116,11 +116,11 @@ public class service_update extends IntentService
 					((total == 1) ? " an unread item." : " unread items."))
 					.setAutoCancel(true);
 
-			Intent result_intent = new Intent(this, main_view.class);
+			Intent result_intent = new Intent(this, main.class);
 
 			TaskStackBuilder stack_builder = TaskStackBuilder.create(this);
 
-			stack_builder.addParentStack(main_view.class);
+			stack_builder.addParentStack(main.class);
 			stack_builder.addNextIntent(result_intent);
 			PendingIntent result_pending_intent = stack_builder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 			not_builder.setContentIntent(result_pending_intent);

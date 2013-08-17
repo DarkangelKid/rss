@@ -31,8 +31,8 @@ public class utilities
 	public static void delete_group(String storage, String group)
 	{
 		/// Move all feeds to an unsorted group.
-		//delete(storage + main_view.GROUPS_DIRECTORY + group + main_view.TXT);
-		//delete(storage + main_view.GROUPS_DIRECTORY + group + main_view.GROUP_CONTENT_APPENDIX);
+		//delete(storage + main.GROUPS_DIRECTORY + group + main.TXT);
+		//delete(storage + main.GROUPS_DIRECTORY + group + main.GROUP_CONTENT_APPENDIX);
 	}
 
 	public static boolean delete_directory(File directory)
@@ -58,7 +58,7 @@ public class utilities
 		String[] feeds;
 		List<String> lines;
 		Boolean found_url = false;
-		List<String> current_groups = read_file_to_list(storage + main_view.GROUP_LIST);
+		List<String> current_groups = read_file_to_list(storage + main.GROUP_LIST);
 		final int size = current_groups.size();
 
 		for(int i = 1; i < size; i++)
@@ -70,14 +70,14 @@ public class utilities
 				if(adapter.getCount() > 0)
 				{
 					/// Read each of the content files from the group and find the line with the url.
-					feeds = read_single_to_array(storage + main_view.GROUPS_DIRECTORY + group + main_view.SEPAR + group + main_view.TXT, "name|");
+					feeds = read_single_to_array(storage + main.GROUPS_DIRECTORY + group + main.SEPAR + group + main.TXT, "name|");
 					found_url = false;
 					url = adapter.return_latest_url();
 					if(!url.equals(""))
 					{
 						for(String feed: feeds)
 						{
-							feed_content_file = storage + main_view.GROUPS_DIRECTORY + group + main_view.SEPAR + feed + main_view.SEPAR + feed + main_view.CONTENT_APPENDIX;
+							feed_content_file = storage + main.GROUPS_DIRECTORY + group + main.SEPAR + feed + main.SEPAR + feed + main.CONTENT_APPENDIX;
 							lines = read_file_to_list(feed_content_file);
 							delete(feed_content_file);
 
@@ -87,17 +87,17 @@ public class utilities
 								if(!found_url)
 								{
 									if(!line.contains(url))
-										out.write(line + main_view.NL);
+										out.write(line + main.NL);
 									else if(!line.substring(0, 9).equals("marker|1|"))
 									{
-										out.write("marker|1|" + line + main_view.NL);
+										out.write("marker|1|" + line + main.NL);
 										found_url = true;
 									}
 									else
-										out.write(line + main_view.NL);
+										out.write(line + main.NL);
 								}
 								else
-									out.write(line + main_view.NL);
+									out.write(line + main.NL);
 							}
 							out.close();
 							if(found_url)
@@ -150,7 +150,7 @@ public class utilities
 		{
 			BufferedWriter out = new BufferedWriter(new FileWriter(path, true));
 			for(Object item : content)
-				out.write(item.toString() + main_view.NL);
+				out.write(item.toString() + main.NL);
 			out.close();
 		}
 		catch(Exception e)
@@ -165,7 +165,7 @@ public class utilities
 		{
 			BufferedWriter out = new BufferedWriter(new FileWriter(path, true));
 			for(String item : content)
-				out.write(item + main_view.NL);
+				out.write(item + main.NL);
 			out.close();
 		}
 		catch(Exception e)
@@ -181,8 +181,8 @@ public class utilities
 		String[] group_array	= new String[size];
 		String[] info_array		= new String[size];
 
-		final String content_path = storage + main_view.GROUPS_DIRECTORY + current_groups.get(0) + main_view.SEPAR + current_groups.get(0) + main_view.CONTENT_APPENDIX;
-		final String count_path = content_path + main_view.COUNT_APPENDIX;
+		final String content_path = storage + main.GROUPS_DIRECTORY + current_groups.get(0) + main.SEPAR + current_groups.get(0) + main.CONTENT_APPENDIX;
+		final String count_path = content_path + main.COUNT_APPENDIX;
 
 		if(exists(count_path))
 			total = Integer.parseInt(read_file_to_list(count_path).get(0));
@@ -192,7 +192,7 @@ public class utilities
 		for(i = 0; i < size; i++)
 		{
 			group_array[i] = current_groups.get(i);
-			content = read_single_to_array(storage + main_view.GROUPS_DIRECTORY + group_array[i] + main_view.SEPAR + group_array[i] + main_view.TXT, "name|");
+			content = read_single_to_array(storage + main.GROUPS_DIRECTORY + group_array[i] + main.SEPAR + group_array[i] + main.TXT, "name|");
 			if(i == 0)
 				info = (size == 1) ? "1 group" :  size + " groups";
 			else
@@ -270,12 +270,12 @@ public class utilities
 				if(contains)
 				{
 					if(!item.contains(string))
-						out.write(item + main_view.NL);
+						out.write(item + main.NL);
 				}
 				else
 				{
 					if(!item.equals(string))
-						out.write(item + main_view.NL);
+						out.write(item + main.NL);
 				}
 			}
 			out.close();
@@ -499,12 +499,12 @@ public class utilities
 	public static void sort_group_content_by_time(String storage, String group)
 	{
 		/// "/storage/groups/Tumblr/Tumbler.content.txt"
-		final String sep				= main_view.SEPAR;
-		final String group_dir			= storage + main_view.GROUPS_DIRECTORY + group + sep;
-		final String group_content_path	= group_dir + group + main_view.CONTENT_APPENDIX;
-		final String group_count_file	= group_content_path + main_view.COUNT_APPENDIX;
+		final String sep				= main.SEPAR;
+		final String group_dir			= storage + main.GROUPS_DIRECTORY + group + sep;
+		final String group_content_path	= group_dir + group + main.CONTENT_APPENDIX;
+		final String group_count_file	= group_content_path + main.COUNT_APPENDIX;
 
-		final String[][] contents	= utilities.read_csv_to_array(group_dir + group + main_view.TXT, 'n', 'g');
+		final String[][] contents	= utilities.read_csv_to_array(group_dir + group + main.TXT, 'n', 'g');
 		final String[] names		= contents[0];
 		final String[] groups		= contents[1];
 
@@ -518,7 +518,7 @@ public class utilities
 		for(int k = 0; k < names.length; k++)
 		{
 			/// "/storage/groups/Tumblr/mariam/mariam.content.txt"
-			content_path = storage + main_view.GROUPS_DIRECTORY + groups[k] + sep + names[k] + sep + names[k] + main_view.CONTENT_APPENDIX;
+			content_path = storage + main.GROUPS_DIRECTORY + groups[k] + sep + names[k] + sep + names[k] + main.CONTENT_APPENDIX;
 			if(exists(content_path))
 			{
 				content 		= read_file_to_list(content_path);
@@ -547,7 +547,7 @@ public class utilities
 		{
 			BufferedWriter out = new BufferedWriter(new FileWriter(group_content_path, true));
 			for(Map.Entry<Long, String> entry : map.entrySet())
-				out.write(entry.getValue() + main_view.NL);
+				out.write(entry.getValue() + main.NL);
 
 			out.close();
 
@@ -563,7 +563,7 @@ public class utilities
 
 	public static void log(String storage, String text)
 	{
-		append_string_to_file(storage + main_view.DUMP_FILE, text + main_view.NL);
+		append_string_to_file(storage + main.DUMP_FILE, text + main.NL);
 	}
 
 	public static void delete(String file_path)

@@ -18,6 +18,7 @@
 	<string name="feed_url_dialog">Feed URL</string>
 	<string name="feed_url_hint">http://example.com/rss</string>
 	<string name="feed_group_dialog">Group</string>
+	<string name="feed_group_title">Groups</string>
 	<string name="feed_group_hint">new group</string>
 	<string name="cancel_dialog">Cancel</string>
 	<string name="add_dialog">Add</string>

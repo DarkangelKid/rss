@@ -28,7 +28,7 @@ import java.io.FileWriter;
 import java.io.BufferedWriter;
 import java.io.BufferedInputStream;
 
-public class add_edit_feeds
+public class add_edit_dialog
 {
 	private static class check_feed_exists extends AsyncTask<String, Void, String[]>
 	{
@@ -62,7 +62,7 @@ public class add_edit_feeds
 			String url = "", feed_title = "";
 			if(group.length()>0)
 			{
-				final List<String> current_groups = utilities.read_file_to_list(main_view.storage + main_view.GROUP_LIST);
+				final List<String> current_groups = utilities.read_file_to_list(main.storage + main.GROUP_LIST);
 				for(String gro : current_groups)
 				{
 					if((gro.toLowerCase(Locale.getDefault())).equals(group.toLowerCase(Locale.getDefault())))
@@ -131,14 +131,14 @@ public class add_edit_feeds
 		{
 			if(!real)
 			{
-				utilities.toast_message(main_view.activity_context, main_view.activity_context.getString(R.string.feed_invalid), false);
+				utilities.toast_message(main.activity_context, main.activity_context.getString(R.string.feed_invalid), false);
 				Button button	= dialog.getButton(AlertDialog.BUTTON_POSITIVE);
 				if(button != null)
 					button.setEnabled(true);
 			}
 			else
 			{
-				String storage = main_view.storage;
+				String storage = main.storage;
 				if(!existing_group)
 					add_group(storage, group);
 				if(name.equals(""))
@@ -186,12 +186,12 @@ public class add_edit_feeds
 					public void onClick(DialogInterface dialog, int which)
 					{
 						final String feed_name	= ((TextView) add_filter_layout).getText().toString().trim();
-						String filter_path		= storage.concat(main_view.FILTER_LIST);
+						String filter_path		= storage.concat(main.FILTER_LIST);
 						List<String> filters	= utilities.read_file_to_list(filter_path);
 						if(!filters.contains(feed_name))
-							utilities.append_string_to_file(filter_path, feed_name + main_view.NL);
-						main_view.filter_list_adapter.set_items(utilities.read_file_to_list(filter_path));
-						main_view.filter_list_adapter.notifyDataSetChanged();
+							utilities.append_string_to_file(filter_path, feed_name + main.NL);
+						main.filter_list_adapter.set_items(utilities.read_file_to_list(filter_path));
+						main.filter_list_adapter.notifyDataSetChanged();
 						add_filter_dialog.hide();
 					}
 				});
@@ -256,7 +256,7 @@ public class add_edit_feeds
 	{
 		final LayoutInflater inflater		= LayoutInflater.from(activity_context);
 		final View edit_rss_dialog			= inflater.inflate(R.layout.add_rss_dialog, null);
-		final String[][] content			= utilities.read_csv_to_array(storage + main_view.GROUPS_DIRECTORY+ current_groups.get(0) + main_view.SEPAR + current_groups.get(0) + main_view.TXT, 'n', 'u', 'g');
+		final String[][] content			= utilities.read_csv_to_array(storage + main.GROUPS_DIRECTORY+ current_groups.get(0) + main.SEPAR + current_groups.get(0) + main.TXT, 'n', 'u', 'g');
 		final String current_title			= content[0][position];
 		final String current_url			= content[1][position];
 		final String current_group			= content[2][position];
@@ -342,48 +342,48 @@ public class add_edit_feeds
 
 	private static void add_feed(String storage, String feed_name, String feed_url, String feed_group, String all_string)
 	{
-		String feed_path	= storage + main_view.GROUPS_DIRECTORY + feed_group + main_view.SEPAR + feed_name;
+		String feed_path	= storage + main.GROUPS_DIRECTORY + feed_group + main.SEPAR + feed_name;
 		File folder		= new File(feed_path);
 		if(!folder.exists())
 		{
 			folder.mkdir();
-			(new File(feed_path + main_view.SEPAR + "images")).mkdir();
-			(new File(feed_path + main_view.SEPAR + "thumbnails")).mkdir();
+			(new File(feed_path + main.SEPAR + "images")).mkdir();
+			(new File(feed_path + main.SEPAR + "thumbnails")).mkdir();
 		}
-		feed_path	= storage + main_view.GROUPS_DIRECTORY + all_string;
+		feed_path	= storage + main.GROUPS_DIRECTORY + all_string;
 		folder		= new File(feed_path);
 		if(!folder.exists())
 			folder.mkdir();
 
-		String feed_info = "name|" +  feed_name + "|url|" + feed_url + "|group|" + feed_group + "|" + main_view.NL;
-		utilities.append_string_to_file(storage + main_view.GROUPS_DIRECTORY + feed_group + main_view.SEPAR + feed_group + main_view.TXT, feed_info);
-		utilities.append_string_to_file(storage + main_view.ALL_FILE, feed_info);
+		String feed_info = "name|" +  feed_name + "|url|" + feed_url + "|group|" + feed_group + "|" + main.NL;
+		utilities.append_string_to_file(storage + main.GROUPS_DIRECTORY + feed_group + main.SEPAR + feed_group + main.TXT, feed_info);
+		utilities.append_string_to_file(storage + main.ALL_FILE, feed_info);
 
-		if(main_view.feed_list_adapter != null)
+		if(main.feed_list_adapter != null)
 		{
 			if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
-				new main_view.refresh_manage_feeds().execute();
+				new main.refresh_manage_feeds().execute();
 			else
-				new main_view.refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+				new main.refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
-		if(main_view.group_list_adapter != null)
+		if(main.group_list_adapter != null)
 		{
 			if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
-				new main_view.refresh_manage_groups().execute();
+				new main.refresh_manage_groups().execute();
 			else
-				new main_view.refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+				new main.refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
 	}
 
 	private static void edit_feed(String storage, String old_name, String new_name, String new_url, String old_group, String new_group, int position, String all_string)
 	{
-		final String sep					= main_view.SEPAR;
-		final String txt					= main_view.TXT;
-		final String count					= main_view.COUNT_APPENDIX;
-		final String con					= main_view.CONTENT_APPENDIX;
-		final String all_group_file			= storage + main_view.ALL_FILE;
-		final String old_group_folder		= storage + main_view.GROUPS_DIRECTORY + old_group;
-		final String new_group_folder		= storage + main_view.GROUPS_DIRECTORY + new_group;
+		final String sep					= main.SEPAR;
+		final String txt					= main.TXT;
+		final String count					= main.COUNT_APPENDIX;
+		final String con					= main.CONTENT_APPENDIX;
+		final String all_group_file			= storage + main.ALL_FILE;
+		final String old_group_folder		= storage + main.GROUPS_DIRECTORY + old_group;
+		final String new_group_folder		= storage + main.GROUPS_DIRECTORY + new_group;
 		final String old_group_file			= old_group_folder + sep + old_group + txt;
 		final String new_group_file			= new_group_folder + sep + new_group + txt;
 		final String old_feed_folder		= old_group_folder + sep + old_name;
@@ -405,13 +405,13 @@ public class add_edit_feeds
 			(new File(old_feed_folder)).renameTo(new File(new_feed_folder));
 
 			utilities.remove_string_from_file(old_group_file, old_name, true);
-			utilities.append_string_to_file(new_group_file, "name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|" + main_view.NL);
+			utilities.append_string_to_file(new_group_file, "name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|" + main.NL);
 
 			utilities.delete_if_empty(old_group_file);
 			if(!(new File(old_group_file).exists()))
 			{
 				utilities.delete_directory(new File(old_group_folder));
-				utilities.remove_string_from_file(storage + main_view.GROUP_LIST, old_group, false);
+				utilities.remove_string_from_file(storage + main.GROUP_LIST, old_group, false);
 			}
 		}
 		if(!old_name.equals(new_name))
@@ -426,9 +426,9 @@ public class add_edit_feeds
 			for(String item : list)
 			{
 				if(item.contains(old_name))
-					out.write("name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|" + main_view.NL);
+					out.write("name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|" + main.NL);
 				else
-					out.write(item + main_view.NL);
+					out.write(item + main.NL);
 			}
 			out.close();
 		}
@@ -444,9 +444,9 @@ public class add_edit_feeds
 			for(String item : list)
 			{
 				if(item.contains(old_name))
-					out2.write("name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|" + main_view.NL);
+					out2.write("name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|" + main.NL);
 				else
-					out2.write(item + main_view.NL);
+					out2.write(item + main.NL);
 			}
 			out2.close();
 		}
@@ -454,7 +454,7 @@ public class add_edit_feeds
 		{
 		}
 		/// Delete the group count file and delete the group_content_file
-		final String all_content_file = storage + main_view.GROUPS_DIRECTORY + all_string + sep + all_string + con;
+		final String all_content_file = storage + main.GROUPS_DIRECTORY + all_string + sep + all_string + con;
 		(new File(new_group_folder + sep + new_group + con))		.delete();
 		(new File(new_group_folder + sep + new_group + con + count)).delete();
 		(new File(old_group_folder + sep + old_group + con))		.delete();
@@ -468,39 +468,39 @@ public class add_edit_feeds
 			utilities.sort_group_content_by_time(storage, new_group);
 		utilities.sort_group_content_by_time(storage, all_string);
 
-		main_view.feed_list_adapter.set_position(position, new_name, new_url + main_view.NL + new_group + " • " + Integer.toString(utilities.count_lines(storage + main_view.GROUPS_DIRECTORY + new_group + main_view.SEPAR + new_name + main_view.SEPAR + new_name + main_view.CONTENT_APPENDIX) - 1) + " items");
-		main_view.feed_list_adapter.notifyDataSetChanged();
+		main.feed_list_adapter.set_position(position, new_name, new_url + main.NL + new_group + " • " + Integer.toString(utilities.count_lines(storage + main.GROUPS_DIRECTORY + new_group + main.SEPAR + new_name + main.SEPAR + new_name + main.CONTENT_APPENDIX) - 1) + " items");
+		main.feed_list_adapter.notifyDataSetChanged();
 
 		/// To refresh the counts and the order of the groups.
-		main_view.update_groups();
+		main.update_groups();
 
 		if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
-			new main_view.refresh_manage_groups().execute();
+			new main.refresh_manage_groups().execute();
 		else
-			new main_view.refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+			new main.refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 		/// Force a refresh of the page.
 		int index;
 		if((new File(old_group_file)).exists())
 		{
-			index = main_view.current_groups.indexOf(old_group);
-			main_view.new_items.set(index, true);
+			index = main.current_groups.indexOf(old_group);
+			main.new_items.set(index, true);
 		}
 		if(!old_group.equals(new_group))
 		{
-			index = main_view.current_groups.indexOf(new_group);
-			main_view.new_items.set(index, true);
+			index = main.current_groups.indexOf(new_group);
+			main.new_items.set(index, true);
 		}
-		main_view.new_items.set(0, true);
+		main.new_items.set(0, true);
 	}
 
 	private static void add_group(String storage, String group_name)
 	{
-		utilities.append_string_to_file(storage + main_view.GROUP_LIST, group_name + main_view.NL);
-		final File folder = new File(storage + main_view.GROUPS_DIRECTORY + group_name);
+		utilities.append_string_to_file(storage + main.GROUP_LIST, group_name + main.NL);
+		final File folder = new File(storage + main.GROUPS_DIRECTORY + group_name);
 		if(!folder.exists())
 			folder.mkdir();
 
-		main_view.update_groups();
+		main.update_groups();
 	}
 }
