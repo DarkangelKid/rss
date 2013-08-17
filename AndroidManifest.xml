@@ -15,7 +15,7 @@
 			android:theme="@style/Brownie.Net"
 			android:hardwareAccelerated="true">
 		<activity
-			android:name="main_view"
+			android:name="main"
 			android:label="@string/feeds_title">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />

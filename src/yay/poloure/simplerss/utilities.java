@@ -71,9 +71,7 @@ public class utilities
 				{
 					/// Read each of the content files from the group and find the line with the url.
 					feeds = read_single_to_array(storage + main.GROUPS_DIRECTORY + group + main.SEPAR + group + main.TXT, "name|");
-					found_url = false;
-					url = adapter.return_latest_url();
-					if(!url.equals(""))
+					/*if(!url.equals(""))
 					{
 						for(String feed: feeds)
 						{
@@ -104,7 +102,7 @@ public class utilities
 								break;
 						}
 						sort_group_content_by_time(storage, group);
-					}
+					}*/
 				}
 			}
 			catch(Exception e){
@@ -499,13 +497,13 @@ public class utilities
 	public static void sort_group_content_by_time(String storage, String group)
 	{
 		/// "/storage/groups/Tumblr/Tumbler.content.txt"
-		final String sep				= main.SEPAR;
-		final String group_dir			= storage + main.GROUPS_DIRECTORY + group + sep;
+		final String sep						= main.SEPAR;
+		final String group_dir				= storage + main.GROUPS_DIRECTORY + group + sep;
 		final String group_content_path	= group_dir + group + main.CONTENT_APPENDIX;
-		final String group_count_file	= group_content_path + main.COUNT_APPENDIX;
+		final String group_count_file		= group_content_path + main.COUNT_APPENDIX;
 
 		final String[][] contents	= utilities.read_csv_to_array(group_dir + group + main.TXT, 'n', 'g');
-		final String[] names		= contents[0];
+		final String[] names			= contents[0];
 		final String[] groups		= contents[1];
 
 		String content_path;
