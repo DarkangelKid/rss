@@ -68,7 +68,7 @@ public class adapter_manage_filter extends BaseAdapter
 			if(convertView == null)
 			{
 
-				convertView = inflater.inflate(R.layout.feed_list_item, parent, false);
+				convertView = inflater.inflate(R.layout.manage_feed_item, parent, false);
 				holder = new ViewHolder();
 				holder.title_view = (TextView) convertView.findViewById(R.id.title_item);
 				//holder.info_view = (TextView) convertView.findViewById(R.id.info_item);

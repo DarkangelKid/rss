@@ -153,7 +153,7 @@ public class adapter_feeds_cards extends BaseAdapter
 							top_item_position = firstVisibleItem - 2;
 					}
 					if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
-						main_view.update_navigation_data(null, false);
+						main.update_navigation_data(null, false);
 				}
 			});
 			first = false;
@@ -458,12 +458,12 @@ public class adapter_feeds_cards extends BaseAdapter
 		@Override
 		public void onClick(View v)
 		{
-			main_view.action_bar.setTitle("Offline");
-			main_view.drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-			main_view.drawer_toggle.setDrawerIndicatorEnabled(false);
-			main_view.action_bar.setDisplayHomeAsUpEnabled(true);
-			main_view.fragment_manager.beginTransaction()
-					.hide(main_view.fragment_manager.findFragmentByTag(main_view.FEEDS))
+			main.action_bar.setTitle("Offline");
+			main.drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+			main.drawer_toggle.setDrawerIndicatorEnabled(false);
+			main.action_bar.setDisplayHomeAsUpEnabled(true);
+			main.fragment_manager.beginTransaction()
+					.hide(main.fragment_manager.findFragmentByTag(main.NAVIGATION_TITLES[0]))
 					.add(R.id.drawer_layout, new fragment_webview(), "OFFLINE")
 					.addToBackStack("BACK")
 					.commit();
@@ -502,7 +502,7 @@ public class adapter_feeds_cards extends BaseAdapter
 		public boolean onLongClick(View v)
 		{
 			String long_press_url = ((TextView) v.findViewById(R.id.time)).getText().toString();
-			add_edit_feeds.show_card_dialog(context, long_press_url);
+			add_edit_dialog.show_card_dialog(context, long_press_url);
 			return true;
 		}
 	}
