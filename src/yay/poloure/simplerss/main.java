@@ -1140,7 +1140,7 @@ public class main extends ActionBarActivity
 		{
 			View settings_view = inflater.inflate(R.layout.viewpager_settings, container, false);
 			ViewPager viewpager_settings = (ViewPager)settings_view.findViewById(R.id.settings_pager);
-			PagerAdapter adapter = /*TODO*/;
+			PagerAdapter adapter = new pageradapter_settings(fragment_manager);
 			viewpager_settings.setAdapter(adapter);
 
 			final PagerTabStrip settings_strip = (PagerTabStrip) settings_view.findViewById(R.id.settings_title_strip);
