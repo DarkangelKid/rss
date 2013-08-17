@@ -1140,6 +1140,84 @@ public class main extends ActionBarActivity
 		}
 	}
 
+	public static class fragment_settings extends Fragment
+	{
+		@Override
+		public void onCreate(Bundle savedInstanceState)
+		{
+			super.onCreate(savedInstanceState);
+
+		}
+
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle SavedInstanceState)
+		{
+			View settings_view = inflater.inflate(R.layout.viewpager_settings, container, false);
+			ViewPager viewpager_settings = (ViewPager)settings_view.findViewById(R.id.settings_pager);
+			PagerAdapter adapter = /*TODO*/;
+			viewpager_settings.setAdapter(adapter);
+
+			final PagerTabStrip settings_strip = (PagerTabStrip) settings_view.findViewById(R.id.settings_title_strip);
+			manage_strip.setDrawFullUnderline(true);
+			manage_strip.setTabIndicatorColor(Color.argb(0, 51, 181, 229));
+
+			return settings_view;
+		}
+	}
+
+	public static class pageradapter_settings extends FragmentPagerAdapter
+	{
+		public pageradapter_settings(FragmentManager fm)
+		{
+			super(fm);
+		}
+
+		@Override
+		public int getCount()
+		{
+			return 1;
+		}
+
+		@Override
+		public Fragment getItem(int position)
+		{
+			switch(position)
+			{
+				case(0):
+					return new fragment_settings_function();
+			}
+			return null;
+		}
+
+		@Override
+		public String getPageTitle(int position)
+		{
+			switch(position)
+			{
+				case(0):
+					return "Titties";
+			}
+			return "";
+		}
+	}
+
+	public static class fragment_settings_function extends ListFragment
+	{
+		@Override
+		public void onCreate(Bundle savedInstanceState)
+		{
+			super.onCreate(savedInstanceState);
+			adapter_settings_function adapter = new adapter_settings_function(activity_context);
+			setListAdapter(adapter);
+		}
+
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle SavedInstanceState)
+		{
+			return inflater.inflate(R.layout.listview_settings_function, container, false);
+		}
+	}
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
