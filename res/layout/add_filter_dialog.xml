@@ -11,4 +11,4 @@
 			android:gravity="fill_horizontal"
 			android:inputType="textUri"
 			android:textSize="20sp"
-			android:textColor="#ffffff"/>
+			android:textColor="#ff000000"/>

@@ -132,7 +132,7 @@ public class main extends ActionBarActivity
 		if(savedInstanceState == null)
 		{
 			Fragment feed		= new fragment_feeds();
-			Fragment prefs		= new Fragment();
+			Fragment prefs		= new fragment_settings();
 			Fragment man		= new fragment_manage();
 			fragment_manager.beginTransaction()
 				.add(R.id.content_frame, feed, NAVIGATION_TITLES[0])
@@ -1128,6 +1128,84 @@ public class main extends ActionBarActivity
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle SavedInstanceState)
 		{
 			return inflater.inflate(R.layout.listview_feed, container, false);
+		}
+	}
+
+	public static class fragment_settings extends Fragment
+	{
+		@Override
+		public void onCreate(Bundle savedInstanceState)
+		{
+			super.onCreate(savedInstanceState);
+
+		}
+
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle SavedInstanceState)
+		{
+			View settings_view = inflater.inflate(R.layout.viewpager_settings, container, false);
+			ViewPager viewpager_settings = (ViewPager)settings_view.findViewById(R.id.settings_pager);
+			pageradapter_settings adapter = new pageradapter_settings(fragment_manager);
+			viewpager_settings.setAdapter(adapter);
+
+			final PagerTabStrip settings_strip = (PagerTabStrip) settings_view.findViewById(R.id.settings_title_strip);
+			settings_strip.setDrawFullUnderline(true);
+			settings_strip.setTabIndicatorColor(Color.argb(0, 51, 181, 229));
+
+			return settings_view;
+		}
+	}
+
+	public static class pageradapter_settings extends FragmentPagerAdapter
+	{
+		public pageradapter_settings(FragmentManager fm)
+		{
+			super(fm);
+		}
+
+		@Override
+		public int getCount()
+		{
+			return 1;
+		}
+
+		@Override
+		public Fragment getItem(int position)
+		{
+			switch(position)
+			{
+				case(0):
+					return new fragment_settings_function();
+			}
+			return null;
+		}
+
+		@Override
+		public String getPageTitle(int position)
+		{
+			switch(position)
+			{
+				case(0):
+					return "Titties";
+			}
+			return "";
+		}
+	}
+
+	public static class fragment_settings_function extends ListFragment
+	{
+		@Override
+		public void onCreate(Bundle savedInstanceState)
+		{
+			super.onCreate(savedInstanceState);
+			adapter_settings_function adapter = new adapter_settings_function(activity_context);
+			setListAdapter(adapter);
+		}
+
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle SavedInstanceState)
+		{
+			return inflater.inflate(R.layout.listview_settings_function, container, false);
 		}
 	}
 

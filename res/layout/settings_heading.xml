@@ -1,0 +1,12 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:orientation="vertical"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content">
+	<TextView
+			android:id="@+id/settings_heading"
+			android:text="@+id/settings_heading"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textColor="#ff000000"
+			android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"/>
+</LinearLayout>
