@@ -596,19 +596,6 @@ public class main extends ActionBarActivity
 			inflater.inflate(R.menu.manage_overflow, optionsMenu);
 			super.onCreateOptionsMenu(optionsMenu, inflater);
 		}
-
-		@Override
-		public boolean onOptionsItemSelected(MenuItem item)
-		{
-			/*if(drawer_toggle.onOptionsItemSelected(item))
-				return true;
-			else if(item.getTitle().equals("add"))
-			{
-				utilities.show_add_feed_dialog(current_groups, activity_context);
-				return true;
-			}*/
-			return super.onOptionsItemSelected(item);
-		}
 	}
 
 	public static class fragment_manage_filters extends Fragment
@@ -1030,7 +1017,6 @@ public class main extends ActionBarActivity
 			}
 			return super.onOptionsItemSelected(item);
 		}
-		///end
 	}
 
 	public static class pageradapter_feeds extends FragmentPagerAdapter
@@ -1231,15 +1217,6 @@ public class main extends ActionBarActivity
 			onBackPressed();
 			return true;
 		}
-		/*if((item.getItemId() == android.R.id.home) && ())
-		{
-			drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-			drawer_toggle.setDrawerIndicatorEnabled(true);
-			action_bar.setDisplayHomeAsUpEnabled(true);
-			onBackPressed();
-			return true;
-		}
-		return drawer_toggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);*/
 	}
 
 	private static void set_refresh(final boolean mode)
@@ -1479,7 +1456,6 @@ public class main extends ActionBarActivity
 			else
 				/// refresh_count is how many new items are added.
 				lv.setSelection(refresh_count);
-				/// Should work.
 
 			set_refresh(check_service_running());
 
@@ -1520,17 +1496,12 @@ public class main extends ActionBarActivity
 			catch(Exception e){
 			}
 
+			/* The fragment has not been created yet so read the file manually for unread items. */
 			if(ith == null)
 				unread_list.add(0);
+			/* Ask the adapter how many items are unread. */
 			else
 			{
-				int most;
-				String count_file = storage + GROUPS_DIRECTORY + current_groups.get(j) + SEPAR + current_groups.get(j) + COUNT_APPENDIX;
-				if(utilities.exists(count_file))
-					most = Integer.parseInt(utilities.read_file_to_list(count_file).get(0));
-				else
-					most = utilities.count_lines(storage + GROUPS_DIRECTORY + current_groups.get(j) + SEPAR + current_groups.get(j) + CONTENT_APPENDIX);
-				unread_list.add(most - ith.return_unread_item_count() - 1);
 			}
 		}
 
