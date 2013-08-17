@@ -51,7 +51,7 @@ public class adapter_feeds_cards extends BaseAdapter
 {
 	private final List<String> content_titles = new ArrayList<String>();
 	private final List<String> content_des = new ArrayList<String>();
-	private final List<String> content_links = new ArrayList<String>();
+	public final List<String> content_links = new ArrayList<String>();
 	private final List<String> content_images = new ArrayList<String>();
 	private final List<Integer> content_height = new ArrayList<Integer>();
 	private final List<Integer> content_width = new ArrayList<Integer>();
@@ -62,10 +62,11 @@ public class adapter_feeds_cards extends BaseAdapter
 	private ListView listview;
 
 	private static int eight = 0;
-	private int top_item_position = -1;
 	private final int screen_width;
-	private int total = 0;
+	public int total = 0;
 	private Boolean first = true;
+	public int unread_count = 0;
+	public int top_item = 0;
 
 	public adapter_feeds_cards(Context context_main)
 	{
@@ -86,22 +87,6 @@ public class adapter_feeds_cards extends BaseAdapter
 		content_width.addAll(new_width);
 		content_marker.addAll(new_marker);
 		total = content_titles.size();
-	}
-
-	public void set_latest_item(int position)
-	{
-		top_item_position = position;
-	}
-
-	public List<String> return_links()
-	{
-		return content_links;
-	}
-
-	public int return_unread_item_count()
-	{
-		/// oldest = 0, newest = 20;
-		return top_item_position;
 	}
 
 	@Override
@@ -147,13 +132,14 @@ public class adapter_feeds_cards extends BaseAdapter
 						if(firstVisibleItem == total)
 						{
 							if(listview.getChildAt(0).getTop() == eight)
-								top_item_position = total - 1;
-							else if(top_item_position != total - 1)
-								top_item_position = total - 2;
+								top_item = total - 1;
+							else if(top_item != total - 1)
+								top_item = total - 2;
 						}
-						else if(firstVisibleItem - 2 > top_item_position)
-							top_item_position = firstVisibleItem - 2;
+						else if(firstVisibleItem - 2 > top_item)
+							top_item = firstVisibleItem - 2;
 					}
+					unread_count = total - top_item - 1;
 					if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
 						main.update_navigation_data(null, false);
 				}
@@ -232,11 +218,6 @@ public class adapter_feeds_cards extends BaseAdapter
 		holder.title_view.setText(title);
 		holder.time_view.setText(link);
 		return convertView;
-	}
-
-	public String return_latest_url()
-	{
-		return content_links.get(top_item_position);
 	}
 
 	static class ViewHolder
