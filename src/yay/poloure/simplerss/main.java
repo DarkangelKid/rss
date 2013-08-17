@@ -1140,12 +1140,12 @@ public class main extends ActionBarActivity
 		{
 			View settings_view = inflater.inflate(R.layout.viewpager_settings, container, false);
 			ViewPager viewpager_settings = (ViewPager)settings_view.findViewById(R.id.settings_pager);
-			PagerAdapter adapter = new pageradapter_settings(fragment_manager);
+			pageradapter_settings adapter = new pageradapter_settings(fragment_manager);
 			viewpager_settings.setAdapter(adapter);
 
 			final PagerTabStrip settings_strip = (PagerTabStrip) settings_view.findViewById(R.id.settings_title_strip);
-			manage_strip.setDrawFullUnderline(true);
-			manage_strip.setTabIndicatorColor(Color.argb(0, 51, 181, 229));
+			settings_strip.setDrawFullUnderline(true);
+			settings_strip.setTabIndicatorColor(Color.argb(0, 51, 181, 229));
 
 			return settings_view;
 		}
