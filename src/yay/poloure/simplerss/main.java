@@ -1146,7 +1146,7 @@ public class main extends ActionBarActivity
 			final PagerTabStrip settings_strip = (PagerTabStrip) settings_view.findViewById(R.id.settings_title_strip);
 			settings_strip.setDrawFullUnderline(true);
 			settings_strip.setTabIndicatorColor(Color.argb(0, 51, 181, 229));
-l
+
 			return settings_view;
 		}
 	}
