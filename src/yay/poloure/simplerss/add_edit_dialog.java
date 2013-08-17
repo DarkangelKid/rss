@@ -237,7 +237,7 @@ public class add_edit_dialog
 				String spinner_group;
 				try
 				{
-					spinner_group	= group_spinner	.getSelectedItem().toString();
+					spinner_group = group_spinner.getSelectedItem().toString();
 				}
 				catch(Exception e)
 				{
@@ -313,7 +313,7 @@ public class add_edit_dialog
 	private static void add_feed(String storage, String feed_name, String feed_url, String feed_group, String all_string)
 	{
 		String feed_path	= storage + main.GROUPS_DIRECTORY + feed_group + main.SEPAR + feed_name;
-		File folder		= new File(feed_path);
+		File folder			= new File(feed_path);
 		if(!folder.exists())
 		{
 			folder.mkdir();

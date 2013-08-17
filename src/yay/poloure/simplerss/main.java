@@ -740,7 +740,11 @@ public class main extends ActionBarActivity
 						for(int i = 0; i < manage_list.getAdapter().getCount(); i++)
 						{
 							manage_list.setItemChecked(i, false);
-							manage_list.getChildAt(i).setBackgroundColor(Color.WHITE);
+							try{
+								manage_list.getChildAt(i).setBackgroundColor(Color.WHITE);
+							}
+							catch(Exception e){
+							}
 						}
 
 						multi_mode = false;
