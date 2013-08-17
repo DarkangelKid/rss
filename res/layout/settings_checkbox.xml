@@ -6,8 +6,9 @@
 			android:id="@+id/check_text"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="@+id/check_text">
-	<CheckBox android:id="@+id/checkbox"
+			android:text="@+id/check_text"/>
+	<CheckBox
+			android:id="@+id/checkbox"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:text="dicks"/>
