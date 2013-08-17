@@ -310,36 +310,6 @@ public class add_edit_dialog
 				edit_feed_dialog.show();
 	}
 
-	public static void show_card_dialog(final Context activity_context, final String URL)
-	{
-		final LayoutInflater inflater		= LayoutInflater.from(activity_context);
-
-		final AlertDialog card_dialog = new AlertDialog.Builder(activity_context)
-				.setCancelable(true)
-				.setItems(R.array.card_menu, new DialogInterface.OnClickListener()
-				{
-					@Override
-					public void onClick(DialogInterface dialog, int position)
-					{
-						switch(position)
-						{
-							case(0):
-								ClipboardManager clipboard = (ClipboardManager) activity_context.getSystemService(Context.CLIPBOARD_SERVICE);
-								ClipData clip = ClipData.newPlainText("label", URL);
-								clipboard.setPrimaryClip(clip);
-								break;
-							case(1):
-
-							case(2):
-
-						}
-					}
-				})
-				.create();
-
-				card_dialog.show();
-	}
-
 	private static void add_feed(String storage, String feed_name, String feed_url, String feed_group, String all_string)
 	{
 		String feed_path	= storage + main.GROUPS_DIRECTORY + feed_group + main.SEPAR + feed_name;

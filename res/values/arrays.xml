@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<string-array
-		name="card_menu">
-		<item>Copy to clipboard</item>
+	<string-array name="card_menu_image">
+		<item>Copy URL to clipboard</item>
+		<item>Open in browser</item>
 		<item>Save image to storage</item>
+    </string-array>
+    <string-array name="card_menu">
+		<item>Copy URL to clipboard</item>
 		<item>Open in browser</item>
     </string-array>
 </resources>

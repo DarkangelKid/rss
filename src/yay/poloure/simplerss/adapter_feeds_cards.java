@@ -42,6 +42,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import android.util.DisplayMetrics;
 import android.os.Handler;
 import android.graphics.Color;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 
 import android.os.Debug;
 
@@ -171,8 +173,8 @@ public class adapter_feeds_cards extends BaseAdapter
 			holder.image_view 		= (ImageView) convertView.findViewById(R.id.image);
 			holder.left				= (ImageView) convertView.findViewById(R.id.white_left_shadow);
 			holder.right			= (ImageView) convertView.findViewById(R.id.white_right_shadow);
-			//convertView				.setOnClickListener(new browser_call());
-			//convertView				.setOnLongClickListener(new long_press());
+			convertView				.setOnClickListener(new webview_mode());
+			convertView				.setOnLongClickListener(new long_press());
 			convertView				.setTag(holder);
 		}
 		else
@@ -453,7 +455,7 @@ public class adapter_feeds_cards extends BaseAdapter
 		purgeHandler.postDelayed(purger, DELAY_BEFORE_PURGE);
 	}
 
-	private class browser_call implements View.OnClickListener
+	private class webview_mode implements View.OnClickListener
 	{
 		@Override
 		public void onClick(View v)
@@ -467,8 +469,6 @@ public class adapter_feeds_cards extends BaseAdapter
 					.add(R.id.drawer_layout, new fragment_webview(), "OFFLINE")
 					.addToBackStack("BACK")
 					.commit();
-
-			//context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(((TextView) v.findViewById(R.id.time)).getText().toString())));
 		}
 	}
 
@@ -499,12 +499,48 @@ public class adapter_feeds_cards extends BaseAdapter
 	private class long_press implements View.OnLongClickListener
 	{
 		@Override
-		public boolean onLongClick(View v)
+		public boolean onLongClick(View view)
 		{
-			String long_press_url = ((TextView) v.findViewById(R.id.time)).getText().toString();
-			add_edit_dialog.show_card_dialog(context, long_press_url);
+			String long_press_url = ((TextView) view.findViewById(R.id.time)).getText().toString();
+			show_card_dialog(context, long_press_url, ((ViewHolder) view.getTag()).image_view.getVisibility());
 			return true;
 		}
+	}
+
+	public static void show_card_dialog(final Context activity_context, final String URL, final int image_visibility)
+	{
+		final LayoutInflater inflater		= LayoutInflater.from(activity_context);
+		String[] menu_items;
+		if(image_visibility != View.VISIBLE)
+			menu_items = activity_context.getResources().getStringArray(R.array.card_menu);
+		else
+			menu_items = activity_context.getResources().getStringArray(R.array.card_menu_image);
+
+
+		final AlertDialog card_dialog = new AlertDialog.Builder(activity_context)
+				.setCancelable(true)
+				.setItems(menu_items, new DialogInterface.OnClickListener()
+				{
+					@Override
+					public void onClick(DialogInterface dialog, int position)
+					{
+						switch(position)
+						{
+							case(0):
+								ClipboardManager clipboard = (ClipboardManager) activity_context.getSystemService(Context.CLIPBOARD_SERVICE);
+								ClipData clip = ClipData.newPlainText("label", URL);
+								clipboard.setPrimaryClip(clip);
+								break;
+							case(1):
+								activity_context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(URL)));
+							/*case(2):
+								break;*/
+						}
+					}
+				})
+				.create();
+
+				card_dialog.show();
 	}
 
 	private class fragment_webview extends Fragment
