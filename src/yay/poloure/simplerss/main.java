@@ -218,13 +218,13 @@ public class main extends ActionBarActivity
 	private void perform_initial_operations()
 	{
 		if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.FROYO)
-			storage				= getExternalFilesDir(null).getAbsolutePath() + SEPAR;
+			storage					= getExternalFilesDir(null).getAbsolutePath() + SEPAR;
 		else
 		{
 			String packageName	= getPackageName();
-			File externalPath	= Environment.getExternalStorageDirectory();
-			storage				= externalPath.getAbsolutePath() + SEPAR + "Android" + SEPAR + "data" + SEPAR + packageName + SEPAR + "files" + SEPAR;
-			File storage_file	= new File(storage);
+			File externalPath		= Environment.getExternalStorageDirectory();
+			storage					= externalPath.getAbsolutePath() + SEPAR + "Android" + SEPAR + "data" + SEPAR + packageName + SEPAR + "files" + SEPAR;
+			File storage_file		= new File(storage);
 			if(!storage_file.exists())
 				storage_file.mkdirs();
 		}
@@ -235,15 +235,15 @@ public class main extends ActionBarActivity
 		if(!folder_file.exists())
 			folder_file.mkdir();
 
-		activity_context	= this;
-		ALL					= getString(R.string.all_group);
-		NAVIGATION			= getString(R.string.navigation_title);
-		DELETE_DIALOG		= getString(R.string.delete_dialog);
-		CLEAR_DIALOG		= getString(R.string.clear_dialog);
+		activity_context		= this;
+		ALL						= getString(R.string.all_group);
+		NAVIGATION				= getString(R.string.navigation_title);
+		DELETE_DIALOG			= getString(R.string.delete_dialog);
+		CLEAR_DIALOG			= getString(R.string.clear_dialog);
 		NAVIGATION_TITLES[0]	= getString(R.string.feeds_title);
 		NAVIGATION_TITLES[1]	= getString(R.string.manage_title);
 		NAVIGATION_TITLES[2]	= getString(R.string.settings_title);
-		ALL_FILE			= GROUPS_DIRECTORY + ALL + SEPAR + ALL + TXT;
+		ALL_FILE					= GROUPS_DIRECTORY + ALL + SEPAR + ALL + TXT;
 	}
 
 	/// This is so the icon and text in the actionbar are selected.
@@ -938,7 +938,8 @@ public class main extends ActionBarActivity
 									}
 									else if(all_groups.size() != 0)
 									{
-										utilities.sort_group_content_by_time(storage, ALL);
+										/* This line may be broken. */
+										utilities.sort_all_content_by_time(ALL);
 										utilities.delete_if_empty(all_file + CONTENT_APPENDIX);
 										utilities.delete_if_empty(all_file + COUNT_APPENDIX);
 										if((new File(all_file + CONTENT_APPENDIX)).exists())
@@ -1103,20 +1104,24 @@ public class main extends ActionBarActivity
 		public void onCreate(Bundle savedInstanceState)
 		{
 			super.onCreate(savedInstanceState);
-			adapter_feeds_cards adapter = new adapter_feeds_cards(getActivity());
 			setRetainInstance(false);
-			setListAdapter(adapter);
+			adapter_feeds_cards ith = new adapter_feeds_cards(getActivity());
+			setListAdapter(ith);
 			String group = current_groups.get(getArguments().getInt("num", 0));
-			final List<String> count_list = utilities.read_file_to_list(storage + GROUPS_DIRECTORY + group + SEPAR + group + CONTENT_APPENDIX);
-			final int sized = count_list.size();
-			int i;
-
-			for(i = sized - 1; i >= 0; i--)
+			List<String> lines = utilities.read_file_to_list(storage + GROUPS_DIRECTORY + group + SEPAR + group + CONTENT_APPENDIX);
+			int count = -1;
+			for(int i = 0; i < lines.size(); i++)
 			{
-				if(count_list.get(i).substring(0, 9).equals("marker|1|"))
+				if(lines.get(i).substring(7, 8).equals("0"))
+				{
+					count = lines.size() - i + 1;
 					break;
+				}
 			}
-			adapter.set_latest_item(i);
+			if(count == -1)
+				ith.unread_count = 0;
+			else
+				ith.unread_count = count;
 		}
 
 		@Override
@@ -1185,9 +1190,10 @@ public class main extends ActionBarActivity
 
 	private static class refresh_page extends AsyncTask<Void, Object, Void>
 	{
-		int marker_position = -1, refresh_count = 0;
+		int marker_position = 0;
 		final int page_number;
-		Boolean markerer, waited = true;
+		Boolean waited = true;
+		Boolean marker_lock = false;
 		Animation animFadeIn;
 		ListFragment l;
 		adapter_feeds_cards ith;
@@ -1214,25 +1220,25 @@ public class main extends ActionBarActivity
 				}
 			}
 
-			String group					= current_groups.get(page_number);
-			final String group_path			= storage + GROUPS_DIRECTORY + group + SEPAR;
-			final String group_file_path 	= group_path + group + TXT;
-			final String group_content_path = group_path + group + CONTENT_APPENDIX;
+			String group							= current_groups.get(page_number);
+			final String group_path				= storage + GROUPS_DIRECTORY + group + SEPAR;
+			final String group_file_path		= group_path + group + TXT;
+			final String group_content_path	= group_path + group + CONTENT_APPENDIX;
 			String thumbnail_path;
 
 			if((!utilities.exists(group_file_path))||(!utilities.exists(group_content_path)))
 				return null;
 
-			String[][] contenter		= utilities.load_csv_to_array(group_content_path);
+			String[][] contenter			= utilities.load_csv_to_array(group_content_path);
 			String[] marker				= contenter[0];
 			String[] titles				= contenter[1];
 			String[] descriptions		= contenter[2];
-			String[] links				= contenter[3];
+			String[] links					= contenter[3];
 			String[] images				= contenter[4];
 			String[] widths				= contenter[5];
-			String[] heights			= contenter[6];
+			String[] heights				= contenter[6];
 			String[] groups				= contenter[7];
-			String[] sources			= contenter[8];
+			String[] sources				= contenter[8];
 
 			if((links[0] == null)||(links.length == 0)||(links[0].equals("")))
 				return null;
@@ -1240,7 +1246,7 @@ public class main extends ActionBarActivity
 			Set<String> existing_items = new HashSet<String>();
 			try
 			{
-				existing_items = new HashSet<String>(utilities.get_adapter_feeds_cards(fragment_manager, viewpager, page_number).return_links());
+				existing_items = new HashSet<String>(utilities.get_adapter_feeds_cards(fragment_manager, viewpager, page_number).content_links);
 			}
 			catch(Exception e)
 			{
@@ -1249,10 +1255,10 @@ public class main extends ActionBarActivity
 			animFadeIn = AnimationUtils.loadAnimation(activity_context, android.R.anim.fade_in);
 			final int size = titles.length;
 			final List<Boolean> new_markers		= new ArrayList<Boolean>();
-			final List<String> new_titles		= new ArrayList<String>();
+			final List<String> new_titles			= new ArrayList<String>();
 			final List<String> new_descriptions = new ArrayList<String>();
-			final List<String> new_links		= new ArrayList<String>();
-			final List<String> new_images		= new ArrayList<String>();
+			final List<String> new_links			= new ArrayList<String>();
+			final List<String> new_images			= new ArrayList<String>();
 			final List<Integer> new_widths		= new ArrayList<Integer>();
 			final List<Integer> new_heights		= new ArrayList<Integer>();
 
@@ -1260,15 +1266,11 @@ public class main extends ActionBarActivity
 
 			for(int m = 0; m < size; m++)
 			{
-				markerer = false;
-				/// It should stop at the latest one unless there is not a newest one. So stay at 0 until it finds one.
-				if(marker[m] != null)
+				if(marker[m].equals("0") && !marker_lock)
 				{
-					markerer = true;
-					marker_position = 0;
+					marker_position	= size - m;
+					marker_lock			= true;
 				}
-				else if(marker_position != -1)
-					marker_position++;
 
 				if(existing_items.add(links[m]))
 				{
@@ -1298,14 +1300,13 @@ public class main extends ActionBarActivity
 					if(titles[m] == null)
 						titles[m] = "";
 
-					new_markers		.add(markerer);
+					new_markers		.add(marker[m].equals("1"));
 					new_titles		.add(titles[m]);
 					new_links		.add(links[m]);
 					new_descriptions.add(descriptions[m]);
 					new_images		.add(thumbnail_path);
 					new_heights		.add(height);
 					new_widths		.add(width);
-					refresh_count++;
 				}
 			}
 			new_items.set(page_number, false);
@@ -1334,9 +1335,7 @@ public class main extends ActionBarActivity
 				}
 				counts = get_unread_counts();
 			}
-
 			publishProgress(new_titles, new_descriptions, new_links, new_images, new_heights, new_widths, new_markers);
-
 			return null;
 		}
 
@@ -1372,12 +1371,10 @@ public class main extends ActionBarActivity
 		{
 			if(lv == null)
 				return;
-			if(marker_position != -1)
+			if(marker_lock)
 				lv.setSelection(marker_position);
-				/// If no "marker|" s were found in the new content fall through to else,
 			else
-				/// refresh_count is how many new items are added.
-				lv.setSelection(refresh_count);
+				lv.setSelection(0);
 
 			set_refresh(check_service_running());
 
@@ -1385,6 +1382,7 @@ public class main extends ActionBarActivity
 
 			lv.setAnimation(animFadeIn);
 			lv.setVisibility(View.VISIBLE);
+			update_navigation_data(null, false);
 		}
 	}
 
@@ -1402,7 +1400,7 @@ public class main extends ActionBarActivity
 
 	public static List<Integer> get_unread_counts()
 	{
-		List<Integer> unread_list = new ArrayList<Integer>();
+		List<Integer> unread_list	= new ArrayList<Integer>();
 		int total = 0;
 		adapter_feeds_cards ith = null;
 		fragment_card fc;
@@ -1415,16 +1413,35 @@ public class main extends ActionBarActivity
 				fc = (fragment_card) (fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(j)));
 				ith = (adapter_feeds_cards) fc.getListAdapter();
 			}
-			catch(Exception e){
+			catch(Exception e)
+			{
 			}
 
 			/* The fragment has not been created yet so read the file manually for unread items. */
 			if(ith == null)
-				unread_list.add(0);
+			{
+				/* Count the unread items in this group. */
+				String group = current_groups.get(j);
+				List<String> lines = utilities.read_file_to_list(storage + GROUPS_DIRECTORY + group + SEPAR + group + CONTENT_APPENDIX);
+				int count = -1;
+				for(int i = 0; i < lines.size(); i++)
+				{
+					if(lines.get(i).substring(7, 8).equals("0"))
+					{
+						count = lines.size() - i;
+						utilities.log(storage, Integer.toString(count));
+						break;
+					}
+				}
+				if(count == -1)
+					unread_list.add(0);
+				else
+					unread_list.add(count);
+			}
+
 			/* Ask the adapter how many items are unread. */
 			else
-			{
-			}
+				unread_list.add(ith.unread_count);
 		}
 
 		for(Integer un : unread_list)
