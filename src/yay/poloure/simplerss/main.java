@@ -132,7 +132,7 @@ public class main extends ActionBarActivity
 		if(savedInstanceState == null)
 		{
 			Fragment feed		= new fragment_feeds();
-			Fragment prefs		= new Fragment();
+			Fragment prefs		= new fragment_settings();
 			Fragment man		= new fragment_manage();
 			fragment_manager.beginTransaction()
 				.add(R.id.content_frame, feed, NAVIGATION_TITLES[0])
@@ -1146,7 +1146,7 @@ public class main extends ActionBarActivity
 			final PagerTabStrip settings_strip = (PagerTabStrip) settings_view.findViewById(R.id.settings_title_strip);
 			settings_strip.setDrawFullUnderline(true);
 			settings_strip.setTabIndicatorColor(Color.argb(0, 51, 181, 229));
-
+l
 			return settings_view;
 		}
 	}
