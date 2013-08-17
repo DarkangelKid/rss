@@ -61,8 +61,8 @@ class parser
 
 		Set<String> set				= new LinkedHashSet<String>();
 		Boolean write_mode			= false;
-		Boolean c_mode				= false;
-		Time time					= new Time();
+		Boolean c_mode					= false;
+		Time time						= new Time();
 		BufferedReader reader		= new BufferedReader(new FileReader(in));
 		StringBuilder line			= new StringBuilder();
 		String current_tag, temp_line, cont, image, image_name;
@@ -99,11 +99,11 @@ class parser
 				if((line.length() > 1)&&(write_mode))
 				{
 					temp_line = line.toString();
-					Boolean already = set.contains("marker|1|" + temp_line);
+					Boolean already = set.contains("marker|1|" + temp_line) || set.contains("marker|0|" + temp_line);
 					if(!temp_line.contains("published|")&&(!temp_line.contains("pubDate|"))&&(!set.contains(temp_line))&&(!already))
 						temp_line = temp_line.concat(("pubDate|").concat(rfc3339.format(new Date()).concat("|")));
 					if(!already)
-						set.add(temp_line);
+						set.add("marker|0|" + temp_line);
 				}
 				line.setLength(0);
 				write_mode = true;
@@ -145,7 +145,7 @@ class parser
 							if(start.length == 6)
 							{
 								start		= utilities.remove_element(start, 5);
-								end			= utilities.remove_element(end, 5);
+								end		= utilities.remove_element(end, 5);
 								of_types	= utilities.remove_element(of_types, 5);
 								of_types	= utilities.remove_element(of_types, 10);
 							}
@@ -264,11 +264,11 @@ class parser
 		if(write_mode)
 		{
 			temp_line = line.toString();
-			Boolean already = set.contains("marker|1|" + temp_line);
+			Boolean already = set.contains("marker|1|" + temp_line) || set.contains("marker|0|" + temp_line);
 			if(!temp_line.contains("published|")&&(!temp_line.contains("pubDate|"))&&(!set.contains(temp_line))&&(!already))
 				temp_line = temp_line.concat(("pubDate|").concat(rfc3339.format(new Date()).concat("|")));
 			if(!already)
-				set.add(temp_line);
+				set.add("marker|0|" + temp_line);
 		}
 		/// Write the new content to the file.
 		in.delete();
