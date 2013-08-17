@@ -238,47 +238,54 @@ public class adapter_manage_groups extends BaseAdapter
 		}
 	}
 
+	int old_view = 0;
+	int[] position = new int[2];
+	final int height = (int) (main.activity_context.getResources().getDisplayMetrics().heightPixels);
+
 	private class MyDragListener implements OnDragListener
 	{
-		int[] position = new int[2];
-		int old_view;
-		final int height = (int) (main.activity_context.getResources().getDisplayMetrics().heightPixels);
 		@Override
 		public boolean onDrag(View v, DragEvent event)
 		{
 			final int action = event.getAction();
+			final ListView listview = ((ListView) v.getParent());
+
 			if(action == DragEvent.ACTION_DRAG_ENTERED)
 			{
-				final ListView listview = ((ListView) v.getParent());
+				/* Find and fade out the new view. */
+				/* V is the thing to fade out. */
+				View temp = (View) event.getLocalState();
+				Animation fadeOut = new AlphaAnimation(1, 0);
+				fadeOut.setDuration(120);
+				fadeOut.setInterpolator(new DecelerateInterpolator());
+				v.setAnimation(fadeOut);
+				v.setVisibility(View.INVISIBLE);
+
+				/* Fade in the view that was just left. */
+				utilities.log(main.storage, Integer.toString(old_view));
+				View last = listview.getChildAt(old_view);
+				Animation fadeIn = new AlphaAnimation(0, 1);
+				fadeIn.setDuration(120);
+				fadeIn.setInterpolator(new DecelerateInterpolator());
+				last.setAnimation(fadeIn);
+				last.setVisibility(View.VISIBLE);
+
+				/* Save the position of the view that just faded out. */
 				new_title = ((TextView) v.findViewById(R.id.group_item)).getText().toString();
-				rearrange_groups(old_title, new_title);
-				notifyDataSetChanged();
-				for(int i = 0; i < listview.getChildCount();  i++)
+				for(int i = 0; i < listview.getChildCount(); i++)
 				{
-					View temp = listview.getChildAt(i);
-					if(temp != null)
+					if(new_title.equals(((TextView) listview.getChildAt(i).findViewById(R.id.group_item)).getText().toString()))
 					{
-						if(temp == v)
-						{
-							Animation fadeOut = new AlphaAnimation(1, 0);
-							fadeOut.setDuration(210);
-							fadeOut.setInterpolator(new DecelerateInterpolator());
-							temp.setAnimation(fadeOut);
-							temp.setVisibility(View.INVISIBLE);
-							old_view = temp.hashCode();
-						}
-						else if(temp.hashCode() == old_view)
-						{
-							Animation fadeIn = new AlphaAnimation(0, 1);
-							fadeIn.setDuration(210);
-							fadeIn.setInterpolator(new DecelerateInterpolator());
-							temp.setAnimation(fadeIn);
-							temp.setVisibility(View.VISIBLE);
-						}
-						else
-							temp.setVisibility(View.VISIBLE);
+						old_view = i;
+						break;
 					}
 				}
+
+				/* Change the information of the card that just disapeared. */
+				/* Old title is the currently touched title and new_title is the one to be replaced */
+				rearrange_groups(old_title, new_title);
+				notifyDataSetChanged();
+
 				v.getLocationOnScreen(position);
 				int first = listview.getFirstVisiblePosition();
 
