@@ -1282,6 +1282,7 @@ public class main extends ActionBarActivity
 		ListView lv;
 		List<Integer> counts;
 		int number_of_items = 0;
+		int oldest_unread = 0;
 
 		public refresh_page(int page)
 		{
@@ -1375,13 +1376,19 @@ public class main extends ActionBarActivity
 					if(titles[m] == null)
 						titles[m] = "";
 
-					new_titles		.add(titles[m]);
-					new_links		.add(links[m]);
-					new_descriptions.add(descriptions[m]);
-					new_images		.add(thumbnail_path);
-					new_heights		.add(height);
-					new_widths		.add(width);
+					new_titles			.add(titles[m]);
+					new_links			.add(links[m]);
+					new_descriptions	.add(descriptions[m]);
+					new_images			.add(thumbnail_path);
+					new_heights			.add(height);
+					new_widths			.add(width);
 					number_of_items++;
+				}
+				/* If this item has not been read, save its position. */
+				if(!adapter_feeds_cards.read_items.contains(links[m]) && oldest_unread == 0)
+				{
+					oldest_unread = m;
+					utilities.log(storage, Integer.toString(m));
 				}
 			}
 			new_items.set(page_number, false);
@@ -1446,7 +1453,9 @@ public class main extends ActionBarActivity
 		{
 			if(lv == null)
 				return;
-			lv.setSelection(number_of_items);
+			if(oldest_unread == 0)
+				oldest_unread = number_of_items;
+			lv.setSelection(number_of_items - oldest_unread);
 
 			set_refresh(check_service_running());
 
