@@ -6,7 +6,7 @@
 		android:id="@+id/seek_title"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
+		android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
 		android:text="Dicks"
 		android:layout_above="@+id/seek_summary"
 		android:layout_alignParentLeft="true"/>
@@ -14,7 +14,7 @@
 		android:id="@+id/seek_summary"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small"
+		android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
 		android:text="Dicks"
 		android:layout_toLeftOf="@+id/seek_read"
 		android:layout_alignParentLeft="true"/>
@@ -29,7 +29,7 @@
 		android:id="@+id/seek_read"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small"
+		android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
 		android:text="100"
 		android:layout_alignParentRight="true"/>
 </RelativeLayout>
