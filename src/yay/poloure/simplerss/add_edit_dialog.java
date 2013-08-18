@@ -42,9 +42,9 @@ public class add_edit_dialog
 		public check_feed_exists(AlertDialog edit_dialog, String new_group, String feed_name, String moder, String current_tit, String current_grop, String spin_group, int position, String all_str)
 		{
 			dialog			= edit_dialog;
-			group			= new_group;
-			name			= feed_name;
-			mode			= moder;
+			group				= new_group;
+			name				= feed_name;
+			mode				= moder;
 			spinner_group	= spin_group;
 			current_group	= current_grop;
 			current_title	= current_tit;
@@ -60,7 +60,7 @@ public class add_edit_dialog
 		{
 			/// If the group entry has text, check to see if it is an old group or if it is new.
 			String url = "", feed_title = "";
-			if(group.length()>0)
+			if(group.length() > 0)
 			{
 				final List<String> current_groups = utilities.read_file_to_list(main.storage + main.GROUP_LIST);
 				for(String gro : current_groups)
@@ -84,8 +84,16 @@ public class add_edit_dialog
 			}
 			else
 			{
-				group = spinner_group;
-				existing_group = true;
+				if(spinner_group.equals(""))
+				{
+					group = "Unsorted";
+					existing_group = false;
+				}
+				else
+				{
+					group = spinner_group;
+					existing_group = true;
+				}
 			}
 
 			String[] check_list;
@@ -241,7 +249,7 @@ public class add_edit_dialog
 				}
 				catch(Exception e)
 				{
-					spinner_group = "unsorted";
+					spinner_group = "";
 				}
 				if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
 					new check_feed_exists(add_feed_dialog, new_group, feed_name, "add", "", "", spinner_group, 0, current_groups.get(0)).execute(URL_check);
