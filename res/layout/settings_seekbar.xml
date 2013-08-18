@@ -8,20 +8,23 @@
 		android:layout_height="wrap_content"
 		android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
 		android:text="Dicks"
-		android:layout_above="@+id/seek_summary"/>
+		android:layout_above="@+id/seek_summary"
+		android:layout_alignParentLeft="true"/>
 	<TextView
 		android:id="@+id/seek_summary"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small"
 		android:text="Dicks"
-		android:layout_toLeftOf="@+id/seek_read"/>
+		android:layout_toLeftOf="@+id/seek_read"
+		android:layout_alignParentLeft="true"/>
 	<SeekBar
 		android:id="@+id/seekbar"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:max="240"
-		android:layout_below="@+id/seek_summary"/>
+		android:layout_below="@+id/seek_summary"
+		android:layout_alignParentLeft="true"/>
 	<TextView
 		android:id="@+id/seek_read"
 		android:layout_width="wrap_content"
