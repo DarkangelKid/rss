@@ -202,12 +202,11 @@ public class main extends ActionBarActivity
 		drawer_layout.setDrawerListener(drawer_toggle);
 		drawer_toggle.syncState();
 
-		update_groups();
-		action_bar = getSupportActionBar();
-
-
 		/* Load read_items to adapter_feed_card.read_items set. */
 		adapter_feeds_cards.read_items = utilities.read_file_to_set(storage + READ_ITEMS);
+
+		update_groups();
+		action_bar = getSupportActionBar();
 
 		if(utilities.exists(storage + ALL_FILE))
 		{
@@ -1386,10 +1385,7 @@ public class main extends ActionBarActivity
 				}
 				/* If this item has not been read, save its position. */
 				if(!adapter_feeds_cards.read_items.contains(links[m]) && oldest_unread == 0)
-				{
 					oldest_unread = m;
-					utilities.log(storage, Integer.toString(m));
-				}
 			}
 			new_items.set(page_number, false);
 
@@ -1482,53 +1478,28 @@ public class main extends ActionBarActivity
 	public static List<Integer> get_unread_counts()
 	{
 		List<Integer> unread_list	= new ArrayList<Integer>();
-		int total = 0;
+		int total = 0, unread;
 		adapter_feeds_cards ith = null;
 		fragment_card fc;
 		final int size = current_groups.size();
 
-		for(int j = 1; j < size; j++)
+		for(int i = 1; i < size; i++)
 		{
-			try
+			unread = 0;
+			String[] urls = utilities.read_single_to_array(storage + GROUPS_DIRECTORY + current_groups.get(i) + SEPAR + current_groups.get(i) + CONTENT_APPENDIX, "link|");
+			for(int j = 0; j < urls.length; j++)
 			{
-				fc = (fragment_card) (fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(j)));
-				ith = (adapter_feeds_cards) fc.getListAdapter();
-			}
-			catch(Exception e)
-			{
-			}
-
-			/* The fragment has not been created yet so read the file manually for unread items. */
-			if(ith == null)
-			{
-				/* Count the unread items in this group. */
-				String group = current_groups.get(j);
-				List<String> lines = utilities.read_file_to_list(storage + GROUPS_DIRECTORY + group + SEPAR + group + CONTENT_APPENDIX);
-				int count = -1;
-				for(int i = 0; i < lines.size(); i++)
+				if(!adapter_feeds_cards.read_items.contains(urls[j]))
 				{
-					if(lines.get(i).substring(7, 8).equals("0"))
-					{
-						count = lines.size() - i;
-						utilities.log(storage, Integer.toString(count));
+						unread = urls.length - j;
 						break;
-					}
 				}
-				if(count == -1)
-					unread_list.add(0);
-				else
-					unread_list.add(count);
 			}
-
-			/* Ask the adapter how many items are unread. */
-			else
-				unread_list.add(ith.unread_count);
+			total += unread;
+			unread_list.add(unread);
 		}
 
-		for(Integer un : unread_list)
-			total += un;
 		unread_list.add(0, total);
-
 		return unread_list;
 	}
 }
