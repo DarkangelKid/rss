@@ -55,7 +55,7 @@ public class adapter_settings_function extends BaseAdapter
 	@Override
 	public boolean isEnabled(int position)
 	{
-		return position != 3;
+		return false;
 	}
 
 	@Override
@@ -104,7 +104,7 @@ public class adapter_settings_function extends BaseAdapter
 			{
 				convertView = (View) inflater.inflate(R.layout.settings_checkbox, parent, false);
 				holder = new main_item_holder();
-				holder.title_view = (TextView) convertView.findViewById(R.id.check_text);
+				holder.title_view = (TextView) convertView.findViewById(R.id.check_title);
 				convertView.setTag(holder);
 			}
 			else
@@ -119,7 +119,7 @@ public class adapter_settings_function extends BaseAdapter
 			{
 				convertView = (View) inflater.inflate(R.layout.settings_seekbar, parent, false);
 				holder = new TextViewHolder();
-				holder.title_view = (TextView) convertView.findViewById(R.id.seek_text);
+				holder.title_view = (TextView) convertView.findViewById(R.id.seek_title);
 				convertView.setTag(holder);
 			}
 			else
