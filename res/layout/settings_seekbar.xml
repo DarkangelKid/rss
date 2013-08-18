@@ -23,7 +23,7 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:max="100"
-		android:minWidth="240dp"
+		android:minWidth="300dp"
 		android:layout_below="@+id/seek_summary"
 		android:layout_alignParentLeft="true"/>
 	<TextView
