@@ -48,15 +48,15 @@ class parser
 
 	private void parse_local_xml(String storage, String group, String feed) throws IOException
 	{
-		dump_path					= storage + "content.dump" + main.TXT;
-		url_path					= storage + "content.url" + main.TXT;
+		dump_path						= storage + "content.dump" + main.TXT;
+		url_path							= storage + "content.url" + main.TXT;
 		final String store_file		= storage + feed + main.STORE_APPENDIX;
 		final String feed_folder	= storage + main.GROUPS_DIRECTORY + group + main.SEPAR + feed + main.SEPAR;
 		final String content_file	= feed_folder + feed + main.CONTENT_APPENDIX;
 		final String image_dir		= feed_folder + main.IMAGE_DIRECTORY;
 		final String thumbnail_dir	= feed_folder + main.THUMBNAIL_DIRECTORY;
-		final File in				= new File(store_file);
-		final File out				= new File(content_file);
+		final File in					= new File(store_file);
+		final File out					= new File(content_file);
 		final List<String> filters	= utilities.read_file_to_list(storage + main.FILTER_LIST);
 
 		Set<String> set				= new LinkedHashSet<String>();
@@ -99,11 +99,9 @@ class parser
 				if((line.length() > 1)&&(write_mode))
 				{
 					temp_line = line.toString();
-					Boolean already = set.contains("marker|1|" + temp_line) || set.contains("marker|0|" + temp_line);
-					if(!temp_line.contains("published|")&&(!temp_line.contains("pubDate|"))&&(!set.contains(temp_line))&&(!already))
+					if(!temp_line.contains("published|")&&(!temp_line.contains("pubDate|"))&&(!set.contains(temp_line)))
 						temp_line = temp_line.concat(("pubDate|").concat(rfc3339.format(new Date()).concat("|")));
-					if(!already)
-						set.add("marker|0|" + temp_line);
+					set.add(temp_line);
 				}
 				line.setLength(0);
 				write_mode = true;
@@ -264,11 +262,9 @@ class parser
 		if(write_mode)
 		{
 			temp_line = line.toString();
-			Boolean already = set.contains("marker|1|" + temp_line) || set.contains("marker|0|" + temp_line);
-			if(!temp_line.contains("published|")&&(!temp_line.contains("pubDate|"))&&(!set.contains(temp_line))&&(!already))
+			if(!temp_line.contains("published|")&&(!temp_line.contains("pubDate|"))&&(!set.contains(temp_line)))
 				temp_line = temp_line.concat(("pubDate|").concat(rfc3339.format(new Date()).concat("|")));
-			if(!already)
-				set.add("marker|0|" + temp_line);
+			set.add(temp_line);
 		}
 		/// Write the new content to the file.
 		in.delete();

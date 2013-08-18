@@ -81,13 +81,13 @@ public class service_update extends IntentService
 
 		/// Sort group order
 		if(!grouper.equals(main.ALL))
-		{
-			utilities.sort_group_content_by_time(storage, main.ALL);
 			utilities.sort_group_content_by_time(storage, grouper);
-		}
+
 		else
-			for(String gro : all_groups)
-				utilities.sort_group_content_by_time(storage, gro);
+		{
+			for(int j = 1; j < all_groups.size(); j++)
+				utilities.sort_group_content_by_time(storage, all_groups.get(j));
+		}
 
 		final List<Integer> unread_list = main.get_unread_counts();
 
