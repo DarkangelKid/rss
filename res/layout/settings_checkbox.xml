@@ -6,6 +6,7 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
+			android:textColor="#808080"
 			android:text="@+id/check_text"
 			android:layout_toLeftOf="@+id/checkbox"
 			android:layout_alignParentLeft="true"/>
@@ -14,6 +15,7 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
+			android:textColor="#808080"
 			android:text="wang"
 			android:layout_below="@+id/check_title"
 			android:layout_alignParentLeft="true"/>

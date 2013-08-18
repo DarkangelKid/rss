@@ -11,6 +11,7 @@
 			android:layout_height="wrap_content"
 			android:textColor="#ff000000"
 			android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
+			android:textColor="#808080"
 			android:textStyle="bold"
 			android:paddingBottom="5dp"/>
 	<ImageView

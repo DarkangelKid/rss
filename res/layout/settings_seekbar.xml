@@ -7,6 +7,7 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
+		android:textColor="#808080"
 		android:text="Dicks"
 		android:layout_above="@+id/seek_summary"
 		android:layout_alignParentLeft="true"/>
@@ -15,6 +16,7 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
+		android:textColor="#808080"
 		android:text="Dicks"
 		android:layout_toLeftOf="@+id/seek_read"
 		android:layout_alignParentLeft="true"/>
@@ -22,6 +24,8 @@
 		android:id="@+id/seekbar"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
+		android:layout_marginLeft="10dp"
+		android:layout_marginRight="10dp"
 		android:max="100"
 		android:minWidth="300dp"
 		android:layout_below="@+id/seek_summary"
@@ -31,6 +35,7 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
+		android:textColor="#808080"
 		android:text="100"
 		android:layout_alignParentRight="true"/>
 </RelativeLayout>
