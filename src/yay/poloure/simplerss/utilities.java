@@ -510,6 +510,8 @@ public class utilities
 		{
 			log(storage, "Failed to write the group content file.");
 		}
+		if(group != main.ALL)
+			sort_group_content_by_time(main.storage, main.ALL);
 	}
 
 	public static void log(String storage, String text)
