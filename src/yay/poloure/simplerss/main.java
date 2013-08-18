@@ -74,40 +74,41 @@ public class main extends ActionBarActivity
 	private static Menu					optionsMenu;
 	private static MenuInflater			menu_inf;
 	private static ViewPager			viewpager;
-	public static DrawerLayout			drawer_layout;
-	public static ActionBarDrawerToggle	drawer_toggle;
-	public static Context				activity_context;
-	public static FragmentManager		fragment_manager;
-	public static ActionBar				action_bar;
-	public static Activity				activity;
-	public static adapter_manage_feeds	feed_list_adapter;
-	public static adapter_manage_groups	group_list_adapter;
-	public static adapter_manage_filter	filter_list_adapter;
-	public static adapter_navigation_drawer nav_adapter;
-	public static List<String> current_groups 			= new ArrayList<String>();
-	public static List<Boolean> new_items 				= new ArrayList<Boolean>();
-	public static String storage, ALL, NAVIGATION, DELETE_DIALOG, CLEAR_DIALOG, ALL_FILE;
+	public  static DrawerLayout			drawer_layout;
+	public  static ActionBarDrawerToggle	drawer_toggle;
+	public  static Context				activity_context;
+	public  static FragmentManager		fragment_manager;
+	public  static ActionBar				action_bar;
+	public  static Activity				activity;
+	public  static adapter_manage_feeds	feed_list_adapter;
+	public  static adapter_manage_groups	group_list_adapter;
+	public  static adapter_manage_filter	filter_list_adapter;
+	public  static adapter_navigation_drawer nav_adapter;
+	public  static List<String> current_groups 			= new ArrayList<String>();
+	public  static List<Boolean> new_items 				= new ArrayList<Boolean>();
+	public  static String storage, ALL, NAVIGATION, DELETE_DIALOG, CLEAR_DIALOG, ALL_FILE;
 
 	/// Private static final are good.
-	private static final int[] times 					= new int[]{15, 30, 45, 60, 120, 180, 240, 300, 360, 400, 480, 540, 600, 660, 720, 960, 1440, 2880, 10080, 43829};
+	private static final int[] times							= new int[]{15, 30, 45, 60, 120, 180, 240, 300, 360, 400, 480, 540, 600, 660, 720, 960, 1440, 2880, 10080, 43829};
 	private static final Pattern whitespace				= Pattern.compile("\\s+");
 
 	/// Public static final are the holy grail.
-	public static final String SEPAR					= System.getProperty("file.separator");
-	public static final String NL						= System.getProperty("line.separator");
-	public static final String TXT						= ".txt";
-	public static final String GROUPS_DIRECTORY			= "groups" + SEPAR;
-	public static final String CONTENT_DIRECTORY		= "content" + SEPAR;
-	public static final String THUMBNAIL_DIRECTORY		= "thumbnails" + SEPAR;
-	public static final String IMAGE_DIRECTORY			= "images" + SEPAR;
-	public static final String DUMP_FILE				= "dump" + TXT;
-	public static final String NEW_ITEMS				= "new_items" + TXT;
-	public static final String STORE_APPENDIX			= ".store" + TXT;
-	public static final String CONTENT_APPENDIX			= ".content" + TXT;
-	public static final String COUNT_APPENDIX			= ".count" + TXT;
-	public static final String GROUP_LIST				= "group_list" + TXT;
-	public static final String FILTER_LIST				= "filter_list" + TXT;
-	public static final String[] NAVIGATION_TITLES		= new String[3];
+	public  static final String SEPAR						= System.getProperty("file.separator");
+	public  static final String NL							= System.getProperty("line.separator");
+	public  static final String TXT							= ".txt";
+	public  static final String GROUPS_DIRECTORY			= "groups" + SEPAR;
+	public  static final String CONTENT_DIRECTORY		= "content" + SEPAR;
+	public  static final String THUMBNAIL_DIRECTORY		= "thumbnails" + SEPAR;
+	public  static final String IMAGE_DIRECTORY			= "images" + SEPAR;
+	public  static final String DUMP_FILE					= "dump" + TXT;
+	public  static final String NEW_ITEMS					= "new_items" + TXT;
+	public  static final String READ_ITEMS					= "read_items" + TXT;
+	public  static final String STORE_APPENDIX			= ".store" + TXT;
+	public  static final String CONTENT_APPENDIX			= ".content" + TXT;
+	public  static final String COUNT_APPENDIX			= ".count" + TXT;
+	public  static final String GROUP_LIST					= "group_list" + TXT;
+	public  static final String FILTER_LIST				= "filter_list" + TXT;
+	public  static final String[] NAVIGATION_TITLES		= new String[3];
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -119,8 +120,8 @@ public class main extends ActionBarActivity
 		perform_initial_operations();
 		current_title	= NAVIGATION_TITLES[0];
 		action_bar		= getSupportActionBar();
-		menu_inf		= getMenuInflater();
-		activity		= this;
+		menu_inf			= getMenuInflater();
+		activity			= this;
 
 		action_bar.setDisplayShowHomeEnabled(true);
 		action_bar.setDisplayHomeAsUpEnabled(true);
@@ -203,6 +204,10 @@ public class main extends ActionBarActivity
 
 		update_groups();
 		action_bar = getSupportActionBar();
+
+
+		/* Load read_items to adapter_feed_card.read_items set. */
+		adapter_feeds_cards.read_items = utilities.read_file_to_set(storage + READ_ITEMS);
 
 		if(utilities.exists(storage + ALL_FILE))
 		{
@@ -363,7 +368,8 @@ public class main extends ActionBarActivity
 			AlarmManager alarm_refresh = (AlarmManager) getSystemService(Activity.ALARM_SERVICE);
 			alarm_refresh.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + interval, interval, pend_intent);
 		}
-		utilities.save_positions(fragment_manager, viewpager, storage);
+		utilities.delete(storage + READ_ITEMS);
+		utilities.write_collection_to_file(storage + READ_ITEMS, adapter_feeds_cards.read_items);
 
 		utilities.write_collection_to_file(storage + NEW_ITEMS, new_items);
 	}
@@ -533,8 +539,8 @@ public class main extends ActionBarActivity
 			else if(item.getTitle().equals("refresh"))
 			{
 				set_refresh(true);
-				/*SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(activity_context);*/
-				utilities.save_positions(fragment_manager, viewpager, storage);
+				/* SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(activity_context);*/
+				/* TODO used to save positions here but now I am not sure I need too anymore. */
 				final int page_number = viewpager.getCurrentItem();
 				final Intent intent = new Intent(activity_context, service_update.class);
 				intent.putExtra("GROUP_NUMBER", page_number);
@@ -939,7 +945,7 @@ public class main extends ActionBarActivity
 									else if(all_groups.size() != 0)
 									{
 										/* This line may be broken. */
-										utilities.sort_all_content_by_time(ALL);
+										utilities.sort_group_content_by_time(storage, ALL);
 										utilities.delete_if_empty(all_file + CONTENT_APPENDIX);
 										utilities.delete_if_empty(all_file + COUNT_APPENDIX);
 										if((new File(all_file + CONTENT_APPENDIX)).exists())
@@ -1268,15 +1274,14 @@ public class main extends ActionBarActivity
 
 	private static class refresh_page extends AsyncTask<Void, Object, Void>
 	{
-		int marker_position = 0;
 		final int page_number;
 		Boolean waited = true;
-		Boolean marker_lock = false;
 		Animation animFadeIn;
 		ListFragment l;
 		adapter_feeds_cards ith;
 		ListView lv;
 		List<Integer> counts;
+		int number_of_items = 0;
 
 		public refresh_page(int page)
 		{
@@ -1308,15 +1313,14 @@ public class main extends ActionBarActivity
 				return null;
 
 			String[][] contenter			= utilities.load_csv_to_array(group_content_path);
-			String[] marker				= contenter[0];
-			String[] titles				= contenter[1];
-			String[] descriptions		= contenter[2];
-			String[] links					= contenter[3];
-			String[] images				= contenter[4];
-			String[] widths				= contenter[5];
-			String[] heights				= contenter[6];
-			String[] groups				= contenter[7];
-			String[] sources				= contenter[8];
+			String[] titles				= contenter[0];
+			String[] descriptions		= contenter[1];
+			String[] links					= contenter[2];
+			String[] images				= contenter[3];
+			String[] widths				= contenter[4];
+			String[] heights				= contenter[5];
+			String[] groups				= contenter[6];
+			String[] sources				= contenter[7];
 
 			if((links[0] == null)||(links.length == 0)||(links[0].equals("")))
 				return null;
@@ -1332,7 +1336,6 @@ public class main extends ActionBarActivity
 
 			animFadeIn = AnimationUtils.loadAnimation(activity_context, android.R.anim.fade_in);
 			final int size = titles.length;
-			final List<Boolean> new_markers		= new ArrayList<Boolean>();
 			final List<String> new_titles			= new ArrayList<String>();
 			final List<String> new_descriptions = new ArrayList<String>();
 			final List<String> new_links			= new ArrayList<String>();
@@ -1344,12 +1347,6 @@ public class main extends ActionBarActivity
 
 			for(int m = 0; m < size; m++)
 			{
-				if(marker[m].equals("0") && !marker_lock)
-				{
-					marker_position	= size - m;
-					marker_lock			= true;
-				}
-
 				if(existing_items.add(links[m]))
 				{
 					thumbnail_path = "";
@@ -1378,13 +1375,13 @@ public class main extends ActionBarActivity
 					if(titles[m] == null)
 						titles[m] = "";
 
-					new_markers		.add(marker[m].equals("1"));
 					new_titles		.add(titles[m]);
 					new_links		.add(links[m]);
 					new_descriptions.add(descriptions[m]);
 					new_images		.add(thumbnail_path);
 					new_heights		.add(height);
 					new_widths		.add(width);
+					number_of_items++;
 				}
 			}
 			new_items.set(page_number, false);
@@ -1413,7 +1410,7 @@ public class main extends ActionBarActivity
 				}
 				counts = get_unread_counts();
 			}
-			publishProgress(new_titles, new_descriptions, new_links, new_images, new_heights, new_widths, new_markers);
+			publishProgress(new_titles, new_descriptions, new_links, new_images, new_heights, new_widths);
 			return null;
 		}
 
@@ -1438,7 +1435,7 @@ public class main extends ActionBarActivity
 				waited = false;
 			}
 
-			ith.add_list((List<String>) progress[0], (List<String>) progress[1], (List<String>) progress[2], (List<String>) progress[3], (List<Integer>) progress[4], (List<Integer>) progress[5], (List<Boolean>) progress[6]);
+			ith.add_list((List<String>) progress[0], (List<String>) progress[1], (List<String>) progress[2], (List<String>) progress[3], (List<Integer>) progress[4], (List<Integer>) progress[5]);
 			ith.notifyDataSetChanged();
 
 			//lv.setSelectionFromTop(index, top - twelve);
@@ -1449,10 +1446,7 @@ public class main extends ActionBarActivity
 		{
 			if(lv == null)
 				return;
-			if(marker_lock)
-				lv.setSelection(marker_position);
-			else
-				lv.setSelection(0);
+			lv.setSelection(number_of_items);
 
 			set_refresh(check_service_running());
 

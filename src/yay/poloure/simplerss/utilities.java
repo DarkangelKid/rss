@@ -8,6 +8,8 @@ import android.os.Environment;
 
 import java.net.URL;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.ArrayList;
@@ -48,46 +50,6 @@ public class utilities
 			}
 		}
 		return directory.delete();
-	}
-
-	public static void save_positions(FragmentManager fragment_manager, ViewPager viewpager, String storage)
-	{
-		adapter_feeds_cards adapter;
-		BufferedWriter out;
-		String url, group, group_content_file;
-		String[] feeds;
-		List<String> lines;
-		List<String> current_groups = read_file_to_list(storage + main.GROUP_LIST);
-		final int size = current_groups.size();
-
-		for(int i = 1; i < size; i++)
-		{
-			try
-			{
-				group = current_groups.get(i);
-				adapter = get_adapter_feeds_cards(fragment_manager, viewpager, i);
-				if(adapter.getCount() > 0)
-				{
-					group_content_file = storage + main.GROUPS_DIRECTORY + group + main.SEPAR + group + main.CONTENT_APPENDIX;
-					lines = read_file_to_list(group_content_file);
-					delete(group_content_file);
-
-					out = new BufferedWriter(new FileWriter(group_content_file, true));
-					for(int j = 0; j < lines.size(); j++)
-					{
-						/* top_item == lines.size() if all are read */
-						if(j < adapter.top_item + 1)
-							out.write("marker|1|" + lines.get(j).substring(9) + main.NL);
-						else
-							out.write("marker|0|" + lines.get(j).substring(9) + main.NL);
-					}
-					out.close();
-				}
-			}
-			catch(Exception e){
-			}
-		}
-		sort_all_content_by_time(storage);
 	}
 
 	public static void toast_message(Context activity_context, CharSequence message, final Boolean short_long)
@@ -375,7 +337,7 @@ public class utilities
 		{
 		}
 
-		String[][] types = new String[9][lines.size()];
+		String[][] types = new String[8][lines.size()];
 
 		for(j = 0; j < lines.size(); j++)
 		{
@@ -390,41 +352,37 @@ public class utilities
 				offset = next + 1;
 				switch(ch)
 				{
-					case 'm':
+					case 't':
 						next = line.indexOf('|', offset);
 						types[0][j]		= line.substring(offset, next);
 						break;
-					case 't':
+					case 'd':
 						next = line.indexOf('|', offset);
 						types[1][j]		= line.substring(offset, next);
 						break;
-					case 'd':
+					case 'l':
 						next = line.indexOf('|', offset);
 						types[2][j]		= line.substring(offset, next);
 						break;
-					case 'l':
+					case 'i':
 						next = line.indexOf('|', offset);
 						types[3][j]		= line.substring(offset, next);
 						break;
-					case 'i':
+					case 'w':
 						next = line.indexOf('|', offset);
 						types[4][j]		= line.substring(offset, next);
 						break;
-					case 'w':
+					case 'h':
 						next = line.indexOf('|', offset);
 						types[5][j]		= line.substring(offset, next);
 						break;
-					case 'h':
+					case 'g':
 						next = line.indexOf('|', offset);
 						types[6][j]		= line.substring(offset, next);
 						break;
-					case 'g':
-						next = line.indexOf('|', offset);
-						types[7][j]		= line.substring(offset, next);
-						break;
 					case 'f':
 						next = line.indexOf('|', offset);
-						types[8][j]		= line.substring(offset, next);
+						types[7][j]		= line.substring(offset, next);
 						break;
 				}
 				offset = line.indexOf('|', offset) + 1;
@@ -438,6 +396,23 @@ public class utilities
 		String line;
 		BufferedReader stream;
 		List<String> lines = new ArrayList<String>();
+		try
+		{
+			stream = new BufferedReader(new FileReader(file_path));
+			while((line = stream.readLine()) != null)
+				lines.add(line);
+			stream.close();
+		}
+		catch(IOException e){
+		}
+		return lines;
+	}
+
+	public static Set<String> read_file_to_set(String file_path)
+	{
+		String line;
+		BufferedReader stream;
+		Set<String> lines = new HashSet<String>();
 		try
 		{
 			stream = new BufferedReader(new FileReader(file_path));
@@ -475,14 +450,6 @@ public class utilities
 
 	public static void sort_group_content_by_time(String storage, String group)
 	{
-		/// "/storage/groups/Tumblr/Tumbler.content.txt"
-		/* This should never be called. */
-		if(group.equals(main.current_groups.get(0)))
-		{
-			log(main.storage, "All sort called. This is a bug.");
-			return;
-		}
-
 		final String sep						= main.SEPAR;
 		final String group_dir				= storage + main.GROUPS_DIRECTORY + group + sep;
 		final String group_content_path	= group_dir + group + main.CONTENT_APPENDIX;
@@ -531,12 +498,7 @@ public class utilities
 		{
 			BufferedWriter out = new BufferedWriter(new FileWriter(group_content_path, true));
 			for(Map.Entry<Long, String> entry : map.entrySet())
-			{
-				if(entry.getValue().contains("marker|"))
 					out.write(entry.getValue() + main.NL);
-				else
-					out.write("marker|0|" + entry.getValue() + main.NL);
-			}
 
 			out.close();
 
@@ -548,68 +510,7 @@ public class utilities
 		{
 			log(storage, "Failed to write the group content file.");
 		}
-		sort_all_content_by_time(storage);
-	}
-
-	public static void sort_all_content_by_time(String storage)
-	{
-		/// "/storage/groups/Tumblr/Tumbler.content.txt"
-
-		final String sep						= main.SEPAR;
-		final String all_dir					= storage + main.GROUPS_DIRECTORY + main.current_groups.get(0) + sep;
-		final String all_content_path		= all_dir + main.current_groups.get(0) + main.CONTENT_APPENDIX;
-		final String all_count_file		= all_content_path + main.COUNT_APPENDIX;
-
-		String content_path;
-		Time time = new Time();
-		String[] pubDates;
-		List<String> content;
-		Map<Long, String> map = new TreeMap<Long, String>();
-		int i;
-
-		for(int k = 1; k < main.current_groups.size(); k++)
-		{
-			/// "/storage/groups/Tumblr/mariam/mariam.content.txt"
-			content_path = storage + main.GROUPS_DIRECTORY + main.current_groups.get(k) + sep + main.current_groups.get(k) + main.CONTENT_APPENDIX;
-			if(exists(content_path))
-			{
-				content 		= read_file_to_list(content_path);
-				pubDates		= read_single_to_array(content_path, "pubDate|");
-
-				if((pubDates[0] == null)||(pubDates[0].length() < 8))
-					pubDates 	= read_single_to_array(content_path, "published|");
-
-				for(i = 0; i < pubDates.length; i++)
-				{
-					try
-					{
-						time.parse3339(pubDates[i]);
-					}
-					catch(Exception e)
-					{
-						break;
-					}
-					map.put(time.toMillis(false) - i, content.get(i));
-				}
-			}
-		}
-
-		delete(all_content_path);
-		try
-		{
-			BufferedWriter out = new BufferedWriter(new FileWriter(all_content_path, true));
-			for(Map.Entry<Long, String> entry : map.entrySet())
-				out.write(entry.getValue() + main.NL);
-			out.close();
-
-			BufferedWriter out2 = new BufferedWriter(new FileWriter(all_count_file, false));
-			out2.write(Integer.toString(map.size()));
-			out2.close();
-		}
-		catch(Exception e)
-		{
-			log(storage, "Failed to write the all content file.");
-		}
+		sort_group_content_by_time(storage, main.ALL);
 	}
 
 	public static void log(String storage, String text)

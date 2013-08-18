@@ -44,18 +44,21 @@ import android.os.Handler;
 import android.graphics.Color;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import java.util.Set;
+import java.util.HashSet;
 
 import android.os.Debug;
 
 public class adapter_feeds_cards extends BaseAdapter
 {
-	private final List<String> content_titles = new ArrayList<String>();
-	private final List<String> content_des = new ArrayList<String>();
-	public final List<String> content_links = new ArrayList<String>();
-	private final List<String> content_images = new ArrayList<String>();
-	private final List<Integer> content_height = new ArrayList<Integer>();
-	private final List<Integer> content_width = new ArrayList<Integer>();
-	private final List<Boolean> content_marker = new ArrayList<Boolean>();
+	private final List<String> content_titles		= new ArrayList<String>();
+	private final List<String> content_des			= new ArrayList<String>();
+	private final List<String> content_images		= new ArrayList<String>();
+	private final List<Integer> content_height	= new ArrayList<Integer>();
+	private final List<Integer> content_width		= new ArrayList<Integer>();
+	private final List<Boolean> content_marker	= new ArrayList<Boolean>();
+	public final List<String> content_links		= new ArrayList<String>();
+	public static Set<String> read_items;
 
 	private static LayoutInflater inflater;
 	private final Context context;
@@ -67,6 +70,7 @@ public class adapter_feeds_cards extends BaseAdapter
 	private Boolean first = true;
 	public int unread_count = 0;
 	public int top_item = 0;
+	private boolean touched = false;
 
 	public adapter_feeds_cards(Context context_main)
 	{
@@ -77,7 +81,7 @@ public class adapter_feeds_cards extends BaseAdapter
 		eight = (int) ((8 * (metrics.density) + 0.5f));
 	}
 
-	public void add_list(List<String> new_title, List<String> new_des, List<String> new_link, List<String> new_image, List<Integer> new_height, List<Integer> new_width, List<Boolean> new_marker)
+	public void add_list(List<String> new_title, List<String> new_des, List<String> new_link, List<String> new_image, List<Integer> new_height, List<Integer> new_width)
 	{
 		content_titles.addAll(new_title);
 		content_des.addAll(new_des);
@@ -85,7 +89,6 @@ public class adapter_feeds_cards extends BaseAdapter
 		content_images.addAll(new_image);
 		content_height.addAll(new_height);
 		content_width.addAll(new_width);
-		content_marker.addAll(new_marker);
 		total = content_titles.size();
 	}
 
@@ -109,6 +112,7 @@ public class adapter_feeds_cards extends BaseAdapter
 		return content_titles.get(position);
 	}
 
+	/* If the listview starts at the very top of a list with 20 items, position 19 is the only on calling getView(). */
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
@@ -124,41 +128,28 @@ public class adapter_feeds_cards extends BaseAdapter
 				@Override
 				public void onScrollStateChanged(AbsListView view, int scrollState)
 				{
-					if((scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)||(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL))
-					{
-						int firstVisibleItem = listview.getFirstVisiblePosition();
-
-						firstVisibleItem = total - firstVisibleItem;
-						if(firstVisibleItem == total)
-						{
-							if(listview.getChildAt(0).getTop() == eight)
-								top_item = total - 1;
-							else if(top_item != total - 1)
-								top_item = total - 2;
-						}
-						else if(firstVisibleItem - 2 > top_item)
-							top_item = firstVisibleItem - 2;
-					}
-					unread_count = total - top_item - 1;
+					if(!touched)
+						touched = true;
 					if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
 						main.update_navigation_data(null, false);
 				}
 			});
 			first = false;
 		}
+		position = total - position - 1;
 
 		ViewHolder holder;
-		position = total - position - 1;
+		utilities.log(main.storage, Integer.toString(position));
 		if(convertView == null)
 		{
-			convertView 			= inflater.inflate(R.layout.card_layout, parent, false);
-			holder 					= new ViewHolder();
+			convertView 				= inflater.inflate(R.layout.card_layout, parent, false);
+			holder 						= new ViewHolder();
 			holder.title_view 		= (TextView) convertView.findViewById(R.id.title);
-			holder.time_view 		= (TextView) convertView.findViewById(R.id.time);
+			holder.time_view 			= (TextView) convertView.findViewById(R.id.time);
 			holder.description_view = (TextView) convertView.findViewById(R.id.description);
 			holder.image_view 		= (ImageView) convertView.findViewById(R.id.image);
-			holder.left				= (ImageView) convertView.findViewById(R.id.white_left_shadow);
-			holder.right			= (ImageView) convertView.findViewById(R.id.white_right_shadow);
+			holder.left					= (ImageView) convertView.findViewById(R.id.white_left_shadow);
+			holder.right				= (ImageView) convertView.findViewById(R.id.white_right_shadow);
 			convertView				.setOnClickListener(new webview_mode());
 			convertView				.setOnLongClickListener(new long_press());
 			convertView				.setTag(holder);
@@ -166,10 +157,35 @@ public class adapter_feeds_cards extends BaseAdapter
 		else
 			holder = (ViewHolder) convertView.getTag();
 
-		String title 				= content_titles.get(position);
+		/* If the item is read, grey it out */
+		if(read_items.contains(content_links.get(position)))
+		{
+			holder.title_view.setAlpha(0.6f);
+			holder.description_view.setAlpha(0.6f);
+			holder.time_view.setAlpha(0.6f);
+			holder.image_view.setAlpha(0.6f);
+		}
+		else
+		{
+			holder.title_view.setAlpha(1.0f);
+			holder.description_view.setAlpha(1.0f);
+			holder.time_view.setAlpha(1.0f);
+			holder.image_view.setAlpha(1.0f);
+		}
+		/* The logic that tells whether the item is read or not. */
+		if(touched)
+		{
+			if(position - 1 >= 0)
+				read_items.add(content_links.get(position - 1));
+			/* The very top item is read only when the padding exists above it. */
+			if(listview.getChildAt(0).getTop() == eight)
+				read_items.add(content_links.get(position - 1));
+		}
+
+		String title 					= content_titles.get(position);
 		String description 			= content_des.get(position);
-		final String link			= content_links.get(position);
-		final int height 			= content_height.get(position);
+		final String link				= content_links.get(position);
+		final int height 				= content_height.get(position);
 		final int width				= content_width.get(position);
 		boolean image_exists 		= false;
 
