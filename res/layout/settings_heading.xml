@@ -1,12 +1,24 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 		android:orientation="vertical"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content">
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:paddingLeft="5dp"
+		android:paddingRight="5dp">
 	<TextView
 			android:id="@+id/settings_heading"
 			android:text="@+id/settings_heading"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:textColor="#ff000000"
-			android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"/>
+			android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
+			android:textStyle="bold"
+			android:paddingBottom="5dp"/>
+	<ImageView
+			android:id="@+id/divider_bold"
+			android:layout_marginLeft="8dp"
+			android:layout_marginRight="8dp"
+			android:layout_width="match_parent"
+			android:layout_height="2dp"
+			android:scaleType="fitXY"
+			android:src="@drawable/drawer_divider"/>
 </LinearLayout>
