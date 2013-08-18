@@ -130,7 +130,7 @@ public class adapter_feeds_cards extends BaseAdapter
 				@Override
 				public void onScrollStateChanged(AbsListView view, int scrollState)
 				{
-					if(!touched)
+					if(!touched && listview.getVisibility() == View.VISIBLE)
 						touched = true;
 					/* The very top item is read only when the padding exists above it. */
 					if(listview.getChildAt(0).getTop() < 2*eight && listview.getChildAt(0).getTop() >= eight)

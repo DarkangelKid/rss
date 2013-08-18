@@ -222,7 +222,7 @@ public class utilities
 		}
 	}
 
-	private static String[] read_single_to_array(String file_path, String type)
+	public static String[] read_single_to_array(String file_path, String type)
 	{
 		int next, offset, j;
 		String line;
@@ -510,7 +510,6 @@ public class utilities
 		{
 			log(storage, "Failed to write the group content file.");
 		}
-		sort_group_content_by_time(storage, main.ALL);
 	}
 
 	public static void log(String storage, String text)
