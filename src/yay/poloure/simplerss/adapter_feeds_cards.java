@@ -116,6 +116,8 @@ public class adapter_feeds_cards extends BaseAdapter
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
+		position = total - position - 1;
+
 		if(first)
 		{
 			listview = (ListView) parent;
@@ -128,18 +130,19 @@ public class adapter_feeds_cards extends BaseAdapter
 				@Override
 				public void onScrollStateChanged(AbsListView view, int scrollState)
 				{
-					if(!touched)
+					if(!touched && listview.getVisibility() == View.VISIBLE)
 						touched = true;
+					/* The very top item is read only when the padding exists above it. */
+					if(listview.getChildAt(0).getTop() < 2*eight && listview.getChildAt(0).getTop() >= eight)
+						read_items.add(content_links.get(content_links.size() - 1));
 					if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
 						main.update_navigation_data(null, false);
 				}
 			});
 			first = false;
 		}
-		position = total - position - 1;
 
 		ViewHolder holder;
-		utilities.log(main.storage, Integer.toString(position));
 		if(convertView == null)
 		{
 			convertView 				= inflater.inflate(R.layout.card_layout, parent, false);
@@ -172,15 +175,10 @@ public class adapter_feeds_cards extends BaseAdapter
 			holder.time_view.setAlpha(1.0f);
 			holder.image_view.setAlpha(1.0f);
 		}
+
 		/* The logic that tells whether the item is read or not. */
-		if(touched)
-		{
-			if(position - 1 >= 0)
-				read_items.add(content_links.get(position - 1));
-			/* The very top item is read only when the padding exists above it. */
-			if(listview.getChildAt(0).getTop() == eight)
-				read_items.add(content_links.get(position - 1));
-		}
+		if(touched && position - 1 >= 0)
+			read_items.add(content_links.get(position - 1));
 
 		String title 					= content_titles.get(position);
 		String description 			= content_des.get(position);
