@@ -6,4 +6,4 @@
 		android:divider="#00000000"
 		android:dividerHeight="0dp"
 		android:drawSelectorOnTop="false"
-		android:padding="8dp"/>
+		android:padding="2dp"/>
