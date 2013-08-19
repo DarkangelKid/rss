@@ -131,17 +131,4 @@ public class service_update extends IntentService
 		wakelock.release();
 		stopSelf();
 	}
-
-	/*private boolean check_activity_running()
-	{
-		ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-		List<RunningTaskInfo> tasks = activityManager.getRunningTasks(Integer.MAX_VALUE);
-
-		for(RunningTaskInfo task : tasks)
-		{
-			if(getPackageName().equalsIgnoreCase(task.baseActivity.getPackageName()))
-				return true;
-		}
-		return false;
-	}*/
 }
