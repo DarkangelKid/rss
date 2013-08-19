@@ -7,7 +7,7 @@
 			android:layout_height="wrap_content"
 			android:layout_marginTop="4dp"
 			android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
-			android:textColor="#808080"
+			android:textColor="#000000"
 			android:text="Boobies"
 			android:layout_toLeftOf="@+id/checkbox"
 			android:layout_alignParentLeft="true"/>
@@ -17,7 +17,7 @@
 			android:layout_height="wrap_content"
 			android:layout_marginTop="4dp"
 			android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
-			android:textColor="#808080"
+			android:textColor="#323232"
 			android:text="wang"
 			android:layout_below="@+id/check_title"
 			android:layout_alignParentLeft="true"/>
@@ -33,8 +33,8 @@
 			android:layout_marginRight="8dp"
 			android:layout_marginTop="4dp"
 			android:layout_width="match_parent"
-			android:layout_height="2dp"
+			android:layout_height="1dp"
 			android:scaleType="fitXY"
-			android:src="@drawable/drawer_divider"
+			android:src="@drawable/divider_settings_light"
 			android:layout_alignParentBottom="true"/>
 </RelativeLayout>
