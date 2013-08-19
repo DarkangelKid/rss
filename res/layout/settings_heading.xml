@@ -9,8 +9,9 @@
 			android:text="@+id/settings_heading"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:textColor="#ff000000"
+			android:layout_marginBottom="4dp"
 			android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
+			android:textColor="#323232"
 			android:textStyle="bold"
 			android:paddingBottom="5dp"/>
 	<ImageView
@@ -20,5 +21,5 @@
 			android:layout_width="match_parent"
 			android:layout_height="2dp"
 			android:scaleType="fitXY"
-			android:src="@drawable/drawer_divider"/>
+			android:src="@drawable/divider_settings_light"/>
 </LinearLayout>
