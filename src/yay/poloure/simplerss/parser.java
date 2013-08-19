@@ -28,7 +28,7 @@ class parser
 	private static final Pattern regex_cdata_tags		= Pattern.compile("\\<.*?\\>");
 	private static final Pattern space_tags				= Pattern.compile("[\\t\\n\\x0B\\f\\r\\|]");
 	private String[] start								= new String[]{"<link>", "<published>", "<pubDate>", "<description>", "<title", "<content"};
-	private String[] end								= new String[]{"</link>", "</published>", "</pubDate>", "</description>", "</title", "</content"};
+	private String[] end								= new String[]{"/link", "/publ", "/pubD", "/desc", "/titl", "/cont"};
 	private String[] of_types							= new String[]{"<link>", "<published>", "<pubDate>", "<description>", "<title", "<content",
 				"</link>", "</published>", "</pubDate>", "</description>", "</title", "</content", "<entry", "<item", "</entry", "</item"};
 	private String dump_path, url_path;
@@ -281,23 +281,20 @@ class parser
 
 	private String get_content_to_end_tag(BufferedReader reader, String tag)
 	{
-		String end_tag = tag;
+		/* </link> */
 		StringBuilder cont = new StringBuilder();
-		Boolean found = false;
-		final int end_length = end_tag.length() - 1;
-		end_tag = end_tag.substring(1, end_length + 1);
-		char[] test_tag = new char[end_length];
+		char[] buffer = new char[5];
 		try
 		{
-			while(!found)
+			while(!(new String(buffer)).equals(tag))
 			{
 				cont.append(read_string_to_next_char(reader, '<'));
-				reader.mark(end_length);
-				reader.read(test_tag, 0, end_length);
-				if((new String(test_tag)).equals(end_tag))
-					found = true;
+				/* hello my name is a penguin< */
+				reader.mark(6);
+				reader.read(buffer, 0, 5);
 				reader.reset();
 			}
+			/* hello my name is a penguin<link>blash stha */
 			cont.deleteCharAt(cont.length() - 1);
 		}
 		catch(Exception e){
@@ -308,16 +305,22 @@ class parser
 
 	private String read_string_to_next_char(BufferedReader reader, char next)
 	{
-		StringBuilder build = new StringBuilder();
-		char current;
-		try{
+		char   current;
+		char[] build	= new char[4096];
+		int    i			= 0;
+		try
+		{
 			while((current = ((char) reader.read())) != next)
-				build.append(current);
-			build.append(next);
+			{
+				build[i] = current;
+				i++;
+			}
+			build[i] = next;
 
-			return build.toString();
+			return new String(build, 0, i + 1);
 		}
-		catch(Exception e){
+		catch(Exception e)
+		{
 			return "";
 		}
 	}
@@ -455,13 +458,15 @@ class parser
 			FileOutputStream out = new FileOutputStream(thumbnail_dir + image_name);
 			bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
 		}
-		catch (Exception e){
+		catch (Exception e)
+		{
 		}
 	}
 
 	private void to_file(String file_namer, String string)
 	{
-		try{
+		try
+		{
 			final BufferedWriter out = new BufferedWriter(new FileWriter(file_namer));
 			out.write(string);
 			out.close();
