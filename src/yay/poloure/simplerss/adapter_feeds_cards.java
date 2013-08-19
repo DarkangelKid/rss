@@ -170,6 +170,37 @@ public class adapter_feeds_cards extends BaseAdapter
 		else
 			holder = (ViewHolder) convertView.getTag();
 
+		position = total - position - 1;
+
+		final String link				= content_links.get(position);
+		final int height 				= content_height.get(position);
+		final int width				= content_width.get(position);
+		boolean image_exists 		= false;
+
+		if(width == 0)
+			holder.image_view.setVisibility(View.GONE);
+		else
+			image_exists = true;
+
+		if(image_exists)
+		{
+			holder.image_view				.setImageDrawable(new ColorDrawable(Color.WHITE));
+			holder.image_view				.setVisibility(View.VISIBLE);
+			holder.left						.setVisibility(View.GONE);
+			holder.right					.setVisibility(View.GONE);
+			ViewGroup.LayoutParams iv	= holder.image_view.getLayoutParams();
+			iv.height						= (int) ((((double) screen_width)/(width)) * (height));
+			iv.width							= LayoutParams.MATCH_PARENT;
+			holder.image_view				.setLayoutParams(iv);
+			holder.image_view				.setPadding(0, four, 0, 0);
+			holder.image_view				.setTag(position);
+
+			if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
+				(new image()).execute(holder, holder.image_view, holder.image_view.getTag());
+			else
+				(new image()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, holder.image_view, holder.image_view.getTag());
+		}
+
 		/* If the item is read, grey it out */
 		if(read_items.contains(content_links.get(position)))
 		{
@@ -192,34 +223,6 @@ public class adapter_feeds_cards extends BaseAdapter
 
 		String title 					= content_titles.get(position);
 		String description 			= content_des.get(position);
-		final String link				= content_links.get(position);
-		final int height 				= content_height.get(position);
-		final int width				= content_width.get(position);
-		boolean image_exists 		= false;
-
-		if(width > 32)
-			image_exists = true;
-
-		if(image_exists)
-		{
-			holder.left						.setVisibility(View.GONE);
-			holder.right					.setVisibility(View.GONE);
-			ViewGroup.LayoutParams iv	= holder.image_view.getLayoutParams();
-			iv.height						= (int) ((((double) screen_width)/(width)) * (height));
-			iv.width							= LayoutParams.MATCH_PARENT;
-			holder.image_view				.setLayoutParams(iv);
-			holder.image_view				.setPadding(0, four, 0, 0);
-			holder.image_view				.setTag(position);
-			holder.image_view				.setVisibility(View.INVISIBLE);
-			holder.image_view				.setImageDrawable(new ColorDrawable(Color.WHITE));
-
-			if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
-				(new image()).execute(holder, holder.image_view, holder.image_view.getTag());
-			else
-				(new image()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, holder.image_view, holder.image_view.getTag());
-		}
-		else
-			holder.image_view.setVisibility(View.GONE);
 
 		if(!description.equals(""))
 		{
@@ -265,23 +268,6 @@ public class adapter_feeds_cards extends BaseAdapter
 			Animation fadeIn = new AlphaAnimation(0, 1);
 			fadeIn.setDuration(240);
 			fadeIn.setInterpolator(new DecelerateInterpolator());
-			fadeIn.setAnimationListener(new Animation.AnimationListener()
-			{
-				public void onAnimationStart(Animation a)
-				{
-				}
-				public void onAnimationRepeat(Animation a)
-				{
-				}
-
-				@Override
-				public void onAnimationEnd(Animation a)
-				{
-					if((Integer) iv.getTag() != tag)
-						return;
-					iv.setVisibility(View.VISIBLE);
-				}
-			});
 			iv.setOnClickListener(new image_call(thumb_img.matcher(content_images.get(tag)).replaceAll("images")));
 			Object[] ob = {BitmapFactory.decodeFile(content_images.get(tag), o), fadeIn};
 			return ob;
