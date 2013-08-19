@@ -1322,7 +1322,7 @@ public class main extends ActionBarActivity
 			String[] groups				= contenter[6];
 			String[] sources				= contenter[7];
 
-			if((links[0] == null)||(links.length == 0)||(links[0].equals("")))
+			if(links[0] == null || links.length == 0)
 				return null;
 
 			Set<String> existing_items = new HashSet<String>();
@@ -1365,12 +1365,7 @@ public class main extends ActionBarActivity
 							width = 0;
 					}
 
-					if((titles[m] != null)&&(descriptions[m] != null))
-					{
-						if((descriptions[m].contains(titles[m]))||(whitespace.matcher(descriptions[m]).replaceAll("").length() < 8))
-							descriptions[m] = "";
-					}
-					else if((descriptions[m] == null)||(whitespace.matcher(descriptions[m]).replaceAll("").length() < 8))
+					if((descriptions[m] == null)||(descriptions[m].length() < 8)/*||(whitespace.matcher(descriptions[m]).replaceAll("").length() < 8)*/)
 						descriptions[m] = "";
 					if(titles[m] == null)
 						titles[m] = "";
