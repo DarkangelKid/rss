@@ -5,17 +5,17 @@
 			android:id="@+id/check_title"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_marginTop="5dp"
+			android:layout_marginTop="4dp"
 			android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
 			android:textColor="#808080"
-			android:text="@+id/check_text"
+			android:text="Boobies"
 			android:layout_toLeftOf="@+id/checkbox"
 			android:layout_alignParentLeft="true"/>
 	<TextView
 			android:id="@+id/check_summary"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_marginTop="5dp"
+			android:layout_marginTop="4dp"
 			android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
 			android:textColor="#808080"
 			android:text="wang"
@@ -27,4 +27,14 @@
 			android:layout_height="wrap_content"
 			android:layout_alignParentRight="true"
 			android:layout_centerVertical="true"/>
+	<ImageView
+			android:id="@+id/divider_norm"
+			android:layout_marginLeft="8dp"
+			android:layout_marginRight="8dp"
+			android:layout_marginTop="4dp"
+			android:layout_width="match_parent"
+			android:layout_height="2dp"
+			android:scaleType="fitXY"
+			android:src="@drawable/drawer_divider"
+			android:layout_alignParentBottom="true"/>
 </RelativeLayout>

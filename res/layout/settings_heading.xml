@@ -9,7 +9,7 @@
 			android:text="@+id/settings_heading"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_marginBottom="5dp"
+			android:layout_marginBottom="4dp"
 			android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
 			android:textColor="#808080"
 			android:textStyle="bold"
