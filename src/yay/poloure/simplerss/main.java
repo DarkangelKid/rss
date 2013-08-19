@@ -1437,6 +1437,7 @@ public class main extends ActionBarActivity
 				return;
 			if(oldest_unread == 0)
 				oldest_unread = number_of_items;
+
 			lv.setSelection(number_of_items - oldest_unread);
 
 			set_refresh(check_service_running());
@@ -1475,13 +1476,29 @@ public class main extends ActionBarActivity
 		for(int i = 1; i < size; i++)
 		{
 			unread = 0;
-			String[] urls = utilities.read_single_to_array(storage + GROUPS_DIRECTORY + current_groups.get(i) + SEPAR + current_groups.get(i) + CONTENT_APPENDIX, "link|");
-			for(int j = 0; j < urls.length; j++)
+			ith = utilities.get_adapter_feeds_cards(fragment_manager, viewpager, i);
+			if(ith == null)
 			{
-				if(!adapter_feeds_cards.read_items.contains(urls[j]))
+				String[] urls = utilities.read_single_to_array(storage + GROUPS_DIRECTORY + current_groups.get(i) + SEPAR + current_groups.get(i) + CONTENT_APPENDIX, "link|");
+				for(int j = 0; j < urls.length; j++)
 				{
-						unread = urls.length - j;
-						break;
+					if(!adapter_feeds_cards.read_items.contains(urls[j]))
+					{
+							unread = urls.length - j;
+							break;
+					}
+				}
+			}
+			else
+			{
+				List<String> urls = ith.content_links;
+				for(int j = 0; j < urls.size(); j++)
+				{
+					if(!adapter_feeds_cards.read_items.contains(urls.get(j)))
+					{
+							unread = urls.size() - j;
+							break;
+					}
 				}
 			}
 			total += unread;

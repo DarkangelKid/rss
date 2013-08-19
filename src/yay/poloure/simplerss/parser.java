@@ -49,7 +49,7 @@ class parser
 	private void parse_local_xml(String storage, String group, String feed) throws IOException
 	{
 		dump_path						= storage + "content.dump" + main.TXT;
-		url_path							= storage + "content.url" + main.TXT;
+		url_path							= storage + "content.url"  + main.TXT;
 		final String store_file		= storage + feed + main.STORE_APPENDIX;
 		final String feed_folder	= storage + main.GROUPS_DIRECTORY + group + main.SEPAR + feed + main.SEPAR;
 		final String content_file	= feed_folder + feed + main.CONTENT_APPENDIX;

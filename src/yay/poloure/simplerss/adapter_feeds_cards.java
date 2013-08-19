@@ -58,35 +58,38 @@ public class adapter_feeds_cards extends BaseAdapter
 	private final List<Integer> content_height	= new ArrayList<Integer>();
 	private final List<Integer> content_width		= new ArrayList<Integer>();
 	private final List<Boolean> content_marker	= new ArrayList<Boolean>();
-	public final List<String> content_links		= new ArrayList<String>();
+	public  final List<String> content_links		= new ArrayList<String>();
 	public static Set<String> read_items;
 
-	private static LayoutInflater inflater;
-	private final Context context;
-	private ListView listview;
-
-	private static int two = 0, four = 0, eight = 0, sixteen = 0;
-	private final int screen_width;
-	public int total = 0;
-	private Boolean first = true;
-	public int unread_count = 0;
-	public int top_item = 0;
-	private boolean touched = false;
-
 	private static final Pattern thumb_img = Pattern.compile("thumbnails");
+	private static LayoutInflater inflater;
+	private static Context context;
+	private static int two = 0, four = 0, eight = 0, sixteen = 0;
+	private static int screen_width;
+
+	public  int			total				= 0;
+	public  int			unread_count	= 0;
+	public  int			top_item			= 0;
+	private boolean	first				= true;
+	private boolean	touched			= false;
+	private ListView	listview;
+
 
 	public adapter_feeds_cards(Context context_main)
 	{
-		context = context_main;
-		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-		screen_width = metrics.widthPixels;
-		if(two == 0)
+		if(context == null)
 		{
-			two		= (int) ((2  * (metrics.density) + 0.5f));
-			four		= (int) ((4  * (metrics.density) + 0.5f));
-			eight		= (int) ((8  * (metrics.density) + 0.5f));
-			sixteen	= (int) ((16 * (metrics.density) + 0.5f));
+			context = context_main;
+			inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+			screen_width = metrics.widthPixels;
+			if(two == 0)
+			{
+				two		= (int) ((2  * (metrics.density) + 0.5f));
+				four		= (int) ((4  * (metrics.density) + 0.5f));
+				eight		= (int) ((8  * (metrics.density) + 0.5f));
+				sixteen	= (int) ((16 * (metrics.density) + 0.5f));
+			}
 		}
 	}
 
@@ -123,10 +126,8 @@ public class adapter_feeds_cards extends BaseAdapter
 
 	/* If the listview starts at the very top of a list with 20 items, position 19 is the only on calling getView(). */
 	@Override
-	public View getView(int pos, View convertView, ViewGroup parent)
+	public View getView(int position, View convertView, ViewGroup parent)
 	{
-		final int position = total - pos - 1;
-
 		if(first)
 		{
 			listview = (ListView) parent;
