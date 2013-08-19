@@ -39,6 +39,7 @@ import android.os.Bundle;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 import android.util.DisplayMetrics;
 import android.os.Handler;
 import android.graphics.Color;
@@ -64,7 +65,7 @@ public class adapter_feeds_cards extends BaseAdapter
 	private final Context context;
 	private ListView listview;
 
-	private static int eight = 0;
+	private static int two = 0, four = 0, eight = 0, sixteen = 0;
 	private final int screen_width;
 	public int total = 0;
 	private Boolean first = true;
@@ -72,13 +73,21 @@ public class adapter_feeds_cards extends BaseAdapter
 	public int top_item = 0;
 	private boolean touched = false;
 
+	private static final Pattern thumb_img = Pattern.compile("thumbnails");
+
 	public adapter_feeds_cards(Context context_main)
 	{
 		context = context_main;
 		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		DisplayMetrics metrics = context.getResources().getDisplayMetrics();
 		screen_width = metrics.widthPixels;
-		eight = (int) ((8 * (metrics.density) + 0.5f));
+		if(two == 0)
+		{
+			two		= (int) ((2  * (metrics.density) + 0.5f));
+			four		= (int) ((4  * (metrics.density) + 0.5f));
+			eight		= (int) ((8  * (metrics.density) + 0.5f));
+			sixteen	= (int) ((16 * (metrics.density) + 0.5f));
+		}
 	}
 
 	public void add_list(List<String> new_title, List<String> new_des, List<String> new_link, List<String> new_image, List<Integer> new_height, List<Integer> new_width)
@@ -114,9 +123,9 @@ public class adapter_feeds_cards extends BaseAdapter
 
 	/* If the listview starts at the very top of a list with 20 items, position 19 is the only on calling getView(). */
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent)
+	public View getView(int pos, View convertView, ViewGroup parent)
 	{
-		position = total - position - 1;
+		final int position = total - pos - 1;
 
 		if(first)
 		{
@@ -133,7 +142,7 @@ public class adapter_feeds_cards extends BaseAdapter
 					if(!touched && listview.getVisibility() == View.VISIBLE)
 						touched = true;
 					/* The very top item is read only when the padding exists above it. */
-					if(listview.getChildAt(0).getTop() < 2*eight && listview.getChildAt(0).getTop() >= eight)
+					if(listview.getChildAt(0).getTop() < sixteen && listview.getChildAt(0).getTop() >= eight)
 						read_items.add(content_links.get(content_links.size() - 1));
 					if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
 						main.update_navigation_data(null, false);
@@ -147,15 +156,15 @@ public class adapter_feeds_cards extends BaseAdapter
 		{
 			convertView 				= inflater.inflate(R.layout.card_layout, parent, false);
 			holder 						= new ViewHolder();
-			holder.title_view 		= (TextView) convertView.findViewById(R.id.title);
-			holder.time_view 			= (TextView) convertView.findViewById(R.id.time);
-			holder.description_view = (TextView) convertView.findViewById(R.id.description);
-			holder.image_view 		= (ImageView) convertView.findViewById(R.id.image);
-			holder.left					= (ImageView) convertView.findViewById(R.id.white_left_shadow);
-			holder.right				= (ImageView) convertView.findViewById(R.id.white_right_shadow);
-			convertView				.setOnClickListener(new webview_mode());
-			convertView				.setOnLongClickListener(new long_press());
-			convertView				.setTag(holder);
+			holder.title_view 		= (TextView)  convertView.findViewById(R.id.title					);
+			holder.time_view 			= (TextView)  convertView.findViewById(R.id.time					);
+			holder.description_view = (TextView)  convertView.findViewById(R.id.description			);
+			holder.image_view 		= (ImageView) convertView.findViewById(R.id.image					);
+			holder.left					= (ImageView) convertView.findViewById(R.id.white_left_shadow	);
+			holder.right				= (ImageView) convertView.findViewById(R.id.white_right_shadow	);
+			convertView					.setOnClickListener(new webview_mode());
+			convertView					.setOnLongClickListener(new long_press());
+			convertView					.setTag(holder);
 		}
 		else
 			holder = (ViewHolder) convertView.getTag();
@@ -168,7 +177,7 @@ public class adapter_feeds_cards extends BaseAdapter
 			holder.time_view.setAlpha(0.6f);
 			holder.image_view.setAlpha(0.6f);
 		}
-		else
+		else if(holder.title_view.getAlpha() == 0.6f)
 		{
 			holder.title_view.setAlpha(1.0f);
 			holder.description_view.setAlpha(1.0f);
@@ -192,16 +201,21 @@ public class adapter_feeds_cards extends BaseAdapter
 
 		if(image_exists)
 		{
-			holder.left				.setVisibility(View.GONE);
-			holder.right			.setVisibility(View.GONE);
-			holder.image_view		.setVisibility(View.VISIBLE);
-			ViewGroup.LayoutParams iv = holder.image_view.getLayoutParams();
-			iv.height	= (int) ((((double) screen_width)/(width)) * (height));
-			iv.width	= LayoutParams.MATCH_PARENT;
-			holder.image_view.setLayoutParams(iv);
-			holder.image_view		.setPadding(0, eight/2, 0, 0);
+			holder.left						.setVisibility(View.GONE);
+			holder.right					.setVisibility(View.GONE);
+			ViewGroup.LayoutParams iv	= holder.image_view.getLayoutParams();
+			iv.height						= (int) ((((double) screen_width)/(width)) * (height));
+			iv.width							= LayoutParams.MATCH_PARENT;
+			holder.image_view				.setLayoutParams(iv);
+			holder.image_view				.setPadding(0, four, 0, 0);
+			holder.image_view				.setTag(position);
+			holder.image_view				.setVisibility(View.INVISIBLE);
+			holder.image_view				.setImageDrawable(new ColorDrawable(Color.WHITE));
 
-			load(content_images.get(position), holder.image_view);
+			if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
+				(new image()).execute(holder, holder.image_view, holder.image_view.getTag());
+			else
+				(new image()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, holder.image_view, holder.image_view.getTag());
 		}
 		else
 			holder.image_view.setVisibility(View.GONE);
@@ -211,13 +225,14 @@ public class adapter_feeds_cards extends BaseAdapter
 			holder.description_view.setVisibility(View.VISIBLE);
 			if(image_exists)
 			{
-				holder.left				.setVisibility(View.VISIBLE);
-				holder.right			.setVisibility(View.VISIBLE);
-				holder.description_view	.setPadding(eight	, eight/2	, eight	, eight);
-				holder.image_view		.setPadding(0		, eight/2	, 0		, eight/2);
+				holder.left					.setVisibility(View.VISIBLE);
+				holder.right				.setVisibility(View.VISIBLE);
+				holder.description_view	.setPadding(eight	, four	, eight	, eight);
+				holder.image_view			.setPadding(0		, four	, 0		, four);
 			}
 			else
-				holder.description_view.setPadding(eight, eight/4, eight, eight);
+				holder.description_view.setPadding(eight, two, eight, eight);
+
 			holder.description_view.setText(description);
 		}
 		else
@@ -234,6 +249,60 @@ public class adapter_feeds_cards extends BaseAdapter
 		return convertView;
 	}
 
+	class image extends AsyncTask<Object, Void, Object[]>
+	{
+		private ImageView iv;
+		private int tag;
+
+		@Override
+		protected Object[] doInBackground(Object... params)
+		{
+			iv		= (ImageView)	params[0];
+			tag	= (Integer)		params[1];
+			BitmapFactory.Options o = new BitmapFactory.Options();
+			o.inSampleSize = 1;
+			Animation fadeIn = new AlphaAnimation(0, 1);
+			fadeIn.setDuration(240);
+			fadeIn.setInterpolator(new DecelerateInterpolator());
+			fadeIn.setAnimationListener(new Animation.AnimationListener()
+			{
+				public void onAnimationStart(Animation a)
+				{
+				}
+				public void onAnimationRepeat(Animation a)
+				{
+				}
+
+				@Override
+				public void onAnimationEnd(Animation a)
+				{
+					if((Integer) iv.getTag() != tag)
+						return;
+					iv.setVisibility(View.VISIBLE);
+				}
+			});
+			iv.setOnClickListener(new image_call(thumb_img.matcher(content_images.get(tag)).replaceAll("images")));
+			Object[] ob = {BitmapFactory.decodeFile(content_images.get(tag), o), fadeIn};
+			return ob;
+		}
+
+		@Override
+		protected void onPostExecute(Object... result)
+		{
+			if((Integer) iv.getTag() != tag)
+				return;
+			if(iv != null && (Bitmap) result[0] != null)
+			{
+				iv.setImageBitmap((Bitmap) result[0]);
+				iv.startAnimation((Animation) result[1]);
+				if((Integer) iv.getTag() != tag)
+					return;
+				iv.setVisibility(View.VISIBLE);
+			}
+		}
+	}
+
+
 	static class ViewHolder
 	{
 		TextView title_view;
@@ -242,212 +311,6 @@ public class adapter_feeds_cards extends BaseAdapter
 		ImageView image_view;
 		ImageView left;
 		ImageView right;
-	}
-
-	private void load(String path, ImageView imageView)
-	{
-		resetPurgeTimer();
-		Bitmap bitmap = getBitmapFromCache(path);
-
-		if(bitmap == null)
-			force_load(path, imageView);
-		else
-		{
-			cancelPotentialDownload(path, imageView);
-			imageView.setImageBitmap(bitmap);
-		}
-	}
-
-	private void force_load(String url, ImageView imageView)
-	{
-		if (url == null)
-		{
-			imageView.setImageDrawable(null);
-			return;
-		}
-
-		if(cancelPotentialDownload(url, imageView))
-		{
-			load_image task = new load_image(imageView);
-			DownloadedDrawable downloadedDrawable = new DownloadedDrawable(task);
-			imageView.setImageDrawable(downloadedDrawable);
-			if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
-				task.execute(url);
-			else
-				task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url);
-		}
-	}
-
-	private static boolean cancelPotentialDownload(String url, ImageView imageView)
-	{
-		load_image bitmapDownloaderTask = getBitmapDownloaderTask(imageView);
-
-		if (bitmapDownloaderTask != null)
-		{
-			String bitmapUrl = bitmapDownloaderTask.url;
-			if ((bitmapUrl == null) || (!bitmapUrl.equals(url)))
-				bitmapDownloaderTask.cancel(true);
-			else
-				return false;
-		}
-		return true;
-	}
-
-
-	private static load_image getBitmapDownloaderTask(ImageView imageView)
-	{
-		if (imageView != null)
-		{
-			Drawable drawable = imageView.getDrawable();
-			if (drawable instanceof DownloadedDrawable)
-			{
-				DownloadedDrawable downloadedDrawable = (DownloadedDrawable)drawable;
-				return downloadedDrawable.getBitmapDownloaderTask();
-			}
-		}
-		return null;
-	}
-
-	class load_image extends AsyncTask<String, Void, Bitmap>
-	{
-		private String url;
-		private final WeakReference<ImageView> imageViewReference;
-
-		public load_image(ImageView imageView)
-		{
-			imageViewReference = new WeakReference<ImageView>(imageView);
-		}
-
-		@Override
-		protected Bitmap doInBackground(String... ton)
-		{
-			url = ton[0];
-			BitmapFactory.Options o = new BitmapFactory.Options();
-			o.inSampleSize = 1;
-			Bitmap bit = BitmapFactory.decodeFile(url, o);
-			addBitmapToCache(url, bit);
-			return bit;
-		}
-
-		@Override
-		protected void onPostExecute(Bitmap im)
-		{
-			if(isCancelled())
-			{
-				im = null;
-				return;
-			}
-
-			if (imageViewReference != null)
-			{
-				ImageView image_view = imageViewReference.get();
-				load_image bitmapDownloaderTask = getBitmapDownloaderTask(image_view);
-				if(this == bitmapDownloaderTask)
-				{
-					Animation fadeIn = new AlphaAnimation(0, 1);
-					fadeIn.setDuration(210);
-					fadeIn.setInterpolator(new DecelerateInterpolator());
-					image_view.setImageBitmap(im);
-					image_view.startAnimation(fadeIn);
-					image_view.setOnClickListener(new image_call(url.replaceAll("thumbnails", "images")));
-				}
-			}
-		}
-	}
-
-	static class DownloadedDrawable extends ColorDrawable
-	{
-		private final WeakReference<load_image> bitmapDownloaderTaskReference;
-
-		public DownloadedDrawable(load_image bitmapDownloaderTask)
-		{
-			super(Color.WHITE);
-			bitmapDownloaderTaskReference =
-				new WeakReference<load_image>(bitmapDownloaderTask);
-		}
-
-		public load_image getBitmapDownloaderTask(){
-			return bitmapDownloaderTaskReference.get();
-		}
-	}
-
-	private static final int HARD_CACHE_CAPACITY = 6;
-	private static final int DELAY_BEFORE_PURGE = 10 * 1000;
-
-	private final HashMap<String, Bitmap> sHardBitmapCache =
-		new LinkedHashMap<String, Bitmap>(HARD_CACHE_CAPACITY / 2, 0.75f, true)
-		{
-			@Override
-			protected boolean removeEldestEntry(LinkedHashMap.Entry<String, Bitmap> eldest)
-			{
-				if(size() > HARD_CACHE_CAPACITY)
-				{
-					sSoftBitmapCache.put(eldest.getKey(), new SoftReference<Bitmap>(eldest.getValue()));
-					return true;
-				}
-				else
-					return false;
-			}
-		};
-
-	private final static ConcurrentHashMap<String, SoftReference<Bitmap>> sSoftBitmapCache =
-		new ConcurrentHashMap<String, SoftReference<Bitmap>>(HARD_CACHE_CAPACITY / 2);
-
-	private final Handler purgeHandler = new Handler();
-
-	private final Runnable purger = new Runnable()
-	{
-		public void run(){
-			clearCache();
-		}
-	};
-
-	private void addBitmapToCache(String url, Bitmap bitmap)
-	{
-		if(bitmap != null)
-		{
-			synchronized(sHardBitmapCache){
-				sHardBitmapCache.put(url, bitmap);
-			}
-		}
-	}
-
-	private Bitmap getBitmapFromCache(String url)
-	{
-		synchronized(sHardBitmapCache)
-		{
-			final Bitmap bitmap = sHardBitmapCache.get(url);
-			if(bitmap != null)
-			{
-				sHardBitmapCache.remove(url);
-				sHardBitmapCache.put(url, bitmap);
-				return bitmap;
-			}
-		}
-
-		SoftReference<Bitmap> bitmapReference = sSoftBitmapCache.get(url);
-		if(bitmapReference != null)
-		{
-			final Bitmap bitmap = bitmapReference.get();
-			if (bitmap != null)
-				return bitmap;
-			else
-				sSoftBitmapCache.remove(url);
-		}
-
-		return null;
-	}
-
-	private void clearCache()
-	{
-		sHardBitmapCache.clear();
-		sSoftBitmapCache.clear();
-	}
-
-	private void resetPurgeTimer()
-	{
-		purgeHandler.removeCallbacks(purger);
-		purgeHandler.postDelayed(purger, DELAY_BEFORE_PURGE);
 	}
 
 	private class webview_mode implements View.OnClickListener
