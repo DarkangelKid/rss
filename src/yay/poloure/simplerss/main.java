@@ -488,20 +488,10 @@ public class main extends ActionBarActivity
 					@Override
 					public void onPageSelected(int position)
 					{
-						if(utilities.get_adapter_feeds_cards(fragment_manager, viewpager, position).getCount() == 0)
-						{
-							if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
-								new refresh_page(position).execute();
-							else
-								new refresh_page(position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-						}
-						else if(new_items.get(position))
-						{
-							if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
-								new refresh_page(position).execute();
-							else
-								new refresh_page(position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-						}
+						if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
+							new refresh_page(position).execute();
+						else
+							new refresh_page(position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 					}
 				}
 			);
@@ -1271,11 +1261,11 @@ public class main extends ActionBarActivity
 		update_navigation_data(null, true);
 	}
 
-	private static class refresh_page extends AsyncTask<Void, Object, Void>
+	private static class refresh_page extends AsyncTask<Void, Object, Animation>
 	{
 		final int page_number;
 		Boolean waited = true;
-		Animation animFadeIn;
+		Boolean flash  = false;
 		ListFragment l;
 		adapter_feeds_cards ith;
 		ListView lv;
@@ -1289,7 +1279,7 @@ public class main extends ActionBarActivity
 		}
 
 		@Override
-		protected Void doInBackground(Void[] hey)
+		protected Animation doInBackground(Void[] hey)
 		{
 			if(new_items.get(page_number))
 			{
@@ -1334,7 +1324,7 @@ public class main extends ActionBarActivity
 			{
 			}
 
-			animFadeIn = AnimationUtils.loadAnimation(activity_context, android.R.anim.fade_in);
+			Animation animFadeIn = AnimationUtils.loadAnimation(activity_context, android.R.anim.fade_in);
 			final int size = titles.length;
 			final List<String> new_titles			= new ArrayList<String>();
 			final List<String> new_descriptions = new ArrayList<String>();
@@ -1365,7 +1355,7 @@ public class main extends ActionBarActivity
 							width = 0;
 					}
 
-					if((descriptions[m] == null)||(descriptions[m].length() < 8)/*||(whitespace.matcher(descriptions[m]).replaceAll("").length() < 8)*/)
+					if(descriptions[m] == null || descriptions[m].length() < 8)
 						descriptions[m] = "";
 					if(titles[m] == null)
 						titles[m] = "";
@@ -1409,7 +1399,7 @@ public class main extends ActionBarActivity
 				counts = get_unread_counts();
 			}
 			publishProgress(new_titles, new_descriptions, new_links, new_images, new_heights, new_widths);
-			return null;
+			return animFadeIn;
 		}
 
 		@Override
@@ -1427,10 +1417,11 @@ public class main extends ActionBarActivity
 				top = v.getTop();
 			}*/
 
-			if(waited)
+			if(ith.getCount() == 0)
 			{
 				lv.setVisibility(View.INVISIBLE);
 				waited = false;
+				flash  = true;
 			}
 
 			ith.add_list((List<String>) progress[0], (List<String>) progress[1], (List<String>) progress[2], (List<String>) progress[3], (List<Integer>) progress[4], (List<Integer>) progress[5]);
@@ -1440,7 +1431,7 @@ public class main extends ActionBarActivity
 		}
 
 		@Override
-		protected void onPostExecute(Void tun)
+		protected void onPostExecute(Animation tun)
 		{
 			if(lv == null)
 				return;
@@ -1452,8 +1443,11 @@ public class main extends ActionBarActivity
 
 			update_navigation_data(counts, false);
 
-			lv.setAnimation(animFadeIn);
-			lv.setVisibility(View.VISIBLE);
+			if(flash)
+			{
+				lv.setAnimation(tun);
+				lv.setVisibility(View.VISIBLE);
+			}
 			update_navigation_data(null, false);
 		}
 	}
