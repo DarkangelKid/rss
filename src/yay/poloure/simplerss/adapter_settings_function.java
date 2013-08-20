@@ -50,7 +50,7 @@ public class adapter_settings_function extends BaseAdapter
 	@Override
 	public int getCount()
 	{
-		return 3;
+		return 5;
 	}
 
 	@Override
@@ -70,7 +70,7 @@ public class adapter_settings_function extends BaseAdapter
 		if(position == 0)
 			return 0;
 
-		else if(position == 1)
+		else if(position == 1 || position > 2)
 			return 1;
 
 		else

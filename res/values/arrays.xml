@@ -13,10 +13,14 @@
 		<item>Auto Refresh</item>
 		<item>Auto Refresh</item>
 		<item>Refresh Time</item>
+		<item>Notifications</item>
+		<item>Offline Mode</item>
 	</string-array>
 	<string-array name="settings_function_summaries">
 		<item>EMPTY</item>
 		<item>Check to enable auto refresh</item>
 		<item>Adjust auto refresh interval</item>
+		<item>Check to enable notifications</item>
+		<item>Check to enable offline mode</item>
 	</string-array>
 </resources>
