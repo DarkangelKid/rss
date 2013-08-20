@@ -4,9 +4,19 @@
 		<item>Copy URL to clipboard</item>
 		<item>Open in browser</item>
 		<item>Save image to storage</item>
-    </string-array>
-    <string-array name="card_menu">
+	</string-array>
+	<string-array name="card_menu">
 		<item>Copy URL to clipboard</item>
 		<item>Open in browser</item>
-    </string-array>
+	</string-array>
+	<string-array name="settings_function_titles">
+		<item>Auto Refresh</item>
+		<item>Auto Refresh</item>
+		<item>Refresh Time</item>
+	</string-array>
+	<string-array name="settings_function_summaries">
+		<item>EMPTY</item>
+		<item>Check to enable auto refresh</item>
+		<item>Adjust auto refresh interval</item>
+	</string-array>
 </resources>

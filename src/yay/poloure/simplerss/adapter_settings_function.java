@@ -12,28 +12,29 @@ import android.widget.ImageView;
 
 public class adapter_settings_function extends BaseAdapter
 {
-	private static final List<String> menu_list = new ArrayList<String>();
-	private static final List<Integer> count_list = new ArrayList<Integer>();
+	private final String[] title_array;
+	private final String[] summary_array;
 
 	private static LayoutInflater inflater;
 
 	public adapter_settings_function(Context context_main)
 	{
 		inflater = (LayoutInflater) context_main.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		title_array = context_main.getResources().getStringArray(R.array.settings_function_titles);
+		summary_array = context_main.getResources().getStringArray(R.array.settings_function_summaries);
 	}
 
-	public void add_list(List<String> new_title)
+	/*public void add_list(List<String> new_title)
 	{
-		menu_list.clear();
-		menu_list.addAll(new_title);
+		title_array.clear();
+		title_array.addAll(new_title);
 	}
 
 	public void add_count(List<Integer> new_count)
 	{
-		count_list.clear();
-		count_list.addAll(new_count);
-	}
-
+		summary_array.clear();
+		summary_array.addAll(new_count);
+	}*/
 	@Override
 	public long getItemId(int position)
 	{
@@ -43,7 +44,7 @@ public class adapter_settings_function extends BaseAdapter
 	@Override
 	public String getItem(int position)
 	{
-		return menu_list.get(position);
+		return title_array[position];
 	}
 
 	@Override
@@ -80,7 +81,6 @@ public class adapter_settings_function extends BaseAdapter
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
 		final int view_type = getItemViewType(position);
-		/* This view is for the main items Feeds, Manage, & Settings. */
 		if(view_type == 0)
 		{
 			settings_heading_holder holder;
@@ -94,7 +94,7 @@ public class adapter_settings_function extends BaseAdapter
 			else
 				holder = (settings_heading_holder) convertView.getTag();
 
-			//holder.title_view.setText("penis");
+			holder.title_view.setText(title_array[position]);
 		}
 
 		else if(view_type == 1)
@@ -105,12 +105,14 @@ public class adapter_settings_function extends BaseAdapter
 				convertView = (View) inflater.inflate(R.layout.settings_checkbox, parent, false);
 				holder = new settings_checkbox_holder();
 				holder.title_view = (TextView) convertView.findViewById(R.id.check_title);
+				holder.summary_view = (TextView) convertView.findViewById(R.id.check_summary);
 				convertView.setTag(holder);
 			}
 			else
 				holder = (settings_checkbox_holder) convertView.getTag();
 
-			//holder.title_view.setText("penis");
+			holder.title_view.setText(title_array[position]);
+			holder.summary_view.setText(summary_array[position]);
 		}
 		else
 		{
@@ -125,7 +127,8 @@ public class adapter_settings_function extends BaseAdapter
 			else
 				holder = (settings_seekbar_holder) convertView.getTag();
 
-			//holder.title_view.setText("boobs");
+			holder.title_view.setText(title_array[position]);
+			holder.summary_view.setText(summary_array[position]);
 		}
 		return convertView;
 	}
@@ -138,11 +141,13 @@ public class adapter_settings_function extends BaseAdapter
 	static class settings_checkbox_holder
 	{
 		TextView title_view;
+		TextView summary_view.
 	}
 
 	static class settings_seekbar_holder
 	{
 		TextView title_view;
+		TextView summary_view;
 	}
 
 }

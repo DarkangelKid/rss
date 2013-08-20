@@ -3,6 +3,7 @@
 		android:layout_height="wrap_content">
 	<TextView
 			android:id="@+id/check_title"
+			android:text="@+id/check_title"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_marginLeft="6dp"
@@ -10,11 +11,11 @@
 			android:layout_marginTop="4dp"
 			android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
 			android:textColor="#000000"
-			android:text="@string/refresh_cat_preferences"
 			android:layout_toLeftOf="@+id/checkbox"
 			android:layout_alignParentLeft="true"/>
 	<TextView
 			android:id="@+id/check_summary"
+			android:text="@+id/check_summary"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_marginLeft="6dp"
@@ -22,7 +23,6 @@
 			android:layout_marginBottom="4dp"
 			android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
 			android:textColor="#323232"
-			android:text="@string/refresh_summary_preferences"
 			android:layout_below="@+id/check_title"
 			android:layout_alignParentLeft="true"/>
 	<CheckBox
