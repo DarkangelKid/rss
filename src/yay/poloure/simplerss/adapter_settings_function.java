@@ -142,7 +142,7 @@ public class adapter_settings_function extends BaseAdapter
 	static class settings_checkbox_holder
 	{
 		TextView title_view;
-		TextView summary_view;edeeedeeeededeededesde
+		TextView summary_view;
 	}
 
 	static class settings_seekbar_holder
