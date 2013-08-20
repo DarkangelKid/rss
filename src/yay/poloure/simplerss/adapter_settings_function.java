@@ -1,14 +1,14 @@
 package yay.poloure.simplerss;
 
 import android.widget.BaseAdapter;
-import java.util.ArrayList;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.content.Context;
 import android.view.LayoutInflater;
-import java.util.List;
 import android.widget.ImageView;
+import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 
 public class adapter_settings_function extends BaseAdapter
 {
@@ -112,6 +112,8 @@ public class adapter_settings_function extends BaseAdapter
 				holder = new settings_seekbar_holder();
 				holder.title_view = (TextView) convertView.findViewById(R.id.seek_title);
 				holder.summary_view = (TextView) convertView.findViewById(R.id.seek_summary);
+				holder.seekbar = (SeekBar) convertView.findViewById(R.id.seekbar);
+				holder.read_view = (TextView) convertView.findViewById(R.id.seek_read);
 				convertView.setTag(holder);
 			}
 			else
@@ -119,6 +121,21 @@ public class adapter_settings_function extends BaseAdapter
 
 			holder.title_view.setText(title_array[position]);
 			holder.summary_view.setText(summary_array[position]);
+			holder.seekbar.setOnSeekBarChangeListener(new OnSeekBarChangeListener()
+			{
+				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
+				{
+					holder.read_view.setText(Integer.toString(progress + 20));
+				}
+
+				public void onStartTrackingTouch(SeekBar seekBar)
+				{
+				}
+
+				public void onStopTrackingTouch(SeekBar seekBar)
+				{
+				}
+			});
 		}
 		return convertView;
 	}
@@ -138,6 +155,8 @@ public class adapter_settings_function extends BaseAdapter
 	{
 		TextView title_view;
 		TextView summary_view;
+		TextView read_view;
+		SeekBar seekbar;
 	}
 
 }
