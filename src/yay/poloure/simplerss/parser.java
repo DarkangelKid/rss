@@ -11,7 +11,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.List;
 import java.util.regex.Pattern;
-//import android.os.Debug;
 import android.text.format.Time;
 import java.util.Date;
 import java.util.Locale;

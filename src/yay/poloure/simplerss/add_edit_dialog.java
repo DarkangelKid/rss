@@ -198,8 +198,8 @@ public class add_edit_dialog
 						List<String> filters	= utilities.read_file_to_list(filter_path);
 						if(!filters.contains(feed_name))
 							utilities.append_string_to_file(filter_path, feed_name + main.NL);
-						main.filter_list_adapter.set_items(utilities.read_file_to_list(filter_path));
-						main.filter_list_adapter.notifyDataSetChanged();
+						fragment_manage_filters.filter_list_adapter.set_items(utilities.read_file_to_list(filter_path));
+						fragment_manage_filters.filter_list_adapter.notifyDataSetChanged();
 						add_filter_dialog.hide();
 					}
 				});
@@ -337,19 +337,19 @@ public class add_edit_dialog
 		utilities.append_string_to_file(storage + main.GROUPS_DIRECTORY + feed_group + main.SEPAR + feed_group + main.TXT, feed_info);
 		utilities.append_string_to_file(storage + main.ALL_FILE, feed_info);
 
-		if(main.feed_list_adapter != null)
+		if(fragment_manage_feed.feed_list_adapter != null)
 		{
 			if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
-				new main.refresh_manage_feeds().execute();
+				new fragment_manage_feed.refresh_manage_feeds().execute();
 			else
-				new main.refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+				new fragment_manage_feed.refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
-		if(main.group_list_adapter != null)
+		if(fragment_manage_group.group_list_adapter != null)
 		{
 			if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
-				new main.refresh_manage_groups().execute();
+				new fragment_manage_group.refresh_manage_groups().execute();
 			else
-				new main.refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+				new fragment_manage_group.refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
 	}
 
@@ -446,16 +446,16 @@ public class add_edit_dialog
 			utilities.sort_group_content_by_time(storage, new_group);
 		utilities.sort_group_content_by_time(storage, all_string);
 
-		main.feed_list_adapter.set_position(position, new_name, new_url + main.NL + new_group + " • " + Integer.toString(utilities.count_lines(storage + main.GROUPS_DIRECTORY + new_group + main.SEPAR + new_name + main.SEPAR + new_name + main.CONTENT_APPENDIX) - 1) + " items");
-		main.feed_list_adapter.notifyDataSetChanged();
+		fragment_manage_feed.feed_list_adapter.set_position(position, new_name, new_url + main.NL + new_group + " • " + Integer.toString(utilities.count_lines(storage + main.GROUPS_DIRECTORY + new_group + main.SEPAR + new_name + main.SEPAR + new_name + main.CONTENT_APPENDIX) - 1) + " items");
+		fragment_manage_feed.feed_list_adapter.notifyDataSetChanged();
 
 		/// To refresh the counts and the order of the groups.
 		main.update_groups();
 
 		if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
-			new main.refresh_manage_groups().execute();
+			new fragment_manage_group.refresh_manage_groups().execute();
 		else
-			new main.refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+			new fragment_manage_group.refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 		/// Force a refresh of the page.
 		int index;
