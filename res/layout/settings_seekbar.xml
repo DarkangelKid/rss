@@ -10,7 +10,7 @@
 		android:layout_marginRight="5dp"
 		android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
 		android:textColor="#000000"
-		android:text="Dicks"
+		android:text="@string/refresh_time_preferences"
 		android:layout_above="@+id/seek_summary"
 		android:layout_alignParentLeft="true"
 		android:layout_alignParentTop="true"/>
@@ -23,7 +23,7 @@
 		android:layout_marginTop="4dp"
 		android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
 		android:textColor="#323232"
-		android:text="Dicks"
+		android:text="@string/refresh_time_summary_preferences"
 		android:layout_toLeftOf="@+id/seek_read"
 		android:layout_alignParentLeft="true"/>
 	<SeekBar
