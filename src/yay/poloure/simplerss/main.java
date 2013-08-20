@@ -727,6 +727,40 @@ public class main extends ActionBarActivity
 
 	private static void jump_to_latest_unread()
 	{
+		final int page_number = viewpager.getCurrentItem();
+		int oldest_unread = 0;
+
+		final String group_path				= storage + GROUPS_DIRECTORY + current_groups.get(page_number) + main.SEPAR;
+		final String group_content_path	= group_path + current_groups.get(page_number) + CONTENT_APPENDIX;
+
+		if(!utilities.exists(group_content_path))
+			return;
+
+		List<String> links = utilities.get_adapter_feeds_cards(fragment_manager, viewpager, page_number).content_links;
+
+		final int size = links.size();
+		for(int m = 0; m < size; m++)
+		{
+			if(!adapter_feeds_cards.read_items.contains(links.get(m)))
+			{
+				oldest_unread = m;
+				break;
+			}
+		}
+		if(oldest_unread == 0)
+			oldest_unread = links.size();
+
+		ListView lv = ((ListFragment) fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_number))).getListView();
+
+		if(lv == null)
+			return;
+
+		final int position = links.size() - oldest_unread - 1;
+		if(position >= 0)
+			lv.setSelection(position);
+		else
+			lv.setSelection(0);
+
 	}
 
 	private static void refresh_feeds()
