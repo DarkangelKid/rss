@@ -19,5 +19,5 @@
 			android:layout_width="match_parent"
 			android:layout_height="2dp"
 			android:scaleType="fitXY"
-			android:src="@drawable/divider_settings_light"/>
+			android:src="@drawable/divider_settings_dark"/>
 </LinearLayout>
