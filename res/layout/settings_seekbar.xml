@@ -32,6 +32,7 @@
 			android:layout_marginBottom="4dp"
 			android:layout_marginLeft="10dp"
 			android:layout_marginRight="10dp"
+			android:paddingBottom="4dp"
 			android:max="100"
 			android:minWidth="300dp"
 			android:layout_below="@+id/seek_summary"
