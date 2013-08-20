@@ -728,7 +728,7 @@ public class main extends ActionBarActivity
 	private static void jump_to_latest_unread()
 	{
 		final int page_number = viewpager.getCurrentItem();
-		int oldest_unread = 0;
+		int oldest_unread = -1;
 
 		final String group_path				= storage + GROUPS_DIRECTORY + current_groups.get(page_number) + main.SEPAR;
 		final String group_content_path	= group_path + current_groups.get(page_number) + CONTENT_APPENDIX;
@@ -755,12 +755,20 @@ public class main extends ActionBarActivity
 		if(lv == null)
 			return;
 
+		if(oldest_unread == links.size())
+		{
+			lv.setSelection(links.size());
+			return;
+		}
+
+		if(oldest_unread == -1)
+			oldest_unread++;
+
 		final int position = links.size() - oldest_unread - 1;
 		if(position >= 0)
 			lv.setSelection(position);
 		else
 			lv.setSelection(0);
-
 	}
 
 	private static void refresh_feeds()
