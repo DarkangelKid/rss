@@ -12,6 +12,8 @@ import android.widget.ImageView;
 
 public class adapter_settings_function extends BaseAdapter
 {
+	private static final List<String> menu_list = new ArrayList<String>();
+	private static final List<Integer> count_list = new ArrayList<Integer>();
 
 	private static LayoutInflater inflater;
 
