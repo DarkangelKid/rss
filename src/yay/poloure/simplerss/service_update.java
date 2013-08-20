@@ -1,10 +1,10 @@
 package yay.poloure.simplerss;
 
 import android.app.IntentService;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.Context;
 import android.os.Environment;
-
 
 import java.util.List;
 
@@ -15,6 +15,8 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
 
 import android.graphics.Point;
 import android.view.WindowManager;
@@ -130,5 +132,14 @@ public class service_update extends IntentService
 
 		wakelock.release();
 		stopSelf();
+	}
+
+	public static boolean check_service_running(Activity activity)
+	{
+		ActivityManager manager = (ActivityManager) activity.getSystemService(Context.ACTIVITY_SERVICE);
+		for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE))
+			if(service_update.class.getName().equals(service.service.getClassName()))
+				return true;
+		return false;
 	}
 }

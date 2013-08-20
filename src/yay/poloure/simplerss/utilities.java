@@ -24,7 +24,6 @@ import java.io.BufferedWriter;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-import android.os.Debug;
 import android.text.format.Time;
 import android.widget.Toast;
 
