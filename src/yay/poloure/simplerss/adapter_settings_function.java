@@ -83,65 +83,65 @@ public class adapter_settings_function extends BaseAdapter
 		/* This view is for the main items Feeds, Manage, & Settings. */
 		if(view_type == 0)
 		{
-			group_item_holder holder;
+			settings_heading_holder holder;
 			if(convertView == null)
 			{
 				convertView = (View) inflater.inflate(R.layout.settings_heading, parent, false);
-				holder = new group_item_holder();
+				holder = new settings_heading_holder();
 				holder.title_view = (TextView) convertView.findViewById(R.id.settings_heading);
 				convertView.setTag(holder);
 			}
 			else
-				holder = (group_item_holder) convertView.getTag();
+				holder = (settings_heading_holder) convertView.getTag();
 
 			//holder.title_view.setText("penis");
 		}
 
 		else if(view_type == 1)
 		{
-			main_item_holder holder;
+			settings_checkbox_holder holder;
 			if(convertView == null)
 			{
 				convertView = (View) inflater.inflate(R.layout.settings_checkbox, parent, false);
-				holder = new main_item_holder();
+				holder = new settings_checkbox_holder();
 				holder.title_view = (TextView) convertView.findViewById(R.id.check_title);
 				convertView.setTag(holder);
 			}
 			else
-				holder = (main_item_holder) convertView.getTag();
+				holder = (settings_checkbox_holder) convertView.getTag();
 
 			//holder.title_view.setText("penis");
 		}
 		else
 		{
-			TextViewHolder holder;
+			settings_seekbar_holder holder;
 			if(convertView == null)
 			{
 				convertView = (View) inflater.inflate(R.layout.settings_seekbar, parent, false);
-				holder = new TextViewHolder();
+				holder = new settings_seekbar_holder();
 				holder.title_view = (TextView) convertView.findViewById(R.id.seek_title);
 				convertView.setTag(holder);
 			}
 			else
-				holder = (TextViewHolder) convertView.getTag();
+				holder = (settings_seekbar_holder) convertView.getTag();
 
 			//holder.title_view.setText("boobs");
 		}
 		return convertView;
 	}
 
-	static class group_item_holder
+	static class settings_heading_holder
 	{
 		TextView title_view;
 	}
 
-	static class main_item_holder
+	static class settings_checkbox_holder
 	{
 		TextView title_view;
 		ImageView divider_view;
 	}
 
-	static class TextViewHolder
+	static class settings_seekbar_holder
 	{
 		TextView title_view;
 		TextView unread_view;
