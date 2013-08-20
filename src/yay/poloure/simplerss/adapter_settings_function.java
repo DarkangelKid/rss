@@ -105,7 +105,7 @@ public class adapter_settings_function extends BaseAdapter
 		}
 		else
 		{
-			settings_seekbar_holder holder;
+			final settings_seekbar_holder holder;
 			if(convertView == null)
 			{
 				convertView = (View) inflater.inflate(R.layout.settings_seekbar, parent, false);
