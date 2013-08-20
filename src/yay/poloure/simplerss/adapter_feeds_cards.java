@@ -126,8 +126,10 @@ public class adapter_feeds_cards extends BaseAdapter
 
 	/* If the listview starts at the very top of a list with 20 items, position 19 is the only on calling getView(). */
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent)
+	public View getView(int pos, View convertView, ViewGroup parent)
 	{
+		final int position = total - pos - 1;
+
 		if(first)
 		{
 			listview = (ListView) parent;
@@ -145,6 +147,8 @@ public class adapter_feeds_cards extends BaseAdapter
 					/* The very top item is read only when the padding exists above it. */
 					if(listview.getChildAt(0).getTop() < sixteen && listview.getChildAt(0).getTop() >= eight)
 						read_items.add(content_links.get(content_links.size() - 1));
+					/*if(listview.getChildAt(position).getTop() == eight)
+						read_items.add(content_links.get(position));*/
 					if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
 						main.update_navigation_data(null, false);
 				}
@@ -169,8 +173,6 @@ public class adapter_feeds_cards extends BaseAdapter
 		}
 		else
 			holder = (ViewHolder) convertView.getTag();
-
-		position = total - position - 1;
 
 		final String link				= content_links.get(position);
 		final int height 				= content_height.get(position);

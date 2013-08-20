@@ -2,11 +2,15 @@
 <menu
 		xmlns:android="http://schemas.android.com/apk/res/android"
 		xmlns:app="http://schemas.android.com/apk/res-auto">
-
 	<item
 			android:id="@+id/add_feed"
 			android:title="add"
 			android:icon="@drawable/add"
+			app:showAsAction="ifRoom"/>
+	<item
+			android:id="@+id/unread"
+			android:title="unread"
+			android:icon="@drawable/unread"
 			app:showAsAction="ifRoom"/>
 	<item
 			android:id="@+id/refresh"
