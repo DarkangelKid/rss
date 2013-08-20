@@ -443,9 +443,15 @@ public class utilities
 
 	public static adapter_feeds_cards get_adapter_feeds_cards(FragmentManager fragment_manager, ViewPager viewpager, int page_index)
 	{
-		return ((adapter_feeds_cards)((ListFragment) fragment_manager
-						.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_index)))
-						.getListAdapter());
+		try
+		{
+			adapter_feeds_cards ith = ((adapter_feeds_cards)((ListFragment) fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_index))).getListAdapter());
+			return ith;
+		}
+		catch(Exception e)
+		{
+			return null;
+		}
 	}
 
 	public static void sort_group_content_by_time(String storage, String group)

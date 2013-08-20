@@ -1373,6 +1373,8 @@ public class main extends ActionBarActivity
 					oldest_unread = m;
 			}
 			new_items.set(page_number, false);
+			if(oldest_unread == 0)
+				oldest_unread = number_of_items;
 
 			while(lv == null)
 			{
@@ -1398,25 +1400,14 @@ public class main extends ActionBarActivity
 				}
 				counts = get_unread_counts();
 			}
-			publishProgress(new_titles, new_descriptions, new_links, new_images, new_heights, new_widths);
+			if(new_titles.size() > 0)
+				publishProgress(new_titles, new_descriptions, new_links, new_images, new_heights, new_widths);
 			return animFadeIn;
 		}
 
 		@Override
 		protected void onProgressUpdate(Object[] progress)
 		{
-			/*int index = lv.getFirstVisiblePosition() + 1;
-			View v = lv.getChildAt(0);
-			int top = (v == null) ? 0 : v.getTop();
-			if(top == 0)
-				index++;
-			else if (top < 0 && lv.getChildAt(1) != null)
-			{
-				index++;
-				v = lv.getChildAt(1);
-				top = v.getTop();
-			}*/
-
 			if(ith.getCount() == 0)
 			{
 				lv.setVisibility(View.INVISIBLE);
@@ -1426,8 +1417,6 @@ public class main extends ActionBarActivity
 
 			ith.add_list((List<String>) progress[0], (List<String>) progress[1], (List<String>) progress[2], (List<String>) progress[3], (List<Integer>) progress[4], (List<Integer>) progress[5]);
 			ith.notifyDataSetChanged();
-
-			//lv.setSelectionFromTop(index, top - twelve);
 		}
 
 		@Override
@@ -1435,8 +1424,7 @@ public class main extends ActionBarActivity
 		{
 			if(lv == null)
 				return;
-			if(oldest_unread == 0)
-				oldest_unread = number_of_items;
+
 			lv.setSelection(number_of_items - oldest_unread);
 
 			set_refresh(check_service_running());
@@ -1475,13 +1463,29 @@ public class main extends ActionBarActivity
 		for(int i = 1; i < size; i++)
 		{
 			unread = 0;
-			String[] urls = utilities.read_single_to_array(storage + GROUPS_DIRECTORY + current_groups.get(i) + SEPAR + current_groups.get(i) + CONTENT_APPENDIX, "link|");
-			for(int j = 0; j < urls.length; j++)
+			ith = utilities.get_adapter_feeds_cards(fragment_manager, viewpager, i);
+			if(ith == null)
 			{
-				if(!adapter_feeds_cards.read_items.contains(urls[j]))
+				String[] urls = utilities.read_single_to_array(storage + GROUPS_DIRECTORY + current_groups.get(i) + SEPAR + current_groups.get(i) + CONTENT_APPENDIX, "link|");
+				for(int j = 0; j < urls.length; j++)
 				{
-						unread = urls.length - j;
-						break;
+					if(!adapter_feeds_cards.read_items.contains(urls[j]))
+					{
+							unread = urls.length - j;
+							break;
+					}
+				}
+			}
+			else
+			{
+				List<String> urls = ith.content_links;
+				for(int j = 0; j < urls.size(); j++)
+				{
+					if(!adapter_feeds_cards.read_items.contains(urls.get(j)))
+					{
+							unread = urls.size() - j;
+							break;
+					}
 				}
 			}
 			total += unread;
