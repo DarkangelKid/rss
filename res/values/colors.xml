@@ -1,3 +1,4 @@
 <resources>
-	<drawable name="divider_settings_light">#cccccc</drawable>
+	<drawable name="divider_settings_dark">#cccccc</drawable>
+	<drawable name="divider_settings_light">#e5e5e5</drawable>
 </resources>

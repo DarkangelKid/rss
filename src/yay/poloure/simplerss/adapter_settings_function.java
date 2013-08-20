@@ -110,7 +110,7 @@ public class adapter_settings_function extends BaseAdapter
 			else
 				holder = (main_item_holder) convertView.getTag();
 
-			holder.title_view.setText("penis");
+			//holder.title_view.setText("penis");
 		}
 		else
 		{
@@ -125,7 +125,7 @@ public class adapter_settings_function extends BaseAdapter
 			else
 				holder = (TextViewHolder) convertView.getTag();
 
-			holder.title_view.setText("boobs");
+			//holder.title_view.setText("boobs");
 		}
 		return convertView;
 	}
