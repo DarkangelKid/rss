@@ -1181,7 +1181,7 @@ public class main extends ActionBarActivity
 			switch(position)
 			{
 				case(0):
-					return "Titties";
+					return "Function";
 			}
 			return "";
 		}
