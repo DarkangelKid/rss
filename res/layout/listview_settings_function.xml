@@ -7,4 +7,5 @@
 		android:scrollbars="none"
 		android:divider="#00000000"
 		android:dividerHeight="0dp"
-		android:drawSelectorOnTop="false"/>
+		android:drawSelectorOnTop="false"
+		android:background="#ffffff"/>

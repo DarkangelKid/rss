@@ -94,7 +94,7 @@ public class adapter_settings_function extends BaseAdapter
 			else
 				holder = (group_item_holder) convertView.getTag();
 
-			holder.title_view.setText("penis");
+			//holder.title_view.setText("penis");
 		}
 
 		else if(view_type == 1)
