@@ -7,17 +7,17 @@
 			android:text="@+id/settings_heading"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_marginBottom="2dp"
-			android:layout_marginLeft="5dp"
-			android:layout_marginRight="5dp"
+			android"layout_marginTop="4dp"
+			android:layout_marginBottom="4dp"
+			android:layout_marginLeft="6dp"
+			android:layout_marginRight="6dp"
 			android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
 			android:textColor="#323232"
-			android:textStyle="bold"
-			android:paddingBottom="5dp"/>
+			android:textStyle="bold"/>
 	<ImageView
 			android:id="@+id/divider_bold"
 			android:layout_width="match_parent"
 			android:layout_height="2dp"
 			android:scaleType="fitXY"
-			android:src="@drawable/divider_settings_light"/>
+			android:src="@drawable/divider_settings_dark"/>
 </LinearLayout>
