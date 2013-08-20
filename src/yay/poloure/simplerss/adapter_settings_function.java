@@ -122,6 +122,7 @@ public class adapter_settings_function extends BaseAdapter
 				convertView = (View) inflater.inflate(R.layout.settings_seekbar, parent, false);
 				holder = new settings_seekbar_holder();
 				holder.title_view = (TextView) convertView.findViewById(R.id.seek_title);
+				holder.summary_view = (TextView) convertView.findViewById(R.id.seek_summary);
 				convertView.setTag(holder);
 			}
 			else
@@ -141,7 +142,7 @@ public class adapter_settings_function extends BaseAdapter
 	static class settings_checkbox_holder
 	{
 		TextView title_view;
-		TextView summary_view;
+		TextView summary_view;edeeedeeeededeededesde
 	}
 
 	static class settings_seekbar_holder
