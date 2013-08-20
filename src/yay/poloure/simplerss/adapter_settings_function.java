@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.CheckBox;
 
 public class adapter_settings_function extends BaseAdapter
 {
@@ -95,6 +96,7 @@ public class adapter_settings_function extends BaseAdapter
 				holder = new settings_checkbox_holder();
 				holder.title_view = (TextView) convertView.findViewById(R.id.check_title);
 				holder.summary_view = (TextView) convertView.findViewById(R.id.check_summary);
+				holder.checkbox = (Checkbox) convertView.findViewById(R.id.checkbox);
 				convertView.setTag(holder);
 			}
 			else
@@ -102,6 +104,15 @@ public class adapter_settings_function extends BaseAdapter
 
 			holder.title_view.setText(title_array[position]);
 			holder.summary_view.setText(summary_array[position]);
+			holder.checkbox.setOnClickListener(new OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					boolean checked = ((CheckBox) v).isChecked();
+					///this is where values are saved to file
+				}
+			});
 		}
 		else
 		{
@@ -126,6 +137,7 @@ public class adapter_settings_function extends BaseAdapter
 				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
 				{
 					holder.read_view.setText(Integer.toString(progress + 20));
+					///may want to consider saving values to file here
 				}
 
 				public void onStartTrackingTouch(SeekBar seekBar)
@@ -149,6 +161,7 @@ public class adapter_settings_function extends BaseAdapter
 	{
 		TextView title_view;
 		TextView summary_view;
+		CheckBox checkbox;
 	}
 
 	static class settings_seekbar_holder
