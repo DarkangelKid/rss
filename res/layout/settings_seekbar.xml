@@ -11,7 +11,7 @@
 			android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
 			android:textColor="#000000"
 			android:text="@string/refresh_time_preferences"
-			android:layout_above="@+id/seek_summary"
+			android:layout_alignParentTop="true"
 			android:layout_alignParentLeft="true"/>
 	<TextView
 			android:id="@+id/seek_summary"
@@ -22,7 +22,7 @@
 			android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
 			android:textColor="#323232"
 			android:text="@string/refresh_time_summary_preferences"
-			android:layout_toLeftOf="@+id/seek_read"
+			android:layout_below="@+id/seek_title"
 			android:layout_alignParentLeft="true"/>
 	<SeekBar
 			android:id="@+id/seekbar"
@@ -45,6 +45,8 @@
 			android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
 			android:textColor="#323232"
 			android:text="100"
+			android:layout_toRightof="@+id/seek_summary"
+			android:layout_above="@+id/seekbar"
 			android:layout_alignParentRight="true"/>
 	<ImageView
 			android:id="@+id/divider_norm"
