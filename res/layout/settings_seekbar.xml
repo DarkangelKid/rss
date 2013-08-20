@@ -45,7 +45,7 @@
 			android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
 			android:textColor="#323232"
 			android:text="100"
-			android:layout_toRightof="@+id/seek_summary"
+			android:layout_toRightOf="@+id/seek_summary"
 			android:layout_above="@+id/seekbar"
 			android:layout_alignParentRight="true"/>
 	<ImageView
