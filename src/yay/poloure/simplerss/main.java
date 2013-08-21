@@ -761,8 +761,10 @@ public class main extends ActionBarActivity
 			return;
 		}
 
+		/* 0 is the top. */
+
 		if(oldest_unread == -1)
-			oldest_unread++;
+			oldest_unread = links.size() - 1;
 
 		final int position = links.size() - oldest_unread - 1;
 		if(position >= 0)
