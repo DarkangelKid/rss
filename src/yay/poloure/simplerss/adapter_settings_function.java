@@ -2,6 +2,7 @@ package yay.poloure.simplerss;
 
 import android.widget.BaseAdapter;
 import android.view.View;
+import android.view.View.onClickListener;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.content.Context;
@@ -15,6 +16,7 @@ public class adapter_settings_function extends BaseAdapter
 {
 	private final String[] title_array;
 	private final String[] summary_array;
+	private static final String[] refresh_times[] = {"15m","30m","45m","1h","2h","3h","4h","8h","12h","24h"};
 
 	private static LayoutInflater inflater;
 
@@ -97,7 +99,7 @@ public class adapter_settings_function extends BaseAdapter
 				holder = new settings_checkbox_holder();
 				holder.title_view = (TextView) convertView.findViewById(R.id.check_title);
 				holder.summary_view = (TextView) convertView.findViewById(R.id.check_summary);
-				holder.checkbox = (Checkbox) convertView.findViewById(R.id.checkbox);
+				holder.checkbox = (CheckBox) convertView.findViewById(R.id.checkbox);
 				convertView.setTag(holder);
 			}
 			else
