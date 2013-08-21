@@ -71,9 +71,10 @@ public class adapter_settings_function extends BaseAdapter
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
 		final int view_type = getItemViewType(position);
+		final int pos = position;
 		if(view_type == 0)
 		{
-			settings_heading_holder holder;
+			final settings_heading_holder holder;
 			if(convertView == null)
 			{
 				convertView = (View) inflater.inflate(R.layout.settings_heading, parent, false);
@@ -89,7 +90,7 @@ public class adapter_settings_function extends BaseAdapter
 
 		else if(view_type == 1)
 		{
-			settings_checkbox_holder holder;
+			final settings_checkbox_holder holder;
 			if(convertView == null)
 			{
 				convertView = (View) inflater.inflate(R.layout.settings_checkbox, parent, false);
@@ -110,7 +111,10 @@ public class adapter_settings_function extends BaseAdapter
 				public void onClick(View v)
 				{
 					boolean checked = ((CheckBox) v).isChecked();
+					String file_name = title_array[pos];
 					///this is where values are saved to file
+					///for settings files the file name should probably be the title of the settings item
+					///as this is already stored in a final array, is unique and will not cause issues between apk updates.
 				}
 			});
 		}
