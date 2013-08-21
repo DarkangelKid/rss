@@ -625,7 +625,7 @@ public class main extends ActionBarActivity
 		@Override
 		public int getCount()
 		{
-			return 1;
+			return 2;
 		}
 
 		@Override
@@ -635,6 +635,8 @@ public class main extends ActionBarActivity
 			{
 				case(0):
 					return new fragment_settings_function();
+				case(1):
+					return new Fragment();
 			}
 			return null;
 		}
@@ -645,7 +647,9 @@ public class main extends ActionBarActivity
 			switch(position)
 			{
 				case(0):
-					return "Function";
+					return "Functions";
+				case(1):
+					return "Interface";
 			}
 			return "";
 		}
