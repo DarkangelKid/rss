@@ -16,7 +16,7 @@ public class adapter_settings_function extends BaseAdapter
 {
 	private final String[] title_array;
 	private final String[] summary_array;
-	private static final String[] refresh_times[] = {"15m","30m","45m","1h","2h","3h","4h","8h","12h","24h"};
+	private static final String[] refresh_times = {"15m","30m","45m","1h","2h","3h","4h","8h","12h","24h"};
 
 	private static LayoutInflater inflater;
 
@@ -140,11 +140,12 @@ public class adapter_settings_function extends BaseAdapter
 
 			holder.title_view.setText(title_array[position]);
 			holder.summary_view.setText(summary_array[position]);
+			holder.seekbar.setMax(9);
 			holder.seekbar.setOnSeekBarChangeListener(new OnSeekBarChangeListener()
 			{
 				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
 				{
-					holder.read_view.setText(Integer.toString(progress + 20));
+					holder.read_view.setText(refresh_times[progress]);
 					String file_name = title_array[pos];
 					///PAULTODO
 					///may want to consider saving values to file here
