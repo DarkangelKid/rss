@@ -2,7 +2,7 @@ package yay.poloure.simplerss;
 
 import android.widget.BaseAdapter;
 import android.view.View;
-import android.view.View.onClickListener;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.content.Context;
