@@ -111,7 +111,9 @@ public class adapter_settings_function extends BaseAdapter
 				public void onClick(View v)
 				{
 					boolean checked = ((CheckBox) v).isChecked();
+					///below code could equally easily be passed through as a final string, whatever.
 					String file_name = title_array[pos];
+					///PAULTODO
 					///this is where values are saved to file
 					///for settings files the file name should probably be the title of the settings item
 					///as this is already stored in a final array, is unique and will not cause issues between apk updates.
@@ -141,6 +143,8 @@ public class adapter_settings_function extends BaseAdapter
 				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
 				{
 					holder.read_view.setText(Integer.toString(progress + 20));
+					String file_name = title_array[pos];
+					///PAULTODO
 					///may want to consider saving values to file here
 				}
 
