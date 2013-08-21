@@ -71,7 +71,6 @@ public class adapter_feeds_cards extends BaseAdapter
 	public  int			unread_count	= 0;
 	public  int			top_item			= 0;
 	private boolean	first				= true;
-	private boolean	touched			= false;
 	private ListView	listview;
 
 
@@ -142,11 +141,13 @@ public class adapter_feeds_cards extends BaseAdapter
 				@Override
 				public void onScrollStateChanged(AbsListView view, int scrollState)
 				{
-					if(!touched && listview.getVisibility() == View.VISIBLE)
-						touched = true;
 					/* The very top item is read only when the padding exists above it. */
-					if(listview.getChildAt(0).getTop() < sixteen && listview.getChildAt(0).getTop() >= eight)
+					/* content_links.get(0) == the last link in the list. position is always 76*/
+					if(listview.getChildAt(0).getTop() == eight)
+					{
+						utilities.log(main.storage, "True.");
 						read_items.add(content_links.get(content_links.size() - 1));
+					}
 					/*if(listview.getChildAt(position).getTop() == eight)
 						read_items.add(content_links.get(position));*/
 					if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
@@ -220,8 +221,13 @@ public class adapter_feeds_cards extends BaseAdapter
 		}
 
 		/* The logic that tells whether the item is read or not. */
-		if(touched && position - 1 >= 0)
-			read_items.add(content_links.get(position - 1));
+		if(listview.getVisibility() == View.VISIBLE)
+		{
+			/*if(listview.getChildAt(position).getTop() == eight)
+				read_items.add(content_links.get(position));
+			else */if(position - 1 >= 0)
+				read_items.add(content_links.get(position - 1));
+		}
 
 		String title 					= content_titles.get(position);
 		String description 			= content_des.get(position);
