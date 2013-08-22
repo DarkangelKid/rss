@@ -1,17 +1,5 @@
 package yay.poloure.simplerss;
 
-import java.net.URL;
-
-import java.util.List;
-import java.util.Locale;
-import java.util.regex.Pattern;
-
-import android.widget.Button;
-import android.widget.TextView;
-import android.widget.SpinnerAdapter;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -19,11 +7,20 @@ import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.SpinnerAdapter;
+import android.widget.TextView;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.BufferedWriter;
-import java.io.BufferedInputStream;
+import java.net.URL;
+import java.util.List;
+import java.util.Locale;
+import java.util.regex.Pattern;
 
 public class add_edit_dialog
 {

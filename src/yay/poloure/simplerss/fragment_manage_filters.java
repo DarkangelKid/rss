@@ -1,20 +1,16 @@
 package yay.poloure.simplerss;
 
-import android.support.v4.app.Fragment;
-
-import android.os.Bundle;
-
-import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.AdapterView;
-import android.widget.ListView;
-
+import android.app.AlertDialog;
 import android.content.DialogInterface;
-
-import android.view.View;
-import android.view.ViewGroup;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.app.AlertDialog;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.ListView;
 
 class fragment_manage_filters extends Fragment
 {

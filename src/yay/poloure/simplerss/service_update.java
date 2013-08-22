@@ -1,25 +1,22 @@
 package yay.poloure.simplerss;
 
-import android.app.IntentService;
 import android.app.Activity;
-import android.content.Intent;
-import android.content.Context;
-import android.os.Environment;
-
-import java.util.List;
-
-import android.os.PowerManager;
-import android.os.Process;
-
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.TaskStackBuilder;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
-
+import android.app.IntentService;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Point;
+import android.os.Environment;
+import android.os.PowerManager;
+import android.os.Process;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.view.WindowManager;
+
+import java.util.List;
 
 public class service_update extends IntentService
 {

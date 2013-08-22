@@ -1,18 +1,16 @@
 package yay.poloure.simplerss;
 
-import android.support.v4.app.ListFragment;
 import android.os.AsyncTask;
-
-import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Collections;
-
-import android.widget.ListView;
-
+import android.support.v4.app.ListFragment;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ListView;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 class refresh_page extends AsyncTask<Void, Object, Animation>
 {

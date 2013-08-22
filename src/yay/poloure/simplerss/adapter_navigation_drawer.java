@@ -1,14 +1,15 @@
 package yay.poloure.simplerss;
 
-import android.widget.BaseAdapter;
-import java.util.ArrayList;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
 import android.content.Context;
 import android.view.LayoutInflater;
-import java.util.List;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class adapter_navigation_drawer extends BaseAdapter
 {

@@ -1,40 +1,39 @@
 package yay.poloure.simplerss;
 
+import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.widget.DrawerLayout;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.graphics.drawable.ColorDrawable;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.support.v4.widget.DrawerLayout;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.widget.ListView;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.AbsListView;
-import android.net.Uri;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
-import java.io.File;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.FrameLayout;
-import android.support.v4.app.Fragment;
 import android.webkit.WebView;
-import android.os.Bundle;
+import android.widget.AbsListView;
+import android.widget.BaseAdapter;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
 
-import java.util.regex.Pattern;
-import android.util.DisplayMetrics;
-import android.graphics.Color;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
+import java.io.File;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 public class adapter_feeds_cards extends BaseAdapter
 {
