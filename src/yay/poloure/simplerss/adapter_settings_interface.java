@@ -88,7 +88,7 @@ public class adapter_settings_interface extends BaseAdapter
 
 		else if(view_type == 1)
 		{
-			final settings_checkbox_holder holder;
+			final settings_holocolour_holder holder;
 			if(convertView == null)
 			{
 				convertView = (View) inflater.inflate(R.layout.settings_holocolour_select, parent, false);
@@ -103,7 +103,7 @@ public class adapter_settings_interface extends BaseAdapter
 				convertView.setTag(holder);
 			}
 			else
-				holder = (settings_checkbox_holder) convertView.getTag();
+				holder = (settings_holocolour_holder) convertView.getTag();
 
 			holder.title_view.setText(title_array[position]);
 			holder.summary_view.setText(summary_array[position]);
