@@ -1,4 +1,16 @@
 <resources>
 	<drawable name="divider_settings_dark">#cccccc</drawable>
 	<drawable name="divider_settings_light">#e5e5e5</drawable>
+
+	<drawable name="colour_blue_bold">#0099cc</drawable>
+	<drawable name="colour_purple_bold">#9933cc</drawable>
+	<drawable name="colour_green_bold">#669900</drawable>
+	<drawable name="colour_yellow_bold">#ff8800</drawable>
+	<drawable name="colour_red_bold">#cc0000</drawable>
+
+	<drawable name="colour_blue_light">#33b5e5</drawable>
+	<drawable name="colour_purple_light">#aa66cc</drawable>
+	<drawable name="colour_green_light">#99cc00</drawable>
+	<drawable name="colour_yellow_light">#ffbb33</drawable>
+	<drawable name="colour_red_light">#ff4444</drawable>
 </resources>
