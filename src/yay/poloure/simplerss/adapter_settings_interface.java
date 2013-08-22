@@ -183,12 +183,12 @@ public class adapter_settings_interface extends BaseAdapter
 		public void onClick(View v)
 		{
 			View parent = (View) v.getParent();
-			((ImageView) parent.findViewById(R.id.blue_image)).setAlpha(0.5);
-			((ImageView) parent.findViewById(R.id.purple_image)).setAlpha(0.5);
-			((ImageView) parent.findViewById(R.id.green_image)).setAlpha(0.5);
-			((ImageView) parent.findViewById(R.id.yellow_image)).setAlpha(0.5);
-			((ImageView) parent.findViewById(R.id.red_image)).setAlpha(0.5);
-			((ImageView) v).setAlpha(1.0);
+			((ImageView) parent.findViewById(R.id.blue_image)).setAlpha(0.5f);
+			((ImageView) parent.findViewById(R.id.purple_image)).setAlpha(0.5f);
+			((ImageView) parent.findViewById(R.id.green_image)).setAlpha(0.5f);
+			((ImageView) parent.findViewById(R.id.yellow_image)).setAlpha(0.5f);
+			((ImageView) parent.findViewById(R.id.red_image)).setAlpha(0.5f);
+			((ImageView) v).setAlpha(1.0f);
 		}
 	}
 
