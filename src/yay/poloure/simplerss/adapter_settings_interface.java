@@ -92,7 +92,7 @@ public class adapter_settings_interface extends BaseAdapter
 			if(convertView == null)
 			{
 				convertView = (View) inflater.inflate(R.layout.settings_holocolour_select, parent, false);
-				holder = new settings_checkbox_holder();
+				holder = new settings_holocolour_holder();
 				holder.title_view = (TextView) convertView.findViewById(R.id.colour_title);
 				holder.summary_view = (TextView) convertView.findViewById(R.id.colour_summary);
 				holder.blue_view = (ImageView) convertView.findViewById(R.id.blue_image);
