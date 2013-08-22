@@ -30,6 +30,7 @@
 			android:layout_width="24dp"
 			android:layout_height="24dp"
 			android:src="@drawable/colour_blue_light"
+			android:layout_marginLeft="24dp"
 			android:layout_marginRight="48dp"
 			android:layout_alignParentLeft="true"
 			android:layout_below="@+id/colour_summary"/>

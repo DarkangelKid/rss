@@ -107,6 +107,12 @@ public class adapter_settings_interface extends BaseAdapter
 
 			holder.title_view.setText(title_array[position]);
 			holder.summary_view.setText(summary_array[position]);
+			holder.blue_view.setOnClickListener(new colour_click(0));
+			holder.purple_view.setOnClickListener(new colour_click(1));
+			holder.green_view.setOnClickListener(new colour_click(2));
+			holder.yellow_view.setOnClickListener(new colour_click(3));
+			holder.red_view.setOnClickListener(new colour_click(4));
+
 			/*holder.checkbox.setOnClickListener(new OnClickListener()
 			{
 				@Override
@@ -163,6 +169,27 @@ public class adapter_settings_interface extends BaseAdapter
 			});
 		}*/
 		return convertView;
+	}
+
+	private class colour_click implements View.OnClickListener
+	{
+		int clicked_colour
+		public colour_click(int colour)
+		{
+			clicked_colour = colour;
+		}
+
+		@Override
+		public void onClick(View v)
+		{
+			View parent = (View) v.getParent();
+			((ImageView) parent.findViewById(R.id.blue_image)).setAlpha(0.5);
+			((ImageView) parent.findViewById(R.id.purple_image)).setAlpha(0.5);
+			((ImageView) parent.findViewById(R.id.green_image)).setAlpha(0.5);
+			((ImageView) parent.findViewById(R.id.yellow_image)).setAlpha(0.5);
+			((ImageView) parent.findViewById(R.id.red_image)).setAlpha(0.5);
+			v.setAlpha(1.0);
+		}
 	}
 
 	static class settings_heading_holder
