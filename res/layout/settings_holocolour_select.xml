@@ -27,37 +27,42 @@
 			android:layout_alignParentLeft="true"/>
 	<ImageView
 			android:id="@+id/blue_image"
-			android:layout_width="8dp"
-			android:layout_height="8dp"
-			android:src="@drawable/colour_blue_bold"
-			android:layout_marginRight="4dp"
+			android:layout_width="24dp"
+			android:layout_height="24dp"
+			android:src="@drawable/colour_blue_light"
+			android:layout_marginRight="48dp"
 			android:layout_alignParentLeft="true"
 			android:layout_below="@+id/colour_summary"/>
 	<ImageView
 			android:id="@+id/purple_image"
-			android:layout_width="8dp"
-			android:layout_height="8dp"
-			android:src="@drawable/colour_purple_bold"
+			android:layout_width="24dp"
+			android:layout_height="24dp"
+			android:src="@drawable/colour_purple_light"
+			android:layout_marginRight="48dp"
+			android:layout_below="@+id/colour_summary"
 			android:layout_toRightOf="@+id/blue_image"/>
 	<ImageView
 			android:id="@+id/green_image"
-			android:layout_width="8dp"
-			android:layout_height="8dp"
-			android:src="@drawable/colour_green_bold"
-			android:layout_marginRight="4dp"
+			android:layout_width="24dp"
+			android:layout_height="24dp"
+			android:src="@drawable/colour_green_light"
+			android:layout_marginRight="48dp"
+			android:layout_below="@+id/colour_summary"
 			android:layout_toRightOf="@+id/purple_image"/>
 	<ImageView
 			android:id="@+id/yellow_image"
-			android:layout_width="8dp"
-			android:layout_height="8dp"
-			android:src="@drawable/colour_yellow_bold"
-			android:layout_marginRight="4dp"
+			android:layout_width="24dp"
+			android:layout_height="24dp"
+			android:src="@drawable/colour_yellow_light"
+			android:layout_marginRight="48dp"
+			android:layout_below="@+id/colour_summary"
 			android:layout_toRightOf="@+id/green_image"/>
 	<ImageView
 			android:id="@+id/red_image"
-			android:layout_width="8dp"
-			android:layout_height="8dp"
-			android:src="@drawable/colour_red_bold"
+			android:layout_width="24dp"
+			android:layout_height="24dp"
+			android:src="@drawable/colour_red_light"
+			android:layout_below="@+id/colour_summary"
 			android:layout_toRightOf="@+id/yellow_image"/>
 	<ImageView
 			android:id="@+id/divider_norm"
