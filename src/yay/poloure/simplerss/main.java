@@ -1,62 +1,39 @@
 package yay.poloure.simplerss;
 
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-
-import android.os.Debug;
-import android.os.Bundle;
-import android.os.AsyncTask;
-import android.os.Environment;
-
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.res.Configuration;
-import android.content.res.Resources;
-
-import android.app.AlertDialog;
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
-import android.app.Activity;
-
+import android.content.Context;
+import android.content.Intent;
+import android.content.res.Configuration;
+import android.graphics.Color;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
+import android.provider.Settings;
+import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.ListFragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.ListFragment;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v4.view.PagerTabStrip;
+import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
-import android.support.v4.view.PagerTabStrip;
-import android.support.v4.widget.DrawerLayout;
-
-import android.view.Menu;
-import android.view.MenuItem;
-import android.support.v4.view.MenuItemCompat;
-import android.view.MenuInflater;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-
-import android.widget.ListView;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.AbsListView.MultiChoiceModeListener;
-
-import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.regex.Pattern;
-
-import android.telephony.TelephonyManager;
-import android.provider.Settings;
+import android.widget.ListView;
 
 import java.io.File;
 
@@ -75,25 +52,22 @@ public class main extends ActionBarActivity
 	public  static FragmentManager		fragment_manager;
 	public  static ActionBar				action_bar;
 	public  static Activity					activity;
+	public  static Handler					service_handler;
 	public  static adapter_navigation_drawer nav_adapter;
-	public  static List<String> current_groups 			= new ArrayList<String>();
-	public  static List<Boolean> new_items 				= new ArrayList<Boolean>();
+	public  static String[] current_groups = new String[0];
 	public  static String storage, ALL, NAVIGATION, DELETE_DIALOG, CLEAR_DIALOG, ALL_FILE;
 
 	/// Private static final are good.
 	private static final int[] times							= new int[]{15, 30, 45, 60, 120, 180, 240, 300, 360, 400, 480, 540, 600, 660, 720, 960, 1440, 2880, 10080, 43829};
-	private static final Pattern whitespace				= Pattern.compile("\\s+");
 
 	/// Public static final are the holy grail.
 	public  static final String SEPAR						= System.getProperty("file.separator");
 	public  static final String NL							= System.getProperty("line.separator");
 	public  static final String TXT							= ".txt";
 	public  static final String GROUPS_DIRECTORY			= "groups" + SEPAR;
-	public  static final String CONTENT_DIRECTORY		= "content" + SEPAR;
 	public  static final String THUMBNAIL_DIRECTORY		= "thumbnails" + SEPAR;
 	public  static final String IMAGE_DIRECTORY			= "images" + SEPAR;
 	public  static final String DUMP_FILE					= "dump" + TXT;
-	public  static final String NEW_ITEMS					= "new_items" + TXT;
 	public  static final String READ_ITEMS					= "read_items" + TXT;
 	public  static final String STORE_APPENDIX			= ".store" + TXT;
 	public  static final String CONTENT_APPENDIX			= ".content" + TXT;
@@ -279,8 +253,6 @@ public class main extends ActionBarActivity
 		}
 		utilities.delete(storage + READ_ITEMS);
 		utilities.write_collection_to_file(storage + READ_ITEMS, adapter_feeds_cards.read_items);
-
-		utilities.write_collection_to_file(storage + NEW_ITEMS, new_items);
 	}
 
 	@Override
@@ -296,16 +268,6 @@ public class main extends ActionBarActivity
 			alarm_manager.cancel(pend_intent);
 		}
 
-		List<String> strings = utilities.read_file_to_list(storage + NEW_ITEMS);
-		new_items = new ArrayList<Boolean>();
-		for(String string : strings)
-		{
-			if(string.equals("true"))
-				new_items.add(true);
-			else if(string.equals("false"))
-				new_items.add(false);
-		}
-
 		if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.FROYO)
 			storage				= getExternalFilesDir(null).getAbsolutePath() + SEPAR;
 		else
@@ -318,13 +280,7 @@ public class main extends ActionBarActivity
 				storage_file.mkdirs();
 		}
 
-		current_groups = utilities.read_file_to_list(storage + GROUP_LIST);
-		if(new_items.size() != current_groups.size())
-		{
-			new_items.clear();
-			for(String string : current_groups)
-				new_items.add(true);
-		}
+		current_groups = utilities.read_file_to_array(storage + GROUP_LIST);
 	}
 
 	private void switch_page(String page_title, int position)
@@ -389,7 +345,7 @@ public class main extends ActionBarActivity
 					@Override
 					public void onPageSelected(int position)
 					{
-						if(utilities.get_adapter_feeds_cards(fragment_manager, viewpager, position).getCount() == 0 || new_items.get(position))
+						if(utilities.get_adapter_feeds_cards(fragment_manager, viewpager, position).getCount() == 0)
 						{
 							if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
 								new refresh_page(position).execute();
@@ -489,13 +445,13 @@ public class main extends ActionBarActivity
 		@Override
 		public int getCount()
 		{
-			return current_groups.size();
+			return current_groups.length;
 		}
 
  		@Override
 		public Fragment getItem(int position)
 		{
-			//if(position < current_groups.size())
+			//if(position < current_groups.length)
 			{
 				fragment_card f = new fragment_card();
 				Bundle args = new Bundle();
@@ -509,7 +465,7 @@ public class main extends ActionBarActivity
 		@Override
 		public String getPageTitle(int position)
 		{
-			return current_groups.get(position);
+			return current_groups[position];
 		}
 	}
 
@@ -566,14 +522,14 @@ public class main extends ActionBarActivity
 			setRetainInstance(false);
 			adapter_feeds_cards ith = new adapter_feeds_cards(getActivity());
 			setListAdapter(ith);
-			String group = current_groups.get(getArguments().getInt("num", 0));
-			List<String> lines = utilities.read_file_to_list(storage + GROUPS_DIRECTORY + group + SEPAR + group + CONTENT_APPENDIX);
+			String group = current_groups[getArguments().getInt("num", 0)];
+			String[] lines = utilities.read_file_to_array(storage + GROUPS_DIRECTORY + group + SEPAR + group + CONTENT_APPENDIX);
 			int count = -1;
-			for(int i = 0; i < lines.size(); i++)
+			for(int i = 0; i < lines.length; i++)
 			{
-				if(lines.get(i).substring(7, 8).equals("0"))
+				if(lines[i].substring(7, 8).equals("0"))
 				{
-					count = lines.size() - i + 1;
+					count = lines.length - i + 1;
 					break;
 				}
 			}
@@ -592,13 +548,6 @@ public class main extends ActionBarActivity
 
 	public static class fragment_settings extends Fragment
 	{
-		@Override
-		public void onCreate(Bundle savedInstanceState)
-		{
-			super.onCreate(savedInstanceState);
-
-		}
-
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle SavedInstanceState)
 		{
@@ -720,19 +669,15 @@ public class main extends ActionBarActivity
 
 	public static void update_groups()
 	{
-		final int previous_size = current_groups.size();
+		final int previous_size = current_groups.length;
 
-		current_groups = utilities.read_file_to_list(storage + GROUP_LIST);
-		final int size = current_groups.size();
+		current_groups = utilities.read_file_to_array(storage + GROUP_LIST);
+		final int size = current_groups.length;
 		if(size == 0)
 		{
 			utilities.append_string_to_file(storage + GROUP_LIST, ALL + NL);
-			current_groups.add(ALL);
+			current_groups = new String[]{"All"};
 		}
-
-		new_items.clear();
-		for(String group : current_groups)
-			new_items.add(false);
 
 		/// If viewpager exists, fragment_manager != null. This must come before the nav_adapter.
 		if(viewpager != null)
@@ -750,41 +695,43 @@ public class main extends ActionBarActivity
 		final int page_number = viewpager.getCurrentItem();
 		int oldest_unread = -1;
 
-		final String group_path				= storage + GROUPS_DIRECTORY + current_groups.get(page_number) + main.SEPAR;
-		final String group_content_path	= group_path + current_groups.get(page_number) + CONTENT_APPENDIX;
+		final String group_path				= storage + GROUPS_DIRECTORY + current_groups[page_number] + main.SEPAR;
+		final String group_content_path	= group_path + current_groups[page_number] + CONTENT_APPENDIX;
 
 		if(!utilities.exists(group_content_path))
 			return;
 
-		List<String> links = utilities.get_adapter_feeds_cards(fragment_manager, viewpager, page_number).content_links;
+		String[] links = utilities.get_adapter_feeds_cards(fragment_manager, viewpager, page_number).links;
 
-		final int size = links.size();
+		final int size = links.length;
 		for(int m = 0; m < size; m++)
 		{
-			if(!adapter_feeds_cards.read_items.contains(links.get(m)))
+			if(!adapter_feeds_cards.read_items.contains(links[m]))
 			{
 				oldest_unread = m;
 				break;
 			}
 		}
 		if(oldest_unread == 0)
-			oldest_unread = links.size();
+			oldest_unread = links.length;
 
 		ListView lv = ((ListFragment) fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_number))).getListView();
 
 		if(lv == null)
 			return;
 
-		if(oldest_unread == links.size())
+		if(oldest_unread == links.length)
 		{
-			lv.setSelection(links.size());
+			lv.setSelection(links.length);
 			return;
 		}
 
-		if(oldest_unread == -1)
-			oldest_unread++;
+		/* 0 is the top. */
 
-		final int position = links.size() - oldest_unread - 1;
+		if(oldest_unread == -1)
+			oldest_unread = links.length - 1;
+
+		final int position = links.length - oldest_unread - 1;
 		if(position >= 0)
 			lv.setSelection(position);
 		else
@@ -794,6 +741,14 @@ public class main extends ActionBarActivity
 	private static void refresh_feeds()
 	{
 		set_refresh(true);
+		service_handler = new Handler()
+		{
+			@Override
+			public void handleMessage(Message msg)
+			{
+				set_refresh(false);
+			}
+		};
 		/* SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(activity_context);*/
 		/* TODO used to save positions here but now I am not sure I need too anymore. */
 		final int page_number = viewpager.getCurrentItem();
@@ -801,16 +756,7 @@ public class main extends ActionBarActivity
 		intent.putExtra("GROUP_NUMBER", page_number);
 		intent.putExtra("NOTIFICATIONS", /*pref.getBoolean("notifications", false)*/true);
 		activity_context.startService(intent);
-		if(page_number == 0)
-		{
-			for(int i = 0; i < new_items.size(); i++)
-				new_items.set(i, true);
-		}
-		else
-		{
-			new_items.set(0, true);
-			new_items.set(page_number, true);
-		}
+
 		/// Maybe do not refresh the page.
 		if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
 			new refresh_page(page_number).execute();
@@ -818,40 +764,38 @@ public class main extends ActionBarActivity
 			new refresh_page(page_number).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 
-	public static void update_navigation_data(List<Integer> counts, Boolean update_names)
+	public static void update_navigation_data(int[] counts, Boolean update_names)
 	{
 		if(counts == null)
 			counts = get_unread_counts();
 
 		if(update_names)
-			nav_adapter.add_list(current_groups);
+			nav_adapter.set_titles(current_groups);
 
-		nav_adapter.add_count(counts);
+		nav_adapter.set_counts(counts);
 		nav_adapter.notifyDataSetChanged();
 	}
 
-	public static List<Integer> get_unread_counts()
+	public static int[] get_unread_counts()
 	{
-		List<Integer> unread_list	= new ArrayList<Integer>();
 		int total = 0, unread;
-		adapter_feeds_cards ith = null;
-		fragment_card fc;
-		final int size = current_groups.size();
+		final int size = current_groups.length;
+		int[] unread_counts	= new int[current_groups.length];
 
 		for(int i = 1; i < size; i++)
 		{
 			unread = 0;
-			String[] urls = utilities.read_single_to_array(storage + GROUPS_DIRECTORY + current_groups.get(i) + SEPAR + current_groups.get(i) + CONTENT_APPENDIX, "link|");
+			String[] urls = utilities.read_single_to_array(storage + GROUPS_DIRECTORY + current_groups[i] + SEPAR + current_groups[i] + CONTENT_APPENDIX, "link|");
 			for(int j = 0; j < urls.length; j++)
 			{
 				if(!adapter_feeds_cards.read_items.contains(urls[j]))
 						unread++;
 			}
 			total += unread;
-			unread_list.add(unread);
+			unread_counts[i] = unread;
 		}
 
-		unread_list.add(0, total);
-		return unread_list;
+		unread_counts[0] = total;
+		return unread_counts;
 	}
 }

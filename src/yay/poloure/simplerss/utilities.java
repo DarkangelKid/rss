@@ -1,31 +1,26 @@
 package yay.poloure.simplerss;
 
 import android.content.Context;
+import android.os.Environment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
 import android.support.v4.view.ViewPager;
-import android.os.Environment;
-
-import java.net.URL;
-import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.ArrayList;
-import java.util.Collection;
-
-import java.io.File;
-import java.io.BufferedInputStream;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.FileReader;
-import java.io.BufferedWriter;
-import java.io.BufferedReader;
-import java.io.IOException;
-
 import android.text.format.Time;
 import android.widget.Toast;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.URL;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 public class utilities
 {
@@ -71,6 +66,45 @@ public class utilities
 		return c;
 	}
 
+	public static String[] concat_string_arrays(String[] A, String[] B)
+	{
+		if(A.length == 0)
+			return B;
+		if(B.length == 0)
+			return A;
+		int aLen = A.length;
+		int bLen = B.length;
+		String[] C = new String[aLen+bLen];
+		System.arraycopy(A, 0, C, 0, aLen);
+		System.arraycopy(B, 0, C, aLen, bLen);
+		return C;
+	}
+
+	public static int[] concat_int_arrays(int[] A, int[] B)
+	{
+		if(A.length == 0)
+			return B;
+		if(B.length == 0)
+			return A;
+		int aLen = A.length;
+		int bLen = B.length;
+		int[] C = new int[aLen+bLen];
+		System.arraycopy(A, 0, C, 0, aLen);
+		System.arraycopy(B, 0, C, aLen, bLen);
+		return C;
+	}
+
+	public static int index_of(String[] array, String value)
+	{
+		for(int i = 0; i < array.length; i++)
+		{
+			if(array[i] == value)
+				return i;
+		}
+		/* Throws an ArrayOutOfBoundsException if not handled. */
+		return -1;
+	}
+
 	public static String[] remove_element(String[] a, int index)
 	{
 		String[] b = new String[a.length - 1];
@@ -110,25 +144,25 @@ public class utilities
 		}
 	}
 
-	public static String[][] create_info_arrays(List<String> current_groups, int size, String storage)
+	public static String[][] create_info_arrays(String[] current_groups, int size, String storage)
 	{
 		String info;
 		int number, i, j, total;
 		String[] content;
-		String[] group_array	= new String[size];
+		String[] group_array		= new String[size];
 		String[] info_array		= new String[size];
 
-		final String content_path = storage + main.GROUPS_DIRECTORY + current_groups.get(0) + main.SEPAR + current_groups.get(0) + main.CONTENT_APPENDIX;
+		final String content_path = storage + main.GROUPS_DIRECTORY + current_groups[0] + main.SEPAR + current_groups[0] + main.CONTENT_APPENDIX;
 		final String count_path = content_path + main.COUNT_APPENDIX;
 
 		if(exists(count_path))
-			total = Integer.parseInt(read_file_to_list(count_path).get(0));
+			total = Integer.parseInt(read_file_to_array(count_path)[0]);
 		else
 			total = count_lines(content_path);
 
 		for(i = 0; i < size; i++)
 		{
-			group_array[i] = current_groups.get(i);
+			group_array[i] = current_groups[i];
 			content = read_single_to_array(storage + main.GROUPS_DIRECTORY + group_array[i] + main.SEPAR + group_array[i] + main.TXT, "name|");
 			if(i == 0)
 				info = (size == 1) ? "1 group" :  size + " groups";
@@ -196,9 +230,9 @@ public class utilities
 		}
 	}
 
-	public static void remove_string_from_file(String file_path, CharSequence string, Boolean contains)
+	public static void remove_string_from_file(String file_path, String string, Boolean contains)
 	{
-		final List<String> list = read_file_to_list(file_path);
+		final String[] list = read_file_to_array(file_path);
 		delete(file_path);
 		try{
 			final BufferedWriter out = new BufferedWriter(new FileWriter(file_path, true));
@@ -226,24 +260,12 @@ public class utilities
 		int next, offset, j;
 		String line;
 		char ch;
-		List<String> lines = new ArrayList<String>();
+		String[] lines = read_file_to_array(file_path);
+		String[] types = new String[lines.length];
 
-		try
+		for(j = 0; j < lines.length; j++)
 		{
-			BufferedReader stream = new BufferedReader(new FileReader(file_path));
-			while((line = stream.readLine()) != null)
-				lines.add(line);
-			stream.close();
-		}
-		catch(Exception e)
-		{
-		}
-
-		String[] types = new String[lines.size()];
-
-		for(j = 0; j < lines.size(); j++)
-		{
-			line = lines.get(j);
+			line = lines[j];
 			if((next = line.indexOf(type, 0)) != -1)
 			{
 				ch = type.charAt(0);
@@ -270,24 +292,14 @@ public class utilities
 		String line;
 		char ch;
 		int start = (type[0] == 'm') ? 1 : 0;
-		List<String> lines = new ArrayList<String>();
 
-		try
-		{
-			BufferedReader stream = new BufferedReader(new FileReader(file_path));
-			while((line = stream.readLine()) != null)
-				lines.add(line);
-			stream.close();
-		}
-		catch(Exception e)
-		{
-		}
-		String[][] types = new String[type.length][lines.size()];
+		String[]   lines = read_file_to_array(file_path);
+		String[][] types = new String[type.length][lines.length];
 
-		for(j = 0; j < lines.size(); j++)
+		for(j = 0; j < lines.length; j++)
 		{
 			offset = 0;
-			line = lines.get(j);
+			line = lines[j];
 			while((next = line.indexOf('|', offset)) != -1)
 			{
 				if(offset == line.length())
@@ -324,24 +336,14 @@ public class utilities
 		String line;
 		char ch;
 
-		List<String> lines = new ArrayList<String>();
-		try
-		{
-			BufferedReader stream = new BufferedReader(new FileReader(file_path));
-			while((line = stream.readLine()) != null)
-				lines.add(line);
-			stream.close();
-		}
-		catch(Exception e)
-		{
-		}
+		String[] lines = read_file_to_array(file_path);
 
-		String[][] types = new String[8][lines.size()];
+		String[][] types = new String[8][lines.length];
 
-		for(j = 0; j < lines.size(); j++)
+		for(j = 0; j < lines.length; j++)
 		{
 			offset = 0;
-			line = lines.get(j);
+			line = lines[j];
 			while((next = line.indexOf('|', offset)) != -1)
 			{
 				if(offset == line.length())
@@ -390,19 +392,21 @@ public class utilities
 		return types;
 	}
 
-	public static List<String> read_file_to_list(String file_path)
+	public static String[] read_file_to_array(String file_path)
 	{
 		String line;
+		int count = count_lines(file_path);
 		BufferedReader stream;
-		List<String> lines = new ArrayList<String>();
+		String[] lines = new String[count];
 		try
 		{
 			stream = new BufferedReader(new FileReader(file_path));
-			while((line = stream.readLine()) != null)
-				lines.add(line);
+			for(int i = 0; i < count; i++)
+				lines[i] = line = stream.readLine();
 			stream.close();
 		}
-		catch(IOException e){
+		catch(IOException e)
+		{
 		}
 		return lines;
 	}
@@ -467,7 +471,7 @@ public class utilities
 		String content_path;
 		Time time = new Time();
 		String[] pubDates;
-		List<String> content;
+		String[] content;
 		Map<Long, String> map = new TreeMap<Long, String>();
 		int i;
 
@@ -477,7 +481,7 @@ public class utilities
 			content_path = storage + main.GROUPS_DIRECTORY + groups[k] + sep + names[k] + sep + names[k] + main.CONTENT_APPENDIX;
 			if(exists(content_path))
 			{
-				content 		= read_file_to_list(content_path);
+				content 		= read_file_to_array(content_path);
 				pubDates		= read_single_to_array(content_path, "pubDate|");
 
 				if((pubDates[0] == null)||(pubDates[0].length() < 8))
@@ -493,7 +497,7 @@ public class utilities
 					{
 						break;
 					}
-					map.put(time.toMillis(false) - i, content.get(i) + "group|" + groups[k] + "|feed|" + names[k] + "|");
+					map.put(time.toMillis(false) - i, content[i] + "group|" + groups[k] + "|feed|" + names[k] + "|");
 				}
 			}
 		}
@@ -515,7 +519,7 @@ public class utilities
 		{
 			log(storage, "Failed to write the group content file.");
 		}
-		if(group != main.ALL)
+		if(!group.equals(main.ALL))
 			sort_group_content_by_time(main.storage, main.ALL);
 	}
 

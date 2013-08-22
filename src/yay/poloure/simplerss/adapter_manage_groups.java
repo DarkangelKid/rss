@@ -1,32 +1,21 @@
 package yay.poloure.simplerss;
 
-import android.content.ClipData;
 import android.content.Context;
-
 import android.graphics.Point;
-
 import android.view.DragEvent;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.View.OnDragListener;
 import android.view.View.OnTouchListener;
+import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.ListView;
-
-import java.util.List;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Set;
-import java.io.FileWriter;
-import java.io.BufferedWriter;
+import android.widget.TextView;
 
 public class adapter_manage_groups extends BaseAdapter
 {
@@ -49,11 +38,6 @@ public class adapter_manage_groups extends BaseAdapter
 		info_array = new_infos;
 	}
 
-	public String[] return_titles()
-	{
-		return group_array;
-	}
-
 	@Override
 	public int getCount()
 	{
@@ -70,12 +54,6 @@ public class adapter_manage_groups extends BaseAdapter
 	public String getItem(int position)
 	{
 		return group_array[position];
-	}
-
-	public void remove_item(int position)
-	{
-		group_array	= utilities.remove_element(group_array, position);
-		info_array	= utilities.remove_element(info_array, position);
 	}
 
 	@Override

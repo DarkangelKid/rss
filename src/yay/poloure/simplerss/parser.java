@@ -1,23 +1,22 @@
 package yay.poloure.simplerss;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.File;
-import java.io.IOException;
-
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.List;
-import java.util.regex.Pattern;
-import android.text.format.Time;
-import java.util.Date;
-import java.util.Locale;
-import java.text.SimpleDateFormat;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.text.format.Time;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.Locale;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 class parser
 {
@@ -56,7 +55,7 @@ class parser
 		final String thumbnail_dir	= feed_folder + main.THUMBNAIL_DIRECTORY;
 		final File in					= new File(store_file);
 		final File out					= new File(content_file);
-		final List<String> filters	= utilities.read_file_to_list(storage + main.FILTER_LIST);
+		final String[] filters		= utilities.read_file_to_array(storage + main.FILTER_LIST);
 
 		Set<String> set				= new LinkedHashSet<String>();
 		Boolean write_mode			= false;
