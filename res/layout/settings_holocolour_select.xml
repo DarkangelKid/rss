@@ -25,46 +25,56 @@
 			android:textColor="#323232"
 			android:layout_below="@+id/colour_title"
 			android:layout_alignParentLeft="true"/>
-	<ImageView
-			android:id="@+id/blue_image"
-			android:layout_width="24dp"
-			android:layout_height="24dp"
-			android:src="@drawable/colour_blue_light"
-			android:layout_marginLeft="24dp"
-			android:layout_marginRight="48dp"
-			android:layout_alignParentLeft="true"
-			android:layout_below="@+id/colour_summary"/>
-	<ImageView
-			android:id="@+id/purple_image"
-			android:layout_width="24dp"
-			android:layout_height="24dp"
-			android:src="@drawable/colour_purple_light"
-			android:layout_marginRight="48dp"
+	<LinearLayout
+			android:orientation="horizontal"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android_paddingLeft="24dp"
+			android:paddingRight="24dp"
 			android:layout_below="@+id/colour_summary"
-			android:layout_toRightOf="@+id/blue_image"/>
-	<ImageView
-			android:id="@+id/green_image"
-			android:layout_width="24dp"
-			android:layout_height="24dp"
-			android:src="@drawable/colour_green_light"
-			android:layout_marginRight="48dp"
-			android:layout_below="@+id/colour_summary"
-			android:layout_toRightOf="@+id/purple_image"/>
-	<ImageView
-			android:id="@+id/yellow_image"
-			android:layout_width="24dp"
-			android:layout_height="24dp"
-			android:src="@drawable/colour_yellow_light"
-			android:layout_marginRight="48dp"
-			android:layout_below="@+id/colour_summary"
-			android:layout_toRightOf="@+id/green_image"/>
-	<ImageView
-			android:id="@+id/red_image"
-			android:layout_width="24dp"
-			android:layout_height="24dp"
-			android:src="@drawable/colour_red_light"
-			android:layout_below="@+id/colour_summary"
-			android:layout_toRightOf="@+id/yellow_image"/>
+			android:layout_alignParentLeft="true">
+		<ImageView
+				android:id="@+id/blue_image"
+				android:layout_width="28dp"
+				android:layout_height="28dp"
+				android:src="@drawable/colour_blue_light"/>
+		<View
+			android:layout_width="0dp"
+			android:layout_height="1dp"
+			android:layout_weight="1" />
+		<ImageView
+				android:id="@+id/purple_image"
+				android:layout_width="28dp"
+				android:layout_height="28dp"
+				android:src="@drawable/colour_purple_light"/>
+		<View
+			android:layout_width="0dp"
+			android:layout_height="1dp"
+			android:layout_weight="1" />
+		<ImageView
+				android:id="@+id/green_image"
+				android:layout_width="28dp"
+				android:layout_height="28dp"
+				android:src="@drawable/colour_green_light"/>
+		<View
+			android:layout_width="0dp"
+			android:layout_height="1dp"
+			android:layout_weight="1" />
+		<ImageView
+				android:id="@+id/yellow_image"
+				android:layout_width="28dp"
+				android:layout_height="28dp"
+				android:src="@drawable/colour_yellow_light"/>
+		<View
+			android:layout_width="0dp"
+			android:layout_height="1dp"
+			android:layout_weight="1" />
+		<ImageView
+				android:id="@+id/red_image"
+				android:layout_width="28dp"
+				android:layout_height="28dp"
+				android:src="@drawable/colour_red_light"/>
+	</LinearLayout>
 	<ImageView
 			android:id="@+id/divider_norm"
 			android:layout_width="match_parent"
