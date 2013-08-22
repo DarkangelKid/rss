@@ -4,9 +4,9 @@ import android.support.v4.app.ListFragment;
 import android.os.AsyncTask;
 
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Collections;
 
 import android.widget.ListView;
 
@@ -17,7 +17,6 @@ import android.view.animation.AnimationUtils;
 class refresh_page extends AsyncTask<Void, Object, Animation>
 {
 	final int page_number;
-	Boolean waited = true;
 	Boolean flash  = false;
 	ListFragment l;
 	adapter_feeds_cards ith;
@@ -71,27 +70,37 @@ class refresh_page extends AsyncTask<Void, Object, Animation>
 		Set<String> existing_items = new HashSet<String>();
 		try
 		{
-			existing_items = new HashSet<String>(utilities.get_adapter_feeds_cards(main.fragment_manager, main.viewpager, page_number).content_links);
+			existing_items = new HashSet<String>();
+			Collections.addAll(existing_items, utilities.get_adapter_feeds_cards(main.fragment_manager, main.viewpager, page_number).links);
 		}
 		catch(Exception e)
 		{
 		}
 
 		Animation animFadeIn = AnimationUtils.loadAnimation(main.activity, android.R.anim.fade_in);
-		final int size = titles.length;
-		final List<String> new_titles			= new ArrayList<String>();
-		final List<String> new_descriptions = new ArrayList<String>();
-		final List<String> new_links			= new ArrayList<String>();
-		final List<String> new_images			= new ArrayList<String>();
-		final List<Integer> new_widths		= new ArrayList<Integer>();
-		final List<Integer> new_heights		= new ArrayList<Integer>();
 
-		int width, height;
+		int width, height, count = 0;
 
-		for(int m = 0; m < size; m++)
+		for(int m = 0; m < titles.length; m++)
+		{
+			if(!existing_items.contains(links[m]))
+				count++;
+		}
+
+		final String[] new_titles	= new String[count];
+		final String[] new_des		= new String[count];
+		final String[] new_images	= new String[count];
+		final String[] new_links	= new String[count];
+		final int[]    new_heights	= new int[count];
+		final int[]    new_widths	= new int[count];
+
+		count = -1;
+
+		for(int m = 0; m < titles.length; m++)
 		{
 			if(existing_items.add(links[m]))
 			{
+				count++;
 				thumbnail_path = "";
 				width = 0;
 				height = 0;
@@ -113,12 +122,12 @@ class refresh_page extends AsyncTask<Void, Object, Animation>
 				if(titles[m] == null)
 					titles[m] = "";
 
-				new_titles			.add(titles[m]);
-				new_links			.add(links[m]);
-				new_descriptions	.add(descriptions[m]);
-				new_images			.add(thumbnail_path);
-				new_heights			.add(height);
-				new_widths			.add(width);
+				new_titles	[count] = titles[m];
+				new_links	[count] = links[m];
+				new_des		[count] = descriptions[m];
+				new_images	[count] = thumbnail_path;
+				new_heights	[count] = height;
+				new_widths	[count] = width;
 				number_of_items++;
 			}
 			/* If this item has not been read, save its position. */
@@ -152,8 +161,8 @@ class refresh_page extends AsyncTask<Void, Object, Animation>
 				}
 			}
 		}
-		if(new_titles.size() > 0)
-			publishProgress(new_titles, new_descriptions, new_links, new_images, new_heights, new_widths);
+		if(new_titles.length > 0)
+			publishProgress(new_titles, new_des, new_links, new_images, new_heights, new_widths);
 
 		counts = main.get_unread_counts();
 
@@ -166,11 +175,10 @@ class refresh_page extends AsyncTask<Void, Object, Animation>
 		if(ith.getCount() == 0)
 		{
 			lv.setVisibility(View.INVISIBLE);
-			waited = false;
 			flash  = true;
 		}
 
-		ith.add_list((List<String>) progress[0], (List<String>) progress[1], (List<String>) progress[2], (List<String>) progress[3], (List<Integer>) progress[4], (List<Integer>) progress[5]);
+		ith.add_array((String[]) progress[0], (String[]) progress[1], (String[]) progress[2], (String[]) progress[3], (int[]) progress[4], (int[]) progress[5]);
 		ith.notifyDataSetChanged();
 	}
 

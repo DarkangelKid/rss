@@ -5,71 +5,56 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ColorDrawable;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.support.v4.widget.DrawerLayout;
 import android.content.ClipData;
 import android.content.ClipboardManager;
-import android.widget.Toast;
 import android.widget.ListView;
 import android.view.ViewGroup.LayoutParams;
-import java.util.List;
 import android.widget.AbsListView;
-import java.util.ArrayList;
 import android.net.Uri;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import java.io.File;
-import java.lang.ref.WeakReference;
-import java.lang.ref.SoftReference;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
-import android.widget.TextView;
 import android.support.v4.app.Fragment;
-import android.view.Gravity;
 import android.webkit.WebView;
 import android.os.Bundle;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import android.util.DisplayMetrics;
-import android.os.Handler;
 import android.graphics.Color;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import java.util.Set;
-import java.util.HashSet;
-
-import android.os.Debug;
 
 public class adapter_feeds_cards extends BaseAdapter
 {
-	private final List<String> content_titles		= new ArrayList<String>();
-	private final List<String> content_des			= new ArrayList<String>();
-	private final List<String> content_images		= new ArrayList<String>();
-	private final List<Integer> content_height	= new ArrayList<Integer>();
-	private final List<Integer> content_width		= new ArrayList<Integer>();
-	private final List<Boolean> content_marker	= new ArrayList<Boolean>();
-	public  final List<String> content_links		= new ArrayList<String>();
+	public  String[] links			= new String[0];
+	private String[] titles			= new String[0];
+	private String[] descriptions	= new String[0];
+	private String[] images			= new String[0];
+	private int[]    heights		= new int[0];
+	private int[]    widths			= new int[0];
+
 	public static Set<String> read_items;
 
 	private static final Pattern thumb_img = Pattern.compile("thumbnails");
-	private static LayoutInflater inflater;
 	private static Context context;
-	private static int two = 0, four = 0, eight = 0, sixteen = 0;
+	private static LayoutInflater inflater;
+	private static int two = 0, four = 0, eight = 0;
 	private static int screen_width;
 
 	public  int			total				= 0;
 	public  int			unread_count	= 0;
-	public  int			top_item			= 0;
 	private boolean	first				= true;
 	private ListView	listview;
 
@@ -78,29 +63,28 @@ public class adapter_feeds_cards extends BaseAdapter
 	{
 		if(context == null)
 		{
-			context = context_main;
-			inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-			screen_width = metrics.widthPixels;
+			context						= context_main;
+			DisplayMetrics metrics	= context.getResources().getDisplayMetrics();
+			inflater						= (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			screen_width 				= metrics.widthPixels;
 			if(two == 0)
 			{
 				two		= (int) ((2  * (metrics.density) + 0.5f));
 				four		= (int) ((4  * (metrics.density) + 0.5f));
 				eight		= (int) ((8  * (metrics.density) + 0.5f));
-				sixteen	= (int) ((16 * (metrics.density) + 0.5f));
 			}
 		}
 	}
 
-	public void add_list(List<String> new_title, List<String> new_des, List<String> new_link, List<String> new_image, List<Integer> new_height, List<Integer> new_width)
+	public void add_array(String[] new_title, String[] new_des, String[] new_link, String[] new_image, int[] new_height, int[] new_width)
 	{
-		content_titles.addAll(new_title);
-		content_des.addAll(new_des);
-		content_links.addAll(new_link);
-		content_images.addAll(new_image);
-		content_height.addAll(new_height);
-		content_width.addAll(new_width);
-		total = content_titles.size();
+		titles			= utilities.concat_string_arrays(titles,			new_title);
+		descriptions	= utilities.concat_string_arrays(descriptions,	new_des);
+		links				= utilities.concat_string_arrays(links,			new_link);
+		images			= utilities.concat_string_arrays(images,			new_image);
+		heights			= utilities.concat_int_arrays(heights,				new_height);
+		widths			= utilities.concat_int_arrays(widths,				new_width);
+		total = titles.length;
 	}
 
 	@Override
@@ -120,7 +104,7 @@ public class adapter_feeds_cards extends BaseAdapter
 	public String getItem(int position)
 	{
 		position = total - position - 1;
-		return content_titles.get(position);
+		return titles[position];
 	}
 
 	/* If the listview starts at the very top of a list with 20 items, position 19 is the only on calling getView(). */
@@ -142,14 +126,12 @@ public class adapter_feeds_cards extends BaseAdapter
 				public void onScrollStateChanged(AbsListView view, int scrollState)
 				{
 					/* The very top item is read only when the padding exists above it. */
-					/* content_links.get(0) == the last link in the list. position is always 76*/
+					/* links.get(0) == the last link in the list. position is always 76*/
 					if(listview.getChildAt(0).getTop() == eight)
-					{
-						utilities.log(main.storage, "True.");
-						read_items.add(content_links.get(content_links.size() - 1));
-					}
+						read_items.add(links[links.length - 1]);
+
 					/*if(listview.getChildAt(position).getTop() == eight)
-						read_items.add(content_links.get(position));*/
+						read_items.add(links.get(position));*/
 					if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
 						main.update_navigation_data(null, false);
 				}
@@ -175,9 +157,9 @@ public class adapter_feeds_cards extends BaseAdapter
 		else
 			holder = (ViewHolder) convertView.getTag();
 
-		final String link				= content_links.get(position);
-		final int height 				= content_height.get(position);
-		final int width				= content_width.get(position);
+		final String link				= links[position];
+		final int height 				= heights[position];
+		final int width				= widths[position];
 		boolean image_exists 		= false;
 
 		if(width == 0)
@@ -205,7 +187,7 @@ public class adapter_feeds_cards extends BaseAdapter
 		}
 
 		/* If the item is read, grey it out */
-		if(read_items.contains(content_links.get(position)))
+		if(read_items.contains(links[position]))
 		{
 			holder.title_view.setAlpha(0.6f);
 			holder.description_view.setAlpha(0.6f);
@@ -221,18 +203,14 @@ public class adapter_feeds_cards extends BaseAdapter
 		}
 
 		/* The logic that tells whether the item is read or not. */
-		if(listview.getVisibility() == View.VISIBLE)
-		{
-			/*if(listview.getChildAt(position).getTop() == eight)
-				read_items.add(content_links.get(position));
-			else */if(position - 1 >= 0)
-				read_items.add(content_links.get(position - 1));
-		}
+		if(listview.getVisibility() == View.VISIBLE && position - 1 >= 0)
+				read_items.add(links[position - 1]);
 
-		String title 					= content_titles.get(position);
-		String description 			= content_des.get(position);
+		String title 					= titles[position];
+		String description 			= descriptions[position];
+		utilities.log(main.storage, Integer.toString(position));
 
-		if(!description.equals(""))
+		if(description != null && !description.equals(""))
 		{
 			holder.description_view.setVisibility(View.VISIBLE);
 			if(image_exists)
@@ -276,8 +254,8 @@ public class adapter_feeds_cards extends BaseAdapter
 			Animation fadeIn = new AlphaAnimation(0, 1);
 			fadeIn.setDuration(240);
 			fadeIn.setInterpolator(new DecelerateInterpolator());
-			iv.setOnClickListener(new image_call(thumb_img.matcher(content_images.get(tag)).replaceAll("images")));
-			Object[] ob = {BitmapFactory.decodeFile(content_images.get(tag), o), fadeIn};
+			iv.setOnClickListener(new image_call(thumb_img.matcher(images[tag]).replaceAll("images")));
+			Object[] ob = {BitmapFactory.decodeFile(images[tag], o), fadeIn};
 			return ob;
 		}
 
@@ -437,12 +415,6 @@ public class adapter_feeds_cards extends BaseAdapter
 		{
 			web_view.onResume();
 			super.onResume();
-		}
-
-		@Override
-		public void onDestroyView()
-		{
-			super.onDestroyView();
 		}
 
 		@Override

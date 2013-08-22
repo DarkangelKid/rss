@@ -24,14 +24,7 @@ public class adapter_manage_filter extends BaseAdapter
 	public void set_items(List<String> new_titles)
 	{
 		title_list = new_titles;
-		//info_array = new_infos;
 	}
-
-	/*public void set_position(int pos, String new_title)
-	{
-		title_list[pos]	= new_title;
-		//info_array[pos]		= new_info;
-	}*/
 
 	@Override
 	public int getCount()
@@ -56,11 +49,6 @@ public class adapter_manage_filter extends BaseAdapter
 		return title_list.get(position);
 	}
 
-	/*public String get_info(int position)
-	{
-		return info_array[position];
-	}*/
-
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
@@ -71,14 +59,12 @@ public class adapter_manage_filter extends BaseAdapter
 				convertView = inflater.inflate(R.layout.manage_feed_item, parent, false);
 				holder = new ViewHolder();
 				holder.title_view = (TextView) convertView.findViewById(R.id.title_item);
-				//holder.info_view = (TextView) convertView.findViewById(R.id.info_item);
 				convertView.setTag(holder);
 			}
 			else
 				holder = (ViewHolder) convertView.getTag();
 
 			holder.title_view.setText(title_list.get(position));
-			//holder.info_view.setText(info_array.get(position));
 
 			return convertView;
 	}
@@ -86,7 +72,6 @@ public class adapter_manage_filter extends BaseAdapter
 	static class ViewHolder
 	{
 		TextView title_view;
-		//TextView info_view;
 	}
 
 }

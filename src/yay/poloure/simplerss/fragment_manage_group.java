@@ -23,7 +23,7 @@ import android.view.animation.AnimationUtils;
 
 class fragment_manage_group extends Fragment
 {
-	public static ListView manage_list;
+	private static ListView manage_list;
 	private static boolean multi_mode = false;
 	private static ActionMode actionmode;
 	private static ActionMode.Callback actionmode_callback;

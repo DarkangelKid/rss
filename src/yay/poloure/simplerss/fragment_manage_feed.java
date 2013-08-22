@@ -1,8 +1,6 @@
 package yay.poloure.simplerss;
 
 import android.support.v4.app.Fragment;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -19,7 +17,6 @@ import android.view.ViewGroup;
 import android.view.LayoutInflater;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.app.AlertDialog;
 
@@ -28,7 +25,7 @@ import java.util.List;
 
 class fragment_manage_feed extends Fragment
 {
-	public static ListView feed_list;
+	private static ListView feed_list;
 	public  static adapter_manage_feeds	feed_list_adapter;
 
 	@Override

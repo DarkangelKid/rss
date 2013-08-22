@@ -13,7 +13,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.ArrayList;
-import java.util.Collection;
 
 import java.io.File;
 import java.io.BufferedInputStream;
@@ -69,6 +68,34 @@ public class utilities
 		System.arraycopy(a, 0, c, 0, a_length);
 		System.arraycopy(b, 0, c, a_length, b_length);
 		return c;
+	}
+
+	public static String[] concat_string_arrays(String[] A, String[] B)
+	{
+		if(A.length == 0)
+			return B;
+		if(B.length == 0)
+			return A;
+		int aLen = A.length;
+		int bLen = B.length;
+		String[] C = new String[aLen+bLen];
+		System.arraycopy(A, 0, C, 0, aLen);
+		System.arraycopy(B, 0, C, aLen, bLen);
+		return C;
+	}
+
+	public static int[] concat_int_arrays(int[] A, int[] B)
+	{
+		if(A.length == 0)
+			return B;
+		if(B.length == 0)
+			return A;
+		int aLen = A.length;
+		int bLen = B.length;
+		int[] C = new int[aLen+bLen];
+		System.arraycopy(A, 0, C, 0, aLen);
+		System.arraycopy(B, 0, C, aLen, bLen);
+		return C;
 	}
 
 	public static String[] remove_element(String[] a, int index)
@@ -515,7 +542,7 @@ public class utilities
 		{
 			log(storage, "Failed to write the group content file.");
 		}
-		if(group != main.ALL)
+		if(!group.equals(main.ALL))
 			sort_group_content_by_time(main.storage, main.ALL);
 	}
 
