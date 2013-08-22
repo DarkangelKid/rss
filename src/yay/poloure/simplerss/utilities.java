@@ -71,6 +71,30 @@ public class utilities
 		return c;
 	}
 
+	public static String[] concat_string_arrays(String[] A, String[] B)
+	{
+		if(A.length == 0)
+			return B;
+		int aLen = A.length;
+		int bLen = B.length;
+		String[] C = new String[aLen+bLen];
+		System.arraycopy(A, 0, C, 0, aLen);
+		System.arraycopy(B, 0, C, aLen, bLen);
+		return C;
+	}
+
+	public static int[] concat_int_arrays(int[] A, int[] B)
+	{
+		if(A.length == 0)
+			return B;
+		int aLen = A.length;
+		int bLen = B.length;
+		int[] C = new int[aLen+bLen];
+		System.arraycopy(A, 0, C, 0, aLen);
+		System.arraycopy(B, 0, C, aLen, bLen);
+		return C;
+	}
+
 	public static String[] remove_element(String[] a, int index)
 	{
 		String[] b = new String[a.length - 1];

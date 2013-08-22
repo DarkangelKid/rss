@@ -736,37 +736,37 @@ public class main extends ActionBarActivity
 		if(!utilities.exists(group_content_path))
 			return;
 
-		List<String> links = utilities.get_adapter_feeds_cards(fragment_manager, viewpager, page_number).content_links;
+		String[] links = utilities.get_adapter_feeds_cards(fragment_manager, viewpager, page_number).links;
 
-		final int size = links.size();
+		final int size = links.length;
 		for(int m = 0; m < size; m++)
 		{
-			if(!adapter_feeds_cards.read_items.contains(links.get(m)))
+			if(!adapter_feeds_cards.read_items.contains(links[m]))
 			{
 				oldest_unread = m;
 				break;
 			}
 		}
 		if(oldest_unread == 0)
-			oldest_unread = links.size();
+			oldest_unread = links.length;
 
 		ListView lv = ((ListFragment) fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_number))).getListView();
 
 		if(lv == null)
 			return;
 
-		if(oldest_unread == links.size())
+		if(oldest_unread == links.length)
 		{
-			lv.setSelection(links.size());
+			lv.setSelection(links.length);
 			return;
 		}
 
 		/* 0 is the top. */
 
 		if(oldest_unread == -1)
-			oldest_unread = links.size() - 1;
+			oldest_unread = links.length - 1;
 
-		final int position = links.size() - oldest_unread - 1;
+		final int position = links.length - oldest_unread - 1;
 		if(position >= 0)
 			lv.setSelection(position);
 		else
