@@ -40,7 +40,6 @@ public class service_update extends IntentService
 
 		final int group						= intent.getIntExtra("GROUP_NUMBER", 0);
 
-		final String stor;
 		final String storage;
 		final String SEPAR = main.SEPAR;
 
@@ -61,7 +60,6 @@ public class service_update extends IntentService
 		final String[] urls					= content[1];
 		final String[] groups				= content[2];
 
-		String feed_path;
 		int i, width;
 
 		if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB_MR2)

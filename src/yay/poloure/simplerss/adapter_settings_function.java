@@ -1,14 +1,11 @@
 package yay.poloure.simplerss;
 
 import android.widget.BaseAdapter;
-import java.util.ArrayList;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.content.Context;
 import android.view.LayoutInflater;
-import java.util.List;
-import android.widget.ImageView;
 
 public class adapter_settings_function extends BaseAdapter
 {
@@ -24,17 +21,6 @@ public class adapter_settings_function extends BaseAdapter
 		summary_array = context_main.getResources().getStringArray(R.array.settings_function_summaries);
 	}
 
-	/*public void add_list(List<String> new_title)
-	{
-		title_array.clear();
-		title_array.addAll(new_title);
-	}
-
-	public void add_count(List<Integer> new_count)
-	{
-		summary_array.clear();
-		summary_array.addAll(new_count);
-	}*/
 	@Override
 	public long getItemId(int position)
 	{

@@ -17,7 +17,6 @@ import android.view.animation.AnimationUtils;
 class refresh_page extends AsyncTask<Void, Object, Animation>
 {
 	final int page_number;
-	Boolean waited = true;
 	Boolean flash  = false;
 	ListFragment l;
 	adapter_feeds_cards ith;
@@ -176,7 +175,6 @@ class refresh_page extends AsyncTask<Void, Object, Animation>
 		if(ith.getCount() == 0)
 		{
 			lv.setVisibility(View.INVISIBLE);
-			waited = false;
 			flash  = true;
 		}
 

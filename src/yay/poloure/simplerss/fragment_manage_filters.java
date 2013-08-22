@@ -4,9 +4,8 @@ import android.support.v4.app.Fragment;
 
 import android.os.Bundle;
 
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import android.content.DialogInterface;
@@ -14,16 +13,12 @@ import android.content.DialogInterface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.app.AlertDialog;
 
-import java.io.File;
-import java.util.List;
-
 class fragment_manage_filters extends Fragment
 {
-	public static ListView filter_list;
+	private static ListView filter_list;
 	public  static adapter_manage_filter filter_list_adapter;
 
 	public void onCreate(Bundle savedInstanceState)

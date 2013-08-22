@@ -13,7 +13,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.ArrayList;
-import java.util.Collection;
 
 import java.io.File;
 import java.io.BufferedInputStream;
@@ -75,6 +74,8 @@ public class utilities
 	{
 		if(A.length == 0)
 			return B;
+		if(B.length == 0)
+			return A;
 		int aLen = A.length;
 		int bLen = B.length;
 		String[] C = new String[aLen+bLen];
@@ -87,6 +88,8 @@ public class utilities
 	{
 		if(A.length == 0)
 			return B;
+		if(B.length == 0)
+			return A;
 		int aLen = A.length;
 		int bLen = B.length;
 		int[] C = new int[aLen+bLen];
@@ -539,7 +542,7 @@ public class utilities
 		{
 			log(storage, "Failed to write the group content file.");
 		}
-		if(group != main.ALL)
+		if(!group.equals(main.ALL))
 			sort_group_content_by_time(main.storage, main.ALL);
 	}
 

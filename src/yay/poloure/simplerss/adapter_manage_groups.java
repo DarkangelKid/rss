@@ -1,6 +1,5 @@
 package yay.poloure.simplerss;
 
-import android.content.ClipData;
 import android.content.Context;
 
 import android.graphics.Point;
@@ -20,13 +19,6 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ListView;
-
-import java.util.List;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Set;
-import java.io.FileWriter;
-import java.io.BufferedWriter;
 
 public class adapter_manage_groups extends BaseAdapter
 {
@@ -49,11 +41,6 @@ public class adapter_manage_groups extends BaseAdapter
 		info_array = new_infos;
 	}
 
-	public String[] return_titles()
-	{
-		return group_array;
-	}
-
 	@Override
 	public int getCount()
 	{
@@ -70,12 +57,6 @@ public class adapter_manage_groups extends BaseAdapter
 	public String getItem(int position)
 	{
 		return group_array[position];
-	}
-
-	public void remove_item(int position)
-	{
-		group_array	= utilities.remove_element(group_array, position);
-		info_array	= utilities.remove_element(info_array, position);
 	}
 
 	@Override

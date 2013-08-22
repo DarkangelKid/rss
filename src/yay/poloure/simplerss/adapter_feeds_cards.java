@@ -5,50 +5,36 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ColorDrawable;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.support.v4.widget.DrawerLayout;
 import android.content.ClipData;
 import android.content.ClipboardManager;
-import android.widget.Toast;
 import android.widget.ListView;
 import android.view.ViewGroup.LayoutParams;
-import java.util.List;
 import android.widget.AbsListView;
-import java.util.ArrayList;
 import android.net.Uri;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import java.io.File;
-import java.lang.ref.WeakReference;
-import java.lang.ref.SoftReference;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
-import android.widget.TextView;
 import android.support.v4.app.Fragment;
-import android.view.Gravity;
 import android.webkit.WebView;
 import android.os.Bundle;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import android.util.DisplayMetrics;
-import android.os.Handler;
 import android.graphics.Color;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import java.util.Set;
-import java.util.HashSet;
-
-import android.os.Debug;
 
 public class adapter_feeds_cards extends BaseAdapter
 {
@@ -62,14 +48,13 @@ public class adapter_feeds_cards extends BaseAdapter
 	public static Set<String> read_items;
 
 	private static final Pattern thumb_img = Pattern.compile("thumbnails");
-	private static LayoutInflater inflater;
 	private static Context context;
-	private static int two = 0, four = 0, eight = 0, sixteen = 0;
+	private static LayoutInflater inflater;
+	private static int two = 0, four = 0, eight = 0;
 	private static int screen_width;
 
 	public  int			total				= 0;
 	public  int			unread_count	= 0;
-	public  int			top_item			= 0;
 	private boolean	first				= true;
 	private ListView	listview;
 
@@ -78,16 +63,15 @@ public class adapter_feeds_cards extends BaseAdapter
 	{
 		if(context == null)
 		{
-			context				= context_main;
-			inflater				= (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			context						= context_main;
 			DisplayMetrics metrics	= context.getResources().getDisplayMetrics();
-			screen_width 		= metrics.widthPixels;
+			inflater						= (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			screen_width 				= metrics.widthPixels;
 			if(two == 0)
 			{
 				two		= (int) ((2  * (metrics.density) + 0.5f));
 				four		= (int) ((4  * (metrics.density) + 0.5f));
 				eight		= (int) ((8  * (metrics.density) + 0.5f));
-				sixteen	= (int) ((16 * (metrics.density) + 0.5f));
 			}
 		}
 	}
@@ -144,10 +128,8 @@ public class adapter_feeds_cards extends BaseAdapter
 					/* The very top item is read only when the padding exists above it. */
 					/* links.get(0) == the last link in the list. position is always 76*/
 					if(listview.getChildAt(0).getTop() == eight)
-					{
-						utilities.log(main.storage, "True.");
 						read_items.add(links[links.length - 1]);
-					}
+
 					/*if(listview.getChildAt(position).getTop() == eight)
 						read_items.add(links.get(position));*/
 					if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
@@ -171,7 +153,6 @@ public class adapter_feeds_cards extends BaseAdapter
 			convertView					.setOnClickListener(new webview_mode());
 			convertView					.setOnLongClickListener(new long_press());
 			convertView					.setTag(holder);
-			utilities.log(main.storage, "once");
 		}
 		else
 			holder = (ViewHolder) convertView.getTag();
@@ -222,18 +203,14 @@ public class adapter_feeds_cards extends BaseAdapter
 		}
 
 		/* The logic that tells whether the item is read or not. */
-		if(listview.getVisibility() == View.VISIBLE)
-		{
-			/*if(listview.getChildAt(position).getTop() == eight)
-				read_items.add(links.get(position));
-			else */if(position - 1 >= 0)
+		if(listview.getVisibility() == View.VISIBLE && position - 1 >= 0)
 				read_items.add(links[position - 1]);
-		}
 
 		String title 					= titles[position];
 		String description 			= descriptions[position];
+		utilities.log(main.storage, Integer.toString(position));
 
-		if(!description.equals(""))
+		if(description != null && !description.equals(""))
 		{
 			holder.description_view.setVisibility(View.VISIBLE);
 			if(image_exists)
@@ -438,12 +415,6 @@ public class adapter_feeds_cards extends BaseAdapter
 		{
 			web_view.onResume();
 			super.onResume();
-		}
-
-		@Override
-		public void onDestroyView()
-		{
-			super.onDestroyView();
 		}
 
 		@Override

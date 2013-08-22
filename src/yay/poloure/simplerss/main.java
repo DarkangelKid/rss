@@ -1,7 +1,6 @@
 package yay.poloure.simplerss;
 
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 
 import android.os.Debug;
 import android.os.Bundle;
@@ -9,12 +8,9 @@ import android.os.AsyncTask;
 import android.os.Environment;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 
-import android.app.AlertDialog;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Activity;
@@ -29,33 +25,24 @@ import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.PagerTabStrip;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 
 import android.view.Menu;
 import android.view.MenuItem;
-import android.support.v4.view.MenuItemCompat;
 import android.view.MenuInflater;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Gravity;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 
 import android.widget.ListView;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.AbsListView.MultiChoiceModeListener;
 
 import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Arrays;
 import java.util.ArrayList;
-import java.util.regex.Pattern;
 
-import android.telephony.TelephonyManager;
 import android.provider.Settings;
 
 import java.io.File;
@@ -82,14 +69,12 @@ public class main extends ActionBarActivity
 
 	/// Private static final are good.
 	private static final int[] times							= new int[]{15, 30, 45, 60, 120, 180, 240, 300, 360, 400, 480, 540, 600, 660, 720, 960, 1440, 2880, 10080, 43829};
-	private static final Pattern whitespace				= Pattern.compile("\\s+");
 
 	/// Public static final are the holy grail.
 	public  static final String SEPAR						= System.getProperty("file.separator");
 	public  static final String NL							= System.getProperty("line.separator");
 	public  static final String TXT							= ".txt";
 	public  static final String GROUPS_DIRECTORY			= "groups" + SEPAR;
-	public  static final String CONTENT_DIRECTORY		= "content" + SEPAR;
 	public  static final String THUMBNAIL_DIRECTORY		= "thumbnails" + SEPAR;
 	public  static final String IMAGE_DIRECTORY			= "images" + SEPAR;
 	public  static final String DUMP_FILE					= "dump" + TXT;
@@ -593,13 +578,6 @@ public class main extends ActionBarActivity
 	public static class fragment_settings extends Fragment
 	{
 		@Override
-		public void onCreate(Bundle savedInstanceState)
-		{
-			super.onCreate(savedInstanceState);
-
-		}
-
-		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle SavedInstanceState)
 		{
 			View settings_view = inflater.inflate(R.layout.viewpager_settings, container, false);
@@ -816,8 +794,6 @@ public class main extends ActionBarActivity
 	{
 		List<Integer> unread_list	= new ArrayList<Integer>();
 		int total = 0, unread;
-		adapter_feeds_cards ith = null;
-		fragment_card fc;
 		final int size = current_groups.size();
 
 		for(int i = 1; i < size; i++)
