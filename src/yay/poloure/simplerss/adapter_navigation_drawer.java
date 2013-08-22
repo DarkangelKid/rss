@@ -8,9 +8,6 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class adapter_navigation_drawer extends BaseAdapter
 {
 	private static String[] menu_array  = new String[0];

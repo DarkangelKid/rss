@@ -17,9 +17,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -158,7 +156,7 @@ public class utilities
 		final String count_path = content_path + main.COUNT_APPENDIX;
 
 		if(exists(count_path))
-			total = Integer.parseInt(read_file_to_list(count_path).get(0));
+			total = Integer.parseInt(read_file_to_array(count_path)[0]);
 		else
 			total = count_lines(content_path);
 
@@ -232,9 +230,9 @@ public class utilities
 		}
 	}
 
-	public static void remove_string_from_file(String file_path, CharSequence string, Boolean contains)
+	public static void remove_string_from_file(String file_path, String string, Boolean contains)
 	{
-		final List<String> list = read_file_to_list(file_path);
+		final String[] list = read_file_to_array(file_path);
 		delete(file_path);
 		try{
 			final BufferedWriter out = new BufferedWriter(new FileWriter(file_path, true));
@@ -262,24 +260,12 @@ public class utilities
 		int next, offset, j;
 		String line;
 		char ch;
-		List<String> lines = new ArrayList<String>();
+		String[] lines = read_file_to_array(file_path);
+		String[] types = new String[lines.length];
 
-		try
+		for(j = 0; j < lines.length; j++)
 		{
-			BufferedReader stream = new BufferedReader(new FileReader(file_path));
-			while((line = stream.readLine()) != null)
-				lines.add(line);
-			stream.close();
-		}
-		catch(Exception e)
-		{
-		}
-
-		String[] types = new String[lines.size()];
-
-		for(j = 0; j < lines.size(); j++)
-		{
-			line = lines.get(j);
+			line = lines[j];
 			if((next = line.indexOf(type, 0)) != -1)
 			{
 				ch = type.charAt(0);
@@ -306,24 +292,14 @@ public class utilities
 		String line;
 		char ch;
 		int start = (type[0] == 'm') ? 1 : 0;
-		List<String> lines = new ArrayList<String>();
 
-		try
-		{
-			BufferedReader stream = new BufferedReader(new FileReader(file_path));
-			while((line = stream.readLine()) != null)
-				lines.add(line);
-			stream.close();
-		}
-		catch(Exception e)
-		{
-		}
-		String[][] types = new String[type.length][lines.size()];
+		String[]   lines = read_file_to_array(file_path);
+		String[][] types = new String[type.length][lines.length];
 
-		for(j = 0; j < lines.size(); j++)
+		for(j = 0; j < lines.length; j++)
 		{
 			offset = 0;
-			line = lines.get(j);
+			line = lines[j];
 			while((next = line.indexOf('|', offset)) != -1)
 			{
 				if(offset == line.length())
@@ -360,24 +336,14 @@ public class utilities
 		String line;
 		char ch;
 
-		List<String> lines = new ArrayList<String>();
-		try
-		{
-			BufferedReader stream = new BufferedReader(new FileReader(file_path));
-			while((line = stream.readLine()) != null)
-				lines.add(line);
-			stream.close();
-		}
-		catch(Exception e)
-		{
-		}
+		String[] lines = read_file_to_array(file_path);
 
-		String[][] types = new String[8][lines.size()];
+		String[][] types = new String[8][lines.length];
 
-		for(j = 0; j < lines.size(); j++)
+		for(j = 0; j < lines.length; j++)
 		{
 			offset = 0;
-			line = lines.get(j);
+			line = lines[j];
 			while((next = line.indexOf('|', offset)) != -1)
 			{
 				if(offset == line.length())
@@ -424,23 +390,6 @@ public class utilities
 			}
 		}
 		return types;
-	}
-
-	public static List<String> read_file_to_list(String file_path)
-	{
-		String line;
-		BufferedReader stream;
-		List<String> lines = new ArrayList<String>();
-		try
-		{
-			stream = new BufferedReader(new FileReader(file_path));
-			while((line = stream.readLine()) != null)
-				lines.add(line);
-			stream.close();
-		}
-		catch(IOException e){
-		}
-		return lines;
 	}
 
 	public static String[] read_file_to_array(String file_path)
@@ -522,7 +471,7 @@ public class utilities
 		String content_path;
 		Time time = new Time();
 		String[] pubDates;
-		List<String> content;
+		String[] content;
 		Map<Long, String> map = new TreeMap<Long, String>();
 		int i;
 
@@ -532,7 +481,7 @@ public class utilities
 			content_path = storage + main.GROUPS_DIRECTORY + groups[k] + sep + names[k] + sep + names[k] + main.CONTENT_APPENDIX;
 			if(exists(content_path))
 			{
-				content 		= read_file_to_list(content_path);
+				content 		= read_file_to_array(content_path);
 				pubDates		= read_single_to_array(content_path, "pubDate|");
 
 				if((pubDates[0] == null)||(pubDates[0].length() < 8))
@@ -548,7 +497,7 @@ public class utilities
 					{
 						break;
 					}
-					map.put(time.toMillis(false) - i, content.get(i) + "group|" + groups[k] + "|feed|" + names[k] + "|");
+					map.put(time.toMillis(false) - i, content[i] + "group|" + groups[k] + "|feed|" + names[k] + "|");
 				}
 			}
 		}

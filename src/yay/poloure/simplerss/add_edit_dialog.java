@@ -18,7 +18,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.net.URL;
-import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 import java.util.Arrays;
@@ -190,10 +189,10 @@ public class add_edit_dialog
 					{
 						final String feed_name	= ((TextView) add_filter_layout).getText().toString().trim();
 						String filter_path		= storage.concat(main.FILTER_LIST);
-						List<String> filters	= utilities.read_file_to_list(filter_path);
-						if(!filters.contains(feed_name))
+						String[] filters			= utilities.read_file_to_array(filter_path);
+						if(utilities.index_of(filters, feed_name) != -1)
 							utilities.append_string_to_file(filter_path, feed_name + main.NL);
-						fragment_manage_filters.filter_list_adapter.set_items(utilities.read_file_to_list(filter_path));
+						fragment_manage_filters.filter_list_adapter.set_items(utilities.read_file_to_array(filter_path));
 						fragment_manage_filters.filter_list_adapter.notifyDataSetChanged();
 						add_filter_dialog.hide();
 					}
@@ -391,7 +390,7 @@ public class add_edit_dialog
 			(new File(old_feed_folder_post)).renameTo(new File(new_feed_folder_post));
 
 		/// Replace the new_group file with the new data.
-		List<String> list = utilities.read_file_to_list(new_group_file);
+		String[] list = utilities.read_file_to_array(new_group_file);
 		(new File(new_group_file)).delete();
 		try
 		{
@@ -409,7 +408,7 @@ public class add_edit_dialog
 		{
 		}
 		/// Replace the all_group file with the new group and data.
-		list = utilities.read_file_to_list(all_group_file);
+		list = utilities.read_file_to_array(all_group_file);
 		(new File(all_group_file)).delete();
 		try
 		{
@@ -457,14 +456,11 @@ public class add_edit_dialog
 		if((new File(old_group_file)).exists())
 		{
 			index = utilities.index_of(main.current_groups, old_group);
-			main.new_items.set(index, true);
 		}
 		if(!old_group.equals(new_group))
 		{
 			index = utilities.index_of(main.current_groups, new_group);
-			main.new_items.set(index, true);
 		}
-		main.new_items.set(0, true);
 	}
 
 	private static void add_group(String storage, String group_name)

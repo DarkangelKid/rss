@@ -7,13 +7,9 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class adapter_manage_filter extends BaseAdapter
 {
-	private static List<String> title_list = new ArrayList<String>();
-	//private static String[] info_array = new String[0];
+	private static String[] title_list = new String[0];
 
 	private static LayoutInflater inflater;
 
@@ -22,7 +18,7 @@ public class adapter_manage_filter extends BaseAdapter
 		inflater = (LayoutInflater) context_main.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 
-	public void set_items(List<String> new_titles)
+	public void set_items(String[] new_titles)
 	{
 		title_list = new_titles;
 	}
@@ -30,7 +26,7 @@ public class adapter_manage_filter extends BaseAdapter
 	@Override
 	public int getCount()
 	{
-		return title_list.size();
+		return title_list.length;
 	}
 
 	@Override
@@ -41,13 +37,13 @@ public class adapter_manage_filter extends BaseAdapter
 
 	public void remove_item(int position)
 	{
-		title_list.remove(position);
+		utilities.remove_element(title_list, position);
 	}
 
 	@Override
 	public String getItem(int position)
 	{
-		return title_list.get(position);
+		return title_list[position];
 	}
 
 	@Override
@@ -65,7 +61,7 @@ public class adapter_manage_filter extends BaseAdapter
 			else
 				holder = (ViewHolder) convertView.getTag();
 
-			holder.title_view.setText(title_list.get(position));
+			holder.title_view.setText(title_list[position]);
 
 			return convertView;
 	}

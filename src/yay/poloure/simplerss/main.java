@@ -10,6 +10,8 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.Settings;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
@@ -34,8 +36,6 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 public class main extends ActionBarActivity
 {
@@ -52,9 +52,9 @@ public class main extends ActionBarActivity
 	public  static FragmentManager		fragment_manager;
 	public  static ActionBar				action_bar;
 	public  static Activity					activity;
+	public  static Handler					service_handler;
 	public  static adapter_navigation_drawer nav_adapter;
 	public  static String[] current_groups = new String[0];
-	public  static List<Boolean> new_items 				= new ArrayList<Boolean>();
 	public  static String storage, ALL, NAVIGATION, DELETE_DIALOG, CLEAR_DIALOG, ALL_FILE;
 
 	/// Private static final are good.
@@ -68,7 +68,6 @@ public class main extends ActionBarActivity
 	public  static final String THUMBNAIL_DIRECTORY		= "thumbnails" + SEPAR;
 	public  static final String IMAGE_DIRECTORY			= "images" + SEPAR;
 	public  static final String DUMP_FILE					= "dump" + TXT;
-	public  static final String NEW_ITEMS					= "new_items" + TXT;
 	public  static final String READ_ITEMS					= "read_items" + TXT;
 	public  static final String STORE_APPENDIX			= ".store" + TXT;
 	public  static final String CONTENT_APPENDIX			= ".content" + TXT;
@@ -254,8 +253,6 @@ public class main extends ActionBarActivity
 		}
 		utilities.delete(storage + READ_ITEMS);
 		utilities.write_collection_to_file(storage + READ_ITEMS, adapter_feeds_cards.read_items);
-
-		utilities.write_collection_to_file(storage + NEW_ITEMS, new_items);
 	}
 
 	@Override
@@ -271,16 +268,6 @@ public class main extends ActionBarActivity
 			alarm_manager.cancel(pend_intent);
 		}
 
-		List<String> strings = utilities.read_file_to_list(storage + NEW_ITEMS);
-		new_items = new ArrayList<Boolean>();
-		for(String string : strings)
-		{
-			if(string.equals("true"))
-				new_items.add(true);
-			else if(string.equals("false"))
-				new_items.add(false);
-		}
-
 		if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.FROYO)
 			storage				= getExternalFilesDir(null).getAbsolutePath() + SEPAR;
 		else
@@ -294,12 +281,6 @@ public class main extends ActionBarActivity
 		}
 
 		current_groups = utilities.read_file_to_array(storage + GROUP_LIST);
-		if(new_items.size() != current_groups.length)
-		{
-			new_items.clear();
-			for(String string : current_groups)
-				new_items.add(true);
-		}
 	}
 
 	private void switch_page(String page_title, int position)
@@ -364,7 +345,7 @@ public class main extends ActionBarActivity
 					@Override
 					public void onPageSelected(int position)
 					{
-						if(utilities.get_adapter_feeds_cards(fragment_manager, viewpager, position).getCount() == 0 || new_items.get(position))
+						if(utilities.get_adapter_feeds_cards(fragment_manager, viewpager, position).getCount() == 0)
 						{
 							if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
 								new refresh_page(position).execute();
@@ -542,13 +523,13 @@ public class main extends ActionBarActivity
 			adapter_feeds_cards ith = new adapter_feeds_cards(getActivity());
 			setListAdapter(ith);
 			String group = current_groups[getArguments().getInt("num", 0)];
-			List<String> lines = utilities.read_file_to_list(storage + GROUPS_DIRECTORY + group + SEPAR + group + CONTENT_APPENDIX);
+			String[] lines = utilities.read_file_to_array(storage + GROUPS_DIRECTORY + group + SEPAR + group + CONTENT_APPENDIX);
 			int count = -1;
-			for(int i = 0; i < lines.size(); i++)
+			for(int i = 0; i < lines.length; i++)
 			{
-				if(lines.get(i).substring(7, 8).equals("0"))
+				if(lines[i].substring(7, 8).equals("0"))
 				{
-					count = lines.size() - i + 1;
+					count = lines.length - i + 1;
 					break;
 				}
 			}
@@ -698,10 +679,6 @@ public class main extends ActionBarActivity
 			current_groups = new String[]{"All"};
 		}
 
-		new_items.clear();
-		for(String group : current_groups)
-			new_items.add(false);
-
 		/// If viewpager exists, fragment_manager != null. This must come before the nav_adapter.
 		if(viewpager != null)
 		{
@@ -764,6 +741,14 @@ public class main extends ActionBarActivity
 	private static void refresh_feeds()
 	{
 		set_refresh(true);
+		service_handler = new Handler()
+		{
+			@Override
+			public void handleMessage(Message msg)
+			{
+				set_refresh(false);
+			}
+		};
 		/* SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(activity_context);*/
 		/* TODO used to save positions here but now I am not sure I need too anymore. */
 		final int page_number = viewpager.getCurrentItem();
@@ -771,16 +756,7 @@ public class main extends ActionBarActivity
 		intent.putExtra("GROUP_NUMBER", page_number);
 		intent.putExtra("NOTIFICATIONS", /*pref.getBoolean("notifications", false)*/true);
 		activity_context.startService(intent);
-		if(page_number == 0)
-		{
-			for(int i = 0; i < new_items.size(); i++)
-				new_items.set(i, true);
-		}
-		else
-		{
-			new_items.set(0, true);
-			new_items.set(page_number, true);
-		}
+
 		/// Maybe do not refresh the page.
 		if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
 			new refresh_page(page_number).execute();
