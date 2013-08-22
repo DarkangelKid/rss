@@ -173,7 +173,7 @@ public class adapter_settings_interface extends BaseAdapter
 
 	private class colour_click implements View.OnClickListener
 	{
-		int clicked_colour
+		int clicked_colour;
 		public colour_click(int colour)
 		{
 			clicked_colour = colour;
@@ -188,7 +188,7 @@ public class adapter_settings_interface extends BaseAdapter
 			((ImageView) parent.findViewById(R.id.green_image)).setAlpha(0.5);
 			((ImageView) parent.findViewById(R.id.yellow_image)).setAlpha(0.5);
 			((ImageView) parent.findViewById(R.id.red_image)).setAlpha(0.5);
-			v.setAlpha(1.0);
+			((ImageView) v).setAlpha(1.0);
 		}
 	}
 
