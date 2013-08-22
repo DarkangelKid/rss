@@ -29,8 +29,10 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_marginTop="2dp"
+			android:layout_marginBottom="4dp"
 			android:layout_marginLeft="10dp"
 			android:layout_marginRight="10dp"
+			android:paddingBottom="4dp"
 			android:max="100"
 			android:minWidth="300dp"
 			android:layout_below="@+id/seek_summary"
@@ -44,7 +46,7 @@
 			android:layout_marginRight="6dp"
 			android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
 			android:textColor="#323232"
-			android:layout_toRightOf="@+id/seek_summary"
+			android:layout_above="@+id/seekbar"
 			android:layout_alignParentRight="true"/>
 	<ImageView
 			android:id="@+id/divider_norm"

@@ -603,7 +603,7 @@ public class main extends ActionBarActivity
 		@Override
 		public int getCount()
 		{
-			return 1;
+			return 2;
 		}
 
 		@Override
@@ -613,6 +613,8 @@ public class main extends ActionBarActivity
 			{
 				case(0):
 					return new fragment_settings_function();
+				case(1):
+					return new fragment_settings_interface();
 			}
 			return null;
 		}
@@ -623,7 +625,9 @@ public class main extends ActionBarActivity
 			switch(position)
 			{
 				case(0):
-					return "Function";
+					return "Functions";
+				case(1):
+					return "Interface";
 			}
 			return "";
 		}
@@ -658,6 +662,22 @@ public class main extends ActionBarActivity
 		{
 			onBackPressed();
 			return true;
+		}
+	}
+
+	public static class fragment_settings_interface extends ListFragment
+	{
+		@Override
+		public void onCreate(Bundle savedInstanceState)
+		{
+			super.onCreate(savedInstanceState);
+			///set adapter here
+		}
+
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle SavedInstanceState)
+		{
+			return inflater.inflate(R.layout.listview_settings_function, container, false);
 		}
 	}
 
