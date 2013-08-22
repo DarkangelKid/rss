@@ -1,40 +1,39 @@
 package yay.poloure.simplerss;
 
+import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.widget.DrawerLayout;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.graphics.drawable.ColorDrawable;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.support.v4.widget.DrawerLayout;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.widget.ListView;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.AbsListView;
-import android.net.Uri;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
-import java.io.File;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.FrameLayout;
-import android.support.v4.app.Fragment;
 import android.webkit.WebView;
-import android.os.Bundle;
+import android.widget.AbsListView;
+import android.widget.BaseAdapter;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
 
-import java.util.regex.Pattern;
-import android.util.DisplayMetrics;
-import android.graphics.Color;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
+import java.io.File;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 public class adapter_feeds_cards extends BaseAdapter
 {
@@ -186,20 +185,23 @@ public class adapter_feeds_cards extends BaseAdapter
 				(new image()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, holder.image_view, holder.image_view.getTag());
 		}
 
-		/* If the item is read, grey it out */
-		if(read_items.contains(links[position]))
+		/* MIN API 11 - Also may be a performance hog - If the item is read, grey it out */
+		if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB)
 		{
-			holder.title_view.setAlpha(0.6f);
-			holder.description_view.setAlpha(0.6f);
-			holder.time_view.setAlpha(0.6f);
-			holder.image_view.setAlpha(0.6f);
-		}
-		else if(holder.title_view.getAlpha() == 0.6f)
-		{
-			holder.title_view.setAlpha(1.0f);
-			holder.description_view.setAlpha(1.0f);
-			holder.time_view.setAlpha(1.0f);
-			holder.image_view.setAlpha(1.0f);
+			if(read_items.contains(links[position]))
+			{
+				holder.title_view.setAlpha(0.6f);
+				holder.description_view.setAlpha(0.6f);
+				holder.time_view.setAlpha(0.6f);
+				holder.image_view.setAlpha(0.6f);
+			}
+			else if(holder.title_view.getAlpha() == 0.6f)
+			{
+				holder.title_view.setAlpha(1.0f);
+				holder.description_view.setAlpha(1.0f);
+				holder.time_view.setAlpha(1.0f);
+				holder.image_view.setAlpha(1.0f);
+			}
 		}
 
 		/* The logic that tells whether the item is read or not. */
@@ -406,14 +408,16 @@ public class adapter_feeds_cards extends BaseAdapter
 		@Override
 		public void onPause()
 		{
-			super.onPause();
+		/* min api 11
+			web_view.onPause();*/
 			web_view.onPause();
 		}
 
 		@Override
 		public void onResume()
 		{
-			web_view.onResume();
+			/* min api 11
+			web_view.onResume();*/
 			super.onResume();
 		}
 

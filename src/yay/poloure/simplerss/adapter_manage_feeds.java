@@ -1,11 +1,11 @@
 package yay.poloure.simplerss;
 
-import android.widget.BaseAdapter;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
 import android.content.Context;
 import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.TextView;
 
 public class adapter_manage_feeds extends BaseAdapter
 {

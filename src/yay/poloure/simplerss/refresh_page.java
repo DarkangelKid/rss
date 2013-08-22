@@ -1,18 +1,15 @@
 package yay.poloure.simplerss;
 
-import android.support.v4.app.ListFragment;
 import android.os.AsyncTask;
-
-import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Collections;
-
-import android.widget.ListView;
-
+import android.support.v4.app.ListFragment;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ListView;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 class refresh_page extends AsyncTask<Void, Object, Animation>
 {
@@ -21,7 +18,7 @@ class refresh_page extends AsyncTask<Void, Object, Animation>
 	ListFragment l;
 	adapter_feeds_cards ith;
 	ListView lv;
-	List<Integer> counts;
+	int[] counts;
 	int number_of_items = 0;
 	int oldest_unread = 0;
 
@@ -33,19 +30,7 @@ class refresh_page extends AsyncTask<Void, Object, Animation>
 	@Override
 	protected Animation doInBackground(Void[] hey)
 	{
-		if(main.new_items.get(page_number))
-		{
-			while(service_update.check_service_running(main.activity))
-			{
-				try{
-					Thread.sleep(100);
-				}
-				catch(Exception e){
-				}
-			}
-		}
-
-		String group							= main.current_groups.get(page_number);
+		String group							= main.current_groups[page_number];
 		final String group_path				= main.storage + main.GROUPS_DIRECTORY + group + main.SEPAR;
 		final String group_file_path		= group_path + group + main.TXT;
 		final String group_content_path	= group_path + group + main.CONTENT_APPENDIX;
@@ -134,7 +119,6 @@ class refresh_page extends AsyncTask<Void, Object, Animation>
 			if(!adapter_feeds_cards.read_items.contains(links[m]) && oldest_unread == 0)
 				oldest_unread = m;
 		}
-		main.new_items.set(page_number, false);
 		if(oldest_unread == 0)
 			oldest_unread = number_of_items;
 

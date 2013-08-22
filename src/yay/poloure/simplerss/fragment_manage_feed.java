@@ -1,27 +1,22 @@
 package yay.poloure.simplerss;
 
-import android.support.v4.app.Fragment;
-
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
-
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ListView;
 
-import android.content.DialogInterface;
-
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.LayoutInflater;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.view.MenuItem;
-import android.app.AlertDialog;
-
 import java.io.File;
-import java.util.List;
 
 class fragment_manage_feed extends Fragment
 {
@@ -96,33 +91,24 @@ class fragment_manage_feed extends Fragment
 								{
 									utilities.delete_directory(new File(main.storage + main.GROUPS_DIRECTORY + group));
 									utilities.remove_string_from_file(main.storage + main.GROUP_LIST, group, false);
-									//getFragmentManager().beginTransaction().remove(((ListFragment) fragment_manager
-									//		.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(pos))));
-									main.new_items.set(pos, true);
 								}
 								else
 								{
 									utilities.sort_group_content_by_time(main.storage, group);
 									utilities.delete_if_empty(group_prepend + main.CONTENT_APPENDIX);
 									utilities.delete_if_empty(group_prepend + main.COUNT_APPENDIX);
-									if((new File(group_prepend + main.CONTENT_APPENDIX)).exists())
-										main.new_items.set(pos, true);
 								}
 
-								List<String> all_groups = utilities.read_file_to_list(main.storage + main.GROUP_LIST);
-								if(all_groups.size() == 1)
-								{
+								String[] all_groups = utilities.read_file_to_array(main.storage + main.GROUP_LIST);
+								if(all_groups.length == 1)
 									utilities.delete_directory(new File(main.storage + main.GROUPS_DIRECTORY + main.ALL));
-									main.new_items.set(0, true);
-								}
-								else if(all_groups.size() != 0)
+
+								else if(all_groups.length != 0)
 								{
 									/* This line may be broken. */
 									utilities.sort_group_content_by_time(main.storage, main.ALL);
 									utilities.delete_if_empty(all_file + main.CONTENT_APPENDIX);
 									utilities.delete_if_empty(all_file + main.COUNT_APPENDIX);
-									if(utilities.exists(all_file + main.CONTENT_APPENDIX))
-										main.new_items.set(0, true);
 								}
 
 								main.update_groups();
@@ -172,9 +158,6 @@ class fragment_manage_feed extends Fragment
 									new refresh_manage_feeds()									.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 									new fragment_manage_group.refresh_manage_groups()	.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 								}
-								main.new_items.set(0, true);
-								main.new_items.set(pos, true);
-
 							}
 						}
 					).show();
@@ -215,7 +198,7 @@ class fragment_manage_feed extends Fragment
 		{
 			if(feed_list_adapter != null)
 			{
-				final String[][] content	= utilities.read_csv_to_array(main.storage + main.GROUPS_DIRECTORY + main.current_groups.get(0) + main.SEPAR + main.current_groups.get(0) + main.TXT, 'n', 'u', 'g');
+				final String[][] content	= utilities.read_csv_to_array(main.storage + main.GROUPS_DIRECTORY + main.current_groups[0] + main.SEPAR + main.current_groups[0] + main.TXT, 'n', 'u', 'g');
 				final int size					= content[0].length;
 				String[] info_array			= new String[size];
 				for(int i = 0; i < size; i++)

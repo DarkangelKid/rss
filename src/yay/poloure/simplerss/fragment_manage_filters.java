@@ -1,20 +1,16 @@
 package yay.poloure.simplerss;
 
-import android.support.v4.app.Fragment;
-
-import android.os.Bundle;
-
-import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.AdapterView;
-import android.widget.ListView;
-
+import android.app.AlertDialog;
 import android.content.DialogInterface;
-
-import android.view.View;
-import android.view.ViewGroup;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.app.AlertDialog;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.ListView;
 
 class fragment_manage_filters extends Fragment
 {
@@ -35,7 +31,7 @@ class fragment_manage_filters extends Fragment
 		filter_list_adapter = new adapter_manage_filter(getActivity());
 		filter_list.setAdapter(filter_list_adapter);
 
-		filter_list_adapter.set_items(utilities.read_file_to_list(main.storage + main.FILTER_LIST));
+		filter_list_adapter.set_items(utilities.read_file_to_array(main.storage + main.FILTER_LIST));
 
 		filter_list.setOnItemLongClickListener
 		(

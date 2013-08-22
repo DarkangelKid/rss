@@ -1,28 +1,28 @@
 package yay.poloure.simplerss;
 
-import android.app.IntentService;
 import android.app.Activity;
-import android.content.Intent;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
+import android.app.IntentService;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Point;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.PowerManager;
+import android.os.Process;
+import android.os.Message;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
+import android.view.WindowManager;
 
 import java.util.List;
 
-import android.os.PowerManager;
-import android.os.Process;
-
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.TaskStackBuilder;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.ActivityManager;
-import android.app.ActivityManager.RunningServiceInfo;
-
-import android.graphics.Point;
-import android.view.WindowManager;
-
 public class service_update extends IntentService
 {
+	private Handler handler;
 
 	public service_update()
 	{
@@ -38,7 +38,8 @@ public class service_update extends IntentService
 
 		Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
-		final int group						= intent.getIntExtra("GROUP_NUMBER", 0);
+		final int group		= intent.getIntExtra("GROUP_NUMBER", 0);
+		handler					= main.service_handler;
 
 		final String storage;
 		final String SEPAR = main.SEPAR;
@@ -51,12 +52,12 @@ public class service_update extends IntentService
 			storage				= Environment.getExternalStorageDirectory().getAbsolutePath() + SEPAR + "Android" + SEPAR + "data" + SEPAR + packageName + SEPAR + "files" + SEPAR;
 		}
 
-		final List<String> all_groups		= utilities.read_file_to_list(storage + main.GROUP_LIST);
-		final String grouper				= all_groups.get(group);
+		final String[] all_groups			= utilities.read_file_to_array(storage + main.GROUP_LIST);
+		final String grouper					= all_groups[group];
 		final String group_file_path		= storage + main.GROUPS_DIRECTORY + grouper + main.SEPAR + grouper + main.TXT;
 
 		final String[][] content			= utilities.read_csv_to_array(group_file_path, 'n', 'u', 'g');
-		final String[] names				= content[0];
+		final String[] names					= content[0];
 		final String[] urls					= content[1];
 		final String[] groups				= content[2];
 
@@ -85,19 +86,19 @@ public class service_update extends IntentService
 
 		else
 		{
-			for(int j = 1; j < all_groups.size(); j++)
-				utilities.sort_group_content_by_time(storage, all_groups.get(j));
+			for(int j = 1; j < all_groups.length; j++)
+				utilities.sort_group_content_by_time(storage, all_groups[j]);
 		}
 
-		final List<Integer> unread_list = main.get_unread_counts();
+		final int[] unread_counts = main.get_unread_counts();
 
 		int group_items = 1;
 		int total = 0, count;
-		final int sizes = unread_list.size();
+		final int sizes = unread_counts.length;
 
 		for(i = 1 ; i < sizes; i++)
 		{
-			count = unread_list.get(i);
+			count = unread_counts[i];
 			if(count > 0)
 			{
 				total += count;
@@ -126,6 +127,14 @@ public class service_update extends IntentService
 			not_builder.setContentIntent(result_pending_intent);
 			NotificationManager notification_manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 			notification_manager.notify(1, not_builder.build());
+		}
+
+		/* If activity is running. */
+		if(handler != null)
+		{
+			/* 120 is just an int. */
+			Message msg = handler.obtainMessage(120, "false");
+			handler.sendMessage(msg);
 		}
 
 		wakelock.release();
