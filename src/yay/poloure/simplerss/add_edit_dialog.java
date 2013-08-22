@@ -21,6 +21,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
+import java.util.Arrays;
 
 public class add_edit_dialog
 {
@@ -56,7 +57,7 @@ public class add_edit_dialog
 			String url = "", feed_title = "";
 			if(group.length() > 0)
 			{
-				final List<String> current_groups = utilities.read_file_to_list(main.storage + main.GROUP_LIST);
+				final String[] current_groups = utilities.read_file_to_array(main.storage + main.GROUP_LIST);
 				for(String gro : current_groups)
 				{
 					if((gro.toLowerCase(Locale.getDefault())).equals(group.toLowerCase(Locale.getDefault())))
@@ -200,11 +201,11 @@ public class add_edit_dialog
 		add_filter_dialog.show();
 	}
 
-	public static void show_add_feed_dialog(final List<String> current_groups, Context activity_context)
+	public static void show_add_feed_dialog(final String[] current_groups, Context activity_context)
 	{
 		final LayoutInflater inflater		= LayoutInflater.from(activity_context);
 		final View add_rss_dialog			= inflater.inflate(R.layout.add_rss_dialog, null);
-		final List<String> spinner_groups	= current_groups.subList(1, current_groups.size());
+		final String[] spinner_groups		= Arrays.copyOfRange(current_groups, 1, current_groups.length);
 		final TextView group_edit			= (TextView) add_rss_dialog.findViewById(R.id.group_edit);
 		final TextView URL_edit				= (TextView) add_rss_dialog.findViewById(R.id.URL_edit);
 		final TextView name_edit			= (TextView) add_rss_dialog.findViewById(R.id.name_edit);
@@ -246,19 +247,19 @@ public class add_edit_dialog
 					spinner_group = "";
 				}
 				if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
-					new check_feed_exists(add_feed_dialog, new_group, feed_name, "add", "", "", spinner_group, 0, current_groups.get(0)).execute(URL_check);
+					new check_feed_exists(add_feed_dialog, new_group, feed_name, "add", "", "", spinner_group, 0, current_groups[0]).execute(URL_check);
 				else
-					new check_feed_exists(add_feed_dialog, new_group, feed_name, "add", "", "", spinner_group, 0, current_groups.get(0)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
+					new check_feed_exists(add_feed_dialog, new_group, feed_name, "add", "", "", spinner_group, 0, current_groups[0]).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
 			}
 		});
 		add_feed_dialog.show();
 	}
 
-	public static void show_edit_feed_dialog(final List<String> current_groups, Context activity_context, String storage, final int position)
+	public static void show_edit_feed_dialog(final String[] current_groups, Context activity_context, String storage, final int position)
 	{
 		final LayoutInflater inflater		= LayoutInflater.from(activity_context);
 		final View edit_rss_dialog			= inflater.inflate(R.layout.add_rss_dialog, null);
-		final String[][] content			= utilities.read_csv_to_array(storage + main.GROUPS_DIRECTORY+ current_groups.get(0) + main.SEPAR + current_groups.get(0) + main.TXT, 'n', 'u', 'g');
+		final String[][] content			= utilities.read_csv_to_array(storage + main.GROUPS_DIRECTORY+ current_groups[0] + main.SEPAR + current_groups[0] + main.TXT, 'n', 'u', 'g');
 		final String current_title			= content[0][position];
 		final String current_url			= content[1][position];
 		final String current_group			= content[2][position];
@@ -268,14 +269,14 @@ public class add_edit_dialog
 		final TextView name_edit			= (TextView) edit_rss_dialog.findViewById(R.id.name_edit);
 		final AdapterView<SpinnerAdapter> group_spinner	= (AdapterView<SpinnerAdapter>) edit_rss_dialog.findViewById(R.id.group_spinner);
 
-		final List<String> spinner_groups	= current_groups.subList(1, current_groups.size());
+		final String[] spinner_groups			= Arrays.copyOfRange(current_groups, 1, current_groups.length);
 
 		final ArrayAdapter<String> adapter	= new ArrayAdapter<String>(activity_context, R.layout.group_spinner_text, spinner_groups);
 		adapter			.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		group_spinner	.setAdapter(adapter);
-		URL_edit		.setText(current_url);
+		URL_edit			.setText(current_url);
 		name_edit		.setText(current_title);
-		group_spinner	.setSelection(spinner_groups.indexOf(current_group));
+		group_spinner	.setSelection(utilities.index_of(spinner_groups, current_group));
 
 		final AlertDialog edit_feed_dialog = new AlertDialog.Builder(activity_context)
 				.setTitle(activity_context.getString(R.string.edit_dialog_title))
@@ -303,9 +304,9 @@ public class add_edit_dialog
 							String feed_name 		= name_edit		.getText().toString().trim();
 							String spinner_group 	= group_spinner	.getSelectedItem().toString();
 							if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
-								new check_feed_exists(edit_feed_dialog, new_group, feed_name, "edit", current_title, current_group, spinner_group, position, current_groups.get(0)).execute(URL_check);
+								new check_feed_exists(edit_feed_dialog, new_group, feed_name, "edit", current_title, current_group, spinner_group, position, current_groups[0]).execute(URL_check);
 							else
-								new check_feed_exists(edit_feed_dialog, new_group, feed_name, "edit", current_title, current_group, spinner_group, position, current_groups.get(0)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
+								new check_feed_exists(edit_feed_dialog, new_group, feed_name, "edit", current_title, current_group, spinner_group, position, current_groups[0]).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
 					}
 				});
 
@@ -349,17 +350,17 @@ public class add_edit_dialog
 
 	private static void edit_feed(String storage, String old_name, String new_name, String new_url, String old_group, String new_group, int position, String all_string)
 	{
-		final String sep					= main.SEPAR;
-		final String txt					= main.TXT;
-		final String count					= main.COUNT_APPENDIX;
-		final String con					= main.CONTENT_APPENDIX;
+		final String sep							= main.SEPAR;
+		final String txt							= main.TXT;
+		final String count						= main.COUNT_APPENDIX;
+		final String con							= main.CONTENT_APPENDIX;
 		final String all_group_file			= storage + main.ALL_FILE;
-		final String old_group_folder		= storage + main.GROUPS_DIRECTORY + old_group;
-		final String new_group_folder		= storage + main.GROUPS_DIRECTORY + new_group;
+		final String old_group_folder			= storage + main.GROUPS_DIRECTORY + old_group;
+		final String new_group_folder			= storage + main.GROUPS_DIRECTORY + new_group;
 		final String old_group_file			= old_group_folder + sep + old_group + txt;
 		final String new_group_file			= new_group_folder + sep + new_group + txt;
-		final String old_feed_folder		= old_group_folder + sep + old_name;
-		final String new_feed_folder		= new_group_folder + sep + new_name;
+		final String old_feed_folder			= old_group_folder + sep + old_name;
+		final String new_feed_folder			= new_group_folder + sep + new_name;
 		final String old_feed_folder_post	= new_group_folder + sep + old_name;
 		final String new_feed_folder_post	= new_group_folder + sep + new_name;
 
@@ -455,12 +456,12 @@ public class add_edit_dialog
 		int index;
 		if((new File(old_group_file)).exists())
 		{
-			index = main.current_groups.indexOf(old_group);
+			index = utilities.index_of(main.current_groups, old_group);
 			main.new_items.set(index, true);
 		}
 		if(!old_group.equals(new_group))
 		{
-			index = main.current_groups.indexOf(new_group);
+			index = utilities.index_of(main.current_groups, new_group);
 			main.new_items.set(index, true);
 		}
 		main.new_items.set(0, true);

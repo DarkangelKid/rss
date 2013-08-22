@@ -19,7 +19,7 @@ class refresh_page extends AsyncTask<Void, Object, Animation>
 	ListFragment l;
 	adapter_feeds_cards ith;
 	ListView lv;
-	List<Integer> counts;
+	int[] counts;
 	int number_of_items = 0;
 	int oldest_unread = 0;
 
@@ -43,7 +43,7 @@ class refresh_page extends AsyncTask<Void, Object, Animation>
 			}
 		}
 
-		String group							= main.current_groups.get(page_number);
+		String group							= main.current_groups[page_number];
 		final String group_path				= main.storage + main.GROUPS_DIRECTORY + group + main.SEPAR;
 		final String group_file_path		= group_path + group + main.TXT;
 		final String group_content_path	= group_path + group + main.CONTENT_APPENDIX;

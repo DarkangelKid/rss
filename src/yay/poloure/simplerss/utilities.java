@@ -96,6 +96,17 @@ public class utilities
 		return C;
 	}
 
+	public static int index_of(String[] array, String value)
+	{
+		for(int i = 0; i < array.length; i++)
+		{
+			if(array[i] == value)
+				return i;
+		}
+		/* Throws an ArrayOutOfBoundsException if not handled. */
+		return -1;
+	}
+
 	public static String[] remove_element(String[] a, int index)
 	{
 		String[] b = new String[a.length - 1];
@@ -135,15 +146,15 @@ public class utilities
 		}
 	}
 
-	public static String[][] create_info_arrays(List<String> current_groups, int size, String storage)
+	public static String[][] create_info_arrays(String[] current_groups, int size, String storage)
 	{
 		String info;
 		int number, i, j, total;
 		String[] content;
-		String[] group_array	= new String[size];
+		String[] group_array		= new String[size];
 		String[] info_array		= new String[size];
 
-		final String content_path = storage + main.GROUPS_DIRECTORY + current_groups.get(0) + main.SEPAR + current_groups.get(0) + main.CONTENT_APPENDIX;
+		final String content_path = storage + main.GROUPS_DIRECTORY + current_groups[0] + main.SEPAR + current_groups[0] + main.CONTENT_APPENDIX;
 		final String count_path = content_path + main.COUNT_APPENDIX;
 
 		if(exists(count_path))
@@ -153,7 +164,7 @@ public class utilities
 
 		for(i = 0; i < size; i++)
 		{
-			group_array[i] = current_groups.get(i);
+			group_array[i] = current_groups[i];
 			content = read_single_to_array(storage + main.GROUPS_DIRECTORY + group_array[i] + main.SEPAR + group_array[i] + main.TXT, "name|");
 			if(i == 0)
 				info = (size == 1) ? "1 group" :  size + " groups";
@@ -428,6 +439,25 @@ public class utilities
 			stream.close();
 		}
 		catch(IOException e){
+		}
+		return lines;
+	}
+
+	public static String[] read_file_to_array(String file_path)
+	{
+		String line;
+		int count = count_lines(file_path);
+		BufferedReader stream;
+		String[] lines = new String[count];
+		try
+		{
+			stream = new BufferedReader(new FileReader(file_path));
+			for(int i = 0; i < count; i++)
+				lines[i] = line = stream.readLine();
+			stream.close();
+		}
+		catch(IOException e)
+		{
 		}
 		return lines;
 	}

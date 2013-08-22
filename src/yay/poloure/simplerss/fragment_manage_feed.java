@@ -211,7 +211,7 @@ class fragment_manage_feed extends Fragment
 		{
 			if(feed_list_adapter != null)
 			{
-				final String[][] content	= utilities.read_csv_to_array(main.storage + main.GROUPS_DIRECTORY + main.current_groups.get(0) + main.SEPAR + main.current_groups.get(0) + main.TXT, 'n', 'u', 'g');
+				final String[][] content	= utilities.read_csv_to_array(main.storage + main.GROUPS_DIRECTORY + main.current_groups[0] + main.SEPAR + main.current_groups[0] + main.TXT, 'n', 'u', 'g');
 				final int size					= content[0].length;
 				String[] info_array			= new String[size];
 				for(int i = 0; i < size; i++)

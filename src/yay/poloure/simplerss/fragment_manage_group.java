@@ -219,7 +219,7 @@ class fragment_manage_group extends Fragment
 		@Override
 		protected Void doInBackground(Void... nothing)
 		{
-			String[][] content		= utilities.create_info_arrays(main.current_groups, main.current_groups.size(), main.storage);
+			String[][] content		= utilities.create_info_arrays(main.current_groups, main.current_groups.length, main.storage);
 			publishProgress(content[1], content[0]);
 			return null;
 		}

@@ -53,7 +53,7 @@ public class main extends ActionBarActivity
 	public  static ActionBar				action_bar;
 	public  static Activity					activity;
 	public  static adapter_navigation_drawer nav_adapter;
-	public  static List<String> current_groups 			= new ArrayList<String>();
+	public  static String[] current_groups = new String[0];
 	public  static List<Boolean> new_items 				= new ArrayList<Boolean>();
 	public  static String storage, ALL, NAVIGATION, DELETE_DIALOG, CLEAR_DIALOG, ALL_FILE;
 
@@ -293,8 +293,8 @@ public class main extends ActionBarActivity
 				storage_file.mkdirs();
 		}
 
-		current_groups = utilities.read_file_to_list(storage + GROUP_LIST);
-		if(new_items.size() != current_groups.size())
+		current_groups = utilities.read_file_to_array(storage + GROUP_LIST);
+		if(new_items.size() != current_groups.length)
 		{
 			new_items.clear();
 			for(String string : current_groups)
@@ -464,13 +464,13 @@ public class main extends ActionBarActivity
 		@Override
 		public int getCount()
 		{
-			return current_groups.size();
+			return current_groups.length;
 		}
 
  		@Override
 		public Fragment getItem(int position)
 		{
-			//if(position < current_groups.size())
+			//if(position < current_groups.length)
 			{
 				fragment_card f = new fragment_card();
 				Bundle args = new Bundle();
@@ -484,7 +484,7 @@ public class main extends ActionBarActivity
 		@Override
 		public String getPageTitle(int position)
 		{
-			return current_groups.get(position);
+			return current_groups[position];
 		}
 	}
 
@@ -541,7 +541,7 @@ public class main extends ActionBarActivity
 			setRetainInstance(false);
 			adapter_feeds_cards ith = new adapter_feeds_cards(getActivity());
 			setListAdapter(ith);
-			String group = current_groups.get(getArguments().getInt("num", 0));
+			String group = current_groups[getArguments().getInt("num", 0)];
 			List<String> lines = utilities.read_file_to_list(storage + GROUPS_DIRECTORY + group + SEPAR + group + CONTENT_APPENDIX);
 			int count = -1;
 			for(int i = 0; i < lines.size(); i++)
@@ -688,14 +688,14 @@ public class main extends ActionBarActivity
 
 	public static void update_groups()
 	{
-		final int previous_size = current_groups.size();
+		final int previous_size = current_groups.length;
 
-		current_groups = utilities.read_file_to_list(storage + GROUP_LIST);
-		final int size = current_groups.size();
+		current_groups = utilities.read_file_to_array(storage + GROUP_LIST);
+		final int size = current_groups.length;
 		if(size == 0)
 		{
 			utilities.append_string_to_file(storage + GROUP_LIST, ALL + NL);
-			current_groups.add(ALL);
+			current_groups = new String[]{"All"};
 		}
 
 		new_items.clear();
@@ -718,8 +718,8 @@ public class main extends ActionBarActivity
 		final int page_number = viewpager.getCurrentItem();
 		int oldest_unread = -1;
 
-		final String group_path				= storage + GROUPS_DIRECTORY + current_groups.get(page_number) + main.SEPAR;
-		final String group_content_path	= group_path + current_groups.get(page_number) + CONTENT_APPENDIX;
+		final String group_path				= storage + GROUPS_DIRECTORY + current_groups[page_number] + main.SEPAR;
+		final String group_content_path	= group_path + current_groups[page_number] + CONTENT_APPENDIX;
 
 		if(!utilities.exists(group_content_path))
 			return;
@@ -788,38 +788,38 @@ public class main extends ActionBarActivity
 			new refresh_page(page_number).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 
-	public static void update_navigation_data(List<Integer> counts, Boolean update_names)
+	public static void update_navigation_data(int[] counts, Boolean update_names)
 	{
 		if(counts == null)
 			counts = get_unread_counts();
 
 		if(update_names)
-			nav_adapter.add_list(current_groups);
+			nav_adapter.set_titles(current_groups);
 
-		nav_adapter.add_count(counts);
+		nav_adapter.set_counts(counts);
 		nav_adapter.notifyDataSetChanged();
 	}
 
-	public static List<Integer> get_unread_counts()
+	public static int[] get_unread_counts()
 	{
-		List<Integer> unread_list	= new ArrayList<Integer>();
 		int total = 0, unread;
-		final int size = current_groups.size();
+		final int size = current_groups.length;
+		int[] unread_counts	= new int[current_groups.length];
 
 		for(int i = 1; i < size; i++)
 		{
 			unread = 0;
-			String[] urls = utilities.read_single_to_array(storage + GROUPS_DIRECTORY + current_groups.get(i) + SEPAR + current_groups.get(i) + CONTENT_APPENDIX, "link|");
+			String[] urls = utilities.read_single_to_array(storage + GROUPS_DIRECTORY + current_groups[i] + SEPAR + current_groups[i] + CONTENT_APPENDIX, "link|");
 			for(int j = 0; j < urls.length; j++)
 			{
 				if(!adapter_feeds_cards.read_items.contains(urls[j]))
 						unread++;
 			}
 			total += unread;
-			unread_list.add(unread);
+			unread_counts[i] = unread;
 		}
 
-		unread_list.add(0, total);
-		return unread_list;
+		unread_counts[0] = total;
+		return unread_counts;
 	}
 }

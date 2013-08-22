@@ -13,8 +13,8 @@ import java.util.List;
 
 public class adapter_navigation_drawer extends BaseAdapter
 {
-	private static final List<String> menu_list = new ArrayList<String>();
-	private static final List<Integer> count_list = new ArrayList<Integer>();
+	private static String[] menu_array  = new String[0];
+	private static int[]    count_array = new int[0];
 	private int twelve;
 
 	private static LayoutInflater inflater;
@@ -25,16 +25,14 @@ public class adapter_navigation_drawer extends BaseAdapter
 		twelve = (int) ((12 * (context_main.getResources().getDisplayMetrics().density) + 0.5f));
 	}
 
-	public void add_list(List<String> new_title)
+	public void set_titles(String[] new_titles)
 	{
-		menu_list.clear();
-		menu_list.addAll(new_title);
+		menu_array = new_titles;
 	}
 
-	public void add_count(List<Integer> new_count)
+	public void set_counts(int[] new_counts)
 	{
-		count_list.clear();
-		count_list.addAll(new_count);
+		count_array = new_counts;
 	}
 
 	@Override
@@ -46,13 +44,13 @@ public class adapter_navigation_drawer extends BaseAdapter
 	@Override
 	public String getItem(int position)
 	{
-		return menu_list.get(position);
+		return menu_array[position];
 	}
 
 	@Override
 	public int getCount()
 	{
-		return menu_list.size() + 4;
+		return menu_array.length + 4;
 	}
 
 	@Override
@@ -89,7 +87,7 @@ public class adapter_navigation_drawer extends BaseAdapter
 			group_item_holder holder;
 			if(convertView == null)
 			{
-				convertView = (View) inflater.inflate(R.layout.navigation_drawer_main_item, parent, false);
+				convertView = inflater.inflate(R.layout.navigation_drawer_main_item, parent, false);
 				holder = new group_item_holder();
 				holder.title_view = (TextView) convertView.findViewById(R.id.menu_item);
 				convertView.setTag(holder);
@@ -124,7 +122,7 @@ public class adapter_navigation_drawer extends BaseAdapter
 			main_item_holder holder;
 			if(convertView == null)
 			{
-				convertView = (View) inflater.inflate(R.layout.navigation_drawer_subtitle_divider, parent, false);
+				convertView = inflater.inflate(R.layout.navigation_drawer_subtitle_divider, parent, false);
 				holder = new main_item_holder();
 				holder.title_view = (TextView) convertView.findViewById(R.id.title_item);
 				holder.divider_view = (ImageView) convertView.findViewById(R.id.divider_item);
@@ -139,7 +137,7 @@ public class adapter_navigation_drawer extends BaseAdapter
 			TextViewHolder holder;
 			if(convertView == null)
 			{
-				convertView = (View) inflater.inflate(R.layout.navigation_drawer_group_item, parent, false);
+				convertView = inflater.inflate(R.layout.navigation_drawer_group_item, parent, false);
 				holder = new TextViewHolder();
 				holder.title_view = (TextView) convertView.findViewById(R.id.group_title);
 				holder.unread_view = (TextView) convertView.findViewById(R.id.unread_item);
@@ -148,8 +146,8 @@ public class adapter_navigation_drawer extends BaseAdapter
 			else
 				holder = (TextViewHolder) convertView.getTag();
 
-			holder.title_view.setText(menu_list.get(position - 4));
-			String number = Integer.toString(count_list.get(position - 4));
+			holder.title_view.setText(menu_array[position - 4]);
+			String number = Integer.toString(count_array[position - 4]);
 			holder.unread_view.setText((number.equals("0")) ? "" : number);
 		}
 		return convertView;

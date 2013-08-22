@@ -78,7 +78,7 @@ public class adapter_settings_function extends BaseAdapter
 			final settings_heading_holder holder;
 			if(convertView == null)
 			{
-				convertView = (View) inflater.inflate(R.layout.settings_heading, parent, false);
+				convertView = inflater.inflate(R.layout.settings_heading, parent, false);
 				holder = new settings_heading_holder();
 				holder.title_view = (TextView) convertView.findViewById(R.id.settings_heading);
 				convertView.setTag(holder);
@@ -94,7 +94,7 @@ public class adapter_settings_function extends BaseAdapter
 			final settings_checkbox_holder holder;
 			if(convertView == null)
 			{
-				convertView = (View) inflater.inflate(R.layout.settings_checkbox, parent, false);
+				convertView = inflater.inflate(R.layout.settings_checkbox, parent, false);
 				holder = new settings_checkbox_holder();
 				holder.title_view = (TextView) convertView.findViewById(R.id.check_title);
 				holder.summary_view = (TextView) convertView.findViewById(R.id.check_summary);
@@ -126,7 +126,7 @@ public class adapter_settings_function extends BaseAdapter
 			final settings_seekbar_holder holder;
 			if(convertView == null)
 			{
-				convertView = (View) inflater.inflate(R.layout.settings_seekbar, parent, false);
+				convertView = inflater.inflate(R.layout.settings_seekbar, parent, false);
 				holder = new settings_seekbar_holder();
 				holder.title_view = (TextView) convertView.findViewById(R.id.seek_title);
 				holder.summary_view = (TextView) convertView.findViewById(R.id.seek_summary);
