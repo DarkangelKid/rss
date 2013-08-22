@@ -1,26 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<string-array name="card_menu_image">
-		<item>Copy URL to clipboard</item>
-		<item>Open in browser</item>
-		<item>Save image to storage</item>
+			<item>Copy URL to clipboard</item>
+			<item>Open in browser</item>
+			<item>Save image to storage</item>
 	</string-array>
 	<string-array name="card_menu">
-		<item>Copy URL to clipboard</item>
-		<item>Open in browser</item>
+			<item>Copy URL to clipboard</item>
+			<item>Open in browser</item>
 	</string-array>
 	<string-array name="settings_function_titles">
-		<item>Auto Refresh</item>
-		<item>Auto Refresh</item>
-		<item>Refresh Time</item>
-		<item>Notifications</item>
-		<item>Offline Mode</item>
+			<item>Auto Refresh</item>
+			<item>Auto Refresh</item>
+			<item>Refresh Time</item>
+			<item>Notifications</item>
+			<item>Offline Mode</item>
 	</string-array>
 	<string-array name="settings_function_summaries">
-		<item>EMPTY</item>
-		<item>Check to enable auto refresh</item>
-		<item>Adjust auto refresh interval</item>
-		<item>Check to enable notifications</item>
-		<item>Check to enable offline mode</item>
+			<item>EMPTY</item>
+			<item>Check to enable auto refresh</item>
+			<item>Adjust auto refresh interval</item>
+			<item>Check to enable notifications</item>
+			<item>Check to enable offline mode</item>
+	</string-array>
+	<string-array name="settings_interface_titles">
+			<item>UI Colours</item>
+			<item>Viewpager Highlight</item>
+	</string-array>
+	<string-array name="settings_interface_summaries">
+			<item>EMPTY</item>
+			<item>Select viewpager highlight colour</item>
 	</string-array>
 </resources>
