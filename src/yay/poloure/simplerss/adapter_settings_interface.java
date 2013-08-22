@@ -41,7 +41,7 @@ public class adapter_settings_interface extends BaseAdapter
 	@Override
 	public int getCount()
 	{
-		return 5;
+		return 2;
 	}
 
 	@Override
