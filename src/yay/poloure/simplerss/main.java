@@ -33,37 +33,38 @@ import java.io.File;
 
 public class main extends ActionBarActivity
 {
-	/// Statics without final intilisations are generally unsafe.
+	/* Statics without final intilisations are generally unsafe. */
 	private static Menu						optionsMenu;
 	public  static ViewPager				viewpager;
 	public  static Context					activity_context;
-	public  static FragmentManager		    fragment_manager;
+	public  static FragmentManager		fragment_manager;
 	public  static ActionBar				action_bar;
 	public  static Activity					activity;
 	public  static Handler					service_handler;
 	public  static String[] current_groups = new String[0];
 	public  static String storage, ALL, NAVIGATION, DELETE_DIALOG, CLEAR_DIALOG, ALL_FILE;
 
-	/// Private static final are good.
-	private static final int[] times							= new int[]{15, 30, 45, 60, 120, 180, 240, 300, 360, 400, 480, 540, 600, 660, 720, 960, 1440, 2880, 10080, 43829};
+	/* Static final are good. */
+	public  static final String SEPAR					= System.getProperty("file.separator");
+	public  static final String NL						= System.getProperty("line.separator");
+	public  static final String TXT						= ".txt";
+	public  static final String GROUPS_DIRECTORY		= "groups" + SEPAR;
+	public  static final String THUMBNAIL_DIRECTORY	= "thumbnails" + SEPAR;
+	public  static final String IMAGE_DIRECTORY		= "images" + SEPAR;
+	public  static final String SETTINGS				= "settings" + SEPAR;
+	public  static final String PAGERTABSTRIPCOLOUR	= "pagertabstrip_colour" + TXT;
+	public  static final String DUMP_FILE				= "dump" + TXT;
+	public  static final String STORE_APPENDIX		= ".store" + TXT;
+	public  static final String CONTENT_APPENDIX		= ".content" + TXT;
+	public  static final String COUNT_APPENDIX		= ".count" + TXT;
+	public  static final String GROUP_LIST				= "group_list" + TXT;
+	public  static final String FILTER_LIST			= "filter_list" + TXT;
+	public  static final PagerTabStrip[] strips		= new PagerTabStrip[3];
 
-	/// Public static final are the holy grail.
-	public  static final String SEPAR						= System.getProperty("file.separator");
-	public  static final String NL							= System.getProperty("line.separator");
-	public  static final String TXT							= ".txt";
-	public  static final String GROUPS_DIRECTORY			= "groups" + SEPAR;
-	public  static final String THUMBNAIL_DIRECTORY		= "thumbnails" + SEPAR;
-	public  static final String IMAGE_DIRECTORY			= "images" + SEPAR;
-	public  static final String SETTINGS					= "settings" + SEPAR;
-	public  static final String PAGERTABSTRIPCOLOUR		= "pagertabstrip_colour" + TXT;
-	public  static final String DUMP_FILE					= "dump" + TXT;
-	private  static final String READ_ITEMS					= "read_items" + TXT;
-	public  static final String STORE_APPENDIX			= ".store" + TXT;
-	public  static final String CONTENT_APPENDIX			= ".content" + TXT;
-	public  static final String COUNT_APPENDIX			= ".count" + TXT;
-	public  static final String GROUP_LIST					= "group_list" + TXT;
-	public  static final String FILTER_LIST				= "filter_list" + TXT;
-	public  static final PagerTabStrip[] strips			= new PagerTabStrip[3];
+	private static final String[] folders				= new String[]{GROUPS_DIRECTORY, SETTINGS};
+	private static final int[] times						= new int[]{15, 30, 45, 60, 120, 180, 240, 300, 360, 400, 480, 540, 600, 660, 720, 960, 1440, 2880, 10080, 43829};
+	private static final String READ_ITEMS				= "read_items" + TXT;
+
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -72,19 +73,54 @@ public class main extends ActionBarActivity
 
 		setContentView(R.layout.navigation_drawer_and_content_frame);
 
-		perform_initial_operations();
+		/* Form the storage path. */
+		if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.FROYO)
+			storage					= getExternalFilesDir(null).getAbsolutePath() + SEPAR;
+		else
+		{
+			String packageName	= getPackageName();
+			File externalPath		= Environment.getExternalStorageDirectory();
+			storage					= externalPath.getAbsolutePath() + SEPAR + "Android" + SEPAR + "data" + SEPAR + packageName + SEPAR + "files" + SEPAR;
+			File storage_file		= new File(storage);
+			if(!storage_file.exists())
+				storage_file.mkdirs();
+		}
 
-		action_bar		= getSupportActionBar();
-		activity		= this;
+		/* Delete the log file. */
+		utilities.delete(storage + DUMP_FILE);
 
+		/* Create the top level folders if they do not exist. */
+		File folder_file;
+		for(String folder : folders)
+		{
+			folder_file = new File(storage + GROUPS_DIRECTORY);
+			if(!folder_file.exists())
+				folder_file.mkdir();
+		}
+
+		/* Load String resources into static variables. */
+		ALL						= getString(R.string.all_group);
+		NAVIGATION				= getString(R.string.navigation_title);
+		DELETE_DIALOG			= getString(R.string.delete_dialog);
+		CLEAR_DIALOG			= getString(R.string.clear_dialog);
+		ALL_FILE					= GROUPS_DIRECTORY + ALL + SEPAR + ALL + TXT;
+
+		/* Save the other satic variables. */
+		fragment_manager	= getSupportFragmentManager();
+		activity_context	= this;
+		activity				= this;
+
+		/* Configure the action bar. */
+		action_bar = getSupportActionBar();
 		action_bar.setDisplayShowHomeEnabled(true);
 		action_bar.setDisplayHomeAsUpEnabled(true);
 		action_bar.setHomeButtonEnabled(true);
 		action_bar.setIcon(R.drawable.rss_icon);
 
-		fragment_manager = getSupportFragmentManager();
+		/* Create the navigation drawer and set all the listeners for it. */
 		new navigation_drawer(activity, this, (DrawerLayout) findViewById(R.id.drawer_layout), (ListView) findViewById(R.id.left_drawer));
 
+		/* Create the fragments that go inside the content frame and add them to the fragment manager. */
 		if(savedInstanceState == null)
 		{
 			Fragment prefs		= new fragment_settings();
@@ -106,12 +142,12 @@ public class main extends ActionBarActivity
 					.commit();
 		}
 
-		/* Load the read items */
+		/* Load the read items. */
 		adapter_feeds_cards.read_items = utilities.read_file_to_set(storage + READ_ITEMS);
 
 		update_groups();
-		action_bar = getSupportActionBar();
 
+		/* If an all_content file exists, refresh page 0. */
 		if(utilities.exists(storage + ALL_FILE))
 		{
 			if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
@@ -132,7 +168,7 @@ public class main extends ActionBarActivity
 		action_bar.setDisplayHomeAsUpEnabled(true);
 	}
 
-	/// This is so the icon and text in the actionbar are selected.
+	/* This is so the icon and text in the actionbar are selected. */
 	@Override
 	public void onConfigurationChanged(Configuration newConfig)
 	{
@@ -186,38 +222,6 @@ public class main extends ActionBarActivity
 	}
 
 	/* END OF OVERRIDES */
-
-	private void perform_initial_operations()
-	{
-		if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.FROYO)
-			storage					= getExternalFilesDir(null).getAbsolutePath() + SEPAR;
-		else
-		{
-			String packageName	= getPackageName();
-			File externalPath		= Environment.getExternalStorageDirectory();
-			storage					= externalPath.getAbsolutePath() + SEPAR + "Android" + SEPAR + "data" + SEPAR + packageName + SEPAR + "files" + SEPAR;
-			File storage_file		= new File(storage);
-			if(!storage_file.exists())
-				storage_file.mkdirs();
-		}
-
-		utilities.delete(storage + DUMP_FILE);
-
-		File folder_file = new File(storage + GROUPS_DIRECTORY);
-		if(!folder_file.exists())
-			folder_file.mkdir();
-
-		folder_file = new File(storage + SETTINGS);
-		if(!folder_file.exists())
-			folder_file.mkdir();
-
-		activity_context		= this;
-		ALL						= getString(R.string.all_group);
-		NAVIGATION				= getString(R.string.navigation_title);
-		DELETE_DIALOG			= getString(R.string.delete_dialog);
-		CLEAR_DIALOG			= getString(R.string.clear_dialog);
-		ALL_FILE					= GROUPS_DIRECTORY + ALL + SEPAR + ALL + TXT;
-	}
 
 	private static class fragment_feeds extends Fragment
 	{
