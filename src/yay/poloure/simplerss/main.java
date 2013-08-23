@@ -62,7 +62,6 @@ public class main extends ActionBarActivity
 	public  static final PagerTabStrip[] strips		= new PagerTabStrip[3];
 
 	private static final String[] folders				= new String[]{GROUPS_DIRECTORY, SETTINGS};
-	private static final int[] times						= new int[]{15, 30, 45, 60, 120, 180, 240, 300, 360, 400, 480, 540, 600, 660, 720, 960, 1440, 2880, 10080, 43829};
 	private static final String READ_ITEMS				= "read_items" + TXT;
 
 
@@ -185,10 +184,11 @@ public class main extends ActionBarActivity
 			Intent intent = new Intent(this, service_update.class);
 			intent.putExtra("GROUP_NUMBER", 0);
 			intent.putExtra("NOTIFICATIONS", /*pref.getBoolean("notifications", false)*/ true);
-			PendingIntent pend_intent = PendingIntent.getService(this, 0, intent, 0);
-			final long interval = (long) times[/*pref.getInt("refresh_time", 20)/5*/2]*60000;
+			/*PendingIntent pend_intent = PendingIntent.getService(this, 0, intent, 0);
+			final long interval = (long) times[pref.getInt("refresh_time", 20)/52]*60000;
 			AlarmManager alarm_refresh = (AlarmManager) getSystemService(Activity.ALARM_SERVICE);
 			alarm_refresh.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + interval, interval, pend_intent);
+			*/
 		}
 		utilities.delete(storage + READ_ITEMS);
 		utilities.write_collection_to_file(storage + READ_ITEMS, adapter_feeds_cards.read_items);
@@ -514,7 +514,7 @@ public class main extends ActionBarActivity
 		public void onCreate(Bundle savedInstanceState)
 		{
 			super.onCreate(savedInstanceState);
-			adapter_settings_interface adapter = new adapter_settings_interface(activity_context);
+			adapter_settings_interface adapter = new adapter_settings_interface(activity_context, storage);
 			setListAdapter(adapter);
 		}
 

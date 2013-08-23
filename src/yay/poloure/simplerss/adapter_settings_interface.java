@@ -14,14 +14,16 @@ public class adapter_settings_interface extends BaseAdapter
 	private final String[] title_array;
 	private final String[] summary_array;
 	private final static String[] colours = new String[]{"blue", "purple", "green", "orange", "red"};
+	private final String storage;
 
 	private static LayoutInflater inflater;
 
-	public adapter_settings_interface(Context context_main)
+	public adapter_settings_interface(Context context_main, String stor)
 	{
 		inflater = (LayoutInflater) context_main.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		title_array = context_main.getResources().getStringArray(R.array.settings_interface_titles);
 		summary_array = context_main.getResources().getStringArray(R.array.settings_interface_summaries);
+		storage = stor;
 	}
 
 	@Override
@@ -109,20 +111,24 @@ public class adapter_settings_interface extends BaseAdapter
 			holder.yellow_view.setOnClickListener(new colour_click(3));
 			holder.red_view.setOnClickListener(new colour_click(4));
 
-			/*holder.checkbox.setOnClickListener(new OnClickListener()
-			{
-				@Override
-				public void onClick(View v)
-				{
-					boolean checked = ((CheckBox) v).isChecked();
-					///below code could equally easily be passed through as a final string, whatever.
-					String file_name = title_array[pos];
-					///PAULTODO
-					///this is where values are saved to file
-					///for settings files the file name should probably be the title of the settings item
-					///as this is already stored in a final array, is unique and will not cause issues between apk updates.
-				}
-			});*/
+			holder.blue_view.setAlpha(0.5f);
+			holder.purple_view.setAlpha(0.5f);
+			holder.green_view.setAlpha(0.5f);
+			holder.yellow_view.setAlpha(0.5f);
+			holder.red_view.setAlpha(0.5f);
+
+			String[] colour_array = utilities.read_file_to_array(storage + main.SETTINGS + main.SEPAR + main.PAGERTABSTRIPCOLOUR);
+
+			if(colour_array[0].equals("blue"))
+				holder.blue_view.setAlpha(1.0f);
+			else if(colour_array[0].equals("purple"))
+				holder.purple_view.setAlpha(1.0f);
+			else if(colour_array[0].equals("green"))
+				holder.green_view.setAlpha(1.0f);
+			else if(colour_array[0].equals("yellow"))
+				holder.yellow_view.setAlpha(1.0f);
+			else
+				holder.red_view.setAlpha(1.0f);
 		}
 		///so far there are only 2 view types, heading and holocolour_select
 		///this will change
