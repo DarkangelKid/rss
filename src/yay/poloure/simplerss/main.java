@@ -67,6 +67,8 @@ public class main extends ActionBarActivity
 	public  static final String GROUPS_DIRECTORY			= "groups" + SEPAR;
 	public  static final String THUMBNAIL_DIRECTORY		= "thumbnails" + SEPAR;
 	public  static final String IMAGE_DIRECTORY			= "images" + SEPAR;
+	public  static final String SETTINGS					= "settings" + SEPAR;
+	public  static final String PAGERTABSTRIPCOLOUR		= "pagertabstrip_colour" + TXT;
 	public  static final String DUMP_FILE					= "dump" + TXT;
 	public  static final String READ_ITEMS					= "read_items" + TXT;
 	public  static final String STORE_APPENDIX			= ".store" + TXT;
@@ -75,6 +77,8 @@ public class main extends ActionBarActivity
 	public  static final String GROUP_LIST					= "group_list" + TXT;
 	public  static final String FILTER_LIST				= "filter_list" + TXT;
 	public  static final String[] NAVIGATION_TITLES		= new String[3];
+	public  static       String colour;
+	public  static       PagerTabStrip[] strips			= new PagerTabStrip[3];
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -84,6 +88,8 @@ public class main extends ActionBarActivity
 		setContentView(R.layout.navigation_drawer_and_content_frame);
 
 		perform_initial_operations();
+		load_preferences();
+
 		current_title	= NAVIGATION_TITLES[0];
 		action_bar		= getSupportActionBar();
 		activity			= this;
@@ -200,7 +206,11 @@ public class main extends ActionBarActivity
 
 		utilities.delete(storage + DUMP_FILE);
 
-		File folder_file = new File(storage + "groups");
+		File folder_file = new File(storage + GROUPS_DIRECTORY);
+		if(!folder_file.exists())
+			folder_file.mkdir();
+
+		folder_file = new File(storage + SETTINGS);
 		if(!folder_file.exists())
 			folder_file.mkdir();
 
@@ -213,6 +223,32 @@ public class main extends ActionBarActivity
 		NAVIGATION_TITLES[1]	= getString(R.string.manage_title);
 		NAVIGATION_TITLES[2]	= getString(R.string.settings_title);
 		ALL_FILE					= GROUPS_DIRECTORY + ALL + SEPAR + ALL + TXT;
+	}
+
+	private void load_preferences()
+	{
+		String[] colour_array = utilities.read_file_to_array(storage + SETTINGS + SEPAR + PAGERTABSTRIPCOLOUR);
+		if(colour_array.length == 0)
+		{
+			colour = "blue";
+			utilities.append_string_to_file(storage + SETTINGS + SEPAR + PAGERTABSTRIPCOLOUR, colour);
+		}
+		else
+			colour = colour_array[0];
+	}
+
+	public static void set_pagertabstrip_colour(PagerTabStrip pagertabstrip_feeds)
+	{
+		if(colour.equals("blue"))
+			pagertabstrip_feeds.setTabIndicatorColor(Color.rgb(51, 181, 229));
+		else if(colour.equals("purple"))
+			pagertabstrip_feeds.setTabIndicatorColor(Color.rgb(170, 102, 204));
+		else if(colour.equals("green"))
+			pagertabstrip_feeds.setTabIndicatorColor(Color.rgb(153, 204, 0));
+		else if(colour.equals("orange"))
+			pagertabstrip_feeds.setTabIndicatorColor(Color.rgb(255, 187, 51));
+		else /* Invalid setting makes it red. */
+			pagertabstrip_feeds.setTabIndicatorColor(Color.rgb(255, 68, 68));
 	}
 
 	/// This is so the icon and text in the actionbar are selected.
@@ -356,9 +392,9 @@ public class main extends ActionBarActivity
 				}
 			);
 
-			PagerTabStrip pager_tab_strip = (PagerTabStrip) feed_view.findViewById(R.id.pager_title_strip);
-			pager_tab_strip.setDrawFullUnderline(true);
-			pager_tab_strip.setTabIndicatorColor(Color.argb(0, 51, 181, 229));
+			strips[0] = (PagerTabStrip) feed_view.findViewById(R.id.pager_title_strip);
+			strips[0].setDrawFullUnderline(true);
+			set_pagertabstrip_colour(strips[0]);
 
 			return feed_view;
 		}
@@ -417,9 +453,9 @@ public class main extends ActionBarActivity
 			ViewPager manage_pager = (ViewPager) manage_view.findViewById(R.id.manage_viewpager);
 			manage_pager.setAdapter(new pageradapter_manage(fragment_manager));
 
-			final PagerTabStrip manage_strip = (PagerTabStrip) manage_view.findViewById(R.id.manage_title_strip);
-			manage_strip.setDrawFullUnderline(true);
-			manage_strip.setTabIndicatorColor(Color.argb(0, 51, 181, 229));
+			strips[1] = (PagerTabStrip) manage_view.findViewById(R.id.manage_title_strip);
+			strips[1].setDrawFullUnderline(true);
+			set_pagertabstrip_colour(strips[1]);
 
 			return manage_view;
 		}
@@ -556,9 +592,9 @@ public class main extends ActionBarActivity
 			pageradapter_settings adapter = new pageradapter_settings(fragment_manager);
 			viewpager_settings.setAdapter(adapter);
 
-			final PagerTabStrip settings_strip = (PagerTabStrip) settings_view.findViewById(R.id.settings_title_strip);
-			settings_strip.setDrawFullUnderline(true);
-			settings_strip.setTabIndicatorColor(Color.argb(0, 51, 181, 229));
+			strips[2] = (PagerTabStrip) settings_view.findViewById(R.id.settings_title_strip);
+			strips[2].setDrawFullUnderline(true);
+			set_pagertabstrip_colour(strips[2]);
 
 			return settings_view;
 		}

@@ -18,8 +18,6 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.view.WindowManager;
 
-import java.util.List;
-
 public class service_update extends IntentService
 {
 	private Handler handler;
@@ -49,7 +47,7 @@ public class service_update extends IntentService
 		else
 		{
 			String packageName	= getPackageName();
-			storage				= Environment.getExternalStorageDirectory().getAbsolutePath() + SEPAR + "Android" + SEPAR + "data" + SEPAR + packageName + SEPAR + "files" + SEPAR;
+			storage					= Environment.getExternalStorageDirectory().getAbsolutePath() + SEPAR + "Android" + SEPAR + "data" + SEPAR + packageName + SEPAR + "files" + SEPAR;
 		}
 
 		final String[] all_groups			= utilities.read_file_to_array(storage + main.GROUP_LIST);
@@ -99,14 +97,14 @@ public class service_update extends IntentService
 		for(i = 1 ; i < sizes; i++)
 		{
 			count = unread_counts[i];
-			if(count > 0)
+			if(count != 0)
 			{
 				total += count;
 				group_items++;
 			}
 		}
 
-		if((total > 0) && intent.getBooleanExtra("NOTIFICATIONS", false))
+		if((total != 0) && intent.getBooleanExtra("NOTIFICATIONS", false))
 		{
 			NotificationCompat.Builder not_builder = new NotificationCompat.Builder(this)
 					.setSmallIcon(R.drawable.rss_icon)

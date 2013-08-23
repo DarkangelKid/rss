@@ -396,6 +396,8 @@ public class utilities
 	{
 		String line;
 		int count = count_lines(file_path);
+		if(count == 0)
+			return new String[0];
 		BufferedReader stream;
 		String[] lines = new String[count];
 		try
