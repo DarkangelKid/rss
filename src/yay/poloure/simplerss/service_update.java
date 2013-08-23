@@ -89,7 +89,7 @@ public class service_update extends IntentService
 				utilities.sort_group_content_by_time(storage, all_groups[j]);
 		}
 
-		final int[] unread_counts = main.get_unread_counts();
+		final int[] unread_counts = utilities.get_unread_counts(storage, all_groups);
 
 		int group_items = 1;
 		int total = 0, count;

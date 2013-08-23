@@ -93,7 +93,7 @@ public class adapter_navigation_drawer extends BaseAdapter
 				holder = (group_item_holder) convertView.getTag();
 
 			/* Set the text for the item. TODO: This should be a static array with the localised names.*/
-			holder.title_view.setText(main.NAVIGATION_TITLES[position]);
+			holder.title_view.setText(navigation_drawer.NAVIGATION_TITLES[position]);
 
 			/* Set the item's image as a CompoundDrawable of the textview. */
 			switch(position)

@@ -195,9 +195,8 @@ public class adapter_settings_interface extends BaseAdapter
 			((ImageView) parent.findViewById(R.id.red_image)).setAlpha(0.5f);
 			((ImageView) v).setAlpha(1.0f);
 			/* Set the new colour. */
-			main.colour = colours[clicked_colour];
 			for(PagerTabStrip strip : main.strips)
-				main.set_pagertabstrip_colour(strip);
+				utilities.set_pagertabstrip_colour(main.storage, strip);
 		}
 	}
 

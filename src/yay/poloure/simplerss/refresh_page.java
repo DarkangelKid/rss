@@ -148,7 +148,7 @@ class refresh_page extends AsyncTask<Void, Object, Animation>
 		if(new_titles.length > 0)
 			publishProgress(new_titles, new_des, new_links, new_images, new_heights, new_widths);
 
-		counts = main.get_unread_counts();
+		counts = utilities.get_unread_counts(main.storage, main.current_groups);
 
 		return animFadeIn;
 	}
@@ -174,7 +174,7 @@ class refresh_page extends AsyncTask<Void, Object, Animation>
 
 		main.set_refresh(service_update.check_service_running(main.activity));
 
-		main.update_navigation_data(counts, false);
+		navigation_drawer.update_navigation_data(counts, false);
 
 		if(flash)
 		{
@@ -182,6 +182,6 @@ class refresh_page extends AsyncTask<Void, Object, Animation>
 			lv.setAnimation(tun);
 			lv.setVisibility(View.VISIBLE);
 		}
-		main.update_navigation_data(null, false);
+		navigation_drawer.update_navigation_data(null, false);
 	}
 }

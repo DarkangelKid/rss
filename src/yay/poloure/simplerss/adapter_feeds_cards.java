@@ -141,7 +141,7 @@ public class adapter_feeds_cards extends BaseAdapter
 					/*if(listview.getChildAt(position).getTop() == eight)
 						read_items.add(links.get(position));*/
 					if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
-						main.update_navigation_data(null, false);
+						navigation_drawer.update_navigation_data(null, false);
 				}
 			});
 		}
@@ -311,11 +311,11 @@ public class adapter_feeds_cards extends BaseAdapter
 		public void onClick(View v)
 		{
 			main.action_bar.setTitle("Offline");
-			main.drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-			main.drawer_toggle.setDrawerIndicatorEnabled(false);
+			navigation_drawer.drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+			navigation_drawer.drawer_toggle.setDrawerIndicatorEnabled(false);
 			main.action_bar.setDisplayHomeAsUpEnabled(true);
 			main.fragment_manager.beginTransaction()
-					.hide(main.fragment_manager.findFragmentByTag(main.NAVIGATION_TITLES[0]))
+					.hide(main.fragment_manager.findFragmentByTag(navigation_drawer.NAVIGATION_TITLES[0]))
 					.add(R.id.drawer_layout, new fragment_webview(), "OFFLINE")
 					.addToBackStack("BACK")
 					.commit();

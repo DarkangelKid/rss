@@ -25,7 +25,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -39,21 +38,14 @@ import java.io.File;
 
 public class main extends ActionBarActivity
 {
-	/// These are fine.
-	private ListView navigation_list;
-
 	/// Statics without final intilisations are generally unsafe.
-	private static String					current_title;
 	private static Menu						optionsMenu;
 	public  static ViewPager				viewpager;
-	public  static DrawerLayout			drawer_layout;
-	public  static ActionBarDrawerToggle	drawer_toggle;
 	public  static Context					activity_context;
 	public  static FragmentManager		fragment_manager;
 	public  static ActionBar				action_bar;
 	public  static Activity					activity;
 	public  static Handler					service_handler;
-	public  static adapter_navigation_drawer nav_adapter;
 	public  static String[] current_groups = new String[0];
 	public  static String storage, ALL, NAVIGATION, DELETE_DIALOG, CLEAR_DIALOG, ALL_FILE;
 
@@ -76,8 +68,6 @@ public class main extends ActionBarActivity
 	public  static final String COUNT_APPENDIX			= ".count" + TXT;
 	public  static final String GROUP_LIST					= "group_list" + TXT;
 	public  static final String FILTER_LIST				= "filter_list" + TXT;
-	public  static final String[] NAVIGATION_TITLES		= new String[3];
-	public  static       String colour;
 	public  static       PagerTabStrip[] strips			= new PagerTabStrip[3];
 
 	@Override
@@ -88,9 +78,7 @@ public class main extends ActionBarActivity
 		setContentView(R.layout.navigation_drawer_and_content_frame);
 
 		perform_initial_operations();
-		load_preferences();
 
-		current_title	= NAVIGATION_TITLES[0];
 		action_bar		= getSupportActionBar();
 		activity			= this;
 
@@ -100,16 +88,16 @@ public class main extends ActionBarActivity
 		action_bar.setIcon(R.drawable.rss_icon);
 
 		fragment_manager = getSupportFragmentManager();
+		new navigation_drawer(activity, this, (DrawerLayout) findViewById(R.id.drawer_layout), (ListView) findViewById(R.id.left_drawer));
 
 		if(savedInstanceState == null)
 		{
-			Fragment feed		= new fragment_feeds();
 			Fragment prefs		= new fragment_settings();
 			Fragment man		= new fragment_manage();
 			fragment_manager.beginTransaction()
-				.add(R.id.content_frame, feed, NAVIGATION_TITLES[0])
-				.add(R.id.content_frame, prefs, NAVIGATION_TITLES[2])
-				.add(R.id.content_frame, man, NAVIGATION_TITLES[1])
+				.add(R.id.content_frame, new fragment_feeds(),	navigation_drawer.NAVIGATION_TITLES[0])
+				.add(R.id.content_frame, prefs,						navigation_drawer.NAVIGATION_TITLES[2])
+				.add(R.id.content_frame, man,							navigation_drawer.NAVIGATION_TITLES[1])
 				.hide(man)
 				.hide(prefs)
 				.commit();
@@ -117,63 +105,13 @@ public class main extends ActionBarActivity
 		else
 		{
 			fragment_manager.beginTransaction()
-					.show(fragment_manager.findFragmentByTag(NAVIGATION_TITLES[0]))
-					.hide(fragment_manager.findFragmentByTag(NAVIGATION_TITLES[2]))
-					.hide(fragment_manager.findFragmentByTag(NAVIGATION_TITLES[1]))
+					.show(fragment_manager.findFragmentByTag(navigation_drawer.NAVIGATION_TITLES[0]))
+					.hide(fragment_manager.findFragmentByTag(navigation_drawer.NAVIGATION_TITLES[2]))
+					.hide(fragment_manager.findFragmentByTag(navigation_drawer.NAVIGATION_TITLES[1]))
 					.commit();
 		}
 
-		nav_adapter		= new adapter_navigation_drawer(this);
-		navigation_list	= (ListView) findViewById(R.id.left_drawer);
-		navigation_list.setOnItemClickListener
-		(
-			new ListView.OnItemClickListener()
-			{
-				@Override
-				public void onItemClick(AdapterView parent, View view, int position, long id)
-				{
-					switch(position)
-					{
-						case 0:
-							switch_page(NAVIGATION_TITLES[0], 0);
-							break;
-						case 1:
-							switch_page(NAVIGATION_TITLES[1], 1);
-							break;
-						case 2:
-							switch_page(NAVIGATION_TITLES[2], 2);
-							break;
-						default:
-							switch_page(NAVIGATION_TITLES[0], position);
-							viewpager.setCurrentItem(position - 4);
-							break;
-					}
-				}
-			}
-		);
-		navigation_list.setAdapter(nav_adapter);
-
-		drawer_layout = (DrawerLayout) findViewById(R.id.drawer_layout);
-		drawer_layout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.END);
-		drawer_toggle = new ActionBarDrawerToggle(this, drawer_layout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
-		{
-			@Override
-			public void onDrawerClosed(View view)
-			{
-				getSupportActionBar().setTitle(current_title);
-			}
-
-			@Override
-			public void onDrawerOpened(View drawerView)
-			{
-				getSupportActionBar().setTitle(NAVIGATION);
-			}
-		};
-
-		drawer_layout.setDrawerListener(drawer_toggle);
-		drawer_toggle.syncState();
-
-		/* Load read_items to adapter_feed_card.read_items set. */
+		/* Load the read items */
 		adapter_feeds_cards.read_items = utilities.read_file_to_set(storage + READ_ITEMS);
 
 		update_groups();
@@ -186,9 +124,73 @@ public class main extends ActionBarActivity
 			else
 				new refresh_page(0).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
-
-		utilities.log(storage, Settings.Secure.getString(getContentResolver(),Settings.Secure.ANDROID_ID));
 	}
+
+	@Override
+	public void onBackPressed()
+	{
+		super.onBackPressed();
+
+		action_bar.setTitle(navigation_drawer.NAVIGATION_TITLES[0]);
+		navigation_drawer.drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+		navigation_drawer.drawer_toggle.setDrawerIndicatorEnabled(true);
+		action_bar.setDisplayHomeAsUpEnabled(true);
+	}
+
+	/// This is so the icon and text in the actionbar are selected.
+	@Override
+	public void onConfigurationChanged(Configuration newConfig)
+	{
+		super.onConfigurationChanged(newConfig);
+		navigation_drawer.drawer_toggle.onConfigurationChanged(newConfig);
+	}
+
+	@Override
+	protected void onStop()
+	{
+		super.onStop();
+		if(/*pref.getBoolean("refresh", false)*/true)
+		{
+			Intent intent = new Intent(this, service_update.class);
+			intent.putExtra("GROUP_NUMBER", 0);
+			intent.putExtra("NOTIFICATIONS", /*pref.getBoolean("notifications", false)*/ true);
+			PendingIntent pend_intent = PendingIntent.getService(this, 0, intent, 0);
+			final long interval = (long) times[/*pref.getInt("refresh_time", 20)/5*/2]*60000;
+			AlarmManager alarm_refresh = (AlarmManager) getSystemService(Activity.ALARM_SERVICE);
+			alarm_refresh.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + interval, interval, pend_intent);
+		}
+		utilities.delete(storage + READ_ITEMS);
+		utilities.write_collection_to_file(storage + READ_ITEMS, adapter_feeds_cards.read_items);
+	}
+
+	@Override
+	protected void onStart()
+	{
+		super.onStart();
+		if(/*pref.getBoolean("refresh", false)*/ true)
+		{
+			Intent intent = new Intent(this, service_update.class);
+			PendingIntent pend_intent = PendingIntent.getService(this, 0, intent, 0);
+			AlarmManager alarm_manager = (AlarmManager) getSystemService(Activity.ALARM_SERVICE);
+			alarm_manager.cancel(pend_intent);
+		}
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
+		String title = action_bar.getTitle().toString();
+
+		if(utilities.index_of(navigation_drawer.NAVIGATION_TITLES, title) != -1)
+			return navigation_drawer.drawer_toggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
+		else
+		{
+			onBackPressed();
+			return true;
+		}
+	}
+
+	/* END OF OVERRIDES */
 
 	private void perform_initial_operations()
 	{
@@ -219,131 +221,7 @@ public class main extends ActionBarActivity
 		NAVIGATION				= getString(R.string.navigation_title);
 		DELETE_DIALOG			= getString(R.string.delete_dialog);
 		CLEAR_DIALOG			= getString(R.string.clear_dialog);
-		NAVIGATION_TITLES[0]	= getString(R.string.feeds_title);
-		NAVIGATION_TITLES[1]	= getString(R.string.manage_title);
-		NAVIGATION_TITLES[2]	= getString(R.string.settings_title);
 		ALL_FILE					= GROUPS_DIRECTORY + ALL + SEPAR + ALL + TXT;
-	}
-
-	private void load_preferences()
-	{
-		String[] colour_array = utilities.read_file_to_array(storage + SETTINGS + SEPAR + PAGERTABSTRIPCOLOUR);
-		if(colour_array.length == 0)
-		{
-			colour = "blue";
-			utilities.append_string_to_file(storage + SETTINGS + SEPAR + PAGERTABSTRIPCOLOUR, colour);
-		}
-		else
-			colour = colour_array[0];
-	}
-
-	public static void set_pagertabstrip_colour(PagerTabStrip pagertabstrip_feeds)
-	{
-		if(colour.equals("blue"))
-			pagertabstrip_feeds.setTabIndicatorColor(Color.rgb(51, 181, 229));
-		else if(colour.equals("purple"))
-			pagertabstrip_feeds.setTabIndicatorColor(Color.rgb(170, 102, 204));
-		else if(colour.equals("green"))
-			pagertabstrip_feeds.setTabIndicatorColor(Color.rgb(153, 204, 0));
-		else if(colour.equals("orange"))
-			pagertabstrip_feeds.setTabIndicatorColor(Color.rgb(255, 187, 51));
-		else /* Invalid setting makes it red. */
-			pagertabstrip_feeds.setTabIndicatorColor(Color.rgb(255, 68, 68));
-	}
-
-	/// This is so the icon and text in the actionbar are selected.
-	@Override
-	public void onConfigurationChanged(Configuration newConfig)
-	{
-		super.onConfigurationChanged(newConfig);
-		drawer_toggle.onConfigurationChanged(newConfig);
-	}
-
-	@Override
-	public void onBackPressed()
-	{
-		super.onBackPressed();
-
-		//if(fragment_manager.getBackStackEntryAt(0).getName().equals("BACK"))
-		{
-			action_bar.setTitle(NAVIGATION_TITLES[0]);
-			drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-			drawer_toggle.setDrawerIndicatorEnabled(true);
-			action_bar.setDisplayHomeAsUpEnabled(true);
-		}
-	}
-
-	protected void onStop()
-	{
-		super.onStop();
-		//SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-		if(/*pref.getBoolean("refresh", false)*/true)
-		{
-			Intent intent = new Intent(this, service_update.class);
-			intent.putExtra("GROUP_NUMBER", 0);
-			intent.putExtra("NOTIFICATIONS", /*pref.getBoolean("notifications", false)*/ true);
-			PendingIntent pend_intent = PendingIntent.getService(this, 0, intent, 0);
-			final long interval = (long) times[/*pref.getInt("refresh_time", 20)/5*/2]*60000;
-			AlarmManager alarm_refresh = (AlarmManager) getSystemService(Activity.ALARM_SERVICE);
-			alarm_refresh.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + interval, interval, pend_intent);
-		}
-		utilities.delete(storage + READ_ITEMS);
-		utilities.write_collection_to_file(storage + READ_ITEMS, adapter_feeds_cards.read_items);
-	}
-
-	@Override
-	protected void onStart()
-	{
-		super.onStart();
-		/*SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);*/
-		if(/*pref.getBoolean("refresh", false)*/ true)
-		{
-			Intent intent = new Intent(this, service_update.class);
-			PendingIntent pend_intent = PendingIntent.getService(this, 0, intent, 0);
-			AlarmManager alarm_manager = (AlarmManager) getSystemService(Activity.ALARM_SERVICE);
-			alarm_manager.cancel(pend_intent);
-		}
-
-		if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.FROYO)
-			storage				= getExternalFilesDir(null).getAbsolutePath() + SEPAR;
-		else
-		{
-			String packageName	= getPackageName();
-			File externalPath	= Environment.getExternalStorageDirectory();
-			storage				= externalPath.getAbsolutePath() + SEPAR + "Android" + SEPAR + "data" + SEPAR + packageName + SEPAR + "files" + SEPAR;
-			File storage_file	= new File(storage);
-			if(!storage_file.exists())
-				storage_file.mkdirs();
-		}
-
-		current_groups = utilities.read_file_to_array(storage + GROUP_LIST);
-	}
-
-	private void switch_page(String page_title, int position)
-	{
-		drawer_layout.closeDrawer(navigation_list);
-		if(!current_title.equals(page_title))
-		{
-			fragment_manager.beginTransaction()
-						.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-						.setCustomAnimations(android.R.anim.fade_in,android.R.anim.fade_out,android.R.anim.fade_in,android.R.anim.fade_out)
-						.hide(fragment_manager.findFragmentByTag(current_title))
-						.show(fragment_manager.findFragmentByTag(page_title))
-						.commit();
-
-			navigation_list.setItemChecked(position, true);
-			if(position < 3)
-				set_title(page_title);
-			else
-				set_title(NAVIGATION_TITLES[0]);
-		}
-		current_title = page_title;
-	}
-
-	public static void set_title(String title)
-	{
-		current_title = title;
-		action_bar.setTitle(title);
 	}
 
 	public static class fragment_feeds extends Fragment
@@ -394,7 +272,7 @@ public class main extends ActionBarActivity
 
 			strips[0] = (PagerTabStrip) feed_view.findViewById(R.id.pager_title_strip);
 			strips[0].setDrawFullUnderline(true);
-			set_pagertabstrip_colour(strips[0]);
+			utilities.set_pagertabstrip_colour(storage, strips[0]);
 
 			return feed_view;
 		}
@@ -414,7 +292,7 @@ public class main extends ActionBarActivity
 		@Override
 		public boolean onOptionsItemSelected(MenuItem item)
 		{
-			if(drawer_toggle.onOptionsItemSelected((MenuItem)item))
+			if(navigation_drawer.drawer_toggle.onOptionsItemSelected((MenuItem)item))
 				return true;
 			else if(item.getTitle().equals("add"))
 			{
@@ -455,7 +333,7 @@ public class main extends ActionBarActivity
 
 			strips[1] = (PagerTabStrip) manage_view.findViewById(R.id.manage_title_strip);
 			strips[1].setDrawFullUnderline(true);
-			set_pagertabstrip_colour(strips[1]);
+			utilities.set_pagertabstrip_colour(storage, strips[1]);
 
 			return manage_view;
 		}
@@ -507,6 +385,9 @@ public class main extends ActionBarActivity
 
 	public static class pageradapter_manage extends FragmentPagerAdapter
 	{
+		private static final Fragment[] manage_fragments	= new Fragment[]{new fragment_manage_group(), new fragment_manage_feed(), new fragment_manage_filters()};
+		private static final int[] manage_titles = new int[]{R.string.groups_manage_sub, R.string.feeds_manage_sub, R.string.filters_manage_sub};
+
 		public pageradapter_manage(FragmentManager fm)
 		{
 			super(fm);
@@ -515,37 +396,19 @@ public class main extends ActionBarActivity
 		@Override
 		public int getCount()
 		{
-			return 3;
+			return manage_fragments.length;
 		}
 
 		@Override
 		public Fragment getItem(int position)
 		{
-			switch(position)
-			{
-				case(0):
-					return new fragment_manage_group();
-				case(1):
-					return new fragment_manage_feed();
-				case(2):
-					return new fragment_manage_filters();
-			}
-			return null;
+			return manage_fragments[position];
 		}
 
 		@Override
 		public String getPageTitle(int position)
 		{
-			switch(position)
-			{
-				case(0):
-					return activity_context.getString(R.string.groups_manage_sub);
-				case(1):
-					return activity_context.getString(R.string.feeds_manage_sub);
-				case(2):
-					return activity_context.getString(R.string.filters_manage_sub);
-			}
-			return "";
+			return activity_context.getString(manage_titles[position]);
 		}
 	}
 
@@ -594,7 +457,7 @@ public class main extends ActionBarActivity
 
 			strips[2] = (PagerTabStrip) settings_view.findViewById(R.id.settings_title_strip);
 			strips[2].setDrawFullUnderline(true);
-			set_pagertabstrip_colour(strips[2]);
+			utilities.set_pagertabstrip_colour(storage, strips[2]);
 
 			return settings_view;
 		}
@@ -602,6 +465,9 @@ public class main extends ActionBarActivity
 
 	public static class pageradapter_settings extends FragmentPagerAdapter
 	{
+		private static final Fragment[] settings_fragments	= new Fragment[]{new fragment_settings_function(), new fragment_settings_interface()};
+		private static final String[]   settings_titles		= new String[]{"Functions", "Interface"};
+
 		public pageradapter_settings(FragmentManager fm)
 		{
 			super(fm);
@@ -610,33 +476,19 @@ public class main extends ActionBarActivity
 		@Override
 		public int getCount()
 		{
-			return 2;
+			return settings_titles.length;
 		}
 
 		@Override
 		public Fragment getItem(int position)
 		{
-			switch(position)
-			{
-				case(0):
-					return new fragment_settings_function();
-				case(1):
-					return new fragment_settings_interface();
-			}
-			return null;
+			return settings_fragments[position];
 		}
 
 		@Override
 		public String getPageTitle(int position)
 		{
-			switch(position)
-			{
-				case(0):
-					return "Functions";
-				case(1):
-					return "Interface";
-			}
-			return "";
+			return settings_titles[position];
 		}
 	}
 
@@ -654,21 +506,6 @@ public class main extends ActionBarActivity
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle SavedInstanceState)
 		{
 			return inflater.inflate(R.layout.listview_settings_function, container, false);
-		}
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item)
-	{
-		String title = action_bar.getTitle().toString();
-
-		if(title.equals(NAVIGATION_TITLES[0]) || title.equals(NAVIGATION_TITLES[1]) || title.equals(NAVIGATION_TITLES[2]) || title.equals(NAVIGATION))
-			return drawer_toggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
-
-		else
-		{
-			onBackPressed();
-			return true;
 		}
 	}
 
@@ -724,7 +561,7 @@ public class main extends ActionBarActivity
 			else
 				viewpager.getAdapter().notifyDataSetChanged();
 		}
-		update_navigation_data(null, true);
+		navigation_drawer.update_navigation_data(null, true);
 	}
 
 	private static void jump_to_latest_unread()
@@ -814,7 +651,6 @@ public class main extends ActionBarActivity
 			}
 		};
 		/* SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(activity_context);*/
-		/* TODO used to save positions here but now I am not sure I need too anymore. */
 		final int page_number = viewpager.getCurrentItem();
 		final Intent intent = new Intent(activity_context, service_update.class);
 		intent.putExtra("GROUP_NUMBER", page_number);
@@ -826,40 +662,5 @@ public class main extends ActionBarActivity
 			new refresh_page(page_number).execute();
 		else
 			new refresh_page(page_number).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-	}
-
-	public static void update_navigation_data(int[] counts, Boolean update_names)
-	{
-		if(counts == null)
-			counts = get_unread_counts();
-
-		if(update_names)
-			nav_adapter.set_titles(current_groups);
-
-		nav_adapter.set_counts(counts);
-		nav_adapter.notifyDataSetChanged();
-	}
-
-	public static int[] get_unread_counts()
-	{
-		int total = 0, unread;
-		final int size = current_groups.length;
-		int[] unread_counts	= new int[current_groups.length];
-
-		for(int i = 1; i < size; i++)
-		{
-			unread = 0;
-			String[] urls = utilities.read_single_to_array(storage + GROUPS_DIRECTORY + current_groups[i] + SEPAR + current_groups[i] + CONTENT_APPENDIX, "link|");
-			for(int j = 0; j < urls.length; j++)
-			{
-				if(!adapter_feeds_cards.read_items.contains(urls[j]))
-						unread++;
-			}
-			total += unread;
-			unread_counts[i] = unread;
-		}
-
-		unread_counts[0] = total;
-		return unread_counts;
 	}
 }
