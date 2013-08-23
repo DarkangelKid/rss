@@ -514,7 +514,7 @@ public class main extends ActionBarActivity
 		public void onCreate(Bundle savedInstanceState)
 		{
 			super.onCreate(savedInstanceState);
-			adapter_settings_interface adapter = new adapter_settings_interface(activity_context);
+			adapter_settings_interface adapter = new adapter_settings_interface(activity_context, storage);
 			setListAdapter(adapter);
 		}
 
