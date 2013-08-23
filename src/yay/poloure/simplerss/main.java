@@ -784,6 +784,33 @@ public class main extends ActionBarActivity
 			public void handleMessage(Message msg)
 			{
 				set_refresh(false);
+				int page = msg.getData().getInt("page_number");
+				if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
+				{
+					if(page != 0)
+					{
+						new refresh_page(page).execute();
+						new refresh_page(0).execute();
+					}
+					else
+					{
+						for(int i = 0; i < current_groups.length; i++)
+							new refresh_page(i).execute();
+					}
+				}
+				else
+				{
+					if(page != 0)
+					{
+						new refresh_page(page).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+						new refresh_page(0).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+					}
+					else
+					{
+						for(int i = 0; i < current_groups.length; i++)
+							new refresh_page(i).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+					}
+				}
 			}
 		};
 		/* SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(activity_context);*/

@@ -9,6 +9,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -130,9 +131,11 @@ public class service_update extends IntentService
 		/* If activity is running. */
 		if(handler != null)
 		{
-			/* 120 is just an int. */
-			Message msg = handler.obtainMessage(120, "false");
-			handler.sendMessage(msg);
+			Message m = new Message();
+         Bundle b = new Bundle();
+         b.putInt("page_number", group);
+         m.setData(b);
+			handler.sendMessage(m);
 		}
 
 		wakelock.release();
