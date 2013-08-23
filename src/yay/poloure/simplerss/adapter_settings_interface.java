@@ -118,7 +118,7 @@ public class adapter_settings_interface extends BaseAdapter
 			holder.yellow_view.setAlpha(0.5f);
 			holder.red_view.setAlpha(0.5f);
 
-			String[] colour_array = read_file_to_array(storage + main.SETTINGS + main.SEPAR + main.PAGERTABSTRIPCOLOUR);
+			String[] colour_array = utilities.read_file_to_array(storage + main.SETTINGS + main.SEPAR + main.PAGERTABSTRIPCOLOUR);
 
 			if(colour_array[0].equals("blue"))
 				holder.blue_view.setAlpha(1.0f);
