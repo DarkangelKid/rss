@@ -120,6 +120,9 @@ public class adapter_settings_function extends BaseAdapter
 					///as this is already stored in a final array, is unique and will not cause issues between apk updates.
 				}
 			});
+
+			holder.checkbox.setChecked(false);
+			///read from file then setchecked
 		}
 		else
 		{
@@ -148,6 +151,8 @@ public class adapter_settings_function extends BaseAdapter
 					String file_name = title_array[pos];
 					///PAULTODO
 					///may want to consider saving values to file here
+					///make sure to avoid changing values/files when the progress is programmatically set
+					///by using the fromUser boolean
 				}
 
 				public void onStartTrackingTouch(SeekBar seekBar)
@@ -158,6 +163,8 @@ public class adapter_settings_function extends BaseAdapter
 				{
 				}
 			});
+			holder.seekbar.setProgress(3);
+			///this will have to be read from file then set to the appropriate value
 		}
 		return convertView;
 	}
