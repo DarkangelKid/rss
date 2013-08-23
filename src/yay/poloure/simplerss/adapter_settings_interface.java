@@ -11,11 +11,13 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.CheckBox;
+import android.support.v4.view.PagerTabStrip;
 
 public class adapter_settings_interface extends BaseAdapter
 {
 	private final String[] title_array;
 	private final String[] summary_array;
+	private final static String[] colours = new String[]{"blue", "purple", "green", "orange", "red"};
 
 	private static LayoutInflater inflater;
 
@@ -173,7 +175,8 @@ public class adapter_settings_interface extends BaseAdapter
 
 	private class colour_click implements View.OnClickListener
 	{
-		int clicked_colour;
+		final int clicked_colour;
+
 		public colour_click(int colour)
 		{
 			clicked_colour = colour;
@@ -182,6 +185,8 @@ public class adapter_settings_interface extends BaseAdapter
 		@Override
 		public void onClick(View v)
 		{
+			utilities.delete(main.storage + main.SETTINGS + main.SEPAR + main.PAGERTABSTRIPCOLOUR);
+			utilities.append_string_to_file(main.storage + main.SETTINGS + main.SEPAR + main.PAGERTABSTRIPCOLOUR, colours[clicked_colour]);
 			View parent = (View) v.getParent();
 			((ImageView) parent.findViewById(R.id.blue_image)).setAlpha(0.5f);
 			((ImageView) parent.findViewById(R.id.purple_image)).setAlpha(0.5f);
@@ -189,6 +194,10 @@ public class adapter_settings_interface extends BaseAdapter
 			((ImageView) parent.findViewById(R.id.yellow_image)).setAlpha(0.5f);
 			((ImageView) parent.findViewById(R.id.red_image)).setAlpha(0.5f);
 			((ImageView) v).setAlpha(1.0f);
+			/* Set the new colour. */
+			main.colour = colours[clicked_colour];
+			for(PagerTabStrip strip : main.strips)
+				main.set_pagertabstrip_colour(strip);
 		}
 	}
 
