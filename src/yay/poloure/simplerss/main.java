@@ -6,18 +6,14 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.Settings;
-import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.ListFragment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.PagerTabStrip;
@@ -31,7 +27,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ListView;
 
 import java.io.File;
@@ -42,7 +37,7 @@ public class main extends ActionBarActivity
 	private static Menu						optionsMenu;
 	public  static ViewPager				viewpager;
 	public  static Context					activity_context;
-	public  static FragmentManager		fragment_manager;
+	public  static FragmentManager		    fragment_manager;
 	public  static ActionBar				action_bar;
 	public  static Activity					activity;
 	public  static Handler					service_handler;
@@ -62,13 +57,13 @@ public class main extends ActionBarActivity
 	public  static final String SETTINGS					= "settings" + SEPAR;
 	public  static final String PAGERTABSTRIPCOLOUR		= "pagertabstrip_colour" + TXT;
 	public  static final String DUMP_FILE					= "dump" + TXT;
-	public  static final String READ_ITEMS					= "read_items" + TXT;
+	private  static final String READ_ITEMS					= "read_items" + TXT;
 	public  static final String STORE_APPENDIX			= ".store" + TXT;
 	public  static final String CONTENT_APPENDIX			= ".content" + TXT;
 	public  static final String COUNT_APPENDIX			= ".count" + TXT;
 	public  static final String GROUP_LIST					= "group_list" + TXT;
 	public  static final String FILTER_LIST				= "filter_list" + TXT;
-	public  static       PagerTabStrip[] strips			= new PagerTabStrip[3];
+	public  static final PagerTabStrip[] strips			= new PagerTabStrip[3];
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -80,7 +75,7 @@ public class main extends ActionBarActivity
 		perform_initial_operations();
 
 		action_bar		= getSupportActionBar();
-		activity			= this;
+		activity		= this;
 
 		action_bar.setDisplayShowHomeEnabled(true);
 		action_bar.setDisplayHomeAsUpEnabled(true);
@@ -224,7 +219,7 @@ public class main extends ActionBarActivity
 		ALL_FILE					= GROUPS_DIRECTORY + ALL + SEPAR + ALL + TXT;
 	}
 
-	public static class fragment_feeds extends Fragment
+	private static class fragment_feeds extends Fragment
 	{
 		@Override
 		public void onCreate(Bundle savedInstanceState)
@@ -292,7 +287,7 @@ public class main extends ActionBarActivity
 		@Override
 		public boolean onOptionsItemSelected(MenuItem item)
 		{
-			if(navigation_drawer.drawer_toggle.onOptionsItemSelected((MenuItem)item))
+			if(navigation_drawer.drawer_toggle.onOptionsItemSelected(item))
 				return true;
 			else if(item.getTitle().equals("add"))
 			{
@@ -313,7 +308,7 @@ public class main extends ActionBarActivity
 		}
 	}
 
-	public static class fragment_manage extends Fragment
+	private static class fragment_manage extends Fragment
 	{
 		@Override
 		public void onCreate(Bundle savedInstanceState)
@@ -412,7 +407,7 @@ public class main extends ActionBarActivity
 		}
 	}
 
-	public static class fragment_card extends ListFragment
+	private static class fragment_card extends ListFragment
 	{
 		@Override
 		public void onCreate(Bundle savedInstanceState)
@@ -445,7 +440,7 @@ public class main extends ActionBarActivity
 		}
 	}
 
-	public static class fragment_settings extends Fragment
+	private static class fragment_settings extends Fragment
 	{
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle SavedInstanceState)
@@ -492,7 +487,7 @@ public class main extends ActionBarActivity
 		}
 	}
 
-	public static class fragment_settings_function extends ListFragment
+	private static class fragment_settings_function extends ListFragment
 	{
 		@Override
 		public void onCreate(Bundle savedInstanceState)
@@ -509,7 +504,7 @@ public class main extends ActionBarActivity
 		}
 	}
 
-	public static class fragment_settings_interface extends ListFragment
+	private static class fragment_settings_interface extends ListFragment
 	{
 		@Override
 		public void onCreate(Bundle savedInstanceState)

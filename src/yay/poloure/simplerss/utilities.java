@@ -100,7 +100,7 @@ public class utilities
 	{
 		for(int i = 0; i < array.length; i++)
 		{
-			if(array[i] == value)
+			if(array[i].equals(value))
 				return i;
 		}
 		/* Throws an ArrayOutOfBoundsException if not handled. */
@@ -257,7 +257,7 @@ public class utilities
 		}
 	}
 
-	public static String[] read_single_to_array(String file_path, String type)
+	private static String[] read_single_to_array(String file_path, String type)
 	{
 		int next, offset, j;
 		String line;
@@ -406,7 +406,7 @@ public class utilities
 		{
 			stream = new BufferedReader(new FileReader(file_path));
 			for(int i = 0; i < count; i++)
-				lines[i] = line = stream.readLine();
+				lines[i] = stream.readLine();
 			stream.close();
 		}
 		catch(IOException e)
@@ -452,8 +452,7 @@ public class utilities
 	{
 		try
 		{
-			adapter_feeds_cards ith = ((adapter_feeds_cards)((ListFragment) fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_index))).getListAdapter());
-			return ith;
+			return (adapter_feeds_cards)((ListFragment) fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_index))).getListAdapter();
 		}
 		catch(Exception e)
 		{
@@ -471,9 +470,9 @@ public class utilities
 		{
 			unread = 0;
 			String[] urls = read_single_to_array(storage + main.GROUPS_DIRECTORY + current_groups[i] + main.SEPAR + current_groups[i] + main.CONTENT_APPENDIX, "link|");
-			for(int j = 0; j < urls.length; j++)
+			for(String url : urls)
 			{
-				if(!adapter_feeds_cards.read_items.contains(urls[j]))
+				if(!adapter_feeds_cards.read_items.contains(url))
 						unread++;
 			}
 			total += unread;

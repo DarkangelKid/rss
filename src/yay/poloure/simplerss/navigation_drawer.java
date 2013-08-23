@@ -12,7 +12,7 @@ import android.support.v4.app.FragmentTransaction;
 
 class navigation_drawer
 {
-	public static adapter_navigation_drawer	nav_adapter;
+	private static adapter_navigation_drawer	nav_adapter;
 	public static DrawerLayout						drawer_layout;
 	public static ActionBarDrawerToggle			drawer_toggle;
 
@@ -20,7 +20,7 @@ class navigation_drawer
 
 	private static String							current_title;
 
-	private ListView navigation_list;
+	private final ListView navigation_list;
 
 	public navigation_drawer(Activity activity, Context context, DrawerLayout draw_layout, ListView nav_list)
 	{

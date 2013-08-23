@@ -222,5 +222,4 @@ class fragment_manage_feed extends Fragment
 			listview.setVisibility(View.VISIBLE);
 		}
 	}
-
 }

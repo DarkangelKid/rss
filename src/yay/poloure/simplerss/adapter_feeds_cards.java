@@ -52,16 +52,16 @@ public class adapter_feeds_cards extends BaseAdapter
 	private static int two = 0, four = 0, eight = 0;
 	private static int screen_width;
 
-	private static int link_black  = Color.rgb(128, 128, 128);
-	private static int link_grey   = Color.rgb(194, 194, 194);
+	private static final int link_black  = Color.rgb(128, 128, 128);
+	private static final int link_grey   = Color.rgb(194, 194, 194);
 
-	private static int des_black   = Color.rgb(78, 78, 78);
-	private static int des_grey    = Color.rgb(167, 167, 167);
+	private static final int des_black   = Color.rgb(78, 78, 78);
+	private static final int des_grey    = Color.rgb(167, 167, 167);
 
-	private static int title_black = Color.rgb(0, 0, 0);
-	private static int title_grey  = Color.rgb(128, 128, 128);
+	private static final int title_black = Color.rgb(0, 0, 0);
+	private static final int title_grey  = Color.rgb(128, 128, 128);
 
-	public  int			total				= 0;
+	private  int			total				= 0;
 	public  int			unread_count	= 0;
 	private boolean	first				= true;
 	private ListView	listview;
@@ -283,7 +283,7 @@ public class adapter_feeds_cards extends BaseAdapter
 		{
 			if((Integer) iv.getTag() != tag)
 				return;
-			if(iv != null && (Bitmap) result[0] != null)
+			if(iv != null && result[0] != null)
 			{
 				iv.setImageBitmap((Bitmap) result[0]);
 				iv.startAnimation((Animation) result[1]);
@@ -357,9 +357,8 @@ public class adapter_feeds_cards extends BaseAdapter
 		}
 	}
 
-	public static void show_card_dialog(final Context activity_context, final String URL, final int image_visibility)
+	private static void show_card_dialog(final Context activity_context, final String URL, final int image_visibility)
 	{
-		final LayoutInflater inflater		= LayoutInflater.from(activity_context);
 		String[] menu_items;
 		if(image_visibility != View.VISIBLE)
 			menu_items = activity_context.getResources().getStringArray(R.array.card_menu);

@@ -13,14 +13,14 @@ import java.util.Set;
 
 class refresh_page extends AsyncTask<Void, Object, Animation>
 {
-	final int page_number;
-	Boolean flash  = false;
-	ListFragment l;
-	adapter_feeds_cards ith;
-	ListView lv;
-	int[] counts;
-	int number_of_items = 0;
-	int oldest_unread = 0;
+	private final int page_number;
+	private Boolean flash  = false;
+	private ListFragment l;
+	private adapter_feeds_cards ith;
+	private ListView lv;
+	private int[] counts;
+	private int number_of_items = 0;
+	private int oldest_unread = 0;
 
 	public refresh_page(int page)
 	{

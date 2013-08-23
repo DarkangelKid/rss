@@ -450,17 +450,6 @@ public class add_edit_dialog
 			new fragment_manage_group.refresh_manage_groups().execute();
 		else
 			new fragment_manage_group.refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
-		/// Force a refresh of the page.
-		int index;
-		if((new File(old_group_file)).exists())
-		{
-			index = utilities.index_of(main.current_groups, old_group);
-		}
-		if(!old_group.equals(new_group))
-		{
-			index = utilities.index_of(main.current_groups, new_group);
-		}
 	}
 
 	private static void add_group(String storage, String group_name)
