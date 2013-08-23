@@ -2,8 +2,10 @@ package yay.poloure.simplerss;
 
 import android.widget.BaseAdapter;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.CheckBox;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.widget.ImageView;
