@@ -52,6 +52,15 @@ public class adapter_feeds_cards extends BaseAdapter
 	private static int two = 0, four = 0, eight = 0;
 	private static int screen_width;
 
+	private static int link_black  = Color.rgb(128, 128, 128);
+	private static int link_grey   = Color.rgb(194, 194, 194);
+
+	private static int des_black   = Color.rgb(78, 78, 78);
+	private static int des_grey    = Color.rgb(167, 167, 167);
+
+	private static int title_black = Color.rgb(0, 0, 0);
+	private static int title_grey  = Color.rgb(128, 128, 128);
+
 	public  int			total				= 0;
 	public  int			unread_count	= 0;
 	private boolean	first				= true;
@@ -135,7 +144,6 @@ public class adapter_feeds_cards extends BaseAdapter
 						main.update_navigation_data(null, false);
 				}
 			});
-			first = false;
 		}
 
 		ViewHolder holder;
@@ -149,6 +157,13 @@ public class adapter_feeds_cards extends BaseAdapter
 			holder.image_view 		= (ImageView) convertView.findViewById(R.id.image					);
 			holder.left					= (ImageView) convertView.findViewById(R.id.white_left_shadow	);
 			holder.right				= (ImageView) convertView.findViewById(R.id.white_right_shadow	);
+			if(first)
+			{
+				holder.title_view			.setTextColor(title_black);
+				holder.description_view	.setTextColor(des_black);
+				holder.time_view			.setTextColor(link_black);
+				first = false;
+			}
 			convertView					.setOnClickListener(new webview_mode());
 			convertView					.setOnLongClickListener(new long_press());
 			convertView					.setTag(holder);
@@ -185,22 +200,25 @@ public class adapter_feeds_cards extends BaseAdapter
 				(new image()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, holder.image_view, holder.image_view.getTag());
 		}
 
-		/* MIN API 11 - Also may be a performance hog - If the item is read, grey it out */
+		/* Alpha MIN API 11 - Also may be a performance hog - If the item is read, grey it out */
+		/*int colour = holder.time_view.getCurrentTextColor();*/
 		if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB)
 		{
-			if(read_items.contains(links[position]))
+			if(read_items.contains(links[position])/* && colour == link_black*/)
 			{
-				holder.title_view.setAlpha(0.6f);
-				holder.description_view.setAlpha(0.6f);
-				holder.time_view.setAlpha(0.6f);
-				holder.image_view.setAlpha(0.6f);
+				holder.title_view			.setTextColor(title_grey);
+				holder.description_view	.setTextColor(des_grey);
+				holder.time_view			.setTextColor(link_grey);
+				if(image_exists)
+					holder.image_view.setAlpha(0.5f);
 			}
-			else if(holder.title_view.getAlpha() == 0.6f)
+			else/* if(colour == link_grey)*/
 			{
-				holder.title_view.setAlpha(1.0f);
-				holder.description_view.setAlpha(1.0f);
-				holder.time_view.setAlpha(1.0f);
-				holder.image_view.setAlpha(1.0f);
+				holder.title_view			.setTextColor(title_black);
+				holder.description_view	.setTextColor(des_black);
+				holder.time_view			.setTextColor(link_black);
+				if(image_exists)
+					holder.image_view.setAlpha(1.0f);
 			}
 		}
 
@@ -210,7 +228,6 @@ public class adapter_feeds_cards extends BaseAdapter
 
 		String title 					= titles[position];
 		String description 			= descriptions[position];
-		utilities.log(main.storage, Integer.toString(position));
 
 		if(description != null && !description.equals(""))
 		{
