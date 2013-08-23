@@ -129,8 +129,7 @@ public class adapter_settings_interface extends BaseAdapter
 			else
 				holder.red_view.setAlpha(1.0f);
 		}
-		///so far there are only 2 view types, heading and holocolour_select
-		///this will change
+		/* So far there are only 2 view types, heading and holocolour_select. This will change */
 		else
 		{
 			final settings_checkbox_holder holder;

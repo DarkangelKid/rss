@@ -179,16 +179,36 @@ public class main extends ActionBarActivity
 	protected void onStop()
 	{
 		super.onStop();
-		if(/*pref.getBoolean("refresh", false)*/true)
+
+		Boolean refresh = false;
+
+		/* Load the refresh boolean value from settings. */
+		String[] check = utilities.read_file_to_array(main.storage + main.SETTINGS + main.SEPAR + adapter_settings_function.file_names[1] + main.TXT);
+		if(check.length != 0)
+			refresh = Boolean.parseBoolean(check[0]);
+
+		if(refresh)
 		{
+			/* Load the refresh time from settings. */
+			int refresh_time = adapter_settings_function.times[3];
+			check = utilities.read_file_to_array(main.storage + main.SETTINGS + main.SEPAR + adapter_settings_function.file_names[2] + main.TXT);
+			if(check.length != 0)
+				refresh_time = Integer.parseInt(check[0]);
+
+			/* Load notification boolean. */
+			Boolean notifications = false;
+			check = utilities.read_file_to_array(main.storage + main.SETTINGS + main.SEPAR + adapter_settings_function.file_names[3] + main.TXT);
+			if(check.length != 0)
+				refresh = Boolean.parseBoolean(check[0]);
+
+			/* Create the pendingIntent and set the alarmservice times for it. */
 			Intent intent = new Intent(this, service_update.class);
 			intent.putExtra("GROUP_NUMBER", 0);
-			intent.putExtra("NOTIFICATIONS", /*pref.getBoolean("notifications", false)*/ true);
-			/*PendingIntent pend_intent = PendingIntent.getService(this, 0, intent, 0);
-			final long interval = (long) times[pref.getInt("refresh_time", 20)/52]*60000;
+			intent.putExtra("NOTIFICATIONS", notifications);
+			PendingIntent pend_intent = PendingIntent.getService(this, 0, intent, 0);
+			final long interval = (long) refresh_time*60000;
 			AlarmManager alarm_refresh = (AlarmManager) getSystemService(Activity.ALARM_SERVICE);
 			alarm_refresh.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + interval, interval, pend_intent);
-			*/
 		}
 		utilities.delete(storage + READ_ITEMS);
 		utilities.write_collection_to_file(storage + READ_ITEMS, adapter_feeds_cards.read_items);
