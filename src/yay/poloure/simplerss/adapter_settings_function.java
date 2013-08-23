@@ -17,8 +17,8 @@ public class adapter_settings_function extends BaseAdapter
 	private final String[] title_array;
 	private final String[] summary_array;
 	private static final String[] refresh_times	= {"15m","30m","45m","1h","2h","3h","4h","8h","12h","24h"};
-	private static final int[] times					= {15, 30, 45, 60, 120, 180, 240, 480, 720, 1440};
-	private static final String[] file_names		= {"null", "auto_refresh_boolean", "refresh_time", "notifications_boolean", "offline_mode"};
+	public  static final int[] times					= {15, 30, 45, 60, 120, 180, 240, 480, 720, 1440};
+	public  static final String[] file_names		= {"null", "auto_refresh_boolean", "refresh_time", "notifications_boolean", "offline_mode"};
 
 	private static LayoutInflater inflater;
 
@@ -162,7 +162,7 @@ public class adapter_settings_function extends BaseAdapter
 				{
 				}
 			});
-			holder.seekbar.setProgress(3);
+
 			/* Load the saved boolean value and set the box as checked if true. */
 			String[] check = utilities.read_file_to_array(main.storage + main.SETTINGS + main.SEPAR + file_names[position] + main.TXT);
 			if(check.length == 0)
@@ -171,9 +171,7 @@ public class adapter_settings_function extends BaseAdapter
 				utilities.append_string_to_file(main.storage + main.SETTINGS + main.SEPAR + file_names[position] + main.TXT, Integer.toString(times[3]));
 			}
 			else
-			{
 				holder.seekbar.setProgress(utilities.index_of_int(times, Integer.parseInt(check[0])));
-			}
 		}
 		return convertView;
 	}
