@@ -13,14 +13,14 @@ import java.util.Set;
 
 class refresh_page extends AsyncTask<Void, Object, Animation>
 {
-	final int page_number;
-	Boolean flash  = false;
-	ListFragment l;
-	adapter_feeds_cards ith;
-	ListView lv;
-	int[] counts;
-	int number_of_items = 0;
-	int oldest_unread = 0;
+	private final int page_number;
+	private Boolean flash  = false;
+	private ListFragment l;
+	private adapter_feeds_cards ith;
+	private ListView lv;
+	private int[] counts;
+	private int number_of_items = 0;
+	private int oldest_unread = 0;
 
 	public refresh_page(int page)
 	{
@@ -148,7 +148,7 @@ class refresh_page extends AsyncTask<Void, Object, Animation>
 		if(new_titles.length > 0)
 			publishProgress(new_titles, new_des, new_links, new_images, new_heights, new_widths);
 
-		counts = main.get_unread_counts();
+		counts = utilities.get_unread_counts(main.storage, main.current_groups);
 
 		return animFadeIn;
 	}
@@ -174,7 +174,7 @@ class refresh_page extends AsyncTask<Void, Object, Animation>
 
 		main.set_refresh(service_update.check_service_running(main.activity));
 
-		main.update_navigation_data(counts, false);
+		navigation_drawer.update_navigation_data(counts, false);
 
 		if(flash)
 		{
@@ -182,6 +182,6 @@ class refresh_page extends AsyncTask<Void, Object, Animation>
 			lv.setAnimation(tun);
 			lv.setVisibility(View.VISIBLE);
 		}
-		main.update_navigation_data(null, false);
+		navigation_drawer.update_navigation_data(null, false);
 	}
 }

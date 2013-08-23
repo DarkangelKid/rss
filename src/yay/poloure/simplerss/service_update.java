@@ -21,8 +21,6 @@ import android.view.WindowManager;
 
 public class service_update extends IntentService
 {
-	private Handler handler;
-
 	public service_update()
 	{
 		super("service_update");
@@ -38,7 +36,6 @@ public class service_update extends IntentService
 		Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
 		final int group		= intent.getIntExtra("GROUP_NUMBER", 0);
-		handler					= main.service_handler;
 
 		final String storage;
 		final String SEPAR = main.SEPAR;
@@ -89,7 +86,7 @@ public class service_update extends IntentService
 				utilities.sort_group_content_by_time(storage, all_groups[j]);
 		}
 
-		final int[] unread_counts = main.get_unread_counts();
+		final int[] unread_counts = utilities.get_unread_counts(storage, all_groups);
 
 		int group_items = 1;
 		int total = 0, count;
@@ -129,13 +126,13 @@ public class service_update extends IntentService
 		}
 
 		/* If activity is running. */
-		if(handler != null)
+		if(main.service_handler != null)
 		{
 			Message m = new Message();
          Bundle b = new Bundle();
          b.putInt("page_number", group);
          m.setData(b);
-			handler.sendMessage(m);
+            main.service_handler.sendMessage(m);
 		}
 
 		wakelock.release();

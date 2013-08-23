@@ -2,15 +2,11 @@ package yay.poloure.simplerss;
 
 import android.widget.BaseAdapter;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.widget.ImageView;
-import android.widget.SeekBar;
-import android.widget.SeekBar.OnSeekBarChangeListener;
-import android.widget.CheckBox;
 import android.support.v4.view.PagerTabStrip;
 
 public class adapter_settings_interface extends BaseAdapter
@@ -71,13 +67,12 @@ public class adapter_settings_interface extends BaseAdapter
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
 		final int view_type = getItemViewType(position);
-		final int pos = position;
 		if(view_type == 0)
 		{
 			final settings_heading_holder holder;
 			if(convertView == null)
 			{
-				convertView = (View) inflater.inflate(R.layout.settings_heading, parent, false);
+				convertView = inflater.inflate(R.layout.settings_heading, parent, false);
 				holder = new settings_heading_holder();
 				holder.title_view = (TextView) convertView.findViewById(R.id.settings_heading);
 				convertView.setTag(holder);
@@ -93,7 +88,7 @@ public class adapter_settings_interface extends BaseAdapter
 			final settings_holocolour_holder holder;
 			if(convertView == null)
 			{
-				convertView = (View) inflater.inflate(R.layout.settings_holocolour_select, parent, false);
+				convertView = inflater.inflate(R.layout.settings_holocolour_select, parent, false);
 				holder = new settings_holocolour_holder();
 				holder.title_view = (TextView) convertView.findViewById(R.id.colour_title);
 				holder.summary_view = (TextView) convertView.findViewById(R.id.colour_summary);
@@ -188,16 +183,15 @@ public class adapter_settings_interface extends BaseAdapter
 			utilities.delete(main.storage + main.SETTINGS + main.SEPAR + main.PAGERTABSTRIPCOLOUR);
 			utilities.append_string_to_file(main.storage + main.SETTINGS + main.SEPAR + main.PAGERTABSTRIPCOLOUR, colours[clicked_colour]);
 			View parent = (View) v.getParent();
-			((ImageView) parent.findViewById(R.id.blue_image)).setAlpha(0.5f);
-			((ImageView) parent.findViewById(R.id.purple_image)).setAlpha(0.5f);
-			((ImageView) parent.findViewById(R.id.green_image)).setAlpha(0.5f);
-			((ImageView) parent.findViewById(R.id.yellow_image)).setAlpha(0.5f);
-			((ImageView) parent.findViewById(R.id.red_image)).setAlpha(0.5f);
-			((ImageView) v).setAlpha(1.0f);
+			(parent.findViewById(R.id.blue_image)).setAlpha(0.5f);
+			(parent.findViewById(R.id.purple_image)).setAlpha(0.5f);
+			(parent.findViewById(R.id.green_image)).setAlpha(0.5f);
+			(parent.findViewById(R.id.yellow_image)).setAlpha(0.5f);
+			(parent.findViewById(R.id.red_image)).setAlpha(0.5f);
+			(v).setAlpha(1.0f);
 			/* Set the new colour. */
-			main.colour = colours[clicked_colour];
 			for(PagerTabStrip strip : main.strips)
-				main.set_pagertabstrip_colour(strip);
+				utilities.set_pagertabstrip_colour(main.storage, strip);
 		}
 	}
 
@@ -216,5 +210,4 @@ public class adapter_settings_interface extends BaseAdapter
 		ImageView yellow_view;
 		ImageView red_view;
 	}
-
 }

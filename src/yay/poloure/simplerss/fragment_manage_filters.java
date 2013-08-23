@@ -64,7 +64,7 @@ class fragment_manage_filters extends Fragment
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
-		if(main.drawer_toggle.onOptionsItemSelected(item))
+		if(navigation_drawer.drawer_toggle.onOptionsItemSelected(item))
 			return true;
 		else if(item.getTitle().equals("add"))
 		{

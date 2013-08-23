@@ -171,7 +171,7 @@ class fragment_manage_feed extends Fragment
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
-		if(main.drawer_toggle.onOptionsItemSelected(item))
+		if(navigation_drawer.drawer_toggle.onOptionsItemSelected(item))
 			return true;
 		else if(item.getTitle().equals("add"))
 		{
@@ -222,5 +222,4 @@ class fragment_manage_feed extends Fragment
 			listview.setVisibility(View.VISIBLE);
 		}
 	}
-
 }

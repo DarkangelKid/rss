@@ -1,6 +1,8 @@
 package yay.poloure.simplerss;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.support.v4.view.PagerTabStrip;
 import android.os.Environment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
@@ -98,7 +100,7 @@ public class utilities
 	{
 		for(int i = 0; i < array.length; i++)
 		{
-			if(array[i] == value)
+			if(array[i].equals(value))
 				return i;
 		}
 		/* Throws an ArrayOutOfBoundsException if not handled. */
@@ -255,7 +257,7 @@ public class utilities
 		}
 	}
 
-	public static String[] read_single_to_array(String file_path, String type)
+	private static String[] read_single_to_array(String file_path, String type)
 	{
 		int next, offset, j;
 		String line;
@@ -404,7 +406,7 @@ public class utilities
 		{
 			stream = new BufferedReader(new FileReader(file_path));
 			for(int i = 0; i < count; i++)
-				lines[i] = line = stream.readLine();
+				lines[i] = stream.readLine();
 			stream.close();
 		}
 		catch(IOException e)
@@ -450,13 +452,58 @@ public class utilities
 	{
 		try
 		{
-			adapter_feeds_cards ith = ((adapter_feeds_cards)((ListFragment) fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_index))).getListAdapter());
-			return ith;
+			return (adapter_feeds_cards)((ListFragment) fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_index))).getListAdapter();
 		}
 		catch(Exception e)
 		{
 			return null;
 		}
+	}
+
+	public static int[] get_unread_counts(String storage, String[] current_groups)
+	{
+		int total = 0, unread;
+		final int size = current_groups.length;
+		int[] unread_counts	= new int[size];
+
+		for(int i = 1; i < size; i++)
+		{
+			unread = 0;
+			String[] urls = read_single_to_array(storage + main.GROUPS_DIRECTORY + current_groups[i] + main.SEPAR + current_groups[i] + main.CONTENT_APPENDIX, "link|");
+			for(String url : urls)
+			{
+				if(!adapter_feeds_cards.read_items.contains(url))
+						unread++;
+			}
+			total += unread;
+			unread_counts[i] = unread;
+		}
+
+		unread_counts[0] = total;
+		return unread_counts;
+	}
+
+	public static void set_pagertabstrip_colour(String storage, PagerTabStrip strip)
+	{
+		final String colour_path	= storage + main.SETTINGS + main.SEPAR + main.PAGERTABSTRIPCOLOUR;
+		String colour					= "blue";
+
+		String[] colour_array = read_file_to_array(colour_path);
+		if(colour_array.length == 0)
+			append_string_to_file(colour_path, colour);
+		else
+			colour = colour_array[0];
+
+		if(colour.equals("blue"))
+			strip.setTabIndicatorColor(Color.rgb(51, 181, 229));
+		else if(colour.equals("purple"))
+			strip.setTabIndicatorColor(Color.rgb(170, 102, 204));
+		else if(colour.equals("green"))
+			strip.setTabIndicatorColor(Color.rgb(153, 204, 0));
+		else if(colour.equals("orange"))
+			strip.setTabIndicatorColor(Color.rgb(255, 187, 51));
+		else /* Invalid setting makes it red. */
+			strip.setTabIndicatorColor(Color.rgb(255, 68, 68));
 	}
 
 	public static void sort_group_content_by_time(String storage, String group)
