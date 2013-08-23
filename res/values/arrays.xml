@@ -26,9 +26,11 @@
 	<string-array name="settings_interface_titles">
 			<item>UI Colours</item>
 			<item>Viewpager Highlight</item>
+			<item>Dark Theme</item>
 	</string-array>
 	<string-array name="settings_interface_summaries">
 			<item>EMPTY</item>
 			<item>Select viewpager highlight colour</item>
+			<item>Check to enable dark theme</item>
 	</string-array>
 </resources>
