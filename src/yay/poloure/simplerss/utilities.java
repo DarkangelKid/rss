@@ -107,6 +107,17 @@ public class utilities
 		return -1;
 	}
 
+	public static int index_of_int(int[] array, int value)
+	{
+		for(int i = 0; i < array.length; i++)
+		{
+			if(array[i] == value)
+				return i;
+		}
+		/* Throws an ArrayOutOfBoundsException if not handled. */
+		return -1;
+	}
+
 	public static String[] remove_element(String[] a, int index)
 	{
 		String[] b = new String[a.length - 1];

@@ -60,17 +60,11 @@ public class adapter_settings_interface extends BaseAdapter
 	@Override
 	public int getItemViewType(int position)
 	{
-		if(position == 0)
-			return 0;
-
-		else if(position == 1)
-			return 1;
-		else
-			return 2;
+		return position;
 	}
 
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent)
+	public View getView(final int position, View convertView, ViewGroup parent)
 	{
 		final int view_type = getItemViewType(position);
 		if(view_type == 0)
@@ -160,7 +154,7 @@ public class adapter_settings_interface extends BaseAdapter
 				public void onClick(View v)
 				{
 					boolean checked = ((CheckBox) v).isChecked();
-					String file_name = title_array[pos];
+					String file_name = title_array[position];
 					///PAULTODO
 				}
 			});

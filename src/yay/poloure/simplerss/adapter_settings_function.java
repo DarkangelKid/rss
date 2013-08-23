@@ -13,9 +13,12 @@ import android.widget.TextView;
 
 public class adapter_settings_function extends BaseAdapter
 {
+	private       TextView title_view;
 	private final String[] title_array;
 	private final String[] summary_array;
-	private static final String[] refresh_times = {"15m","30m","45m","1h","2h","3h","4h","8h","12h","24h"};
+	private static final String[] refresh_times	= {"15m","30m","45m","1h","2h","3h","4h","8h","12h","24h"};
+	private static final int[] times					= {15, 30, 45, 60, 120, 180, 240, 480, 720, 1440};
+	private static final String[] file_names		= {"null", "auto_refresh_boolean", "refresh_time", "notifications_boolean", "offline_mode"};
 
 	private static LayoutInflater inflater;
 
@@ -69,24 +72,18 @@ public class adapter_settings_function extends BaseAdapter
 	}
 
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent)
+	public View getView(final int position, View convertView, ViewGroup parent)
 	{
 		final int view_type = getItemViewType(position);
-		final int pos = position;
 		if(view_type == 0)
 		{
-			final settings_heading_holder holder;
 			if(convertView == null)
 			{
 				convertView = inflater.inflate(R.layout.settings_heading, parent, false);
-				holder = new settings_heading_holder();
-				holder.title_view = (TextView) convertView.findViewById(R.id.settings_heading);
-				convertView.setTag(holder);
+				title_view = (TextView) convertView.findViewById(R.id.settings_heading);
 			}
-			else
-				holder = (settings_heading_holder) convertView.getTag();
 
-			holder.title_view.setText(title_array[position]);
+			title_view.setText(title_array[position]);
 		}
 
 		else if(view_type == 1)
@@ -106,23 +103,28 @@ public class adapter_settings_function extends BaseAdapter
 
 			holder.title_view.setText(title_array[position]);
 			holder.summary_view.setText(summary_array[position]);
+
+			/* On click, save the value of the click to a settings file. */
 			holder.checkbox.setOnClickListener(new OnClickListener()
 			{
 				@Override
 				public void onClick(View v)
 				{
 					boolean checked = ((CheckBox) v).isChecked();
-					///below code could equally easily be passed through as a final string, whatever.
-					String file_name = title_array[pos];
-					///PAULTODO
-					///this is where values are saved to file
-					///for settings files the file name should probably be the title of the settings item
-					///as this is already stored in a final array, is unique and will not cause issues between apk updates.
+					utilities.delete(main.storage + main.SETTINGS + main.SEPAR + file_names[position] + main.TXT);
+					utilities.append_string_to_file(main.storage + main.SETTINGS + main.SEPAR + file_names[position] + main.TXT, Boolean.toString(checked));
 				}
 			});
 
-			holder.checkbox.setChecked(false);
-			///read from file then setchecked
+			/* Load the saved boolean value and set the box as checked if true. */
+			String[] check = utilities.read_file_to_array(main.storage + main.SETTINGS + main.SEPAR + file_names[position] + main.TXT);
+			if(check.length == 0)
+			{
+				holder.checkbox.setChecked(false);
+				utilities.append_string_to_file(main.storage + main.SETTINGS + main.SEPAR + file_names[position] + main.TXT, Boolean.toString(false));
+			}
+			else
+				holder.checkbox.setChecked(Boolean.parseBoolean(check[0]));
 		}
 		else
 		{
@@ -148,11 +150,8 @@ public class adapter_settings_function extends BaseAdapter
 				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
 				{
 					holder.read_view.setText(refresh_times[progress]);
-					String file_name = title_array[pos];
-					///PAULTODO
-					///may want to consider saving values to file here
-					///make sure to avoid changing values/files when the progress is programmatically set
-					///by using the fromUser boolean
+					utilities.delete(main.storage + main.SETTINGS + main.SEPAR + file_names[position] + main.TXT);
+					utilities.append_string_to_file(main.storage + main.SETTINGS + main.SEPAR + file_names[position] + main.TXT, Integer.toString(times[progress]));
 				}
 
 				public void onStartTrackingTouch(SeekBar seekBar)
@@ -164,14 +163,19 @@ public class adapter_settings_function extends BaseAdapter
 				}
 			});
 			holder.seekbar.setProgress(3);
-			///this will have to be read from file then set to the appropriate value
+			/* Load the saved boolean value and set the box as checked if true. */
+			String[] check = utilities.read_file_to_array(main.storage + main.SETTINGS + main.SEPAR + file_names[position] + main.TXT);
+			if(check.length == 0)
+			{
+				holder.seekbar.setProgress(3);
+				utilities.append_string_to_file(main.storage + main.SETTINGS + main.SEPAR + file_names[position] + main.TXT, Integer.toString(times[3]));
+			}
+			else
+			{
+				holder.seekbar.setProgress(utilities.index_of_int(times, Integer.parseInt(check[0])));
+			}
 		}
 		return convertView;
-	}
-
-	static class settings_heading_holder
-	{
-		TextView title_view;
 	}
 
 	static class settings_checkbox_holder

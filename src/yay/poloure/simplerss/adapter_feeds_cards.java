@@ -61,7 +61,7 @@ public class adapter_feeds_cards extends BaseAdapter
 	private static final int title_black = Color.rgb(0, 0, 0);
 	private static final int title_grey  = Color.rgb(128, 128, 128);
 
-	private  int			total				= 0;
+	private int		total					= 0;
 	public  int			unread_count	= 0;
 	private boolean	first				= true;
 	private ListView	listview;
