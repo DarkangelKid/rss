@@ -2,8 +2,10 @@ package yay.poloure.simplerss;
 
 import android.widget.BaseAdapter;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.CheckBox;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.widget.ImageView;
@@ -41,7 +43,7 @@ public class adapter_settings_interface extends BaseAdapter
 	@Override
 	public int getCount()
 	{
-		return 2;
+		return 3;
 	}
 
 	@Override
@@ -52,20 +54,17 @@ public class adapter_settings_interface extends BaseAdapter
 
 	@Override
 	public int getViewTypeCount(){
-		return 2;
+		return 3;
 	}
 
 	@Override
 	public int getItemViewType(int position)
 	{
-		if(position == 0)
-			return 0;
-		else
-			return 1;
+		return position;
 	}
 
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent)
+	public View getView(final int position, View convertView, ViewGroup parent)
 	{
 		final int view_type = getItemViewType(position);
 		if(view_type == 0)
@@ -125,51 +124,42 @@ public class adapter_settings_interface extends BaseAdapter
 				holder.purple_view.setAlpha(1.0f);
 			else if(colour_array[0].equals("green"))
 				holder.green_view.setAlpha(1.0f);
-			else if(colour_array[0].equals("yellow"))
+			else if(colour_array[0].equals("orange"))
 				holder.yellow_view.setAlpha(1.0f);
 			else
 				holder.red_view.setAlpha(1.0f);
 		}
 		///so far there are only 2 view types, heading and holocolour_select
 		///this will change
-		/*else
+		else
 		{
-			final settings_seekbar_holder holder;
+			final settings_checkbox_holder holder;
 			if(convertView == null)
 			{
-				convertView = (View) inflater.inflate(R.layout.settings_seekbar, parent, false);
-				holder = new settings_seekbar_holder();
-				holder.title_view = (TextView) convertView.findViewById(R.id.seek_title);
-				holder.summary_view = (TextView) convertView.findViewById(R.id.seek_summary);
-				holder.seekbar = (SeekBar) convertView.findViewById(R.id.seekbar);
-				holder.read_view = (TextView) convertView.findViewById(R.id.seek_read);
+				convertView = (View) inflater.inflate(R.layout.settings_checkbox, parent, false);
+				holder = new settings_checkbox_holder();
+				holder.title_view = (TextView) convertView.findViewById(R.id.check_title);
+				holder.summary_view = (TextView) convertView.findViewById(R.id.check_summary);
+				holder.checkbox = (CheckBox) convertView.findViewById(R.id.checkbox);
 				convertView.setTag(holder);
 			}
 			else
-				holder = (settings_seekbar_holder) convertView.getTag();
+				holder = (settings_checkbox_holder) convertView.getTag();
 
 			holder.title_view.setText(title_array[position]);
 			holder.summary_view.setText(summary_array[position]);
-			holder.seekbar.setMax(9);
-			holder.seekbar.setOnSeekBarChangeListener(new OnSeekBarChangeListener()
+			holder.checkbox.setOnClickListener(new OnClickListener()
 			{
-				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
+				@Override
+				public void onClick(View v)
 				{
-					holder.read_view.setText(refresh_times[progress]);
-					String file_name = title_array[pos];
+					boolean checked = ((CheckBox) v).isChecked();
+					String file_name = title_array[position];
 					///PAULTODO
-					///may want to consider saving values to file here
-				}
-
-				public void onStartTrackingTouch(SeekBar seekBar)
-				{
-				}
-
-				public void onStopTrackingTouch(SeekBar seekBar)
-				{
 				}
 			});
-		}*/
+			holder.checkbox.setChecked(false);
+		}
 		return convertView;
 	}
 
@@ -214,5 +204,12 @@ public class adapter_settings_interface extends BaseAdapter
 		ImageView green_view;
 		ImageView yellow_view;
 		ImageView red_view;
+	}
+
+	static class settings_checkbox_holder
+	{
+		TextView title_view;
+		TextView summary_view;
+		CheckBox checkbox;
 	}
 }
