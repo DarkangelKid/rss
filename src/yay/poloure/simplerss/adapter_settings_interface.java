@@ -58,7 +58,6 @@ public class adapter_settings_interface extends BaseAdapter
 	{
 		if(position == 0)
 			return 0;
-
 		else
 			return 1;
 	}
