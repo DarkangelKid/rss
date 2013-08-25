@@ -9,6 +9,10 @@
 			<item>Copy URL to clipboard</item>
 			<item>Open in browser</item>
 	</string-array>
+	<string-array name="settings_pagertab_titles">
+			<item>Functions</item>
+			<item>Interface</item>
+	</string-array>
 	<string-array name="settings_function_titles">
 			<item>Auto Refresh</item>
 			<item>Auto Refresh</item>
