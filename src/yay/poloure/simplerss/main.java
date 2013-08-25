@@ -180,9 +180,8 @@ public class main extends ActionBarActivity
 	{
 		super.onStop();
 
-		Boolean refresh = false;
-
 		/* Load the refresh boolean value from settings. */
+		Boolean refresh = false;
 		String[] check = utilities.read_file_to_array(main.storage + main.SETTINGS + main.SEPAR + adapter_settings_function.file_names[1] + main.TXT);
 		if(check.length != 0)
 			refresh = Boolean.parseBoolean(check[0]);
@@ -199,7 +198,7 @@ public class main extends ActionBarActivity
 			Boolean notifications = false;
 			check = utilities.read_file_to_array(main.storage + main.SETTINGS + main.SEPAR + adapter_settings_function.file_names[3] + main.TXT);
 			if(check.length != 0)
-				refresh = Boolean.parseBoolean(check[0]);
+				notifications = Boolean.parseBoolean(check[0]);
 
 			/* Create the pendingIntent and set the alarmservice times for it. */
 			Intent intent = new Intent(this, service_update.class);
@@ -218,7 +217,13 @@ public class main extends ActionBarActivity
 	protected void onStart()
 	{
 		super.onStart();
-		if(/*pref.getBoolean("refresh", false)*/ true)
+		Boolean refresh = false;
+		/* Load the refresh boolean value from settings. */
+		String[] check = utilities.read_file_to_array(main.storage + main.SETTINGS + main.SEPAR + adapter_settings_function.file_names[1] + main.TXT);
+		if(check.length != 0)
+			refresh = Boolean.parseBoolean(check[0]);
+
+		if(refresh)
 		{
 			Intent intent = new Intent(this, service_update.class);
 			PendingIntent pend_intent = PendingIntent.getService(this, 0, intent, 0);
@@ -669,11 +674,17 @@ public class main extends ActionBarActivity
 				}
 			}
 		};
-		/* SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(activity_context);*/
+
+		/* Load notification boolean. */
+		Boolean notifications = false;
+		check = utilities.read_file_to_array(main.storage + main.SETTINGS + main.SEPAR + adapter_settings_function.file_names[3] + main.TXT);
+		if(check.length != 0)
+			notifications = Boolean.parseBoolean(check[0]);
+
 		final int page_number = viewpager.getCurrentItem();
 		final Intent intent = new Intent(activity_context, service_update.class);
 		intent.putExtra("GROUP_NUMBER", page_number);
-		intent.putExtra("NOTIFICATIONS", /*pref.getBoolean("notifications", false)*/true);
+		intent.putExtra("NOTIFICATIONS", notifications);
 		activity_context.startService(intent);
 
 		/// Maybe do not refresh the page.
