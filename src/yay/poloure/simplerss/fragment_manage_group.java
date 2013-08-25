@@ -124,10 +124,7 @@ class fragment_manage_group extends Fragment
 						else
 							actionmode = main.activity.startActionMode(actionmode_callback);
 					}
-					if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN)
-						view.setBackground(new ColorDrawable(Color.parseColor("#8033b5e5")));
-					else
-						view.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#8033b5e5")));
+					view.setBackgroundColor(Color.parseColor("#8033b5e5"));
 
 					return true;
 				}
@@ -143,7 +140,6 @@ class fragment_manage_group extends Fragment
 				{
 					if(position == 0)
 					{
-						/// Override default onclick method
 						manage_list.setItemChecked(position, false);
 						return;
 					}
@@ -151,38 +147,18 @@ class fragment_manage_group extends Fragment
 
 					if(multi_mode)
 					{
-						if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN)
+						if(!manage_list.isItemChecked(position))
 						{
-							if(!manage_list.isItemChecked(position))
-							{
-								view.setBackground(new ColorDrawable(Color.parseColor("#ffffffff")));
+							view.setBackgroundColor(Color.parseColor("#ffffffff"));
 
-								if(manage_list.getCheckedItemPositions().indexOfValue(true) < 0)
-								{
-									actionmode.finish();
-									multi_mode = false;
-								}
+							if(manage_list.getCheckedItemPositions().indexOfValue(true) < 0)
+							{
+								actionmode.finish();
+								multi_mode = false;
 							}
-							else
-								view.setBackground(new ColorDrawable(Color.parseColor("#8033b5e5")));
 						}
-						/// < 11
 						else
-						{
-							if(!manage_list.isItemChecked(position))
-							{
-								view.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#ffffffff")));
-
-								if(manage_list.getCheckedItemPositions().indexOfValue(true) < 0)
-								{
-									if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB)
-										actionmode.finish();
-									multi_mode = false;
-								}
-							}
-							else
-								view.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#8033b5e5")));
-						}
+							view.setBackgroundColor(Color.parseColor("#8033b5e5"));
 					}
 				}
 			}
