@@ -363,7 +363,6 @@ public class add_edit_dialog
 		final String old_feed_folder_post	= new_group_folder + sep + old_name;
 		final String new_feed_folder_post	= new_group_folder + sep + new_name;
 
-		/// TEST 1: Did not copy the folder, did add the new name, left the old name and did not delete the folder.
 		if(!old_name.equals(new_name))
 		{
 			(new File(old_feed_folder + sep + old_name + txt)).renameTo(new File(old_feed_folder + sep + new_name + txt));
@@ -371,8 +370,6 @@ public class add_edit_dialog
 		}
 		if(!old_group.equals(new_group))
 		{
-			/// Java 1.7 nio
-			///	Files.move(old_feed_folder, new_feed_folder, Files.REPLACE_EXISTING);
 
 			(new File(old_feed_folder)).renameTo(new File(new_feed_folder));
 

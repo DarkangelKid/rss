@@ -427,16 +427,16 @@ public class adapter_feeds_cards extends BaseAdapter
 		@Override
 		public void onPause()
 		{
-		/* min api 11
-			web_view.onPause();*/
+		/* min api 11. */
 			web_view.onPause();
+			super.onPause();
 		}
 
 		@Override
 		public void onResume()
 		{
-			/* min api 11
-			web_view.onResume();*/
+			/* min api 11. */
+			web_view.onResume();
 			super.onResume();
 		}
 
