@@ -486,11 +486,12 @@ public class main extends ActionBarActivity
 	public static class pageradapter_settings extends FragmentPagerAdapter
 	{
 		private static final Fragment[] settings_fragments	= new Fragment[]{new fragment_settings_function(), new fragment_settings_interface()};
-		private static final String[]   settings_titles		= new String[]{"Functions", "Interface"};
+		private final String[]  settings_titles;
 
 		public pageradapter_settings(FragmentManager fm)
 		{
 			super(fm);
+			settings_titles = activity_context.getResources().getStringArray(R.array.settings_pagertab_titles);
 		}
 
 		@Override
