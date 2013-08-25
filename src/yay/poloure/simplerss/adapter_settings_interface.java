@@ -104,30 +104,27 @@ public class adapter_settings_interface extends BaseAdapter
 
 			holder.title_view.setText(title_array[position]);
 			holder.summary_view.setText(summary_array[position]);
-			holder.blue_view.setOnClickListener(new colour_click(0));
-			holder.purple_view.setOnClickListener(new colour_click(1));
-			holder.green_view.setOnClickListener(new colour_click(2));
-			holder.yellow_view.setOnClickListener(new colour_click(3));
-			holder.red_view.setOnClickListener(new colour_click(4));
-
-			holder.blue_view.setAlpha(0.5f);
-			holder.purple_view.setAlpha(0.5f);
-			holder.green_view.setAlpha(0.5f);
-			holder.yellow_view.setAlpha(0.5f);
-			holder.red_view.setAlpha(0.5f);
 
 			String[] colour_array = utilities.read_file_to_array(storage + main.SETTINGS + main.SEPAR + main.PAGERTABSTRIPCOLOUR);
 
-			if(colour_array[0].equals("blue"))
-				holder.blue_view.setAlpha(1.0f);
-			else if(colour_array[0].equals("purple"))
-				holder.purple_view.setAlpha(1.0f);
-			else if(colour_array[0].equals("green"))
-				holder.green_view.setAlpha(1.0f);
-			else if(colour_array[0].equals("orange"))
-				holder.yellow_view.setAlpha(1.0f);
-			else
-				holder.red_view.setAlpha(1.0f);
+			if(colour_array.length == 0)
+			{
+				colour_array = new String[]{"blue"};
+				utilities.append_string_to_file(storage + main.SETTINGS + main.SEPAR + main.PAGERTABSTRIPCOLOUR, "blue");
+			}
+
+			ImageView[] colour_views = new ImageView[]{holder.blue_view, holder.purple_view, holder.green_view, holder.yellow_view, holder.red_view};
+
+			for(int i = 0; i < colour_views.length; i++)
+			{
+				colour_views[i].setOnClickListener(new colour_click(i));
+
+				/* Set the alpha to fade out if it is not the currently selected colour. */
+				if(colour_array[0].equals(colours[i]))
+					colour_views[i].setAlpha(1.0f);
+				else
+					colour_views[i].setAlpha(0.5f);
+			}
 		}
 		/* So far there are only 2 view types, heading and holocolour_select. This will change */
 		else

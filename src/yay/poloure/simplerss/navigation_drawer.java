@@ -65,6 +65,9 @@ class navigation_drawer
 		if(update_names)
 			nav_adapter.set_titles(main.current_groups);
 
+		/*if(counts[main.viewpager.getCurrentItem()] == 0)*/
+
+
 		nav_adapter.set_counts(counts);
 		nav_adapter.notifyDataSetChanged();
 	}
