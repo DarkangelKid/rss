@@ -17,8 +17,7 @@ class navigation_drawer
 	public static ActionBarDrawerToggle			drawer_toggle;
 
 	public static final String[] NAVIGATION_TITLES = new String[3];
-
-	private static String							current_title;
+	private static String current_title;
 
 	private final ListView navigation_list;
 
@@ -28,8 +27,6 @@ class navigation_drawer
 		NAVIGATION_TITLES[1]	= context.getString(R.string.manage_title);
 		NAVIGATION_TITLES[2]	= context.getString(R.string.settings_title);
 
-		current_title		= NAVIGATION_TITLES[0];
-
 		nav_adapter			= new adapter_navigation_drawer(context);
 		navigation_list	= nav_list;
 		drawer_layout		= draw_layout;
@@ -38,14 +35,9 @@ class navigation_drawer
 		drawer_toggle = new ActionBarDrawerToggle(activity, drawer_layout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
 		{
 			@Override
-			public void onDrawerClosed(View view)
-			{
-				main.action_bar.setTitle(current_title);
-			}
-
-			@Override
 			public void onDrawerOpened(View drawerView)
 			{
+				current_title = (String) main.action_bar.getTitle();
 				main.action_bar.setTitle(main.NAVIGATION);
 			}
 		};
@@ -65,9 +57,6 @@ class navigation_drawer
 		if(update_names)
 			nav_adapter.set_titles(main.current_groups);
 
-		/*if(counts[main.viewpager.getCurrentItem()] == 0)*/
-
-
 		nav_adapter.set_counts(counts);
 		nav_adapter.notifyDataSetChanged();
 	}
@@ -77,20 +66,12 @@ class navigation_drawer
 		@Override
 		public void onItemClick(AdapterView parent, View view, int position, long id)
 		{
-			switch(position)
+			if(position < 3)
+				switch_page(NAVIGATION_TITLES[position], position);
+			else
 			{
-				case 0:
-					switch_page(NAVIGATION_TITLES[0], 0);
-					break;
-				case 1:
-					switch_page(NAVIGATION_TITLES[1], 1);
-					break;
-				case 2:
-					switch_page(NAVIGATION_TITLES[2], 2);
-					break;
-				default:
-					switch_page(NAVIGATION_TITLES[0], position);
-					main.viewpager.setCurrentItem(position - 4);
+				switch_page(NAVIGATION_TITLES[0], position);
+				main.viewpager.setCurrentItem(position - 4);
 			}
 		}
 	}
@@ -109,16 +90,9 @@ class navigation_drawer
 
 			navigation_list.setItemChecked(position, true);
 			if(position < 3)
-				set_title(page_title);
+				main.action_bar.setTitle(page_title);
 			else
-				set_title(navigation_drawer.NAVIGATION_TITLES[0]);
+				main.action_bar.setTitle(navigation_drawer.NAVIGATION_TITLES[0]);
 		}
-		current_title = page_title;
-	}
-
-	private static void set_title(String title)
-	{
-		current_title = title;
-		main.action_bar.setTitle(title);
 	}
 }

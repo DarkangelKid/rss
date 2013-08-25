@@ -125,7 +125,6 @@ class fragment_manage_group extends Fragment
 							actionmode = main.activity.startActionMode(actionmode_callback);
 					}
 					view.setBackgroundColor(Color.parseColor("#8033b5e5"));
-
 					return true;
 				}
 			}
