@@ -35,13 +35,13 @@ public class service_update extends IntentService
 
 		Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
-		final int group		= intent.getIntExtra("GROUP_NUMBER", 0);
+		final int group			= intent.getIntExtra("GROUP_NUMBER", 0);
 
 		final String storage;
 		final String SEPAR = main.SEPAR;
 
 		if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.FROYO)
-			storage				= getExternalFilesDir(null).getAbsolutePath() + SEPAR;
+			storage					= getExternalFilesDir(null).getAbsolutePath() + SEPAR;
 		else
 		{
 			String packageName	= getPackageName();
@@ -50,14 +50,14 @@ public class service_update extends IntentService
 
 		final String[] all_groups			= utilities.read_file_to_array(storage + main.GROUP_LIST);
 		final String grouper					= all_groups[group];
-		final String group_file_path		= storage + main.GROUPS_DIRECTORY + grouper + main.SEPAR + grouper + main.TXT;
+		final String group_file_path		= storage + main.GROUPS_DIRECTORY + grouper + SEPAR + grouper + main.TXT;
 
 		final String[][] content			= utilities.read_csv_to_array(group_file_path, 'n', 'u', 'g');
 		final String[] names					= content[0];
 		final String[] urls					= content[1];
 		final String[] groups				= content[2];
 
-		int i, width;
+		int width;
 
 		if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB_MR2)
 			width = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getWidth();
@@ -68,49 +68,54 @@ public class service_update extends IntentService
 			width = (int) (Math.round(((screen_size.x)*0.944)));
 		}
 
-		final int size = names.length;
-		/// For each feed you must do this.
-		for(i = 0; i < size; i++)
+		/* Download and parse each feed in the group. */
+		for(int i = 0; i < names.length; i++)
 		{
 			utilities.download_file(urls[i], storage + names[i] + main.STORE_APPENDIX);
 			new parser(storage, groups[i], names[i], width);
 		}
 
-		/// Sort group order
+		/* Always sort all & sort others too. */
+		utilities.sort_group_content_by_time(storage, all_groups[0]);
 		if(!grouper.equals(main.ALL))
 			utilities.sort_group_content_by_time(storage, grouper);
-
 		else
 		{
-			for(int j = 1; j < all_groups.length; j++)
-				utilities.sort_group_content_by_time(storage, all_groups[j]);
+			for(int i = 1; i < all_groups.length; i++)
+				utilities.sort_group_content_by_time(storage, all_groups[i]);
 		}
 
 		final int[] unread_counts = utilities.get_unread_counts(storage, all_groups);
 
-		int group_items = 1;
-		int total = 0, count;
-		final int sizes = unread_counts.length;
-
-		for(i = 1 ; i < sizes; i++)
+		/* If activity is running. */
+		if(main.service_handler != null)
 		{
-			count = unread_counts[i];
-			if(count != 0)
-			{
-				total += count;
-				group_items++;
-			}
+			Message m = new Message();
+         Bundle b = new Bundle();
+         b.putInt("page_number", group);
+         m.setData(b);
+            main.service_handler.sendMessage(m);
 		}
-
-		if((total != 0) && intent.getBooleanExtra("NOTIFICATIONS", false))
+		else if((unread_counts[0] != 0) && intent.getBooleanExtra("NOTIFICATIONS", false))
 		{
+			/* Calculate the number of groups with new items. */
+			int group_items = 1, count;
+			final int sizes = unread_counts.length;
+
+			for(int i = 1 ; i < sizes; i++)
+			{
+				count = unread_counts[i];
+				if(count != 0)
+					group_items++;
+			}
+
 			NotificationCompat.Builder not_builder = new NotificationCompat.Builder(this)
 					.setSmallIcon(R.drawable.rss_icon)
-					.setContentTitle(Integer.toString(total) + " Unread Item" + ((total == 1) ? "" : "s"))
+					.setContentTitle(Integer.toString(unread_counts[0]) + " Unread Item" + ((unread_counts[0] == 1) ? "" : "s"))
 					.setContentText(
 					Integer.toString(group_items - 1) +
 					((group_items - 1 == 1) ? " group has" : " groups have") +
-					((total == 1) ? " an unread item." : " unread items."))
+					((unread_counts[0] == 1) ? " an unread item." : " unread items."))
 					.setAutoCancel(true);
 
 			Intent result_intent = new Intent(this, main.class);
@@ -123,16 +128,6 @@ public class service_update extends IntentService
 			not_builder.setContentIntent(result_pending_intent);
 			NotificationManager notification_manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 			notification_manager.notify(1, not_builder.build());
-		}
-
-		/* If activity is running. */
-		if(main.service_handler != null)
-		{
-			Message m = new Message();
-         Bundle b = new Bundle();
-         b.putInt("page_number", group);
-         m.setData(b);
-            main.service_handler.sendMessage(m);
 		}
 
 		wakelock.release();

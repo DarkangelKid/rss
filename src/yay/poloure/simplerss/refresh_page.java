@@ -14,13 +14,12 @@ import java.util.Set;
 class refresh_page extends AsyncTask<Void, Object, Animation>
 {
 	private final int page_number;
-	private Boolean flash  = false;
+	private Boolean flash = false;
 	private ListFragment l;
 	private adapter_feeds_cards ith;
 	private ListView lv;
 	private int[] counts;
-	private int number_of_items = 0;
-	private int oldest_unread = 0;
+	private int position = -3;
 
 	public refresh_page(int page)
 	{
@@ -113,14 +112,8 @@ class refresh_page extends AsyncTask<Void, Object, Animation>
 				new_images	[count] = thumbnail_path;
 				new_heights	[count] = height;
 				new_widths	[count] = width;
-				number_of_items++;
 			}
-			/* If this item has not been read, save its position. */
-			if(!adapter_feeds_cards.read_items.contains(links[m]) && oldest_unread == 0)
-				oldest_unread = m;
 		}
-		if(oldest_unread == 0)
-			oldest_unread = number_of_items;
 
 		while(lv == null)
 		{
@@ -145,6 +138,10 @@ class refresh_page extends AsyncTask<Void, Object, Animation>
 				}
 			}
 		}
+
+		/* Do not count items as read while we are updating the list. */
+		ith.touched = false;
+
 		if(new_titles.length > 0)
 			publishProgress(new_titles, new_des, new_links, new_images, new_heights, new_widths);
 
@@ -156,32 +153,57 @@ class refresh_page extends AsyncTask<Void, Object, Animation>
 	@Override
 	protected void onProgressUpdate(Object[] progress)
 	{
-		if(ith.getCount() == 0)
+		/* If these are the first items to be added to the list. */
+		if(lv.getCount() == 0)
 		{
 			lv.setVisibility(View.INVISIBLE);
-			flash  = true;
+			flash = true;
+		}
+
+		int index = 0, top = 0;
+		/* Find the exact position in the list. */
+		if(!flash)
+		{
+			index = lv.getFirstVisiblePosition() + 1;
+			View v = lv.getChildAt(0);
+			top = (v == null) ? 0 : v.getTop();
+			if(top == 0)
+				index++;
+			else if (top < 0 && lv.getChildAt(1) != null)
+			{
+				index++;
+				v = lv.getChildAt(1);
+				top = v.getTop();
+			}
 		}
 
 		ith.add_array((String[]) progress[0], (String[]) progress[1], (String[]) progress[2], (String[]) progress[3], (int[]) progress[4], (int[]) progress[5]);
 		ith.notifyDataSetChanged();
+
+		if(flash)
+			position	= main.jump_to_latest_unread(ith.links, false, page_number);
+
+		if(top != 0)
+			lv.setSelectionFromTop(index, top - (ith.four*4));
 	}
 
 	@Override
 	protected void onPostExecute(Animation tun)
 	{
+		/* Update the unread counts in the navigation drawer. */
+		navigation_drawer.update_navigation_data(counts, false);
+
 		if(lv == null)
 			return;
 
-		main.set_refresh(service_update.check_service_running(main.activity));
-
-		navigation_drawer.update_navigation_data(counts, false);
-
+		/* If there were no items to start with (the listview is invisible).*/
 		if(flash)
 		{
-			lv.setSelection(number_of_items - oldest_unread);
+			lv.setSelection(position);
 			lv.setAnimation(tun);
 			lv.setVisibility(View.VISIBLE);
 		}
-		navigation_drawer.update_navigation_data(null, false);
+		/* Resume read item checking. */
+		ith.touched = true;
 	}
 }
