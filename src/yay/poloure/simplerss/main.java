@@ -677,7 +677,7 @@ public class main extends ActionBarActivity
 
 		/* Load notification boolean. */
 		Boolean notifications = false;
-		check = utilities.read_file_to_array(main.storage + main.SETTINGS + main.SEPAR + adapter_settings_function.file_names[3] + main.TXT);
+		String[] check = utilities.read_file_to_array(main.storage + main.SETTINGS + main.SEPAR + adapter_settings_function.file_names[3] + main.TXT);
 		if(check.length != 0)
 			notifications = Boolean.parseBoolean(check[0]);
 
