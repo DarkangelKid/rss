@@ -92,7 +92,7 @@ public class main extends ActionBarActivity
 		File folder_file;
 		for(String folder : folders)
 		{
-			folder_file = new File(storage + GROUPS_DIRECTORY);
+			folder_file = new File(storage + folder);
 			if(!folder_file.exists())
 				folder_file.mkdir();
 		}

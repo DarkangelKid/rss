@@ -136,13 +136,15 @@ public class adapter_feeds_cards extends BaseAdapter
 				{
 					/* The very top item is read only when the padding exists above it. */
 					/* links.get(0) == the last link in the list. position is always 76*/
-					if(listview.getChildAt(0).getTop() == eight)
+					if(listview.getChildAt(0).getTop() == eight && listview.getVisibility() == View.VISIBLE && touched)
 						read_items.add(links[links.length - 1]);
 
 					/*if(listview.getChildAt(position).getTop() == eight)
 						read_items.add(links.get(position));*/
 					if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
+					{
 						navigation_drawer.update_navigation_data(null, false);
+					}
 				}
 			});
 		}
