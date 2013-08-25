@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import android.widget.ListView;
 
 public class utilities
 {
@@ -459,11 +460,16 @@ public class utilities
 		return i;
 	}
 
-	public static adapter_feeds_cards get_adapter_feeds_cards(FragmentManager fragment_manager, ViewPager viewpager, int page_index)
+	public static adapter_feeds_cards get_adapter_feeds_cards(FragmentManager fragment_manager, ViewPager viewpager, int page_number)
+	{
+		return (adapter_feeds_cards) get_listview(fragment_manager, viewpager, page_number).getAdapter();
+	}
+
+	public static ListView get_listview(FragmentManager fragment_manager, ViewPager viewpager, int page_number)
 	{
 		try
 		{
-			return (adapter_feeds_cards)((ListFragment) fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_index))).getListAdapter();
+			return ((ListFragment) fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + page_number)).getListView();
 		}
 		catch(Exception e)
 		{

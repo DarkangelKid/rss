@@ -49,7 +49,7 @@ public class adapter_feeds_cards extends BaseAdapter
 	private static final Pattern thumb_img = Pattern.compile("thumbnails");
 	private static Context context;
 	private static LayoutInflater inflater;
-	private static int two = 0, four = 0, eight = 0;
+	public  static int two = 0, four = 0, eight = 0;
 	private static int screen_width;
 
 	private static final int link_black  = Color.rgb(128, 128, 128);
@@ -61,10 +61,11 @@ public class adapter_feeds_cards extends BaseAdapter
 	private static final int title_black = Color.rgb(0, 0, 0);
 	private static final int title_grey  = Color.rgb(128, 128, 128);
 
-	private int		total					= 0;
+	private int			total				= 0;
 	public  int			unread_count	= 0;
 	private boolean	first				= true;
 	private ListView	listview;
+	public  boolean	touched			= true;
 
 
 	public adapter_feeds_cards(Context context_main)
@@ -223,7 +224,7 @@ public class adapter_feeds_cards extends BaseAdapter
 		}
 
 		/* The logic that tells whether the item is read or not. */
-		if(listview.getVisibility() == View.VISIBLE && position - 1 >= 0)
+		if(listview.getVisibility() == View.VISIBLE && position - 1 >= 0 && touched)
 				read_items.add(links[position - 1]);
 
 		String title 					= titles[position];

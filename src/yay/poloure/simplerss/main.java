@@ -325,7 +325,7 @@ public class main extends ActionBarActivity
 			}
 			else if(item.getTitle().equals("unread"))
 			{
-				jump_to_latest_unread();
+				jump_to_latest_unread(null, true, 0);
 				return true;
 			}
 			else if(item.getTitle().equals("refresh"))
@@ -389,15 +389,11 @@ public class main extends ActionBarActivity
  		@Override
 		public Fragment getItem(int position)
 		{
-			//if(position < current_groups.length)
-			{
-				fragment_card f = new fragment_card();
-				Bundle args = new Bundle();
-				args.putInt("num", position);
-				f.setArguments(args);
-				return f;
-			}
-			//return null;
+			fragment_card f = new fragment_card();
+			Bundle args = new Bundle();
+			args.putInt("num", position);
+			f.setArguments(args);
+			return f;
 		}
 
 		@Override
@@ -577,7 +573,6 @@ public class main extends ActionBarActivity
 			current_groups = new String[]{"All"};
 		}
 
-		/// If viewpager exists, fragment_manager != null. This must come before the nav_adapter.
 		if(viewpager != null)
 		{
 			if(previous_size != size)
@@ -588,52 +583,31 @@ public class main extends ActionBarActivity
 		navigation_drawer.update_navigation_data(null, true);
 	}
 
-	private static void jump_to_latest_unread()
+	public static int jump_to_latest_unread(String[] links, boolean update, int page_number)
 	{
-		final int page_number = viewpager.getCurrentItem();
-		int oldest_unread = -1;
+		int m;
 
-		final String group_path				= storage + GROUPS_DIRECTORY + current_groups[page_number] + main.SEPAR;
-		final String group_content_path	= group_path + current_groups[page_number] + CONTENT_APPENDIX;
+		if(update)
+			page_number = viewpager.getCurrentItem();
 
-		if(!utilities.exists(group_content_path))
-			return;
+		if(links == null)
+			links = utilities.get_adapter_feeds_cards(fragment_manager, viewpager, page_number).links;
 
-		String[] links = utilities.get_adapter_feeds_cards(fragment_manager, viewpager, page_number).links;
-
-		final int size = links.length;
-		for(int m = 0; m < size; m++)
+		for(m = links.length - 1; m >= 0; m--)
 		{
-			if(!adapter_feeds_cards.read_items.contains(links[m]))
-			{
-				oldest_unread = m;
+			if(!adapter_feeds_cards.read_items.contains(links[links.length - m - 1]))
 				break;
-			}
 		}
-		if(oldest_unread == 0)
-			oldest_unread = links.length;
 
-		ListView lv = ((ListFragment) fragment_manager.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + Integer.toString(page_number))).getListView();
-
-		if(lv == null)
-			return;
-
-		if(oldest_unread == links.length)
+		/* 0 is the top. links.length - 1 is the bottom.*/
+		if(update)
 		{
-			lv.setSelection(links.length);
-			return;
+			ListView lv = utilities.get_listview(fragment_manager, viewpager, page_number);
+			if(lv == null)
+				return -1;
+			lv.setSelection(m);
 		}
-
-		/* 0 is the top. */
-
-		if(oldest_unread == -1)
-			oldest_unread = links.length - 1;
-
-		final int position = links.length - oldest_unread - 1;
-		if(position >= 0)
-			lv.setSelection(position);
-		else
-			lv.setSelection(0);
+		return m;
 	}
 
 	private static void refresh_feeds()
@@ -648,27 +622,23 @@ public class main extends ActionBarActivity
 				int page = msg.getData().getInt("page_number");
 				if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
 				{
+					new refresh_page(0).execute();
 					if(page != 0)
-					{
 						new refresh_page(page).execute();
-						new refresh_page(0).execute();
-					}
 					else
 					{
-						for(int i = 0; i < current_groups.length; i++)
+						for(int i = 1; i < current_groups.length; i++)
 							new refresh_page(i).execute();
 					}
 				}
 				else
 				{
+					new refresh_page(0).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 					if(page != 0)
-					{
 						new refresh_page(page).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-						new refresh_page(0).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-					}
 					else
 					{
-						for(int i = 0; i < current_groups.length; i++)
+						for(int i = 1; i < current_groups.length; i++)
 							new refresh_page(i).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 					}
 				}
@@ -686,11 +656,5 @@ public class main extends ActionBarActivity
 		intent.putExtra("GROUP_NUMBER", page_number);
 		intent.putExtra("NOTIFICATIONS", notifications);
 		activity_context.startService(intent);
-
-		/// Maybe do not refresh the page.
-		if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
-			new refresh_page(page_number).execute();
-		else
-			new refresh_page(page_number).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 }
