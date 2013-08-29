@@ -35,7 +35,7 @@ public class service_update extends IntentService
 
 		Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
-		final String UNREAD_ITEM			= getString(R.string.notification_title_singular);
+		final String UNREAD_ITEM		= getString(R.string.notification_title_singular);
 		final String UNREAD_ITEMS		= getString(R.string.notification_title_plural);
 		final String GROUP_UNREAD		= getString(R.string.notification_content_group_item);
 		final String GROUP_UNREADS		= getString(R.string.notification_content_group_items);
@@ -117,17 +117,17 @@ public class service_update extends IntentService
 
 			String not_title;
 			if(unread_counts[0] == 1)
-				not_title = String.format("%d %s", 1, UNREAD_ITEM);
+				not_title = String.format(UNREAD_ITEM, 1);
 			else
-				not_title = String.format("%d %s", unread_counts[0], UNREAD_ITEMS);
+				not_title = String.format(UNREAD_ITEMS, unread_counts[0]);
 
 			String not_content;
 			if(unread_counts[0] == 1 && (group_items - 1) == 1)
-				not_content = String.format("%d %s", 1, GROUP_UNREAD);
+				not_content = String.format(GROUP_UNREAD, 1);
 			else if(unread_counts[0] > 1 && (group_items - 1) == 1)
-				not_content = String.format("%d %s", 1, GROUP_UNREADS);
+				not_content = String.format(GROUP_UNREADS, 1);
 			else
-				not_content = String.format("%d %s", (group_items - 1), GROUPS_UNREADS);
+				not_content = String.format(GROUPS_UNREADS, (group_items - 1));
 
 			NotificationCompat.Builder not_builder = new NotificationCompat.Builder(this)
 					.setSmallIcon(R.drawable.rss_icon)
