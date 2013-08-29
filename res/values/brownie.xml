@@ -2,8 +2,18 @@
 <resources>
 	<color name="custom_theme_color">#ffe5e5e5</color>
 	<color name="action_bar_colour">#ff212021</color>
+	<color name="white">#ffffffff</color>
 	<color name="cab">#ff002c36</color>
 	<style name="Brownie.Net" parent="@style/Theme.AppCompat.Light.DarkActionBar">
 		<item name="android:windowBackground">@color/custom_theme_color</item>
+		<item name="android:actionBarStyle">@style/AppTheme.ActionBarStyle</item>
+	</style>
+	<style name="AppTheme.ActionBarStyle" parent="android:style/Widget.Holo.ActionBar">
+		<item name="android:background">@color/action_bar_colour</item>
+		<item name="android:titleTextStyle">@style/AppTheme.ActionBar.TitleTextStyle</item>
+		<item name="android:icon">@drawable/rss_icon</item>
+	</style>
+	<style name="AppTheme.ActionBar.TitleTextStyle" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
+		<item name="android:textColor">@color/white</item>
 	</style>
 </resources>
