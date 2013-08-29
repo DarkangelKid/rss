@@ -550,7 +550,7 @@ public class utilities
 				content 		= read_file_to_array(content_path);
 				pubDates		= read_single_to_array(content_path, "pubDate|");
 
-				if((pubDates[0] == null)||(pubDates[0].length() < 8))
+				if((pubDates == null)||(pubDates[0].length() < 8))
 					pubDates 	= read_single_to_array(content_path, "published|");
 
 				for(i = 0; i < pubDates.length; i++)

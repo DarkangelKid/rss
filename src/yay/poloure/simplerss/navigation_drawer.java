@@ -35,6 +35,13 @@ class navigation_drawer
 		drawer_toggle = new ActionBarDrawerToggle(activity, drawer_layout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
 		{
 			@Override
+			public void onDrawerClosed(View drawerView)
+			{
+				/* If the title is still "Navigation", then change it back to current_title. */
+				if(((String) main.action_bar.getTitle()).equals(main.NAVIGATION))
+					main.action_bar.setTitle(current_title);
+			}
+			@Override
 			public void onDrawerOpened(View drawerView)
 			{
 				current_title = (String) main.action_bar.getTitle();
