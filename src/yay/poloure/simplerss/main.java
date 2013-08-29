@@ -111,7 +111,7 @@ public class main extends ActionBarActivity
 
 		/* Configure the action bar. */
 		action_bar = getSupportActionBar();
-		action_bar.setDisplayShowHomeEnabled(true);
+		/*action_bar.setDisplayShowHomeEnabled(true);*/
 		action_bar.setDisplayHomeAsUpEnabled(true);
 		action_bar.setHomeButtonEnabled(true);
 		action_bar.setIcon(R.drawable.rss_icon);
@@ -218,6 +218,7 @@ public class main extends ActionBarActivity
 	{
 		super.onStart();
 		Boolean refresh = false;
+
 		/* Load the refresh boolean value from settings. */
 		String[] check = utilities.read_file_to_array(main.storage + main.SETTINGS + main.SEPAR + adapter_settings_function.file_names[1] + main.TXT);
 		if(check.length != 0)
@@ -235,15 +236,16 @@ public class main extends ActionBarActivity
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
-		String title = action_bar.getTitle().toString();
-
-		if(utilities.index_of(navigation_drawer.NAVIGATION_TITLES, title) != -1)
-			return navigation_drawer.drawer_toggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
-		else
+		if(action_bar.getTitle().toString().equals("Offline"))
 		{
 			onBackPressed();
 			return true;
 		}
+
+		if(navigation_drawer.drawer_toggle.onOptionsItemSelected(item))
+			return true;
+
+		return super.onOptionsItemSelected(item);
 	}
 
 	/* END OF OVERRIDES */
