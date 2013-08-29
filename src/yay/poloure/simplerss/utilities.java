@@ -273,9 +273,12 @@ public class utilities
 	{
 		int next, offset, j;
 		String line;
+		String[] lines;
+		String[] types;
 		char ch;
-		String[] lines = read_file_to_array(file_path);
-		String[] types = new String[lines.length];
+
+		lines = read_file_to_array(file_path);
+		types = new String[lines.length];
 
 		for(j = 0; j < lines.length; j++)
 		{
@@ -304,11 +307,13 @@ public class utilities
 	{
 		int next, offset, k, j;
 		String line;
+		String[][] types;
+		String[] lines;
 		char ch;
 		int start = (type[0] == 'm') ? 1 : 0;
 
-		String[]   lines = read_file_to_array(file_path);
-		String[][] types = new String[type.length][lines.length];
+		lines = read_file_to_array(file_path);
+		types = new String[type.length][lines.length];
 
 		for(j = 0; j < lines.length; j++)
 		{
@@ -348,11 +353,12 @@ public class utilities
 	{
 		int next, offset, j;
 		String line;
+		String[] lines;
+		String[][] types;
 		char ch;
 
-		String[] lines = read_file_to_array(file_path);
-
-		String[][] types = new String[8][lines.length];
+		lines = read_file_to_array(file_path);
+		types = new String[8][lines.length];
 
 		for(j = 0; j < lines.length; j++)
 		{
@@ -409,15 +415,31 @@ public class utilities
 	public static String[] read_file_to_array(String file_path)
 	{
 		String line;
-		int count = count_lines(file_path);
-		if(count == 0)
+		String[] lines;
+
+		/* Read the count file to an array. */
+		if(!file_path.contains("count.txt"))
+		{
+			String[] line_temp = read_file_to_array(file_path + main.COUNT_APPENDIX);
+
+			/* If the count file does not exist, count the lines of the file. */
+			if(line_temp.length == 0)
+				lines = new String[count_lines(file_path)];
+			else
+				lines = new String[Integer.parseInt(line_temp[0])];
+		}
+		else
+			lines = new String[count_lines(file_path)];
+
+		/* If the file is empty, return a zero length array so we can check. */
+		if(lines.length == 0)
 			return new String[0];
+
 		BufferedReader stream;
-		String[] lines = new String[count];
 		try
 		{
 			stream = new BufferedReader(new FileReader(file_path));
-			for(int i = 0; i < count; i++)
+			for(int i = 0; i < lines.length; i++)
 				lines[i] = stream.readLine();
 			stream.close();
 		}
