@@ -56,6 +56,7 @@ public class main extends ActionBarActivity
 	public  static final String DUMP_FILE				= "dump" + TXT;
 	public  static final String STORE_APPENDIX		= ".store" + TXT;
 	public  static final String CONTENT_APPENDIX		= ".content" + TXT;
+	public  static final String URL_APPENDIX			= ".urls" + TXT;
 	public  static final String COUNT_APPENDIX		= ".count" + TXT;
 	public  static final String GROUP_LIST				= "group_list" + TXT;
 	public  static final String FILTER_LIST			= "filter_list" + TXT;
@@ -182,7 +183,7 @@ public class main extends ActionBarActivity
 
 		/* Load the refresh boolean value from settings. */
 		Boolean refresh = false;
-		String[] check = utilities.read_file_to_array(main.storage + main.SETTINGS + main.SEPAR + adapter_settings_function.file_names[1] + main.TXT);
+		String[] check = utilities.read_file_to_array(main.storage + main.SETTINGS + adapter_settings_function.file_names[1] + main.TXT);
 		if(check.length != 0)
 			refresh = Boolean.parseBoolean(check[0]);
 
@@ -190,13 +191,13 @@ public class main extends ActionBarActivity
 		{
 			/* Load the refresh time from settings. */
 			int refresh_time = adapter_settings_function.times[3];
-			check = utilities.read_file_to_array(main.storage + main.SETTINGS + main.SEPAR + adapter_settings_function.file_names[2] + main.TXT);
+			check = utilities.read_file_to_array(main.storage + main.SETTINGS + adapter_settings_function.file_names[2] + main.TXT);
 			if(check.length != 0)
 				refresh_time = Integer.parseInt(check[0]);
 
 			/* Load notification boolean. */
 			Boolean notifications = false;
-			check = utilities.read_file_to_array(main.storage + main.SETTINGS + main.SEPAR + adapter_settings_function.file_names[3] + main.TXT);
+			check = utilities.read_file_to_array(main.storage + main.SETTINGS + adapter_settings_function.file_names[3] + main.TXT);
 			if(check.length != 0)
 				notifications = Boolean.parseBoolean(check[0]);
 
@@ -220,7 +221,7 @@ public class main extends ActionBarActivity
 		Boolean refresh = false;
 
 		/* Load the refresh boolean value from settings. */
-		String[] check = utilities.read_file_to_array(main.storage + main.SETTINGS + main.SEPAR + adapter_settings_function.file_names[1] + main.TXT);
+		String[] check = utilities.read_file_to_array(main.storage + main.SETTINGS + adapter_settings_function.file_names[1] + main.TXT);
 		if(check.length != 0)
 			refresh = Boolean.parseBoolean(check[0]);
 
@@ -582,8 +583,10 @@ public class main extends ActionBarActivity
 				viewpager.setAdapter(new pageradapter_feeds(fragment_manager));
 			else
 				viewpager.getAdapter().notifyDataSetChanged();
+
+			/* Does not run on first update. */
+			navigation_drawer.update_navigation_data(null, true);
 		}
-		navigation_drawer.update_navigation_data(null, true);
 	}
 
 	public static int jump_to_latest_unread(String[] links, boolean update, int page_number)
@@ -650,7 +653,7 @@ public class main extends ActionBarActivity
 
 		/* Load notification boolean. */
 		Boolean notifications = false;
-		String[] check = utilities.read_file_to_array(main.storage + main.SETTINGS + main.SEPAR + adapter_settings_function.file_names[3] + main.TXT);
+		String[] check = utilities.read_file_to_array(main.storage + main.SETTINGS + adapter_settings_function.file_names[3] + main.TXT);
 		if(check.length != 0)
 			notifications = Boolean.parseBoolean(check[0]);
 

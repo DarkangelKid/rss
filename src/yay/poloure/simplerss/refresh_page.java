@@ -191,7 +191,7 @@ class refresh_page extends AsyncTask<Void, Object, Animation>
 	protected void onPostExecute(Animation tun)
 	{
 		/* Update the unread counts in the navigation drawer. */
-		navigation_drawer.update_navigation_data(counts, false);
+		navigation_drawer.update_navigation_data(counts, true);
 
 		if(lv == null)
 			return;

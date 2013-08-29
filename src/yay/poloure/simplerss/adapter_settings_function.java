@@ -111,17 +111,17 @@ public class adapter_settings_function extends BaseAdapter
 				public void onClick(View v)
 				{
 					boolean checked = ((CheckBox) v).isChecked();
-					utilities.delete(main.storage + main.SETTINGS + main.SEPAR + file_names[position] + main.TXT);
-					utilities.append_string_to_file(main.storage + main.SETTINGS + main.SEPAR + file_names[position] + main.TXT, Boolean.toString(checked));
+					utilities.delete(main.storage + main.SETTINGS + file_names[position] + main.TXT);
+					utilities.append_string_to_file(main.storage + main.SETTINGS + file_names[position] + main.TXT, Boolean.toString(checked));
 				}
 			});
 
 			/* Load the saved boolean value and set the box as checked if true. */
-			String[] check = utilities.read_file_to_array(main.storage + main.SETTINGS + main.SEPAR + file_names[position] + main.TXT);
+			String[] check = utilities.read_file_to_array(main.storage + main.SETTINGS + file_names[position] + main.TXT);
 			if(check.length == 0)
 			{
 				holder.checkbox.setChecked(false);
-				utilities.append_string_to_file(main.storage + main.SETTINGS + main.SEPAR + file_names[position] + main.TXT, Boolean.toString(false));
+				utilities.append_string_to_file(main.storage + main.SETTINGS + file_names[position] + main.TXT, Boolean.toString(false));
 			}
 			else
 				holder.checkbox.setChecked(Boolean.parseBoolean(check[0]));
@@ -150,8 +150,8 @@ public class adapter_settings_function extends BaseAdapter
 				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
 				{
 					holder.read_view.setText(refresh_times[progress]);
-					utilities.delete(main.storage + main.SETTINGS + main.SEPAR + file_names[position] + main.TXT);
-					utilities.append_string_to_file(main.storage + main.SETTINGS + main.SEPAR + file_names[position] + main.TXT, Integer.toString(times[progress]));
+					utilities.delete(main.storage + main.SETTINGS + file_names[position] + main.TXT);
+					utilities.append_string_to_file(main.storage + main.SETTINGS + file_names[position] + main.TXT, Integer.toString(times[progress]));
 				}
 
 				public void onStartTrackingTouch(SeekBar seekBar)
@@ -164,11 +164,11 @@ public class adapter_settings_function extends BaseAdapter
 			});
 
 			/* Load the saved boolean value and set the box as checked if true. */
-			String[] check = utilities.read_file_to_array(main.storage + main.SETTINGS + main.SEPAR + file_names[position] + main.TXT);
+			String[] check = utilities.read_file_to_array(main.storage + main.SETTINGS + file_names[position] + main.TXT);
 			if(check.length == 0)
 			{
 				holder.seekbar.setProgress(3);
-				utilities.append_string_to_file(main.storage + main.SETTINGS + main.SEPAR + file_names[position] + main.TXT, Integer.toString(times[3]));
+				utilities.append_string_to_file(main.storage + main.SETTINGS + file_names[position] + main.TXT, Integer.toString(times[3]));
 			}
 			else
 				holder.seekbar.setProgress(utilities.index_of_int(times, Integer.parseInt(check[0])));
