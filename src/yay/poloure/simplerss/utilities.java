@@ -515,6 +515,10 @@ public class utilities
 		int[] unread_counts	= new int[size];
 		adapter_feeds_cards temp;
 
+		/* read_items == null when being called from the service for notifications. */
+		if(adapter_feeds_cards.read_items == null)
+			adapter_feeds_cards.read_items = read_file_to_set(storage + main.READ_ITEMS);
+
 		for(int i = 1; i < size; i++)
 		{
 			unread = 0;

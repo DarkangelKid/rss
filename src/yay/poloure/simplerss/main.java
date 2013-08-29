@@ -45,25 +45,26 @@ public class main extends ActionBarActivity
 	public  static String storage, ALL, NAVIGATION, DELETE_DIALOG, CLEAR_DIALOG, ALL_FILE;
 
 	/* Static final are good. */
-	public  static final String SEPAR					= System.getProperty("file.separator");
-	public  static final String NL						= System.getProperty("line.separator");
-	public  static final String TXT						= ".txt";
-	public  static final String GROUPS_DIRECTORY		= "groups" + SEPAR;
-	public  static final String THUMBNAIL_DIRECTORY	= "thumbnails" + SEPAR;
-	public  static final String IMAGE_DIRECTORY		= "images" + SEPAR;
-	public  static final String SETTINGS				= "settings" + SEPAR;
-	public  static final String PAGERTABSTRIPCOLOUR	= "pagertabstrip_colour" + TXT;
-	public  static final String DUMP_FILE				= "dump" + TXT;
-	public  static final String STORE_APPENDIX		= ".store" + TXT;
-	public  static final String CONTENT_APPENDIX		= ".content" + TXT;
-	public  static final String URL_APPENDIX			= ".urls" + TXT;
-	public  static final String COUNT_APPENDIX		= ".count" + TXT;
-	public  static final String GROUP_LIST				= "group_list" + TXT;
-	public  static final String FILTER_LIST			= "filter_list" + TXT;
+	public static final String SEPAR						= System.getProperty("file.separator");
+	public static final String NL							= System.getProperty("line.separator");
+	public static final String TXT						= ".txt";
+	public static final String GROUPS_DIRECTORY		= "groups" + SEPAR;
+	public static final String THUMBNAIL_DIRECTORY	= "thumbnails" + SEPAR;
+	public static final String IMAGE_DIRECTORY		= "images" + SEPAR;
+	public static final String SETTINGS					= "settings" + SEPAR;
+	public static final String PAGERTABSTRIPCOLOUR	= "pagertabstrip_colour" + TXT;
+	public static final String DUMP_FILE				= "dump" + TXT;
+	public static final String STORE_APPENDIX			= ".store" + TXT;
+	public static final String CONTENT_APPENDIX		= ".content" + TXT;
+	public static final String URL_APPENDIX			= ".urls" + TXT;
+	public static final String COUNT_APPENDIX			= ".count" + TXT;
+	public static final String GROUP_LIST				= "group_list" + TXT;
+	public static final String FILTER_LIST				= "filter_list" + TXT;
+	public static final String READ_ITEMS				= "read_items" + TXT;
+
 	public  static final PagerTabStrip[] strips		= new PagerTabStrip[3];
 
 	private static final String[] folders				= new String[]{GROUPS_DIRECTORY, SETTINGS};
-	private static final String READ_ITEMS				= "read_items" + TXT;
 
 
 	@Override
