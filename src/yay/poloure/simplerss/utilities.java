@@ -414,22 +414,28 @@ public class utilities
 
 	public static String[] read_file_to_array(String file_path)
 	{
-		String line;
+		String line, line_temp = "";
 		String[] lines;
 
-		/* Read the count file to an array. */
-		if(!file_path.contains("count.txt"))
-		{
-			String[] line_temp = read_file_to_array(file_path + main.COUNT_APPENDIX);
-
-			/* If the count file does not exist, count the lines of the file. */
-			if(line_temp.length == 0)
-				lines = new String[count_lines(file_path)];
-			else
-				lines = new String[Integer.parseInt(line_temp[0])];
-		}
-		else
+		/* If the count file does not exist, count the lines of the file. */
+		if(!exists(file_path + main.COUNT_APPENDIX))
 			lines = new String[count_lines(file_path)];
+		else
+		{
+			/* Read the count file. */
+			BufferedReader stream2;
+			try
+			{
+				stream2 = new BufferedReader(new FileReader(file_path + main.COUNT_APPENDIX));
+				line_temp = stream2.readLine();
+				stream2.close();
+			}
+			catch(IOException e)
+			{
+			}
+
+			lines = new String[Integer.parseInt(line_temp)];
+		}
 
 		/* If the file is empty, return a zero length array so we can check. */
 		if(lines.length == 0)
@@ -484,6 +490,9 @@ public class utilities
 
 	public static adapter_feeds_cards get_adapter_feeds_cards(FragmentManager fragment_manager, ViewPager viewpager, int page_number)
 	{
+		ListView list = get_listview(fragment_manager, viewpager, page_number);
+		if(list == null)
+			return null;
 		return (adapter_feeds_cards) get_listview(fragment_manager, viewpager, page_number).getAdapter();
 	}
 
@@ -501,19 +510,21 @@ public class utilities
 
 	public static int[] get_unread_counts(String storage, String[] current_groups)
 	{
-		int total = 0, unread;
+		int total = 0, unread, num;
 		final int size = current_groups.length;
 		int[] unread_counts	= new int[size];
+		adapter_feeds_cards temp;
 
 		for(int i = 1; i < size; i++)
 		{
 			unread = 0;
-			String[] urls = read_single_to_array(storage + main.GROUPS_DIRECTORY + current_groups[i] + main.SEPAR + current_groups[i] + main.CONTENT_APPENDIX, "link|");
+			String[] urls = read_file_to_array(storage + main.GROUPS_DIRECTORY + current_groups[i] + main.SEPAR + current_groups[i] + main.CONTENT_APPENDIX + main.URL_APPENDIX);
 			for(String url : urls)
 			{
 				if(!adapter_feeds_cards.read_items.contains(url))
 						unread++;
 			}
+
 			total += unread;
 			unread_counts[i] = unread;
 		}
@@ -524,7 +535,7 @@ public class utilities
 
 	public static void set_pagertabstrip_colour(String storage, PagerTabStrip strip)
 	{
-		final String colour_path	= storage + main.SETTINGS + main.SEPAR + main.PAGERTABSTRIPCOLOUR;
+		final String colour_path	= storage + main.SETTINGS + main.PAGERTABSTRIPCOLOUR;
 		String colour					= "blue";
 
 		String[] colour_array = read_file_to_array(colour_path);
@@ -552,9 +563,13 @@ public class utilities
 		final String group_content_path	= group_dir + group + main.CONTENT_APPENDIX;
 		final String group_count_file		= group_content_path + main.COUNT_APPENDIX;
 
-		final String[][] contents	= utilities.read_csv_to_array(group_dir + group + main.TXT, 'n', 'g');
+		String[][] temp;
+
+		final String[][] contents	= read_csv_to_array(group_dir + group + main.TXT, 'n', 'g');
 		final String[] names			= contents[0];
 		final String[] groups		= contents[1];
+
+		String[] urls					= new String[0];
 
 		String content_path;
 		Time time = new Time();
@@ -569,12 +584,10 @@ public class utilities
 			content_path = storage + main.GROUPS_DIRECTORY + groups[k] + sep + names[k] + sep + names[k] + main.CONTENT_APPENDIX;
 			if(exists(content_path))
 			{
-				content 		= read_file_to_array(content_path);
-				pubDates		= read_single_to_array(content_path, "pubDate|");
-
-				log(main.storage, content_path);
-				if((pubDates == null)||(pubDates[0].length() < 8))
-					pubDates 	= read_single_to_array(content_path, "published|");
+				temp		= read_csv_to_array(content_path, 'p', 'l');
+				content 	= read_file_to_array(content_path);
+				pubDates	= temp[0];
+				urls		= concat_string_arrays(urls, temp[1]);
 
 				for(i = 0; i < pubDates.length; i++)
 				{
@@ -591,18 +604,27 @@ public class utilities
 			}
 		}
 
-		delete(group_content_path);
 		try
 		{
-			BufferedWriter out = new BufferedWriter(new FileWriter(group_content_path, true));
+			BufferedWriter out = new BufferedWriter(new FileWriter(group_content_path, false));
 			for(Map.Entry<Long, String> entry : map.entrySet())
-					out.write(entry.getValue() + main.NL);
+					out.write(entry.getValue().concat(main.NL));
 
 			out.close();
 
 			BufferedWriter out2 = new BufferedWriter(new FileWriter(group_count_file, false));
 			out2.write(Integer.toString(map.size()));
 			out2.close();
+
+			BufferedWriter out3 = new BufferedWriter(new FileWriter(group_content_path + main.URL_APPENDIX, false));
+			for(String url : urls)
+				out3.write(url.concat(main.NL));
+			out3.close();
+
+			BufferedWriter out4 = new BufferedWriter(new FileWriter(group_content_path + main.URL_APPENDIX + main.COUNT_APPENDIX, false));
+			out4.write(Integer.toString(urls.length));
+			out4.close();
+
 		}
 		catch(Exception e)
 		{

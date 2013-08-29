@@ -105,12 +105,12 @@ public class adapter_settings_interface extends BaseAdapter
 			holder.title_view.setText(title_array[position]);
 			holder.summary_view.setText(summary_array[position]);
 
-			String[] colour_array = utilities.read_file_to_array(storage + main.SETTINGS + main.SEPAR + main.PAGERTABSTRIPCOLOUR);
+			String[] colour_array = utilities.read_file_to_array(storage + main.SETTINGS + main.PAGERTABSTRIPCOLOUR);
 
 			if(colour_array.length == 0)
 			{
 				colour_array = new String[]{"blue"};
-				utilities.append_string_to_file(storage + main.SETTINGS + main.SEPAR + main.PAGERTABSTRIPCOLOUR, "blue");
+				utilities.append_string_to_file(storage + main.SETTINGS + main.PAGERTABSTRIPCOLOUR, "blue");
 			}
 
 			ImageView[] colour_views = new ImageView[]{holder.blue_view, holder.purple_view, holder.green_view, holder.yellow_view, holder.red_view};
@@ -171,8 +171,8 @@ public class adapter_settings_interface extends BaseAdapter
 		@Override
 		public void onClick(View v)
 		{
-			utilities.delete(main.storage + main.SETTINGS + main.SEPAR + main.PAGERTABSTRIPCOLOUR);
-			utilities.append_string_to_file(main.storage + main.SETTINGS + main.SEPAR + main.PAGERTABSTRIPCOLOUR, colours[clicked_colour]);
+			utilities.delete(main.storage + main.SETTINGS + main.PAGERTABSTRIPCOLOUR);
+			utilities.append_string_to_file(main.storage + main.SETTINGS + main.PAGERTABSTRIPCOLOUR, colours[clicked_colour]);
 			View parent = (View) v.getParent();
 			(parent.findViewById(R.id.blue_image)).setAlpha(0.5f);
 			(parent.findViewById(R.id.purple_image)).setAlpha(0.5f);
