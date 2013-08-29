@@ -3,7 +3,7 @@
 				android:id="@+id/manage_viewpager"
 				android:layout_width="match_parent"
 				android:layout_height="match_parent"
-				android:background="#e5e5e5">
+				android:background="#00000000">
 
 			<android.support.v4.view.PagerTabStrip
 					android:id="@+id/manage_title_strip"
