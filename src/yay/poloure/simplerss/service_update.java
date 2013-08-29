@@ -76,13 +76,13 @@ public class service_update extends IntentService
 		}
 
 		/* Always sort all & sort others too. */
-		utilities.sort_group_content_by_time(storage, all_groups[0]);
+		utilities.sort_group_content_by_time(storage, all_groups[0], all_groups[0]);
 		if(!grouper.equals(main.ALL))
-			utilities.sort_group_content_by_time(storage, grouper);
+			utilities.sort_group_content_by_time(storage, grouper, all_groups[0]);
 		else
 		{
 			for(int i = 1; i < all_groups.length; i++)
-				utilities.sort_group_content_by_time(storage, all_groups[i]);
+				utilities.sort_group_content_by_time(storage, all_groups[i], all_groups[0]);
 		}
 
 		final int[] unread_counts = utilities.get_unread_counts(storage, all_groups);

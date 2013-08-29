@@ -432,10 +432,10 @@ public class add_edit_dialog
 		(new File(all_content_file + count))						.delete();
 		/// This is because the group file contains the feed name and feed group (for location of images).
 		if((new File(old_group_file)).exists())
-			utilities.sort_group_content_by_time(storage, old_group);
+			utilities.sort_group_content_by_time(storage, old_group, main.ALL);
 		if(!old_group.equals(new_group))
-			utilities.sort_group_content_by_time(storage, new_group);
-		utilities.sort_group_content_by_time(storage, all_string);
+			utilities.sort_group_content_by_time(storage, new_group, main.ALL);
+		utilities.sort_group_content_by_time(storage, all_string, main.ALL);
 
 		fragment_manage_feed.feed_list_adapter.set_position(position, new_name, new_url + main.NL + new_group + " • " + Integer.toString(utilities.count_lines(storage + main.GROUPS_DIRECTORY + new_group + main.SEPAR + new_name + main.SEPAR + new_name + main.CONTENT_APPENDIX) - 1) + " items");
 		fragment_manage_feed.feed_list_adapter.notifyDataSetChanged();

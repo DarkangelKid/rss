@@ -94,7 +94,7 @@ class fragment_manage_feed extends Fragment
 								}
 								else
 								{
-									utilities.sort_group_content_by_time(main.storage, group);
+									utilities.sort_group_content_by_time(main.storage, group, main.ALL);
 									utilities.delete_if_empty(group_prepend + main.CONTENT_APPENDIX);
 									utilities.delete_if_empty(group_prepend + main.COUNT_APPENDIX);
 								}
@@ -106,7 +106,7 @@ class fragment_manage_feed extends Fragment
 								else if(all_groups.length != 0)
 								{
 									/* This line may be broken. */
-									utilities.sort_group_content_by_time(main.storage, main.ALL);
+									utilities.sort_group_content_by_time(main.storage, main.ALL, main.ALL);
 									utilities.delete_if_empty(all_file + main.CONTENT_APPENDIX);
 									utilities.delete_if_empty(all_file + main.COUNT_APPENDIX);
 								}

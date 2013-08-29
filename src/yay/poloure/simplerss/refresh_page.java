@@ -48,7 +48,7 @@ class refresh_page extends AsyncTask<Void, Object, Animation>
 		String[] groups				= contenter[6];
 		String[] sources				= contenter[7];
 
-		if(links[0] == null || links.length == 0)
+		if(links.length == 0 || links[0] == null)
 			return null;
 
 		Set<String> existing_items = new HashSet<String>();
