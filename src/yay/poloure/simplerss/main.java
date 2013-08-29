@@ -115,7 +115,6 @@ public class main extends ActionBarActivity
 		/*action_bar.setDisplayShowHomeEnabled(true);*/
 		action_bar.setDisplayHomeAsUpEnabled(true);
 		action_bar.setHomeButtonEnabled(true);
-		action_bar.setIcon(R.drawable.rss_icon);
 
 		/* Create the navigation drawer and set all the listeners for it. */
 		new navigation_drawer(activity, this, (DrawerLayout) findViewById(R.id.drawer_layout), (ListView) findViewById(R.id.left_drawer));
@@ -574,7 +573,7 @@ public class main extends ActionBarActivity
 		if(size == 0)
 		{
 			utilities.append_string_to_file(storage + GROUP_LIST, ALL + NL);
-			current_groups = new String[]{"All"};
+			current_groups = new String[]{ALL};
 		}
 
 		if(viewpager != null)
