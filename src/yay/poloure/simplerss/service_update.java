@@ -35,11 +35,11 @@ public class service_update extends IntentService
 
 		Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
-		/*final static String UNREAD_ITEM			= getString(R.string.notification_title_singular);
-		final static String UNREAD_ITEMS		= getString(R.string.notification_title_plural);
-		final static String GROUP_UNREAD		= getString(R.string.all_group);
-		final static String GROUP_UNREADS		= getString(R.string.all_group);
-		final static String GROUPS_UNREADS			= getString(R.string.all_group);*/
+		final String UNREAD_ITEM			= getString(R.string.notification_title_singular);
+		final String UNREAD_ITEMS		= getString(R.string.notification_title_plural);
+		final String GROUP_UNREAD		= getString(R.string.notification_content_group_item);
+		final String GROUP_UNREADS		= getString(R.string.notification_content_group_items);
+		final String GROUPS_UNREADS		= getString(R.string.notification_content_groups);
 
 		final int group			= intent.getIntExtra("GROUP_NUMBER", 0);
 
@@ -115,20 +115,24 @@ public class service_update extends IntentService
 					group_items++;
 			}
 
-			String hello;
-			if(unread_counts[0] == 1 && group_items == 1)
-				hello = String.format("%d group has an unread item", 1);
-			else if(unread_counts[0] > 1 && group_items == 1)
-				hello = String.format("%d group has unread items", 1);
-			else if(group_items > 1)
-				hello = String.format("%d groups have unread items", group_items);
+			String not_title;
+			if(unread_counts[0] == 1)
+				not_title = String.format("%d %s", 1, UNREAD_ITEM);
+			else
+				not_title = String.format("%d %s", unread_counts[0], UNREAD_ITEMS);
+
+			String not_content;
+			if(unread_counts[0] == 1 && (group_items - 1) == 1)
+				not_content = String.format("%d %s", 1, GROUP_UNREAD);
+			else if(unread_counts[0] > 1 && (group_items - 1) == 1)
+				not_content = String.format("%d %s", 1, GROUP_UNREADS);
+			else
+				not_content = String.format("%d %s", (group_items - 1), GROUPS_UNREADS);
 
 			NotificationCompat.Builder not_builder = new NotificationCompat.Builder(this)
 					.setSmallIcon(R.drawable.rss_icon)
-					.setContentTitle(Integer.toString(unread_counts[0]) + ((unread_counts[0] == 1) ? " Unread Item" : " Unread Items"))
-					.setContentText(
-					Integer.toString(group_items - 1) +
-					((group_items - 1 == 1) ? ((unread_counts[0] == 1) ? " group has an unread item" : " group has unread items.") : " groups have unread items"))
+					.setContentTitle(not_title)
+					.setContentText(not_content)
 					.setAutoCancel(true);
 
 			Intent result_intent = new Intent(this, main.class);
