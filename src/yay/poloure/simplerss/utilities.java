@@ -523,7 +523,7 @@ public class utilities
 			strip.setTabIndicatorColor(Color.rgb(255, 68, 68));
 	}
 
-	public static void sort_group_content_by_time(String storage, String group)
+	public static void sort_group_content_by_time(String storage, String group, String all_group)
 	{
 		final String sep						= main.SEPAR;
 		final String group_dir				= storage + main.GROUPS_DIRECTORY + group + sep;
@@ -550,6 +550,7 @@ public class utilities
 				content 		= read_file_to_array(content_path);
 				pubDates		= read_single_to_array(content_path, "pubDate|");
 
+				log(main.storage, content_path);
 				if((pubDates == null)||(pubDates[0].length() < 8))
 					pubDates 	= read_single_to_array(content_path, "published|");
 
@@ -585,8 +586,10 @@ public class utilities
 		{
 			log(storage, "Failed to write the group content file.");
 		}
-		if(!group.equals(main.ALL))
-			sort_group_content_by_time(main.storage, main.ALL);
+
+		/* Sorts the all_group every time another group is updated. */
+		if(!group.equals(all_group))
+			sort_group_content_by_time(main.storage, all_group, all_group);
 	}
 
 	public static void log(String storage, String text)
