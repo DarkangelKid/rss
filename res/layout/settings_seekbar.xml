@@ -39,7 +39,7 @@
 			android:layout_alignParentLeft="true"/>
 	<TextView
 			android:id="@+id/seek_read"
-			android:text="100"
+			android:text="15m"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_marginLeft="6dp"
