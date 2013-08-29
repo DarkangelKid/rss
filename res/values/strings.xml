@@ -40,4 +40,12 @@
 
 	<string name="all_group">All</string>
 
+	<string name="notification_title_singular"> Unread Item</string>
+	<!--<string name="notification_title_plural"> Unread Items</string>
+	<string name="notification_title_plural"> Unread Items</string>
+	<string name="notification_title_plural"> Unread Items</string>
+	<string name="notification_title_plural"> Unread Items</string>
+	<string name="notification_title_plural"> Unread Items</string>-->
+
+
 </resources>
