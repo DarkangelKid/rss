@@ -40,11 +40,10 @@
 
 	<string name="all_group">All</string>
 
-	<string name="notification_title_singular">Unread Item</string>
-	<string name="notification_title_plural">Unread Items</string>
-	<string name="notification_content_group_item">group has an unread item</string>
-	<string name="notification_content_group_items">group has unread items</string>
-	<string name="notification_content_groups">groups have unread items</string>
-
+	<string name="notification_title_singular">%d Unread Item</string>
+	<string name="notification_title_plural">%d Unread Items</string>
+	<string name="notification_content_group_item">%d group has an unread item</string>
+	<string name="notification_content_group_items">%d group has unread items</string>
+	<string name="notification_content_groups">%d groups have unread items</string>
 
 </resources>
