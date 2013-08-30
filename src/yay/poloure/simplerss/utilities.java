@@ -3,6 +3,7 @@ package yay.poloure.simplerss;
 import android.content.Context;
 import android.graphics.Color;
 import android.support.v4.view.PagerTabStrip;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
@@ -638,6 +639,22 @@ public class utilities
 		/* Sorts the all_group every time another group is updated. */
 		if(!group.equals(all_group))
 			sort_group_content_by_time(main.storage, all_group, all_group);
+	}
+
+	public static void update_navigation_adapter_compat(int[] counts)
+	{
+		if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
+			new navigation_drawer.update_navigation_adapter().execute(counts);
+		else
+			new navigation_drawer.update_navigation_adapter().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, counts);
+	}
+
+	public static void refresh_page_compat(int page_number)
+	{
+		if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
+			new refresh_page().execute(page_number);
+		else
+			new refresh_page().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, page_number);
 	}
 
 	public static void log(String storage, String text)

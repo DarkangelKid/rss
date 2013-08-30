@@ -13,26 +13,29 @@ import android.support.v4.app.FragmentTransaction;
 
 class navigation_drawer
 {
+	private final  ListView							navigation_list;
+
 	private static adapter_navigation_drawer	nav_adapter;
-	public static DrawerLayout						drawer_layout;
-	public static ActionBarDrawerToggle			drawer_toggle;
+	private static String							current_title;
 
-	public static final String[] NAVIGATION_TITLES = new String[3];
-	private static String current_title;
-
-	private final ListView navigation_list;
+	public  static final String[] NAVIGATION_TITLES = new String[0];
+	public  static DrawerLayout					drawer_layout;
+	public  static ActionBarDrawerToggle		drawer_toggle;
 
 	public navigation_drawer(Activity activity, Context context, DrawerLayout draw_layout, ListView nav_list)
 	{
-		NAVIGATION_TITLES[0]	= context.getString(R.string.feeds_title);
-		NAVIGATION_TITLES[1]	= context.getString(R.string.manage_title);
-		NAVIGATION_TITLES[2]	= context.getString(R.string.settings_title);
+		/* Get the main three fragment titles from the values resource. */
+		NAVIGATION_TITLES	= new String[]
+		{
+			context.getString(R.string.feeds_title),
+			context.getString(R.string.manage_title),
+			context.getString(R.string.settings_title)
+		};
 
-		nav_adapter			= new adapter_navigation_drawer(context);
-		navigation_list	= nav_list;
-		drawer_layout		= draw_layout;
+		/* Save the drawer layout to the public static variable then set the shadow of the drawer. */
+		(drawer_layout	= draw_layout).setDrawerShadow(R.drawable.drawer_shadow, Gravity.END);
 
-		drawer_layout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.END);
+		/* Create the action bar toggle and set it as the drawer open/closer after. */
 		drawer_toggle = new ActionBarDrawerToggle(activity, drawer_layout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
 		{
 			@Override
@@ -45,38 +48,36 @@ class navigation_drawer
 			@Override
 			public void onDrawerOpened(View drawerView)
 			{
+				/* Save the action bar's title to current title. Then change the title to NAVIGATION. */
 				current_title = (String) main.action_bar.getTitle();
 				main.action_bar.setTitle(main.NAVIGATION);
 			}
 		};
 
-		drawer_layout.setDrawerListener(drawer_toggle);
+		/* Set the listeners (and save the navigation list to the public static variable). */
+		drawer_layout						.setDrawerListener(drawer_toggle);
+		(navigation_list = nav_list)	.setOnItemClickListener(new click_navigation_drawer());
+
 		drawer_toggle.syncState();
 
-		navigation_list.setOnItemClickListener(new click_navigation_drawer());
-		navigation_list.setAdapter(nav_adapter);
+		/* Save a new adapter as the public static nav_adapter variable and set it as this lists adapter. */
+		navigation_list.setAdapter(nav_adapter	= new adapter_navigation_drawer(context));
 	}
 
-	public static class update_navigation_data extends AsyncTask<Object, Void, int[]>
+	public static class update_navigation_adapter extends AsyncTask<int[], Void, int[]>
 	{
 		@Override
-		protected int[] doInBackground(Object... things)
+		protected int[] doInBackground(int[]... counts)
 		{
-			int[] counts			= (int[]) things[0];
-			Boolean update_names	= (Boolean) things[1];
-
-			if(counts == null)
-				counts = utilities.get_unread_counts(main.storage, main.current_groups);
-
-			return counts;
+			/* If null was passed into the task, count the unread items. */
+			return (counts[0] != null) ? counts[0] : utilities.get_unread_counts(main.storage, main.current_groups);
 		}
 
 		@Override
-		protected void onPostExecute(int... pop)
+		protected void onPostExecute(int[] pop)
 		{
-			/*if((Boolean) pop[1])*/
-				nav_adapter.set_titles(main.current_groups);
-
+			/* Set the titles & counts arrays in this file and notifiy the adapter. */
+			nav_adapter.set_titles(main.current_groups);
 			nav_adapter.set_counts(pop);
 			nav_adapter.notifyDataSetChanged();
 		}
@@ -87,33 +88,30 @@ class navigation_drawer
 		@Override
 		public void onItemClick(AdapterView parent, View view, int position, long id)
 		{
-			if(position < 3)
-				switch_page(NAVIGATION_TITLES[position], position);
-			else
-			{
-				switch_page(NAVIGATION_TITLES[0], position);
-				main.viewpager.setCurrentItem(position - 4);
-			}
-		}
-	}
+			/* Close the drawer on any click of a navigation item. */
+			drawer_layout.closeDrawer(navigation_list);
 
-	private void switch_page(String page_title, int position)
-	{
-		drawer_layout.closeDrawer(navigation_list);
-		if(!current_title.equals(page_title))
-		{
+			/* Determine the new title based on the position of the item clicked. */
+			final String selected_title	= (position > 3) ? NAVIGATION_TITLES[0] : NAVIGATION_TITLES[position];
+
+			/* If the item selected was a group, change the viewpager to that group. */
+			if(position > 3)
+				main.viewpager.setCurrentItem(position - 4);
+
+			/* If the selected title is the title of the current page, exit. */
+			if(current_title.equals(selected_title))
+				return;
+
+			/* Hide the current fragment and display the selected one. */
 			main.fragment_manager.beginTransaction()
 						.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
 						.setCustomAnimations(android.R.anim.fade_in,android.R.anim.fade_out,android.R.anim.fade_in,android.R.anim.fade_out)
 						.hide(main.fragment_manager.findFragmentByTag(current_title))
-						.show(main.fragment_manager.findFragmentByTag(page_title))
+						.show(main.fragment_manager.findFragmentByTag(selected_title))
 						.commit();
 
-			navigation_list.setItemChecked(position, true);
-			if(position < 3)
-				main.action_bar.setTitle(page_title);
-			else
-				main.action_bar.setTitle(navigation_drawer.NAVIGATION_TITLES[0]);
+			/* Set the title text of the actionbar to the selected item. */
+			main.action_bar.setTitle(selected_title);
 		}
 	}
 }
