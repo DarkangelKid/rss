@@ -71,18 +71,22 @@ public class main extends ActionBarActivity
 
 		setContentView(R.layout.navigation_drawer_and_content_frame);
 
+		/* Save the other satic variables. */
+		fragment_manager	= getSupportFragmentManager();
+		activity_context	= this;
+		activity				= this;
+
 		/* Form the storage path. */
-		if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.FROYO)
-			storage					= getExternalFilesDir(null).getAbsolutePath() + SEPAR;
-		else
-		{
-			String packageName	= getPackageName();
-			File externalPath		= Environment.getExternalStorageDirectory();
-			storage					= externalPath.getAbsolutePath() + SEPAR + "Android" + SEPAR + "data" + SEPAR + packageName + SEPAR + "files" + SEPAR;
-			File storage_file		= new File(storage);
-			if(!storage_file.exists())
-				storage_file.mkdirs();
-		}
+		storage = utilities.get_storage();
+
+		if(storage == null)
+			return;
+
+		/* Load String resources into static variables. */
+		ALL						= getString(R.string.all_group);
+		DELETE_DIALOG			= getString(R.string.delete_dialog);
+		CLEAR_DIALOG			= getString(R.string.clear_dialog);
+		ALL_FILE					= GROUPS_DIRECTORY + ALL + SEPAR + ALL + TXT;
 
 		/* Delete the log file. */
 		utilities.delete(storage + DUMP_FILE);
@@ -95,17 +99,6 @@ public class main extends ActionBarActivity
 			if(!folder_file.exists())
 				folder_file.mkdir();
 		}
-
-		/* Load String resources into static variables. */
-		ALL						= getString(R.string.all_group);
-		DELETE_DIALOG			= getString(R.string.delete_dialog);
-		CLEAR_DIALOG			= getString(R.string.clear_dialog);
-		ALL_FILE					= GROUPS_DIRECTORY + ALL + SEPAR + ALL + TXT;
-
-		/* Save the other satic variables. */
-		fragment_manager	= getSupportFragmentManager();
-		activity_context	= this;
-		activity				= this;
 
 		/* Configure the action bar. */
 		action_bar = getSupportActionBar();

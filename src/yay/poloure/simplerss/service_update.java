@@ -21,6 +21,9 @@ import android.view.WindowManager;
 
 public class service_update extends IntentService
 {
+	public static Context service_context;
+	public static String storage;
+
 	public service_update()
 	{
 		super("service_update");
@@ -29,6 +32,8 @@ public class service_update extends IntentService
 	@Override
 	protected void onHandleIntent(Intent intent)
 	{
+		service_context = this;
+
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		PowerManager.WakeLock wakelock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SIMPLERSS");
 		wakelock.acquire();
@@ -41,18 +46,15 @@ public class service_update extends IntentService
 		final String GROUP_UNREADS		= getString(R.string.notification_content_group_items);
 		final String GROUPS_UNREADS	= getString(R.string.notification_content_groups);
 
-		final int group			= intent.getIntExtra("GROUP_NUMBER", 0);
+		final int group		= intent.getIntExtra("GROUP_NUMBER", 0);
 
-		final String storage;
-		final String SEPAR = main.SEPAR;
+		final String SEPAR	= main.SEPAR;
 
-		if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.FROYO)
-			storage					= getExternalFilesDir(null).getAbsolutePath() + SEPAR;
-		else
-		{
-			String packageName	= getPackageName();
-			storage					= Environment.getExternalStorageDirectory().getAbsolutePath() + SEPAR + "Android" + SEPAR + "data" + SEPAR + packageName + SEPAR + "files" + SEPAR;
-		}
+		storage = utilities.get_storage();
+
+		/* If storage == null then the storage is not avialable and we should stop. */
+		if(storage == null)
+			return;
 
 		final String[] all_groups			= utilities.read_file_to_array(storage + main.GROUP_LIST);
 		final String grouper					= all_groups[group];
@@ -75,10 +77,14 @@ public class service_update extends IntentService
 		}
 
 		/* Download and parse each feed in the group. */
+		boolean success;
 		for(int i = 0; i < names.length; i++)
 		{
-			utilities.download_file(urls[i], storage + names[i] + main.STORE_APPENDIX);
-			new parser(storage, groups[i], names[i], width);
+			success = utilities.download_file(urls[i], storage + names[i] + main.STORE_APPENDIX);
+			if(success)
+				new parser(storage, groups[i], names[i], width);
+			else
+				utilities.post("Download of " + urls[i] + " failed.");
 		}
 
 		/* Always sort all & sort others too. */

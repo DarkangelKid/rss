@@ -109,16 +109,23 @@ class parser
 				image = check_for_image();
 				if(!image.equals(""))
 				{
-					line.append("image|").append(image).append('|'); /// ends with a |
+					line.append("image|").append(image).append('|');
 					image_name = image.substring(image.lastIndexOf(main.SEPAR) + 1, image.length());
 
+					boolean success = false;
+					/* If the image does not exist, try to download it from the internet. */
 					if(!utilities.exists(image_dir + image_name))
-						utilities.download_file(image, image_dir + image_name);
-					if(!utilities.exists(thumbnail_dir + image_name))
+						success = utilities.download_file(image, image_dir + image_name);
+
+					/* If the image failed to download. */
+					if(!success)
+						utilities.log(storage, "Failed to download image " + image);
+
+					/* If the image downloaded fine and a thumbnail does not exist. */
+					else if(!utilities.exists(thumbnail_dir + image_name))
 						compress_file(image_dir, thumbnail_dir, image_name);
 
-					/// TODO: If it does exist, skip this next step somehow. (turn write mode to false)
-
+					/* ISSUE #194 */
 					BitmapFactory.decodeFile(thumbnail_dir + image_name, options);
 					line.append("width|").append(options.outWidth).append('|')
 						.append("height|").append(options.outHeight).append('|');

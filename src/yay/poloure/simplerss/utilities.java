@@ -27,6 +27,30 @@ import android.widget.ListView;
 
 public class utilities
 {
+		private final static String[] media_error_messages = new String[]
+		{
+			"Media not mounted.",
+			"Unable to mount media.",
+			"Media is shared via USB mass storage.",
+			"Media does not exist.",
+			"Media contains unsupported filesystem.",
+			"Media mounted as read-only.",
+			"Media is being disk checked.",
+			"Media was removed before unmounted."
+		};
+
+		private final static String[] media_errors = new String[]
+		{
+			Environment.MEDIA_UNMOUNTED,
+			Environment.MEDIA_UNMOUNTABLE,
+			Environment.MEDIA_SHARED,
+			Environment.MEDIA_REMOVED,
+			Environment.MEDIA_NOFS,
+			Environment.MEDIA_MOUNTED_READ_ONLY,
+			Environment.MEDIA_CHECKING,
+			Environment.MEDIA_BAD_REMOVAL
+		};
+
 	public static void delete_group(String storage, String group)
 	{
 		/// Move all feeds to an unsorted group.
@@ -168,9 +192,8 @@ public class utilities
 			else
 			{
 				info = "";
-				number = 3;
-				if(content.length < 3)
-					number = content.length;
+				number = (content.length < 3) ? content.length : 3;
+
 				for(j = 0; j < number - 1; j++)
 					info += content[j].concat(", ");
 
@@ -185,9 +208,9 @@ public class utilities
 		return (new String[][]{info_array, group_array});
 	}
 
-	public static void download_file(String urler, String file_path)
+	public static boolean download_file(String urler, String file_path)
 	{
-		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
+		if(Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
 		{
 			try
 			{
@@ -211,9 +234,14 @@ public class utilities
 						fout.close();
 				}
 			}
-			catch(Exception e){
+			catch(Exception e)
+			{
+				delete(file_path);
+				return false;
 			}
 		}
+		File file = new File(file_path);
+		return (file.exists() && file.length() != 0);
 	}
 
 	public static void append_string_to_file(String file_path, String string)
@@ -300,15 +328,24 @@ public class utilities
 		else
 		{
 			/* Read the count file. */
-			BufferedReader stream2;
 			try
 			{
-				stream2 = new BufferedReader(new FileReader(file_path + main.COUNT_APPENDIX));
-				line_temp = stream2.readLine();
-				stream2.close();
+				BufferedReader in = null;
+				try
+				{
+					in = new BufferedReader(new FileReader(file_path + main.COUNT_APPENDIX));
+					line_temp = in.readLine();
+					in.close();
+				}
+				finally
+				{
+					if(in != null)
+						in.close();
+				}
 			}
 			catch(IOException e)
 			{
+				return new String[0];
 			}
 
 			lines = new String[Integer.parseInt(line_temp)];
@@ -383,6 +420,48 @@ public class utilities
 		{
 			return null;
 		}
+	}
+
+	/* This function will return null if it fails. You must check for null each time. */
+	public static String get_storage()
+	{
+		final Context context;
+
+		/* Try to get the context from the activity, if it is not running, ask the service. */
+		if(main.activity_context != null)
+			context = main.activity_context;
+		else if(service_update.service_context != null)
+			context = service_update.service_context;
+		else /* This case should never happen because either must be running. */
+			return null;
+
+		/* Check the media state for any undesirable states. */
+		final String state = Environment.getExternalStorageState();
+		for(int i = 0; i < media_errors.length; i++)
+		{
+			if(state.equals(media_errors[i]))
+			{
+				post(media_error_messages[i]);
+				return null;
+			}
+		}
+
+		/* If it has reached here the state is MEDIA_MOUNTED and we can continue.
+			Build the storage string depending on android version. */
+		String storage;
+
+		if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.FROYO)
+			storage					= context.getExternalFilesDir(null).getAbsolutePath() + main.SEPAR;
+		else
+		{
+			String packageName	= context.getPackageName();
+			File externalPath		= Environment.getExternalStorageDirectory();
+			storage					= externalPath.getAbsolutePath() + main.SEPAR + "Android" + main.SEPAR + "data" + main.SEPAR + packageName + main.SEPAR + "files" + main.SEPAR;
+			File storage_file		= new File(storage);
+			if(!storage_file.exists())
+				storage_file.mkdirs();
+		}
+		return storage;
 	}
 
 	public static int[] get_unread_counts(String storage, String[] current_groups)
@@ -552,6 +631,18 @@ public class utilities
 	public static void log(String storage, String text)
 	{
 		append_string_to_file(storage + main.DUMP_FILE, text + main.NL);
+	}
+
+	public static void post(String message)
+	{
+		/* If the activity is running, make a toast notification. Log the event regardless. */
+		if(main.service_handler != null)
+			toast_message(main.activity_context, message, true);
+		/* This function could be called from a state where it is impossible to get storage so this is optional. */
+		if(main.storage != null)
+			log(main.storage, message);
+		else if(service_update.storage != null)
+			log(service_update.storage, message);
 	}
 
 	public static void delete(String file_path)
