@@ -70,8 +70,8 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
 		final String[] new_des		= new String[count];
 		final String[] new_images	= new String[count];
 		final String[] new_links	= new String[count];
-		final int[]    new_heights	= new int[count];
-		final int[]    new_widths	= new int[count];
+		final Integer[]    new_heights	= new Integer[count];
+		final Integer[]    new_widths		= new Integer[count];
 
 		count = -1;
 
@@ -171,7 +171,7 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
 			}
 		}
 
-		ith.add_array((String[]) progress[0], (String[]) progress[1], (String[]) progress[2], (String[]) progress[3], (int[]) progress[4], (int[]) progress[5]);
+		ith.add_array((String[]) progress[0], (String[]) progress[1], (String[]) progress[2], (String[]) progress[3], (Integer[]) progress[4], (Integer[]) progress[5]);
 		ith.notifyDataSetChanged();
 
 		if(flash)

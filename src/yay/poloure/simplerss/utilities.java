@@ -19,6 +19,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -75,50 +76,21 @@ public class utilities
 
 	public static void toast_message(Context activity_context, CharSequence message, final Boolean short_long)
 	{
-		Toast message_toast;
-		if(short_long)
-			message_toast = Toast.makeText(activity_context, message, Toast.LENGTH_SHORT);
-		else
-			message_toast = Toast.makeText(activity_context, message, Toast.LENGTH_LONG);
-		message_toast.show();
+		Toast.makeText(activity_context, message, (short_long) ? Toast.LENGTH_SHORT : Toast.LENGTH_LONG).show();
 	}
 
-	public static byte[] concat_byte_arrays(byte[] a, byte... b)
+	public static <T> T[] concat_arrays(T[] first, T[] second)
 	{
-		final int a_length = a.length;
-		final int b_length = b.length;
-		byte[] c = new byte[a_length + b_length];
-		System.arraycopy(a, 0, c, 0, a_length);
-		System.arraycopy(b, 0, c, a_length, b_length);
-		return c;
+		T[] result = Arrays.copyOf(first, first.length + second.length);
+		System.arraycopy(second, 0, result, first.length, second.length);
+		return result;
 	}
 
-	public static String[] concat_string_arrays(String[] A, String[] B)
+	public static byte[] concat_byte_arrays(byte[] first, byte[] second)
 	{
-		if(A.length == 0)
-			return B;
-		if(B.length == 0)
-			return A;
-		int aLen = A.length;
-		int bLen = B.length;
-		String[] C = new String[aLen+bLen];
-		System.arraycopy(A, 0, C, 0, aLen);
-		System.arraycopy(B, 0, C, aLen, bLen);
-		return C;
-	}
-
-	public static int[] concat_int_arrays(int[] A, int[] B)
-	{
-		if(A.length == 0)
-			return B;
-		if(B.length == 0)
-			return A;
-		int aLen = A.length;
-		int bLen = B.length;
-		int[] C = new int[aLen+bLen];
-		System.arraycopy(A, 0, C, 0, aLen);
-		System.arraycopy(B, 0, C, aLen, bLen);
-		return C;
+		byte[] result = Arrays.copyOf(first, first.length + second.length);
+		System.arraycopy(second, 0, result, first.length, second.length);
+		return result;
 	}
 
 	public static int index_of(String[] array, String value)
@@ -542,7 +514,7 @@ public class utilities
 				temp		= read_csv_to_array(content_path, 'p', 'l');
 				content 	= read_file_to_array(content_path);
 				pubDates	= temp[0];
-				urls		= concat_string_arrays(urls, temp[1]);
+				urls		= concat_arrays(urls, temp[1]);
 
 				for(i = 0; i < pubDates.length; i++)
 				{

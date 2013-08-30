@@ -41,8 +41,8 @@ public class adapter_feeds_cards extends BaseAdapter
 	private String[] titles			= new String[0];
 	private String[] descriptions	= new String[0];
 	private String[] images			= new String[0];
-	private int[]    heights		= new int[0];
-	private int[]    widths			= new int[0];
+	private Integer[] heights		= new Integer[0];
+	private Integer[] widths		= new Integer[0];
 
 	public static Set<String> read_items;
 
@@ -83,14 +83,14 @@ public class adapter_feeds_cards extends BaseAdapter
 		}
 	}
 
-	public void add_array(String[] new_title, String[] new_des, String[] new_link, String[] new_image, int[] new_height, int[] new_width)
+	public void add_array(String[] new_title, String[] new_des, String[] new_link, String[] new_image, Integer[] new_height, Integer[] new_width)
 	{
-		titles			= utilities.concat_string_arrays(titles,			new_title);
-		descriptions	= utilities.concat_string_arrays(descriptions,	new_des);
-		links				= utilities.concat_string_arrays(links,			new_link);
-		images			= utilities.concat_string_arrays(images,			new_image);
-		heights			= utilities.concat_int_arrays(heights,				new_height);
-		widths			= utilities.concat_int_arrays(widths,				new_width);
+		titles			= utilities.concat_arrays(titles,			new_title);
+		descriptions	= utilities.concat_arrays(descriptions,	new_des);
+		links				= utilities.concat_arrays(links,				new_link);
+		images			= utilities.concat_arrays(images,			new_image);
+		heights			= utilities.concat_arrays(heights,			new_height);
+		widths			= utilities.concat_arrays(widths,			new_width);
 	}
 
 	@Override
