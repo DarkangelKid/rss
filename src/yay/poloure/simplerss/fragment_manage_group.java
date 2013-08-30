@@ -185,7 +185,6 @@ class fragment_manage_group extends Fragment
 			listview = fragment_manage_group.manage_list;
 			if(group_list_adapter.getCount() == 0)
 				listview.setVisibility(View.INVISIBLE);
-
 		}
 
 		@Override

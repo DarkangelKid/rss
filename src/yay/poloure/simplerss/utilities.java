@@ -63,8 +63,7 @@ public class utilities
 	{
 		if(directory.isDirectory())
 		{
-			String[] children = directory.list();
-			for (String child : children)
+			for(String child : directory.list())
 			{
 				boolean success = delete_directory(new File(directory, child));
 				if(!success)
@@ -503,7 +502,6 @@ public class utilities
 		String[] pubDates;
 		String[] content;
 		Map<Long, String> map = new TreeMap<Long, String>();
-		int i;
 
 		for(int k = 0; k < names.length; k++)
 		{
@@ -516,7 +514,7 @@ public class utilities
 				pubDates	= temp[0];
 				urls		= concat_arrays(urls, temp[1]);
 
-				for(i = 0; i < pubDates.length; i++)
+				for(int i = 0; i < pubDates.length; i++)
 				{
 					try
 					{
@@ -557,7 +555,7 @@ public class utilities
 
 		/* Sorts the all_group every time another group is updated. */
 		if(!group.equals(all_group))
-			sort_group_content_by_time(main.storage, all_group, all_group);
+			sort_group_content_by_time(storage, all_group, all_group);
 	}
 
 	public static void update_navigation_adapter_compat(int[] counts)
