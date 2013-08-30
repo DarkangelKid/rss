@@ -64,9 +64,6 @@ public class main extends ActionBarActivity
 
 	public  static final PagerTabStrip[] strips		= new PagerTabStrip[3];
 
-	private static final String[] folders				= new String[]{GROUPS_DIRECTORY, SETTINGS};
-
-
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -92,7 +89,7 @@ public class main extends ActionBarActivity
 
 		/* Create the top level folders if they do not exist. */
 		File folder_file;
-		for(String folder : folders)
+		for(String folder : new String[]{GROUPS_DIRECTORY, SETTINGS})
 		{
 			folder_file = new File(storage + folder);
 			if(!folder_file.exists())
@@ -253,6 +250,10 @@ public class main extends ActionBarActivity
 
 	private static class fragment_feeds extends Fragment
 	{
+		public fragment_feeds()
+		{
+		}
+
 		@Override
 		public void onCreate(Bundle savedInstanceState)
 		{
@@ -342,6 +343,10 @@ public class main extends ActionBarActivity
 
 	private static class fragment_manage extends Fragment
 	{
+		public fragment_manage()
+		{
+		}
+
 		@Override
 		public void onCreate(Bundle savedInstanceState)
 		{
@@ -437,6 +442,10 @@ public class main extends ActionBarActivity
 
 	private static class fragment_card extends ListFragment
 	{
+		public fragment_card()
+		{
+		}
+
 		@Override
 		public void onCreate(Bundle savedInstanceState)
 		{
@@ -470,6 +479,10 @@ public class main extends ActionBarActivity
 
 	private static class fragment_settings extends Fragment
 	{
+		public fragment_settings()
+		{
+		}
+
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle SavedInstanceState)
 		{
@@ -518,6 +531,10 @@ public class main extends ActionBarActivity
 
 	private static class fragment_settings_function extends ListFragment
 	{
+		public fragment_settings_function()
+		{
+		}
+
 		@Override
 		public void onCreate(Bundle savedInstanceState)
 		{
@@ -535,6 +552,10 @@ public class main extends ActionBarActivity
 
 	private static class fragment_settings_interface extends ListFragment
 	{
+		public fragment_settings_interface()
+		{
+		}
+
 		@Override
 		public void onCreate(Bundle savedInstanceState)
 		{
