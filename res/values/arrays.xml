@@ -19,6 +19,7 @@
 			<item>Refresh Time</item>
 			<item>Notifications</item>
 			<item>Offline Mode</item>
+			<item>Text Size</item>
 	</string-array>
 	<string-array name="settings_function_summaries">
 			<item>EMPTY</item>
@@ -26,7 +27,8 @@
 			<item>Adjust auto refresh interval</item>
 			<item>Check to enable notifications</item>
 			<item>Check to enable offline mode</item>
-	</string-array>
+			<item>Adjust text size</item>
+			</string-array>
 	<string-array name="settings_interface_titles">
 			<item>UI Colours</item>
 			<item>Viewpager Highlight</item>

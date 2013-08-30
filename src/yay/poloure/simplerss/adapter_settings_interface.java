@@ -52,7 +52,7 @@ public class adapter_settings_interface extends BaseAdapter
 	@Override
 	public int getCount()
 	{
-		return 3;
+		return 4;
 	}
 
 	@Override
@@ -63,7 +63,7 @@ public class adapter_settings_interface extends BaseAdapter
 
 	@Override
 	public int getViewTypeCount(){
-		return 3;
+		return 4;
 	}
 
 	@Override
@@ -136,8 +136,9 @@ public class adapter_settings_interface extends BaseAdapter
 			}
 		}
 		/* So far there are only 2 view types, heading and holocolour_select. This will change */
-		else
+		else if(view_type == 2)
 		{
+			
 			final settings_checkbox_holder holder;
 			if(convertView == null)
 			{
@@ -165,6 +166,42 @@ public class adapter_settings_interface extends BaseAdapter
 			});
 			holder.checkbox.setChecked(false);
 		}
+		else 
+		{
+			final settings_seekbar_holder holder;
+			if(convertView == null)
+			{
+				convertView = inflater.inflate(R.layout.settings_seekbar, parent, false);
+				holder = new settings_seekbar_holder();
+				holder.title_view = (TextView) convertView.findViewById(R.id.seek_title);
+				holder.summary_view = (TextView) convertView.findViewById(R.id.seek_summary);
+				holder.seekbar = (SeekBar) convertView.findViewById(R.id.seekbar);
+				holder.read_view = (TextView) convertView.findViewById(R.id.seek_read);
+				convertView.setTag(holder);
+			}
+			else
+				holder = (settings_seekbar_holder) convertView.getTag();
+
+			holder.title_view.setText(title_array[position]);
+			holder.summary_view.setText(summary_array[position]);
+			holder.seekbar.setMax(9);
+			holder.seekbar.setOnSeekBarChangeListener(new OnSeekBarChangeListener()
+			{
+				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
+				{
+					holder.read_view.setText("DICKS");
+					//utilities.delete(main.storage + main.SETTINGS + file_names[position] + main.TXT);
+					//utilities.append_string_to_file(main.storage + main.SETTINGS + file_names[position] + main.TXT, Integer.toString(times[progress]));
+				}
+
+				public void onStartTrackingTouch(SeekBar seekBar)
+				{
+				}
+
+				public void onStopTrackingTouch(SeekBar seekBar)
+				{
+				}
+			});
 		return convertView;
 	}
 
