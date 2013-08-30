@@ -1,5 +1,6 @@
 package yay.poloure.simplerss;
 
+import android.graphics.Color;
 import android.widget.BaseAdapter;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -13,10 +14,18 @@ import android.support.v4.view.PagerTabStrip;
 
 public class adapter_settings_interface extends BaseAdapter
 {
+	private final String storage;
 	private final String[] title_array;
 	private final String[] summary_array;
-	private final static String[] colours = new String[]{"blue", "purple", "green", "orange", "red"};
-	private final String storage;
+	public  final static String[] colours	= new String[]{"blue", "purple", "green", "orange", "red"};
+	public  final static int[] colour_ints	= new int[]
+	{
+		Color.rgb(51, 181, 229), // blue
+		Color.rgb(170, 102, 204), // purple
+		Color.rgb(153, 204, 0), // green
+		Color.rgb(255, 187, 51), // orange
+		Color.rgb(255, 68, 68) // red
+	};
 
 	private static LayoutInflater inflater;
 

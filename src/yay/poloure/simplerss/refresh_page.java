@@ -33,7 +33,7 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
 		if((!utilities.exists(group_file_path))||(!utilities.exists(group_content_path)))
 			return null;
 
-		String[][] contenter			= utilities.load_csv_to_array(group_content_path);
+		String[][] contenter			= utilities.read_csv_to_array(group_content_path, 't', 'd', 'l', 'i', 'w', 'h', 'g', 'f');
 		String[] titles				= contenter[0];
 		String[] descriptions		= contenter[1];
 		String[] links					= contenter[2];

@@ -195,7 +195,7 @@ public class adapter_manage_groups extends BaseAdapter
 			card.setVisibility(View.VISIBLE);
 			up_card.setVisibility(View.VISIBLE);
 
-			utilities.write_array_to_file(main.storage + main.GROUP_LIST, group_array);
+			utilities.write_collection_to_file(main.storage + main.GROUP_LIST, group_array);
 			main.update_groups();
 		}
 	}*/
@@ -280,7 +280,7 @@ public class adapter_manage_groups extends BaseAdapter
 				v.setAnimation(fadeIn2);
 				v.setVisibility(View.VISIBLE);
 
-				utilities.write_array_to_file(main.storage + main.GROUP_LIST, group_array);
+				utilities.write_collection_to_file(main.storage + main.GROUP_LIST, java.util.Arrays.asList(group_array));
 				main.update_groups();
 			}
 			return true;
