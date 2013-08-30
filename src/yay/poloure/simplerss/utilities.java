@@ -487,6 +487,7 @@ public class utilities
 					out.write(entry.getValue().concat(main.NL));
 			out.close();
 
+			utilities.delete(group_count_file);
 			utilities.append_string_to_file(group_count_file, Integer.toString(map.size()));
 
 			BufferedWriter out3 = new BufferedWriter(new FileWriter(group_content_path + main.URL_APPENDIX, false));
@@ -494,6 +495,7 @@ public class utilities
 				out3.write(url.concat(main.NL));
 			out3.close();
 
+			utilities.delete(group_content_path + main.URL_APPENDIX + main.COUNT_APPENDIX);
 			utilities.append_string_to_file(group_content_path + main.URL_APPENDIX + main.COUNT_APPENDIX, Integer.toString(urls.length));
 
 		}
