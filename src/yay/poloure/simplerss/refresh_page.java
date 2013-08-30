@@ -112,7 +112,8 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
 
 		while(lv == null)
 		{
-			try{
+			try
+			{
 				Thread.sleep(5);
 			}
 			catch(Exception e){

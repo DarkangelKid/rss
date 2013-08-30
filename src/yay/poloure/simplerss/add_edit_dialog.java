@@ -24,7 +24,7 @@ import java.util.Arrays;
 
 public class add_edit_dialog
 {
-	private static class check_feed_exists extends AsyncTask<String, Void, String[]>
+	public static class check_feed_exists extends AsyncTask<String, Void, String[]>
 	{
 		private Boolean existing_group = false, real = false;
 		private final AlertDialog dialog;
@@ -245,10 +245,7 @@ public class add_edit_dialog
 				{
 					spinner_group = "";
 				}
-				if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
-					new check_feed_exists(add_feed_dialog, new_group, feed_name, "add", "", "", spinner_group, 0, current_groups[0]).execute(URL_check);
-				else
-					new check_feed_exists(add_feed_dialog, new_group, feed_name, "add", "", "", spinner_group, 0, current_groups[0]).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
+				utilities.check_feed_exists_compat(add_feed_dialog, new_group, feed_name, "add", "", "", spinner_group, 0, current_groups[0],URL_check);
 			}
 		});
 		add_feed_dialog.show();
@@ -302,10 +299,7 @@ public class add_edit_dialog
 							String URL_check 		= URL_edit		.getText().toString().trim();
 							String feed_name 		= name_edit		.getText().toString().trim();
 							String spinner_group 	= group_spinner	.getSelectedItem().toString();
-							if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
-								new check_feed_exists(edit_feed_dialog, new_group, feed_name, "edit", current_title, current_group, spinner_group, position, current_groups[0]).execute(URL_check);
-							else
-								new check_feed_exists(edit_feed_dialog, new_group, feed_name, "edit", current_title, current_group, spinner_group, position, current_groups[0]).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
+							utilities.check_feed_exists_compat(edit_feed_dialog, new_group, feed_name, "edit", current_title, current_group, spinner_group, position, current_groups[0], URL_check);
 					}
 				});
 
@@ -332,19 +326,9 @@ public class add_edit_dialog
 		utilities.append_string_to_file(storage + main.ALL_FILE, feed_info);
 
 		if(fragment_manage_feed.feed_list_adapter != null)
-		{
-			if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
-				new fragment_manage_feed.refresh_manage_feeds().execute();
-			else
-				new fragment_manage_feed.refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-		}
+			utilities.refresh_manage_feeds_compat();
 		if(fragment_manage_group.group_list_adapter != null)
-		{
-			if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
-				new fragment_manage_group.refresh_manage_groups().execute();
-			else
-				new fragment_manage_group.refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-		}
+			utilities.refresh_manage_groups_compat();
 	}
 
 	private static void edit_feed(String storage, String old_name, String new_name, String new_url, String old_group, String new_group, int position, String all_string)
@@ -386,42 +370,14 @@ public class add_edit_dialog
 		if(!old_name.equals(new_name))
 			(new File(old_feed_folder_post)).renameTo(new File(new_feed_folder_post));
 
-		/// Replace the new_group file with the new data.
-		String[] list = utilities.read_file_to_array(new_group_file);
-		(new File(new_group_file)).delete();
-		try
-		{
-			BufferedWriter out = new BufferedWriter(new FileWriter(new_group_file, true));
-			for(String item : list)
-			{
-				if(item.contains(old_name))
-					out.write("name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|" + main.NL);
-				else
-					out.write(item + main.NL);
-			}
-			out.close();
-		}
-		catch(Exception e)
-		{
-		}
-		/// Replace the all_group file with the new group and data.
-		list = utilities.read_file_to_array(all_group_file);
-		(new File(all_group_file)).delete();
-		try
-		{
-			BufferedWriter out2 = new BufferedWriter(new FileWriter(all_group_file, true));
-			for(String item : list)
-			{
-				if(item.contains(old_name))
-					out2.write("name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|" + main.NL);
-				else
-					out2.write(item + main.NL);
-			}
-			out2.close();
-		}
-		catch(Exception e)
-		{
-		}
+		/* Replace the new_group file with the new data. */
+		utilities.remove_string_from_file(new_group_file, old_name, true);
+		utilities.append_string_to_file(new_group_file, "name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|" + main.NL);
+
+		/* Replace the all_group file with the new group and data. */
+		utilities.remove_string_from_file(all_group_file, old_name, true);
+		utilities.append_string_to_file(all_group_file, "name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|" + main.NL);
+
 		/// Delete the group count file and delete the group_content_file
 		final String all_content_file = storage + main.GROUPS_DIRECTORY + all_string + sep + all_string + con;
 		(new File(new_group_folder + sep + new_group + con))		.delete();
@@ -430,6 +386,7 @@ public class add_edit_dialog
 		(new File(old_group_folder + sep + old_group + con + count)).delete();
 		(new File(all_content_file))								.delete();
 		(new File(all_content_file + count))						.delete();
+
 		/// This is because the group file contains the feed name and feed group (for location of images).
 		if((new File(old_group_file)).exists())
 			utilities.sort_group_content_by_time(storage, old_group, main.ALL);
@@ -442,11 +399,7 @@ public class add_edit_dialog
 
 		/// To refresh the counts and the order of the groups.
 		main.update_groups();
-
-		if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
-			new fragment_manage_group.refresh_manage_groups().execute();
-		else
-			new fragment_manage_group.refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		utilities.refresh_manage_groups_compat();
 	}
 
 	private static void add_group(String storage, String group_name)

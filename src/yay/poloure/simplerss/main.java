@@ -42,7 +42,7 @@ public class main extends ActionBarActivity
 	public  static Activity					activity;
 	public  static Handler					service_handler;
 	public  static String[] current_groups = new String[0];
-	public  static String storage, ALL, NAVIGATION, DELETE_DIALOG, CLEAR_DIALOG, ALL_FILE;
+	public  static String storage, ALL, DELETE_DIALOG, CLEAR_DIALOG, ALL_FILE;
 
 	/* Static final are good. */
 	public static final String SEPAR						= System.getProperty("file.separator");
@@ -98,7 +98,6 @@ public class main extends ActionBarActivity
 
 		/* Load String resources into static variables. */
 		ALL						= getString(R.string.all_group);
-		NAVIGATION				= getString(R.string.navigation_title);
 		DELETE_DIALOG			= getString(R.string.delete_dialog);
 		CLEAR_DIALOG			= getString(R.string.clear_dialog);
 		ALL_FILE					= GROUPS_DIRECTORY + ALL + SEPAR + ALL + TXT;

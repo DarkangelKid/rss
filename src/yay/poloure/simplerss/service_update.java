@@ -33,13 +33,11 @@ public class service_update extends IntentService
 		PowerManager.WakeLock wakelock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SIMPLERSS");
 		wakelock.acquire();
 
-		Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-
-		final String UNREAD_ITEM			= getString(R.string.notification_title_singular);
+		final String UNREAD_ITEM		= getString(R.string.notification_title_singular);
 		final String UNREAD_ITEMS		= getString(R.string.notification_title_plural);
 		final String GROUP_UNREAD		= getString(R.string.notification_content_group_item);
 		final String GROUP_UNREADS		= getString(R.string.notification_content_group_items);
-		final String GROUPS_UNREADS		= getString(R.string.notification_content_groups);
+		final String GROUPS_UNREADS	= getString(R.string.notification_content_groups);
 
 		final int group			= intent.getIntExtra("GROUP_NUMBER", 0);
 
@@ -97,12 +95,12 @@ public class service_update extends IntentService
 		if(main.service_handler != null)
 		{
 			Message m = new Message();
-         Bundle b = new Bundle();
-         b.putInt("page_number", group);
-         m.setData(b);
-            main.service_handler.sendMessage(m);
+			Bundle b = new Bundle();
+			b.putInt("page_number", group);
+			m.setData(b);
+			main.service_handler.sendMessage(m);
 		}
-		else if((unread_counts[0] != 0) && intent.getBooleanExtra("NOTIFICATIONS", false))
+		else if(unread_counts[0] != 0 && intent.getBooleanExtra("NOTIFICATIONS", false))
 		{
 			/* Calculate the number of groups with new items. */
 			int group_items = 1, count;

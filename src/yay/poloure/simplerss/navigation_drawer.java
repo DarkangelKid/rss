@@ -1,15 +1,11 @@
 package yay.poloure.simplerss;
 
-import android.app.Activity;
 import android.widget.ListView;
 import android.os.AsyncTask;
 import android.view.View;
-import android.content.Context;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.widget.AdapterView;
-import android.view.Gravity;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v4.app.FragmentTransaction;
 
 class navigation_drawer
 {
@@ -18,11 +14,13 @@ class navigation_drawer
 	private static adapter_navigation_drawer	nav_adapter;
 	private static String							current_title;
 
-	public  static final String[] NAVIGATION_TITLES = new String[0];
+	public  static String[] NAVIGATION_TITLES = new String[0];
+	public  static String   NAVIGATION;
+
 	public  static DrawerLayout					drawer_layout;
 	public  static ActionBarDrawerToggle		drawer_toggle;
 
-	public navigation_drawer(Activity activity, Context context, DrawerLayout draw_layout, ListView nav_list)
+	public navigation_drawer(android.app.Activity activity, android.content.Context context, DrawerLayout draw_layout, ListView nav_list)
 	{
 		/* Get the main three fragment titles from the values resource. */
 		NAVIGATION_TITLES	= new String[]
@@ -32,8 +30,10 @@ class navigation_drawer
 			context.getString(R.string.settings_title)
 		};
 
+		NAVIGATION = context.getString(R.string.navigation_title);
+
 		/* Save the drawer layout to the public static variable then set the shadow of the drawer. */
-		(drawer_layout	= draw_layout).setDrawerShadow(R.drawable.drawer_shadow, Gravity.END);
+		(drawer_layout	= draw_layout).setDrawerShadow(R.drawable.drawer_shadow, android.view.Gravity.END);
 
 		/* Create the action bar toggle and set it as the drawer open/closer after. */
 		drawer_toggle = new ActionBarDrawerToggle(activity, drawer_layout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
@@ -42,7 +42,7 @@ class navigation_drawer
 			public void onDrawerClosed(View drawerView)
 			{
 				/* If the title is still "Navigation", then change it back to current_title. */
-				if(((String) main.action_bar.getTitle()).equals(main.NAVIGATION))
+				if(((String) main.action_bar.getTitle()).equals(NAVIGATION))
 					main.action_bar.setTitle(current_title);
 			}
 			@Override
@@ -50,7 +50,7 @@ class navigation_drawer
 			{
 				/* Save the action bar's title to current title. Then change the title to NAVIGATION. */
 				current_title = (String) main.action_bar.getTitle();
-				main.action_bar.setTitle(main.NAVIGATION);
+				main.action_bar.setTitle(NAVIGATION);
 			}
 		};
 
@@ -104,7 +104,7 @@ class navigation_drawer
 
 			/* Hide the current fragment and display the selected one. */
 			main.fragment_manager.beginTransaction()
-						.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+						.setTransition(android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE)
 						.setCustomAnimations(android.R.anim.fade_in,android.R.anim.fade_out,android.R.anim.fade_in,android.R.anim.fade_out)
 						.hide(main.fragment_manager.findFragmentByTag(current_title))
 						.show(main.fragment_manager.findFragmentByTag(selected_title))

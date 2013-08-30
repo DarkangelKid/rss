@@ -649,12 +649,36 @@ public class utilities
 			new navigation_drawer.update_navigation_adapter().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, counts);
 	}
 
+	public static void refresh_manage_feeds_compat()
+	{
+		if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
+			new fragment_manage_feed.refresh_manage_feeds().execute();
+		else
+			new fragment_manage_feed.refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+	}
+
+	public static void refresh_manage_groups_compat()
+	{
+		if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
+			new fragment_manage_group.refresh_manage_groups().execute();
+		else
+			new fragment_manage_group.refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+	}
+
 	public static void refresh_page_compat(int page_number)
 	{
 		if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
 			new refresh_page().execute(page_number);
 		else
 			new refresh_page().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, page_number);
+	}
+
+	public static void check_feed_exists_compat(android.app.AlertDialog dlg, String ngroup, String fname, String mode, String ctitle, String cgroup, String sgroup, int pos, String all_str, String URL_check)
+	{
+		if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
+			new add_edit_dialog.check_feed_exists(dlg, ngroup, fname, mode, ctitle, cgroup, sgroup, pos, all_str).execute(URL_check);
+		else
+			new add_edit_dialog.check_feed_exists(dlg, ngroup, fname, mode, ctitle, cgroup, sgroup, pos, all_str).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
 	}
 
 	public static void log(String storage, String text)

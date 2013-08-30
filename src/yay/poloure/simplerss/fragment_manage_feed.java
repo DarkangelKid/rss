@@ -51,10 +51,7 @@ class fragment_manage_feed extends Fragment
 		feed_list_adapter = new adapter_manage_feeds(getActivity());
 		feed_list.setAdapter(feed_list_adapter);
 
-		if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
-			new refresh_manage_feeds().execute();
-		else
-			new refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		utilities.refresh_manage_feeds_compat();
 
 		feed_list.setOnItemLongClickListener
 		(
@@ -115,10 +112,7 @@ class fragment_manage_feed extends Fragment
 								feed_list_adapter.remove_item(pos);
 								feed_list_adapter.notifyDataSetChanged();
 
-								if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
-									new fragment_manage_group.refresh_manage_groups().execute();
-								else
-									new fragment_manage_group.refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+								utilities.refresh_manage_groups_compat();
 							}
 						}
 					)
@@ -145,19 +139,10 @@ class fragment_manage_feed extends Fragment
 								(new File(main.storage + main.GROUPS_DIRECTORY + main.ALL + main.SEPAR + main.ALL + main.CONTENT_APPENDIX)).delete();
 								(new File(main.storage + main.GROUPS_DIRECTORY + main.ALL + main.SEPAR + main.ALL + main.COUNT_APPENDIX)).delete();
 
-								//feed_list_adapter.notifyDataSetChanged();
 								/// Refresh pages and update groups and stuff
 								main.update_groups();
-								if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
-								{
-									new refresh_manage_feeds()									.execute();
-									new fragment_manage_group.refresh_manage_groups()	.execute();
-								}
-								else
-								{
-									new refresh_manage_feeds()									.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-									new fragment_manage_group.refresh_manage_groups()	.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-								}
+								utilities.refresh_manage_feeds_compat();
+								utilities.refresh_manage_groups_compat();
 							}
 						}
 					).show();
