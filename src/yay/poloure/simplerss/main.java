@@ -450,24 +450,7 @@ public class main extends ActionBarActivity
 		public void onCreate(Bundle savedInstanceState)
 		{
 			super.onCreate(savedInstanceState);
-			setRetainInstance(false);
-			adapter_feeds_cards ith = new adapter_feeds_cards(getActivity());
-			setListAdapter(ith);
-			String group = current_groups[getArguments().getInt("num", 0)];
-			String[] lines = utilities.read_file_to_array(storage + GROUPS_DIRECTORY + group + SEPAR + group + CONTENT_APPENDIX);
-			int count = -1;
-			for(int i = 0; i < lines.length; i++)
-			{
-				if(lines[i].substring(7, 8).equals("0"))
-				{
-					count = lines.length - i + 1;
-					break;
-				}
-			}
-			if(count == -1)
-				ith.unread_count = 0;
-			else
-				ith.unread_count = count;
+			setListAdapter(new adapter_feeds_cards(getActivity()));
 		}
 
 		@Override
@@ -606,7 +589,10 @@ public class main extends ActionBarActivity
 				viewpager.getAdapter().notifyDataSetChanged();
 
 			/* Does not run on first update. */
-			navigation_drawer.update_navigation_data(null, true);
+			if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
+				new navigation_drawer.update_navigation_data().execute(null, true);
+			else
+				new navigation_drawer.update_navigation_data().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null, true);
 		}
 	}
 

@@ -2,6 +2,7 @@ package yay.poloure.simplerss;
 
 import android.app.Activity;
 import android.widget.ListView;
+import android.os.AsyncTask;
 import android.view.View;
 import android.content.Context;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -56,16 +57,29 @@ class navigation_drawer
 		navigation_list.setAdapter(nav_adapter);
 	}
 
-	public static void update_navigation_data(int[] counts, Boolean update_names)
+	public static class update_navigation_data extends AsyncTask<Object, Void, int[]>
 	{
-		if(counts == null)
-			counts = utilities.get_unread_counts(main.storage, main.current_groups);
+		@Override
+		protected int[] doInBackground(Object... things)
+		{
+			int[] counts			= (int[]) things[0];
+			Boolean update_names	= (Boolean) things[1];
 
-		if(update_names)
-			nav_adapter.set_titles(main.current_groups);
+			if(counts == null)
+				counts = utilities.get_unread_counts(main.storage, main.current_groups);
 
-		nav_adapter.set_counts(counts);
-		nav_adapter.notifyDataSetChanged();
+			return counts;
+		}
+
+		@Override
+		protected void onPostExecute(int... pop)
+		{
+			/*if((Boolean) pop[1])*/
+				nav_adapter.set_titles(main.current_groups);
+
+			nav_adapter.set_counts(pop);
+			nav_adapter.notifyDataSetChanged();
+		}
 	}
 
 	private class click_navigation_drawer implements ListView.OnItemClickListener
