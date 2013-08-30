@@ -61,8 +61,6 @@ public class adapter_feeds_cards extends BaseAdapter
 	private static final int title_black = Color.rgb(0, 0, 0);
 	private static final int title_grey  = Color.rgb(128, 128, 128);
 
-	private int			total				= 0;
-	public  int			unread_count	= 0;
 	private boolean	first				= true;
 	private ListView	listview;
 	public  boolean	touched			= true;
@@ -93,26 +91,25 @@ public class adapter_feeds_cards extends BaseAdapter
 		images			= utilities.concat_string_arrays(images,			new_image);
 		heights			= utilities.concat_int_arrays(heights,				new_height);
 		widths			= utilities.concat_int_arrays(widths,				new_width);
-		total = titles.length;
 	}
 
 	@Override
 	public int getCount()
 	{
-		return total;
+		return titles.length;
 	}
 
 	@Override
 	public long getItemId(int position)
 	{
-		position = total - position - 1;
+		position = titles.length - position - 1;
 		return position;
 	}
 
 	@Override
 	public String getItem(int position)
 	{
-		position = total - position - 1;
+		position = titles.length - position - 1;
 		return titles[position];
 	}
 
@@ -120,7 +117,7 @@ public class adapter_feeds_cards extends BaseAdapter
 	@Override
 	public View getView(int pos, View convertView, ViewGroup parent)
 	{
-		final int position = total - pos - 1;
+		final int position = titles.length - pos - 1;
 
 		if(first)
 		{
@@ -143,7 +140,10 @@ public class adapter_feeds_cards extends BaseAdapter
 						read_items.add(links.get(position));*/
 					if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
 					{
-						navigation_drawer.update_navigation_data(null, false);
+						if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
+							new navigation_drawer.update_navigation_data().execute(null, true);
+						else
+							new navigation_drawer.update_navigation_data().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null, true);
 					}
 				}
 			});
