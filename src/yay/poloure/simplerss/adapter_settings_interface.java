@@ -169,7 +169,7 @@ public class adapter_settings_interface extends BaseAdapter
 			holder.checkbox.setChecked(false);
 		}
 		else 
-		{
+		
 			final settings_seekbar_holder holder;
 			if(convertView == null)
 			{
@@ -256,5 +256,12 @@ public class adapter_settings_interface extends BaseAdapter
 		TextView title_view;
 		TextView summary_view;
 		CheckBox checkbox;
+	}
+	static class settings_seekbar_holder
+	{
+		TextView title_view;
+		TextView summary_view;
+		TextView read_view;
+		SeekBar seekbar;
 	}
 }
