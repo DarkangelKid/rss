@@ -169,7 +169,7 @@ public class adapter_settings_interface extends BaseAdapter
 			holder.checkbox.setChecked(false);
 		}
 		else 
-		
+		{
 			final settings_seekbar_holder holder;
 			if(convertView == null)
 			{
