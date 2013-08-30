@@ -42,7 +42,7 @@ public class main extends ActionBarActivity
 	public  static Activity					activity;
 	public  static Handler					service_handler;
 	public  static String[] current_groups = new String[0];
-	public  static String storage, ALL, NAVIGATION, DELETE_DIALOG, CLEAR_DIALOG, ALL_FILE;
+	public  static String storage, ALL, DELETE_DIALOG, CLEAR_DIALOG, ALL_FILE;
 
 	/* Static final are good. */
 	public static final String SEPAR						= System.getProperty("file.separator");
@@ -98,7 +98,6 @@ public class main extends ActionBarActivity
 
 		/* Load String resources into static variables. */
 		ALL						= getString(R.string.all_group);
-		NAVIGATION				= getString(R.string.navigation_title);
 		DELETE_DIALOG			= getString(R.string.delete_dialog);
 		CLEAR_DIALOG			= getString(R.string.clear_dialog);
 		ALL_FILE					= GROUPS_DIRECTORY + ALL + SEPAR + ALL + TXT;
@@ -146,12 +145,7 @@ public class main extends ActionBarActivity
 
 		/* If an all_content file exists, refresh page 0. */
 		if(utilities.exists(storage + ALL_FILE))
-		{
-			if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
-				new refresh_page(0).execute();
-			else
-				new refresh_page(0).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-		}
+			utilities.refresh_page_compat(0);
 	}
 
 	@Override
@@ -288,12 +282,7 @@ public class main extends ActionBarActivity
 					public void onPageSelected(int position)
 					{
 						if(utilities.get_adapter_feeds_cards(fragment_manager, viewpager, position).getCount() == 0)
-						{
-							if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
-								new refresh_page(position).execute();
-							else
-								new refresh_page(position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-						}
+							utilities.refresh_page_compat(position);
 					}
 				}
 			);
@@ -589,10 +578,7 @@ public class main extends ActionBarActivity
 				viewpager.getAdapter().notifyDataSetChanged();
 
 			/* Does not run on first update. */
-			if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
-				new navigation_drawer.update_navigation_data().execute(null, true);
-			else
-				new navigation_drawer.update_navigation_data().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null, true);
+			utilities.update_navigation_adapter_compat(null);
 		}
 	}
 
@@ -633,27 +619,14 @@ public class main extends ActionBarActivity
 			{
 				set_refresh(false);
 				int page = msg.getData().getInt("page_number");
-				if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
-				{
-					new refresh_page(0).execute();
-					if(page != 0)
-						new refresh_page(page).execute();
-					else
-					{
-						for(int i = 1; i < current_groups.length; i++)
-							new refresh_page(i).execute();
-					}
-				}
+
+				utilities.refresh_page_compat(0);
+				if(page != 0)
+					utilities.refresh_page_compat(page);
 				else
 				{
-					new refresh_page(0).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-					if(page != 0)
-						new refresh_page(page).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-					else
-					{
-						for(int i = 1; i < current_groups.length; i++)
-							new refresh_page(i).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-					}
+					for(int i = 1; i < current_groups.length; i++)
+						utilities.refresh_page_compat(i);
 				}
 			}
 		};

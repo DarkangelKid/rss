@@ -43,10 +43,7 @@ class fragment_manage_group extends Fragment
 		manage_list.setItemsCanFocus(false);
 		manage_list.setAdapter(group_list_adapter);
 
-		if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
-			new refresh_manage_groups().execute();
-		else
-			new refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		utilities.refresh_manage_groups_compat();
 
 		if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
 			registerForContextMenu(manage_list);

@@ -1,8 +1,8 @@
 package yay.poloure.simplerss;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.support.v4.view.PagerTabStrip;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
@@ -143,21 +143,6 @@ public class utilities
 		}
 	}
 
-	public static void write_array_to_file(String path, String... content)
-	{
-		delete(path);
-		try
-		{
-			BufferedWriter out = new BufferedWriter(new FileWriter(path, true));
-			for(String item : content)
-				out.write(item + main.NL);
-			out.close();
-		}
-		catch(Exception e)
-		{
-		}
-	}
-
 	public static String[][] create_info_arrays(String[] current_groups, int size, String storage)
 	{
 		String info;
@@ -177,7 +162,7 @@ public class utilities
 		for(i = 0; i < size; i++)
 		{
 			group_array[i] = current_groups[i];
-			content = read_single_to_array(storage + main.GROUPS_DIRECTORY + group_array[i] + main.SEPAR + group_array[i] + main.TXT, "name|");
+			content = read_csv_to_array(storage + main.GROUPS_DIRECTORY + group_array[i] + main.SEPAR + group_array[i] + main.TXT, 'n')[0];
 			if(i == 0)
 				info = (size == 1) ? "1 group" :  size + " groups";
 			else
@@ -246,17 +231,14 @@ public class utilities
 
 	public static void remove_string_from_file(String file_path, String string, Boolean contains)
 	{
-		final String[] list = read_file_to_array(file_path);
 		delete(file_path);
-		try{
+		try
+		{
 			final BufferedWriter out = new BufferedWriter(new FileWriter(file_path, true));
-			for(String item : list)
+			for(String item : read_file_to_array(file_path))
 			{
-				if(contains)
-				{
-					if(!item.contains(string))
+				if(contains && !item.contains(string))
 						out.write(item + main.NL);
-				}
 				else
 				{
 					if(!item.equals(string))
@@ -265,52 +247,18 @@ public class utilities
 			}
 			out.close();
 		}
-		catch(Exception e){
-		}
-	}
-
-	private static String[] read_single_to_array(String file_path, String type)
-	{
-		int next, offset, j;
-		String line;
-		String[] lines;
-		String[] types;
-		char ch;
-
-		lines = read_file_to_array(file_path);
-		types = new String[lines.length];
-
-		for(j = 0; j < lines.length; j++)
+		catch(Exception e)
 		{
-			line = lines[j];
-			if((next = line.indexOf(type, 0)) != -1)
-			{
-				ch = type.charAt(0);
-				offset = next + 1;
-				switch(ch)
-				{
-					case 'm':
-						types[j] = "1";
-						break;
-					default:
-						next = line.indexOf('|', offset);
-						offset = next + 1;
-						types[j] = line.substring(offset, line.indexOf('|', offset));
-						break;
-				}
-			}
 		}
-		return types;
 	}
 
 	public static String[][] read_csv_to_array(String file_path, char... type)
 	{
-		int next, offset, k, j;
+		int next, offset, i, j;
 		String line;
 		String[][] types;
 		String[] lines;
 		char ch;
-		int start = (type[0] == 'm') ? 1 : 0;
 
 		lines = read_file_to_array(file_path);
 		types = new String[type.length][lines.length];
@@ -326,85 +274,14 @@ public class utilities
 
 				ch = line.charAt(offset);
 				offset = next + 1;
-				switch(ch)
+				for(i = 0; i < type.length; i++)
 				{
-					case 'm':
-						types[0][j] = "1";
-						break;
-					default:
-						for(k = start; k < type.length; k++)
-						{
-							if(ch == type[k])
-							{
-								next = line.indexOf('|', offset);
-								types[k][j] = line.substring(offset, next);
-								break;
-							}
-						}
-						break;
-				}
-				offset = line.indexOf('|', offset) + 1;
-			}
-		}
-		return types;
-	}
-
-	public static String[][] load_csv_to_array(String file_path)
-	{
-		int next, offset, j;
-		String line;
-		String[] lines;
-		String[][] types;
-		char ch;
-
-		lines = read_file_to_array(file_path);
-		types = new String[8][lines.length];
-
-		for(j = 0; j < lines.length; j++)
-		{
-			offset = 0;
-			line = lines[j];
-			while((next = line.indexOf('|', offset)) != -1)
-			{
-				if(offset == line.length())
-					break;
-
-				ch = line.charAt(offset);
-				offset = next + 1;
-				switch(ch)
-				{
-					case 't':
+					if(ch == type[i])
+					{
 						next = line.indexOf('|', offset);
-						types[0][j]		= line.substring(offset, next);
+						types[i][j] = line.substring(offset, next);
 						break;
-					case 'd':
-						next = line.indexOf('|', offset);
-						types[1][j]		= line.substring(offset, next);
-						break;
-					case 'l':
-						next = line.indexOf('|', offset);
-						types[2][j]		= line.substring(offset, next);
-						break;
-					case 'i':
-						next = line.indexOf('|', offset);
-						types[3][j]		= line.substring(offset, next);
-						break;
-					case 'w':
-						next = line.indexOf('|', offset);
-						types[4][j]		= line.substring(offset, next);
-						break;
-					case 'h':
-						next = line.indexOf('|', offset);
-						types[5][j]		= line.substring(offset, next);
-						break;
-					case 'g':
-						next = line.indexOf('|', offset);
-						types[6][j]		= line.substring(offset, next);
-						break;
-					case 'f':
-						next = line.indexOf('|', offset);
-						types[7][j]		= line.substring(offset, next);
-						break;
+					}
 				}
 				offset = line.indexOf('|', offset) + 1;
 			}
@@ -542,22 +419,17 @@ public class utilities
 		final String colour_path	= storage + main.SETTINGS + main.PAGERTABSTRIPCOLOUR;
 		String colour					= "blue";
 
+		/* Read the colour from the settings/colour file, if blank, save as blue. */
 		String[] colour_array = read_file_to_array(colour_path);
 		if(colour_array.length == 0)
 			append_string_to_file(colour_path, colour);
 		else
 			colour = colour_array[0];
 
-		if(colour.equals("blue"))
-			strip.setTabIndicatorColor(Color.rgb(51, 181, 229));
-		else if(colour.equals("purple"))
-			strip.setTabIndicatorColor(Color.rgb(170, 102, 204));
-		else if(colour.equals("green"))
-			strip.setTabIndicatorColor(Color.rgb(153, 204, 0));
-		else if(colour.equals("orange"))
-			strip.setTabIndicatorColor(Color.rgb(255, 187, 51));
-		else /* Invalid setting makes it red. */
-			strip.setTabIndicatorColor(Color.rgb(255, 68, 68));
+		/* Find the colour stored in adapter_stettings_interface that we want. */
+		int position = utilities.index_of(adapter_settings_interface.colours, colour);
+		if(position != -1)
+			strip.setTabIndicatorColor(adapter_settings_interface.colour_ints[position]);
 	}
 
 	public static void sort_group_content_by_time(String storage, String group, String all_group)
@@ -613,21 +485,16 @@ public class utilities
 			BufferedWriter out = new BufferedWriter(new FileWriter(group_content_path, false));
 			for(Map.Entry<Long, String> entry : map.entrySet())
 					out.write(entry.getValue().concat(main.NL));
-
 			out.close();
 
-			BufferedWriter out2 = new BufferedWriter(new FileWriter(group_count_file, false));
-			out2.write(Integer.toString(map.size()));
-			out2.close();
+			utilities.append_string_to_file(group_count_file, Integer.toString(map.size()));
 
 			BufferedWriter out3 = new BufferedWriter(new FileWriter(group_content_path + main.URL_APPENDIX, false));
 			for(String url : urls)
 				out3.write(url.concat(main.NL));
 			out3.close();
 
-			BufferedWriter out4 = new BufferedWriter(new FileWriter(group_content_path + main.URL_APPENDIX + main.COUNT_APPENDIX, false));
-			out4.write(Integer.toString(urls.length));
-			out4.close();
+			utilities.append_string_to_file(group_content_path + main.URL_APPENDIX + main.COUNT_APPENDIX, Integer.toString(urls.length));
 
 		}
 		catch(Exception e)
@@ -638,6 +505,46 @@ public class utilities
 		/* Sorts the all_group every time another group is updated. */
 		if(!group.equals(all_group))
 			sort_group_content_by_time(main.storage, all_group, all_group);
+	}
+
+	public static void update_navigation_adapter_compat(int[] counts)
+	{
+		if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
+			new navigation_drawer.update_navigation_adapter().execute(counts);
+		else
+			new navigation_drawer.update_navigation_adapter().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, counts);
+	}
+
+	public static void refresh_manage_feeds_compat()
+	{
+		if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
+			new fragment_manage_feed.refresh_manage_feeds().execute();
+		else
+			new fragment_manage_feed.refresh_manage_feeds().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+	}
+
+	public static void refresh_manage_groups_compat()
+	{
+		if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
+			new fragment_manage_group.refresh_manage_groups().execute();
+		else
+			new fragment_manage_group.refresh_manage_groups().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+	}
+
+	public static void refresh_page_compat(int page_number)
+	{
+		if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
+			new refresh_page().execute(page_number);
+		else
+			new refresh_page().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, page_number);
+	}
+
+	public static void check_feed_exists_compat(android.app.AlertDialog dlg, String ngroup, String fname, String mode, String ctitle, String cgroup, String sgroup, int pos, String all_str, String URL_check)
+	{
+		if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
+			new add_edit_dialog.check_feed_exists(dlg, ngroup, fname, mode, ctitle, cgroup, sgroup, pos, all_str).execute(URL_check);
+		else
+			new add_edit_dialog.check_feed_exists(dlg, ngroup, fname, mode, ctitle, cgroup, sgroup, pos, all_str).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
 	}
 
 	public static void log(String storage, String text)

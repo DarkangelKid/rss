@@ -11,24 +11,19 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-class refresh_page extends AsyncTask<Void, Object, Animation>
+class refresh_page extends AsyncTask<Integer, Object, Animation>
 {
-	private final int page_number;
+	private int page_number;
 	private Boolean flash = false;
 	private ListFragment l;
 	private adapter_feeds_cards ith;
 	private ListView lv;
-	private int[] counts;
 	private int position = -3;
 
-	public refresh_page(int page)
-	{
-		page_number = page;
-	}
-
 	@Override
-	protected Animation doInBackground(Void[] hey)
+	protected Animation doInBackground(Integer... page)
 	{
+		page_number								= page[0];
 		String group							= main.current_groups[page_number];
 		final String group_path				= main.storage + main.GROUPS_DIRECTORY + group + main.SEPAR;
 		final String group_file_path		= group_path + group + main.TXT;
@@ -38,7 +33,7 @@ class refresh_page extends AsyncTask<Void, Object, Animation>
 		if((!utilities.exists(group_file_path))||(!utilities.exists(group_content_path)))
 			return null;
 
-		String[][] contenter			= utilities.load_csv_to_array(group_content_path);
+		String[][] contenter			= utilities.read_csv_to_array(group_content_path, 't', 'd', 'l', 'i', 'w', 'h', 'g', 'f');
 		String[] titles				= contenter[0];
 		String[] descriptions		= contenter[1];
 		String[] links					= contenter[2];
@@ -117,7 +112,8 @@ class refresh_page extends AsyncTask<Void, Object, Animation>
 
 		while(lv == null)
 		{
-			try{
+			try
+			{
 				Thread.sleep(5);
 			}
 			catch(Exception e){
@@ -144,8 +140,6 @@ class refresh_page extends AsyncTask<Void, Object, Animation>
 
 		if(new_titles.length > 0)
 			publishProgress(new_titles, new_des, new_links, new_images, new_heights, new_widths);
-
-		counts = utilities.get_unread_counts(main.storage, main.current_groups);
 
 		return animFadeIn;
 	}
@@ -191,10 +185,7 @@ class refresh_page extends AsyncTask<Void, Object, Animation>
 	protected void onPostExecute(Animation tun)
 	{
 		/* Update the unread counts in the navigation drawer. */
-		if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
-			new navigation_drawer.update_navigation_data().execute(null, true);
-		else
-			new navigation_drawer.update_navigation_data().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null, true);
+		utilities.update_navigation_adapter_compat(null);
 
 		if(lv == null)
 			return;

@@ -139,12 +139,7 @@ public class adapter_feeds_cards extends BaseAdapter
 					/*if(listview.getChildAt(position).getTop() == eight)
 						read_items.add(links.get(position));*/
 					if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
-					{
-						if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB)
-							new navigation_drawer.update_navigation_data().execute(null, true);
-						else
-							new navigation_drawer.update_navigation_data().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null, true);
-					}
+						utilities.update_navigation_adapter_compat(null);
 				}
 			});
 		}
