@@ -52,9 +52,10 @@ Use a single space between each charater in a comparision.
 ```
 if( 8 == max ), looks clearer than if(8 == max)
 ```
-For functions that return booleans, use no spaces.
+For functions that return booleans, use no spaces. Unless more than one.
 ```
 if(main.TXT.equals(".txt"))
+if( main.TXT.equals(".txt") || a.equals(X) )
 ```
 
 Use left-hand comparisons because if '=' is typed instead of '==',
@@ -74,6 +75,9 @@ if( a == b ||
 ```
 
 Even for single line conditions and loops, require curly brackets.
+This is the only one I am not completely convinced with. As you know, you can
+comment out a condition and it still works. Perhaps just require a space after
+the single line and not the condition.
 ```
 for(i = 0; i < array.length; i++)
 {
@@ -98,7 +102,7 @@ It also looks a bit clearer, for example
 ```
 /*If the activity is running, make a toast notification. Log the event regardless. */
 if( main.service_handler != null )
-   Toast.makeText(main.activity_context, (CharSequence) message, Toast.LENGTH_LONG).show();
+   Toast.makeText(main.con, (CharSequence) message, Toast.LENGTH_LONG).show();
 
 /*This function could be called from a state where it is impossible to get storage so this is optional. */
 if ( main.storage != null )
@@ -112,7 +116,7 @@ vs
 /*If the activity is running, make a toast notification. Log the event regardless. */
 if( main.service_handler != null )
 {
-   Toast.makeText(main.activity_context, (CharSequence) message, Toast.LENGTH_LONG).show();
+   Toast.makeText(main.con, (CharSequence) message, Toast.LENGTH_LONG).show();
 }
 
 /*This function could be called from a state where it is impossible to get storage so this is optional. */

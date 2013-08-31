@@ -82,9 +82,9 @@ public class main extends ActionBarActivity
       setContentView(R.layout.navigation_drawer_and_content_frame);
 
       /* Save the other satic variables. */
-      fman  = getSupportFragmentManager();
-      con  = this;
-      activity          = this;
+      fman     = getSupportFragmentManager();
+      con      = this;
+      activity = this;
 
       /* Form the storage path. */
       storage = util.get_storage();
@@ -125,9 +125,9 @@ public class main extends ActionBarActivity
        * to the fragment manager. Hide all but the current one. */
       if(savedInstanceState == null)
       {
-         Fragment feeds    = new fragment_feeds();
-         Fragment man      = new fragment_manage();
-         Fragment prefs    = new fragment_settings();
+         Fragment feeds = new fragment_feeds();
+         Fragment man   = new fragment_manage();
+         Fragment prefs = new fragment_settings();
 
          fman.beginTransaction()
             .add(R.id.content_frame, feeds, navigation_drawer.NAV_TITLES[0])
@@ -160,9 +160,11 @@ public class main extends ActionBarActivity
    public void onBackPressed()
    {
       super.onBackPressed();
+      int    lock  = DrawerLayout.LOCK_MODE_UNLOCKED;
+      String feeds = navigation_drawer.NAV_TITLES[0];
 
-      action_bar.setTitle(navigation_drawer.NAV_TITLES[0]);
-      navigation_drawer.drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+      action_bar.setTitle(feeds);
+      navigation_drawer.drawer_layout.setDrawerLockMode(lock);
       navigation_drawer.drawer_toggle.setDrawerIndicatorEnabled(true);
       action_bar.setDisplayHomeAsUpEnabled(true);
    }
@@ -223,9 +225,9 @@ public class main extends ActionBarActivity
       }
 
       @Override
-      public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle b)
+      public View onCreateView(LayoutInflater in, ViewGroup container, Bundle b)
       {
-         View v = inflater.inflate(R.layout.viewpager_feeds, container, false);
+         View v = in.inflate(R.layout.viewpager_feeds, container, false);
 
          viewpager = (ViewPager) v.findViewById(R.id.pager);
          viewpager.setAdapter(new pageradapter_feeds(fman));
@@ -238,7 +240,7 @@ public class main extends ActionBarActivity
             }
 
             @Override
-            public void onPageScrolled(int pos, float posOffset, int posOffsetPx)
+            public void onPageScrolled(int pos, float offset, int offsetPx)
             {
             }
 
@@ -308,9 +310,9 @@ public class main extends ActionBarActivity
       }
 
       @Override
-      public View onCreateView(LayoutInflater inf, ViewGroup container, Bundle savedInstanceState)
+      public View onCreateView(LayoutInflater in, ViewGroup container, Bundle b)
       {
-         View v = inf.inflate(R.layout.viewpager_manage, container, false);
+         View v = in.inflate(R.layout.viewpager_manage, container, false);
 
          ViewPager manage_pager = (ViewPager) v.findViewById(R.id.manage_viewpager);
          manage_pager.setAdapter(new pageradapter_manage(fman));
@@ -365,13 +367,13 @@ public class main extends ActionBarActivity
 
    public static class pageradapter_manage extends FragmentPagerAdapter
    {
-      private static final Fragment[] manage_fragments = new Fragment[]
+      private static final Fragment[] fragments = new Fragment[]
       {
          new fragment_manage_group(),
          new fragment_manage_feed(),
          new fragment_manage_filters(),
       };
-      private static final int[] manage_titles = new int[]
+      private static final int[] titles = new int[]
       {
          R.string.groups_manage_sub,
          R.string.feeds_manage_sub,
@@ -386,19 +388,19 @@ public class main extends ActionBarActivity
       @Override
       public int getCount()
       {
-         return manage_fragments.length;
+         return fragments.length;
       }
 
       @Override
       public Fragment getItem(int position)
       {
-         return manage_fragments[position];
+         return fragments[position];
       }
 
       @Override
       public String getPageTitle(int position)
       {
-         return con.getString(manage_titles[position]);
+         return con.getString(titles[position]);
       }
    }
 
@@ -416,9 +418,9 @@ public class main extends ActionBarActivity
       }
 
       @Override
-      public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle SavedInstanceState)
+      public View onCreateView(LayoutInflater in, ViewGroup container, Bundle b)
       {
-         return inflater.inflate(R.layout.listview_feed, container, false);
+         return in.inflate(R.layout.listview_feed, container, false);
       }
    }
 
@@ -429,53 +431,53 @@ public class main extends ActionBarActivity
       }
 
       @Override
-      public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle SavedInstanceState)
+      public View onCreateView(LayoutInflater in, ViewGroup container, Bundle b)
       {
-         View settings_view = inflater.inflate(R.layout.viewpager_settings, container, false);
-         ViewPager viewpager_settings = (ViewPager)settings_view.findViewById(R.id.settings_pager);
+         View v = in.inflate(R.layout.viewpager_settings, container, false);
+         ViewPager vp = (ViewPager) v.findViewById(R.id.settings_pager);
          pageradapter_settings adapter = new pageradapter_settings(fman);
-         viewpager_settings.setAdapter(adapter);
+         vp.setAdapter(adapter);
 
-         strips[2] = (PagerTabStrip) settings_view.findViewById(R.id.settings_title_strip);
+         strips[2] = (PagerTabStrip) v.findViewById(R.id.settings_title_strip);
          strips[2].setDrawFullUnderline(true);
          util.set_pagertabstrip_colour(storage, strips[2]);
 
-         return settings_view;
+         return v;
       }
    }
 
    public static class pageradapter_settings extends FragmentPagerAdapter
    {
-      private static final Fragment[] settings_fragments = new Fragment[]
+      private static final Fragment[] fragments = new Fragment[]
       {
          new fragment_settings_function(),
          new fragment_settings_interface(),
       };
 
-      private final String[]  settings_titles;
+      private final String[] titles;
 
       public pageradapter_settings(FragmentManager fm)
       {
          super(fm);
-         settings_titles = con.getResources().getStringArray(R.array.settings_pagertab_titles);
+         titles = con.getResources().getStringArray(R.array.settings_pagertab_titles);
       }
 
       @Override
       public int getCount()
       {
-         return settings_titles.length;
+         return titles.length;
       }
 
       @Override
       public Fragment getItem(int position)
       {
-         return settings_fragments[position];
+         return fragments[position];
       }
 
       @Override
       public String getPageTitle(int position)
       {
-         return settings_titles[position];
+         return titles[position];
       }
    }
 
@@ -567,7 +569,7 @@ public class main extends ActionBarActivity
       if(update)
          page = viewpager.getCurrentItem();
 
-      if(links == null)
+      if( links == null )
          links = util.get_card_adapter(fman, viewpager, page).links;
 
       for(m = links.length - 1; m >= 0; m--)
