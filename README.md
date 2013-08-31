@@ -20,17 +20,19 @@ Using spaces allows allignment using indentation to be consistant. It also makes
 readable. Tab now inserts three spaces. Backspace will also know it was a tab and delete three.
 
 When commenting, use /* style */. When commenting out single lines of code, use //.
-For commenting out multiple lines, use /* */.
+For commenting out multiple lines, use /* hi = 2 */.
 
 Always leave an empty line above /* */ comments.
 
-The 80 column argument seems to be pretty much standard. It is the width of monospace on A4.
-It is for readability because it is hard to read wide lines. There are other reasons too like
-having two pages open side by side. It also means the code can be scrolled on github without
-a horizontal bar. Things like that.
+The 80 column argument seems to be pretty much standard.
+It is the width of monospace on A4. Books tend to be 66 characters.
+It is for readability because it is hard to read wide lines.
+Possible to have two pages open side by side on most monitors.
+Some terminals max at 80 chars.
+Code can be read on github without a horizontal bar.
+Lines over 80 characters tend to be a sign of over complexity.
 
 If parameters to a function go over 80 characters width, align with single spaces.
-
 ```
 int foobar2(int qux,
             int quux,
