@@ -111,7 +111,7 @@ public class add_edit_dialog
 						{
 							data2 = new byte[512];
 							in.read(data2, 0, 512);
-							data = utilities.concat_byte_arrays(data, data2);
+							data = utilities.concat(data, data2);
 							line = new String(data);
 						}
 						final int ind = line.indexOf(">", line.indexOf("<title")) + 1;
@@ -133,7 +133,7 @@ public class add_edit_dialog
 		{
 			if(!real)
 			{
-				utilities.toast_message(main.activity_context, main.activity_context.getString(R.string.feed_invalid), false);
+				utilities.post(main.activity_context.getString(R.string.feed_invalid));
 				Button button	= dialog.getButton(AlertDialog.BUTTON_POSITIVE);
 				if(button != null)
 					button.setEnabled(true);
@@ -190,7 +190,7 @@ public class add_edit_dialog
 						final String feed_name	= ((TextView) add_filter_layout).getText().toString().trim();
 						String filter_path		= storage.concat(main.FILTER_LIST);
 						String[] filters			= utilities.read_file_to_array(filter_path);
-						if(utilities.index_of(filters, feed_name) != -1)
+						if(utilities.index(filters, feed_name) != -1)
 							utilities.append_string_to_file(filter_path, feed_name + main.NL);
 						fragment_manage_filters.filter_list_adapter.set_items(utilities.read_file_to_array(filter_path));
 						fragment_manage_filters.filter_list_adapter.notifyDataSetChanged();
@@ -272,7 +272,7 @@ public class add_edit_dialog
 		group_spinner	.setAdapter(adapter);
 		URL_edit			.setText(current_url);
 		name_edit		.setText(current_title);
-		group_spinner	.setSelection(utilities.index_of(spinner_groups, current_group));
+		group_spinner	.setSelection(utilities.index(spinner_groups, current_group));
 
 		final AlertDialog edit_feed_dialog = new AlertDialog.Builder(activity_context)
 				.setTitle(activity_context.getString(R.string.edit_dialog_title))

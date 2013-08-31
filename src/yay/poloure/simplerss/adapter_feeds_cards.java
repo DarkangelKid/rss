@@ -85,12 +85,12 @@ public class adapter_feeds_cards extends BaseAdapter
 
 	public void add_array(String[] new_title, String[] new_des, String[] new_link, String[] new_image, Integer[] new_height, Integer[] new_width)
 	{
-		titles			= utilities.concat_arrays(titles,			new_title);
-		descriptions	= utilities.concat_arrays(descriptions,	new_des);
-		links				= utilities.concat_arrays(links,				new_link);
-		images			= utilities.concat_arrays(images,			new_image);
-		heights			= utilities.concat_arrays(heights,			new_height);
-		widths			= utilities.concat_arrays(widths,			new_width);
+		titles			= utilities.concat(titles,			new_title);
+		descriptions	= utilities.concat(descriptions,	new_des);
+		links				= utilities.concat(links,			new_link);
+		images			= utilities.concat(images,			new_image);
+		heights			= utilities.concat(heights,		new_height);
+		widths			= utilities.concat(widths,			new_width);
 	}
 
 	@Override

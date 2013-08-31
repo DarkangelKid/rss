@@ -73,26 +73,21 @@ public class utilities
 		return directory.delete();
 	}
 
-	public static void toast_message(Context activity_context, CharSequence message, final Boolean short_long)
-	{
-		Toast.makeText(activity_context, message, (short_long) ? Toast.LENGTH_SHORT : Toast.LENGTH_LONG).show();
-	}
-
-	public static <T> T[] concat_arrays(T[] first, T[] second)
+	public static <T> T[] concat(T[] first, T[] second)
 	{
 		T[] result = Arrays.copyOf(first, first.length + second.length);
 		System.arraycopy(second, 0, result, first.length, second.length);
 		return result;
 	}
 
-	public static byte[] concat_byte_arrays(byte[] first, byte[] second)
+	public static byte[] concat(byte[] first, byte[] second)
 	{
 		byte[] result = Arrays.copyOf(first, first.length + second.length);
 		System.arraycopy(second, 0, result, first.length, second.length);
 		return result;
 	}
 
-	public static int index_of(String[] array, String value)
+	public static <T> int index(T[] array, T value)
 	{
 		for(int i = 0; i < array.length; i++)
 		{
@@ -103,7 +98,7 @@ public class utilities
 		return -1;
 	}
 
-	public static int index_of_int(int[] array, int value)
+	public static int index(int[] array, int value)
 	{
 		for(int i = 0; i < array.length; i++)
 		{
@@ -477,7 +472,7 @@ public class utilities
 			colour = colour_array[0];
 
 		/* Find the colour stored in adapter_stettings_interface that we want. */
-		int position = utilities.index_of(adapter_settings_interface.colours, colour);
+		int position = utilities.index(adapter_settings_interface.colours, colour);
 		if(position != -1)
 			strip.setTabIndicatorColor(adapter_settings_interface.colour_ints[position]);
 	}
@@ -512,7 +507,7 @@ public class utilities
 				temp		= read_csv_to_array(content_path, 'p', 'l');
 				content 	= read_file_to_array(content_path);
 				pubDates	= temp[0];
-				urls		= concat_arrays(urls, temp[1]);
+				urls		= concat(urls, temp[1]);
 
 				for(int i = 0; i < pubDates.length; i++)
 				{
@@ -618,7 +613,7 @@ public class utilities
 		if(check.length == 0)
 			append_string_to_file(path, Integer.toString(adapter_settings_function.times[3]));
 
-		seekbar.setProgress(index_of_int(adapter_settings_function.times, value));
+		seekbar.setProgress(index(adapter_settings_function.times, value));
 		return value;
 	}
 
@@ -631,7 +626,7 @@ public class utilities
 	{
 		/* If the activity is running, make a toast notification. Log the event regardless. */
 		if(main.service_handler != null)
-			toast_message(main.activity_context, message, true);
+			Toast.makeText(main.activity_context, (CharSequence) message, Toast.LENGTH_LONG).show();
 		/* This function could be called from a state where it is impossible to get storage so this is optional. */
 		if(main.storage != null)
 			log(main.storage, message);

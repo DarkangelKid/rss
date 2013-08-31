@@ -28,7 +28,7 @@ public class adapter_manage_feeds extends BaseAdapter
 	public void set_position(int pos, String new_title, String new_info)
 	{
 		title_array[pos]	= new_title;
-		info_array[pos]		= new_info;
+		info_array[pos]	= new_info;
 	}
 
 	@Override
