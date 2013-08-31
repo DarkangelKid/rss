@@ -39,29 +39,28 @@ String   hello  = 1;
 
 Use a single space between each charater in a comparision.
 ```
-if( 8 = max ), looks clearer than if(8 = max)
+if( 8 == max ), looks clearer than if(8 == max)
 ```
-for functions that return booleans, no spaces.
+For functions that return booleans, use no spaces.
 ```
 if(main.TXT.equals(".txt"))
 ```
 
-Use left-hand comparisons because if = is typed instead of ==,
+Use left-hand comparisons because if '=' is typed instead of '==',
 ```
 if( 2 = a ); /* Throws a compile-time error. */
 if( a = 2 ); /* Sets a to 2. */
 ```
 
-For conditions that go over 96 characters width, align using the minimum number of tabs.
+For conditions that go over 96 characters width, align using one space and the end ')' one after
+any '&&' or '||'s.
 ```
 if( a == b ||
-   a == c   )
+    a == c   )
 {
    ...
 };
-
 ```
-
 
 Even for single line conditions and loops, require curly brackets.
 ```
@@ -69,7 +68,6 @@ for(i = 0; i < array.length; i++)
 {
    i++;
 };
-
 ```
 
 This format avoids error such as:
@@ -83,7 +81,6 @@ and,
 for(i = 0; i < array.length; i++)
    i++;
    line = i;
-
 ```
 
 Use trailing commas for arrays with long elements.
