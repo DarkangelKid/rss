@@ -7,6 +7,8 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.CheckBox;
+import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.widget.ImageView;
@@ -49,6 +51,14 @@ public class adapter_settings_interface extends BaseAdapter
 		CheckBox checkbox;
 	}
 
+	private static class settings_seekbar_holder
+	{
+		TextView title_view;
+		TextView summary_view;
+		TextView read_view;
+		SeekBar seekbar;
+	}
+
 	public adapter_settings_interface(Context context_main, String stor)
 	{
 		inflater = (LayoutInflater) context_main.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -72,7 +82,7 @@ public class adapter_settings_interface extends BaseAdapter
 	@Override
 	public int getCount()
 	{
-		return 3;
+		return 4;
 	}
 
 	@Override
@@ -84,7 +94,7 @@ public class adapter_settings_interface extends BaseAdapter
 	@Override
 	public int getViewTypeCount()
 	{
-		return 3;
+		return 4;
 	}
 
 	@Override
@@ -116,15 +126,15 @@ public class adapter_settings_interface extends BaseAdapter
 				final settings_holocolour_holder holder;
 				if(convertView == null)
 				{
-					convertView = inflater.inflate(R.layout.settings_holocolour_select, parent, false);
-					holder = new settings_holocolour_holder();
-					holder.title_view = (TextView) convertView.findViewById(R.id.colour_title);
-					holder.summary_view = (TextView) convertView.findViewById(R.id.colour_summary);
-					holder.blue_view = (ImageView) convertView.findViewById(R.id.blue_image);
-					holder.purple_view = (ImageView) convertView.findViewById(R.id.purple_image);
-					holder.green_view = (ImageView) convertView.findViewById(R.id.green_image);
-					holder.yellow_view = (ImageView) convertView.findViewById(R.id.yellow_image);
-					holder.red_view = (ImageView) convertView.findViewById(R.id.red_image);
+					convertView				= inflater.inflate(R.layout.settings_holocolour_select, parent, false);
+					holder					= new settings_holocolour_holder();
+					holder.title_view		= (TextView) convertView.findViewById(R.id.colour_title);
+					holder.summary_view	= (TextView) convertView.findViewById(R.id.colour_summary);
+					holder.blue_view		= (ImageView) convertView.findViewById(R.id.blue_image);
+					holder.purple_view	= (ImageView) convertView.findViewById(R.id.purple_image);
+					holder.green_view		= (ImageView) convertView.findViewById(R.id.green_image);
+					holder.yellow_view	= (ImageView) convertView.findViewById(R.id.yellow_image);
+					holder.red_view		= (ImageView) convertView.findViewById(R.id.red_image);
 					convertView.setTag(holder);
 				}
 				else
@@ -155,16 +165,16 @@ public class adapter_settings_interface extends BaseAdapter
 				}
 				break;
 
-		/* This type is a checkbox setting. */
-			default:
+			/* This type is a checkbox setting. */
+			case(2):
 				final settings_checkbox_holder hold;
 				if(convertView == null)
 				{
-					convertView = (View) inflater.inflate(R.layout.settings_checkbox, parent, false);
-					hold = new settings_checkbox_holder();
-					hold.title_view = (TextView) convertView.findViewById(R.id.check_title);
+					convertView			= (View) inflater.inflate(R.layout.settings_checkbox, parent, false);
+					hold					= new settings_checkbox_holder();
+					hold.title_view	= (TextView) convertView.findViewById(R.id.check_title);
 					hold.summary_view = (TextView) convertView.findViewById(R.id.check_summary);
-					hold.checkbox = (CheckBox) convertView.findViewById(R.id.checkbox);
+					hold.checkbox		= (CheckBox) convertView.findViewById(R.id.checkbox);
 					convertView.setTag(hold);
 				}
 				else
@@ -183,6 +193,44 @@ public class adapter_settings_interface extends BaseAdapter
 				});
 				/* Load the saved boolean value and set the box as checked if true. */
 				utilities.load_checkbox(hold.checkbox, setting_path);
+				break;
+
+			/* This is the seekbar. */
+			default:
+				final settings_seekbar_holder hold2;
+				if(convertView == null)
+				{
+					convertView				= inflater.inflate(R.layout.settings_seekbar, parent, false);
+					hold2						= new settings_seekbar_holder();
+					hold2.title_view		= (TextView) convertView.findViewById(R.id.seek_title);
+					hold2.summary_view	= (TextView) convertView.findViewById(R.id.seek_summary);
+					hold2.seekbar			= (SeekBar) convertView.findViewById(R.id.seekbar);
+					hold2.read_view		= (TextView) convertView.findViewById(R.id.seek_read);
+					convertView.setTag(hold2);
+				}
+				else
+					hold2 = (settings_seekbar_holder) convertView.getTag();
+
+				hold2.title_view.setText(title_array[position]);
+				hold2.summary_view.setText(summary_array[position]);
+				hold2.seekbar.setMax(9);
+				hold2.seekbar.setOnSeekBarChangeListener(new OnSeekBarChangeListener()
+				{
+					public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
+					{
+						hold2.read_view.setText("DICKS");
+						/* KIRSTY - refer to the seekbar in adapter_settings_fuction to see what happens in onProgressChanged(). */
+					}
+
+					public void onStartTrackingTouch(SeekBar seekBar)
+					{
+					}
+
+					public void onStopTrackingTouch(SeekBar seekBar)
+					{
+					}
+				});
+				/* KIRSTY - use utilities.load_seekbar(hold2.seekbar, setting_path) to load and set the seekbar value. */
 		}
 		return convertView;
 	}
