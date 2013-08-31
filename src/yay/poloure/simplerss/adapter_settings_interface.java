@@ -29,6 +29,26 @@ public class adapter_settings_interface extends BaseAdapter
 
 	private static LayoutInflater inflater;
 
+		TextView settings_heading;
+
+	private static class settings_holocolour_holder
+	{
+		TextView title_view;
+		TextView summary_view;
+		ImageView blue_view;
+		ImageView purple_view;
+		ImageView green_view;
+		ImageView yellow_view;
+		ImageView red_view;
+	}
+
+	private static class settings_checkbox_holder
+	{
+		TextView title_view;
+		TextView summary_view;
+		CheckBox checkbox;
+	}
+
 	public adapter_settings_interface(Context context_main, String stor)
 	{
 		inflater = (LayoutInflater) context_main.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -62,7 +82,8 @@ public class adapter_settings_interface extends BaseAdapter
 	}
 
 	@Override
-	public int getViewTypeCount(){
+	public int getViewTypeCount()
+	{
 		return 3;
 	}
 
@@ -76,94 +97,92 @@ public class adapter_settings_interface extends BaseAdapter
 	public View getView(final int position, View convertView, ViewGroup parent)
 	{
 		final int view_type = getItemViewType(position);
-		if(view_type == 0)
+		final String setting_path = main.storage + main.SETTINGS + title_array[position] + main.TXT;
+		switch(view_type)
 		{
-			final settings_heading_holder holder;
-			if(convertView == null)
-			{
-				convertView = inflater.inflate(R.layout.settings_heading, parent, false);
-				holder = new settings_heading_holder();
-				holder.title_view = (TextView) convertView.findViewById(R.id.settings_heading);
-				convertView.setTag(holder);
-			}
-			else
-				holder = (settings_heading_holder) convertView.getTag();
-
-			holder.title_view.setText(title_array[position]);
-		}
-
-		else if(view_type == 1)
-		{
-			final settings_holocolour_holder holder;
-			if(convertView == null)
-			{
-				convertView = inflater.inflate(R.layout.settings_holocolour_select, parent, false);
-				holder = new settings_holocolour_holder();
-				holder.title_view = (TextView) convertView.findViewById(R.id.colour_title);
-				holder.summary_view = (TextView) convertView.findViewById(R.id.colour_summary);
-				holder.blue_view = (ImageView) convertView.findViewById(R.id.blue_image);
-				holder.purple_view = (ImageView) convertView.findViewById(R.id.purple_image);
-				holder.green_view = (ImageView) convertView.findViewById(R.id.green_image);
-				holder.yellow_view = (ImageView) convertView.findViewById(R.id.yellow_image);
-				holder.red_view = (ImageView) convertView.findViewById(R.id.red_image);
-				convertView.setTag(holder);
-			}
-			else
-				holder = (settings_holocolour_holder) convertView.getTag();
-
-			holder.title_view.setText(title_array[position]);
-			holder.summary_view.setText(summary_array[position]);
-
-			String[] colour_array = utilities.read_file_to_array(storage + main.SETTINGS + main.PAGERTABSTRIPCOLOUR);
-
-			if(colour_array.length == 0)
-			{
-				colour_array = new String[]{"blue"};
-				utilities.append_string_to_file(storage + main.SETTINGS + main.PAGERTABSTRIPCOLOUR, "blue");
-			}
-
-			ImageView[] colour_views = new ImageView[]{holder.blue_view, holder.purple_view, holder.green_view, holder.yellow_view, holder.red_view};
-
-			for(int i = 0; i < colour_views.length; i++)
-			{
-				colour_views[i].setOnClickListener(new colour_click(i));
-
-				/* Set the alpha to fade out if it is not the currently selected colour. */
-				if(colour_array[0].equals(colours[i]))
-					colour_views[i].setAlpha(1.0f);
-				else
-					colour_views[i].setAlpha(0.5f);
-			}
-		}
-		/* So far there are only 2 view types, heading and holocolour_select. This will change */
-		else
-		{
-			final settings_checkbox_holder holder;
-			if(convertView == null)
-			{
-				convertView = (View) inflater.inflate(R.layout.settings_checkbox, parent, false);
-				holder = new settings_checkbox_holder();
-				holder.title_view = (TextView) convertView.findViewById(R.id.check_title);
-				holder.summary_view = (TextView) convertView.findViewById(R.id.check_summary);
-				holder.checkbox = (CheckBox) convertView.findViewById(R.id.checkbox);
-				convertView.setTag(holder);
-			}
-			else
-				holder = (settings_checkbox_holder) convertView.getTag();
-
-			holder.title_view.setText(title_array[position]);
-			holder.summary_view.setText(summary_array[position]);
-			holder.checkbox.setOnClickListener(new OnClickListener()
-			{
-				@Override
-				public void onClick(View v)
+			/* This type is a heading. */
+			case(0):
+				if(convertView == null)
 				{
-					boolean checked = ((CheckBox) v).isChecked();
-					String file_name = title_array[position];
-					///PAULTODO
+					convertView = inflater.inflate(R.layout.settings_heading, parent, false);
+					settings_heading = (TextView) convertView.findViewById(R.id.settings_heading);
 				}
-			});
-			holder.checkbox.setChecked(false);
+
+				settings_heading.setText(title_array[position]);
+				break;
+
+			/* This type is the colour selector. */
+			case(1):
+				final settings_holocolour_holder holder;
+				if(convertView == null)
+				{
+					convertView = inflater.inflate(R.layout.settings_holocolour_select, parent, false);
+					holder = new settings_holocolour_holder();
+					holder.title_view = (TextView) convertView.findViewById(R.id.colour_title);
+					holder.summary_view = (TextView) convertView.findViewById(R.id.colour_summary);
+					holder.blue_view = (ImageView) convertView.findViewById(R.id.blue_image);
+					holder.purple_view = (ImageView) convertView.findViewById(R.id.purple_image);
+					holder.green_view = (ImageView) convertView.findViewById(R.id.green_image);
+					holder.yellow_view = (ImageView) convertView.findViewById(R.id.yellow_image);
+					holder.red_view = (ImageView) convertView.findViewById(R.id.red_image);
+					convertView.setTag(holder);
+				}
+				else
+					holder = (settings_holocolour_holder) convertView.getTag();
+
+				holder.title_view.setText(title_array[position]);
+				holder.summary_view.setText(summary_array[position]);
+
+				String[] colour_array = utilities.read_file_to_array(storage + main.SETTINGS + main.PAGERTABSTRIPCOLOUR);
+
+				if(colour_array.length == 0)
+				{
+					colour_array = new String[]{"blue"};
+					utilities.append_string_to_file(storage + main.SETTINGS + main.PAGERTABSTRIPCOLOUR, "blue");
+				}
+
+				ImageView[] colour_views = new ImageView[]{holder.blue_view, holder.purple_view, holder.green_view, holder.yellow_view, holder.red_view};
+
+				for(int i = 0; i < colour_views.length; i++)
+				{
+					colour_views[i].setOnClickListener(new colour_click(i));
+
+					/* Set the alpha to fade out if it is not the currently selected colour. */
+					if(colour_array[0].equals(colours[i]))
+						colour_views[i].setAlpha(1.0f);
+					else
+						colour_views[i].setAlpha(0.5f);
+				}
+				break;
+
+		/* This type is a checkbox setting. */
+			default:
+				final settings_checkbox_holder hold;
+				if(convertView == null)
+				{
+					convertView = (View) inflater.inflate(R.layout.settings_checkbox, parent, false);
+					hold = new settings_checkbox_holder();
+					hold.title_view = (TextView) convertView.findViewById(R.id.check_title);
+					hold.summary_view = (TextView) convertView.findViewById(R.id.check_summary);
+					hold.checkbox = (CheckBox) convertView.findViewById(R.id.checkbox);
+					convertView.setTag(hold);
+				}
+				else
+					hold = (settings_checkbox_holder) convertView.getTag();
+
+				hold.title_view.setText(title_array[position]);
+				hold.summary_view.setText(summary_array[position]);
+				hold.checkbox.setOnClickListener(new OnClickListener()
+				{
+					@Override
+					public void onClick(View v)
+					{
+						utilities.delete(setting_path);
+						utilities.append_string_to_file(setting_path, Boolean.toString(((CheckBox) v).isChecked()));
+					}
+				});
+				/* Load the saved boolean value and set the box as checked if true. */
+				utilities.load_checkbox(hold.checkbox, setting_path);
 		}
 		return convertView;
 	}
@@ -193,28 +212,5 @@ public class adapter_settings_interface extends BaseAdapter
 			for(PagerTabStrip strip : main.strips)
 				utilities.set_pagertabstrip_colour(main.storage, strip);
 		}
-	}
-
-	static class settings_heading_holder
-	{
-		TextView title_view;
-	}
-
-	static class settings_holocolour_holder
-	{
-		TextView title_view;
-		TextView summary_view;
-		ImageView blue_view;
-		ImageView purple_view;
-		ImageView green_view;
-		ImageView yellow_view;
-		ImageView red_view;
-	}
-
-	static class settings_checkbox_holder
-	{
-		TextView title_view;
-		TextView summary_view;
-		CheckBox checkbox;
 	}
 }

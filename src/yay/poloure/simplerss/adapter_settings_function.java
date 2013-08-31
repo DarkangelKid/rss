@@ -75,103 +75,97 @@ public class adapter_settings_function extends BaseAdapter
 	public View getView(final int position, View convertView, ViewGroup parent)
 	{
 		final int view_type = getItemViewType(position);
-		if(view_type == 0)
+		final String setting_path = main.storage + main.SETTINGS + file_names[position] + main.TXT;
+		String[] check;
+
+		switch(view_type)
 		{
-			if(convertView == null)
-			{
-				convertView = inflater.inflate(R.layout.settings_heading, parent, false);
-				title_view = (TextView) convertView.findViewById(R.id.settings_heading);
-			}
-
-			title_view.setText(title_array[position]);
-		}
-
-		else if(view_type == 1)
-		{
-			final settings_checkbox_holder holder;
-			if(convertView == null)
-			{
-				convertView = inflater.inflate(R.layout.settings_checkbox, parent, false);
-				holder = new settings_checkbox_holder();
-				holder.title_view = (TextView) convertView.findViewById(R.id.check_title);
-				holder.summary_view = (TextView) convertView.findViewById(R.id.check_summary);
-				holder.checkbox = (CheckBox) convertView.findViewById(R.id.checkbox);
-				convertView.setTag(holder);
-			}
-			else
-				holder = (settings_checkbox_holder) convertView.getTag();
-
-			holder.title_view.setText(title_array[position]);
-			holder.summary_view.setText(summary_array[position]);
-
-			/* On click, save the value of the click to a settings file. */
-			holder.checkbox.setOnClickListener(new OnClickListener()
-			{
-				@Override
-				public void onClick(View v)
+			/* This type is the a heading. */
+			case(0):
+				if(convertView == null)
 				{
-					boolean checked = ((CheckBox) v).isChecked();
-					utilities.delete(main.storage + main.SETTINGS + file_names[position] + main.TXT);
-					utilities.append_string_to_file(main.storage + main.SETTINGS + file_names[position] + main.TXT, Boolean.toString(checked));
-				}
-			});
-
-			/* Load the saved boolean value and set the box as checked if true. */
-			String[] check = utilities.read_file_to_array(main.storage + main.SETTINGS + file_names[position] + main.TXT);
-			if(check.length == 0)
-			{
-				holder.checkbox.setChecked(false);
-				utilities.append_string_to_file(main.storage + main.SETTINGS + file_names[position] + main.TXT, Boolean.toString(false));
-			}
-			else
-				holder.checkbox.setChecked(Boolean.parseBoolean(check[0]));
-		}
-		else
-		{
-			final settings_seekbar_holder holder;
-			if(convertView == null)
-			{
-				convertView = inflater.inflate(R.layout.settings_seekbar, parent, false);
-				holder = new settings_seekbar_holder();
-				holder.title_view = (TextView) convertView.findViewById(R.id.seek_title);
-				holder.summary_view = (TextView) convertView.findViewById(R.id.seek_summary);
-				holder.seekbar = (SeekBar) convertView.findViewById(R.id.seekbar);
-				holder.read_view = (TextView) convertView.findViewById(R.id.seek_read);
-				convertView.setTag(holder);
-			}
-			else
-				holder = (settings_seekbar_holder) convertView.getTag();
-
-			holder.title_view.setText(title_array[position]);
-			holder.summary_view.setText(summary_array[position]);
-			holder.seekbar.setMax(9);
-			holder.seekbar.setOnSeekBarChangeListener(new OnSeekBarChangeListener()
-			{
-				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
-				{
-					holder.read_view.setText(refresh_times[progress]);
-					utilities.delete(main.storage + main.SETTINGS + file_names[position] + main.TXT);
-					utilities.append_string_to_file(main.storage + main.SETTINGS + file_names[position] + main.TXT, Integer.toString(times[progress]));
+					convertView = inflater.inflate(R.layout.settings_heading, parent, false);
+					title_view = (TextView) convertView.findViewById(R.id.settings_heading);
 				}
 
-				public void onStartTrackingTouch(SeekBar seekBar)
-				{
-				}
+				title_view.setText(title_array[position]);
+				break;
 
-				public void onStopTrackingTouch(SeekBar seekBar)
+			/* This type is a checkbox setting. */
+			case(1):
+				final settings_checkbox_holder holder;
+				if(convertView == null)
 				{
+					convertView = inflater.inflate(R.layout.settings_checkbox, parent, false);
+					holder = new settings_checkbox_holder();
+					holder.title_view = (TextView) convertView.findViewById(R.id.check_title);
+					holder.summary_view = (TextView) convertView.findViewById(R.id.check_summary);
+					holder.checkbox = (CheckBox) convertView.findViewById(R.id.checkbox);
+					convertView.setTag(holder);
 				}
-			});
+				else
+					holder = (settings_checkbox_holder) convertView.getTag();
 
-			/* Load the saved boolean value and set the box as checked if true. */
-			String[] check = utilities.read_file_to_array(main.storage + main.SETTINGS + file_names[position] + main.TXT);
-			if(check.length == 0)
-			{
-				holder.seekbar.setProgress(3);
-				utilities.append_string_to_file(main.storage + main.SETTINGS + file_names[position] + main.TXT, Integer.toString(times[3]));
-			}
-			else
-				holder.seekbar.setProgress(utilities.index_of_int(times, Integer.parseInt(check[0])));
+				holder.title_view.setText(title_array[position]);
+				holder.summary_view.setText(summary_array[position]);
+
+				/* On click, save the value of the click to a settings file. */
+				holder.checkbox.setOnClickListener(new OnClickListener()
+				{
+					@Override
+					public void onClick(View v)
+					{
+						utilities.delete(setting_path);
+						utilities.append_string_to_file(setting_path, Boolean.toString(((CheckBox) v).isChecked()));
+					}
+				});
+
+				/* Load the saved boolean value and set the box as checked if true. */
+				utilities.load_checkbox(holder.checkbox, setting_path);
+				break;
+
+			/* Otherwise, the type will default to a seekbar. */
+			default:
+				final settings_seekbar_holder hold;
+				if(convertView == null)
+				{
+					convertView = inflater.inflate(R.layout.settings_seekbar, parent, false);
+					hold = new settings_seekbar_holder();
+					hold.title_view = (TextView) convertView.findViewById(R.id.seek_title);
+					hold.summary_view = (TextView) convertView.findViewById(R.id.seek_summary);
+					hold.seekbar = (SeekBar) convertView.findViewById(R.id.seekbar);
+					hold.read_view = (TextView) convertView.findViewById(R.id.seek_read);
+					convertView.setTag(hold);
+				}
+				else
+					hold = (settings_seekbar_holder) convertView.getTag();
+
+				hold.title_view.setText(title_array[position]);
+				hold.summary_view.setText(summary_array[position]);
+				hold.seekbar.setMax(9);
+				hold.seekbar.setOnSeekBarChangeListener(new OnSeekBarChangeListener()
+				{
+					@Override
+					public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
+					{
+						hold.read_view.setText(refresh_times[progress]);
+						utilities.delete(setting_path);
+						utilities.append_string_to_file(setting_path, Integer.toString(times[progress]));
+					}
+
+					@Override
+					public void onStartTrackingTouch(SeekBar seekBar)
+					{
+					}
+
+					@Override
+					public void onStopTrackingTouch(SeekBar seekBar)
+					{
+					}
+				});
+
+				/* Load the saved boolean value and set the box as checked if true. */
+				utilities.load_seekbar(hold.seekbar, setting_path);
 		}
 		return convertView;
 	}

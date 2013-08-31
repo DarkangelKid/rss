@@ -598,6 +598,30 @@ public class utilities
 			new add_edit_dialog.check_feed_exists(dlg, ngroup, fname, mode, ctitle, cgroup, sgroup, pos, all_str).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
 	}
 
+	public static boolean load_checkbox(android.widget.CheckBox checkbox, String path)
+	{
+		String[] check = read_file_to_array(path);
+		boolean value = (check.length == 0) ? false : Boolean.parseBoolean(check[0]);
+
+		if(check.length == 0)
+			append_string_to_file(path, Boolean.toString(value));
+
+		checkbox.setChecked(value);
+		return value;
+	}
+
+	public static int load_seekbar(android.widget.SeekBar seekbar, String path)
+	{
+		String[] check = read_file_to_array(path);
+		int value = (check.length == 0) ? 3 : Integer.parseInt(check[0]);
+
+		if(check.length == 0)
+			append_string_to_file(path, Integer.toString(adapter_settings_function.times[3]));
+
+		seekbar.setProgress(index_of_int(adapter_settings_function.times, value));
+		return value;
+	}
+
 	public static void log(String storage, String text)
 	{
 		append_string_to_file(storage + main.DUMP_FILE, text + main.NL);
