@@ -55,7 +55,7 @@ class parser
 		final String thumbnail_dir	= feed_folder + main.THUMBNAIL_DIRECTORY;
 		final File in					= new File(store_file);
 		final File out					= new File(content_file);
-		final String[] filters		= utilities.read_file_to_array(storage + main.FILTER_LIST);
+		final String[] filters		= utilities.read_file(storage + main.FILTER_LIST);
 
 		Set<String> set				= new LinkedHashSet<String>();
 		Boolean write_mode			= false;
@@ -430,7 +430,7 @@ class parser
 						if((tem3 != -1)&&(tem3 < tem2))
 								tem2 = tem3;
 					}
-					utilities.delete(dump_path);
+					utilities.rm(dump_path);
 					to_file(dump_path, tag.substring(tem + 6, tem2) + main.NL);
 				}
 			}

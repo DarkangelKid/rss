@@ -54,6 +54,7 @@ public class main extends ActionBarActivity
 	public static final String SETTINGS					= "settings" + SEPAR;
 	public static final String PAGERTABSTRIPCOLOUR	= "pagertabstrip_colour" + TXT;
 	public static final String DUMP_FILE				= "dump" + TXT;
+	public static final String TEMP						= ".temp" + TXT;
 	public static final String STORE_APPENDIX			= ".store" + TXT;
 	public static final String CONTENT_APPENDIX		= ".content" + TXT;
 	public static final String URL_APPENDIX			= ".urls" + TXT;
@@ -89,7 +90,7 @@ public class main extends ActionBarActivity
 		ALL_FILE					= GROUPS_DIRECTORY + ALL + SEPAR + ALL + TXT;
 
 		/* Delete the log file. */
-		utilities.delete(storage + DUMP_FILE);
+		utilities.rm(storage + DUMP_FILE);
 
 		/* Create the top level folders if they do not exist. */
 		File folder_file;
@@ -167,7 +168,7 @@ public class main extends ActionBarActivity
 
 		/* Load the refresh boolean value from settings. */
 		Boolean refresh = false;
-		String[] check = utilities.read_file_to_array(main.storage + main.SETTINGS + adapter_settings_function.file_names[1] + main.TXT);
+		String[] check = utilities.read_file(main.storage + main.SETTINGS + adapter_settings_function.file_names[1] + main.TXT);
 		if(check.length != 0)
 			refresh = Boolean.parseBoolean(check[0]);
 
@@ -175,13 +176,13 @@ public class main extends ActionBarActivity
 		{
 			/* Load the refresh time from settings. */
 			int refresh_time = adapter_settings_function.times[3];
-			check = utilities.read_file_to_array(main.storage + main.SETTINGS + adapter_settings_function.file_names[2] + main.TXT);
+			check = utilities.read_file(main.storage + main.SETTINGS + adapter_settings_function.file_names[2] + main.TXT);
 			if(check.length != 0)
 				refresh_time = Integer.parseInt(check[0]);
 
 			/* Load notification boolean. */
 			Boolean notifications = false;
-			check = utilities.read_file_to_array(main.storage + main.SETTINGS + adapter_settings_function.file_names[3] + main.TXT);
+			check = utilities.read_file(main.storage + main.SETTINGS + adapter_settings_function.file_names[3] + main.TXT);
 			if(check.length != 0)
 				notifications = Boolean.parseBoolean(check[0]);
 
@@ -194,7 +195,7 @@ public class main extends ActionBarActivity
 			AlarmManager alarm_refresh = (AlarmManager) getSystemService(Activity.ALARM_SERVICE);
 			alarm_refresh.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + interval, interval, pend_intent);
 		}
-		utilities.delete(storage + READ_ITEMS);
+		utilities.rm(storage + READ_ITEMS);
 		utilities.write_collection_to_file(storage + READ_ITEMS, adapter_feeds_cards.read_items);
 	}
 
@@ -205,7 +206,7 @@ public class main extends ActionBarActivity
 		Boolean refresh = false;
 
 		/* Load the refresh boolean value from settings. */
-		String[] check = utilities.read_file_to_array(main.storage + main.SETTINGS + adapter_settings_function.file_names[1] + main.TXT);
+		String[] check = utilities.read_file(main.storage + main.SETTINGS + adapter_settings_function.file_names[1] + main.TXT);
 		if(check.length != 0)
 			refresh = Boolean.parseBoolean(check[0]);
 
@@ -555,7 +556,7 @@ public class main extends ActionBarActivity
 	{
 		final int previous_size = current_groups.length;
 
-		current_groups = utilities.read_file_to_array(storage + GROUP_LIST);
+		current_groups = utilities.read_file(storage + GROUP_LIST);
 		final int size = current_groups.length;
 		if(size == 0)
 		{
@@ -626,7 +627,7 @@ public class main extends ActionBarActivity
 
 		/* Load notification boolean. */
 		Boolean notifications = false;
-		String[] check = utilities.read_file_to_array(main.storage + main.SETTINGS + adapter_settings_function.file_names[3] + main.TXT);
+		String[] check = utilities.read_file(main.storage + main.SETTINGS + adapter_settings_function.file_names[3] + main.TXT);
 		if(check.length != 0)
 			notifications = Boolean.parseBoolean(check[0]);
 

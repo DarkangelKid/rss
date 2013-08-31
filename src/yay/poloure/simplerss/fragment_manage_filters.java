@@ -31,7 +31,7 @@ class fragment_manage_filters extends Fragment
 		filter_list_adapter = new adapter_manage_filter(getActivity());
 		filter_list.setAdapter(filter_list_adapter);
 
-		filter_list_adapter.set_items(utilities.read_file_to_array(main.storage + main.FILTER_LIST));
+		filter_list_adapter.set_items(utilities.read_file(main.storage + main.FILTER_LIST));
 
 		filter_list.setOnItemLongClickListener
 		(

@@ -56,7 +56,7 @@ public class add_edit_dialog
 			String url = "", feed_title = "";
 			if(group.length() > 0)
 			{
-				final String[] current_groups = utilities.read_file_to_array(main.storage + main.GROUP_LIST);
+				final String[] current_groups = utilities.read_file(main.storage + main.GROUP_LIST);
 				for(String gro : current_groups)
 				{
 					if((gro.toLowerCase(Locale.getDefault())).equals(group.toLowerCase(Locale.getDefault())))
@@ -189,10 +189,10 @@ public class add_edit_dialog
 					{
 						final String feed_name	= ((TextView) add_filter_layout).getText().toString().trim();
 						String filter_path		= storage.concat(main.FILTER_LIST);
-						String[] filters			= utilities.read_file_to_array(filter_path);
+						String[] filters			= utilities.read_file(filter_path);
 						if(utilities.index(filters, feed_name) != -1)
 							utilities.append_string_to_file(filter_path, feed_name + main.NL);
-						fragment_manage_filters.filter_list_adapter.set_items(utilities.read_file_to_array(filter_path));
+						fragment_manage_filters.filter_list_adapter.set_items(utilities.read_file(filter_path));
 						fragment_manage_filters.filter_list_adapter.notifyDataSetChanged();
 						add_filter_dialog.hide();
 					}
@@ -360,10 +360,10 @@ public class add_edit_dialog
 			utilities.remove_string_from_file(old_group_file, old_name, true);
 			utilities.append_string_to_file(new_group_file, "name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|" + main.NL);
 
-			utilities.delete_if_empty(old_group_file);
+			utilities.rm_empty(old_group_file);
 			if(!(new File(old_group_file).exists()))
 			{
-				utilities.delete_directory(new File(old_group_folder));
+				utilities.rmdir(new File(old_group_folder));
 				utilities.remove_string_from_file(storage + main.GROUP_LIST, old_group, false);
 			}
 		}

@@ -56,7 +56,7 @@ public class service_update extends IntentService
 		if(storage == null)
 			return;
 
-		final String[] all_groups			= utilities.read_file_to_array(storage + main.GROUP_LIST);
+		final String[] all_groups			= utilities.read_file(storage + main.GROUP_LIST);
 		final String grouper					= all_groups[group];
 		final String group_file_path		= storage + main.GROUPS_DIRECTORY + grouper + SEPAR + grouper + main.TXT;
 

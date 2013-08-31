@@ -55,22 +55,8 @@ public class utilities
 	public static void delete_group(String storage, String group)
 	{
 		/// Move all feeds to an unsorted group.
-		//delete(storage + main.GROUPS_DIRECTORY + group + main.TXT);
-		//delete(storage + main.GROUPS_DIRECTORY + group + main.GROUP_CONTENT_APPENDIX);
-	}
-
-	public static boolean delete_directory(File directory)
-	{
-		if(directory.isDirectory())
-		{
-			for(String child : directory.list())
-			{
-				boolean success = delete_directory(new File(directory, child));
-				if(!success)
-					return false;
-			}
-		}
-		return directory.delete();
+		//rm(storage + main.GROUPS_DIRECTORY + group + main.TXT);
+		//rm(storage + main.GROUPS_DIRECTORY + group + main.GROUP_CONTENT_APPENDIX);
 	}
 
 	public static <T> T[] concat(T[] first, T[] second)
@@ -120,7 +106,7 @@ public class utilities
 
 	public static void write_collection_to_file(String path, Iterable<?> content)
 	{
-		delete(path);
+		rm(path);
 		try
 		{
 			BufferedWriter out = new BufferedWriter(new FileWriter(path, true));
@@ -144,8 +130,9 @@ public class utilities
 		final String content_path = storage + main.GROUPS_DIRECTORY + current_groups[0] + main.SEPAR + current_groups[0] + main.CONTENT_APPENDIX;
 		final String count_path = content_path + main.COUNT_APPENDIX;
 
-		if(exists(count_path))
-			total = Integer.parseInt(read_file_to_array(count_path)[0]);
+		String[] count = read_file(count_path);
+		if(count.length != 0)
+			total = Integer.parseInt(count[0]);
 		else
 			total = count_lines(content_path);
 
@@ -174,76 +161,123 @@ public class utilities
 		return (new String[][]{info_array, group_array});
 	}
 
+	/* Function should be safe, returns false if fails. */
 	public static boolean download_file(String urler, String file_path)
 	{
-		if(Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
+		/* Check to see if we can write to the media. */
+		if(!Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
+			return false;
+
+		try
 		{
+			BufferedInputStream in = null;
+			FileOutputStream fout = null;
 			try
 			{
-				BufferedInputStream in = null;
-				FileOutputStream fout = null;
-				try
-				{
-					in = new BufferedInputStream(new URL(urler).openStream());
-					fout = new FileOutputStream(file_path);
+				in = new BufferedInputStream(new URL(urler).openStream());
+				fout = new FileOutputStream(file_path);
 
-					byte data[] = new byte[1024];
-					int count;
-					while ((count = in.read(data, 0, 1024)) != -1)
-						fout.write(data, 0, count);
-				}
-				finally
-				{
-					if (in != null)
-						in.close();
-					if (fout != null)
-						fout.close();
-				}
+				byte data[] = new byte[1024];
+				int count;
+				while ((count = in.read(data, 0, 1024)) != -1)
+					fout.write(data, 0, count);
 			}
-			catch(Exception e)
+			finally
 			{
-				delete(file_path);
-				return false;
+				if (in != null)
+					in.close();
+				if (fout != null)
+					fout.close();
 			}
+		}
+		catch(Exception e)
+		{
+			rm(file_path);
+			return false;
 		}
 		File file = new File(file_path);
 		return (file.exists() && file.length() != 0);
 	}
 
-	public static void append_string_to_file(String file_path, String string)
+	/* Function should be safe, returns false if fails. */
+	public static boolean append_string_to_file(String file_path, String string)
 	{
+		/* Check to see if we can write to the media. */
+		if(!Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
+			return false;
+
+		BufferedWriter out = null;
 		try
 		{
-			final BufferedWriter out = new BufferedWriter(new FileWriter(file_path, true));
-			out.write(string);
-			out.close();
+			try
+			{
+				out = new BufferedWriter(new FileWriter(file_path, true));
+				out.write(string);
+			}
+			finally
+			{
+				if(out != null)
+					out.close();
+			}
 		}
 		catch (Exception e)
 		{
+			rm(file_path);
+			return false;
 		}
+		return true;
 	}
 
-	public static void remove_string_from_file(String file_path, String string, Boolean contains)
+	/* This function should be safe, returns false if it failed (and consequently has changed nothing). */
+	public static boolean remove_string_from_file(String file_path, String string, Boolean contains)
 	{
-		delete(file_path);
+		/* Check to see if we can write to the media. */
+		if(!Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
+			return false;
+
+		final String temp_path	= file_path + main.TEMP;
+		final String[] lines;
+		BufferedWriter out		= null;
 		try
 		{
-			final BufferedWriter out = new BufferedWriter(new FileWriter(file_path, true));
-			for(String item : read_file_to_array(file_path))
+			try
 			{
-				if(contains && !item.contains(string))
-						out.write(item + main.NL);
-				else
+				/* Read the file to a String array, if the file does not exist, return false. */
+				lines = read_file(file_path);
+				if(lines.length == 0)
+					return false;
+
+				out = new BufferedWriter(new FileWriter(temp_path, true));
+
+				for(String item : lines)
 				{
-					if(!item.equals(string))
+					if(contains && !item.contains(string))
+						out.write(item + main.NL);
+					else if(!contains && !item.equals(string))
 						out.write(item + main.NL);
 				}
 			}
-			out.close();
+			finally
+			{
+				if(out != null)
+					out.close();
+			}
 		}
+		/* If fail while writing to the temp file, delete the temp file and return false. */
 		catch(Exception e)
 		{
+			rm(temp_path);
+			return false;
 		}
+
+		/* If the rename failed, delete the file and write the original back to the file. */
+		boolean success = mv(temp_path, file_path);
+		if(!success)
+		{
+			rm(file_path);
+			write_collection_to_file(file_path, java.util.Arrays.asList(lines));
+		}
+		return success;
 	}
 
 	public static String[][] read_csv_to_array(String file_path, char... type)
@@ -254,7 +288,10 @@ public class utilities
 		String[] lines;
 		char ch;
 
-		lines = read_file_to_array(file_path);
+		lines = read_file(file_path);
+		if(lines.length == 0)
+			return new String[0][0];
+
 		types = new String[type.length][lines.length];
 
 		for(j = 0; j < lines.length; j++)
@@ -283,87 +320,80 @@ public class utilities
 		return types;
 	}
 
-	public static String[] read_file_to_array(String file_path)
+	/* This function is now safe. It will return a zero length array on error. */
+	public static String[] read_file(String file_path)
 	{
-		String line, line_temp = "";
-		String[] lines;
+		final String count_path = file_path + main.COUNT_APPENDIX;
+		final int count;
+		String line;
 
-		/* If the count file does not exist, count the lines of the file. */
-		if(!exists(file_path + main.COUNT_APPENDIX))
-			lines = new String[count_lines(file_path)];
-		else
+		/* If the file_path is not a count file, get the number of lines. */
+		if(!file_path.contains(main.COUNT_APPENDIX))
 		{
-			/* Read the count file. */
-			try
-			{
-				BufferedReader in = null;
-				try
-				{
-					in = new BufferedReader(new FileReader(file_path + main.COUNT_APPENDIX));
-					line_temp = in.readLine();
-					in.close();
-				}
-				finally
-				{
-					if(in != null)
-						in.close();
-				}
-			}
-			catch(IOException e)
-			{
-				return new String[0];
-			}
-
-			lines = new String[Integer.parseInt(line_temp)];
+			String[] temp	= read_file(count_path);
+			count				= (temp.length == 0) ? count_lines(file_path) : Integer.parseInt(temp[0]);
 		}
+		else
+			count = count_lines(count_path);
 
-		/* If the file is empty, return a zero length array so we can check. */
-		if(lines.length == 0)
+		/* If the file is empty, return a zero length array. */
+		if(count == 0)
 			return new String[0];
 
-		BufferedReader stream;
+		/* Use the count to allocate memory for the array. */
+		String[] lines = new String[count];
+
+		/* Begin reading the file to the String array. */
+		BufferedReader in = null;
 		try
 		{
-			stream = new BufferedReader(new FileReader(file_path));
-			for(int i = 0; i < lines.length; i++)
-				lines[i] = stream.readLine();
-			stream.close();
+			try
+			{
+				in = new BufferedReader(new FileReader(file_path));
+				for(int i = 0; i < lines.length; i++)
+					lines[i] = in.readLine();
+				in.close();
+			}
+			finally
+			{
+				if(in != null)
+					in.close();
+			}
 		}
 		catch(IOException e)
 		{
+			return new String[0];
 		}
 		return lines;
 	}
 
 	public static Set<String> read_file_to_set(String file_path)
 	{
-		String line;
-		BufferedReader stream;
-		Set<String> lines = new HashSet<String>();
-		try
-		{
-			stream = new BufferedReader(new FileReader(file_path));
-			while((line = stream.readLine()) != null)
-				lines.add(line);
-			stream.close();
-		}
-		catch(IOException e){
-		}
-		return lines;
+		Set set = new HashSet<String>();
+		java.util.Collections.addAll(set, read_file(file_path));
+		return set;
 	}
 
 	public static int count_lines(String file_path)
 	{
-		BufferedReader stream;
+		BufferedReader in = null;
 		int i = 0;
 		try
 		{
-			stream = new BufferedReader(new FileReader(file_path));
-			while(stream.readLine() != null)
-				i++;
-			stream.close();
+			try
+			{
+				in = new BufferedReader(new FileReader(file_path));
+				while(in.readLine() != null)
+					i++;
+			}
+			finally
+			{
+				if(in != null)
+					in.close();
+			}
 		}
-		catch(IOException e){
+		catch(IOException e)
+		{
 		}
 		return i;
 	}
@@ -444,7 +474,7 @@ public class utilities
 		for(int i = 1; i < size; i++)
 		{
 			unread = 0;
-			String[] urls = read_file_to_array(storage + main.GROUPS_DIRECTORY + current_groups[i] + main.SEPAR + current_groups[i] + main.CONTENT_APPENDIX + main.URL_APPENDIX);
+			String[] urls = read_file(storage + main.GROUPS_DIRECTORY + current_groups[i] + main.SEPAR + current_groups[i] + main.CONTENT_APPENDIX + main.URL_APPENDIX);
 			for(String url : urls)
 			{
 				if(!adapter_feeds_cards.read_items.contains(url))
@@ -465,7 +495,7 @@ public class utilities
 		String colour					= "blue";
 
 		/* Read the colour from the settings/colour file, if blank, save as blue. */
-		String[] colour_array = read_file_to_array(colour_path);
+		String[] colour_array = read_file(colour_path);
 		if(colour_array.length == 0)
 			append_string_to_file(colour_path, colour);
 		else
@@ -505,7 +535,7 @@ public class utilities
 			if(exists(content_path))
 			{
 				temp		= read_csv_to_array(content_path, 'p', 'l');
-				content 	= read_file_to_array(content_path);
+				content 	= read_file(content_path);
 				pubDates	= temp[0];
 				urls		= concat(urls, temp[1]);
 
@@ -531,7 +561,7 @@ public class utilities
 					out.write(entry.getValue().concat(main.NL));
 			out.close();
 
-			utilities.delete(group_count_file);
+			utilities.rm(group_count_file);
 			utilities.append_string_to_file(group_count_file, Integer.toString(map.size()));
 
 			BufferedWriter out3 = new BufferedWriter(new FileWriter(group_content_path + main.URL_APPENDIX, false));
@@ -539,7 +569,7 @@ public class utilities
 				out3.write(url.concat(main.NL));
 			out3.close();
 
-			utilities.delete(group_content_path + main.URL_APPENDIX + main.COUNT_APPENDIX);
+			utilities.rm(group_content_path + main.URL_APPENDIX + main.COUNT_APPENDIX);
 			utilities.append_string_to_file(group_content_path + main.URL_APPENDIX + main.COUNT_APPENDIX, Integer.toString(urls.length));
 
 		}
@@ -595,7 +625,7 @@ public class utilities
 
 	public static boolean load_checkbox(android.widget.CheckBox checkbox, String path)
 	{
-		String[] check = read_file_to_array(path);
+		String[] check = read_file(path);
 		boolean value = (check.length == 0) ? false : Boolean.parseBoolean(check[0]);
 
 		if(check.length == 0)
@@ -607,7 +637,7 @@ public class utilities
 
 	public static int load_seekbar(android.widget.SeekBar seekbar, String path)
 	{
-		String[] check = read_file_to_array(path);
+		String[] check = read_file(path);
 		int value = (check.length == 0) ? 3 : Integer.parseInt(check[0]);
 
 		if(check.length == 0)
@@ -634,20 +664,39 @@ public class utilities
 			log(service_update.storage, message);
 	}
 
-	public static void delete(String file_path)
+	public static boolean rm(String file_path)
 	{
-		(new File(file_path)).delete();
+		return (new File(file_path)).delete();
 	}
 
-	public static Boolean exists(String file_path)
-	{
-		return (new File(file_path)).exists();
-	}
-
-	public static void delete_if_empty(String file_path)
+	public static void rm_empty(String file_path)
 	{
 		File file = new File(file_path);
 		if(file.exists() && file.length() == 0)
 			file.delete();
+	}
+
+	public static boolean rmdir(File directory)
+	{
+		if(directory.isDirectory())
+		{
+			for(String child : directory.list())
+			{
+				boolean success = rmdir(new File(directory, child));
+				if(!success)
+					return false;
+			}
+		}
+		return directory.delete();
+	}
+
+	public static boolean mv(String a, String b)
+	{
+		return (new File(a)).renameTo(new File(b));
+	}
+
+	public static boolean exists(String file_path)
+	{
+		return (new File(file_path)).exists();
 	}
 }

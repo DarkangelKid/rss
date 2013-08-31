@@ -79,33 +79,33 @@ class fragment_manage_feed extends Fragment
 								final String group_prepend	= main.storage + main.GROUPS_DIRECTORY + group +    main.SEPAR + group;
 								final String all_file		= main.storage + main.GROUPS_DIRECTORY + main.ALL + main.SEPAR + main.ALL;
 
-								utilities.delete_directory(new File(main.storage + main.GROUPS_DIRECTORY + group + main.SEPAR + name));
+								utilities.rmdir(new File(main.storage + main.GROUPS_DIRECTORY + group + main.SEPAR + name));
 								utilities.remove_string_from_file(group_file, name, true);
 								utilities.remove_string_from_file(all_file + main.TXT, name, true);
 
-								utilities.delete_if_empty(group_file);
+								utilities.rm_empty(group_file);
 								if(!(new File(group_file).exists()))
 								{
-									utilities.delete_directory(new File(main.storage + main.GROUPS_DIRECTORY + group));
+									utilities.rmdir(new File(main.storage + main.GROUPS_DIRECTORY + group));
 									utilities.remove_string_from_file(main.storage + main.GROUP_LIST, group, false);
 								}
 								else
 								{
 									utilities.sort_group_content_by_time(main.storage, group, main.ALL);
-									utilities.delete_if_empty(group_prepend + main.CONTENT_APPENDIX);
-									utilities.delete_if_empty(group_prepend + main.COUNT_APPENDIX);
+									utilities.rm_empty(group_prepend + main.CONTENT_APPENDIX);
+									utilities.rm_empty(group_prepend + main.COUNT_APPENDIX);
 								}
 
-								String[] all_groups = utilities.read_file_to_array(main.storage + main.GROUP_LIST);
+								String[] all_groups = utilities.read_file(main.storage + main.GROUP_LIST);
 								if(all_groups.length == 1)
-									utilities.delete_directory(new File(main.storage + main.GROUPS_DIRECTORY + main.ALL));
+									utilities.rmdir(new File(main.storage + main.GROUPS_DIRECTORY + main.ALL));
 
 								else if(all_groups.length != 0)
 								{
 									/* This line may be broken. */
 									utilities.sort_group_content_by_time(main.storage, main.ALL, main.ALL);
-									utilities.delete_if_empty(all_file + main.CONTENT_APPENDIX);
-									utilities.delete_if_empty(all_file + main.COUNT_APPENDIX);
+									utilities.rm_empty(all_file + main.CONTENT_APPENDIX);
+									utilities.rm_empty(all_file + main.COUNT_APPENDIX);
 								}
 
 								main.update_groups();
@@ -130,7 +130,7 @@ class fragment_manage_feed extends Fragment
 								final String name			= feed_list_adapter.getItem(pos);
 								final String path			= main.storage + main.GROUPS_DIRECTORY + group + main.SEPAR + name;
 								final File feed_folder	= new File(path);
-								utilities.delete_directory(feed_folder);
+								utilities.rmdir(feed_folder);
 								/// make the image and thumnail folders.
 								(new File(path + main.SEPAR + main.IMAGE_DIRECTORY))		.mkdir();
 								(new File(path + main.SEPAR + main.THUMBNAIL_DIRECTORY))	.mkdir();

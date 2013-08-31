@@ -143,7 +143,7 @@ public class adapter_settings_interface extends BaseAdapter
 				holder.title_view.setText(title_array[position]);
 				holder.summary_view.setText(summary_array[position]);
 
-				String[] colour_array = utilities.read_file_to_array(storage + main.SETTINGS + main.PAGERTABSTRIPCOLOUR);
+				String[] colour_array = utilities.read_file(storage + main.SETTINGS + main.PAGERTABSTRIPCOLOUR);
 
 				if(colour_array.length == 0)
 				{
@@ -187,7 +187,7 @@ public class adapter_settings_interface extends BaseAdapter
 					@Override
 					public void onClick(View v)
 					{
-						utilities.delete(setting_path);
+						utilities.rm(setting_path);
 						utilities.append_string_to_file(setting_path, Boolean.toString(((CheckBox) v).isChecked()));
 					}
 				});
@@ -247,7 +247,7 @@ public class adapter_settings_interface extends BaseAdapter
 		@Override
 		public void onClick(View v)
 		{
-			utilities.delete(main.storage + main.SETTINGS + main.PAGERTABSTRIPCOLOUR);
+			utilities.rm(main.storage + main.SETTINGS + main.PAGERTABSTRIPCOLOUR);
 			utilities.append_string_to_file(main.storage + main.SETTINGS + main.PAGERTABSTRIPCOLOUR, colours[clicked_colour]);
 			View parent = (View) v.getParent();
 			(parent.findViewById(R.id.blue_image)).setAlpha(0.5f);

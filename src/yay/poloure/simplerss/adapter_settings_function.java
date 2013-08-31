@@ -115,7 +115,7 @@ public class adapter_settings_function extends BaseAdapter
 					@Override
 					public void onClick(View v)
 					{
-						utilities.delete(setting_path);
+						utilities.rm(setting_path);
 						utilities.append_string_to_file(setting_path, Boolean.toString(((CheckBox) v).isChecked()));
 					}
 				});
@@ -149,7 +149,7 @@ public class adapter_settings_function extends BaseAdapter
 					public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
 					{
 						hold.read_view.setText(refresh_times[progress]);
-						utilities.delete(setting_path);
+						utilities.rm(setting_path);
 						utilities.append_string_to_file(setting_path, Integer.toString(times[progress]));
 					}
 
