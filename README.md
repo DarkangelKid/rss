@@ -1,5 +1,4 @@
 We agree on the Allman style but here are some further propositions to allign our code style to.
-I am using github markup of 4 spaces for the initial indent just for the readme file.
 
 I read through
 ```
@@ -17,10 +16,10 @@ Edit:Preferences:Editor:Indentation - set width to 3 and type to spaces.
 Edit:Preferences:Editor:Display     - set column to 96.
 ```
 
-This allows allignment using indentation to be consistant. It also makes our github code
-readable. Tab now inserts three spaces. Backspace will also know it was a tab and delele 3.
+Using spaces allows allignment using indentation to be consistant. It also makes our github code
+readable. Tab now inserts three spaces. Backspace will also know it was a tab and delete three.
 
-If parameters to a function go over 96 characters width, aligned with single spaces.
+If parameters to a function go over 96 characters width, align with single spaces.
 
 ```
 int foobar2(int qux,
