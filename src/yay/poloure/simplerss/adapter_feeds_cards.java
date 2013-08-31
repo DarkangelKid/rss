@@ -65,7 +65,6 @@ public class adapter_feeds_cards extends BaseAdapter
    private ListView  listview;
    public  boolean   touched        = true;
 
-
    public adapter_feeds_cards(Context context_main)
    {
       if(context == null)
@@ -102,26 +101,53 @@ public class adapter_feeds_cards extends BaseAdapter
    @Override
    public long getItemId(int position)
    {
-      position = titles.length - position - 1;
       return position;
    }
 
    @Override
    public String getItem(int position)
    {
-      position = titles.length - position - 1;
       return titles[position];
+   }
+
+   @Override
+   public int getViewTypeCount()
+   {
+      return 4;
+   }
+
+   @Override
+   public int getItemViewType(int position)
+   {
+      boolean img = ( widths[position] != null &&
+                      widths[position] != 0 );
+      boolean des = ( descriptions[position] != null &&
+                     !descriptions[position].equals("") );
+
+      //write.log(main.storage, position + " || " + Boolean.toString(img) + " || " + Boolean.toString(des));
+
+      if(img && des)
+         return 0;
+      if(img && !des)
+         return 1;
+      if(!img && des)
+         return 2;
+      if(!img && !des)
+         return 3;
+
+      return 3;
    }
 
    /* If the listview starts at the very top of a list with 20 items, position 19 is the only on calling getView(). */
    @Override
-   public View getView(int pos, View convertView, ViewGroup parent)
+   public View getView(int position, View convertView, ViewGroup parent)
    {
-      final int position = titles.length - pos - 1;
+      int view_type = getItemViewType(position);
 
       if(first)
       {
          listview = (ListView) parent;
+         listview.setScrollingCacheEnabled(false);
          listview.setOnScrollListener(new AbsListView.OnScrollListener()
          {
             @Override
@@ -144,65 +170,104 @@ public class adapter_feeds_cards extends BaseAdapter
          });
       }
 
-      ViewHolder holder;
-      if(convertView == null)
+      /* card_full.xml img && des. */
+      if(view_type == 0)
       {
-         convertView             = inflater.inflate(R.layout.card_layout, parent, false);
-         holder                  = new ViewHolder();
-         holder.title_view       = (TextView)  convertView.findViewById(R.id.title              );
-         holder.time_view        = (TextView)  convertView.findViewById(R.id.time               );
-         holder.description_view = (TextView)  convertView.findViewById(R.id.description        );
-         holder.image_view       = (ImageView) convertView.findViewById(R.id.image              );
-         holder.left             = (ImageView) convertView.findViewById(R.id.white_left_shadow  );
-         holder.right            = (ImageView) convertView.findViewById(R.id.white_right_shadow );
-         if(first)
+         full_holder holder;
+         if(convertView == null)
          {
-            holder.title_view       .setTextColor(title_black);
-            holder.description_view .setTextColor(des_black);
-            holder.time_view        .setTextColor(link_black);
-            first = false;
+            convertView  = inflater.inflate(R.layout.card_full, parent, false);
+            holder       = new full_holder();
+            holder.title = (TextView)  convertView.findViewById(R.id.title);
+            holder.url   = (TextView)  convertView.findViewById(R.id.url);
+            holder.des   = (TextView)  convertView.findViewById(R.id.description);
+            holder.image = (ImageView) convertView.findViewById(R.id.image);
+            convertView.setOnClickListener(new webview_mode());
+            convertView.setOnLongClickListener(new long_press());
+            convertView.setTag(holder);
          }
-         convertView             .setOnClickListener(new webview_mode());
-         convertView             .setOnLongClickListener(new long_press());
-         convertView             .setTag(holder);
-      }
-      else
-         holder = (ViewHolder) convertView.getTag();
-
-      final String link          = links[position];
-      final int height           = heights[position];
-      final int width            = widths[position];
-      boolean image_exists       = false;
-
-      if(width == 0)
-         holder.image_view.setVisibility(View.GONE);
-      else
-         image_exists = true;
-
-      if(image_exists)
-      {
-         holder.image_view          .setImageDrawable(new ColorDrawable(Color.WHITE));
-         holder.image_view          .setVisibility(View.VISIBLE);
-         holder.left                .setVisibility(View.GONE);
-         holder.right               .setVisibility(View.GONE);
-         ViewGroup.LayoutParams iv  = holder.image_view.getLayoutParams();
-         iv.height                  = (int) ((((double) screen_width)/(width)) * (height));
-         iv.width                   = LayoutParams.MATCH_PARENT;
-         holder.image_view          .setLayoutParams(iv);
-         holder.image_view          .setPadding(0, four, 0, 0);
-         holder.image_view          .setTag(position);
-
-         if(!main.HONEYCOMB)
-            (new image()).execute(holder, holder.image_view, holder.image_view.getTag());
          else
-            (new image()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, holder.image_view, holder.image_view.getTag());
+            holder = (full_holder) convertView.getTag();
+
+         display_img(holder.image, position);
+
+         holder.title.setText(titles[position]);
+         holder.des  .setText(descriptions[position]);
+         holder.url  .setText(links[position]);
+      }
+      /* card_no_des_img.xml no description, image, title. */
+      else if(view_type == 1)
+      {
+         img_no_des_holder holder;
+         if(convertView == null)
+         {
+            convertView  = inflater.inflate(R.layout.card_no_des_img, parent, false);
+            holder       = new img_no_des_holder();
+            holder.title = (TextView)  convertView.findViewById(R.id.title);
+            holder.url   = (TextView)  convertView.findViewById(R.id.url);
+            holder.image = (ImageView) convertView.findViewById(R.id.image);
+            convertView.setOnClickListener(new webview_mode());
+            convertView.setOnLongClickListener(new long_press());
+            convertView.setTag(holder);
+         }
+         else
+            holder = (img_no_des_holder) convertView.getTag();
+
+         display_img(holder.image, position);
+
+         holder.title.setText(titles[position]);
+         holder.url  .setText(links[position]);
+      }
+      /* card_des_no_img.xml no image, descirition, title. */
+      else if(view_type == 2)
+      {
+         no_img_des_holder holder;
+         if(convertView == null)
+         {
+            convertView  = inflater.inflate(R.layout.card_des_no_img, parent, false);
+            holder       = new no_img_des_holder();
+            holder.title = (TextView)  convertView.findViewById(R.id.title);
+            holder.url   = (TextView)  convertView.findViewById(R.id.url);
+            holder.des   = (TextView)  convertView.findViewById(R.id.description);
+            convertView.setOnClickListener(new webview_mode());
+            convertView.setOnLongClickListener(new long_press());
+            convertView.setTag(holder);
+         }
+         else
+            holder = (no_img_des_holder) convertView.getTag();
+
+         holder.title.setText(titles[position]);
+         holder.des  .setText(descriptions[position]);
+         holder.url  .setText(links[position]);
+      }
+      /* No description or image. */
+      else if(view_type == 3)
+      {
+         no_img_no_des_holder holder;
+         if(convertView == null)
+         {
+            convertView  = inflater.inflate(R.layout.card_no_des_no_img, parent, false);
+            holder       = new no_img_no_des_holder();
+            holder.title = (TextView)  convertView.findViewById(R.id.title);
+            holder.url   = (TextView)  convertView.findViewById(R.id.url);
+            convertView.setOnClickListener(new webview_mode());
+            convertView.setOnLongClickListener(new long_press());
+            convertView.setTag(holder);
+         }
+         else
+            holder = (no_img_no_des_holder) convertView.getTag();
+
+         holder.title.setText(titles[position]);
+         holder.url  .setText(links[position]);
       }
 
-      /* Alpha MIN API 11 - Also may be a performance hog - If the item is read, grey it out */
-      /*int colour = holder.time_view.getCurrentTextColor();*/
-      if(main.HONEYCOMB)
+      /* Stuff unrelated to the view creation below here. */
+
+      /* Alpha MIN API 11 - Also may be a performance hog - If the item is read, grey it out
+       * int colour = holder.time_view.getCurrentTextColor();*/
+     /* if(main.HONEYCOMB)
       {
-         if(read_items.contains(links[position])/* && colour == link_black*/)
+         if(read_items.contains(links[position]))
          {
             holder.title_view       .setTextColor(title_grey);
             holder.description_view .setTextColor(des_grey);
@@ -210,7 +275,7 @@ public class adapter_feeds_cards extends BaseAdapter
             if(image_exists)
                holder.image_view.setAlpha(0.5f);
          }
-         else/* if(colour == link_grey)*/
+         else
          {
             holder.title_view       .setTextColor(title_black);
             holder.description_view .setTextColor(des_black);
@@ -218,42 +283,31 @@ public class adapter_feeds_cards extends BaseAdapter
             if(image_exists)
                holder.image_view.setAlpha(1.0f);
          }
-      }
+      }*/
 
       /* The logic that tells whether the item is read or not. */
       if(listview.getVisibility() == View.VISIBLE && position - 1 >= 0 && touched)
-            read_items.add(links[position - 1]);
+         read_items.add(links[position - 1]);
 
-      String title               = titles[position];
-      String description         = descriptions[position];
-
-      if(description != null && !description.equals(""))
-      {
-         holder.description_view.setVisibility(View.VISIBLE);
-         if(image_exists)
-         {
-            holder.left             .setVisibility(View.VISIBLE);
-            holder.right            .setVisibility(View.VISIBLE);
-            holder.description_view .setPadding(eight , four   , eight  , eight);
-            holder.image_view       .setPadding(0     , four   , 0      , four);
-         }
-         else
-            holder.description_view.setPadding(eight, two, eight, eight);
-
-         holder.description_view.setText(description);
-      }
-      else
-      {
-         holder.description_view.setVisibility(View.GONE);
-         if(!image_exists)
-         {
-            holder.time_view.setPadding(eight, 0, eight, eight);
-         }
-      }
-
-      holder.title_view.setText(title);
-      holder.time_view.setText(link);
       return convertView;
+   }
+
+   private void display_img(ImageView view, int position)
+   {
+      int height  = heights[position];
+      int width   = widths[position];
+
+      view.setImageDrawable(new ColorDrawable(Color.WHITE));
+      ViewGroup.LayoutParams iv = view.getLayoutParams();
+
+      iv.height = (int) ((((double) screen_width)/(width)) * (height));
+      view.setLayoutParams(iv);
+      view.setTag(position);
+
+      if(!main.HONEYCOMB)
+         (new image()).execute(view, view.getTag());
+      else
+         (new image()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, view, view.getTag());
    }
 
    class image extends AsyncTask<Object, Void, Object[]>
@@ -293,14 +347,32 @@ public class adapter_feeds_cards extends BaseAdapter
    }
 
 
-   static class ViewHolder
+   private static class full_holder
    {
-      TextView title_view;
-      TextView time_view;
-      TextView description_view;
-      ImageView image_view;
-      ImageView left;
-      ImageView right;
+      TextView title;
+      TextView url;
+      TextView des;
+      ImageView image;
+   }
+
+   private static class no_img_des_holder
+   {
+      TextView title;
+      TextView url;
+      TextView des;
+   }
+
+   private static class img_no_des_holder
+   {
+      TextView title;
+      TextView url;
+      ImageView image;
+   }
+
+   private static class no_img_no_des_holder
+   {
+      TextView title;
+      TextView url;
    }
 
    private class webview_mode implements View.OnClickListener
@@ -349,8 +421,8 @@ public class adapter_feeds_cards extends BaseAdapter
       @Override
       public boolean onLongClick(View v)
       {
-         String long_press_url = util.getstr((TextView) v.findViewById(R.id.time));
-         show_card_dialog(context, long_press_url, ((ViewHolder) v.getTag()).image_view.getVisibility());
+         String long_press_url = util.getstr((TextView) v.findViewById(R.id.url));
+        /* show_card_dialog(context, long_press_url, ((ViewHolder) v.getTag()).image_view.getVisibility());*/
          return true;
       }
    }

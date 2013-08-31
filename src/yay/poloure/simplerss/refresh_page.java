@@ -76,7 +76,7 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
 
       count = -1;
 
-      for(int m = 0; m < titles.length; m++)
+      for(int m = titles.length - 1; m >= 0; m--)
       {
          if(existing_items.add(links[m]))
          {
@@ -101,6 +101,8 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
 
             if(descriptions[m] == null || descriptions[m].length() < 8)
                descriptions[m] = "";
+            else if( descriptions[m].length() >= 360 )
+               descriptions[m] = descriptions[m].substring(0, 360);
             if(titles[m] == null)
                titles[m] = "";
 
