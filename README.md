@@ -13,13 +13,23 @@ time.
 ```
 Edit:Preferences:Files:Replace tabs with spaces to checked.
 Edit:Preferences:Editor:Indentation - set width to 3 and type to spaces.
-Edit:Preferences:Editor:Display     - set column to 96.
+Edit:Preferences:Editor:Display     - set column to 80.
 ```
 
 Using spaces allows allignment using indentation to be consistant. It also makes our github code
 readable. Tab now inserts three spaces. Backspace will also know it was a tab and delete three.
 
-If parameters to a function go over 96 characters width, align with single spaces.
+When commenting, use /* style */. When commenting out single lines of code, use //.
+For commenting out multiple lines, use /* */.
+
+Always leave an empty line above /* */ comments.
+
+The 80 column argument seems to be pretty much standard. It is the width of monospace on A4.
+It is for readability because it is hard to read wide lines. There are other reasons too like
+having two pages open side by side. It also means the code can be scrolled on github without
+a horizontal bar. Things like that.
+
+If parameters to a function go over 80 characters width, align with single spaces.
 
 ```
 int foobar2(int qux,
@@ -51,7 +61,7 @@ if( 2 = a ); /* Throws a compile-time error. */
 if( a = 2 ); /* Sets a to 2. */
 ```
 
-For conditions that go over 96 characters width, align using one space and the end ')' one after
+For conditions that go over 80 characters width, align using one space and the end ')' one after
 any '&&' or '||'s.
 ```
 if( a == b ||
@@ -81,6 +91,39 @@ for(i = 0; i < array.length; i++)
    i++;
    line = i;
 ```
+
+It also looks a bit clearer, for example
+```
+/*If the activity is running, make a toast notification. Log the event regardless. */
+if( main.service_handler != null )
+   Toast.makeText(main.activity_context, (CharSequence) message, Toast.LENGTH_LONG).show();
+
+/*This function could be called from a state where it is impossible to get storage so this is optional. */
+if ( main.storage != null )
+   log(main.storage, message);
+else if( service_update.storage != null )
+   log(service_update.storage, message);
+```
+
+vs
+```
+/*If the activity is running, make a toast notification. Log the event regardless. */
+if( main.service_handler != null )
+{
+   Toast.makeText(main.activity_context, (CharSequence) message, Toast.LENGTH_LONG).show();
+}
+
+/*This function could be called from a state where it is impossible to get storage so this is optional. */
+if ( main.storage != null )
+{
+   log(main.storage, message);
+}
+else if( service_update.storage != null )
+{
+   log(service_update.storage, message);
+}
+```
+
 
 Use trailing commas for arrays with long elements.
 Keep the last comma so editing the array is one change in revision control.
