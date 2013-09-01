@@ -3,13 +3,19 @@ package yay.poloure.simplerss;
 import android.os.Environment;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
+import android.content.Context;
 import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.net.URL;
 import java.util.Map;
 import java.util.TreeMap;
+import java.io.FileNotFoundException;
 import android.text.format.Time;
 
 public class write
@@ -21,18 +27,43 @@ public class write
 
    public static boolean collection(String path, Iterable<?> content)
    {
-      if(!util.check_media_mounted())
+      String name     = util.create_internal_name(path);
+      Context context = util.get_context();
+      String storage  = util.get_storage();
+      String internal = util.get_internal();
+
+      /* If storage is unmounted OR if we force to use external. */
+      if(util.check_unmounted())
          return false;
 
-      util.rm(path);
+      if(internal.equals(storage))
+         util.rm(path);
+
+      BufferedWriter out = null;
+      FileOutputStream f = null;
       try
       {
-         BufferedWriter out = new BufferedWriter(new FileWriter(path, true));
-         for(Object item : content)
+         try
          {
-            out.write(item.toString() + main.NL);
+            /* Create the buffered writer. */
+            if(!internal.equals(storage))
+            {
+               f = context.openFileOutput(name, Context.MODE_PRIVATE);
+               out = new BufferedWriter(new OutputStreamWriter(f, "UTF8"));
+            }
+            else
+               out = new BufferedWriter(new FileWriter(path, true));
+
+            for(Object item : content)
+            {
+               out.write(item.toString() + main.NL);
+            }
          }
-         out.close();
+         finally
+         {
+            if(out != null)
+               out.close();
+         }
       }
       catch(Exception e)
       {
@@ -43,7 +74,13 @@ public class write
    /* Function should be safe, returns false if fails. */
    public static boolean dl(String urler, String file_path)
    {
-      if(!util.check_media_mounted())
+      String name     = util.create_internal_name(file_path);
+      Context context = util.get_context();
+      String storage  = util.get_storage();
+      String internal = util.get_internal();
+
+      /* If storage is unmounted OR if we force to use external. */
+      if(util.check_unmounted())
          return false;
 
       try
@@ -53,7 +90,16 @@ public class write
          try
          {
             in = new BufferedInputStream(new URL(urler).openStream());
-            fout = new FileOutputStream(file_path);
+            if((!internal.equals(storage))&&
+               !urler.contains(".jpg")&&
+               !urler.contains(".png")&&
+               !urler.contains(".gif")&&
+               !urler.contains(".JPEG")&&
+               !urler.contains(".JPG")&&
+               !urler.contains(".jpeg"))
+               fout = context.openFileOutput(name, Context.MODE_PRIVATE);
+            else
+               fout = new FileOutputStream(file_path);
 
             byte data[] = new byte[1024];
             int count;
@@ -80,15 +126,29 @@ public class write
    /* Function should be safe, returns false if fails. */
    public static boolean single(String file_path, String string)
    {
-      if(!util.check_media_mounted())
+      String name     = util.create_internal_name(file_path);
+      Context context = util.get_context();
+      String storage  = util.get_storage();
+      String internal = util.get_internal();
+
+      /* If storage is unmounted OR if we force to use external. */
+      if(util.check_unmounted())
          return false;
 
       BufferedWriter out = null;
+      FileOutputStream f = null;
       try
       {
          try
          {
-            out = new BufferedWriter(new FileWriter(file_path, true));
+            if(!internal.equals(storage))
+            {
+               f = context.openFileOutput(name, Context.MODE_APPEND);
+               out = new BufferedWriter(new OutputStreamWriter(f, "UTF8"));
+            }
+            else
+               out = new BufferedWriter(new FileWriter(file_path, true));
+
             out.write(string);
          }
          finally
@@ -97,23 +157,30 @@ public class write
                out.close();
          }
       }
-      catch (Exception e)
+      catch(Exception e)
       {
-         util.rm(file_path);
          return false;
       }
       return true;
    }
 
-   /* This function should be safe, returns false if it failed. */
+   /* This function should be safe, returns false if it failed.
+    * NOT SAFE FOR INTERNAL IF FAILS. */
    static boolean remove_string(String file_path, String string, Boolean contains)
    {
-      if(!util.check_media_mounted())
+      String name     = util.create_internal_name(file_path);
+      Context context = util.get_context();
+      String storage  = util.get_storage();
+      String internal = util.get_internal();
+
+      /* If storage is unmounted OR if we force to use external. */
+      if(util.check_unmounted())
          return false;
 
       String temp_path   = file_path + main.TEMP;
       String[] lines;
       BufferedWriter out = null;
+      FileOutputStream f = null;
       try
       {
          try
@@ -123,7 +190,15 @@ public class write
             if(lines.length == 0)
                return false;
 
-            out = new BufferedWriter(new FileWriter(temp_path, true));
+            /* Create the buffered writer. */
+            if(!internal.equals(storage))
+            {
+               /* Mode private should delete the file first. */
+               f = context.openFileOutput(name, Context.MODE_PRIVATE);
+               out = new BufferedWriter(new OutputStreamWriter(f, "UTF8"));
+            }
+            else
+               out = new BufferedWriter(new FileWriter(temp_path, true));
 
             for(String item : lines)
             {
@@ -142,28 +217,37 @@ public class write
       /* If writing to the temp file fails, delete the temp file and return. */
       catch(Exception e)
       {
-         util.rm(temp_path);
+         if(internal.equals(storage))
+            util.rm(temp_path);
          return false;
       }
 
       /* If the rename failed, delete the file and write the original. */
-      boolean success = util.mv(temp_path, file_path);
-      if(!success)
+      if(internal.equals(storage))
       {
-         util.rm(file_path);
-         collection(file_path, java.util.Arrays.asList(lines));
+         boolean success = util.mv(temp_path, file_path);
+         if(!success)
+         {
+            util.rm(file_path);
+            collection(file_path, java.util.Arrays.asList(lines));
+         }
+         return success;
       }
-      return success;
+      return true;
    }
 
    public static boolean sort_content(String group, String all_group)
    {
-      if(!util.check_media_mounted())
+      Context context = util.get_context();
+      String storage  = util.get_storage();
+      String internal = util.get_internal();
+
+      /* If storage is unmounted OR if we force to use external. */
+      if(util.check_unmounted())
          return false;
 
       String sep                = main.SEPAR;
-      String storage            = util.get_storage();
-      String group_dir          = storage + main.GROUPS_DIR + group + sep;
+      String group_dir          = internal + main.GROUPS_DIR + group + sep;
       String group_content_path = group_dir + group + main.CONTENT;
       String group_count_file   = group_content_path + main.COUNT;
       String url_path           = group_content_path + main.URL;
@@ -184,7 +268,7 @@ public class write
       for(int k = 0; k < names.length; k++)
       {
          /* "/storage/groups/Tumblr/mariam/mariam.content.txt" */
-         content_path = storage + main.GROUPS_DIR + groups[k] + sep + names[k]
+         content_path = internal + main.GROUPS_DIR + groups[k] + sep + names[k]
                         + sep + names[k] + main.CONTENT;
 
          if(util.exists(content_path))
@@ -214,25 +298,42 @@ public class write
       try
       {
          BufferedWriter out = null;
+         FileOutputStream f = null;
 
-         out = new BufferedWriter(new FileWriter(group_content_path, false));
+         String name = util.create_internal_name(group_content_path);
+         if(!internal.equals(storage))
+         {
+            f = context.openFileOutput(name, Context.MODE_PRIVATE);
+            out = new BufferedWriter(new OutputStreamWriter(f, "UTF8"));
+         }
+         else
+            out = new BufferedWriter(new FileWriter(group_content_path, false));
          for(Map.Entry<Long, String> entry : map.entrySet())
          {
             out.write(entry.getValue().concat(main.NL));
          }
          out.close();
 
-         util.rm(group_count_file);
+         if(internal.equals(storage))
+            util.rm(group_count_file);
          single(group_count_file, Integer.toString(map.size()));
 
-         out = new BufferedWriter(new FileWriter(url_path, false));
+         name = util.create_internal_name(url_path);
+         if(!internal.equals(storage))
+         {
+            f = context.openFileOutput(name, Context.MODE_PRIVATE);
+            out = new BufferedWriter(new OutputStreamWriter(f, "UTF8"));
+         }
+         else
+            out = new BufferedWriter(new FileWriter(url_path, false));
          for(String url : urls)
          {
             out.write(url.concat(main.NL));
          }
          out.close();
 
-         util.rm(url_count);
+         if(internal.equals(storage))
+            util.rm(url_count);
          single(url_count, Integer.toString(urls.length));
       }
       catch(Exception e)
@@ -248,10 +349,8 @@ public class write
       return true;
    }
 
-   public static boolean log(String text)
+   public static void log(String text)
    {
-      if(!util.check_media_mounted())
-         return false;
-      return single(util.get_storage() + main.DUMP_FILE, text + main.NL);
+      single(util.get_internal() + main.DUMP_FILE, text + main.NL);
    }
 }

@@ -44,7 +44,7 @@ public class main extends ActionBarActivity
    static String[] cgroups = new String[0];
 
    /* These must be set straight away in onCreate. */
-   static String storage, ALL, DELETE_DIALOG, CLEAR_DIALOG, ALL_FILE;
+   static String storage, internal, ALL, DELETE_DIALOG, CLEAR_DIALOG, ALL_FILE;
 
    /* Static final are best only when type is a primitive or a String.
     * Static is also better than not static when primitive or String.
@@ -76,6 +76,7 @@ public class main extends ActionBarActivity
    static final String THUMBNAIL_DIR = "thumbnails" + SEPAR;
    static final String IMAGE_DIR     = "images" + SEPAR;
    static final String SETTINGS      = "settings" + SEPAR;
+   static final String INT_STORAGE   = "internal" + TXT;
    static final String STRIP_COLOR   = "pagertabstrip_colour" + TXT;
    static final String DUMP_FILE     = "dump" + TXT;
    static final String TEMP          = ".temp" + TXT;
@@ -108,29 +109,24 @@ public class main extends ActionBarActivity
       activity = this;
 
       /* Form the storage path. */
-      storage = util.get_storage();
+      internal = util.get_internal();
+      storage  = util.get_storage();
+      write.log(internal + NL);
 
       /* Load String resources into static variables. */
       ALL           = getString(R.string.all_group);
       DELETE_DIALOG = getString(R.string.delete_dialog);
       CLEAR_DIALOG  = getString(R.string.clear_dialog);
 
-      if(storage != null)
-      {
-         ALL_FILE      = storage + GROUPS_DIR + ALL + SEPAR + ALL + TXT;
+      ALL_FILE      = internal + GROUPS_DIR + ALL + SEPAR + ALL + TXT;
 
-         /* Delete the log file. */
-         util.rm(storage + DUMP_FILE);
+      /* Delete the log file. */
+      /* util.rm(internal + DUMP_FILE); */
 
-         /* Create the top level folders if they do not exist. */
-         File folder_file;
-         for(String folder : new String[]{GROUPS_DIR, SETTINGS})
-         {
-            folder_file = new File(storage + folder);
-            if(!folder_file.exists())
-               folder_file.mkdir();
-         }
-      }
+      /* Create the top level folders if they do not exist. */
+      /* TODO only if media exists. */
+      for(String folder : new String[]{GROUPS_DIR, SETTINGS})
+         util.mkdir(folder);
 
       /* Configure the action bar. */
       action_bar = getSupportActionBar();
@@ -169,16 +165,13 @@ public class main extends ActionBarActivity
       }
 
       /* Load the read items. */
-      if(storage != null)
-      {
-         adapter_feeds_cards.read_items = read.set(storage + READ_ITEMS);
+        adapter_feeds_cards.read_items = read.set(internal + READ_ITEMS);
 
-         update_groups();
+        update_groups();
 
-         /* If an all_content file exists, refresh page 0. */
-         if(util.exists(ALL_FILE))
-            update.page(0);
-      }
+        /* If an all_content file exists, refresh page 0. */
+        if(util.exists(ALL_FILE))
+         update.page(0);
    }
 
    @Override
@@ -206,16 +199,16 @@ public class main extends ActionBarActivity
    protected void onStop()
    {
       super.onStop();
-      util.set_service(this, storage, 0, "start");
-      util.rm(storage + READ_ITEMS);
-      write.collection(storage + READ_ITEMS, adapter_feeds_cards.read_items);
+      util.set_service(this, 0, "start");
+      util.rm(internal + READ_ITEMS);
+      write.collection(internal + READ_ITEMS, adapter_feeds_cards.read_items);
    }
 
    @Override
    protected void onStart()
    {
       super.onStart();
-      util.set_service(this, storage, 0, "stop");
+      util.set_service(this, 0, "stop");
    }
 
    @Override
@@ -567,11 +560,11 @@ public class main extends ActionBarActivity
    {
       int previous_size = cgroups.length;
 
-      cgroups = read.file(storage + GROUP_LIST);
+      cgroups = read.file(internal + GROUP_LIST);
       int size = cgroups.length;
       if(size == 0)
       {
-         write.single(storage + GROUP_LIST, ALL + NL);
+         write.single(internal + GROUP_LIST, ALL + NL);
          cgroups = new String[]{ALL};
       }
 
@@ -631,7 +624,7 @@ public class main extends ActionBarActivity
             util.refresh_pages(page);
          }
       };
-      Intent intent = util.make_intent(con, storage, viewpager.getCurrentItem());
+      Intent intent = util.make_intent(con, viewpager.getCurrentItem());
       con.startService(intent);
    }
 }

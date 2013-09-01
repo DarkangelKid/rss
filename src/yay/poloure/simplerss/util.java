@@ -44,6 +44,7 @@ public class util
       Environment.MEDIA_BAD_REMOVAL
    };
 
+   /* TODO UPDATE FOR INTERNAL STORAGE. */
    static void delete_feed(String group, String feed, int pos)
    {
       /* Get strings to make things clearer. */
@@ -162,13 +163,13 @@ public class util
    static String[][] create_info_arrays(String[] cgroups, int size)
    {
       String info, group_path, sep = main.SEPAR;
-      String storage       = get_storage();
+      String internal      = util.get_internal();
       int number, i, j, total;
       String[] content;
       String[] group_array = new String[size];
       String[] info_array  = new String[size];
 
-      String content_path = storage + main.GROUPS_DIR + cgroups[0]
+      String content_path = internal + main.GROUPS_DIR + cgroups[0]
                             + sep + cgroups[0] + main.CONTENT;
 
       String count_path = content_path + main.COUNT;
@@ -182,7 +183,7 @@ public class util
       for(i = 0; i < size; i++)
       {
          group_array[i] = cgroups[i];
-         group_path     = storage + main.GROUPS_DIR + group_array[i]
+         group_path     = internal + main.GROUPS_DIR + group_array[i]
                           + sep + group_array[i] + main.TXT;
 
          content = read.csv(group_path, 'n')[0];
@@ -201,10 +202,29 @@ public class util
             else if(number > 0)
                info += content[number - 1];
          }
-         info_array[i] = Integer.toString(content.length) + " feeds • " + info;
+         info_array[i] = content.length + " feeds • " + info;
       }
       info_array[0] =  total + " items • " + info_array[0];
       return (new String[][]{info_array, group_array});
+   }
+
+   static boolean check_unmounted()
+   {
+      String storage  = get_storage();
+      String internal = get_internal();
+      if(storage == null || internal.equals(storage));
+      {
+         if(!util.check_media_mounted())
+            return true;
+      }
+      return false;
+   }
+
+   static String create_internal_name(String path)
+   {
+      String name = path;
+      name = path.substring(path.indexOf("/files/") + 7);
+      return name.replaceAll("/", "-");
    }
 
    static adapter_feeds_cards get_card_adapter(FragmentManager fman, ViewPager viewpager, int page_number)
@@ -227,6 +247,41 @@ public class util
       }
    }
 
+   static Context get_context()
+   {
+      /* If running get the context from the activity, else ask the service. */
+      if(main.con != null)
+         return main.con;
+
+      else if(service_update.service_context != null)
+         return service_update.service_context;
+
+      else /* This case should never happen because either must be running. */
+         return null;
+   }
+
+   static String get_internal()
+   {
+      /* First check to see if storage all ready exists in the service
+       * or activity. */
+      if(main.internal != null)
+         return main.internal;
+
+      if(service_update.internal != null)
+         return service_update.internal;
+
+      Context context = get_context();
+      String settings = main.SETTINGS;
+      String internal = context.getFilesDir().getAbsolutePath() + main.SEPAR;
+
+      /* If setting says force external for all, use external for internal. */
+      /*String use = read.setting(internal + settings + main.INT_STORAGE);
+      if(use.equals("false"))
+         internal = get_storage();*/
+
+      return internal;
+   }
+
    /* This function will return null if it fails. Check for null each time.
     * It should be pretty safe and efficient to call all the time. */
    static String get_storage()
@@ -239,17 +294,7 @@ public class util
       if(service_update.storage != null)
          return service_update.storage;
 
-      Context context;
-
-      /* If running get the context from the activity, else ask the service. */
-      if(main.con != null)
-         context = main.con;
-
-      else if(service_update.service_context != null)
-         context = service_update.service_context;
-
-      else /* This case should never happen because either must be running. */
-         return null;
+      Context context = get_context();
 
       /* Check the media state for any undesirable states. */
       String state = Environment.getExternalStorageState();
@@ -286,7 +331,7 @@ public class util
 
    static int[] get_unread_counts(String[] cgroups)
    {
-      String storage       = get_storage();
+      String internal      = util.get_internal();
       int total            = 0, unread, num;
       final int size       = cgroups.length;
       int[] unread_counts  = new int[size];
@@ -295,13 +340,13 @@ public class util
       /* read_items == null when called from the service for notifications. */
       if( adapter_feeds_cards.read_items == null )
       {
-         adapter_feeds_cards.read_items = read.set(storage + main.READ_ITEMS);
+         adapter_feeds_cards.read_items = read.set(internal + main.READ_ITEMS);
       }
 
       for(int i = 1; i < size; i++)
       {
          unread = 0;
-         String[] urls = read.file(storage + main.GROUPS_DIR + cgroups[i]
+         String[] urls = read.file(internal + main.GROUPS_DIR + cgroups[i]
                                    + main.SEPAR + cgroups[i] +
                                    main.CONTENT + main.URL);
          for(String url : urls)
@@ -320,8 +365,8 @@ public class util
 
    static void set_strip_colour(PagerTabStrip strip)
    {
-      String storage = get_storage();
-      String colour_path = storage + main.SETTINGS + main.STRIP_COLOR;
+      String internal    = util.get_internal();
+      String colour_path = internal + main.SETTINGS + main.STRIP_COLOR;
 
       /* Read the colour from the settings/colour file, if blank, use blue. */
       String[] check  = read.file(colour_path);
@@ -335,10 +380,10 @@ public class util
       }
    }
 
-   public static Intent make_intent(Context context, String storage, int page)
+   static Intent make_intent(Context context, int page)
    {
       /* Load notification boolean. */
-      String path    = storage + main.SETTINGS
+      String path    = util.get_internal() + main.SETTINGS
                      + adapter_settings_function.file_names[3] + main.TXT;
       String[] check = read.file(path);
 
@@ -349,12 +394,12 @@ public class util
       return intent;
    }
 
-   public static void set_service(Context con, String storage, int page, String state)
+   static void set_service(Context con, int page, String state)
    {
       String   alarm = Activity.ALARM_SERVICE;
       int      time  = adapter_settings_function.times[3];
       String[] names = adapter_settings_function.file_names;
-      String   pre   = storage + main.SETTINGS;
+      String   pre   = util.get_internal() + main.SETTINGS;
       String   txt   = main.TXT;
 
       /* Load the refresh boolean value from settings. */
@@ -370,7 +415,7 @@ public class util
          time = stoi(check[0]);
 
       /* Create intent, turn into pending intent, and get the alarmmanager. */
-      Intent        intent  = make_intent(con, storage, 0);
+      Intent        intent  = make_intent(con, 0);
       PendingIntent pintent = PendingIntent.getService(con, 0, intent, 0);
       AlarmManager  am      = (AlarmManager) con.getSystemService(alarm);
 
@@ -388,7 +433,7 @@ public class util
    }
 
    /* Use this after content has been updated and you need to refresh */
-   public static void refresh_pages(int page)
+   static void refresh_pages(int page)
    {
       update.page(0);
       if(page != 0)
@@ -400,7 +445,7 @@ public class util
       }
    }
 
-   public static void post(CharSequence message)
+   static void post(CharSequence message)
    {
       /* If the activity is running, make a toast notification.
        * Log the event regardless. */
@@ -413,19 +458,19 @@ public class util
          write.log((String) message);
    }
 
-   public static boolean rm(String file_path)
+   static boolean rm(String file_path)
    {
       return (new File(file_path)).delete();
    }
 
-   public static void rm_empty(String file_path)
+   static void rm_empty(String file_path)
    {
       File file = new File(file_path);
       if(file.exists() && file.length() == 0)
          file.delete();
    }
 
-   public static boolean rmdir(File directory)
+   static boolean rmdir(File directory)
    {
       if(directory.isDirectory())
       {
@@ -439,37 +484,44 @@ public class util
       return directory.delete();
    }
 
+   static void mkdir(String path)
+   {
+      File folder = new File(get_storage() + path);
+      if(!folder.exists())
+         folder.mkdirs();
+   }
+
 
    /* Wrappers for neatness. */
 
-   public static boolean mv(String a, String b)
+   static boolean mv(String a, String b)
    {
       return (new File(a)).renameTo(new File(b));
    }
 
-   public static boolean strbol(String str)
+   static boolean strbol(String str)
    {
       return Boolean.parseBoolean(str);
    }
 
-   public static int stoi(String str)
+   static int stoi(String str)
    {
       return Integer.parseInt(str);
    }
 
-   public static boolean exists(String file_path)
+   static boolean exists(String file_path)
    {
       return (new File(file_path)).exists();
    }
 
-   public static String getstr(TextView t)
+   static String getstr(TextView t)
    {
       return t.getText().toString().trim();
    }
 
    /* Returns a zero-length array if the resource is not found and logs the
     * event in log. */
-   public static String[] get_array(Context con, int resource)
+   static String[] get_array(Context con, int resource)
    {
       String[] array  = new String[0];
       try
@@ -478,9 +530,7 @@ public class util
       }
       catch(android.content.res.Resources.NotFoundException e)
       {
-         String storage = get_storage();
-         if(storage != null)
-            write.log(resource + " does not exist.");
+         write.log(resource + " does not exist.");
       }
       return array;
    }

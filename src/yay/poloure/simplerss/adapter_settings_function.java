@@ -83,7 +83,7 @@ public class adapter_settings_function extends BaseAdapter
    public View getView(final int position, View cv, ViewGroup parent)
    {
       final int view_type = getItemViewType(position);
-      final String setting_path = main.storage + main.SETTINGS
+      final String setting_path = util.get_internal() + main.SETTINGS
                                   + file_names[position] + main.TXT;
       String[] check;
 

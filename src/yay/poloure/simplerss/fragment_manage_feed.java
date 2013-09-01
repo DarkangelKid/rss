@@ -43,7 +43,7 @@ class fragment_manage_feed extends Fragment
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
-               add_edit_dialog.show_edit_dialog(main.cgroups, main.con, main.storage, position);
+               add_edit_dialog.show_edit_dialog(main.cgroups, main.con, position);
             }
          }
       );
@@ -86,25 +86,28 @@ class fragment_manage_feed extends Fragment
                      @Override
                      public void onClick(DialogInterface dialog, int id)
                      {
-                        String all     = main.ALL;
-                        String storage = main.storage;
-                        String sep     = main.SEPAR;
-                        String g_dir   = main.GROUPS_DIR;
+                        String all      = main.ALL;
+                        String internal = util.get_internal();
+                        String storage  = util.get_storage();
+                        String sep      = main.SEPAR;
+                        String g_dir    = main.GROUPS_DIR;
 
                         /* Parse for the group name from the info string. */
-                        String group   = feed_list_adapter.get_info(pos);
-                        int start = group.indexOf('\n') + 1;
-                        int end   = group.indexOf(' ');
-                        group = group.substring(start, end);
+                        String group    = feed_list_adapter.get_info(pos);
+                        int start       = group.indexOf('\n') + 1;
+                        int end         = group.indexOf(' ');
+                        group           = group.substring(start, end);
 
                         String name     = feed_list_adapter.getItem(pos);
-                        String path     = storage + g_dir + group + sep + name;
-                        String all_path = storage + g_dir + all + sep + all;
+                        String in_path  = internal + g_dir + group + sep + name;
+                        String ex_path  = storage + g_dir + group + sep + name;
+                        String all_path = internal + g_dir + all + sep + all;
 
-                        util.rmdir(new File(path));
+                        util.rmdir(new File(in_path));
+                        util.rmdir(new File(ex_path));
                         /* make the image and thumnail folders. */
-                        (new File(path + sep + main.IMAGE_DIR)).mkdir();
-                        (new File(path + sep + main.THUMBNAIL_DIR)).mkdir();
+                        (new File(ex_path + sep + main.IMAGE_DIR)).mkdir();
+                        (new File(ex_path + sep + main.THUMBNAIL_DIR)).mkdir();
 
                         /* Delete the all content files. */
                         util.rm(all_path + main.CONTENT);
@@ -154,11 +157,11 @@ class fragment_manage_feed extends Fragment
       {
          if(feed_list_adapter != null)
          {
-            String storage = main.storage;
+            String internal = util.get_internal();
             String sep     = main.SEPAR;
             String g_dir   = main.GROUPS_DIR;
             String all     = main.cgroups[0];
-            String path = storage + g_dir + all + sep + all + main.TXT;
+            String path = internal + g_dir + all + sep + all + main.TXT;
 
             /* Read the all group file for names, urls, and groups. */
             String[][] content  = read.csv(path, 'n', 'u', 'g');
@@ -168,7 +171,7 @@ class fragment_manage_feed extends Fragment
             for(int i = 0; i < size; i++)
             {
                /* Form the path to the feed_content file. */
-               path = storage + g_dir + content[2][i] + sep + content[0][i]
+               path = internal + g_dir + content[2][i] + sep + content[0][i]
                       + sep + content[0][i] + main.CONTENT;
 
                /* Build the info string. */

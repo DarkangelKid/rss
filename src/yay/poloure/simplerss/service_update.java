@@ -21,8 +21,10 @@ import android.view.WindowManager;
 
 public class service_update extends IntentService
 {
-   public static Context service_context;
-   public static String storage;
+   static Context service_context;
+
+   static String storage;
+   static String internal;
 
    public service_update()
    {
@@ -50,15 +52,12 @@ public class service_update extends IntentService
 
       String SEPAR   = main.SEPAR;
 
-      storage = util.get_storage();
+      storage  = util.get_storage();
+      internal = util.get_internal();
 
-      /* If storage == null then the storage is not avialable and we should stop. */
-      if(storage == null)
-         return;
-
-      String[] all_groups        = read.file(storage + main.GROUP_LIST);
+      String[] all_groups        = read.file(internal + main.GROUP_LIST);
       String grouper             = all_groups[group];
-      String group_file_path     = storage + main.GROUPS_DIR + grouper + SEPAR + grouper + main.TXT;
+      String group_file_path     = internal + main.GROUPS_DIR + grouper + SEPAR + grouper + main.TXT;
 
       String[][] content         = read.csv(group_file_path, 'n', 'u', 'g');
       String[] names             = content[0];
@@ -71,7 +70,7 @@ public class service_update extends IntentService
          width = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getWidth();
       else
       {
-         final Point screen_size = new Point();
+         Point screen_size = new Point();
          ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getSize(screen_size);
          width = (int) (Math.round(((screen_size.x)*0.944)));
       }
@@ -80,7 +79,7 @@ public class service_update extends IntentService
       boolean success;
       for(int i = 0; i < names.length; i++)
       {
-         success = write.dl(urls[i], storage + names[i] + main.STORE);
+         success = write.dl(urls[i], internal + names[i] + main.STORE);
          if(success)
             new parser(groups[i], names[i], width);
          else

@@ -31,7 +31,9 @@ class fragment_manage_filters extends Fragment
       filter_list_adapter = new adapter_manage_filter(getActivity());
       filter_list.setAdapter(filter_list_adapter);
 
-      filter_list_adapter.set_items(read.file(main.storage + main.FILTER_LIST));
+      final String filter_path = util.get_internal() + main.FILTER_LIST;
+
+      filter_list_adapter.set_items(read.file(filter_path));
 
       filter_list.setOnItemLongClickListener
       (
@@ -47,7 +49,7 @@ class fragment_manage_filters extends Fragment
                   @Override
                   public void onClick(DialogInterface dialog, int id)
                   {
-                     write.remove_string(main.storage + main.FILTER_LIST, filter_list_adapter.getItem(position), false);
+                     write.remove_string(filter_path, filter_list_adapter.getItem(position), false);
                      filter_list_adapter.remove_item(position);
                      filter_list_adapter.notifyDataSetChanged();
                   }

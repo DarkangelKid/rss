@@ -56,21 +56,23 @@ class parser
 
    void parse_local_xml(String group, String feed) throws IOException
    {
-      String storage       = util.get_storage();
-      String sep           = main.SEPAR;
-      String g_dir         = main.GROUPS_DIR;
-      String txt           = main.TXT;
+      String internal = util.get_internal();
+      String storage  = util.get_storage();
+      String sep      = main.SEPAR;
+      String g_dir    = main.GROUPS_DIR;
+      String txt      = main.TXT;
 
-      dump_path            = storage + "content.dump" + txt;
-      url_path             = storage + "content.url"  + txt;
-      String store_file    = storage + feed + main.STORE;
-      String feed_folder   = storage + g_dir + group + sep + feed + sep;
-      String content_file  = feed_folder + feed + main.CONTENT;
-      String image_dir     = feed_folder + main.IMAGE_DIR;
-      String thumbnail_dir = feed_folder + main.THUMBNAIL_DIR;
-      File in              = new File(store_file);
-      File out             = new File(content_file);
-      String[] filters     = read.file(storage + main.FILTER_LIST);
+      dump_path             = internal + "content.dump" + txt;
+      url_path              = internal + "content.url"  + txt;
+      String store_file     = internal + feed + main.STORE;
+      String in_feed_folder = internal + feed + main.STORE;
+      String ex_feed_folder = storage + g_dir + group + sep + feed + sep;
+      String content_file   = in_feed_folder + feed + main.CONTENT;
+      String image_dir      = ex_feed_folder + main.IMAGE_DIR;
+      String thumbnail_dir  = ex_feed_folder + main.THUMBNAIL_DIR;
+      File in               = new File(store_file);
+      File out              = new File(content_file);
+      String[] filters      = read.file(internal + main.FILTER_LIST);
 
       Set<String> set       = new LinkedHashSet<String>();
       Boolean write_mode    = false;
@@ -81,15 +83,9 @@ class parser
       String current_tag, temp_line, cont, image, image_name;
       int tem, tem2, tem3, description_length, take, cont_length, i;
 
-      /// Read the file's lines to a list and make a set from that.
+      /* Read the file's lines to a set. */
       if(out.exists())
-      {
-         String liner;
-         BufferedReader stream = new BufferedReader(new FileReader(out));
-         while((liner = stream.readLine()) != null)
-            set.add(liner);
-         stream.close();
-      }
+         set = read.set(content_file);
 
       BitmapFactory.Options options = new BitmapFactory.Options();
       options.inJustDecodeBounds = true;
@@ -218,7 +214,7 @@ class parser
                      }
                      catch(Exception e)
                      {
-                        write.single(storage + "time_bug.txt", "BUG : Meant to be atom-3339 but looks like: " + cont + main.NL);
+                        write.log("BUG : Meant to be atom-3339 but looks like: " + cont);
                         cont = rfc3339.format(new Date());
                      }
                      line.append(cont).append("|");
@@ -234,7 +230,7 @@ class parser
                      }
                      catch(Exception e)
                      {
-                        write.single(storage + "time_bug.txt", "BUG : Meant to be atom-3339 but looks like: " + cont + main.NL);
+                        write.log("BUG : Meant to be atom-3339 but looks like: " + cont);
                         cont = rfc3339.format(new Date());
                      }
                      line.append(cont).append("|");
@@ -290,17 +286,9 @@ class parser
             temp_line = temp_line.concat(("pubDate|").concat(rfc3339.format(new Date()).concat("|")));
          set.add(temp_line);
       }
-      /// Write the new content to the file.
-      in.delete();
-      out.delete();
 
-      String[] feeds = set.toArray(new String[set.size()]);
-
-      /// TODO: May already be the out File.
-      BufferedWriter write = new BufferedWriter(new FileWriter(content_file, true));
-      for(String fed : feeds)
-         write.write(fed + main.NL);
-      write.close();
+      /* Write the new content to the file. */
+      write.collection(content_file, set);
    }
 
    String get_content_to_end_tag(BufferedReader reader, String tag)
@@ -331,8 +319,8 @@ class parser
    String read_string_to_next_char(BufferedReader reader, char next)
    {
       char   current;
-      char[] build   = new char[4096];
-      int    i       = 0;
+      char[] build = new char[4096];
+      int    i     = 0;
       try
       {
          while((current = ((char) reader.read())) != next)
@@ -352,36 +340,39 @@ class parser
 
    String check_for_image()
    {
-      File im = new File(dump_path);
       String popo = "";
       try
       {
-         BufferedReader image = new BufferedReader(new FileReader(im));
-         String image_url = image.readLine();
+         String image_url = read.file(dump_path)[0];
          if(image_url.length() > 6)
             popo = image_url;
       }
-      catch(Exception e){
+      catch(Exception e)
+      {
       }
-      im.delete();
+      if(util.get_internal() != util.get_storage())
+         util.get_context().deleteFile(util.create_internal_name(dump_path));
+      else
+         util.rm(dump_path);
       return popo;
    }
 
    String check_for_url()
    {
-      File iu = new File(url_path);
       String momo = "";
       try
       {
-         BufferedReader u = new BufferedReader(new FileReader(iu));
-         String url = u.readLine();
+         String url = read.file(url_path)[0];
          if(url.length() > 6)
             momo = "link|" + url + "|";
       }
       catch(Exception e)
       {
       }
-      iu.delete();
+      if(util.get_internal() != util.get_storage())
+         util.get_context().deleteFile(util.create_internal_name(url_path));
+      else
+         util.rm(url_path);
       return momo;
    }
 
@@ -451,7 +442,7 @@ class parser
                   if((tem3 != -1)&&(tem3 < tem2))
                         tem2 = tem3;
                }
-               util.rm(dump_path);
+               util.get_context().deleteFile(util.create_internal_name(dump_path));
                write.single(dump_path, tag.substring(tem + 6, tem2) + main.NL);
             }
          }

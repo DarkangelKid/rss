@@ -4,6 +4,9 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import android.content.Context;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
@@ -15,7 +18,7 @@ public class read
 
    static String setting(String path)
    {
-      if(!util.check_media_mounted())
+      if(util.check_unmounted())
          return null;
 
       String[] check = read.file(path);
@@ -24,7 +27,7 @@ public class read
 
    static String[][] csv(String file_path, char... type)
    {
-      if(!util.check_media_mounted())
+      if(util.check_unmounted())
          return new String[0][0];
 
       int next, offset, i, j;
@@ -68,7 +71,12 @@ public class read
    /* This function is now safe. It will return a zero length array on error. */
    static String[] file(String file_path)
    {
-      if(!util.check_media_mounted())
+      String name     = util.create_internal_name(file_path);
+      Context context = util.get_context();
+      String storage  = util.get_storage();
+      String internal = util.get_internal();
+
+      if(util.check_unmounted())
          return new String[0];
 
       String count_path = file_path + main.COUNT;
@@ -93,11 +101,19 @@ public class read
 
       /* Begin reading the file to the String array. */
       BufferedReader in = null;
+      FileInputStream f = null;
       try
       {
          try
          {
-            in = new BufferedReader(new FileReader(file_path));
+            if(internal.equals(storage))
+               in = new BufferedReader(new FileReader(file_path));
+            else
+            {
+               f  = context.openFileInput(name);
+               in = new BufferedReader(new InputStreamReader(f, "UTF-8"));
+            }
+
             for(int i = 0; i < lines.length; i++)
                lines[i] = in.readLine();
             in.close();
@@ -108,7 +124,7 @@ public class read
                in.close();
          }
       }
-      catch(IOException e)
+      catch(Exception e)
       {
          return new String[0];
       }
@@ -119,7 +135,7 @@ public class read
    {
       Set set = new HashSet<String>();
 
-      if(!util.check_media_mounted())
+      if(util.check_unmounted())
          return set;
 
       java.util.Collections.addAll(set, file(file_path));
@@ -128,16 +144,29 @@ public class read
 
    static int count(String file_path)
    {
-      if(!util.check_media_mounted())
+      String name     = util.create_internal_name(file_path);
+      Context context = util.get_context();
+      String storage  = util.get_storage();
+      String internal = util.get_internal();
+
+      if(util.check_unmounted())
          return 0;
 
       BufferedReader in = null;
+      FileInputStream f = null;
       int i = 0;
       try
       {
          try
          {
-            in = new BufferedReader(new FileReader(file_path));
+            if(internal.equals(storage))
+               in = new BufferedReader(new FileReader(file_path));
+            else
+            {
+               f  = context.openFileInput(name);
+               in = new BufferedReader(new InputStreamReader(f, "UTF-8"));
+            }
+
             while(in.readLine() != null)
                i++;
          }

@@ -16,7 +16,6 @@ import android.support.v4.view.PagerTabStrip;
 
 public class adapter_settings_interface extends BaseAdapter
 {
-   String storage;
    String[] title_array;
    String[] summary_array;
    static final String[] colours = new String[]
@@ -74,7 +73,6 @@ public class adapter_settings_interface extends BaseAdapter
          inf = (LayoutInflater) con.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
          title_array   = util.get_array(con, R.array.settings_interface_titles);
          summary_array = util.get_array(con, R.array.settings_interface_summaries);
-         storage       = util.get_storage();
       }
    }
 
@@ -120,7 +118,7 @@ public class adapter_settings_interface extends BaseAdapter
       int view_type       = getItemViewType(position);
       String title        = title_array[position];
       String summary      = summary_array[position];
-      final String setting_path = main.storage + main.SETTINGS + title + main.TXT;
+      final String setting_path = util.get_internal() + main.SETTINGS + title + main.TXT;
 
       /* This type is a heading. */
       if(view_type == 0)
@@ -158,7 +156,7 @@ public class adapter_settings_interface extends BaseAdapter
          holder.summary.setText(summary);
 
          /* Read the colour from settings, if null, set as blue. */
-         String   colour_path  = storage + main.SETTINGS + main.STRIP_COLOR;
+         String   colour_path  = util.get_internal() + main.SETTINGS + main.STRIP_COLOR;
          String[] colour_array = read.file(colour_path);
 
          String colour = (colour_array.length == 0) ? "blue" : colour_array[0];
@@ -270,7 +268,7 @@ public class adapter_settings_interface extends BaseAdapter
       public void onClick(View v)
       {
          /* Write the new colour to file. */
-         String colour_path = main.storage + main.SETTINGS + main.STRIP_COLOR;
+         String colour_path = util.get_internal() + main.SETTINGS + main.STRIP_COLOR;
          util.rm(colour_path);
          write.single(colour_path, colours[clicked_colour]);
 
