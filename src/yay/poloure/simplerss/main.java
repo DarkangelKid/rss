@@ -33,46 +33,67 @@ import java.io.File;
 
 public class main extends ActionBarActivity
 {
-   /* Statics without final intilisations are generally unsafe. */
-   private static Menu                 optionsMenu;
-   public  static ViewPager            viewpager;
-   public  static Context              con;
-   public  static FragmentManager      fman;
-   public  static ActionBar            action_bar;
-   public  static Activity             activity;
-   public  static Handler              service_handler;
-   public  static String[] current_groups = new String[0];
+   /* Generally unsafe. */
+   static Menu                 optionsMenu;
+   static ViewPager            viewpager;
+   static Context              con;
+   static FragmentManager      fman;
+   static ActionBar            action_bar;
+   static Activity             activity;
+   static Handler              service_handler;
+   static String[] cgroups = new String[0];
 
    /* These must be set straight away in onCreate. */
-   public  static String storage, ALL, DELETE_DIALOG, CLEAR_DIALOG, ALL_FILE;
+   static String storage, ALL, DELETE_DIALOG, CLEAR_DIALOG, ALL_FILE;
 
-   /* Static final are good. */
-   public static final String SEPAR = System.getProperty("file.separator");
-   public static final String NL    = System.getProperty("line.separator");
+   /* Static final are best only when type is a primitive or a String.
+    * Static is also better than not static when primitive or String.
+    * Final is only desirable when complicated logic is in place or it
+    * must be accessed within an inner class.
+    *
+    * Nothing should be public, replace with nothing. Nothing is
+    * package-private which is basically public. Public is avialable ouside
+    * the package but all our classes are inside the same package.
+    *
+    * Unless you really do not want another class accessing a variable,
+    * there is no need to make it private, it makes no difference after
+    * compiling.
+    *
+    * Overriden functions from android have public because they are in an
+    * android package and we want to access them.
+    *
+    * A final method means it can not be overriden/overided but again,
+    * since we are not coding a library, there is no need.
+    *
+    * If an field is not initilised when static finaled, it can cause a
+    * NullPointerException and be carefull relying on it being not null. */
 
-   public static final String TXT           = ".txt";
-   public static final String GROUPS_DIR    = "groups" + SEPAR;
-   public static final String THUMBNAIL_DIR = "thumbnails" + SEPAR;
-   public static final String IMAGE_DIR     = "images" + SEPAR;
-   public static final String SETTINGS      = "settings" + SEPAR;
-   public static final String STRIP_COLOR   = "pagertabstrip_colour" + TXT;
-   public static final String DUMP_FILE     = "dump" + TXT;
-   public static final String TEMP          = ".temp" + TXT;
-   public static final String STORE         = ".store" + TXT;
-   public static final String CONTENT       = ".content" + TXT;
-   public static final String URL           = ".urls" + TXT;
-   public static final String COUNT         = ".count" + TXT;
-   public static final String GROUP_LIST    = "group_list" + TXT;
-   public static final String FILTER_LIST   = "filter_list" + TXT;
-   public static final String READ_ITEMS    = "read_items" + TXT;
+   static final String SEPAR = System.getProperty("file.separator");
+   static final String NL    = System.getProperty("line.separator");
 
-   static int ver                      = VERSION.SDK_INT;
-   public static boolean FROYO         = ver >= VERSION_CODES.FROYO;
-   public static boolean HONEYCOMB     = ver >= VERSION_CODES.HONEYCOMB;
-   public static boolean HONEYCOMB_MR2 = ver >= VERSION_CODES.HONEYCOMB_MR2;
-   public static boolean JELLYBEAN     = ver >= VERSION_CODES.JELLY_BEAN;
+   static final String TXT           = ".txt";
+   static final String GROUPS_DIR    = "groups" + SEPAR;
+   static final String THUMBNAIL_DIR = "thumbnails" + SEPAR;
+   static final String IMAGE_DIR     = "images" + SEPAR;
+   static final String SETTINGS      = "settings" + SEPAR;
+   static final String STRIP_COLOR   = "pagertabstrip_colour" + TXT;
+   static final String DUMP_FILE     = "dump" + TXT;
+   static final String TEMP          = ".temp" + TXT;
+   static final String STORE         = ".store" + TXT;
+   static final String CONTENT       = ".content" + TXT;
+   static final String URL           = ".urls" + TXT;
+   static final String COUNT         = ".count" + TXT;
+   static final String GROUP_LIST    = "group_list" + TXT;
+   static final String FILTER_LIST   = "filter_list" + TXT;
+   static final String READ_ITEMS    = "read_items" + TXT;
 
-   public static final PagerTabStrip[] strips = new PagerTabStrip[3];
+   static final int v                 = VERSION.SDK_INT;
+   static final boolean FROYO         = v >= VERSION_CODES.FROYO;
+   static final boolean HONEYCOMB     = v >= VERSION_CODES.HONEYCOMB;
+   static final boolean HONEYCOMB_MR2 = v >= VERSION_CODES.HONEYCOMB_MR2;
+   static final boolean JELLYBEAN     = v >= VERSION_CODES.JELLY_BEAN;
+
+   static final PagerTabStrip[] strips = new PagerTabStrip[3];
 
    @Override
    public void onCreate(Bundle savedInstanceState)
@@ -210,7 +231,7 @@ public class main extends ActionBarActivity
 
    /* END OF OVERRIDES */
 
-   private static class fragment_feeds extends Fragment
+   static class fragment_feeds extends Fragment
    {
       public fragment_feeds()
       {
@@ -254,7 +275,7 @@ public class main extends ActionBarActivity
 
          strips[0] = (PagerTabStrip) v.findViewById(R.id.pager_title_strip);
          strips[0].setDrawFullUnderline(true);
-         util.set_pagertabstrip_colour(storage, strips[0]);
+         util.set_strip_colour(strips[0]);
 
          return v;
       }
@@ -278,7 +299,7 @@ public class main extends ActionBarActivity
             return true;
          else if(item.getTitle().equals("add"))
          {
-            add_edit_dialog.show_add_dialog(current_groups, con);
+            add_edit_dialog.show_add_dialog(cgroups, con);
             return true;
          }
          else if(item.getTitle().equals("unread"))
@@ -295,7 +316,7 @@ public class main extends ActionBarActivity
       }
    }
 
-   private static class fragment_manage extends Fragment
+   static class fragment_manage extends Fragment
    {
       public fragment_manage()
       {
@@ -314,12 +335,12 @@ public class main extends ActionBarActivity
       {
          View v = in.inflate(R.layout.viewpager_manage, container, false);
 
-         ViewPager manage_pager = (ViewPager) v.findViewById(R.id.manage_viewpager);
-         manage_pager.setAdapter(new pageradapter_manage(fman));
+         ViewPager pager = (ViewPager) v.findViewById(R.id.manage_viewpager);
+         pager.setAdapter(new pageradapter_manage(fman));
 
          strips[1] = (PagerTabStrip) v.findViewById(R.id.manage_title_strip);
          strips[1].setDrawFullUnderline(true);
-         util.set_pagertabstrip_colour(storage, strips[1]);
+         util.set_strip_colour(strips[1]);
 
          return v;
       }
@@ -335,7 +356,7 @@ public class main extends ActionBarActivity
       }
    }
 
-   public static class pageradapter_feeds extends FragmentPagerAdapter
+   static class pageradapter_feeds extends FragmentPagerAdapter
    {
       public pageradapter_feeds(FragmentManager fm)
       {
@@ -345,7 +366,7 @@ public class main extends ActionBarActivity
       @Override
       public int getCount()
       {
-         return current_groups.length;
+         return cgroups.length;
       }
 
       @Override
@@ -361,11 +382,11 @@ public class main extends ActionBarActivity
       @Override
       public String getPageTitle(int position)
       {
-         return current_groups[position];
+         return cgroups[position];
       }
    }
 
-   public static class pageradapter_manage extends FragmentPagerAdapter
+   static class pageradapter_manage extends FragmentPagerAdapter
    {
       private static final Fragment[] fragments = new Fragment[]
       {
@@ -404,7 +425,7 @@ public class main extends ActionBarActivity
       }
    }
 
-   private static class fragment_card extends ListFragment
+   static class fragment_card extends ListFragment
    {
       public fragment_card()
       {
@@ -424,7 +445,7 @@ public class main extends ActionBarActivity
       }
    }
 
-   private static class fragment_settings extends Fragment
+   static class fragment_settings extends Fragment
    {
       public fragment_settings()
       {
@@ -440,13 +461,13 @@ public class main extends ActionBarActivity
 
          strips[2] = (PagerTabStrip) v.findViewById(R.id.settings_title_strip);
          strips[2].setDrawFullUnderline(true);
-         util.set_pagertabstrip_colour(storage, strips[2]);
+         util.set_strip_colour(strips[2]);
 
          return v;
       }
    }
 
-   public static class pageradapter_settings extends FragmentPagerAdapter
+   static class pageradapter_settings extends FragmentPagerAdapter
    {
       private static final Fragment[] fragments = new Fragment[]
       {
@@ -459,7 +480,7 @@ public class main extends ActionBarActivity
       public pageradapter_settings(FragmentManager fm)
       {
          super(fm);
-         titles = con.getResources().getStringArray(R.array.settings_pagertab_titles);
+         titles = util.get_array(con, R.array.settings_pagertab_titles);
       }
 
       @Override
@@ -481,7 +502,7 @@ public class main extends ActionBarActivity
       }
    }
 
-   private static class fragment_settings_function extends ListFragment
+   static class fragment_settings_function extends ListFragment
    {
       public fragment_settings_function()
       {
@@ -502,7 +523,7 @@ public class main extends ActionBarActivity
       }
    }
 
-   private static class fragment_settings_interface extends ListFragment
+   static class fragment_settings_interface extends ListFragment
    {
       public fragment_settings_interface()
       {
@@ -512,7 +533,7 @@ public class main extends ActionBarActivity
       public void onCreate(Bundle savedInstanceState)
       {
          super.onCreate(savedInstanceState);
-         adapter_settings_interface adapter = new adapter_settings_interface(con, storage);
+         adapter_settings_interface adapter = new adapter_settings_interface(con);
          setListAdapter(adapter);
       }
 
@@ -523,11 +544,11 @@ public class main extends ActionBarActivity
       }
    }
 
-   public static void set_refresh(final boolean mode)
+   static void set_refresh(final boolean mode)
    {
       if(optionsMenu != null)
       {
-         final MenuItem refreshItem = optionsMenu.findItem(R.id.refresh);
+         MenuItem refreshItem = optionsMenu.findItem(R.id.refresh);
          if(refreshItem != null)
          {
             if (mode)
@@ -538,16 +559,16 @@ public class main extends ActionBarActivity
       }
    }
 
-   public static void update_groups()
+   static void update_groups()
    {
-      final int previous_size = current_groups.length;
+      int previous_size = cgroups.length;
 
-      current_groups = read.file(storage + GROUP_LIST);
-      final int size = current_groups.length;
+      cgroups = read.file(storage + GROUP_LIST);
+      int size = cgroups.length;
       if(size == 0)
       {
          write.single(storage + GROUP_LIST, ALL + NL);
-         current_groups = new String[]{ALL};
+         cgroups = new String[]{ALL};
       }
 
       if(viewpager != null)
@@ -562,7 +583,7 @@ public class main extends ActionBarActivity
       }
    }
 
-   public static int jump_to_latest_unread(String[] links, boolean update, int page)
+   static int jump_to_latest_unread(String[] links, boolean update, int page)
    {
       int m;
 
@@ -593,7 +614,7 @@ public class main extends ActionBarActivity
       return m;
    }
 
-   private static void refresh_feeds()
+   static void refresh_feeds()
    {
       set_refresh(true);
       service_handler = new Handler()

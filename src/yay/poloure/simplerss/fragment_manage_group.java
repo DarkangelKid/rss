@@ -20,11 +20,11 @@ import android.widget.ListView;
 
 class fragment_manage_group extends Fragment
 {
-   private static ListView manage_list;
-   private static boolean multi_mode = false;
-   private static ActionMode actionmode;
-   private static ActionMode.Callback actionmode_callback;
-   public  static adapter_manage_groups group_list_adapter;
+   static ListView manage_list;
+   static boolean multi_mode = false;
+   static ActionMode actionmode;
+   static ActionMode.Callback actionmode_callback;
+   static adapter_manage_groups group_list_adapter;
 
    public void onCreate(Bundle savedInstanceState)
    {
@@ -49,7 +49,6 @@ class fragment_manage_group extends Fragment
          registerForContextMenu(manage_list);
       else
       {
-
          actionmode_callback = new ActionMode.Callback()
          {
             @Override
@@ -167,16 +166,16 @@ class fragment_manage_group extends Fragment
          return true;
       else if(item.getTitle().equals("add"))
       {
-         add_edit_dialog.show_add_dialog(main.current_groups, main.con);
+         add_edit_dialog.show_add_dialog(main.cgroups, main.con);
          return true;
       }
       return super.onOptionsItemSelected(item);
    }
 
-   public static class refresh extends AsyncTask<Void, String[], Void>
+   static class refresh extends AsyncTask<Void, String[], Void>
    {
-      final Animation animFadeIn = AnimationUtils.loadAnimation(main.con, android.R.anim.fade_in);
-      private final ListView listview;
+      Animation animFadeIn = AnimationUtils.loadAnimation(main.con, android.R.anim.fade_in);
+      ListView listview;
 
       public refresh()
       {
@@ -188,7 +187,7 @@ class fragment_manage_group extends Fragment
       @Override
       protected Void doInBackground(Void... nothing)
       {
-         String[][] content = util.create_info_arrays(main.current_groups, main.current_groups.length, main.storage);
+         String[][] content = util.create_info_arrays(main.cgroups, main.cgroups.length);
          publishProgress(content[1], content[0]);
          return null;
       }

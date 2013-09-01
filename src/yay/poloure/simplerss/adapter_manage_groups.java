@@ -21,20 +21,21 @@ import java.util.Arrays;
 
 public class adapter_manage_groups extends BaseAdapter
 {
-   private String old_title = "";
-   private String new_title = "";
+   String old_title = "";
+   String new_title = "";
 
-   private static String[] group_array = new String[0];
-   private static String[] info_array = new String[0];
+   static String[] group_array = new String[0];
+   static String[] info_array = new String[0];
 
-   private static LayoutInflater inflater;
+   static LayoutInflater inflater;
 
-   public adapter_manage_groups(Context context)
+   public adapter_manage_groups(Context con)
    {
-      inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+      if( inflater == null )
+         inflater = (LayoutInflater) con.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
    }
 
-   public void set_items(String[] new_groups, String[] new_infos)
+   void set_items(String[] new_groups, String[] new_infos)
    {
       group_array = new_groups;
       info_array = new_infos;
@@ -202,8 +203,9 @@ public class adapter_manage_groups extends BaseAdapter
       }
    }*/
 
-   private class MyTouchListener implements OnTouchListener
+   class MyTouchListener implements OnTouchListener
    {
+      @Override
       public boolean onTouch(View view, MotionEvent motionEvent)
       {
          if (motionEvent.getAction() == MotionEvent.ACTION_DOWN)
@@ -220,15 +222,15 @@ public class adapter_manage_groups extends BaseAdapter
 
    int old_view = 0;
    int[] position = new int[2];
-   final int height = (int) (main.con.getResources().getDisplayMetrics().heightPixels);
+   int height = (int) main.con.getResources().getDisplayMetrics().heightPixels;
 
-   private class MyDragListener implements OnDragListener
+   class MyDragListener implements OnDragListener
    {
       @Override
       public boolean onDrag(View v, DragEvent event)
       {
-         final int action = event.getAction();
-         final ListView listview = ((ListView) v.getParent());
+         int action        = event.getAction();
+         ListView listview = ((ListView) v.getParent());
 
          if(action == DragEvent.ACTION_DRAG_ENTERED)
          {
@@ -242,7 +244,6 @@ public class adapter_manage_groups extends BaseAdapter
             v.setVisibility(View.INVISIBLE);
 
             /* Fade in the view that was just left. */
-            write.log(main.storage, Integer.toString(old_view));
             View last = listview.getChildAt(old_view);
             Animation fadeIn = new AlphaAnimation(0, 1);
             fadeIn.setDuration(120);
@@ -289,7 +290,7 @@ public class adapter_manage_groups extends BaseAdapter
       }
    }
 
-   private void rearrange_groups(String previous, String next)
+   void rearrange_groups(String previous, String next)
    {
       int i = 0;
       while(!previous.equals(group_array[i])){
@@ -309,11 +310,11 @@ public class adapter_manage_groups extends BaseAdapter
       group_array[j] = old;
    }
 
-   private class custom_drag_builder extends View.DragShadowBuilder
+   class custom_drag_builder extends View.DragShadowBuilder
    {
-      private final View view_store;
+      View view_store;
 
-      private custom_drag_builder(View v)
+      public custom_drag_builder(View v)
       {
          super(v);
          view_store = v;

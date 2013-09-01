@@ -25,7 +25,7 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
    {
       page_number               = page[0];
       String sep                = main.SEPAR;
-      String group              = main.current_groups[page_number];
+      String group              = main.cgroups[page_number];
       String group_path         = main.storage + main.GROUPS_DIR + group + sep;
       String group_file_path    = group_path + group + main.TXT;
       String group_content_path = group_path + group + main.CONTENT;

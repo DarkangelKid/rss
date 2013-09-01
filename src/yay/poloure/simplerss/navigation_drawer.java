@@ -9,16 +9,15 @@ import android.support.v4.widget.DrawerLayout;
 
 class navigation_drawer
 {
-   private final  ListView                   navigation_list;
+   ListView navigation_list;
 
-   private static adapter_navigation_drawer  nav_adapter;
-   private static String                     current_title;
+   static String   current_title;
+   static String[] NAV_TITLES = new String[0];
+   static String   NAVIGATION;
 
-   public  static String[] NAV_TITLES = new String[0];
-   public  static String   NAVIGATION;
-
-   public  static DrawerLayout               drawer_layout;
-   public  static ActionBarDrawerToggle      drawer_toggle;
+   static adapter_navigation_drawer nav_adapter;
+   static DrawerLayout              drawer_layout;
+   static ActionBarDrawerToggle     drawer_toggle;
 
    public navigation_drawer(android.app.Activity activity, android.content.Context context, DrawerLayout draw_layout, ListView nav_list)
    {
@@ -64,26 +63,26 @@ class navigation_drawer
       navigation_list.setAdapter(nav_adapter = new adapter_navigation_drawer(context));
    }
 
-   public static class update_navigation_adapter extends AsyncTask<int[], Void, int[]>
+   static class update_navigation_adapter extends AsyncTask<int[], Void, int[]>
    {
       @Override
       protected int[] doInBackground(int[]... counts)
       {
          /* If null was passed into the task, count the unread items. */
-         return (counts[0] != null) ? counts[0] : util.get_unread_counts(main.storage, main.current_groups);
+         return (counts[0] != null) ? counts[0] : util.get_unread_counts(main.cgroups);
       }
 
       @Override
       protected void onPostExecute(int[] pop)
       {
          /* Set the titles & counts arrays in this file and notifiy the adapter. */
-         nav_adapter.set_titles(main.current_groups);
+         nav_adapter.set_titles(main.cgroups);
          nav_adapter.set_counts(pop);
          nav_adapter.notifyDataSetChanged();
       }
    }
 
-   private class click_navigation_drawer implements ListView.OnItemClickListener
+   class click_navigation_drawer implements ListView.OnItemClickListener
    {
       @Override
       public void onItemClick(AdapterView parent, View view, int position, long id)

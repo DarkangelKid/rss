@@ -7,18 +7,19 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-public class adapter_manage_filter extends BaseAdapter
+class adapter_manage_filter extends BaseAdapter
 {
-   private static String[] title_list = new String[0];
+   static String[] title_list = new String[0];
 
-   private static LayoutInflater inflater;
+   static LayoutInflater inflater;
 
    public adapter_manage_filter(Context context_main)
    {
-      inflater = (LayoutInflater) context_main.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+      if(inflater == null)
+         inflater = (LayoutInflater) context_main.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
    }
 
-   public void set_items(String[] new_titles)
+   void set_items(String[] new_titles)
    {
       title_list = new_titles;
    }
@@ -35,7 +36,7 @@ public class adapter_manage_filter extends BaseAdapter
       return position;
    }
 
-   public void remove_item(int position)
+   void remove_item(int position)
    {
       util.remove_element(title_list, position);
    }

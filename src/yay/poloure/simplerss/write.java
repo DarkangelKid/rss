@@ -99,15 +99,15 @@ public class write
    }
 
    /* This function should be safe, returns false if it failed. */
-   public static boolean remove_string(String file_path, String string, Boolean contains)
+   static boolean remove_string(String file_path, String string, Boolean contains)
    {
       /* Check to see if we can write to the media. */
       if(!Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
          return false;
 
-      final String temp_path  = file_path + main.TEMP;
-      final String[] lines;
-      BufferedWriter out      = null;
+      String temp_path   = file_path + main.TEMP;
+      String[] lines;
+      BufferedWriter out = null;
       try
       {
          try
@@ -150,9 +150,10 @@ public class write
       return success;
    }
 
-   public static void sort_content(String storage, String group, String all_group)
+   public static void sort_content(String group, String all_group)
    {
       String sep                = main.SEPAR;
+      String storage            = util.get_storage();
       String group_dir          = storage + main.GROUPS_DIR + group + sep;
       String group_content_path = group_dir + group + main.CONTENT;
       String group_count_file   = group_content_path + main.COUNT;
@@ -226,18 +227,18 @@ public class write
       }
       catch(Exception e)
       {
-         log(storage, "Failed to write the group content file.");
+         log("Failed to write the group content file.");
       }
 
       /* Sorts the all_group every time another group is updated. */
       if(!group.equals(all_group))
       {
-         sort_content(storage, all_group, all_group);
+         sort_content(all_group, all_group);
       }
    }
 
-   public static void log(String storage, String text)
+   public static void log(String text)
    {
-      single(storage + main.DUMP_FILE, text + main.NL);
+      single(util.get_storage() + main.DUMP_FILE, text + main.NL);
    }
 }

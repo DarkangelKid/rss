@@ -8,24 +8,24 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class adapter_navigation_drawer extends BaseAdapter
+class adapter_navigation_drawer extends BaseAdapter
 {
-   private static String[] menu_array  = new String[0];
-   private static int[]    count_array = new int[0];
-   private int twelve;
-   private static int[]    title_array = new int[]{R.drawable.feeds, R.drawable.manage, R.drawable.feeds};
+   static String[] menu_array  = new String[0];
+   static int[]    count_array = new int[0];
+   int twelve;
+   static int[]    title_array = new int[]{R.drawable.feeds, R.drawable.manage, R.drawable.feeds};
 
-   private static LayoutInflater inflater;
+   static LayoutInflater inflater;
 
-   private TextView main_item;
+   TextView main_item;
 
-   private static class divider
+   static class divider
    {
       TextView title;
       ImageView divider_view;
    }
 
-   private static class group_item
+   static class group_item
    {
       TextView title;
       TextView unread_view;
@@ -33,16 +33,19 @@ public class adapter_navigation_drawer extends BaseAdapter
 
    public adapter_navigation_drawer(Context context_main)
    {
-      inflater = (LayoutInflater) context_main.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-      twelve = (int) ((12 * (context_main.getResources().getDisplayMetrics().density) + 0.5f));
+      if(inflater == null)
+      {
+         inflater = (LayoutInflater) context_main.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+         twelve = (int) ((12 * (context_main.getResources().getDisplayMetrics().density) + 0.5f));
+      }
    }
 
-   public void set_titles(String[] new_titles)
+   void set_titles(String[] new_titles)
    {
       menu_array = new_titles;
    }
 
-   public void set_counts(int[] new_counts)
+   void set_counts(int[] new_counts)
    {
       count_array = new_counts;
    }
@@ -91,7 +94,7 @@ public class adapter_navigation_drawer extends BaseAdapter
    }
 
    @Override
-   public View getView(int position, View convertView, ViewGroup parent)
+   public View getView(int position, View cv, ViewGroup parent)
    {
       final int view_type = getItemViewType(position);
 
@@ -99,10 +102,10 @@ public class adapter_navigation_drawer extends BaseAdapter
       {
          /* This view is for the main items Feeds, Manage, & Settings. */
          case(0):
-            if(convertView == null)
+            if(cv == null)
             {
-               convertView = inflater.inflate(R.layout.navigation_drawer_main_item, parent, false);
-               main_item = (TextView) convertView.findViewById(R.id.menu_item);
+               cv = inflater.inflate(R.layout.navigation_drawer_main_item, parent, false);
+               main_item = (TextView) cv.findViewById(R.id.menu_item);
             }
 
             main_item.setText(navigation_drawer.NAV_TITLES[position]);
@@ -112,39 +115,41 @@ public class adapter_navigation_drawer extends BaseAdapter
             main_item.setCompoundDrawablePadding(twelve);
             break;
 
-         /* This view is for the divider and "Groups" subtitle. The imageview divider is below the subtitle. */
+         /* This view is for the divider and "Groups" subtitle.
+          * The imageview divider is below the subtitle. */
          case(1):
             divider holder;
-            if(convertView == null)
+            if(cv == null)
             {
-               convertView = inflater.inflate(R.layout.navigation_drawer_subtitle_divider, parent, false);
+               cv = inflater.inflate(R.layout.navigation_drawer_subtitle_divider, parent, false);
                holder = new divider();
-               holder.title = (TextView) convertView.findViewById(R.id.title_item);
-               holder.divider_view = (ImageView) convertView.findViewById(R.id.divider_item);
-               convertView.setTag(holder);
+               holder.title = (TextView) cv.findViewById(R.id.title_item);
+               holder.divider_view = (ImageView) cv.findViewById(R.id.divider_item);
+               cv.setTag(holder);
             }
             else
-               holder = (divider) convertView.getTag();
+               holder = (divider) cv.getTag();
             break;
 
-         /* This view is for the group items of the navigation drawer. The one with unread counters. */
+         /* This view is for the group items of the navigation drawer.
+          * The one with unread counters. */
          default:
             group_item holder2;
-            if(convertView == null)
+            if(cv == null)
             {
-               convertView = inflater.inflate(R.layout.navigation_drawer_group_item, parent, false);
+               cv = inflater.inflate(R.layout.navigation_drawer_group_item, parent, false);
                holder2 = new group_item();
-               holder2.title = (TextView) convertView.findViewById(R.id.group_title);
-               holder2.unread_view = (TextView) convertView.findViewById(R.id.unread_item);
-               convertView.setTag(holder2);
+               holder2.title = (TextView) cv.findViewById(R.id.group_title);
+               holder2.unread_view = (TextView) cv.findViewById(R.id.unread_item);
+               cv.setTag(holder2);
             }
             else
-               holder2 = (group_item) convertView.getTag();
+               holder2 = (group_item) cv.getTag();
 
             holder2.title.setText(menu_array[position - 4]);
             String number = Integer.toString(count_array[position - 4]);
             holder2.unread_view.setText((number.equals("0")) ? "" : number);
       }
-      return convertView;
+      return cv;
    }
 }

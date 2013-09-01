@@ -20,45 +20,95 @@ import java.util.Arrays;
 
 public class util
 {
-      private final static String[] media_error_messages = new String[]
-      {
-         "Media not mounted.",
-         "Unable to mount media.",
-         "Media is shared via USB mass storage.",
-         "Media does not exist.",
-         "Media contains unsupported filesystem.",
-         "Media mounted as read-only.",
-         "Media is being disk checked.",
-         "Media was removed before unmounted."
-      };
-
-      private final static String[] media_errors = new String[]
-      {
-         Environment.MEDIA_UNMOUNTED,
-         Environment.MEDIA_UNMOUNTABLE,
-         Environment.MEDIA_SHARED,
-         Environment.MEDIA_REMOVED,
-         Environment.MEDIA_NOFS,
-         Environment.MEDIA_MOUNTED_READ_ONLY,
-         Environment.MEDIA_CHECKING,
-         Environment.MEDIA_BAD_REMOVAL
-      };
-
-   public static void delete_group(String storage, String group)
+   static final String[] media_error_messages = new String[]
    {
-      /// Move all feeds to an unsorted group.
-      //rm(storage + main.GROUPS_DIR + group + main.TXT);
-      //rm(storage + main.GROUPS_DIR + group + main.GROUP_CONTENT);
+      "Media not mounted.",
+      "Unable to mount media.",
+      "Media is shared via USB mass storage.",
+      "Media does not exist.",
+      "Media contains unsupported filesystem.",
+      "Media mounted as read-only.",
+      "Media is being disk checked.",
+      "Media was removed before unmounted."
+   };
+
+   static final String[] media_errors = new String[]
+   {
+      Environment.MEDIA_UNMOUNTED,
+      Environment.MEDIA_UNMOUNTABLE,
+      Environment.MEDIA_SHARED,
+      Environment.MEDIA_REMOVED,
+      Environment.MEDIA_NOFS,
+      Environment.MEDIA_MOUNTED_READ_ONLY,
+      Environment.MEDIA_CHECKING,
+      Environment.MEDIA_BAD_REMOVAL
+   };
+
+   static void delete_feed(String group, String feed, int pos)
+   {
+      /* Get strings to make things clearer. */
+      String storage = get_storage();
+      String sep     = main.SEPAR;
+      String txt     = main.TXT;
+      String all     = main.ALL;
+      String content = main.CONTENT;
+      String count   = main.COUNT;
+      String g_list  = main.GROUP_LIST;
+      String g_dir   = main.GROUPS_DIR;
+
+      /* Parse the group name from the info string. */
+      int start    = group.indexOf('\n') + 1;
+      int end      = group.indexOf(' ');
+      group        = group.substring(start, end);
+
+      String group_dir  = storage + g_dir + group;
+      String all_file   = storage + g_dir + all + sep + all;
+      String group_file = group_dir + sep + group;
+
+      rmdir(new File(group_dir + sep + feed));
+      write.remove_string(group_file + txt, feed, true);
+      write.remove_string(all_file + txt, feed, true);
+
+      rm_empty(group_file + txt);
+      if(!(new File(group_file + txt).exists()))
+      {
+         rmdir(new File(group_dir));
+         write.remove_string(storage + g_list, group, false);
+      }
+      else
+      {
+         write.sort_content(group, all);
+         rm_empty(group_file + content);
+         rm_empty(group_file + count);
+      }
+
+      String[] all_groups = read.file(storage + g_list);
+      if(all_groups.length == 1)
+         rmdir(new File(storage + g_dir + all));
+
+      else if(all_groups.length != 0)
+      {
+         /* This line may be broken. */
+         write.sort_content(all, all);
+         rm_empty(all_file + content);
+         rm_empty(all_file + count);
+      }
+
+      main.update_groups();
+      fragment_manage_feed.feed_list_adapter.remove_item(pos);
+      fragment_manage_feed.feed_list_adapter.notifyDataSetChanged();
+
+      update.manage_groups();
    }
 
-   public static <T> T[] concat(T[] first, T[] second)
+   static <T> T[] concat(T[] first, T[] second)
    {
       T[] result = Arrays.copyOf(first, first.length + second.length);
       System.arraycopy(second, 0, result, first.length, second.length);
       return result;
    }
 
-   public static byte[] concat(byte[] first, byte[] second)
+   static byte[] concat(byte[] first, byte[] second)
    {
       byte[] result = Arrays.copyOf(first, first.length + second.length);
       System.arraycopy(second, 0, result, first.length, second.length);
@@ -66,7 +116,7 @@ public class util
    }
 
    /* index throws an ArrayOutOfBoundsException if not handled. */
-   public static <T> int index(T[] array, T value)
+   static <T> int index(T[] array, T value)
    {
       for(int i = 0; i < array.length; i++)
       {
@@ -76,7 +126,7 @@ public class util
       return -1;
    }
 
-   public static int index(int[] array, int value)
+   static int index(int[] array, int value)
    {
       for(int i = 0; i < array.length; i++)
       {
@@ -86,7 +136,7 @@ public class util
       return -1;
    }
 
-   public static String[] remove_element(String[] a, int index)
+   static String[] remove_element(String[] a, int index)
    {
       String[] b = new String[a.length - 1];
       System.arraycopy(a, 0, b, 0, index);
@@ -97,16 +147,17 @@ public class util
       return b;
    }
 
-   public static String[][] create_info_arrays(String[] current_groups, int size, String storage)
+   static String[][] create_info_arrays(String[] cgroups, int size)
    {
       String info, group_path, sep = main.SEPAR;
+      String storage       = get_storage();
       int number, i, j, total;
       String[] content;
       String[] group_array = new String[size];
       String[] info_array  = new String[size];
 
-      String content_path = storage + main.GROUPS_DIR + current_groups[0]
-                            + sep + current_groups[0] + main.CONTENT;
+      String content_path = storage + main.GROUPS_DIR + cgroups[0]
+                            + sep + cgroups[0] + main.CONTENT;
 
       String count_path = content_path + main.COUNT;
 
@@ -118,7 +169,7 @@ public class util
 
       for(i = 0; i < size; i++)
       {
-         group_array[i] = current_groups[i];
+         group_array[i] = cgroups[i];
          group_path     = storage + main.GROUPS_DIR + group_array[i]
                           + sep + group_array[i] + main.TXT;
 
@@ -144,7 +195,7 @@ public class util
       return (new String[][]{info_array, group_array});
    }
 
-   public static adapter_feeds_cards get_card_adapter(FragmentManager fman, ViewPager viewpager, int page_number)
+   static adapter_feeds_cards get_card_adapter(FragmentManager fman, ViewPager viewpager, int page_number)
    {
       ListView list = get_listview(fman, viewpager, page_number);
       if(list == null)
@@ -152,7 +203,7 @@ public class util
       return (adapter_feeds_cards) get_listview(fman, viewpager, page_number).getAdapter();
    }
 
-   public static ListView get_listview(FragmentManager fman, ViewPager viewpager, int page_number)
+   static ListView get_listview(FragmentManager fman, ViewPager viewpager, int page_number)
    {
       try
       {
@@ -164,25 +215,32 @@ public class util
       }
    }
 
-   /* This function will return null if it fails. Check for null each time. */
-   public static String get_storage()
+   /* This function will return null if it fails. Check for null each time.
+    * It should be pretty safe and efficient to call all the time. */
+   static String get_storage()
    {
-      final Context context;
+      /* First check to see if storage all ready exists in the service
+       * or activity. */
+      if(main.storage != null)
+         return main.storage;
+
+      if(service_update.storage != null)
+         return service_update.storage;
+
+      Context context;
 
       /* If running get the context from the activity, else ask the service. */
       if(main.con != null)
-      {
          context = main.con;
-      }
+
       else if(service_update.service_context != null)
-      {
          context = service_update.service_context;
-      }
+
       else /* This case should never happen because either must be running. */
          return null;
 
       /* Check the media state for any undesirable states. */
-      final String state = Environment.getExternalStorageState();
+      String state = Environment.getExternalStorageState();
       for(int i = 0; i < media_errors.length; i++)
       {
          if(state.equals(media_errors[i]))
@@ -202,8 +260,9 @@ public class util
       else
       {
          String name = context.getPackageName();
-         String ext  = Environment.getExternalStorageDirectory().getAbsolutePath();
-         storage     = ext + sep + "Android" + sep + "data" + sep + name + sep + "files" + sep;
+         File ext    = Environment.getExternalStorageDirectory();
+         storage     = ext.getAbsolutePath() + sep + "Android" + sep + "data"
+                       + sep + name + sep + "files" + sep;
 
          /* If the folder does not exist, create it. */
          File storage_file  = new File(storage);
@@ -213,10 +272,11 @@ public class util
       return storage;
    }
 
-   public static int[] get_unread_counts(String storage, String[] current_groups)
+   static int[] get_unread_counts(String[] cgroups)
    {
-      int total = 0, unread, num;
-      final int size = current_groups.length;
+      String storage       = get_storage();
+      int total            = 0, unread, num;
+      final int size       = cgroups.length;
       int[] unread_counts  = new int[size];
       adapter_feeds_cards temp;
 
@@ -229,8 +289,8 @@ public class util
       for(int i = 1; i < size; i++)
       {
          unread = 0;
-         String[] urls = read.file(storage + main.GROUPS_DIR + current_groups[i]
-                                   + main.SEPAR + current_groups[i] +
+         String[] urls = read.file(storage + main.GROUPS_DIR + cgroups[i]
+                                   + main.SEPAR + cgroups[i] +
                                    main.CONTENT + main.URL);
          for(String url : urls)
          {
@@ -246,9 +306,10 @@ public class util
       return unread_counts;
    }
 
-   public static void set_pagertabstrip_colour(String storage, PagerTabStrip strip)
+   static void set_strip_colour(PagerTabStrip strip)
    {
-      final String colour_path = storage + main.SETTINGS + main.STRIP_COLOR;
+      String storage = get_storage();
+      String colour_path = storage + main.SETTINGS + main.STRIP_COLOR;
 
       /* Read the colour from the settings/colour file, if blank, use blue. */
       String[] check  = read.file(colour_path);
@@ -269,7 +330,7 @@ public class util
                      + adapter_settings_function.file_names[3] + main.TXT;
       String[] check = read.file(path);
 
-      boolean notif = (check.length != 0) ? util.strbol(check[0]) : false;
+      boolean notif = (check.length != 0) ? strbol(check[0]) : false;
       Intent intent = new Intent(context, service_update.class);
       intent.putExtra("GROUP_NUMBER", page);
       intent.putExtra("NOTIFICATIONS", notif);
@@ -278,6 +339,7 @@ public class util
 
    public static void set_service(Context con, String storage, int page, String state)
    {
+      String   alarm = Activity.ALARM_SERVICE;
       int      time  = adapter_settings_function.times[3];
       String[] names = adapter_settings_function.file_names;
       String   pre   = storage + main.SETTINGS;
@@ -285,7 +347,7 @@ public class util
 
       /* Load the refresh boolean value from settings. */
       String[] check  = read.file(pre + names[1] + txt);
-      Boolean refresh = (check.length != 0) ? util.strbol(check[0]) : false;
+      Boolean refresh = (check.length != 0) ? strbol(check[0]) : false;
 
       if(!refresh && state.equals("start"))
          return;
@@ -295,19 +357,21 @@ public class util
       if(check.length != 0)
          time = stoi(check[0]);
 
-      Intent intent             = make_intent(con, storage, 0);
-      PendingIntent pend_intent = PendingIntent.getService(con, 0, intent, 0);
+      /* Create intent, turn into pending intent, and get the alarmmanager. */
+      Intent        intent  = make_intent(con, storage, 0);
+      PendingIntent pintent = PendingIntent.getService(con, 0, intent, 0);
+      AlarmManager  am      = (AlarmManager) con.getSystemService(alarm);
 
-      AlarmManager am = (AlarmManager) con.getSystemService(Activity.ALARM_SERVICE);
+      /* Depending on the state string, start or stop the service. */
       if(state.equals("start"))
       {
          long interval = (long) time*60000;
          long next     =  System.currentTimeMillis() + interval;
-         am.setRepeating(AlarmManager.RTC_WAKEUP, next, interval, pend_intent);
+         am.setRepeating(AlarmManager.RTC_WAKEUP, next, interval, pintent);
       }
       else if(state.equals("stop"))
       {
-         am.cancel(pend_intent);
+         am.cancel(pintent);
       }
    }
 
@@ -319,29 +383,20 @@ public class util
          update.page(page);
       else
       {
-         for(int i = 1; i < main.current_groups.length; i++)
+         for(int i = 1; i < main.cgroups.length; i++)
             update.page(i);
       }
    }
 
-   public static void post(String message)
+   public static void post(CharSequence message)
    {
       /* If the activity is running, make a toast notification.
        * Log the event regardless. */
       if(main.service_handler != null)
-      {
-         Toast.makeText(main.con, (CharSequence) message, Toast.LENGTH_LONG).show();
-      }
+         Toast.makeText(main.con, message, Toast.LENGTH_LONG).show();
 
       /* This function can be called when no media, so this is optional. */
-      if(main.storage != null)
-      {
-         write.log(main.storage, message);
-      }
-      else if(service_update.storage != null)
-      {
-         write.log(service_update.storage, message);
-      }
+      write.log((String) message);
    }
 
    public static boolean rm(String file_path)
@@ -396,5 +451,23 @@ public class util
    public static String getstr(TextView t)
    {
       return t.getText().toString().trim();
+   }
+
+   /* Returns a zero-length array if the resource is not found and logs the
+    * event in log. */
+   public static String[] get_array(Context con, int resource)
+   {
+      String[] array  = new String[0];
+      try
+      {
+         array = con.getResources().getStringArray(resource);
+      }
+      catch(android.content.res.Resources.NotFoundException e)
+      {
+         String storage = get_storage();
+         if(storage != null)
+            write.log(resource + " does not exist.");
+      }
+      return array;
    }
 }

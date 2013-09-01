@@ -20,49 +20,64 @@ import java.util.regex.Pattern;
 
 class parser
 {
-   private static final SimpleDateFormat rss_date     = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
-   private static final SimpleDateFormat rfc3339      = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS'Z'");
-   private static final Pattern regex_tags            = Pattern.compile("(&lt;).*?(&gt;)");
-   private static final Pattern regex_cdata_tags      = Pattern.compile("\\<.*?\\>");
-   private static final Pattern space_tags            = Pattern.compile("[\\t\\n\\x0B\\f\\r\\|]");
-   private String[] start                       = new String[]{"<link>", "<published>", "<pubDate>", "<description>", "<title", "<content"};
-   private String[] end                      = new String[]{"/link", "/publ", "/pubD", "/desc", "/titl", "/cont"};
-   private String[] of_types                    = new String[]{"<link>", "<published>", "<pubDate>", "<description>", "<title", "<content",
-            "</link>", "</published>", "</pubDate>", "</description>", "</title", "</content", "<entry", "<item", "</entry", "</item"};
-   private String dump_path, url_path;
-   private final int width;
+   static final SimpleDateFormat rss_date = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
+   static final SimpleDateFormat rfc3339  = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS'Z'");
+   static final Pattern regex_tags        = Pattern.compile("(&lt;).*?(&gt;)");
+   static final Pattern regex_cdata_tags  = Pattern.compile("\\<.*?\\>");
+   static final Pattern space_tags        = Pattern.compile("[\\t\\n\\x0B\\f\\r\\|]");
+   String[] start    = new String[]
+   {
+      "<link>", "<published>", "<pubDate>", "<description>", "<title","<content"
+   };
+   String[] end      = new String[]
+   {
+      "/link", "/publ", "/pubD", "/desc", "/titl", "/cont"
+   };
+   String[] of_types = new String[]
+   {
+      "<link>", "<published>", "<pubDate>", "<description>", "<title",
+      "<content", "</link>", "</published>", "</pubDate>", "</description>",
+      "</title", "</content", "<entry", "<item", "</entry", "</item"
+   };
+   String dump_path, url_path;
+   int width;
 
-   public parser(String storage, String group, String feed, int widther)
+   public parser(String group, String feed, int widther)
    {
       width = widther;
       try
       {
-         parse_local_xml(storage, group, feed);
+         parse_local_xml(group, feed);
       }
       catch(IOException e)
       {
       }
    }
 
-   private void parse_local_xml(String storage, String group, String feed) throws IOException
+   void parse_local_xml(String group, String feed) throws IOException
    {
-      dump_path                  = storage + "content.dump" + main.TXT;
-      url_path                   = storage + "content.url"  + main.TXT;
-      final String store_file    = storage + feed + main.STORE;
-      final String feed_folder   = storage + main.GROUPS_DIR + group + main.SEPAR + feed + main.SEPAR;
-      final String content_file  = feed_folder + feed + main.CONTENT;
-      final String image_dir     = feed_folder + main.IMAGE_DIR;
-      final String thumbnail_dir = feed_folder + main.THUMBNAIL_DIR;
-      final File in              = new File(store_file);
-      final File out             = new File(content_file);
-      final String[] filters     = read.file(storage + main.FILTER_LIST);
+      String storage       = util.get_storage();
+      String sep           = main.SEPAR;
+      String g_dir         = main.GROUPS_DIR;
+      String txt           = main.TXT;
 
-      Set<String> set            = new LinkedHashSet<String>();
-      Boolean write_mode         = false;
-      Boolean c_mode             = false;
-      Time time                  = new Time();
-      BufferedReader reader      = new BufferedReader(new FileReader(in));
-      StringBuilder line         = new StringBuilder();
+      dump_path            = storage + "content.dump" + txt;
+      url_path             = storage + "content.url"  + txt;
+      String store_file    = storage + feed + main.STORE;
+      String feed_folder   = storage + g_dir + group + sep + feed + sep;
+      String content_file  = feed_folder + feed + main.CONTENT;
+      String image_dir     = feed_folder + main.IMAGE_DIR;
+      String thumbnail_dir = feed_folder + main.THUMBNAIL_DIR;
+      File in              = new File(store_file);
+      File out             = new File(content_file);
+      String[] filters     = read.file(storage + main.FILTER_LIST);
+
+      Set<String> set       = new LinkedHashSet<String>();
+      Boolean write_mode    = false;
+      Boolean c_mode        = false;
+      Time time             = new Time();
+      BufferedReader reader = new BufferedReader(new FileReader(in));
+      StringBuilder line    = new StringBuilder();
       String current_tag, temp_line, cont, image, image_name;
       int tem, tem2, tem3, description_length, take, cont_length, i;
 
@@ -70,7 +85,7 @@ class parser
       if(out.exists())
       {
          String liner;
-         final BufferedReader stream = new BufferedReader(new FileReader(out));
+         BufferedReader stream = new BufferedReader(new FileReader(out));
          while((liner = stream.readLine()) != null)
             set.add(liner);
          stream.close();
@@ -97,8 +112,12 @@ class parser
             if((line.length() > 1)&&(write_mode))
             {
                temp_line = line.toString();
-               if(!temp_line.contains("published|")&&(!temp_line.contains("pubDate|"))&&(!set.contains(temp_line)))
+               if(!temp_line.contains("published|")&&
+                  !temp_line.contains("pubDate|")  &&
+                  !set.contains(temp_line)           )
+               {
                   temp_line = temp_line.concat(("pubDate|").concat(rfc3339.format(new Date()).concat("|")));
+               }
                set.add(temp_line);
             }
             line.setLength(0);
@@ -119,7 +138,7 @@ class parser
 
                /* If the image failed to download. */
                if(!success)
-                  write.log(storage, "Failed to download image " + image);
+                  write.log("Failed to download image " + image);
 
                /* If the image downloaded fine and a thumbnail does not exist. */
                else if(!util.exists(thumbnail_dir + image_name))
@@ -187,7 +206,7 @@ class parser
                            if((tem3 != -1)&&(tem3 < tem2))
                                  tem2 = tem3;
                         }
-                        to_file(dump_path, cont.substring(tem + 9, tem2) + main.NL);
+                        write.single(dump_path, cont.substring(tem + 9, tem2) + main.NL);
                      }
                   }
                   /// If it follows the rss 2.0 specification for rfc882
@@ -275,16 +294,16 @@ class parser
       in.delete();
       out.delete();
 
-      final String[] feeds = set.toArray(new String[set.size()]);
+      String[] feeds = set.toArray(new String[set.size()]);
 
       /// TODO: May already be the out File.
-      final BufferedWriter write = new BufferedWriter(new FileWriter(content_file, true));
+      BufferedWriter write = new BufferedWriter(new FileWriter(content_file, true));
       for(String fed : feeds)
          write.write(fed + main.NL);
       write.close();
    }
 
-   private String get_content_to_end_tag(BufferedReader reader, String tag)
+   String get_content_to_end_tag(BufferedReader reader, String tag)
    {
       /* </link> */
       StringBuilder cont = new StringBuilder();
@@ -302,13 +321,14 @@ class parser
          /* hello my name is a penguin<link>blash stha */
          cont.deleteCharAt(cont.length() - 1);
       }
-      catch(Exception e){
+      catch(Exception e)
+      {
          return "";
       }
       return cont.toString();
    }
 
-   private String read_string_to_next_char(BufferedReader reader, char next)
+   String read_string_to_next_char(BufferedReader reader, char next)
    {
       char   current;
       char[] build   = new char[4096];
@@ -330,14 +350,14 @@ class parser
       }
    }
 
-   private String check_for_image()
+   String check_for_image()
    {
-      final File im = new File(dump_path);
+      File im = new File(dump_path);
       String popo = "";
       try
       {
-         final BufferedReader image = new BufferedReader(new FileReader(im));
-         final String image_url = image.readLine();
+         BufferedReader image = new BufferedReader(new FileReader(im));
+         String image_url = image.readLine();
          if(image_url.length() > 6)
             popo = image_url;
       }
@@ -347,24 +367,25 @@ class parser
       return popo;
    }
 
-   private String check_for_url()
+   String check_for_url()
    {
-      final File iu = new File(url_path);
+      File iu = new File(url_path);
       String momo = "";
       try
       {
-         final BufferedReader u = new BufferedReader(new FileReader(iu));
-         final String url = u.readLine();
+         BufferedReader u = new BufferedReader(new FileReader(iu));
+         String url = u.readLine();
          if(url.length() > 6)
             momo = "link|" + url + "|";
       }
-      catch(Exception e){
+      catch(Exception e)
+      {
       }
       iu.delete();
       return momo;
    }
 
-   private String get_next_tag(BufferedReader reader, String... types) throws IOException
+   String get_next_tag(BufferedReader reader, String... types) throws IOException
    {
       boolean found = false;
       int tem, tem2, tem3;
@@ -396,7 +417,7 @@ class parser
                if((tem3 != -1)&&(tem3 < tem2))
                      tem2 = tem3;
             }
-            to_file(dump_path, tag.substring(tem + 9, tem2) + main.NL);
+            write.single(dump_path, tag.substring(tem + 9, tem2) + main.NL);
          }
 
          if((tag.contains("type=\"text/html"))||(tag.contains("type=\'text/html")))
@@ -413,7 +434,7 @@ class parser
                   if((tem3 != -1)&&(tem3 < tem2))
                         tem2 = tem3;
                }
-               to_file(url_path, tag.substring(tem + 6, tem2) + main.NL);
+               write.single(url_path, tag.substring(tem + 6, tem2) + main.NL);
             }
          }
          else if((tag.contains("type=\"image/jpeg"))||(tag.contains("type=\'image/jpeg")))
@@ -431,7 +452,7 @@ class parser
                         tem2 = tem3;
                }
                util.rm(dump_path);
-               to_file(dump_path, tag.substring(tem + 6, tem2) + main.NL);
+               write.single(dump_path, tag.substring(tem + 6, tem2) + main.NL);
             }
          }
 
@@ -442,7 +463,7 @@ class parser
       return tag;
    }
 
-   private void compress_file(String image_dir, String thumbnail_dir, String image_name)
+   void compress_file(String image_dir, String thumbnail_dir, String image_name)
    {
       int insample;
 
@@ -466,16 +487,5 @@ class parser
       catch (Exception e)
       {
       }
-   }
-
-   private void to_file(String file_namer, String string)
-   {
-      try
-      {
-         final BufferedWriter out = new BufferedWriter(new FileWriter(file_namer));
-         out.write(string);
-         out.close();
-      }
-      catch(Exception e){}
    }
 }

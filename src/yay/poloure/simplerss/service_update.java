@@ -40,15 +40,15 @@ public class service_update extends IntentService
 
       Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
-      final String UNREAD_ITEM      = getString(R.string.notification_title_singular);
-      final String UNREAD_ITEMS     = getString(R.string.notification_title_plural);
-      final String GROUP_UNREAD     = getString(R.string.notification_content_group_item);
-      final String GROUP_UNREADS    = getString(R.string.notification_content_group_items);
-      final String GROUPS_UNREADS   = getString(R.string.notification_content_groups);
+      String UNREAD_ITEM      = getString(R.string.notification_title_singular);
+      String UNREAD_ITEMS     = getString(R.string.notification_title_plural);
+      String GROUP_UNREAD     = getString(R.string.notification_content_group_item);
+      String GROUP_UNREADS    = getString(R.string.notification_content_group_items);
+      String GROUPS_UNREADS   = getString(R.string.notification_content_groups);
 
-      final int group      = intent.getIntExtra("GROUP_NUMBER", 0);
+      int group      = intent.getIntExtra("GROUP_NUMBER", 0);
 
-      final String SEPAR   = main.SEPAR;
+      String SEPAR   = main.SEPAR;
 
       storage = util.get_storage();
 
@@ -56,14 +56,14 @@ public class service_update extends IntentService
       if(storage == null)
          return;
 
-      final String[] all_groups        = read.file(storage + main.GROUP_LIST);
-      final String grouper             = all_groups[group];
-      final String group_file_path     = storage + main.GROUPS_DIR + grouper + SEPAR + grouper + main.TXT;
+      String[] all_groups        = read.file(storage + main.GROUP_LIST);
+      String grouper             = all_groups[group];
+      String group_file_path     = storage + main.GROUPS_DIR + grouper + SEPAR + grouper + main.TXT;
 
-      final String[][] content         = read.csv(group_file_path, 'n', 'u', 'g');
-      final String[] names             = content[0];
-      final String[] urls              = content[1];
-      final String[] groups            = content[2];
+      String[][] content         = read.csv(group_file_path, 'n', 'u', 'g');
+      String[] names             = content[0];
+      String[] urls              = content[1];
+      String[] groups            = content[2];
 
       int width;
 
@@ -82,22 +82,22 @@ public class service_update extends IntentService
       {
          success = write.dl(urls[i], storage + names[i] + main.STORE);
          if(success)
-            new parser(storage, groups[i], names[i], width);
+            new parser(groups[i], names[i], width);
          else
             util.post("Download of " + urls[i] + " failed.");
       }
 
       /* Always sort all & sort others too. */
-      write.sort_content(storage, all_groups[0], all_groups[0]);
+      write.sort_content(all_groups[0], all_groups[0]);
       if(!grouper.equals(main.ALL))
-         write.sort_content(storage, grouper, all_groups[0]);
+         write.sort_content(grouper, all_groups[0]);
       else
       {
          for(int i = 1; i < all_groups.length; i++)
-            write.sort_content(storage, all_groups[i], all_groups[0]);
+            write.sort_content(all_groups[i], all_groups[0]);
       }
 
-      final int[] unread_counts = util.get_unread_counts(storage, all_groups);
+      int[] unread_counts = util.get_unread_counts(all_groups);
 
       /* If activity is running. */
       if(main.service_handler != null)
@@ -112,7 +112,7 @@ public class service_update extends IntentService
       {
          /* Calculate the number of groups with new items. */
          int group_items = 1, count;
-         final int sizes = unread_counts.length;
+         int sizes       = unread_counts.length;
 
          for(int i = 1 ; i < sizes; i++)
          {
@@ -122,10 +122,8 @@ public class service_update extends IntentService
          }
 
          String not_title;
-         if(unread_counts[0] == 1)
-            not_title = String.format(UNREAD_ITEM, 1);
-         else
-            not_title = String.format(UNREAD_ITEMS, unread_counts[0]);
+         not_title = (unread_counts[0] == 1) ? String.format(UNREAD_ITEM, 1) :
+                      String.format(UNREAD_ITEMS, unread_counts[0]);
 
          String not_content;
          if(unread_counts[0] == 1 && (group_items - 1) == 1)
@@ -161,8 +159,10 @@ public class service_update extends IntentService
    {
       ActivityManager manager = (ActivityManager) activity.getSystemService(Context.ACTIVITY_SERVICE);
       for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE))
+      {
          if(service_update.class.getName().equals(service.service.getClassName()))
             return true;
+      }
       return false;
    }
 }

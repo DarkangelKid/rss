@@ -35,35 +35,35 @@ import java.io.File;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-public class adapter_feeds_cards extends BaseAdapter
+class adapter_feeds_cards extends BaseAdapter
 {
-   public  String[] links        = new String[0];
-   private String[] titles       = new String[0];
-   private String[] descriptions = new String[0];
-   private String[] images       = new String[0];
-   private Integer[] heights     = new Integer[0];
-   private Integer[] widths      = new Integer[0];
+   String[] links        = new String[0];
+   String[] titles       = new String[0];
+   String[] descriptions = new String[0];
+   String[] images       = new String[0];
+   Integer[] heights     = new Integer[0];
+   Integer[] widths      = new Integer[0];
 
-   public static Set<String> read_items;
+   static Set<String> read_items;
 
-   private static final Pattern thumb_img = Pattern.compile("thumbnails");
-   private static Context context;
-   private static LayoutInflater inflater;
-   public  static int two = 0, four = 0, eight = 0;
-   private static int screen_width;
+   static final Pattern thumb_img = Pattern.compile("thumbnails");
+   static Context context;
+   static LayoutInflater inflater;
+   static int two = 0, four = 0, eight = 0;
+   static int screen_width;
 
-   private static final int link_black  = Color.rgb(128, 128, 128);
-   private static final int link_grey   = Color.rgb(194, 194, 194);
+   static final int link_black  = Color.rgb(128, 128, 128);
+   static final int link_grey   = Color.rgb(194, 194, 194);
 
-   private static final int des_black   = Color.rgb(78, 78, 78);
-   private static final int des_grey    = Color.rgb(167, 167, 167);
+   static final int des_black   = Color.rgb(78, 78, 78);
+   static final int des_grey    = Color.rgb(167, 167, 167);
 
-   private static final int title_black = Color.rgb(0, 0, 0);
-   private static final int title_grey  = Color.rgb(128, 128, 128);
+   static final int title_black = Color.rgb(0, 0, 0);
+   static final int title_grey  = Color.rgb(128, 128, 128);
 
-   private boolean   first          = true;
-   private ListView  listview;
-   public  boolean   touched        = true;
+   boolean   first          = true;
+   ListView  listview;
+   boolean   touched        = true;
 
    public adapter_feeds_cards(Context context_main)
    {
@@ -82,7 +82,7 @@ public class adapter_feeds_cards extends BaseAdapter
       }
    }
 
-   public void add_array(String[] new_title, String[] new_des, String[] new_link, String[] new_image, Integer[] new_height, Integer[] new_width)
+   void add_array(String[] new_title, String[] new_des, String[] new_link, String[] new_image, Integer[] new_height, Integer[] new_width)
    {
       titles         = util.concat(titles,       new_title);
       descriptions   = util.concat(descriptions, new_des);
@@ -124,7 +124,7 @@ public class adapter_feeds_cards extends BaseAdapter
       boolean des = ( descriptions[position] != null &&
                      !descriptions[position].equals("") );
 
-      //write.log(main.storage, position + " || " + Boolean.toString(img) + " || " + Boolean.toString(des));
+      //write.log(position + " || " + Boolean.toString(img) + " || " + Boolean.toString(des));
 
       if(img && des)
          return 0;
@@ -162,8 +162,6 @@ public class adapter_feeds_cards extends BaseAdapter
                if(listview.getChildAt(0).getTop() == eight && listview.getVisibility() == View.VISIBLE && touched)
                   read_items.add(links[links.length - 1]);
 
-               /*if(listview.getChildAt(position).getTop() == eight)
-                  read_items.add(links.get(position));*/
                if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
                   update.navigation(null);
             }
@@ -292,7 +290,7 @@ public class adapter_feeds_cards extends BaseAdapter
       return convertView;
    }
 
-   private void display_img(ImageView view, int position)
+   void display_img(ImageView view, int position)
    {
       int height  = heights[position];
       int width   = widths[position];
@@ -312,8 +310,8 @@ public class adapter_feeds_cards extends BaseAdapter
 
    class image extends AsyncTask<Object, Void, Object[]>
    {
-      private ImageView iv;
-      private int tag;
+      ImageView iv;
+      int tag;
 
       @Override
       protected Object[] doInBackground(Object... params)
@@ -347,7 +345,7 @@ public class adapter_feeds_cards extends BaseAdapter
    }
 
 
-   private static class full_holder
+   static class full_holder
    {
       TextView title;
       TextView url;
@@ -355,27 +353,27 @@ public class adapter_feeds_cards extends BaseAdapter
       ImageView image;
    }
 
-   private static class no_img_des_holder
+   static class no_img_des_holder
    {
       TextView title;
       TextView url;
       TextView des;
    }
 
-   private static class img_no_des_holder
+   static class img_no_des_holder
    {
       TextView title;
       TextView url;
       ImageView image;
    }
 
-   private static class no_img_no_des_holder
+   static class no_img_no_des_holder
    {
       TextView title;
       TextView url;
    }
 
-   private class webview_mode implements View.OnClickListener
+   class webview_mode implements View.OnClickListener
    {
       @Override
       public void onClick(View v)
@@ -392,7 +390,7 @@ public class adapter_feeds_cards extends BaseAdapter
       }
    }
 
-   private class image_call implements View.OnClickListener
+   class image_call implements View.OnClickListener
    {
       private final String image_path;
       public image_call(String im)
@@ -416,7 +414,7 @@ public class adapter_feeds_cards extends BaseAdapter
       }
    }
 
-   private class long_press implements View.OnLongClickListener
+   class long_press implements View.OnLongClickListener
    {
       @Override
       public boolean onLongClick(View v)
@@ -427,13 +425,13 @@ public class adapter_feeds_cards extends BaseAdapter
       }
    }
 
-   private static void show_card_dialog(final Context con, final String URL, final int image_visibility)
+   static void show_card_dialog(final Context con, final String URL, final int image_visibility)
    {
       String[] menu_items;
       if(image_visibility != View.VISIBLE)
-         menu_items = con.getResources().getStringArray(R.array.card_menu);
+         menu_items = util.get_array(con, R.array.card_menu);
       else
-         menu_items = con.getResources().getStringArray(R.array.card_menu_image);
+         menu_items = util.get_array(con, R.array.card_menu_image);
 
 
       final AlertDialog card_dialog = new AlertDialog.Builder(con)
@@ -462,11 +460,11 @@ public class adapter_feeds_cards extends BaseAdapter
             card_dialog.show();
    }
 
-   private class fragment_webview extends Fragment
+   class fragment_webview extends Fragment
    {
-      private WebView web_view;
-      private FrameLayout view;
-      private TextView text;
+      WebView web_view;
+      FrameLayout view;
+      TextView text;
 
       public fragment_webview()
       {
@@ -521,7 +519,7 @@ public class adapter_feeds_cards extends BaseAdapter
          super.onDestroy();
       }
 
-      public WebView get_webview()
+      WebView get_webview()
       {
          return web_view;
       }

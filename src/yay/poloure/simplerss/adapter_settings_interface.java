@@ -16,11 +16,18 @@ import android.support.v4.view.PagerTabStrip;
 
 public class adapter_settings_interface extends BaseAdapter
 {
-   private final String storage;
-   private final String[] title_array;
-   private final String[] summary_array;
-   public  final static String[] colours  = new String[]{"blue", "purple", "green", "orange", "red"};
-   public  final static int[] colour_ints = new int[]
+   String storage;
+   String[] title_array;
+   String[] summary_array;
+   static final String[] colours = new String[]
+   {
+      "blue",
+      "purple",
+      "green",
+      "orange",
+      "red"
+   };
+   static final int[] colour_ints = new int[]
    {
       Color.rgb(51, 181, 229), // blue
       Color.rgb(170, 102, 204), // purple
@@ -29,42 +36,46 @@ public class adapter_settings_interface extends BaseAdapter
       Color.rgb(255, 68, 68) // red
    };
 
-   private static LayoutInflater inflater;
+   static ImageView[] colour_views;
+   static LayoutInflater inf;
 
-      TextView settings_heading;
+   TextView settings_heading;
 
-   private static class settings_holocolour_holder
+   static class settings_holocolour_holder
    {
-      TextView title_view;
-      TextView summary_view;
-      ImageView blue_view;
-      ImageView purple_view;
-      ImageView green_view;
-      ImageView yellow_view;
-      ImageView red_view;
+      TextView  title;
+      TextView  summary;
+      ImageView blue;
+      ImageView purple;
+      ImageView green;
+      ImageView yellow;
+      ImageView red;
    }
 
-   private static class settings_checkbox_holder
+   static class settings_checkbox_holder
    {
-      TextView title_view;
-      TextView summary_view;
+      TextView title;
+      TextView summary;
       CheckBox checkbox;
    }
 
-   private static class settings_seekbar_holder
+   static class settings_seekbar_holder
    {
-      TextView title_view;
-      TextView summary_view;
-      TextView read_view;
+      TextView title;
+      TextView summary;
+      TextView read;
       SeekBar seekbar;
    }
 
-   public adapter_settings_interface(Context context_main, String stor)
+   public adapter_settings_interface(Context con)
    {
-      inflater = (LayoutInflater) context_main.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-      title_array = context_main.getResources().getStringArray(R.array.settings_interface_titles);
-      summary_array = context_main.getResources().getStringArray(R.array.settings_interface_summaries);
-      storage = stor;
+      if(inf == null)
+      {
+         inf = (LayoutInflater) con.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+         title_array   = util.get_array(con, R.array.settings_interface_titles);
+         summary_array = util.get_array(con, R.array.settings_interface_summaries);
+         storage       = util.get_storage();
+      }
    }
 
    @Override
@@ -82,7 +93,7 @@ public class adapter_settings_interface extends BaseAdapter
    @Override
    public int getCount()
    {
-      return 4;
+      return title_array.length;
    }
 
    @Override
@@ -104,140 +115,151 @@ public class adapter_settings_interface extends BaseAdapter
    }
 
    @Override
-   public View getView(final int position, View convertView, ViewGroup parent)
+   public View getView(final int position, View cv, ViewGroup parent)
    {
-      final int view_type = getItemViewType(position);
-      final String setting_path = main.storage + main.SETTINGS + title_array[position] + main.TXT;
-      switch(view_type)
+      int view_type       = getItemViewType(position);
+      String title        = title_array[position];
+      String summary      = summary_array[position];
+      final String setting_path = main.storage + main.SETTINGS + title + main.TXT;
+
+      /* This type is a heading. */
+      if(view_type == 0)
       {
-         /* This type is a heading. */
-         case(0):
-            if(convertView == null)
-            {
-               convertView = inflater.inflate(R.layout.settings_heading, parent, false);
-               settings_heading = (TextView) convertView.findViewById(R.id.settings_heading);
-            }
+         if(cv == null)
+         {
+            cv = inf.inflate(R.layout.settings_heading, parent, false);
+            settings_heading = (TextView) cv.findViewById(R.id.settings_heading);
+         }
 
-            settings_heading.setText(title_array[position]);
-            break;
-
-         /* This type is the colour selector. */
-         case(1):
-            final settings_holocolour_holder holder;
-            if(convertView == null)
-            {
-               convertView          = inflater.inflate(R.layout.settings_holocolour_select, parent, false);
-               holder               = new settings_holocolour_holder();
-               holder.title_view    = (TextView) convertView.findViewById(R.id.colour_title);
-               holder.summary_view  = (TextView) convertView.findViewById(R.id.colour_summary);
-               holder.blue_view     = (ImageView) convertView.findViewById(R.id.blue_image);
-               holder.purple_view   = (ImageView) convertView.findViewById(R.id.purple_image);
-               holder.green_view    = (ImageView) convertView.findViewById(R.id.green_image);
-               holder.yellow_view   = (ImageView) convertView.findViewById(R.id.yellow_image);
-               holder.red_view      = (ImageView) convertView.findViewById(R.id.red_image);
-               convertView.setTag(holder);
-            }
-            else
-               holder = (settings_holocolour_holder) convertView.getTag();
-
-            holder.title_view.setText(title_array[position]);
-            holder.summary_view.setText(summary_array[position]);
-
-            String[] colour_array = read.file(storage + main.SETTINGS + main.STRIP_COLOR);
-
-            if(colour_array.length == 0)
-            {
-               colour_array = new String[]{"blue"};
-               write.single(storage + main.SETTINGS + main.STRIP_COLOR, "blue");
-            }
-
-            ImageView[] colour_views = new ImageView[]{holder.blue_view, holder.purple_view, holder.green_view, holder.yellow_view, holder.red_view};
-
-            for(int i = 0; i < colour_views.length; i++)
-            {
-               colour_views[i].setOnClickListener(new colour_click(i));
-
-               /* Set the alpha to fade out if it is not the currently selected colour. */
-               if(colour_array[0].equals(colours[i]))
-                  colour_views[i].setAlpha(1.0f);
-               else
-                  colour_views[i].setAlpha(0.5f);
-            }
-            break;
-
-         /* This type is a checkbox setting. */
-         case(2):
-            final settings_checkbox_holder hold;
-            if(convertView == null)
-            {
-               convertView       = (View) inflater.inflate(R.layout.settings_checkbox, parent, false);
-               hold              = new settings_checkbox_holder();
-               hold.title_view   = (TextView) convertView.findViewById(R.id.check_title);
-               hold.summary_view = (TextView) convertView.findViewById(R.id.check_summary);
-               hold.checkbox     = (CheckBox) convertView.findViewById(R.id.checkbox);
-               convertView.setTag(hold);
-            }
-            else
-               hold = (settings_checkbox_holder) convertView.getTag();
-
-            hold.title_view.setText(title_array[position]);
-            hold.summary_view.setText(summary_array[position]);
-            hold.checkbox.setOnClickListener(new OnClickListener()
-            {
-               @Override
-               public void onClick(View v)
-               {
-                  util.rm(setting_path);
-                  write.single(setting_path, Boolean.toString(((CheckBox) v).isChecked()));
-               }
-            });
-
-            /* Load the saved boolean value and set the box as checked if true. */
-            hold.checkbox.setChecked(util.strbol(read.setting(setting_path)));
-            break;
-
-         /* This is the seekbar. */
-         default:
-            final settings_seekbar_holder hold2;
-            if(convertView == null)
-            {
-               convertView          = inflater.inflate(R.layout.settings_seekbar, parent, false);
-               hold2                = new settings_seekbar_holder();
-               hold2.title_view     = (TextView) convertView.findViewById(R.id.seek_title);
-               hold2.summary_view   = (TextView) convertView.findViewById(R.id.seek_summary);
-               hold2.seekbar        = (SeekBar) convertView.findViewById(R.id.seekbar);
-               hold2.read_view      = (TextView) convertView.findViewById(R.id.seek_read);
-               convertView.setTag(hold2);
-            }
-            else
-               hold2 = (settings_seekbar_holder) convertView.getTag();
-
-            hold2.title_view.setText(title_array[position]);
-            hold2.summary_view.setText(summary_array[position]);
-            hold2.seekbar.setMax(9);
-            hold2.seekbar.setOnSeekBarChangeListener(new OnSeekBarChangeListener()
-            {
-               public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
-               {
-                  hold2.read_view.setText("DICKS");
-                  /* KIRSTY - refer to the seekbar in adapter_settings_fuction to see what happens in onProgressChanged(). */
-               }
-
-               public void onStartTrackingTouch(SeekBar seekBar)
-               {
-               }
-
-               public void onStopTrackingTouch(SeekBar seekBar)
-               {
-               }
-            });
+         settings_heading.setText(title);
       }
-      return convertView;
+
+      /* This type is the colour selector. */
+      else if(view_type == 1)
+      {
+         settings_holocolour_holder holder;
+         if(cv == null)
+         {
+            cv = inf.inflate(R.layout.settings_holocolour_select, parent, false);
+            holder         = new settings_holocolour_holder();
+            holder.title   = (TextView)  cv.findViewById(R.id.colour_title);
+            holder.summary = (TextView)  cv.findViewById(R.id.colour_summary);
+            holder.blue    = (ImageView) cv.findViewById(R.id.blue_image);
+            holder.purple  = (ImageView) cv.findViewById(R.id.purple_image);
+            holder.green   = (ImageView) cv.findViewById(R.id.green_image);
+            holder.yellow  = (ImageView) cv.findViewById(R.id.yellow_image);
+            holder.red     = (ImageView) cv.findViewById(R.id.red_image);
+            cv.setTag(holder);
+         }
+         else
+            holder = (settings_holocolour_holder) cv.getTag();
+
+         holder.title.setText(title);
+         holder.summary.setText(summary);
+
+         /* Read the colour from settings, if null, set as blue. */
+         String   colour_path  = storage + main.SETTINGS + main.STRIP_COLOR;
+         String[] colour_array = read.file(colour_path);
+
+         String colour = (colour_array.length == 0) ? "blue" : colour_array[0];
+
+         /* Save the private static variable colour_views. */
+         colour_views = new ImageView[]
+         {
+            holder.blue,
+            holder.purple,
+            holder.green,
+            holder.yellow,
+            holder.red,
+         };
+
+         /* Set the alpha to 0.5 if not the currently selected colour. */
+         float alpha;
+         for(int i = 0; i < colour_views.length; i++)
+         {
+            colour_views[i].setOnClickListener(new colour_click(i));
+
+            alpha = (colour.equals(colours[i])) ? 1.0f : 0.5f;
+            colour_views[i].setAlpha(alpha);
+         }
+      }
+
+      /* This type is a checkbox setting. */
+      else if(view_type == 2)
+      {
+         settings_checkbox_holder holder;
+         if(cv == null)
+         {
+            cv = (View) inf.inflate(R.layout.settings_checkbox, parent, false);
+            holder          = new settings_checkbox_holder();
+            holder.title    = (TextView) cv.findViewById(R.id.check_title);
+            holder.summary  = (TextView) cv.findViewById(R.id.check_summary);
+            holder.checkbox = (CheckBox) cv.findViewById(R.id.checkbox);
+            cv.setTag(holder);
+         }
+         else
+            holder = (settings_checkbox_holder) cv.getTag();
+
+         holder.title.setText(title);
+         holder.summary.setText(summary);
+         holder.checkbox.setOnClickListener(new OnClickListener()
+         {
+            @Override
+            public void onClick(View v)
+            {
+               /* Save the value of the checkbox to file on click. */
+               util.rm(setting_path);
+               String value = Boolean.toString(((CheckBox) v).isChecked());
+               write.single(setting_path, value);
+            }
+         });
+
+         /* Load the saved boolean value and set the box as checked if true. */
+         holder.checkbox.setChecked(util.strbol(read.setting(setting_path)));
+      }
+      /* This is the seekbar. */
+      else
+      {
+         final settings_seekbar_holder holder;
+         if(cv == null)
+         {
+            cv = inf.inflate(R.layout.settings_seekbar, parent, false);
+            holder         = new settings_seekbar_holder();
+            holder.title   = (TextView) cv.findViewById(R.id.seek_title);
+            holder.summary = (TextView) cv.findViewById(R.id.seek_summary);
+            holder.seekbar = (SeekBar)  cv.findViewById(R.id.seekbar);
+            holder.read    = (TextView) cv.findViewById(R.id.seek_read);
+            cv.setTag(holder);
+         }
+         else
+            holder = (settings_seekbar_holder) cv.getTag();
+
+         holder.title  .setText(title);
+         holder.summary.setText(summary);
+         holder.seekbar.setMax(9);
+         holder.seekbar.setOnSeekBarChangeListener(new OnSeekBarChangeListener()
+         {
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
+            {
+               holder.read.setText("DICKS");
+               /* KIRSTY - refer to the seekbar in adapter_settings_fuction to see what happens in onProgressChanged(). */
+            }
+
+            public void onStartTrackingTouch(SeekBar seekBar)
+            {
+            }
+
+            public void onStopTrackingTouch(SeekBar seekBar)
+            {
+            }
+         });
+      }
+      return cv;
    }
 
-   private class colour_click implements View.OnClickListener
+   class colour_click implements View.OnClickListener
    {
-      final int clicked_colour;
+      int clicked_colour;
 
       public colour_click(int colour)
       {
@@ -247,18 +269,21 @@ public class adapter_settings_interface extends BaseAdapter
       @Override
       public void onClick(View v)
       {
-         util.rm(main.storage + main.SETTINGS + main.STRIP_COLOR);
-         write.single(main.storage + main.SETTINGS + main.STRIP_COLOR, colours[clicked_colour]);
-         View parent = (View) v.getParent();
-         (parent.findViewById(R.id.blue_image)).setAlpha(0.5f);
-         (parent.findViewById(R.id.purple_image)).setAlpha(0.5f);
-         (parent.findViewById(R.id.green_image)).setAlpha(0.5f);
-         (parent.findViewById(R.id.yellow_image)).setAlpha(0.5f);
-         (parent.findViewById(R.id.red_image)).setAlpha(0.5f);
-         (v).setAlpha(1.0f);
+         /* Write the new colour to file. */
+         String colour_path = main.storage + main.SETTINGS + main.STRIP_COLOR;
+         util.rm(colour_path);
+         write.single(colour_path, colours[clicked_colour]);
+
+         /* Change the selected square to alpha 1 and the rest to 0.5. */
+         for(ImageView colour : colour_views)
+         {
+            colour.setAlpha(0.5f);
+         }
+         v.setAlpha(1.0f);
+
          /* Set the new colour. */
          for(PagerTabStrip strip : main.strips)
-            util.set_pagertabstrip_colour(main.storage, strip);
+            util.set_strip_colour(strip);
       }
    }
 }

@@ -7,25 +7,25 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-public class adapter_manage_feeds extends BaseAdapter
+class adapter_manage_feeds extends BaseAdapter
 {
-   private static String[] title_array = new String[0];
-   private static String[] info_array = new String[0];
+   static String[] title_array = new String[0];
+   static String[] info_array = new String[0];
 
-   private static LayoutInflater inflater;
+   static LayoutInflater inflater;
 
-   public adapter_manage_feeds(Context context_main)
+   adapter_manage_feeds(Context context_main)
    {
       inflater = (LayoutInflater) context_main.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
    }
 
-   public void set_items(String[] new_titles, String[] new_infos)
+   void set_items(String[] new_titles, String[] new_infos)
    {
       title_array = new_titles;
       info_array = new_infos;
    }
 
-   public void set_position(int pos, String new_title, String new_info)
+   void set_position(int pos, String new_title, String new_info)
    {
       title_array[pos]  = new_title;
       info_array[pos]   = new_info;
@@ -43,7 +43,7 @@ public class adapter_manage_feeds extends BaseAdapter
       return position;
    }
 
-   public void remove_item(int position)
+   void remove_item(int position)
    {
       title_array = util.remove_element(title_array, position);
       info_array  = util.remove_element(info_array, position);
@@ -55,7 +55,7 @@ public class adapter_manage_feeds extends BaseAdapter
       return title_array[position];
    }
 
-   public String get_info(int position)
+   String get_info(int position)
    {
       return info_array[position];
    }
@@ -63,23 +63,23 @@ public class adapter_manage_feeds extends BaseAdapter
    @Override
    public View getView(int position, View convertView, ViewGroup parent)
    {
-         ViewHolder holder;
-         if(convertView == null)
-         {
+      ViewHolder holder;
+      if(convertView == null)
+      {
 
-            convertView = inflater.inflate(R.layout.manage_feed_item, parent, false);
-            holder = new ViewHolder();
-            holder.title_view = (TextView) convertView.findViewById(R.id.title_item);
-            holder.info_view = (TextView) convertView.findViewById(R.id.info_item);
-            convertView.setTag(holder);
-         }
-         else
-            holder = (ViewHolder) convertView.getTag();
+         convertView = inflater.inflate(R.layout.manage_feed_item, parent, false);
+         holder = new ViewHolder();
+         holder.title_view = (TextView) convertView.findViewById(R.id.title_item);
+         holder.info_view = (TextView) convertView.findViewById(R.id.info_item);
+         convertView.setTag(holder);
+      }
+      else
+         holder = (ViewHolder) convertView.getTag();
 
-         holder.title_view.setText(title_array[position]);
-         holder.info_view.setText(info_array[position]);
+      holder.title_view.setText(title_array[position]);
+      holder.info_view.setText(info_array[position]);
 
-         return convertView;
+      return convertView;
    }
 
    static class ViewHolder

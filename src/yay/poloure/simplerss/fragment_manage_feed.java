@@ -20,8 +20,8 @@ import java.io.File;
 
 class fragment_manage_feed extends Fragment
 {
-   private static ListView feed_list;
-   public  static adapter_manage_feeds feed_list_adapter;
+   static ListView feed_list;
+   static adapter_manage_feeds feed_list_adapter;
 
    @Override
    public void onCreate(Bundle savedInstanceState)
@@ -43,7 +43,7 @@ class fragment_manage_feed extends Fragment
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
-               add_edit_dialog.show_edit_dialog(main.current_groups, main.con, main.storage, position);
+               add_edit_dialog.show_edit_dialog(main.cgroups, main.con, main.storage, position);
             }
          }
       );
@@ -67,52 +67,13 @@ class fragment_manage_feed extends Fragment
                   main.DELETE_DIALOG,
                   new DialogInterface.OnClickListener()
                   {
-                     /// Delete the feed.
+                     /* Delete the feed. */
                      @Override
                      public void onClick(DialogInterface dialog, int id)
                      {
-                        String group = feed_list_adapter.get_info(pos);
-                        group = group.substring(group.indexOf('\n') + 1, group.indexOf(' '));
-                        final String name = feed_list_adapter.getItem(pos);
-
-                        final String group_file    = main.storage + main.GROUPS_DIR + group +    main.SEPAR + group + main.TXT;
-                        final String group_prepend = main.storage + main.GROUPS_DIR + group +    main.SEPAR + group;
-                        final String all_file      = main.storage + main.GROUPS_DIR + main.ALL + main.SEPAR + main.ALL;
-
-                        util.rmdir(new File(main.storage + main.GROUPS_DIR + group + main.SEPAR + name));
-                        write.remove_string(group_file, name, true);
-                        write.remove_string(all_file + main.TXT, name, true);
-
-                        util.rm_empty(group_file);
-                        if(!(new File(group_file).exists()))
-                        {
-                           util.rmdir(new File(main.storage + main.GROUPS_DIR + group));
-                           write.remove_string(main.storage + main.GROUP_LIST, group, false);
-                        }
-                        else
-                        {
-                           write.sort_content(main.storage, group, main.ALL);
-                           util.rm_empty(group_prepend + main.CONTENT);
-                           util.rm_empty(group_prepend + main.COUNT);
-                        }
-
-                        String[] all_groups = read.file(main.storage + main.GROUP_LIST);
-                        if(all_groups.length == 1)
-                           util.rmdir(new File(main.storage + main.GROUPS_DIR + main.ALL));
-
-                        else if(all_groups.length != 0)
-                        {
-                           /* This line may be broken. */
-                           write.sort_content(main.storage, main.ALL, main.ALL);
-                           util.rm_empty(all_file + main.CONTENT);
-                           util.rm_empty(all_file + main.COUNT);
-                        }
-
-                        main.update_groups();
-                        feed_list_adapter.remove_item(pos);
-                        feed_list_adapter.notifyDataSetChanged();
-
-                        update.manage_groups();
+                        util.delete_feed(feed_list_adapter.get_info(pos),
+                                         feed_list_adapter.getItem(pos),
+                                         pos                             );
                      }
                   }
                )
@@ -125,21 +86,31 @@ class fragment_manage_feed extends Fragment
                      @Override
                      public void onClick(DialogInterface dialog, int id)
                      {
-                        String group            = feed_list_adapter.get_info(pos);
-                        group                   = group.substring(group.indexOf('\n') + 1, group.indexOf(' '));
-                        final String name       = feed_list_adapter.getItem(pos);
-                        final String path       = main.storage + main.GROUPS_DIR + group + main.SEPAR + name;
-                        final File feed_folder  = new File(path);
-                        util.rmdir(feed_folder);
-                        /// make the image and thumnail folders.
-                        (new File(path + main.SEPAR + main.IMAGE_DIR))     .mkdir();
-                        (new File(path + main.SEPAR + main.THUMBNAIL_DIR)) .mkdir();
+                        String all     = main.ALL;
+                        String storage = main.storage;
+                        String sep     = main.SEPAR;
+                        String g_dir   = main.GROUPS_DIR;
 
-                        /// Delete the all content files.
-                        (new File(main.storage + main.GROUPS_DIR + main.ALL + main.SEPAR + main.ALL + main.CONTENT)).delete();
-                        (new File(main.storage + main.GROUPS_DIR + main.ALL + main.SEPAR + main.ALL + main.COUNT)).delete();
+                        /* Parse for the group name from the info string. */
+                        String group   = feed_list_adapter.get_info(pos);
+                        int start = group.indexOf('\n') + 1;
+                        int end   = group.indexOf(' ');
+                        group = group.substring(start, end);
 
-                        /// Refresh pages and update groups and stuff
+                        String name     = feed_list_adapter.getItem(pos);
+                        String path     = storage + g_dir + group + sep + name;
+                        String all_path = storage + g_dir + all + sep + all;
+
+                        util.rmdir(new File(path));
+                        /* make the image and thumnail folders. */
+                        (new File(path + sep + main.IMAGE_DIR)).mkdir();
+                        (new File(path + sep + main.THUMBNAIL_DIR)).mkdir();
+
+                        /* Delete the all content files. */
+                        util.rm(all_path + main.CONTENT);
+                        util.rm(all_path + main.COUNT);
+
+                        /* Refresh pages and update groups and stuff. */
                         main.update_groups();
                         update.manage_feeds();
                         update.manage_groups();
@@ -160,16 +131,16 @@ class fragment_manage_feed extends Fragment
          return true;
       else if(item.getTitle().equals("add"))
       {
-         add_edit_dialog.show_add_dialog(main.current_groups, main.con);
+         add_edit_dialog.show_add_dialog(main.cgroups, main.con);
          return true;
       }
       return super.onOptionsItemSelected(item);
    }
 
-   public static class refresh extends AsyncTask<Void, String[], Void>
+   static class refresh extends AsyncTask<Void, String[], Void>
    {
-      private final Animation animFadeIn = AnimationUtils.loadAnimation(main.con, android.R.anim.fade_in);
-      private final ListView listview;
+      Animation fade_in = AnimationUtils.loadAnimation(main.con, android.R.anim.fade_in);
+      ListView listview;
 
       public refresh()
       {
@@ -183,11 +154,27 @@ class fragment_manage_feed extends Fragment
       {
          if(feed_list_adapter != null)
          {
-            final String[][] content   = read.csv(main.storage + main.GROUPS_DIR + main.current_groups[0] + main.SEPAR + main.current_groups[0] + main.TXT, 'n', 'u', 'g');
-            final int size             = content[0].length;
-            String[] info_array        = new String[size];
+            String storage = main.storage;
+            String sep     = main.SEPAR;
+            String g_dir   = main.GROUPS_DIR;
+            String all     = main.cgroups[0];
+            String path = storage + g_dir + all + sep + all + main.TXT;
+
+            /* Read the all group file for names, urls, and groups. */
+            String[][] content  = read.csv(path, 'n', 'u', 'g');
+            int size            = content[0].length;
+            String[] info_array = new String[size];
+
             for(int i = 0; i < size; i++)
-               info_array[i] = content[1][i] + main.NL + content[2][i] + " • " + Integer.toString(read.count(main.storage + main.GROUPS_DIR + content[2][i] + main.SEPAR + content[0][i] + main.SEPAR + content[0][i] + main.CONTENT)) + " items";
+            {
+               /* Form the path to the feed_content file. */
+               path = storage + g_dir + content[2][i] + sep + content[0][i]
+                      + sep + content[0][i] + main.CONTENT;
+
+               /* Build the info string. */
+               info_array[i] = content[1][i] + main.NL + content[2][i] + " • "
+                               + read.count(path) + " items";
+            }
             publishProgress(content[0], info_array);
          }
          return null;
@@ -203,7 +190,7 @@ class fragment_manage_feed extends Fragment
       @Override
       protected void onPostExecute(Void tun)
       {
-         listview.setAnimation(animFadeIn);
+         listview.setAnimation(fade_in);
          listview.setVisibility(View.VISIBLE);
       }
    }

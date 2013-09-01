@@ -14,8 +14,8 @@ import android.widget.ListView;
 
 class fragment_manage_filters extends Fragment
 {
-   private static ListView filter_list;
-   public  static adapter_manage_filter filter_list_adapter;
+   static ListView filter_list;
+   static adapter_manage_filter filter_list_adapter;
 
    public void onCreate(Bundle savedInstanceState)
    {
@@ -68,7 +68,7 @@ class fragment_manage_filters extends Fragment
          return true;
       else if(item.getTitle().equals("add"))
       {
-         add_edit_dialog.show_add_filter_dialog(getActivity(), main.storage);
+         add_edit_dialog.show_add_filter_dialog(getActivity());
          return true;
       }
       return super.onOptionsItemSelected(item);
