@@ -176,7 +176,8 @@ public class adapter_settings_function extends BaseAdapter
          });
 
          /* Load the saved value and set the progress.*/
-         int time = util.stoi(read.setting(setting_path));
+         String checker = read.setting(setting_path);
+         int time = (checker.equals("")) ? 3 : util.stoi(checker);
          holder.seekbar.setProgress(util.index(times, time));
       }
       return cv;

@@ -133,12 +133,12 @@ public class main extends ActionBarActivity
       action_bar.setDisplayHomeAsUpEnabled(true);
       action_bar.setHomeButtonEnabled(true);
 
-      write.single(storage + "single.txt", "link|test|");
+      /*write.single(storage + "single.txt", "link|test|");
       write.collection(storage + "collection.txt", java.util.Arrays.asList(new String[]{"test1", "test2"}));
       write.single(storage + "read_file.txt", read.file(storage + "single.txt")[0]);
       write.single(storage + "count.txt", Integer.toString(read.count(storage + "collection.txt")));
       write.single(storage + "set.txt", (String)(read.set(storage + "single.txt")).toArray()[0]);
-      write.single(storage + "csv.txt", read.csv(storage + "single.txt", 'l')[0][0]);
+      write.single(storage + "csv.txt", read.csv(storage + "single.txt", 'l')[0][0]);*/
 
       /* Create the navigation drawer and set all the listeners for it. */
       new navigation_drawer(activity,

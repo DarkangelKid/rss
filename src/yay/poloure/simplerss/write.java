@@ -121,8 +121,9 @@ public class write
          util.rm(file_path);
          return false;
       }
-      File file = new File(file_path);
-      return (file.exists() && file.length() != 0);
+      /*File file = new File(file_path);
+      return (file.exists() && file.length() != 0);*/
+      return true;
    }
 
    /* Function should be safe, returns false if fails. */
@@ -143,7 +144,7 @@ public class write
       {
          try
          {
-            if(!internal.equals(storage) && !file_path.contains(main.DUMP_FILE))
+            if(!internal.equals(storage))
             {
                f = context.openFileOutput(name, Context.MODE_APPEND);
                out = new BufferedWriter(new OutputStreamWriter(f, "UTF8"));
@@ -274,7 +275,7 @@ public class write
       for(int k = 0; k < names.length; k++)
       {
          /* "/storage/groups/Tumblr/mariam/mariam.content.txt" */
-         content_path = internal + main.GROUPS_DIR + groups[k] + sep + names[k]
+         content_path = storage + main.GROUPS_DIR + groups[k] + sep + names[k]
                         + sep + names[k] + main.CONTENT;
 
          if(util.exists(content_path))
@@ -283,7 +284,6 @@ public class write
             content  = read.file(content_path);
             pubDates = temp[0];
             urls     = util.concat(urls, temp[1]);
-            util.post(Integer.toString(pubDates.length));
 
             for(int i = 0; i < pubDates.length; i++)
             {
@@ -332,6 +332,6 @@ public class write
 
    public static void log(String text)
    {
-      single(util.get_internal() + main.DUMP_FILE, text + main.NL);
+      single(util.get_storage() + main.DUMP_FILE, text + main.NL);
    }
 }

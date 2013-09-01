@@ -11,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedHashSet;
@@ -45,16 +46,10 @@ class parser
    public parser(String group, String feed, int widther)
    {
       width = widther;
-      try
-      {
-         parse_local_xml(group, feed);
-      }
-      catch(IOException e)
-      {
-      }
+      parse_local_xml(group, feed);
    }
 
-   void parse_local_xml(String group, String feed) throws IOException
+   void parse_local_xml(String group, String feed)
    {
       String storage  = util.get_storage();
       String sep      = main.SEPAR;
@@ -64,34 +59,61 @@ class parser
       dump_path             = storage + "content.dump" + txt;
       url_path              = storage + "content.url"  + txt;
       String store_file     = storage + feed + main.STORE;
-      String ex_feed_folder = storage + feed + main.STORE;
+      String ex_feed_folder = storage + g_dir + group + sep + feed + sep;
       String content_file   = ex_feed_folder + feed + main.CONTENT;
-      String image_dir      = storage + main.IMAGE_DIR;
-      String thumbnail_dir  = storage + main.THUMBNAIL_DIR;
-      File in               = new File(store_file);
-      File out              = new File(content_file);
+      String image_dir      = ex_feed_folder + main.IMAGE_DIR;
+      String thumbnail_dir  = ex_feed_folder + main.THUMBNAIL_DIR;
       String[] filters      = read.file(storage + main.FILTER_LIST);
 
       Set<String> set       = new LinkedHashSet<String>();
       Boolean write_mode    = false;
       Boolean c_mode        = false;
       Time time             = new Time();
-      BufferedReader reader = new BufferedReader(new FileReader(in));
+
+      BufferedReader reader     = null;
+      java.io.FileInputStream f = null;
+      try
+      {
+         if(util.get_internal().equals(storage))
+            reader = new BufferedReader(new FileReader(new File(store_file)));
+         else
+         {
+            f      = util.get_context().openFileInput(util.create_internal_name(store_file));
+            reader = new BufferedReader(new java.io.InputStreamReader(f, "UTF-8"));
+         }
+      }
+      catch(FileNotFoundException t)
+      {
+         util.post("FileNotFoundException in parser 1.");
+      }
+      catch(IOException e)
+      {
+         util.post("IOException in parser 1.");
+      }
+
       StringBuilder line    = new StringBuilder();
       String current_tag, temp_line, cont, image, image_name;
       int tem, tem2, tem3, description_length, take, cont_length, i;
 
       /* Read the file's lines to a set. */
-      if(out.exists())
+      if(util.exists(content_file))
          set = read.set(content_file);
 
       BitmapFactory.Options options = new BitmapFactory.Options();
       options.inJustDecodeBounds = true;
 
-      reader.mark(2);
-      while(reader.read() != -1)
+      int test = 0;
+      while(test != -1)
       {
-         reader.reset();
+         try
+         {
+            reader.reset();
+         }
+         catch(IOException e)
+         {
+            util.post("Could not reset reader.");
+         }
+
          try
          {
             current_tag = get_next_tag(reader, of_types);
@@ -120,6 +142,7 @@ class parser
          else if((current_tag.contains("</entry"))||(current_tag.contains("</item")))
          {
             image = check_for_image();
+            util.post(image);
             if(!image.equals(""))
             {
                line.append("image|").append(image).append('|');
@@ -273,7 +296,15 @@ class parser
                }
             }
          }
-         reader.mark(2);
+         try
+         {
+            reader.mark(2);
+            test = reader.read();
+         }
+         catch(IOException e)
+         {
+            util.post("IOException in testing next parser char.");
+         }
       }
 
       /// Add the last line that has no <entry / <item after it.
@@ -285,6 +316,7 @@ class parser
          set.add(temp_line);
       }
 
+      util.rm(store_file);
       /* Write the new content to the file. */
       write.collection(content_file, set);
    }
@@ -338,34 +370,30 @@ class parser
 
    String check_for_image()
    {
-      String popo = "";
-      try
-      {
-         String image_url = read.file(dump_path)[0];
-         if(image_url.length() > 6)
-            popo = image_url;
-      }
-      catch(Exception e)
-      {
-      }
+      String[] image_url = read.file(dump_path);
+      if(image_url.length == 0)
+         return "";
+
+      if(image_url[0].length() <= 6)
+         image_url[0] = "";
+
       util.rm(dump_path);
-      return popo;
+      return image_url[0];
    }
 
    String check_for_url()
    {
-      String momo = "";
-      try
-      {
-         String url = read.file(url_path)[0];
-         if(url.length() > 6)
-            momo = "link|" + url + "|";
-      }
-      catch(Exception e)
-      {
-      }
+      String[] url = read.file(url_path);
+      if(url.length == 0)
+         return "";
+
+      if(url[0].length() > 6)
+         url[0] = "link|" + url + "|";
+      else
+         url[0] = "";
+
       util.rm(url_path);
-      return momo;
+      return url[0];
    }
 
    String get_next_tag(BufferedReader reader, String... types) throws IOException

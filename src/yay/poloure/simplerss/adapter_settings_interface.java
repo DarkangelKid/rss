@@ -16,8 +16,8 @@ import android.support.v4.view.PagerTabStrip;
 
 public class adapter_settings_interface extends BaseAdapter
 {
-   String[] title_array;
-   String[] summary_array;
+   String[] title_array   = new String[0];
+   String[] summary_array = new String[0];
    static final String[] colours = new String[]
    {
       "blue",

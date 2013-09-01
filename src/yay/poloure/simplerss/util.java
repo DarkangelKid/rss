@@ -510,9 +510,13 @@ public class util
       return Integer.parseInt(str);
    }
 
-   static boolean exists(String file_path)
+   static boolean exists(String path)
    {
-      return (new File(file_path)).exists();
+      if(get_internal().equals(get_storage()) || path.contains(main.IMAGE_DIR)
+         || path.contains(main.THUMBNAIL_DIR))
+         return (new File(path)).exists();
+      else
+         return (get_context().getFileStreamPath(create_internal_name(path))).exists();
    }
 
    static String getstr(TextView t)
