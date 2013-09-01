@@ -14,8 +14,16 @@ import android.text.format.Time;
 
 public class write
 {
-   public static void collection(String path, Iterable<?> content)
+   static final String MEDIA_UNMOUNTED = "Media not mounted.";
+
+   /* All functions in here must check that the media is available before
+    * continuing. */
+
+   public static boolean collection(String path, Iterable<?> content)
    {
+      if(!util.check_media_mounted())
+         return false;
+
       util.rm(path);
       try
       {
@@ -29,13 +37,13 @@ public class write
       catch(Exception e)
       {
       }
+      return true;
    }
 
    /* Function should be safe, returns false if fails. */
    public static boolean dl(String urler, String file_path)
    {
-      /* Check to see if we can write to the media. */
-      if(!Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
+      if(!util.check_media_mounted())
          return false;
 
       try
@@ -72,8 +80,7 @@ public class write
    /* Function should be safe, returns false if fails. */
    public static boolean single(String file_path, String string)
    {
-      /* Check to see if we can write to the media. */
-      if(!Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
+      if(!util.check_media_mounted())
          return false;
 
       BufferedWriter out = null;
@@ -101,8 +108,7 @@ public class write
    /* This function should be safe, returns false if it failed. */
    static boolean remove_string(String file_path, String string, Boolean contains)
    {
-      /* Check to see if we can write to the media. */
-      if(!Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
+      if(!util.check_media_mounted())
          return false;
 
       String temp_path   = file_path + main.TEMP;
@@ -150,8 +156,11 @@ public class write
       return success;
    }
 
-   public static void sort_content(String group, String all_group)
+   public static boolean sort_content(String group, String all_group)
    {
+      if(!util.check_media_mounted())
+         return false;
+
       String sep                = main.SEPAR;
       String storage            = util.get_storage();
       String group_dir          = storage + main.GROUPS_DIR + group + sep;
@@ -193,7 +202,8 @@ public class write
                }
                catch(Exception e)
                {
-                  break;
+                  util.post("Unable to parse date.");
+                  return false;
                }
                map.put(time.toMillis(false) - i, content[i] + "group|"
                        + groups[k] + "|feed|" + names[k] + "|");
@@ -227,7 +237,7 @@ public class write
       }
       catch(Exception e)
       {
-         log("Failed to write the group content file.");
+         util.post("Failed to write the group content file.");
       }
 
       /* Sorts the all_group every time another group is updated. */
@@ -235,10 +245,13 @@ public class write
       {
          sort_content(all_group, all_group);
       }
+      return true;
    }
 
-   public static void log(String text)
+   public static boolean log(String text)
    {
-      single(util.get_storage() + main.DUMP_FILE, text + main.NL);
+      if(!util.check_media_mounted())
+         return false;
+      return single(util.get_storage() + main.DUMP_FILE, text + main.NL);
    }
 }

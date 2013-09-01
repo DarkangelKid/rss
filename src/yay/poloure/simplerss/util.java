@@ -101,6 +101,18 @@ public class util
       update.manage_groups();
    }
 
+   static boolean check_media_mounted()
+   {
+      /* Check to see if we can write to the media. */
+      String mounted = Environment.MEDIA_MOUNTED;
+      if(!mounted.equals(Environment.getExternalStorageState()))
+      {
+         util.post(write.MEDIA_UNMOUNTED);
+         return false;
+      }
+      return true;
+   }
+
    static <T> T[] concat(T[] first, T[] second)
    {
       T[] result = Arrays.copyOf(first, first.length + second.length);
@@ -396,7 +408,9 @@ public class util
          Toast.makeText(main.con, message, Toast.LENGTH_LONG).show();
 
       /* This function can be called when no media, so this is optional. */
-      write.log((String) message);
+      String mounted = Environment.MEDIA_MOUNTED;
+      if(mounted.equals(Environment.getExternalStorageState()))
+         write.log((String) message);
    }
 
    public static boolean rm(String file_path)

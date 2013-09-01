@@ -110,25 +110,26 @@ public class main extends ActionBarActivity
       /* Form the storage path. */
       storage = util.get_storage();
 
-      if(storage == null)
-         return;
-
       /* Load String resources into static variables. */
       ALL           = getString(R.string.all_group);
       DELETE_DIALOG = getString(R.string.delete_dialog);
       CLEAR_DIALOG  = getString(R.string.clear_dialog);
-      ALL_FILE      = storage + GROUPS_DIR + ALL + SEPAR + ALL + TXT;
 
-      /* Delete the log file. */
-      util.rm(storage + DUMP_FILE);
-
-      /* Create the top level folders if they do not exist. */
-      File folder_file;
-      for(String folder : new String[]{GROUPS_DIR, SETTINGS})
+      if(storage != null)
       {
-         folder_file = new File(storage + folder);
-         if(!folder_file.exists())
-            folder_file.mkdir();
+         ALL_FILE      = storage + GROUPS_DIR + ALL + SEPAR + ALL + TXT;
+
+         /* Delete the log file. */
+         util.rm(storage + DUMP_FILE);
+
+         /* Create the top level folders if they do not exist. */
+         File folder_file;
+         for(String folder : new String[]{GROUPS_DIR, SETTINGS})
+         {
+            folder_file = new File(storage + folder);
+            if(!folder_file.exists())
+               folder_file.mkdir();
+         }
       }
 
       /* Configure the action bar. */
@@ -168,13 +169,16 @@ public class main extends ActionBarActivity
       }
 
       /* Load the read items. */
-      adapter_feeds_cards.read_items = read.set(storage + READ_ITEMS);
+      if(storage != null)
+      {
+         adapter_feeds_cards.read_items = read.set(storage + READ_ITEMS);
 
-      update_groups();
+         update_groups();
 
-      /* If an all_content file exists, refresh page 0. */
-      if(util.exists(ALL_FILE))
-         update.page(0);
+         /* If an all_content file exists, refresh page 0. */
+         if(util.exists(ALL_FILE))
+            update.page(0);
+      }
    }
 
    @Override

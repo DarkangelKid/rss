@@ -10,14 +10,23 @@ import java.util.Set;
 
 public class read
 {
-   public static String setting(String path)
+   /* All functions in here must check that the media is available before
+    * continuing. */
+
+   static String setting(String path)
    {
+      if(!util.check_media_mounted())
+         return null;
+
       String[] check = read.file(path);
       return (check.length == 0) ? "" : check[0];
    }
 
-   public static String[][] csv(String file_path, char... type)
+   static String[][] csv(String file_path, char... type)
    {
+      if(!util.check_media_mounted())
+         return new String[0][0];
+
       int next, offset, i, j;
       String line;
       String[][] types;
@@ -57,10 +66,13 @@ public class read
    }
 
    /* This function is now safe. It will return a zero length array on error. */
-   public static String[] file(String file_path)
+   static String[] file(String file_path)
    {
-      final String count_path = file_path + main.COUNT;
-      final int count;
+      if(!util.check_media_mounted())
+         return new String[0];
+
+      String count_path = file_path + main.COUNT;
+      int count;
       String line;
 
       /* If the file_path is not a count file, get the number of lines. */
@@ -103,15 +115,22 @@ public class read
       return lines;
    }
 
-   public static Set<String> set(String file_path)
+   static Set<String> set(String file_path)
    {
       Set set = new HashSet<String>();
+
+      if(!util.check_media_mounted())
+         return set;
+
       java.util.Collections.addAll(set, file(file_path));
       return set;
    }
 
-   public static int count(String file_path)
+   static int count(String file_path)
    {
+      if(!util.check_media_mounted())
+         return 0;
+
       BufferedReader in = null;
       int i = 0;
       try
