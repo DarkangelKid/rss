@@ -163,6 +163,8 @@ class parser
 
                /* ISSUE #194 */
                BitmapFactory.decodeFile(thumbnail_dir + image_name, options);
+               if(options.outWidth == 0)
+                  write_mode = false;
                line.append("width|").append(options.outWidth).append('|')
                   .append("height|").append(options.outHeight).append('|');
             }

@@ -102,18 +102,6 @@ public class util
       update.manage_groups();
    }
 
-   static boolean check_media_mounted()
-   {
-      /* Check to see if we can write to the media. */
-      String mounted = Environment.MEDIA_MOUNTED;
-      if(!mounted.equals(Environment.getExternalStorageState()))
-      {
-         util.post(write.MEDIA_UNMOUNTED);
-         return false;
-      }
-      return true;
-   }
-
    static <T> T[] concat(T[] first, T[] second)
    {
       T[] result = Arrays.copyOf(first, first.length + second.length);
@@ -212,11 +200,17 @@ public class util
    {
       String storage  = get_storage();
       String internal = get_internal();
-      if(storage == null || internal.equals(storage));
+      if(!internal.equals(storage))
+         return false;
+
+      /* Check to see if we can write to the media. */
+      String mounted = Environment.MEDIA_MOUNTED;
+      if(!mounted.equals(Environment.getExternalStorageState()))
       {
-         if(!util.check_media_mounted())
-            return true;
+         util.post(write.MEDIA_UNMOUNTED);
+         return true;
       }
+
       return false;
    }
 
@@ -447,15 +441,22 @@ public class util
 
    static void post(CharSequence message)
    {
-      /* If the activity is running, make a toast notification.
-       * Log the event regardless. */
-      if(main.service_handler != null)
-         Toast.makeText(main.con, message, Toast.LENGTH_LONG).show();
+      /* If this is called from off the UI thread, it will die. */
+      try
+      {
+         /* If the activity is running, make a toast notification.
+            * Log the event regardless. */
+         if(main.service_handler != null)
+            Toast.makeText(main.con, message, Toast.LENGTH_LONG).show();
 
-      /* This function can be called when no media, so this is optional. */
-      String mounted = Environment.MEDIA_MOUNTED;
-      if(mounted.equals(Environment.getExternalStorageState()))
-         write.log((String) message);
+         /* This function can be called when no media, so this is optional. */
+         String mounted = Environment.MEDIA_MOUNTED;
+         if(mounted.equals(Environment.getExternalStorageState()))
+            write.log((String) message);
+      }
+      catch(RuntimeException e)
+      {
+      }
    }
 
    static boolean rm(String file_path)

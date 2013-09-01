@@ -124,8 +124,6 @@ class adapter_feeds_cards extends BaseAdapter
       boolean des = ( descriptions[position] != null &&
                      !descriptions[position].equals("") );
 
-      //write.log(position + " || " + Boolean.toString(img) + " || " + Boolean.toString(des));
-
       if(img && des)
          return 0;
       if(img && !des)

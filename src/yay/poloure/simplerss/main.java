@@ -120,11 +120,7 @@ public class main extends ActionBarActivity
 
       ALL_FILE      = storage + GROUPS_DIR + ALL + SEPAR + ALL + TXT;
 
-      /* Delete the log file. */
-      /* util.rm(internal + DUMP_FILE); */
-
       /* Create the top level folders if they do not exist. */
-      /* TODO only if media exists. */
       for(String folder : new String[]{GROUPS_DIR, SETTINGS})
          util.mkdir(folder);
 
@@ -132,13 +128,6 @@ public class main extends ActionBarActivity
       action_bar = getSupportActionBar();
       action_bar.setDisplayHomeAsUpEnabled(true);
       action_bar.setHomeButtonEnabled(true);
-
-      /*write.single(storage + "single.txt", "link|test|");
-      write.collection(storage + "collection.txt", java.util.Arrays.asList(new String[]{"test1", "test2"}));
-      write.single(storage + "read_file.txt", read.file(storage + "single.txt")[0]);
-      write.single(storage + "count.txt", Integer.toString(read.count(storage + "collection.txt")));
-      write.single(storage + "set.txt", (String)(read.set(storage + "single.txt")).toArray()[0]);
-      write.single(storage + "csv.txt", read.csv(storage + "single.txt", 'l')[0][0]);*/
 
       /* Create the navigation drawer and set all the listeners for it. */
       new navigation_drawer(activity,
@@ -172,13 +161,13 @@ public class main extends ActionBarActivity
       }
 
       /* Load the read items. */
-        adapter_feeds_cards.read_items = read.set(storage + READ_ITEMS);
+      adapter_feeds_cards.read_items = read.set(storage + READ_ITEMS);
 
-        update_groups();
+      update_groups();
 
-        /* If an all_content file exists, refresh page 0. */
-        if(util.exists(ALL_FILE))
-         update.page(0);
+      /* If an all_content file exists, refresh page 0. */
+      if(util.exists(ALL_FILE))
+      update.page(0);
    }
 
    @Override

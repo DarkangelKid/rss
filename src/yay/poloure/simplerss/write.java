@@ -121,8 +121,7 @@ public class write
          util.rm(file_path);
          return false;
       }
-      /*File file = new File(file_path);
-      return (file.exists() && file.length() != 0);*/
+      /* TODO: if file exists. */
       return true;
    }
 
