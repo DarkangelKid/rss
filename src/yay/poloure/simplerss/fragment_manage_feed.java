@@ -87,7 +87,6 @@ class fragment_manage_feed extends Fragment
                      public void onClick(DialogInterface dialog, int id)
                      {
                         String all      = main.ALL;
-                        String internal = util.get_internal();
                         String storage  = util.get_storage();
                         String sep      = main.SEPAR;
                         String g_dir    = main.GROUPS_DIR;
@@ -99,11 +98,9 @@ class fragment_manage_feed extends Fragment
                         group           = group.substring(start, end);
 
                         String name     = feed_list_adapter.getItem(pos);
-                        String in_path  = internal + g_dir + group + sep + name;
                         String ex_path  = storage + g_dir + group + sep + name;
-                        String all_path = internal + g_dir + all + sep + all;
+                        String all_path = storage + g_dir + all + sep + all;
 
-                        util.rmdir(new File(in_path));
                         util.rmdir(new File(ex_path));
                         /* make the image and thumnail folders. */
                         (new File(ex_path + sep + main.IMAGE_DIR)).mkdir();
@@ -157,11 +154,11 @@ class fragment_manage_feed extends Fragment
       {
          if(feed_list_adapter != null)
          {
-            String internal = util.get_internal();
+            String storage = util.get_storage();
             String sep     = main.SEPAR;
             String g_dir   = main.GROUPS_DIR;
             String all     = main.cgroups[0];
-            String path = internal + g_dir + all + sep + all + main.TXT;
+            String path = storage + g_dir + all + sep + all + main.TXT;
 
             /* Read the all group file for names, urls, and groups. */
             String[][] content  = read.csv(path, 'n', 'u', 'g');
@@ -171,7 +168,7 @@ class fragment_manage_feed extends Fragment
             for(int i = 0; i < size; i++)
             {
                /* Form the path to the feed_content file. */
-               path = internal + g_dir + content[2][i] + sep + content[0][i]
+               path = storage + g_dir + content[2][i] + sep + content[0][i]
                       + sep + content[0][i] + main.CONTENT;
 
                /* Build the info string. */

@@ -55,9 +55,9 @@ public class service_update extends IntentService
       storage  = util.get_storage();
       internal = util.get_internal();
 
-      String[] all_groups        = read.file(internal + main.GROUP_LIST);
+      String[] all_groups        = read.file(storage + main.GROUP_LIST);
       String grouper             = all_groups[group];
-      String group_file_path     = internal + main.GROUPS_DIR + grouper + SEPAR + grouper + main.TXT;
+      String group_file_path     = storage + main.GROUPS_DIR + grouper + SEPAR + grouper + main.TXT;
 
       String[][] content         = read.csv(group_file_path, 'n', 'u', 'g');
       String[] names             = content[0];
@@ -79,7 +79,7 @@ public class service_update extends IntentService
       boolean success;
       for(int i = 0; i < names.length; i++)
       {
-         success = write.dl(urls[i], internal + names[i] + main.STORE);
+         success = write.dl(urls[i], storage + names[i] + main.STORE);
          if(success)
             new parser(groups[i], names[i], width);
          else

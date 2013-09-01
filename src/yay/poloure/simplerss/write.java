@@ -63,6 +63,8 @@ public class write
          {
             if(out != null)
                out.close();
+            if(f != null)
+               f.close();
          }
       }
       catch(Exception e)
@@ -141,7 +143,7 @@ public class write
       {
          try
          {
-            if(!internal.equals(storage))
+            if(!internal.equals(storage) && !file_path.contains(main.DUMP_FILE))
             {
                f = context.openFileOutput(name, Context.MODE_APPEND);
                out = new BufferedWriter(new OutputStreamWriter(f, "UTF8"));
@@ -155,6 +157,8 @@ public class write
          {
             if(out != null)
                out.close();
+            if(f != null)
+               f.close();
          }
       }
       catch(Exception e)
@@ -212,6 +216,8 @@ public class write
          {
             if(out != null)
                out.close();
+            if(f != null)
+               f.close();
          }
       }
       /* If writing to the temp file fails, delete the temp file and return. */
@@ -277,6 +283,7 @@ public class write
             content  = read.file(content_path);
             pubDates = temp[0];
             urls     = util.concat(urls, temp[1]);
+            util.post(Integer.toString(pubDates.length));
 
             for(int i = 0; i < pubDates.length; i++)
             {

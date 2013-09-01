@@ -283,7 +283,7 @@ public class adapter_manage_groups extends BaseAdapter
             v.setAnimation(fadeIn2);
             v.setVisibility(View.VISIBLE);
 
-            write.collection(util.get_internal() + main.GROUP_LIST, Arrays.asList(group_array));
+            write.collection(util.get_storage() + main.GROUP_LIST, Arrays.asList(group_array));
             main.update_groups();
          }
          return true;

@@ -122,6 +122,8 @@ public class read
          {
             if(in != null)
                in.close();
+            if(f != null)
+               f.close();
          }
       }
       catch(Exception e)
@@ -174,6 +176,8 @@ public class read
          {
             if(in != null)
                in.close();
+            if(f != null)
+               f.close();
          }
       }
       catch(IOException e)

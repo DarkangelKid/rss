@@ -57,7 +57,7 @@ public class add_edit_dialog
          String url = "", feed_title = "";
          if(group.length() > 0)
          {
-            String[] cgroups = read.file(util.get_internal() + main.GROUP_LIST);
+            String[] cgroups = read.file(util.get_storage() + main.GROUP_LIST);
             for(String gro : cgroups)
             {
                if((gro.toLowerCase(Locale.getDefault())).equals(group.toLowerCase(Locale.getDefault())))
@@ -178,7 +178,7 @@ public class add_edit_dialog
                public void onClick(DialogInterface dialog, int which)
                {
                   final String feed_name  = util.getstr((TextView) add_filter_layout);
-                  String filter_path      = util.get_internal() + main.FILTER_LIST;
+                  String filter_path      = util.get_storage() + main.FILTER_LIST;
                   String[] filters        = read.file(filter_path);
                   if(util.index(filters, feed_name) != -1)
                      write.single(filter_path, feed_name + main.NL);
@@ -243,10 +243,10 @@ public class add_edit_dialog
 
    static void show_edit_dialog(final String[] cgroups, Context con, final int position)
    {
-      String internal            = util.get_internal();
+      String storage             = util.get_storage();
       LayoutInflater inf         = LayoutInflater.from(con);
       View edit_rss_dialog       = inf.inflate(R.layout.add_rss_dialog, null);
-      String[][] content         = read.csv(internal + main.GROUPS_DIR + cgroups[0] + main.SEPAR + cgroups[0] + main.TXT, 'n', 'u', 'g');
+      String[][] content         = read.csv(storage + main.GROUPS_DIR + cgroups[0] + main.SEPAR + cgroups[0] + main.TXT, 'n', 'u', 'g');
       final String current_title = content[0][position];
       final String current_url   = content[1][position];
       final String current_group = content[2][position];
@@ -302,12 +302,9 @@ public class add_edit_dialog
    static void add_feed(String name, String url, String group, String all_string)
    {
       String storage       = util.get_storage();
-      String internal      = util.get_internal();
-      String in_group_dir  = internal + main.GROUPS_DIR + group + main.SEPAR;
       String ex_group_dir  = storage + main.GROUPS_DIR + group + main.SEPAR;
-      String all_path      = internal + main.GROUPS_DIR + all_string;
-      String group_path    = in_group_dir + group + main.TXT;
-      String in_feed_path  = in_group_dir + name;
+      String all_path      = storage + main.GROUPS_DIR + all_string;
+      String group_path    = ex_group_dir + group + main.TXT;
       String ex_feed_path  = ex_group_dir + name;
 
       /* Create folders if they do not exist. */
@@ -413,8 +410,8 @@ public class add_edit_dialog
 
    static void add_group(String group_name)
    {
-      String internal = util.get_internal();
-      write.single(internal + main.GROUP_LIST, group_name + main.NL);
+      String storage = util.get_storage();
+      write.single(storage + main.GROUP_LIST, group_name + main.NL);
 
       util.mkdir(main.GROUPS_DIR + group_name);
 

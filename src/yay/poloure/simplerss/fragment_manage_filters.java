@@ -31,7 +31,7 @@ class fragment_manage_filters extends Fragment
       filter_list_adapter = new adapter_manage_filter(getActivity());
       filter_list.setAdapter(filter_list_adapter);
 
-      final String filter_path = util.get_internal() + main.FILTER_LIST;
+      final String filter_path = util.get_storage() + main.FILTER_LIST;
 
       filter_list_adapter.set_items(read.file(filter_path));
 

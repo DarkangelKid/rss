@@ -163,13 +163,13 @@ public class util
    static String[][] create_info_arrays(String[] cgroups, int size)
    {
       String info, group_path, sep = main.SEPAR;
-      String internal      = util.get_internal();
+      String storage      = util.get_storage();
       int number, i, j, total;
       String[] content;
       String[] group_array = new String[size];
       String[] info_array  = new String[size];
 
-      String content_path = internal + main.GROUPS_DIR + cgroups[0]
+      String content_path = storage + main.GROUPS_DIR + cgroups[0]
                             + sep + cgroups[0] + main.CONTENT;
 
       String count_path = content_path + main.COUNT;
@@ -183,7 +183,7 @@ public class util
       for(i = 0; i < size; i++)
       {
          group_array[i] = cgroups[i];
-         group_path     = internal + main.GROUPS_DIR + group_array[i]
+         group_path     = storage + main.GROUPS_DIR + group_array[i]
                           + sep + group_array[i] + main.TXT;
 
          content = read.csv(group_path, 'n')[0];
@@ -272,12 +272,12 @@ public class util
 
       Context context = get_context();
       String settings = main.SETTINGS;
-      String internal = context.getFilesDir().getAbsolutePath() + main.SEPAR;
+      String internal = util.get_context().getFilesDir().getAbsolutePath() + main.SEPAR;
 
       /* If setting says force external for all, use external for internal. */
       /*String use = read.setting(internal + settings + main.INT_STORAGE);
       if(use.equals("false"))
-         internal = get_storage();*/
+          util.get_internal()get_storage();*/
 
       return internal;
    }
@@ -331,7 +331,7 @@ public class util
 
    static int[] get_unread_counts(String[] cgroups)
    {
-      String internal      = util.get_internal();
+      String storage       = util.get_storage();
       int total            = 0, unread, num;
       final int size       = cgroups.length;
       int[] unread_counts  = new int[size];
@@ -340,13 +340,13 @@ public class util
       /* read_items == null when called from the service for notifications. */
       if( adapter_feeds_cards.read_items == null )
       {
-         adapter_feeds_cards.read_items = read.set(internal + main.READ_ITEMS);
+         adapter_feeds_cards.read_items = read.set(storage + main.READ_ITEMS);
       }
 
       for(int i = 1; i < size; i++)
       {
          unread = 0;
-         String[] urls = read.file(internal + main.GROUPS_DIR + cgroups[i]
+         String[] urls = read.file(storage + main.GROUPS_DIR + cgroups[i]
                                    + main.SEPAR + cgroups[i] +
                                    main.CONTENT + main.URL);
          for(String url : urls)
@@ -365,8 +365,8 @@ public class util
 
    static void set_strip_colour(PagerTabStrip strip)
    {
-      String internal    = util.get_internal();
-      String colour_path = internal + main.SETTINGS + main.STRIP_COLOR;
+      String storage     = util.get_storage();
+      String colour_path = storage + main.SETTINGS + main.STRIP_COLOR;
 
       /* Read the colour from the settings/colour file, if blank, use blue. */
       String[] check  = read.file(colour_path);
@@ -383,7 +383,7 @@ public class util
    static Intent make_intent(Context context, int page)
    {
       /* Load notification boolean. */
-      String path    = util.get_internal() + main.SETTINGS
+      String path    = util.get_storage() + main.SETTINGS
                      + adapter_settings_function.file_names[3] + main.TXT;
       String[] check = read.file(path);
 
@@ -399,7 +399,7 @@ public class util
       String   alarm = Activity.ALARM_SERVICE;
       int      time  = adapter_settings_function.times[3];
       String[] names = adapter_settings_function.file_names;
-      String   pre   = util.get_internal() + main.SETTINGS;
+      String   pre   = util.get_storage() + main.SETTINGS;
       String   txt   = main.TXT;
 
       /* Load the refresh boolean value from settings. */

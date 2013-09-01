@@ -111,14 +111,14 @@ public class main extends ActionBarActivity
       /* Form the storage path. */
       internal = util.get_internal();
       storage  = util.get_storage();
-      write.log(internal + NL);
+      write.log(storage + NL);
 
       /* Load String resources into static variables. */
       ALL           = getString(R.string.all_group);
       DELETE_DIALOG = getString(R.string.delete_dialog);
       CLEAR_DIALOG  = getString(R.string.clear_dialog);
 
-      ALL_FILE      = internal + GROUPS_DIR + ALL + SEPAR + ALL + TXT;
+      ALL_FILE      = storage + GROUPS_DIR + ALL + SEPAR + ALL + TXT;
 
       /* Delete the log file. */
       /* util.rm(internal + DUMP_FILE); */
@@ -132,6 +132,13 @@ public class main extends ActionBarActivity
       action_bar = getSupportActionBar();
       action_bar.setDisplayHomeAsUpEnabled(true);
       action_bar.setHomeButtonEnabled(true);
+
+      write.single(storage + "single.txt", "link|test|");
+      write.collection(storage + "collection.txt", java.util.Arrays.asList(new String[]{"test1", "test2"}));
+      write.single(storage + "read_file.txt", read.file(storage + "single.txt")[0]);
+      write.single(storage + "count.txt", Integer.toString(read.count(storage + "collection.txt")));
+      write.single(storage + "set.txt", (String)(read.set(storage + "single.txt")).toArray()[0]);
+      write.single(storage + "csv.txt", read.csv(storage + "single.txt", 'l')[0][0]);
 
       /* Create the navigation drawer and set all the listeners for it. */
       new navigation_drawer(activity,
@@ -165,7 +172,7 @@ public class main extends ActionBarActivity
       }
 
       /* Load the read items. */
-        adapter_feeds_cards.read_items = read.set(internal + READ_ITEMS);
+        adapter_feeds_cards.read_items = read.set(storage + READ_ITEMS);
 
         update_groups();
 
@@ -200,8 +207,8 @@ public class main extends ActionBarActivity
    {
       super.onStop();
       util.set_service(this, 0, "start");
-      util.rm(internal + READ_ITEMS);
-      write.collection(internal + READ_ITEMS, adapter_feeds_cards.read_items);
+      util.rm(storage + READ_ITEMS);
+      write.collection(storage + READ_ITEMS, adapter_feeds_cards.read_items);
    }
 
    @Override
@@ -560,11 +567,11 @@ public class main extends ActionBarActivity
    {
       int previous_size = cgroups.length;
 
-      cgroups = read.file(internal + GROUP_LIST);
+      cgroups = read.file(storage + GROUP_LIST);
       int size = cgroups.length;
       if(size == 0)
       {
-         write.single(internal + GROUP_LIST, ALL + NL);
+         write.single(storage + GROUP_LIST, ALL + NL);
          cgroups = new String[]{ALL};
       }
 

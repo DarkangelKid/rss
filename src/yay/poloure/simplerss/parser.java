@@ -56,23 +56,21 @@ class parser
 
    void parse_local_xml(String group, String feed) throws IOException
    {
-      String internal = util.get_internal();
       String storage  = util.get_storage();
       String sep      = main.SEPAR;
       String g_dir    = main.GROUPS_DIR;
       String txt      = main.TXT;
 
-      dump_path             = internal + "content.dump" + txt;
-      url_path              = internal + "content.url"  + txt;
-      String store_file     = internal + feed + main.STORE;
-      String in_feed_folder = internal + feed + main.STORE;
-      String ex_feed_folder = storage + g_dir + group + sep + feed + sep;
-      String content_file   = in_feed_folder + feed + main.CONTENT;
-      String image_dir      = ex_feed_folder + main.IMAGE_DIR;
-      String thumbnail_dir  = ex_feed_folder + main.THUMBNAIL_DIR;
+      dump_path             = storage + "content.dump" + txt;
+      url_path              = storage + "content.url"  + txt;
+      String store_file     = storage + feed + main.STORE;
+      String ex_feed_folder = storage + feed + main.STORE;
+      String content_file   = ex_feed_folder + feed + main.CONTENT;
+      String image_dir      = storage + main.IMAGE_DIR;
+      String thumbnail_dir  = storage + main.THUMBNAIL_DIR;
       File in               = new File(store_file);
       File out              = new File(content_file);
-      String[] filters      = read.file(internal + main.FILTER_LIST);
+      String[] filters      = read.file(storage + main.FILTER_LIST);
 
       Set<String> set       = new LinkedHashSet<String>();
       Boolean write_mode    = false;
@@ -350,10 +348,7 @@ class parser
       catch(Exception e)
       {
       }
-      if(util.get_internal() != util.get_storage())
-         util.get_context().deleteFile(util.create_internal_name(dump_path));
-      else
-         util.rm(dump_path);
+      util.rm(dump_path);
       return popo;
    }
 
@@ -369,10 +364,7 @@ class parser
       catch(Exception e)
       {
       }
-      if(util.get_internal() != util.get_storage())
-         util.get_context().deleteFile(util.create_internal_name(url_path));
-      else
-         util.rm(url_path);
+      util.rm(url_path);
       return momo;
    }
 
@@ -442,7 +434,7 @@ class parser
                   if((tem3 != -1)&&(tem3 < tem2))
                         tem2 = tem3;
                }
-               util.get_context().deleteFile(util.create_internal_name(dump_path));
+               util.rm(dump_path);
                write.single(dump_path, tag.substring(tem + 6, tem2) + main.NL);
             }
          }
