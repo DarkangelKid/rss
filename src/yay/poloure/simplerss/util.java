@@ -460,6 +460,7 @@ public class util
 
    static boolean rm(String file_path)
    {
+      get_context().deleteFile(create_internal_name(file_path));
       return (new File(file_path)).delete();
    }
 

@@ -300,40 +300,14 @@ public class write
          BufferedWriter out = null;
          FileOutputStream f = null;
 
-         String name = util.create_internal_name(group_content_path);
-         if(!internal.equals(storage))
-         {
-            f = context.openFileOutput(name, Context.MODE_PRIVATE);
-            out = new BufferedWriter(new OutputStreamWriter(f, "UTF8"));
-         }
-         else
-            out = new BufferedWriter(new FileWriter(group_content_path, false));
-         for(Map.Entry<Long, String> entry : map.entrySet())
-         {
-            out.write(entry.getValue().concat(main.NL));
-         }
-         out.close();
+         write.collection(group_content_path, map.values());
 
-         if(internal.equals(storage))
-            util.rm(group_count_file);
+         util.rm(group_count_file);
          single(group_count_file, Integer.toString(map.size()));
 
-         name = util.create_internal_name(url_path);
-         if(!internal.equals(storage))
-         {
-            f = context.openFileOutput(name, Context.MODE_PRIVATE);
-            out = new BufferedWriter(new OutputStreamWriter(f, "UTF8"));
-         }
-         else
-            out = new BufferedWriter(new FileWriter(url_path, false));
-         for(String url : urls)
-         {
-            out.write(url.concat(main.NL));
-         }
-         out.close();
+         write.collection(url_path, java.util.Arrays.asList(urls));
 
-         if(internal.equals(storage))
-            util.rm(url_count);
+         util.rm(url_count);
          single(url_count, Integer.toString(urls.length));
       }
       catch(Exception e)

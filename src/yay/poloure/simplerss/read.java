@@ -90,7 +90,7 @@ public class read
          count = (temp.length == 0) ? count(file_path) : util.stoi(temp[0]);
       }
       else
-         count = count(count_path);
+         count = 1;
 
       /* If the file is empty, return a zero length array. */
       if(count == 0)
