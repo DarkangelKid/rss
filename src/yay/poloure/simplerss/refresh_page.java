@@ -53,19 +53,19 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
       try
       {
          existing_items = new HashSet<String>();
-         Collections.addAll(existing_items, util.get_card_adapter(main.fman, main.viewpager, page_number).links);
+         Collections.addAll(existing_items, util.get_card_adapter(page_number).links);
       }
       catch(Exception e)
       {
       }
 
-      Animation animFadeIn = AnimationUtils.loadAnimation(main.activity, android.R.anim.fade_in);
+      Animation animFadeIn = AnimationUtils.loadAnimation(util.get_context(), android.R.anim.fade_in);
 
       int width, height, count = 0;
 
-      for(int m = 0; m < titles.length; m++)
+      for(int i = 0; i < titles.length; i++)
       {
-         if(!existing_items.contains(links[m]))
+         if(!existing_items.contains(links[i]))
             count++;
       }
 
@@ -182,7 +182,7 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
       ith.notifyDataSetChanged();
 
       if(flash)
-         position = main.jump_to_latest_unread(ith.links, false, page_number);
+         position = util.jump_to_latest_unread(ith.links, false, page_number);
 
       if(top != 0)
          lv.setSelectionFromTop(index, top - (ith.four*4));

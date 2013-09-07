@@ -1,21 +1,15 @@
 package yay.poloure.simplerss;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Configuration;
-import android.os.AsyncTask;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
-import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.ListFragment;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.PagerTabStrip;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -23,13 +17,10 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-
-import java.io.File;
 
 public class main extends ActionBarActivity
 {
@@ -39,9 +30,8 @@ public class main extends ActionBarActivity
    static Context              con;
    static FragmentManager      fman;
    static ActionBar            action_bar;
-   static Activity             activity;
    static Handler              service_handler;
-   static String[] cgroups = new String[0];
+   static String[] cgroups     = new String[0];
 
    /* These must be set straight away in onCreate. */
    static String storage, internal, ALL, DELETE_DIALOG, CLEAR_DIALOG, ALL_FILE;
@@ -106,12 +96,10 @@ public class main extends ActionBarActivity
       /* Save the other satic variables. */
       fman     = getSupportFragmentManager();
       con      = this;
-      activity = this;
 
       /* Form the storage path. */
       internal = util.get_internal();
       storage  = util.get_storage();
-      write.log(storage + NL);
 
       /* Load String resources into static variables. */
       ALL           = getString(R.string.all_group);
@@ -130,10 +118,9 @@ public class main extends ActionBarActivity
       action_bar.setHomeButtonEnabled(true);
 
       /* Create the navigation drawer and set all the listeners for it. */
-      new navigation_drawer(activity,
-                            this,
-                            (DrawerLayout) findViewById(R.id.drawer_layout),
-                            (ListView) findViewById(R.id.left_drawer));
+      DrawerLayout dl = (DrawerLayout) findViewById(R.id.drawer_layout);
+      ListView left_drawer = (ListView) findViewById(R.id.left_drawer);
+      new navigation_drawer(dl, left_drawer);
 
       /* Create the fragments that go inside the content frame and add them
        * to the fragment manager. Hide all but the current one. */
@@ -160,14 +147,11 @@ public class main extends ActionBarActivity
             .commit();
       }
 
-      /* Load the read items. */
-      adapter_feeds_cards.read_items = read.set(storage + READ_ITEMS);
-
-      update_groups();
+      util.update_groups();
 
       /* If an all_content file exists, refresh page 0. */
       if(util.exists(ALL_FILE))
-      update.page(0);
+         update.page(0);
    }
 
    @Override
@@ -195,8 +179,10 @@ public class main extends ActionBarActivity
    protected void onStop()
    {
       super.onStop();
+      /* Set the alarm service to go of starting now. */
       util.set_service(this, 0, "start");
-      util.rm(storage + READ_ITEMS);
+
+      /* Save the read_items to file. */
       write.collection(storage + READ_ITEMS, adapter_feeds_cards.read_items);
    }
 
@@ -204,12 +190,15 @@ public class main extends ActionBarActivity
    protected void onStart()
    {
       super.onStart();
+
+      /* Stop the alarmservice and reset the time to 0. */
       util.set_service(this, 0, "stop");
    }
 
    @Override
    public boolean onOptionsItemSelected(MenuItem item)
    {
+      /* If the user has clicked the title and the tilte says "Offline". */
       if(action_bar.getTitle().toString().equals("Offline"))
       {
          onBackPressed();
@@ -223,131 +212,6 @@ public class main extends ActionBarActivity
    }
 
    /* END OF OVERRIDES */
-
-   static class fragment_feeds extends Fragment
-   {
-      public fragment_feeds()
-      {
-      }
-
-      @Override
-      public void onCreate(Bundle savedInstanceState)
-      {
-         super.onCreate(savedInstanceState);
-         setRetainInstance(false);
-         setHasOptionsMenu(true);
-      }
-
-      @Override
-      public View onCreateView(LayoutInflater in, ViewGroup container, Bundle b)
-      {
-         View v = in.inflate(R.layout.viewpager_feeds, container, false);
-
-         viewpager = (ViewPager) v.findViewById(R.id.pager);
-         viewpager.setAdapter(new pageradapter_feeds(fman));
-         viewpager.setOffscreenPageLimit(128);
-         viewpager.setOnPageChangeListener(new ViewPager.OnPageChangeListener()
-         {
-            @Override
-            public void onPageScrollStateChanged(int state)
-            {
-            }
-
-            @Override
-            public void onPageScrolled(int pos, float offset, int offsetPx)
-            {
-            }
-
-            @Override
-            public void onPageSelected(int pos)
-            {
-               if(util.get_card_adapter(fman, viewpager, pos).getCount() == 0)
-                  update.page(pos);
-            }
-         });
-
-         strips[0] = (PagerTabStrip) v.findViewById(R.id.pager_title_strip);
-         strips[0].setDrawFullUnderline(true);
-         util.set_strip_colour(strips[0]);
-
-         return v;
-      }
-
-      @Override
-      public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
-      {
-         optionsMenu = menu;
-         optionsMenu.clear();
-
-         inflater.inflate(R.menu.main_overflow, optionsMenu);
-         super.onCreateOptionsMenu(optionsMenu, inflater);
-
-         set_refresh(service_update.check_service_running(getActivity()));
-      }
-
-      @Override
-      public boolean onOptionsItemSelected(MenuItem item)
-      {
-         if(navigation_drawer.drawer_toggle.onOptionsItemSelected(item))
-            return true;
-         else if(item.getTitle().equals("add"))
-         {
-            add_edit_dialog.show_add_dialog(cgroups, con);
-            return true;
-         }
-         else if(item.getTitle().equals("unread"))
-         {
-            jump_to_latest_unread(null, true, 0);
-            return true;
-         }
-         else if(item.getTitle().equals("refresh"))
-         {
-            refresh_feeds();
-            return true;
-         }
-         return super.onOptionsItemSelected(item);
-      }
-   }
-
-   static class fragment_manage extends Fragment
-   {
-      public fragment_manage()
-      {
-      }
-
-      @Override
-      public void onCreate(Bundle savedInstanceState)
-      {
-         super.onCreate(savedInstanceState);
-         setRetainInstance(false);
-         setHasOptionsMenu(true);
-      }
-
-      @Override
-      public View onCreateView(LayoutInflater in, ViewGroup container, Bundle b)
-      {
-         View v = in.inflate(R.layout.viewpager_manage, container, false);
-
-         ViewPager pager = (ViewPager) v.findViewById(R.id.manage_viewpager);
-         pager.setAdapter(new pageradapter_manage(fman));
-
-         strips[1] = (PagerTabStrip) v.findViewById(R.id.manage_title_strip);
-         strips[1].setDrawFullUnderline(true);
-         util.set_strip_colour(strips[1]);
-
-         return v;
-      }
-
-      @Override
-      public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
-      {
-         optionsMenu = menu;
-         optionsMenu.clear();
-
-         inflater.inflate(R.menu.manage_overflow, optionsMenu);
-         super.onCreateOptionsMenu(optionsMenu, inflater);
-      }
-   }
 
    static class pageradapter_feeds extends FragmentPagerAdapter
    {
@@ -510,9 +374,9 @@ public class main extends ActionBarActivity
       }
 
       @Override
-      public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle SavedInstanceState)
+      public View onCreateView(LayoutInflater inf, ViewGroup cont, Bundle b)
       {
-         return inflater.inflate(R.layout.listview_settings_function, container, false);
+         return inf.inflate(R.layout.listview_settings_function, cont, false);
       }
    }
 
@@ -526,101 +390,14 @@ public class main extends ActionBarActivity
       public void onCreate(Bundle savedInstanceState)
       {
          super.onCreate(savedInstanceState);
-         adapter_settings_interface adapter = new adapter_settings_interface(con);
+         adapter_settings_UI adapter = new adapter_settings_UI(con);
          setListAdapter(adapter);
       }
 
       @Override
-      public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle SavedInstanceState)
+      public View onCreateView(LayoutInflater inf, ViewGroup cont, Bundle b)
       {
-         return inflater.inflate(R.layout.listview_settings_function, container, false);
+         return inf.inflate(R.layout.listview_settings_function, cont, false);
       }
-   }
-
-   static void set_refresh(final boolean mode)
-   {
-      if(optionsMenu != null)
-      {
-         MenuItem refreshItem = optionsMenu.findItem(R.id.refresh);
-         if(refreshItem != null)
-         {
-            if (mode)
-               MenuItemCompat.setActionView(refreshItem, R.layout.progress_circle);
-            else
-               MenuItemCompat.setActionView(refreshItem, null);
-         }
-      }
-   }
-
-   static void update_groups()
-   {
-      int previous_size = cgroups.length;
-
-      cgroups = read.file(storage + GROUP_LIST);
-      int size = cgroups.length;
-      if(size == 0)
-      {
-         write.single(storage + GROUP_LIST, ALL + NL);
-         cgroups = new String[]{ALL};
-      }
-
-      if(viewpager != null)
-      {
-         if(previous_size != size)
-            viewpager.setAdapter(new pageradapter_feeds(fman));
-         else
-            viewpager.getAdapter().notifyDataSetChanged();
-
-         /* Does not run on first update. */
-         update.navigation(null);
-      }
-   }
-
-   static int jump_to_latest_unread(String[] links, boolean update, int page)
-   {
-      int m;
-
-      if(update)
-         page = viewpager.getCurrentItem();
-
-      if( links == null )
-         links = util.get_card_adapter(fman, viewpager, page).links;
-
-      for(m = links.length - 1; m >= 0; m--)
-      {
-         if(!adapter_feeds_cards.read_items.contains(links[links.length - m - 1]))
-         {
-            break;
-         }
-      }
-
-      /* 0 is the top. links.length - 1 is the bottom.*/
-      if(update)
-      {
-         ListView lv = util.get_listview(fman, viewpager, page);
-         if(lv == null)
-         {
-            return -1;
-         }
-         lv.setSelection(m);
-      }
-      return m;
-   }
-
-   static void refresh_feeds()
-   {
-      set_refresh(true);
-      service_handler = new Handler()
-      {
-         @Override
-         public void handleMessage(Message msg)
-         {
-            set_refresh(false);
-            int page = msg.getData().getInt("page_number");
-            util.refresh_pages(page);
-         }
-      };
-      Intent intent = util.make_intent(con, viewpager.getCurrentItem());
-      con.startService(intent);
    }
 }

@@ -8,7 +8,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -17,7 +16,6 @@ import android.os.Process;
 import android.os.Message;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
-import android.view.WindowManager;
 
 public class service_update extends IntentService
 {
@@ -42,38 +40,28 @@ public class service_update extends IntentService
 
       Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
-      String UNREAD_ITEM      = getString(R.string.notification_title_singular);
-      String UNREAD_ITEMS     = getString(R.string.notification_title_plural);
-      String GROUP_UNREAD     = getString(R.string.notification_content_group_item);
-      String GROUP_UNREADS    = getString(R.string.notification_content_group_items);
-      String GROUPS_UNREADS   = getString(R.string.notification_content_groups);
+      String UNREAD_ITEM    = getString(R.string.notification_title_singular);
+      String UNREAD_ITEMS   = getString(R.string.notification_title_plural);
+      String GROUP_UNREAD   = getString(R.string.notification_content_group_item);
+      String GROUP_UNREADS  = getString(R.string.notification_content_group_items);
+      String GROUPS_UNREADS = getString(R.string.notification_content_groups);
 
-      int group      = intent.getIntExtra("GROUP_NUMBER", 0);
-
-      String SEPAR   = main.SEPAR;
+      int page     = intent.getIntExtra("GROUP_NUMBER", 0);
+      String sep   = main.SEPAR;
+      String g_dir = main.GROUPS_DIR;
+      String txt   = main.TXT;
 
       storage  = util.get_storage();
       internal = util.get_internal();
 
-      String[] all_groups        = read.file(storage + main.GROUP_LIST);
-      String grouper             = all_groups[group];
-      String group_file_path     = storage + main.GROUPS_DIR + grouper + SEPAR + grouper + main.TXT;
+      String[] all_groups = read.file(storage + main.GROUP_LIST);
+      String group        = all_groups[page];
+      String group_path   = storage + g_dir + group + sep + group + txt;
 
-      String[][] content         = read.csv(group_file_path, 'n', 'u', 'g');
-      String[] names             = content[0];
-      String[] urls              = content[1];
-      String[] groups            = content[2];
-
-      int width;
-
-      if(!main.HONEYCOMB_MR2)
-         width = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getWidth();
-      else
-      {
-         Point screen_size = new Point();
-         ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getSize(screen_size);
-         width = (int) (Math.round(((screen_size.x)*0.944)));
-      }
+      String[][] content  = read.csv(group_path, 'n', 'u', 'g');
+      String[] names      = content[0];
+      String[] urls       = content[1];
+      String[] groups     = content[2];
 
       /* Download and parse each feed in the group. */
       boolean success;
@@ -81,15 +69,15 @@ public class service_update extends IntentService
       {
          success = write.dl(urls[i], storage + names[i] + main.STORE);
          if(success)
-            new parser(groups[i], names[i], width);
+            new parser(groups[i], names[i]);
          else
             util.post("Download of " + urls[i] + " failed.");
       }
 
       /* Always sort all & sort others too. */
       write.sort_content(all_groups[0], all_groups[0]);
-      if(!grouper.equals(main.ALL))
-         write.sort_content(grouper, all_groups[0]);
+      if(!group.equals(main.ALL))
+         write.sort_content(group, all_groups[0]);
       else
       {
          for(int i = 1; i < all_groups.length; i++)
@@ -103,7 +91,7 @@ public class service_update extends IntentService
       {
          Message m = new Message();
          Bundle b = new Bundle();
-         b.putInt("page_number", group);
+         b.putInt("page_number", page);
          m.setData(b);
          main.service_handler.sendMessage(m);
       }

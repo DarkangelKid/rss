@@ -43,9 +43,9 @@ class parser
    String dump_path, url_path;
    int width;
 
-   public parser(String group, String feed, int widther)
+   public parser(String group, String feed)
    {
-      width = widther;
+      width = (int) Math.round(util.get_screen_width()*0.944);
       parse_local_xml(group, feed);
    }
 
@@ -478,18 +478,17 @@ class parser
 
    void compress_file(String image_dir, String thumbnail_dir, String image_name)
    {
-      int insample;
 
       BitmapFactory.Options o = new BitmapFactory.Options();
       o.inJustDecodeBounds = true;
       BitmapFactory.decodeFile(image_dir + image_name, o);
 
-      int width_tmp = o.outWidth;
+      float width_tmp = (float) o.outWidth;
 
-      insample = (width_tmp > width) ? (Math.round((float) width_tmp / (float) width)) : 1;
+      float insample = (width_tmp > width) ? (Math.round(width_tmp/width)) : 1;
 
       BitmapFactory.Options o2 = new BitmapFactory.Options();
-      o2.inSampleSize = insample;
+      o2.inSampleSize = (int) insample;
       Bitmap bitmap = BitmapFactory.decodeFile(image_dir + image_name, o2);
 
       try

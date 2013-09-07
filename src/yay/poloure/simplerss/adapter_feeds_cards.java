@@ -44,7 +44,7 @@ class adapter_feeds_cards extends BaseAdapter
    Integer[] heights     = new Integer[0];
    Integer[] widths      = new Integer[0];
 
-   static Set<String> read_items;
+   static Set<String> read_items = read.set(main.storage + main.READ_ITEMS);
 
    static final Pattern thumb_img = Pattern.compile("thumbnails");
    static Context context;
@@ -72,7 +72,7 @@ class adapter_feeds_cards extends BaseAdapter
          context                 = context_main;
          DisplayMetrics metrics  = context.getResources().getDisplayMetrics();
          inflater                = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-         screen_width            = metrics.widthPixels;
+         screen_width            = util.get_screen_width();
          if(two == 0)
          {
             two      = (int) ((2  * (metrics.density) + 0.5f));

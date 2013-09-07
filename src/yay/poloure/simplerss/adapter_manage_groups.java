@@ -199,7 +199,7 @@ public class adapter_manage_groups extends BaseAdapter
          up_card.setVisibility(View.VISIBLE);
 
          util.write_collection_to_file(main.storage + main.GROUP_LIST, group_array);
-         main.update_groups();
+         util.update_groups();
       }
    }*/
 
@@ -284,7 +284,7 @@ public class adapter_manage_groups extends BaseAdapter
             v.setVisibility(View.VISIBLE);
 
             write.collection(util.get_storage() + main.GROUP_LIST, Arrays.asList(group_array));
-            main.update_groups();
+            util.update_groups();
          }
          return true;
       }

@@ -1,11 +1,13 @@
 package yay.poloure.simplerss;
 
-import android.widget.ListView;
+import android.app.Activity;
+import android.content.Context;
 import android.os.AsyncTask;
-import android.view.View;
 import android.support.v4.app.ActionBarDrawerToggle;
-import android.widget.AdapterView;
 import android.support.v4.widget.DrawerLayout;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
 
 class navigation_drawer
 {
@@ -19,23 +21,25 @@ class navigation_drawer
    static DrawerLayout              drawer_layout;
    static ActionBarDrawerToggle     drawer_toggle;
 
-   public navigation_drawer(android.app.Activity activity, android.content.Context context, DrawerLayout draw_layout, ListView nav_list)
+   public navigation_drawer(DrawerLayout draw_layout, ListView nav_list)
    {
+      Context con = util.get_context();
+
       /* Get the main three fragment titles from the values resource. */
       NAV_TITLES  = new String[]
       {
-         context.getString(R.string.feeds_title),
-         context.getString(R.string.manage_title),
-         context.getString(R.string.settings_title)
+         con.getString(R.string.feeds_title),
+         con.getString(R.string.manage_title),
+         con.getString(R.string.settings_title)
       };
 
-      NAVIGATION = context.getString(R.string.navigation_title);
+      NAVIGATION = con.getString(R.string.navigation_title);
 
       /* Save the drawer layout to the public static variable then set the shadow of the drawer. */
       (drawer_layout = draw_layout).setDrawerShadow(R.drawable.drawer_shadow, android.view.Gravity.END);
 
       /* Create the action bar toggle and set it as the drawer open/closer after. */
-      drawer_toggle = new ActionBarDrawerToggle(activity, drawer_layout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
+      drawer_toggle = new ActionBarDrawerToggle((Activity) con, drawer_layout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
       {
          @Override
          public void onDrawerClosed(View drawerView)
@@ -60,7 +64,7 @@ class navigation_drawer
       drawer_toggle.syncState();
 
       /* Save a new adapter as the public static nav_adapter variable and set it as this lists adapter. */
-      navigation_list.setAdapter(nav_adapter = new adapter_navigation_drawer(context));
+      navigation_list.setAdapter(nav_adapter = new adapter_navigation_drawer(con));
    }
 
    static class update_navigation_adapter extends AsyncTask<int[], Void, int[]>

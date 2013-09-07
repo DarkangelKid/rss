@@ -190,9 +190,10 @@ public class add_edit_dialog
       add_filter_dialog.show();
    }
 
-   static void show_add_dialog(final String[] cgroups, Context con)
+   static void show_add_dialog(final String[] cgroups)
    {
-      LayoutInflater inf = LayoutInflater.from(con);
+      Context        con      = util.get_context();
+      LayoutInflater inf      = LayoutInflater.from(con);
       View add_rss_dialog     = inf.inflate(R.layout.add_rss_dialog, null);
       String[] spinner_groups = Arrays.copyOfRange(cgroups, 1, cgroups.length);
       final TextView group_edit     = (TextView) add_rss_dialog.findViewById(R.id.group_edit);
@@ -404,7 +405,7 @@ public class add_edit_dialog
       fragment_manage_feed.feed_list_adapter.notifyDataSetChanged();
 
       /// To refresh the counts and the order of the groups.
-      main.update_groups();
+      util.update_groups();
       update.manage_groups();
    }
 
@@ -415,6 +416,6 @@ public class add_edit_dialog
 
       util.mkdir(main.GROUPS_DIR + group_name);
 
-      main.update_groups();
+      util.update_groups();
    }
 }

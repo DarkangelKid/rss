@@ -3,17 +3,24 @@ package yay.poloure.simplerss;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.support.v4.view.PagerTabStrip;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v4.view.PagerTabStrip;
 import android.support.v4.view.ViewPager;
+import android.view.MenuItem;
+import android.view.WindowManager;
 import android.widget.Toast;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import android.graphics.Point;
 
 import java.io.File;
 import java.util.Arrays;
@@ -95,7 +102,7 @@ public class util
          rm_empty(all_file + count);
       }
 
-      main.update_groups();
+      util.update_groups();
       fragment_manage_feed.feed_list_adapter.remove_item(pos);
       fragment_manage_feed.feed_list_adapter.notifyDataSetChanged();
 
@@ -148,12 +155,80 @@ public class util
       return b;
    }
 
-   static String[][] create_info_arrays(String[] cgroups, int size)
+   static boolean update_groups()
    {
-      String info, group_path, sep = main.SEPAR;
-      String storage      = util.get_storage();
+      /* Since this function is static, we can not rely on the fields being
+       * non-null. */
+      String storage = util.get_storage();
+
+      /* Update cgroups. */
+      main.cgroups = read.file(storage + main.GROUP_LIST);
+
+      /* If no groups exist add the ALL group. */
+      if(main.cgroups.length == 0)
+      {
+         write.single(storage + main.GROUP_LIST, main.ALL + main.NL);
+         main.cgroups = new String[]{main.ALL};
+      }
+
+      if(main.viewpager != null)
+      {
+         main.viewpager.getAdapter().notifyDataSetChanged();
+         /* Does not run on first update. */
+         update.navigation(null);
+         return true;
+      }
+      return false;
+   }
+
+   static int jump_to_latest_unread(String[] links, boolean update, int page)
+   {
+      int i, pos;
+
+      if(main.viewpager == null)
+         return -1;
+
+      if(update)
+         page = main.viewpager.getCurrentItem();
+
+      if(links == null)
+      {
+         adapter_feeds_cards adp = util.get_card_adapter(page);
+         if(adp == null)
+            return -1;
+
+         links = adp.links;
+      }
+
+      for(i = links.length - 1; i >= 0; i--)
+      {
+         pos = links.length - i - 1;
+         if(!adapter_feeds_cards.read_items.contains(links[pos]))
+            break;
+      }
+
+      /* 0 is the top. links.length - 1 is the bottom.
+       * May not be true anymore.*/
+      if(update)
+      {
+         ListView lv = util.get_listview(page);
+         if(lv == null)
+            return -1;
+
+         lv.setSelection(i);
+      }
+      return i;
+   }
+
+   static String[][] create_info_arrays(String[] cgroups)
+   {
+      String info, group_path;
       int number, i, j, total;
       String[] content;
+
+      int size             = cgroups.length;
+      String sep           = main.SEPAR;
+      String storage       = util.get_storage();
       String[] group_array = new String[size];
       String[] info_array  = new String[size];
 
@@ -214,6 +289,8 @@ public class util
       return false;
    }
 
+   /* Replaces all '/'s with '-' to emulate a folder directory layout in
+    * data/data. */
    static String create_internal_name(String path)
    {
       String name = path;
@@ -221,26 +298,30 @@ public class util
       return name.replaceAll("/", "-");
    }
 
-   static adapter_feeds_cards get_card_adapter(FragmentManager fman, ViewPager viewpager, int page_number)
+   /* For these two functions, check for null. Should only really be
+    * null if called from the service_update. */
+   static adapter_feeds_cards get_card_adapter(int page)
    {
-      ListView list = get_listview(fman, viewpager, page_number);
+      ListView list = get_listview(page);
       if(list == null)
          return null;
-      return (adapter_feeds_cards) get_listview(fman, viewpager, page_number).getAdapter();
+
+      return (adapter_feeds_cards) list.getAdapter();
    }
 
-   static ListView get_listview(FragmentManager fman, ViewPager viewpager, int page_number)
+   /* This is the second one. */
+   static ListView get_listview(int page)
    {
-      try
-      {
-         return ((ListFragment) fman.findFragmentByTag("android:switcher:" + viewpager.getId() + ":" + page_number)).getListView();
-      }
-      catch(Exception e)
-      {
+      FragmentManager fman = main.fman;
+      ViewPager  viewpager = main.viewpager;
+      if(fman == null || viewpager == null)
          return null;
-      }
+
+      String tag = "android:switcher:" + viewpager.getId() + ":" + page;
+      return ((ListFragment) fman.findFragmentByTag(tag)).getListView();
    }
 
+   /* This should never return null and so do not check. */
    static Context get_context()
    {
       /* If running get the context from the activity, else ask the service. */
@@ -266,7 +347,7 @@ public class util
 
       Context context = get_context();
       String settings = main.SETTINGS;
-      String internal = util.get_context().getFilesDir().getAbsolutePath() + main.SEPAR;
+      String internal = context.getFilesDir().getAbsolutePath() + main.SEPAR;
 
       /* If setting says force external for all, use external for internal. */
       /*String use = read.setting(internal + settings + main.INT_STORAGE);
@@ -274,6 +355,12 @@ public class util
           util.get_internal()get_storage();*/
 
       return internal;
+   }
+
+   /* Safe to call at anytime. */
+   static int get_screen_width()
+   {
+      return get_context().getResources().getDisplayMetrics().widthPixels;
    }
 
    /* This function will return null if it fails. Check for null each time.
@@ -367,10 +454,10 @@ public class util
       String   colour = (check.length == 0) ? "blue" : check[0];
 
       /* Find the colour stored in adapter_stettings_interface that we want. */
-      int pos = index(adapter_settings_interface.colours, colour);
+      int pos = index(adapter_settings_UI.colours, colour);
       if(pos != -1)
       {
-         strip.setTabIndicatorColor(adapter_settings_interface.colour_ints[pos]);
+         strip.setTabIndicatorColor(adapter_settings_UI.colour_ints[pos]);
       }
    }
 
@@ -426,6 +513,49 @@ public class util
       }
    }
 
+   /* Changes the refresh menu item to an animation if mode = true. */
+   static void set_refresh(boolean mode)
+   {
+      if(main.optionsMenu == null)
+         return;
+
+      /* Find the menu item by ID caled refresh. */
+      MenuItem item = main.optionsMenu.findItem(R.id.refresh);
+      if(item == null)
+         return;
+
+      /* Change it depending on the mode. */
+      if(mode)
+         MenuItemCompat.setActionView(item, R.layout.progress_circle);
+      else
+         MenuItemCompat.setActionView(item, null);
+   }
+
+   /* Updates and refreshes the groups with any new content. */
+   static void refresh_feeds()
+   {
+      set_refresh(true);
+
+      /* Set the service handler in main so we can check and call it
+       * from service_update. */
+
+      main.service_handler = new Handler()
+      {
+         /* The stuff we would like to run when the service completes. */
+         @Override
+         public void handleMessage(Message msg)
+         {
+            set_refresh(false);
+            int page = msg.getData().getInt("page_number");
+            util.refresh_pages(page);
+         }
+      };
+      Context context = get_context();
+      int current_page = main.viewpager.getCurrentItem();
+      Intent intent = util.make_intent(context, current_page);
+      context.startService(intent);
+   }
+
    /* Use this after content has been updated and you need to refresh */
    static void refresh_pages(int page)
    {
@@ -439,6 +569,7 @@ public class util
       }
    }
 
+   /* This will log and toast any message. */
    static void post(CharSequence message)
    {
       /* If this is called from off the UI thread, it will die. */
@@ -517,7 +648,10 @@ public class util
          || path.contains(main.THUMBNAIL_DIR))
          return (new File(path)).exists();
       else
-         return (get_context().getFileStreamPath(create_internal_name(path))).exists();
+      {
+         String in_path = create_internal_name(path);
+         return (get_context().getFileStreamPath(in_path)).exists();
+      }
    }
 
    static String getstr(TextView t)
