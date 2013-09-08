@@ -69,25 +69,20 @@ public class read
    }
 
    /* This function is now safe. It will return a zero length array on error. */
-   static String[] file(String file_path)
+   static String[] file(String path)
    {
-      String name     = util.create_internal_name(file_path);
-      Context context = util.get_context();
-      String storage  = util.get_storage();
-      String internal = util.get_internal();
-
       if(util.check_unmounted())
          return new String[0];
 
-      String count_path = file_path + main.COUNT;
+      String count_path = path + main.COUNT;
       int count;
       String line;
 
-      /* If the file_path is not a count file, get the number of lines. */
-      if(!file_path.contains(main.COUNT))
+      /* If the path is not a count file, get the number of lines. */
+      if(!path.contains(main.COUNT))
       {
          String[] temp = file(count_path);
-         count = (temp.length == 0) ? count(file_path) : util.stoi(temp[0]);
+         count = (temp.length == 0) ? count(path) : util.stoi(temp[0]);
       }
       else
          count = 1;
@@ -101,29 +96,19 @@ public class read
 
       /* Begin reading the file to the String array. */
       BufferedReader in = null;
-      FileInputStream f = null;
       try
       {
          try
          {
-            if(internal.equals(storage))
-               in = new BufferedReader(new FileReader(file_path));
-            else
-            {
-               f  = context.openFileInput(name);
-               in = new BufferedReader(new InputStreamReader(f, "UTF-8"));
-            }
+            in = (util.use_sd()) ? reader(path) : reader(path, "UTF-8");
 
             for(int i = 0; i < lines.length; i++)
                lines[i] = in.readLine();
-            in.close();
          }
          finally
          {
             if(in != null)
                in.close();
-            if(f != null)
-               f.close();
          }
       }
       catch(Exception e)
@@ -144,30 +129,18 @@ public class read
       return set;
    }
 
-   static int count(String file_path)
+   static int count(String path)
    {
-      String name     = util.create_internal_name(file_path);
-      Context context = util.get_context();
-      String storage  = util.get_storage();
-      String internal = util.get_internal();
-
       if(util.check_unmounted())
          return 0;
 
       BufferedReader in = null;
-      FileInputStream f = null;
       int i = 0;
       try
       {
          try
          {
-            if(internal.equals(storage))
-               in = new BufferedReader(new FileReader(file_path));
-            else
-            {
-               f  = context.openFileInput(name);
-               in = new BufferedReader(new InputStreamReader(f, "UTF-8"));
-            }
+            in = (util.use_sd()) ? reader(path) : reader(path, "UTF-8");
 
             while(in.readLine() != null)
                i++;
@@ -176,13 +149,26 @@ public class read
          {
             if(in != null)
                in.close();
-            if(f != null)
-               f.close();
          }
       }
-      catch(IOException e)
+      catch(Exception e)
       {
       }
       return i;
+   }
+
+   /* Wrapper for creating external BufferedReader. */
+   public static BufferedReader reader(String path) throws IOException
+   {
+      return new BufferedReader(new FileReader(path));
+   }
+
+   /* For reading from the internal storage. */
+   public static BufferedReader reader(String path, String UTF) throws Exception
+   {
+      Context context     = util.get_context();
+      path                = util.create_internal_name(path);
+      FileInputStream fis = context.openFileInput(path);
+      return new BufferedReader(new InputStreamReader(fis, "UTF-8"));
    }
 }

@@ -71,24 +71,14 @@ class parser
       Time time             = new Time();
 
       BufferedReader reader     = null;
-      java.io.FileInputStream f = null;
       try
       {
-         if(util.get_internal().equals(storage))
-            reader = new BufferedReader(new FileReader(new File(store_file)));
-         else
-         {
-            f      = util.get_context().openFileInput(util.create_internal_name(store_file));
-            reader = new BufferedReader(new java.io.InputStreamReader(f, "UTF-8"));
-         }
+         reader = (util.use_sd()) ? read.reader(store_file) :
+                                    read.reader(store_file, "UTF-8");
       }
-      catch(FileNotFoundException t)
+      catch(Exception e)
       {
-         util.post("FileNotFoundException in parser 1.");
-      }
-      catch(IOException e)
-      {
-         util.post("IOException in parser 1.");
+         util.post("Exception in parser 1.");
       }
 
       StringBuilder line    = new StringBuilder();
@@ -202,7 +192,8 @@ class parser
                   cont_length = cont.length();
 
                   /// remove <![CDATA[ if it exists.
-                  if((cont_length > 10)&&(cont.substring(0, 9).equals("<![CDATA[")))
+                  if( cont_length > 10 &&
+                      cont.substring(0, 9).equals("<![CDATA["))
                   {
                         cont = cont.substring(9, cont_length - 3);
                         c_mode = true;
@@ -225,10 +216,11 @@ class parser
                            if((tem3 != -1)&&(tem3 < tem2))
                                  tem2 = tem3;
                         }
-                        write.single(dump_path, cont.substring(tem + 9, tem2) + main.NL);
+                        String imgstr = cont.substring(tem + 9, tem2) + main.NL;
+                        write.single(dump_path, imgstr);
                      }
                   }
-                  /// If it follows the rss 2.0 specification for rfc882
+                  /* If it follows the rss 2.0 specification for rfc882. */
                   else if(current_tag.equals("<pubDate>"))
                   {
                      try
@@ -237,13 +229,14 @@ class parser
                      }
                      catch(Exception e)
                      {
-                        write.log("BUG : Meant to be atom-3339 but looks like: " + cont);
+                        write.log("BUG : atom-3339, looks like: " + cont);
                         cont = rfc3339.format(new Date());
                      }
                      line.append(cont).append("|");
                      break;
                   }
-                  /// If it is an atom feed it will be one of four rfc3339 formats.
+                  /* If it is an atom feed it will be one of four
+                   * rfc3339 formats. */
                   else if(current_tag.equals("<published>"))
                   {
                      try
@@ -253,7 +246,7 @@ class parser
                      }
                      catch(Exception e)
                      {
-                        write.log("BUG : Meant to be atom-3339 but looks like: " + cont);
+                        write.log("BUG : atom-3339, looks like: " + cont);
                         cont = rfc3339.format(new Date());
                      }
                      line.append(cont).append("|");
@@ -313,8 +306,12 @@ class parser
       if(write_mode)
       {
          temp_line = line.toString();
-         if(!temp_line.contains("published|")&&(!temp_line.contains("pubDate|"))&&(!set.contains(temp_line)))
-            temp_line = temp_line.concat(("pubDate|").concat(rfc3339.format(new Date()).concat("|")));
+         if(!temp_line.contains("published|") &&
+            !temp_line.contains("pubDate|")   &&
+            !set.contains(temp_line)            )
+         {
+            temp_line +=  "pubDate|" + rfc3339.format(new Date()) + "|";
+         }
          set.add(temp_line);
       }
 
@@ -433,7 +430,8 @@ class parser
             write.single(dump_path, tag.substring(tem + 9, tem2) + main.NL);
          }
 
-         if((tag.contains("type=\"text/html"))||(tag.contains("type=\'text/html")))
+         if( tag.contains("type=\"text/html") ||
+             tag.contains("type=\'text/html") )
          {
             tem = tag.indexOf("href=");
             if(tem != -1)
@@ -450,7 +448,8 @@ class parser
                write.single(url_path, tag.substring(tem + 6, tem2) + main.NL);
             }
          }
-         else if((tag.contains("type=\"image/jpeg"))||(tag.contains("type=\'image/jpeg")))
+         else if( tag.contains("type=\"image/jpeg") ||
+                  tag.contains("type=\'image/jpeg") )
          {
             tem = tag.indexOf("href=");
             if(tem != -1)
@@ -470,18 +469,20 @@ class parser
          }
 
          for(String type : types)
+         {
             if(tag.contains(type))
                found = true;
+         }
       }
       return tag;
    }
 
-   void compress_file(String image_dir, String thumbnail_dir, String image_name)
+   void compress_file(String img_dir, String thumb_dir, String img)
    {
 
       BitmapFactory.Options o = new BitmapFactory.Options();
       o.inJustDecodeBounds = true;
-      BitmapFactory.decodeFile(image_dir + image_name, o);
+      BitmapFactory.decodeFile(img_dir + img, o);
 
       float width_tmp = (float) o.outWidth;
 
@@ -489,11 +490,11 @@ class parser
 
       BitmapFactory.Options o2 = new BitmapFactory.Options();
       o2.inSampleSize = (int) insample;
-      Bitmap bitmap = BitmapFactory.decodeFile(image_dir + image_name, o2);
+      Bitmap bitmap = BitmapFactory.decodeFile(img_dir + img, o2);
 
       try
       {
-         FileOutputStream out = new FileOutputStream(thumbnail_dir + image_name);
+         FileOutputStream out = new FileOutputStream(thumb_dir + img);
          bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
       }
       catch (Exception e)

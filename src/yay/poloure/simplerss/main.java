@@ -31,9 +31,9 @@ public class main extends ActionBarActivity
    static FragmentManager      fman;
    static ActionBar            action_bar;
    static Handler              service_handler;
-   static String[] cgroups     = new String[0];
 
    /* These must be set straight away in onCreate. */
+   /* UI related strings. */
    static String storage, internal, ALL, DELETE_DIALOG, CLEAR_DIALOG, ALL_FILE;
 
    /* Static final are best only when type is a primitive or a String.
@@ -61,6 +61,7 @@ public class main extends ActionBarActivity
    static final String SEPAR = System.getProperty("file.separator");
    static final String NL    = System.getProperty("line.separator");
 
+   /* File related names. */
    static final String TXT           = ".txt";
    static final String GROUPS_DIR    = "groups" + SEPAR;
    static final String THUMBNAIL_DIR = "thumbnails" + SEPAR;
@@ -86,6 +87,9 @@ public class main extends ActionBarActivity
 
    static final PagerTabStrip[] strips = new PagerTabStrip[3];
 
+   /* Safe (non-null) statics. */
+   static String[] cgroups;
+
    @Override
    public void onCreate(Bundle savedInstanceState)
    {
@@ -96,6 +100,7 @@ public class main extends ActionBarActivity
       /* Save the other satic variables. */
       fman     = getSupportFragmentManager();
       con      = this;
+      cgroups  = read.file(storage + GROUP_LIST);
 
       /* Form the storage path. */
       internal = util.get_internal();

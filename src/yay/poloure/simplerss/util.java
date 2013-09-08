@@ -91,10 +91,11 @@ public class util
       }
 
       String[] all_groups = read.file(storage + g_list);
-      if(all_groups.length == 1)
+      if( all_groups.length == 1 )
+      {
          rmdir(new File(storage + g_dir + all));
-
-      else if(all_groups.length != 0)
+      }
+      else if( all_groups.length != 0 )
       {
          /* This line may be broken. */
          write.sort_content(all, all);
@@ -102,7 +103,7 @@ public class util
          rm_empty(all_file + count);
       }
 
-      util.update_groups();
+      update_groups();
       fragment_manage_feed.feed_list_adapter.remove_item(pos);
       fragment_manage_feed.feed_list_adapter.notifyDataSetChanged();
 
@@ -159,7 +160,7 @@ public class util
    {
       /* Since this function is static, we can not rely on the fields being
        * non-null. */
-      String storage = util.get_storage();
+      String storage = get_storage();
 
       /* Update cgroups. */
       main.cgroups = read.file(storage + main.GROUP_LIST);
@@ -193,7 +194,7 @@ public class util
 
       if(links == null)
       {
-         adapter_feeds_cards adp = util.get_card_adapter(page);
+         adapter_feeds_cards adp = get_card_adapter(page);
          if(adp == null)
             return -1;
 
@@ -211,7 +212,7 @@ public class util
        * May not be true anymore.*/
       if(update)
       {
-         ListView lv = util.get_listview(page);
+         ListView lv = get_listview(page);
          if(lv == null)
             return -1;
 
@@ -228,7 +229,7 @@ public class util
 
       int size             = cgroups.length;
       String sep           = main.SEPAR;
-      String storage       = util.get_storage();
+      String storage       = get_storage();
       String[] group_array = new String[size];
       String[] info_array  = new String[size];
 
@@ -282,7 +283,7 @@ public class util
       String mounted = Environment.MEDIA_MOUNTED;
       if(!mounted.equals(Environment.getExternalStorageState()))
       {
-         util.post(write.MEDIA_UNMOUNTED);
+         post(write.MEDIA_UNMOUNTED);
          return true;
       }
 
@@ -352,7 +353,7 @@ public class util
       /* If setting says force external for all, use external for internal. */
       /*String use = read.setting(internal + settings + main.INT_STORAGE);
       if(use.equals("false"))
-          util.get_internal()get_storage();*/
+          get_internal()get_storage();*/
 
       return internal;
    }
@@ -412,7 +413,7 @@ public class util
 
    static int[] get_unread_counts(String[] cgroups)
    {
-      String storage       = util.get_storage();
+      String storage       = get_storage();
       int total            = 0, unread, num;
       final int size       = cgroups.length;
       int[] unread_counts  = new int[size];
@@ -446,7 +447,7 @@ public class util
 
    static void set_strip_colour(PagerTabStrip strip)
    {
-      String storage     = util.get_storage();
+      String storage     = get_storage();
       String colour_path = storage + main.SETTINGS + main.STRIP_COLOR;
 
       /* Read the colour from the settings/colour file, if blank, use blue. */
@@ -464,7 +465,7 @@ public class util
    static Intent make_intent(Context context, int page)
    {
       /* Load notification boolean. */
-      String path    = util.get_storage() + main.SETTINGS
+      String path    = get_storage() + main.SETTINGS
                      + adapter_settings_function.file_names[3] + main.TXT;
       String[] check = read.file(path);
 
@@ -480,7 +481,7 @@ public class util
       String   alarm = Activity.ALARM_SERVICE;
       int      time  = adapter_settings_function.times[3];
       String[] names = adapter_settings_function.file_names;
-      String   pre   = util.get_storage() + main.SETTINGS;
+      String   pre   = get_storage() + main.SETTINGS;
       String   txt   = main.TXT;
 
       /* Load the refresh boolean value from settings. */
@@ -547,12 +548,12 @@ public class util
          {
             set_refresh(false);
             int page = msg.getData().getInt("page_number");
-            util.refresh_pages(page);
+            refresh_pages(page);
          }
       };
       Context context = get_context();
       int current_page = main.viewpager.getCurrentItem();
-      Intent intent = util.make_intent(context, current_page);
+      Intent intent = make_intent(context, current_page);
       context.startService(intent);
    }
 
@@ -630,6 +631,11 @@ public class util
    static boolean mv(String a, String b)
    {
       return (new File(a)).renameTo(new File(b));
+   }
+
+   static boolean use_sd()
+   {
+      return get_internal().equals(get_storage());
    }
 
    static boolean strbol(String str)
