@@ -29,11 +29,11 @@ public class add_edit_dialog
       boolean existing_group = false, real = false;
       String group, name;
       final AlertDialog dialog;
-      final String mode, all_string, spinner_group, current_group, current_title;
+      final String mode, spinner_group, current_group, current_title;
       final int pos;
       static final Pattern illegal_file_chars = Pattern.compile("[/\\?%*|<>:]");
 
-      public check_feed_exists(AlertDialog edit_dialog, String new_group, String feed_name, String moder, String current_tit, String current_grop, String spin_group, int position, String all_str)
+      public check_feed_exists(AlertDialog edit_dialog, String new_group, String feed_name, String moder, String current_tit, String current_grop, String spin_group, int position)
       {
          dialog         = edit_dialog;
          group          = new_group;
@@ -43,7 +43,6 @@ public class add_edit_dialog
          current_group  = current_grop;
          current_title  = current_tit;
          pos            = position;
-         all_string     = all_str;
          Button button  = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
          if(button != null)
             button.setEnabled(false);
@@ -139,7 +138,7 @@ public class add_edit_dialog
             name = illegal_file_chars.matcher(name).replaceAll("");
 
             if(mode.equals("edit"))
-               edit_feed(current_title, name, ton[0], current_group, group, pos, all_string);
+               edit_feed(current_title, name, ton[0], current_group, group, pos);
             else
                add_feed(name, ton[0], group);
 
@@ -236,7 +235,7 @@ public class add_edit_dialog
             {
                spinner_group = "";
             }
-            update.check_feed(add_feed_dialog, new_group, feed_name, "add", "", "", spinner_group, 0, cgroups[0],URL_check);
+            update.check_feed(add_feed_dialog, new_group, feed_name, "add", "", "", spinner_group, 0,URL_check);
          }
       });
       add_feed_dialog.show();
@@ -293,7 +292,7 @@ public class add_edit_dialog
                      String URL_check     = util.getstr(URL_edit);
                      String feed_name     = util.getstr(name_edit);
                      String spinner_group = group_spinner.getSelectedItem().toString();
-                     update.check_feed(edit_feed_dialog, new_group, feed_name, "edit", current_title, current_group, spinner_group, position, cgroups[0], URL_check);
+                     update.check_feed(edit_feed_dialog, new_group, feed_name, "edit", current_title, current_group, spinner_group, position, URL_check);
                }
             });
 
@@ -336,24 +335,25 @@ public class add_edit_dialog
    }
 
    /* TODO EDIT FEED UPDATE FOR INTERNAL. */
-   static void edit_feed(String old_name, String new_name, String new_url, String old_group, String new_group, int position, String all_string)
+   static void edit_feed(String old_name, String new_name, String new_url, String old_group, String new_group, int position)
    {
-      String sep                    = main.SEPAR;
-      String txt                    = main.TXT;
-      String count                  = main.COUNT;
-      String content                = main.CONTENT;
-      String g_dir                  = main.GROUPS_DIR;
-      String storage                = util.get_storage();
-      String all                    = main.ALL;
-      String all_group_file         = storage + g_dir + all + sep + all + txt;
-      String old_group_folder       = storage + g_dir + old_group;
-      String new_group_folder       = storage + g_dir + new_group;
-      String old_group_file         = old_group_folder + sep + old_group + txt;
-      String new_group_file         = new_group_folder + sep + new_group + txt;
-      String old_feed_folder        = old_group_folder + sep + old_name;
-      String new_feed_folder        = new_group_folder + sep + new_name;
-      String old_feed_folder_post   = new_group_folder + sep + old_name;
-      String new_feed_folder_post   = new_group_folder + sep + new_name;
+      String sep     = main.SEPAR;
+      String txt     = main.TXT;
+      String count   = main.COUNT;
+      String content = main.CONTENT;
+      String storage = util.get_storage();
+      String g_dir   = storage + main.GROUPS_DIR;
+      String all     = main.ALL;
+
+      String all_index            = g_dir + all + sep + all + txt;
+      String old_group_folder     = g_dir + old_group;
+      String new_group_folder     = g_dir + new_group;
+      String old_index            = old_group_folder + sep + old_group + txt;
+      String new_index            = new_group_folder + sep + new_group + txt;
+      String old_feed_folder      = old_group_folder + sep + old_name;
+      String new_feed_folder      = new_group_folder + sep + new_name;
+      String old_feed_folder_post = new_group_folder + sep + old_name;
+      String new_feed_folder_post = new_group_folder + sep + new_name;
 
       if(!old_name.equals(new_name))
       {
@@ -367,11 +367,11 @@ public class add_edit_dialog
 
          util.mv(old_feed_folder, new_feed_folder);
 
-         write.remove_string(old_group_file, old_name, true);
-         write.single(new_group_file, "name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|" + main.NL);
+         write.remove_string(old_index, old_name, true);
+         write.single(new_index, "name|" +  new_name + "|url|" + new_url + "|group|" + new_group + "|" + main.NL);
 
-         util.rm_empty(old_group_file);
-         if(!util.exists(old_group_file))
+         util.rm_empty(old_index);
+         if(!util.exists(old_index))
          {
             util.rmdir(new File(old_group_folder));
             write.remove_string(storage + main.GROUP_LIST, old_group, false);
@@ -381,18 +381,18 @@ public class add_edit_dialog
          util.mv(old_feed_folder_post, new_feed_folder_post);
 
       /* Replace the new_group file with the new data. */
-      write.remove_string(new_group_file, old_name, true);
-      write.single(new_group_file, "name|" +  new_name + "|url|" + new_url
+      write.remove_string(new_index, old_name, true);
+      write.single(new_index, "name|" +  new_name + "|url|" + new_url
                    + "|group|" + new_group + "|" + main.NL);
 
       /* Replace the all_group file with the new group and data. */
-      write.remove_string(all_group_file, old_name, true);
-      write.single(all_group_file, "name|" +  new_name + "|url|" + new_url
+      write.remove_string(all_index, old_name, true);
+      write.single(all_index, "name|" +  new_name + "|url|" + new_url
                    + "|group|" + new_group + "|" + main.NL);
 
       /// Delete the group count file and delete the group_content_file
-      String all_content_file = storage + main.GROUPS_DIR + all_string
-                                      + sep + all_string + content;
+      String all_content_file = storage + main.GROUPS_DIR + all
+                                      + sep + all + content;
 
       util.rm(new_group_folder + sep + new_group + content);
       util.rm(new_group_folder + sep + new_group + content + count);
@@ -402,11 +402,11 @@ public class add_edit_dialog
       util.rm(all_content_file + count);
 
       /// This is because the group file contains the feed name and feed group (for location of images).
-      if(util.exists(old_group_file))
-         write.sort_content(old_group, main.ALL);
+      if(util.exists(old_index))
+         write.sort_content(old_group, all);
       if(!old_group.equals(new_group))
-         write.sort_content(new_group, main.ALL);
-      write.sort_content(all_string, main.ALL);
+         write.sort_content(new_group, all);
+      write.sort_content(all, all);
 
       fragment_manage_feed.feed_list_adapter.set_position(position, new_name, new_url + main.NL + new_group + " • " + Integer.toString(read.count(storage + main.GROUPS_DIR + new_group + main.SEPAR + new_name + main.SEPAR + new_name + main.CONTENT) - 1) + " items");
       fragment_manage_feed.feed_list_adapter.notifyDataSetChanged();

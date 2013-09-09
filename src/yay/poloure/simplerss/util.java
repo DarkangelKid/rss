@@ -9,7 +9,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.ListFragment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.PagerTabStrip;
@@ -229,12 +231,13 @@ public class util
 
       int size             = cgroups.length;
       String sep           = main.SEPAR;
-      String storage       = get_storage();
+      String all           = main.ALL;
+      String txt           = main.TXT;
+      String g_dir         = get_storage() + main.GROUPS_DIR;
       String[] group_array = new String[size];
       String[] info_array  = new String[size];
 
-      String content_path = storage + main.GROUPS_DIR + cgroups[0]
-                            + sep + cgroups[0] + main.CONTENT;
+      String content_path = g_dir + all + sep + all + main.CONTENT;
 
       String count_path = content_path + main.COUNT;
 
@@ -247,8 +250,7 @@ public class util
       for(i = 0; i < size; i++)
       {
          group_array[i] = cgroups[i];
-         group_path     = storage + main.GROUPS_DIR + group_array[i]
-                          + sep + group_array[i] + main.TXT;
+         group_path     = g_dir + group_array[i] + sep + cgroups[i] + txt;
 
          content = read.csv(group_path, 'n')[0];
          if(i == 0)
@@ -275,9 +277,10 @@ public class util
    static boolean check_unmounted()
    {
       String storage  = get_storage();
-      String internal = get_internal();
-      if(!internal.equals(storage))
-         return false;
+
+      /* TODO If setting to force sd is true, return false. */
+      /*if(!internal.equals(storage))
+         return false;*/
 
       /* Check to see if we can write to the media. */
       String mounted = Environment.MEDIA_MOUNTED;
@@ -334,28 +337,6 @@ public class util
 
       else /* This case should never happen because either must be running. */
          return null;
-   }
-
-   static String get_internal()
-   {
-      /* First check to see if storage all ready exists in the service
-       * or activity. */
-      if(main.internal != null)
-         return main.internal;
-
-      if(service_update.internal != null)
-         return service_update.internal;
-
-      Context context = get_context();
-      String settings = main.SETTINGS;
-      String internal = context.getFilesDir().getAbsolutePath() + main.SEPAR;
-
-      /* If setting says force external for all, use external for internal. */
-      /*String use = read.setting(internal + settings + main.INT_STORAGE);
-      if(use.equals("false"))
-          get_internal()get_storage();*/
-
-      return internal;
    }
 
    /* Safe to call at anytime. */
@@ -459,6 +440,24 @@ public class util
       {
          strip.setTabIndicatorColor(adapter_settings_UI.colour_ints[pos]);
       }
+   }
+
+   static void show_fragment(Fragment fragment)
+   {
+      FragmentTransaction tran = main.fman.beginTransaction();
+      for(Fragment frag : main.main_fragments)
+      {
+         if(!frag.isHidden())
+         {
+            tran.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+            .setCustomAnimations(android.R.anim.fade_in,android.R.anim.fade_out,android.R.anim.fade_in,android.R.anim.fade_out)
+            .hide(frag)
+            .show(fragment)
+            .commit();
+            return;
+         }
+      }
+      tran.show(fragment).commit();
    }
 
    static Intent make_intent(Context context, int page)
@@ -634,7 +633,8 @@ public class util
 
    static boolean use_sd()
    {
-      return get_internal().equals(get_storage());
+      /* Return true if force sd setting is true. */
+      return false;
    }
 
    static boolean strbol(String str)
@@ -649,8 +649,8 @@ public class util
 
    static boolean exists(String path)
    {
-      if(get_internal().equals(get_storage()) || path.contains(main.IMAGE_DIR)
-         || path.contains(main.THUMBNAIL_DIR))
+      if( use_sd() || path.contains(main.IMAGE_DIR) ||
+                      path.contains(main.THUMBNAIL_DIR))
          return (new File(path)).exists();
       else
       {

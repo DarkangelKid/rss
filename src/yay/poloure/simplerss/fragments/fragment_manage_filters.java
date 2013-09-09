@@ -44,7 +44,7 @@ class fragment_manage_filters extends Fragment
             {
                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                builder.setCancelable(true)
-               .setPositiveButton(main.DELETE_DIALOG, new DialogInterface.OnClickListener()
+               .setPositiveButton(getString(R.string.delete_dialog), new DialogInterface.OnClickListener()
                {
                   @Override
                   public void onClick(DialogInterface dialog, int id)

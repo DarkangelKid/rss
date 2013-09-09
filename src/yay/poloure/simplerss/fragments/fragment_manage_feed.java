@@ -64,7 +64,7 @@ class fragment_manage_feed extends Fragment
                .setCancelable(true)
                .setNegativeButton
                (
-                  main.DELETE_DIALOG,
+                  getString(R.string.delete_dialog),
                   new DialogInterface.OnClickListener()
                   {
                      /* Delete the feed. */
@@ -79,7 +79,7 @@ class fragment_manage_feed extends Fragment
                )
                .setPositiveButton
                (
-                  main.CLEAR_DIALOG,
+                  getString(R.string.clear_dialog),
                   new DialogInterface.OnClickListener()
                   {
                      /// Delete the cache.
@@ -102,8 +102,8 @@ class fragment_manage_feed extends Fragment
 
                         util.rmdir(new File(feed_path));
                         /* make the image and thumnail folders. */
-                        (new File(feed_path + main.IMAGE_DIR)).mkdir();
-                        (new File(feed_path + main.THUMBNAIL_DIR)).mkdir();
+                        util.mkdir(feed_path + main.IMAGE_DIR);
+                        util.mkdir(feed_path + main.THUMBNAIL_DIR);
 
                         /* Delete the all content files. */
                         util.rm(all_path + main.CONTENT);
@@ -156,7 +156,7 @@ class fragment_manage_feed extends Fragment
             String storage = util.get_storage();
             String sep     = main.SEPAR;
             String g_dir   = main.GROUPS_DIR;
-            String all     = main.cgroups[0];
+            String all     = main.ALL;
             String path = storage + g_dir + all + sep + all + main.TXT;
 
             /* Read the all group file for names, urls, and groups. */

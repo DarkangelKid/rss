@@ -22,7 +22,6 @@ public class service_update extends IntentService
    static Context service_context;
 
    static String storage;
-   static String internal;
 
    public service_update()
    {
@@ -52,7 +51,6 @@ public class service_update extends IntentService
       String txt   = main.TXT;
 
       storage  = util.get_storage();
-      internal = util.get_internal();
 
       String[] all_groups = read.file(storage + main.GROUP_LIST);
       String group        = all_groups[page];

@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.ListFragment;
 import android.support.v4.view.PagerTabStrip;
@@ -34,7 +35,10 @@ public class main extends ActionBarActivity
 
    /* These must be set straight away in onCreate. */
    /* UI related strings. */
-   static String storage, internal, ALL, DELETE_DIALOG, CLEAR_DIALOG;
+   static String storage, ALL;
+   static String[] cgroups;
+
+   static Fragment[] main_fragments;
 
    /* Static final are best only when type is a primitive or a String.
     * Static is also better than not static when primitive or String.
@@ -87,9 +91,6 @@ public class main extends ActionBarActivity
 
    static final PagerTabStrip[] strips = new PagerTabStrip[3];
 
-   /* Safe (non-null) statics. */
-   static String[] cgroups;
-
    @Override
    public void onCreate(Bundle savedInstanceState)
    {
@@ -98,19 +99,15 @@ public class main extends ActionBarActivity
       setContentView(R.layout.navigation_drawer_and_content_frame);
 
       /* Save the other satic variables. */
-      fman     = getSupportFragmentManager();
-      con      = this;
+      fman    = getSupportFragmentManager();
+      con     = this;
 
       /* Form the storage path. */
-      internal = util.get_internal();
-      storage  = util.get_storage();
-
-      cgroups  = read.file(storage + GROUP_LIST);
+      storage = util.get_storage();
+      cgroups = read.file(storage + GROUP_LIST);
 
       /* Load String resources into static variables. */
-      ALL           = getString(R.string.all_group);
-      DELETE_DIALOG = getString(R.string.delete_dialog);
-      CLEAR_DIALOG  = getString(R.string.clear_dialog);
+      ALL     = getString(R.string.all_group);
 
       /* Configure the action bar. */
       action_bar = getSupportActionBar();
@@ -119,42 +116,30 @@ public class main extends ActionBarActivity
 
       /* Create the navigation drawer and set all the listeners for it. */
       DrawerLayout dl      = (DrawerLayout) findViewById(R.id.drawer_layout);
-      ListView left_drawer = (ListView) findViewById(R.id.left_drawer);
+      ListView left_drawer = (ListView)     findViewById(R.id.left_drawer);
       new navigation_drawer(dl, left_drawer);
 
-      /* Create the fragments that go inside the content frame and add them
-       * to the fragment manager. Hide all but the current one. */
-      String[] titles = navigation_drawer.NAV_TITLES;
-
+      /* Create the fragments that go inside the content frame. */
       if(savedInstanceState == null)
       {
-         Fragment feeds = new fragment_feeds();
-         Fragment man   = new fragment_manage();
-         Fragment prefs = new fragment_settings();
-         int frame      = R.id.content_frame;
+         main_fragments = new Fragment[]
+         {
+            new fragment_feeds(),
+            new fragment_manage(),
+            new fragment_settings(),
+         };
 
-         fman.beginTransaction()
-            .add(frame, feeds, titles[0])
-            .add(frame, man,   titles[1])
-            .add(frame, prefs, titles[2])
-            .hide(man)
-            .hide(prefs)
-            .commit();
-      }
-      else
-      {
-         fman.beginTransaction()
-            .show(fman.findFragmentByTag(titles[0]))
-            .hide(fman.findFragmentByTag(titles[1]))
-            .hide(fman.findFragmentByTag(titles[2]))
-            .commit();
+         int frame = R.id.content_frame;
+
+         FragmentTransaction tran = main.fman.beginTransaction();
+         tran.add(frame, main_fragments[0])
+             .add(frame, main_fragments[1])
+             .add(frame, main_fragments[2])
+             .hide(main_fragments[1]).hide(main_fragments[2]).commit();
       }
 
       util.update_groups();
-
-      /* If an all_content file exists, refresh page 0. */
-      if(util.exists(storage + GROUPS_DIR + ALL + SEPAR + ALL + TXT))
-         update.page(0);
+      update.page(0);
    }
 
    @Override
@@ -167,7 +152,6 @@ public class main extends ActionBarActivity
       action_bar.setTitle(feeds);
       navigation_drawer.drawer_layout.setDrawerLockMode(lock);
       navigation_drawer.drawer_toggle.setDrawerIndicatorEnabled(true);
-      action_bar.setDisplayHomeAsUpEnabled(true);
    }
 
    /* This is so the icon and text in the actionbar are selected. */
@@ -255,13 +239,7 @@ public class main extends ActionBarActivity
          new fragment_manage_filters(),
       };
 
-      /* TODO Replace this with a string[] soft code. */
-      static final int[] titles = new int[]
-      {
-         R.string.groups_manage_sub,
-         R.string.feeds_manage_sub,
-         R.string.filters_manage_sub,
-      };
+      static final String[] titles = util.get_array(R.array.manage_titles);
 
       public pageradapter_manage(FragmentManager fm)
       {
@@ -283,7 +261,7 @@ public class main extends ActionBarActivity
       @Override
       public String getPageTitle(int position)
       {
-         return con.getString(titles[position]);
+         return titles[position];
       }
    }
 
@@ -336,8 +314,7 @@ public class main extends ActionBarActivity
          new fragment_settings_interface(),
       };
 
-      static int array = R.array.settings_pagertab_titles;
-      static final String[] titles = util.get_array(array);
+      static final String[] titles = util.get_array(R.array.settings_titles);
 
       public pageradapter_settings(FragmentManager fm)
       {

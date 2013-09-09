@@ -209,13 +209,13 @@ public class write
          return false;
 
       String sep                = main.SEPAR;
-      String group_dir          = storage + main.GROUPS_DIR + group + sep;
-      String group_content_path = group_dir + group + main.CONTENT;
+      String g_dir              = storage + main.GROUPS_DIR + group + sep;
+      String group_content_path = g_dir + group + main.CONTENT;
       String group_count_file   = group_content_path + main.COUNT;
       String url_path           = group_content_path + main.URL;
       String url_count          = url_path + main.COUNT;
 
-      String[][] contents = read.csv(group_dir + group + main.TXT, 'n', 'g');
+      String[][] contents = read.csv(g_dir + group + main.TXT, 'n', 'g');
       String[] names      = contents[0];
       String[] groups     = contents[1];
       String[] urls       = new String[0];

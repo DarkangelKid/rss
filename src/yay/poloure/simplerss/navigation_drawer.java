@@ -95,23 +95,20 @@ class navigation_drawer
          drawer_layout.closeDrawer(navigation_list);
 
          /* Determine the new title based on the position of the item clicked. */
-         final String selected_title   = (position > 3) ? NAV_TITLES[0] : NAV_TITLES[position];
+         String selected_title = (position > 3) ? NAV_TITLES[0] : NAV_TITLES[position];
 
          /* If the item selected was a group, change the viewpager to that group. */
          if(position > 3)
             main.viewpager.setCurrentItem(position - 4);
+
+         position = (position > 3) ? 0 : position;
 
          /* If the selected title is the title of the current page, exit. */
          if(current_title.equals(selected_title))
             return;
 
          /* Hide the current fragment and display the selected one. */
-         main.fman.beginTransaction()
-                  .setTransition(android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                  .setCustomAnimations(android.R.anim.fade_in,android.R.anim.fade_out,android.R.anim.fade_in,android.R.anim.fade_out)
-                  .hide(main.fman.findFragmentByTag(current_title))
-                  .show(main.fman.findFragmentByTag(selected_title))
-                  .commit();
+         util.show_fragment(main.main_fragments[position]);
 
          /* Set the title text of the actionbar to the selected item. */
          main.action_bar.setTitle(selected_title);

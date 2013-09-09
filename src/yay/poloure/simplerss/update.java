@@ -40,11 +40,11 @@ public class update
             .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, page_number);
    }
 
-   public static void check_feed(android.app.AlertDialog dlg, String ngroup, String fname, String mode, String ctitle, String cgroup, String sgroup, int pos, String all_str, String URL_check)
+   public static void check_feed(android.app.AlertDialog dlg, String ngroup, String fname, String mode, String ctitle, String cgroup, String sgroup, int pos, String URL_check)
    {
       if(main.HONEYCOMB)
-         new add_edit_dialog.check_feed_exists(dlg, ngroup, fname, mode, ctitle, cgroup, sgroup, pos, all_str).execute(URL_check);
+         new add_edit_dialog.check_feed_exists(dlg, ngroup, fname, mode, ctitle, cgroup, sgroup, pos).execute(URL_check);
       else
-         new add_edit_dialog.check_feed_exists(dlg, ngroup, fname, mode, ctitle, cgroup, sgroup, pos, all_str).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
+         new add_edit_dialog.check_feed_exists(dlg, ngroup, fname, mode, ctitle, cgroup, sgroup, pos).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
    }
 }
