@@ -30,11 +30,12 @@ public class adapter_settings_function extends BaseAdapter
 
    static LayoutInflater inflater;
 
-   public adapter_settings_function(Context con)
+   public adapter_settings_function()
    {
+      Context con = util.get_context();
       inflater = (LayoutInflater) con.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-      title_array   = util.get_array(con, R.array.settings_function_titles);
-      summary_array = util.get_array(con, R.array.settings_function_summaries);
+      title_array   = util.get_array(R.array.settings_function_titles);
+      summary_array = util.get_array(R.array.settings_function_summaries);
    }
 
    @Override

@@ -87,9 +87,8 @@ class fragment_manage_feed extends Fragment
                      public void onClick(DialogInterface dialog, int id)
                      {
                         String all      = main.ALL;
-                        String storage  = util.get_storage();
                         String sep      = main.SEPAR;
-                        String g_dir    = main.GROUPS_DIR;
+                        String g_dir    = util.get_storage() + main.GROUPS_DIR;
 
                         /* Parse for the group name from the info string. */
                         String group    = feed_list_adapter.get_info(pos);
@@ -97,14 +96,14 @@ class fragment_manage_feed extends Fragment
                         int end         = group.indexOf(' ');
                         group           = group.substring(start, end);
 
-                        String name     = feed_list_adapter.getItem(pos);
-                        String ex_path  = storage + g_dir + group + sep + name;
-                        String all_path = storage + g_dir + all + sep + all;
+                        String name      = feed_list_adapter.getItem(pos);
+                        String feed_path = g_dir + group + sep + name + sep;
+                        String all_path  = g_dir + all + sep + all;
 
-                        util.rmdir(new File(ex_path));
+                        util.rmdir(new File(feed_path));
                         /* make the image and thumnail folders. */
-                        (new File(ex_path + sep + main.IMAGE_DIR)).mkdir();
-                        (new File(ex_path + sep + main.THUMBNAIL_DIR)).mkdir();
+                        (new File(feed_path + main.IMAGE_DIR)).mkdir();
+                        (new File(feed_path + main.THUMBNAIL_DIR)).mkdir();
 
                         /* Delete the all content files. */
                         util.rm(all_path + main.CONTENT);

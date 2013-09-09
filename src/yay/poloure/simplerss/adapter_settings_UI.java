@@ -66,13 +66,14 @@ public class adapter_settings_UI extends BaseAdapter
       SeekBar seekbar;
    }
 
-   public adapter_settings_UI(Context con)
+   public adapter_settings_UI()
    {
       if(inf == null)
       {
+         Context con   = util.get_context();
          inf = (LayoutInflater) con.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-         title_array   = util.get_array(con, R.array.settings_interface_titles);
-         summary_array = util.get_array(con, R.array.settings_interface_summaries);
+         title_array   = util.get_array(R.array.settings_interface_titles);
+         summary_array = util.get_array(R.array.settings_interface_summaries);
       }
    }
 

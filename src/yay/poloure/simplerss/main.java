@@ -34,7 +34,7 @@ public class main extends ActionBarActivity
 
    /* These must be set straight away in onCreate. */
    /* UI related strings. */
-   static String storage, internal, ALL, DELETE_DIALOG, CLEAR_DIALOG, ALL_FILE;
+   static String storage, internal, ALL, DELETE_DIALOG, CLEAR_DIALOG;
 
    /* Static final are best only when type is a primitive or a String.
     * Static is also better than not static when primitive or String.
@@ -100,22 +100,17 @@ public class main extends ActionBarActivity
       /* Save the other satic variables. */
       fman     = getSupportFragmentManager();
       con      = this;
-      cgroups  = read.file(storage + GROUP_LIST);
 
       /* Form the storage path. */
       internal = util.get_internal();
       storage  = util.get_storage();
 
+      cgroups  = read.file(storage + GROUP_LIST);
+
       /* Load String resources into static variables. */
       ALL           = getString(R.string.all_group);
       DELETE_DIALOG = getString(R.string.delete_dialog);
       CLEAR_DIALOG  = getString(R.string.clear_dialog);
-
-      ALL_FILE      = storage + GROUPS_DIR + ALL + SEPAR + ALL + TXT;
-
-      /* Create the top level folders if they do not exist. */
-      for(String folder : new String[]{GROUPS_DIR, SETTINGS})
-         util.mkdir(folder);
 
       /* Configure the action bar. */
       action_bar = getSupportActionBar();
@@ -123,22 +118,25 @@ public class main extends ActionBarActivity
       action_bar.setHomeButtonEnabled(true);
 
       /* Create the navigation drawer and set all the listeners for it. */
-      DrawerLayout dl = (DrawerLayout) findViewById(R.id.drawer_layout);
+      DrawerLayout dl      = (DrawerLayout) findViewById(R.id.drawer_layout);
       ListView left_drawer = (ListView) findViewById(R.id.left_drawer);
       new navigation_drawer(dl, left_drawer);
 
       /* Create the fragments that go inside the content frame and add them
        * to the fragment manager. Hide all but the current one. */
+      String[] titles = navigation_drawer.NAV_TITLES;
+
       if(savedInstanceState == null)
       {
          Fragment feeds = new fragment_feeds();
          Fragment man   = new fragment_manage();
          Fragment prefs = new fragment_settings();
+         int frame      = R.id.content_frame;
 
          fman.beginTransaction()
-            .add(R.id.content_frame, feeds, navigation_drawer.NAV_TITLES[0])
-            .add(R.id.content_frame, man,   navigation_drawer.NAV_TITLES[1])
-            .add(R.id.content_frame, prefs, navigation_drawer.NAV_TITLES[2])
+            .add(frame, feeds, titles[0])
+            .add(frame, man,   titles[1])
+            .add(frame, prefs, titles[2])
             .hide(man)
             .hide(prefs)
             .commit();
@@ -146,16 +144,16 @@ public class main extends ActionBarActivity
       else
       {
          fman.beginTransaction()
-            .show(fman.findFragmentByTag(navigation_drawer.NAV_TITLES[0]))
-            .hide(fman.findFragmentByTag(navigation_drawer.NAV_TITLES[2]))
-            .hide(fman.findFragmentByTag(navigation_drawer.NAV_TITLES[1]))
+            .show(fman.findFragmentByTag(titles[0]))
+            .hide(fman.findFragmentByTag(titles[1]))
+            .hide(fman.findFragmentByTag(titles[2]))
             .commit();
       }
 
       util.update_groups();
 
       /* If an all_content file exists, refresh page 0. */
-      if(util.exists(ALL_FILE))
+      if(util.exists(storage + GROUPS_DIR + ALL + SEPAR + ALL + TXT))
          update.page(0);
    }
 
@@ -250,13 +248,15 @@ public class main extends ActionBarActivity
 
    static class pageradapter_manage extends FragmentPagerAdapter
    {
-      private static final Fragment[] fragments = new Fragment[]
+      static final Fragment[] fragments = new Fragment[]
       {
          new fragment_manage_group(),
          new fragment_manage_feed(),
          new fragment_manage_filters(),
       };
-      private static final int[] titles = new int[]
+
+      /* TODO Replace this with a string[] soft code. */
+      static final int[] titles = new int[]
       {
          R.string.groups_manage_sub,
          R.string.feeds_manage_sub,
@@ -318,8 +318,7 @@ public class main extends ActionBarActivity
       {
          View v = in.inflate(R.layout.viewpager_settings, container, false);
          ViewPager vp = (ViewPager) v.findViewById(R.id.settings_pager);
-         pageradapter_settings adapter = new pageradapter_settings(fman);
-         vp.setAdapter(adapter);
+         vp.setAdapter(new pageradapter_settings(fman));
 
          strips[2] = (PagerTabStrip) v.findViewById(R.id.settings_title_strip);
          strips[2].setDrawFullUnderline(true);
@@ -331,18 +330,18 @@ public class main extends ActionBarActivity
 
    static class pageradapter_settings extends FragmentPagerAdapter
    {
-      private static final Fragment[] fragments = new Fragment[]
+      static final Fragment[] fragments = new Fragment[]
       {
          new fragment_settings_function(),
          new fragment_settings_interface(),
       };
 
-      private final String[] titles;
+      static int array = R.array.settings_pagertab_titles;
+      static final String[] titles = util.get_array(array);
 
       public pageradapter_settings(FragmentManager fm)
       {
          super(fm);
-         titles = util.get_array(con, R.array.settings_pagertab_titles);
       }
 
       @Override
@@ -374,8 +373,7 @@ public class main extends ActionBarActivity
       public void onCreate(Bundle savedInstanceState)
       {
          super.onCreate(savedInstanceState);
-         adapter_settings_function adapter = new adapter_settings_function(con);
-         setListAdapter(adapter);
+         setListAdapter(new adapter_settings_function());
       }
 
       @Override
@@ -395,8 +393,7 @@ public class main extends ActionBarActivity
       public void onCreate(Bundle savedInstanceState)
       {
          super.onCreate(savedInstanceState);
-         adapter_settings_UI adapter = new adapter_settings_UI(con);
-         setListAdapter(adapter);
+         setListAdapter(new adapter_settings_UI());
       }
 
       @Override

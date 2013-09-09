@@ -40,7 +40,7 @@ public class write
          try
          {
             /* Create the buffered writer. */
-            out = (util.use_sd()) ? writer(path, false) :
+            out = util.use_sd() ? writer(path, false) :
                                   writer(path, Context.MODE_PRIVATE);
 
             for(Object item : content)
@@ -77,7 +77,7 @@ public class write
          try
          {
             in = new BufferedInputStream(new URL(urler).openStream());
-            if((!util.use_sd())&&
+            if(!util.use_sd()         &&
                !urler.contains(".jpg")&&
                !urler.contains(".png")&&
                !urler.contains(".gif")&&
@@ -90,7 +90,7 @@ public class write
 
             byte data[] = new byte[1024];
             int count;
-            while ((count = in.read(data, 0, 1024)) != -1)
+            while((count = in.read(data, 0, 1024)) != -1)
                fout.write(data, 0, count);
          }
          finally
@@ -122,9 +122,8 @@ public class write
       {
          try
          {
-            out = (util.use_sd()) ? writer(path, true) :
-                                  writer(path, Context.MODE_APPEND);
-
+            out = util.use_sd() ? writer(path, true) :
+                                    writer(path, Context.MODE_APPEND);
             out.write(string);
          }
          finally
@@ -142,7 +141,7 @@ public class write
 
    /* This function should be safe, returns false if it failed.
     * NOT SAFE FOR INTERNAL IF FAILS. */
-   static boolean remove_string(String path, String string, Boolean contains)
+   static boolean remove_string(String path, String string, boolean contains)
    {
       /* If storage is unmounted OR if we force to use external. */
       if(util.check_unmounted())
@@ -162,7 +161,7 @@ public class write
                return false;
 
             /* No backup for internal storage. */
-            out = (util.use_sd()) ? writer(temp_path, false) :
+            out = util.use_sd() ? writer(temp_path, false) :
                                   writer(path, Context.MODE_PRIVATE);
 
             for(String item : lines)
@@ -203,16 +202,14 @@ public class write
 
    public static boolean sort_content(String group, String all_group)
    {
-      Context context = util.get_context();
       String storage  = util.get_storage();
-      String internal = util.get_internal();
 
       /* If storage is unmounted OR if we force to use external. */
       if(util.check_unmounted())
          return false;
 
       String sep                = main.SEPAR;
-      String group_dir          = internal + main.GROUPS_DIR + group + sep;
+      String group_dir          = storage + main.GROUPS_DIR + group + sep;
       String group_content_path = group_dir + group + main.CONTENT;
       String group_count_file   = group_content_path + main.COUNT;
       String url_path           = group_content_path + main.URL;
@@ -260,12 +257,12 @@ public class write
          }
       }
 
-      write.collection(group_content_path, map.values());
+      collection(group_content_path, map.values());
 
       util.rm(group_count_file);
       single(group_count_file, Integer.toString(map.size()));
 
-      write.collection(url_path, java.util.Arrays.asList(urls));
+      collection(url_path, java.util.Arrays.asList(urls));
 
       util.rm(url_count);
       single(url_count, Integer.toString(urls.length));
@@ -291,7 +288,7 @@ public class write
    {
       Context context    = util.get_context();
       path               = util.create_internal_name(path);
-      FileOutputStream f = context.openFileOutput(path, Context.MODE_PRIVATE);
+      FileOutputStream f = context.openFileOutput(path, MODE);
       return new BufferedWriter(new OutputStreamWriter(f, "UTF8"));
    }
 }

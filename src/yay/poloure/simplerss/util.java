@@ -165,7 +165,7 @@ public class util
       /* Update cgroups. */
       main.cgroups = read.file(storage + main.GROUP_LIST);
 
-      /* If no groups exist add the ALL group. */
+      /* If no groups exists, add the ALL group. */
       if(main.cgroups.length == 0)
       {
          write.single(storage + main.GROUP_LIST, main.ALL + main.NL);
@@ -376,8 +376,6 @@ public class util
       if(service_update.storage != null)
          return service_update.storage;
 
-      Context context = get_context();
-
       /* Check the media state for any undesirable states. */
       String state = Environment.getExternalStorageState();
       for(int i = 0; i < media_errors.length; i++)
@@ -393,6 +391,7 @@ public class util
          Build the storage string depending on android version. */
       String storage;
       String sep = main.SEPAR;
+      Context context = get_context();
 
       if(main.FROYO)
          storage = context.getExternalFilesDir(null).getAbsolutePath() + sep;
@@ -486,7 +485,7 @@ public class util
 
       /* Load the refresh boolean value from settings. */
       String[] check  = read.file(pre + names[1] + txt);
-      Boolean refresh = (check.length != 0) ? strbol(check[0]) : false;
+      boolean refresh = (check.length != 0) ? strbol(check[0]) : false;
 
       if(!refresh && state.equals("start"))
          return;
@@ -620,7 +619,7 @@ public class util
 
    static void mkdir(String path)
    {
-      File folder = new File(get_storage() + path);
+      File folder = new File(path);
       if(!folder.exists())
          folder.mkdirs();
    }
@@ -667,9 +666,10 @@ public class util
 
    /* Returns a zero-length array if the resource is not found and logs the
     * event in log. */
-   static String[] get_array(Context con, int resource)
+   static String[] get_array(int resource)
    {
       String[] array  = new String[0];
+      Context  con    = get_context();
       try
       {
          array = con.getResources().getStringArray(resource);

@@ -66,8 +66,8 @@ class parser
       String[] filters      = read.file(storage + main.FILTER_LIST);
 
       Set<String> set       = new LinkedHashSet<String>();
-      Boolean write_mode    = false;
-      Boolean c_mode        = false;
+      boolean write_mode    = false;
+      boolean c_mode        = false;
       Time time             = new Time();
 
       BufferedReader reader     = null;

@@ -21,7 +21,7 @@ public class read
       if(util.check_unmounted())
          return null;
 
-      String[] check = read.file(path);
+      String[] check = file(path);
       return (check.length == 0) ? "" : check[0];
    }
 

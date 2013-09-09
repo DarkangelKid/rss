@@ -427,9 +427,9 @@ class adapter_feeds_cards extends BaseAdapter
    {
       String[] menu_items;
       if(image_visibility != View.VISIBLE)
-         menu_items = util.get_array(con, R.array.card_menu);
+         menu_items = util.get_array(R.array.card_menu);
       else
-         menu_items = util.get_array(con, R.array.card_menu_image);
+         menu_items = util.get_array(R.array.card_menu_image);
 
 
       final AlertDialog card_dialog = new AlertDialog.Builder(con)

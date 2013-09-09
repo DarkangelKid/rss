@@ -26,7 +26,7 @@ public class add_edit_dialog
 {
    public static class check_feed_exists extends AsyncTask<String, Void, String[]>
    {
-      Boolean existing_group = false, real = false;
+      boolean existing_group = false, real = false;
       String group, name;
       final AlertDialog dialog;
       final String mode, all_string, spinner_group, current_group, current_title;
@@ -141,7 +141,7 @@ public class add_edit_dialog
             if(mode.equals("edit"))
                edit_feed(current_title, name, ton[0], current_group, group, pos, all_string);
             else
-               add_feed(name, ton[0], group, all_string);
+               add_feed(name, ton[0], group);
 
             dialog.dismiss();
          }
@@ -300,28 +300,33 @@ public class add_edit_dialog
             edit_feed_dialog.show();
    }
 
-   static void add_feed(String name, String url, String group, String all_string)
+   static void add_feed(String name, String url, String group)
    {
-      String storage       = util.get_storage();
-      String ex_group_dir  = storage + main.GROUPS_DIR + group + main.SEPAR;
-      String all_path      = storage + main.GROUPS_DIR + all_string;
-      String group_path    = ex_group_dir + group + main.TXT;
-      String ex_feed_path  = ex_group_dir + name;
+      String sep           = main.SEPAR;
+      String g_dir         = util.get_storage() + main.GROUPS_DIR;
+      String all           = main.ALL;
+
+      /* storage/Groups/Mariam/Mariam.txt */
+      String group_index    = g_dir + group + sep + group + main.TXT;
+      /* storage/Groups/Mariam/mrm/ */
+      String feed_path      = g_dir + group + sep + name + sep;
+      /* storage/Groups/All/All.txt */
+      String all_index      = g_dir + all + sep + all + main.TXT;
 
       /* Create folders if they do not exist. */
-      util.mkdir(main.GROUPS_DIR + group + main.SEPAR + name);
-      util.mkdir(main.GROUPS_DIR + all_string);
+      util.mkdir(feed_path);
+      util.mkdir(g_dir + all);
 
-      (new File(ex_feed_path + main.SEPAR + "images")).mkdir();
-      (new File(ex_feed_path + main.SEPAR + "thumbnails")).mkdir();
+      util.mkdir(feed_path + "images");
+      util.mkdir(feed_path + "thumbnails");
 
       /* Create the csv. */
       String feed_info = "name|" +  name + "|url|" + url + "|group|"
                          + group + "|" + main.NL;
 
       /* Save the feed to the all file and the group file. */
-      write.single(group_path, feed_info);
-      write.single(main.ALL_FILE, feed_info);
+      write.single(group_index, feed_info);
+      write.single(all_index, feed_info);
 
       /* Update the manage listviews with the new information. */
       if(fragment_manage_feed.feed_list_adapter != null)
@@ -337,10 +342,12 @@ public class add_edit_dialog
       String txt                    = main.TXT;
       String count                  = main.COUNT;
       String content                = main.CONTENT;
-      String all_group_file         = main.ALL_FILE;
+      String g_dir                  = main.GROUPS_DIR;
       String storage                = util.get_storage();
-      String old_group_folder       = storage + main.GROUPS_DIR + old_group;
-      String new_group_folder       = storage + main.GROUPS_DIR + new_group;
+      String all                    = main.ALL;
+      String all_group_file         = storage + g_dir + all + sep + all + txt;
+      String old_group_folder       = storage + g_dir + old_group;
+      String new_group_folder       = storage + g_dir + new_group;
       String old_group_file         = old_group_folder + sep + old_group + txt;
       String new_group_file         = new_group_folder + sep + new_group + txt;
       String old_feed_folder        = old_group_folder + sep + old_name;
@@ -414,7 +421,7 @@ public class add_edit_dialog
       String storage = util.get_storage();
       write.single(storage + main.GROUP_LIST, group_name + main.NL);
 
-      util.mkdir(main.GROUPS_DIR + group_name);
+      util.mkdir(storage + main.GROUPS_DIR + group_name);
 
       util.update_groups();
    }

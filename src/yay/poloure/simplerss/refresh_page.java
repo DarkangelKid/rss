@@ -14,7 +14,7 @@ import java.util.Set;
 class refresh_page extends AsyncTask<Integer, Object, Animation>
 {
    private int page_number;
-   private Boolean flash = false;
+   private boolean flash = false;
    private ListFragment l;
    private adapter_feeds_cards ith;
    private ListView lv;
