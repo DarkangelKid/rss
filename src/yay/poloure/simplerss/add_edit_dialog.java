@@ -147,8 +147,9 @@ public class add_edit_dialog
       }
    }
 
-   static void show_add_filter_dialog(Context con)
+   static void show_add_filter_dialog()
    {
+      Context con                  = util.get_context();
       LayoutInflater inf           = LayoutInflater.from(con);
       final View add_filter_layout = inf.inflate(R.layout.add_filter_dialog, null);
 
@@ -181,8 +182,8 @@ public class add_edit_dialog
                   String[] filters        = read.file(filter_path);
                   if(util.index(filters, feed_name) != -1)
                      write.single(filter_path, feed_name + main.NL);
-                  fragment_manage_filters.filter_list_adapter.set_items(read.file(filter_path));
-                  fragment_manage_filters.filter_list_adapter.notifyDataSetChanged();
+                  ((adapter_manage_filter) pageradapter_manage.fragments[2].getListAdapter()).set_items(read.file(filter_path));
+                  /*pageradapter_manage.fragments[2].getListAdapter().notifyDataSetChanged();*/
                   add_filter_dialog.hide();
                }
             });
@@ -328,9 +329,9 @@ public class add_edit_dialog
       write.single(all_index, feed_info);
 
       /* Update the manage listviews with the new information. */
-      if(fragment_manage_feed.feed_list_adapter != null)
+      if(pageradapter_manage.fragments[1].getListAdapter() != null)
          update.manage_feeds();
-      if(fragment_manage_group.group_list_adapter != null)
+      if(pageradapter_manage.fragments[1].getListAdapter() != null)
          update.manage_groups();
    }
 
@@ -408,8 +409,9 @@ public class add_edit_dialog
          write.sort_content(new_group, all);
       write.sort_content(all, all);
 
-      fragment_manage_feed.feed_list_adapter.set_position(position, new_name, new_url + main.NL + new_group + " • " + Integer.toString(read.count(storage + main.GROUPS_DIR + new_group + main.SEPAR + new_name + main.SEPAR + new_name + main.CONTENT) - 1) + " items");
-      fragment_manage_feed.feed_list_adapter.notifyDataSetChanged();
+      adapter_manage_feeds adpt = ((adapter_manage_feeds) pageradapter_manage.fragments[1].getListAdapter());
+
+      adpt.set_position(position, new_name, new_url + main.NL + new_group + " • " + Integer.toString(read.count(storage + main.GROUPS_DIR + new_group + main.SEPAR + new_name + main.SEPAR + new_name + main.CONTENT) - 1) + " items");
 
       /// To refresh the counts and the order of the groups.
       util.update_groups();

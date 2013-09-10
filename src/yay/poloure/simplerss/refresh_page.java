@@ -16,7 +16,7 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
    private int page_number;
    private boolean flash = false;
    private ListFragment l;
-   private adapter_feeds_cards ith;
+   private adapter_card ith;
    private ListView lv;
    private int position = -3;
 
@@ -128,7 +128,7 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
          if((main.viewpager != null)&&(l == null))
             l = (ListFragment) main.fman.findFragmentByTag("android:switcher:" + main.viewpager.getId() + ":" + Integer.toString(page_number));
          if((l != null)&&(ith == null))
-            ith = ((adapter_feeds_cards) l.getListAdapter());
+            ith = ((adapter_card) l.getListAdapter());
          if((l != null)&&(lv == null))
          {
             try

@@ -11,11 +11,14 @@ import android.widget.TextView;
 class adapter_navigation_drawer extends BaseAdapter
 {
    static String[] menu_array  = new String[0];
-   static int[]    count_array = new int[0];
+   static int[] count_array = new int[0];
    int twelve;
-   static int[]    title_array = new int[]{R.drawable.feeds, R.drawable.manage, R.drawable.feeds};
-
-   static LayoutInflater inflater;
+   static int[] title_array = new int[]
+   {
+      R.drawable.feeds,
+      R.drawable.manage,
+      R.drawable.feeds,
+   };
 
    TextView main_item;
 
@@ -31,12 +34,11 @@ class adapter_navigation_drawer extends BaseAdapter
       TextView unread_view;
    }
 
-   public adapter_navigation_drawer(Context context_main)
+   public adapter_navigation_drawer()
    {
-      if(inflater == null)
+      if(twelve == 0)
       {
-         inflater = (LayoutInflater) context_main.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-         twelve = (int) ((12 * (context_main.getResources().getDisplayMetrics().density) + 0.5f));
+         twelve = (int) ((12 * (util.get_context().getResources().getDisplayMetrics().density) + 0.5f));
       }
    }
 
@@ -97,6 +99,7 @@ class adapter_navigation_drawer extends BaseAdapter
    public View getView(int position, View cv, ViewGroup parent)
    {
       final int view_type = getItemViewType(position);
+      LayoutInflater inflater = util.get_inflater();
 
       switch(view_type)
       {

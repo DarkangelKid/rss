@@ -35,7 +35,7 @@ import java.io.File;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-class adapter_feeds_cards extends BaseAdapter
+class adapter_card extends BaseAdapter
 {
    String[] links        = new String[0];
    String[] titles       = new String[0];
@@ -47,8 +47,6 @@ class adapter_feeds_cards extends BaseAdapter
    static Set<String> read_items = read.set(main.storage + main.READ_ITEMS);
 
    static final Pattern thumb_img = Pattern.compile("thumbnails");
-   static Context context;
-   static LayoutInflater inflater;
    static int two = 0, four = 0, eight = 0;
    static int screen_width;
 
@@ -65,13 +63,11 @@ class adapter_feeds_cards extends BaseAdapter
    ListView  listview;
    boolean   touched        = true;
 
-   public adapter_feeds_cards(Context context_main)
+   public adapter_card()
    {
-      if(context == null)
+      if(screen_width == 0)
       {
-         context                 = context_main;
-         DisplayMetrics metrics  = context.getResources().getDisplayMetrics();
-         inflater                = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+         DisplayMetrics metrics  = util.get_context().getResources().getDisplayMetrics();
          screen_width            = util.get_screen_width();
          if(two == 0)
          {
@@ -138,7 +134,7 @@ class adapter_feeds_cards extends BaseAdapter
 
    /* If the listview starts at the very top of a list with 20 items, position 19 is the only on calling getView(). */
    @Override
-   public View getView(int position, View convertView, ViewGroup parent)
+   public View getView(int position, View cv, ViewGroup parent)
    {
       int view_type = getItemViewType(position);
 
@@ -166,24 +162,26 @@ class adapter_feeds_cards extends BaseAdapter
          });
       }
 
+      LayoutInflater inflater = util.get_inflater();
+
       /* card_full.xml img && des. */
       if(view_type == 0)
       {
          full_holder holder;
-         if(convertView == null)
+         if(cv == null)
          {
-            convertView  = inflater.inflate(R.layout.card_full, parent, false);
+            cv  = inflater.inflate(R.layout.card_full, parent, false);
             holder       = new full_holder();
-            holder.title = (TextView)  convertView.findViewById(R.id.title);
-            holder.url   = (TextView)  convertView.findViewById(R.id.url);
-            holder.des   = (TextView)  convertView.findViewById(R.id.description);
-            holder.image = (ImageView) convertView.findViewById(R.id.image);
-            convertView.setOnClickListener(new webview_mode());
-            convertView.setOnLongClickListener(new long_press());
-            convertView.setTag(holder);
+            holder.title = (TextView)  cv.findViewById(R.id.title);
+            holder.url   = (TextView)  cv.findViewById(R.id.url);
+            holder.des   = (TextView)  cv.findViewById(R.id.description);
+            holder.image = (ImageView) cv.findViewById(R.id.image);
+            cv.setOnClickListener(new webview_mode());
+            cv.setOnLongClickListener(new long_press());
+            cv.setTag(holder);
          }
          else
-            holder = (full_holder) convertView.getTag();
+            holder = (full_holder) cv.getTag();
 
          display_img(holder.image, position);
 
@@ -195,19 +193,19 @@ class adapter_feeds_cards extends BaseAdapter
       else if(view_type == 1)
       {
          img_no_des_holder holder;
-         if(convertView == null)
+         if(cv == null)
          {
-            convertView  = inflater.inflate(R.layout.card_no_des_img, parent, false);
+            cv  = inflater.inflate(R.layout.card_no_des_img, parent, false);
             holder       = new img_no_des_holder();
-            holder.title = (TextView)  convertView.findViewById(R.id.title);
-            holder.url   = (TextView)  convertView.findViewById(R.id.url);
-            holder.image = (ImageView) convertView.findViewById(R.id.image);
-            convertView.setOnClickListener(new webview_mode());
-            convertView.setOnLongClickListener(new long_press());
-            convertView.setTag(holder);
+            holder.title = (TextView)  cv.findViewById(R.id.title);
+            holder.url   = (TextView)  cv.findViewById(R.id.url);
+            holder.image = (ImageView) cv.findViewById(R.id.image);
+            cv.setOnClickListener(new webview_mode());
+            cv.setOnLongClickListener(new long_press());
+            cv.setTag(holder);
          }
          else
-            holder = (img_no_des_holder) convertView.getTag();
+            holder = (img_no_des_holder) cv.getTag();
 
          display_img(holder.image, position);
 
@@ -218,19 +216,19 @@ class adapter_feeds_cards extends BaseAdapter
       else if(view_type == 2)
       {
          no_img_des_holder holder;
-         if(convertView == null)
+         if(cv == null)
          {
-            convertView  = inflater.inflate(R.layout.card_des_no_img, parent, false);
+            cv  = inflater.inflate(R.layout.card_des_no_img, parent, false);
             holder       = new no_img_des_holder();
-            holder.title = (TextView)  convertView.findViewById(R.id.title);
-            holder.url   = (TextView)  convertView.findViewById(R.id.url);
-            holder.des   = (TextView)  convertView.findViewById(R.id.description);
-            convertView.setOnClickListener(new webview_mode());
-            convertView.setOnLongClickListener(new long_press());
-            convertView.setTag(holder);
+            holder.title = (TextView)  cv.findViewById(R.id.title);
+            holder.url   = (TextView)  cv.findViewById(R.id.url);
+            holder.des   = (TextView)  cv.findViewById(R.id.description);
+            cv.setOnClickListener(new webview_mode());
+            cv.setOnLongClickListener(new long_press());
+            cv.setTag(holder);
          }
          else
-            holder = (no_img_des_holder) convertView.getTag();
+            holder = (no_img_des_holder) cv.getTag();
 
          holder.title.setText(titles[position]);
          holder.des  .setText(descriptions[position]);
@@ -240,18 +238,18 @@ class adapter_feeds_cards extends BaseAdapter
       else if(view_type == 3)
       {
          no_img_no_des_holder holder;
-         if(convertView == null)
+         if(cv == null)
          {
-            convertView  = inflater.inflate(R.layout.card_no_des_no_img, parent, false);
+            cv  = inflater.inflate(R.layout.card_no_des_no_img, parent, false);
             holder       = new no_img_no_des_holder();
-            holder.title = (TextView)  convertView.findViewById(R.id.title);
-            holder.url   = (TextView)  convertView.findViewById(R.id.url);
-            convertView.setOnClickListener(new webview_mode());
-            convertView.setOnLongClickListener(new long_press());
-            convertView.setTag(holder);
+            holder.title = (TextView)  cv.findViewById(R.id.title);
+            holder.url   = (TextView)  cv.findViewById(R.id.url);
+            cv.setOnClickListener(new webview_mode());
+            cv.setOnLongClickListener(new long_press());
+            cv.setTag(holder);
          }
          else
-            holder = (no_img_no_des_holder) convertView.getTag();
+            holder = (no_img_no_des_holder) cv.getTag();
 
          holder.title.setText(titles[position]);
          holder.url  .setText(links[position]);
@@ -285,7 +283,7 @@ class adapter_feeds_cards extends BaseAdapter
       if(listview.getVisibility() == View.VISIBLE && position - 1 >= 0 && touched)
          read_items.add(links[position - 1]);
 
-      return convertView;
+      return cv;
    }
 
    void display_img(ImageView view, int position)
@@ -408,7 +406,7 @@ class adapter_feeds_cards extends BaseAdapter
          else
             intent.setDataAndTypeAndNormalize(Uri.fromFile(new File(image_path)), "image/" + type);
 
-         context.startActivity(intent);
+         util.get_context().startActivity(intent);
       }
    }
 
@@ -478,7 +476,7 @@ class adapter_feeds_cards extends BaseAdapter
          web_view = new WebView(getActivity());
          view.addView(web_view, LayoutParams.MATCH_PARENT);
 
-         /*text = new TextView(getActivity());
+         /*text = new TextView();
          text.setText("webview");
          text.setGravity(Gravity.CENTER);
          text.setVisibility(View.GONE);

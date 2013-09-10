@@ -9,18 +9,13 @@ import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.ListFragment;
 import android.support.v4.view.PagerTabStrip;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ListView;
 
 public class main extends ActionBarActivity
@@ -170,7 +165,7 @@ public class main extends ActionBarActivity
       util.set_service(this, 0, "start");
 
       /* Save the read_items to file. */
-      write.collection(storage + READ_ITEMS, adapter_feeds_cards.read_items);
+      write.collection(storage + READ_ITEMS, adapter_card.read_items);
    }
 
    @Override
@@ -196,187 +191,5 @@ public class main extends ActionBarActivity
          return true;
 
       return super.onOptionsItemSelected(item);
-   }
-
-   /* END OF OVERRIDES */
-
-   static class pageradapter_feeds extends FragmentPagerAdapter
-   {
-      public pageradapter_feeds(FragmentManager fm)
-      {
-         super(fm);
-      }
-
-      @Override
-      public int getCount()
-      {
-         return cgroups.length;
-      }
-
-      @Override
-      public Fragment getItem(int position)
-      {
-         fragment_card f = new fragment_card();
-         Bundle args = new Bundle();
-         args.putInt("num", position);
-         f.setArguments(args);
-         return f;
-      }
-
-      @Override
-      public String getPageTitle(int position)
-      {
-         return cgroups[position];
-      }
-   }
-
-   static class pageradapter_manage extends FragmentPagerAdapter
-   {
-      static final Fragment[] fragments = new Fragment[]
-      {
-         new fragment_manage_group(),
-         new fragment_manage_feed(),
-         new fragment_manage_filters(),
-      };
-
-      static final String[] titles = util.get_array(R.array.manage_titles);
-
-      public pageradapter_manage(FragmentManager fm)
-      {
-         super(fm);
-      }
-
-      @Override
-      public int getCount()
-      {
-         return fragments.length;
-      }
-
-      @Override
-      public Fragment getItem(int position)
-      {
-         return fragments[position];
-      }
-
-      @Override
-      public String getPageTitle(int position)
-      {
-         return titles[position];
-      }
-   }
-
-   static class fragment_card extends ListFragment
-   {
-      public fragment_card()
-      {
-      }
-
-      @Override
-      public void onCreate(Bundle savedInstanceState)
-      {
-         super.onCreate(savedInstanceState);
-         setListAdapter(new adapter_feeds_cards(getActivity()));
-      }
-
-      @Override
-      public View onCreateView(LayoutInflater in, ViewGroup container, Bundle b)
-      {
-         return in.inflate(R.layout.listview_feed, container, false);
-      }
-   }
-
-   static class fragment_settings extends Fragment
-   {
-      public fragment_settings()
-      {
-      }
-
-      @Override
-      public View onCreateView(LayoutInflater in, ViewGroup container, Bundle b)
-      {
-         View v = in.inflate(R.layout.viewpager_settings, container, false);
-         ViewPager vp = (ViewPager) v.findViewById(R.id.settings_pager);
-         vp.setAdapter(new pageradapter_settings(fman));
-
-         strips[2] = (PagerTabStrip) v.findViewById(R.id.settings_title_strip);
-         strips[2].setDrawFullUnderline(true);
-         util.set_strip_colour(strips[2]);
-
-         return v;
-      }
-   }
-
-   static class pageradapter_settings extends FragmentPagerAdapter
-   {
-      static final Fragment[] fragments = new Fragment[]
-      {
-         new fragment_settings_function(),
-         new fragment_settings_interface(),
-      };
-
-      static final String[] titles = util.get_array(R.array.settings_titles);
-
-      public pageradapter_settings(FragmentManager fm)
-      {
-         super(fm);
-      }
-
-      @Override
-      public int getCount()
-      {
-         return titles.length;
-      }
-
-      @Override
-      public Fragment getItem(int position)
-      {
-         return fragments[position];
-      }
-
-      @Override
-      public String getPageTitle(int position)
-      {
-         return titles[position];
-      }
-   }
-
-   static class fragment_settings_function extends ListFragment
-   {
-      public fragment_settings_function()
-      {
-      }
-
-      @Override
-      public void onCreate(Bundle savedInstanceState)
-      {
-         super.onCreate(savedInstanceState);
-         setListAdapter(new adapter_settings_function());
-      }
-
-      @Override
-      public View onCreateView(LayoutInflater inf, ViewGroup cont, Bundle b)
-      {
-         return inf.inflate(R.layout.listview_settings_function, cont, false);
-      }
-   }
-
-   static class fragment_settings_interface extends ListFragment
-   {
-      public fragment_settings_interface()
-      {
-      }
-
-      @Override
-      public void onCreate(Bundle savedInstanceState)
-      {
-         super.onCreate(savedInstanceState);
-         setListAdapter(new adapter_settings_UI());
-      }
-
-      @Override
-      public View onCreateView(LayoutInflater inf, ViewGroup cont, Bundle b)
-      {
-         return inf.inflate(R.layout.listview_settings_function, cont, false);
-      }
    }
 }

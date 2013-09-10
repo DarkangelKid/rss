@@ -16,16 +16,10 @@ import android.support.v4.view.PagerTabStrip;
 
 public class adapter_settings_UI extends BaseAdapter
 {
-   String[] title_array   = new String[0];
-   String[] summary_array = new String[0];
-   static final String[] colours = new String[]
-   {
-      "blue",
-      "purple",
-      "green",
-      "orange",
-      "red"
-   };
+   static final String[] title_array   = util.get_array(R.array.settings_interface_titles);
+   static final String[] summary_array = util.get_array(R.array.settings_interface_summaries);
+   static final String[] colours       = util.get_array(R.array.settings_colours);
+
    static final int[] colour_ints = new int[]
    {
       Color.rgb(51, 181, 229), // blue
@@ -36,7 +30,6 @@ public class adapter_settings_UI extends BaseAdapter
    };
 
    static ImageView[] colour_views;
-   static LayoutInflater inf;
 
    TextView settings_heading;
 
@@ -68,13 +61,6 @@ public class adapter_settings_UI extends BaseAdapter
 
    public adapter_settings_UI()
    {
-      if(inf == null)
-      {
-         Context con   = util.get_context();
-         inf = (LayoutInflater) con.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-         title_array   = util.get_array(R.array.settings_interface_titles);
-         summary_array = util.get_array(R.array.settings_interface_summaries);
-      }
    }
 
    @Override
@@ -120,6 +106,8 @@ public class adapter_settings_UI extends BaseAdapter
       String title        = title_array[position];
       String summary      = summary_array[position];
       final String setting_path = util.get_storage() + main.SETTINGS + title + main.TXT;
+
+      LayoutInflater inf = util.get_inflater();
 
       /* This type is a heading. */
       if(view_type == 0)

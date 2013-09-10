@@ -3,7 +3,7 @@ package yay.poloure.simplerss;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -12,11 +12,8 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ListView;
 
-class fragment_manage_filters extends Fragment
+class fragment_manage_filters extends ListFragment
 {
-   static ListView filter_list;
-   static adapter_manage_filter filter_list_adapter;
-
    public void onCreate(Bundle savedInstanceState)
    {
       super.onCreate(savedInstanceState);
@@ -24,18 +21,20 @@ class fragment_manage_filters extends Fragment
    }
 
    @Override
-   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+   public View onCreateView(LayoutInflater inf, ViewGroup cont, Bundle b)
    {
-      final View view = inflater.inflate(R.layout.manage_listviews, container, false);
-      filter_list = (ListView) view.findViewById(R.id.manage_listview);
-      filter_list_adapter = new adapter_manage_filter(getActivity());
-      filter_list.setAdapter(filter_list_adapter);
+      final View view = inf.inflate(R.layout.manage_listviews, cont, false);
+
+      ListView listview = getListView();
+      final adapter_manage_filter adapter = new adapter_manage_filter();
+
+      setListAdapter(adapter);
 
       final String filter_path = util.get_storage() + main.FILTER_LIST;
 
-      filter_list_adapter.set_items(read.file(filter_path));
+      adapter.set_items(read.file(filter_path));
 
-      filter_list.setOnItemLongClickListener
+      listview.setOnItemLongClickListener
       (
          new OnItemLongClickListener()
          {
@@ -49,9 +48,8 @@ class fragment_manage_filters extends Fragment
                   @Override
                   public void onClick(DialogInterface dialog, int id)
                   {
-                     write.remove_string(filter_path, filter_list_adapter.getItem(position), false);
-                     filter_list_adapter.remove_item(position);
-                     filter_list_adapter.notifyDataSetChanged();
+                     write.remove_string(filter_path, adapter.getItem(position), false);
+                     adapter.remove_item(position);
                   }
                });
                AlertDialog alert = builder.create();
@@ -70,7 +68,7 @@ class fragment_manage_filters extends Fragment
          return true;
       else if(item.getTitle().equals("add"))
       {
-         add_edit_dialog.show_add_filter_dialog(getActivity());
+         add_edit_dialog.show_add_filter_dialog();
          return true;
       }
       return super.onOptionsItemSelected(item);

@@ -64,7 +64,7 @@ class navigation_drawer
       drawer_toggle.syncState();
 
       /* Save a new adapter as the public static nav_adapter variable and set it as this lists adapter. */
-      navigation_list.setAdapter(nav_adapter = new adapter_navigation_drawer(con));
+      navigation_list.setAdapter(nav_adapter = new adapter_navigation_drawer());
    }
 
    static class update_navigation_adapter extends AsyncTask<int[], Void, int[]>

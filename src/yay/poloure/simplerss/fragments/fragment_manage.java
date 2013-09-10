@@ -29,12 +29,12 @@ class fragment_manage extends Fragment
    @Override
    public View onCreateView(LayoutInflater inf, ViewGroup container, Bundle b)
    {
-      View v = inf.inflate(R.layout.viewpager_manage, container, false);
+      View v = inf.inflate(R.layout.viewpager, container, false);
 
-      ViewPager pager = (ViewPager) v.findViewById(R.id.manage_viewpager);
-      pager.setAdapter(new main.pageradapter_manage(main.fman));
+      ViewPager pager = (ViewPager) v.findViewById(R.id.pager);
+      pager.setAdapter(new pageradapter_manage(main.fman));
 
-      main.strips[1] = (PagerTabStrip) v.findViewById(R.id.manage_title_strip);
+      main.strips[1] = (PagerTabStrip) v.findViewById(R.id.pager_tab_strip);
       main.strips[1].setDrawFullUnderline(true);
       util.set_strip_colour(main.strips[1]);
 

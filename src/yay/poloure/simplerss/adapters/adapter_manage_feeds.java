@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
 class adapter_manage_feeds extends BaseAdapter
@@ -12,23 +13,23 @@ class adapter_manage_feeds extends BaseAdapter
    static String[] title_array = new String[0];
    static String[] info_array = new String[0];
 
-   static LayoutInflater inflater;
 
-   adapter_manage_feeds(Context context_main)
+   adapter_manage_feeds()
    {
-      inflater = (LayoutInflater) context_main.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
    }
 
    void set_items(String[] new_titles, String[] new_infos)
    {
       title_array = new_titles;
       info_array = new_infos;
+      notifyDataSetChanged();
    }
 
    void set_position(int pos, String new_title, String new_info)
    {
       title_array[pos]  = new_title;
       info_array[pos]   = new_info;
+      notifyDataSetChanged();
    }
 
    @Override
@@ -61,25 +62,24 @@ class adapter_manage_feeds extends BaseAdapter
    }
 
    @Override
-   public View getView(int position, View convertView, ViewGroup parent)
+   public View getView(int position, View cv, ViewGroup parent)
    {
       ViewHolder holder;
-      if(convertView == null)
+      if(cv == null)
       {
-
-         convertView = inflater.inflate(R.layout.manage_feed_item, parent, false);
+         cv = util.get_inflater().inflate(R.layout.manage_feed_item, parent, false);
          holder = new ViewHolder();
-         holder.title_view = (TextView) convertView.findViewById(R.id.title_item);
-         holder.info_view = (TextView) convertView.findViewById(R.id.info_item);
-         convertView.setTag(holder);
+         holder.title_view = (TextView) cv.findViewById(R.id.title_item);
+         holder.info_view = (TextView) cv.findViewById(R.id.info_item);
+         cv.setTag(holder);
       }
       else
-         holder = (ViewHolder) convertView.getTag();
+         holder = (ViewHolder) cv.getTag();
 
       holder.title_view.setText(title_array[position]);
       holder.info_view.setText(info_array[position]);
 
-      return convertView;
+      return cv;
    }
 
    static class ViewHolder

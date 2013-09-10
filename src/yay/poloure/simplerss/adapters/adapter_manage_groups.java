@@ -27,12 +27,8 @@ public class adapter_manage_groups extends BaseAdapter
    static String[] group_array = new String[0];
    static String[] info_array = new String[0];
 
-   static LayoutInflater inflater;
-
-   public adapter_manage_groups(Context con)
+   public adapter_manage_groups()
    {
-      if( inflater == null )
-         inflater = (LayoutInflater) con.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
    }
 
    void set_items(String[] new_groups, String[] new_infos)
@@ -84,7 +80,7 @@ public class adapter_manage_groups extends BaseAdapter
          ViewHolder holder;
          if(convertView == null)
          {
-            convertView = inflater.inflate(R.layout.manage_group_item, parent, false);
+            convertView = util.get_inflater().inflate(R.layout.manage_group_item, parent, false);
             holder = new ViewHolder();
             holder.group_view = (TextView) convertView.findViewById(R.id.group_item);
             holder.info_view = (TextView) convertView.findViewById(R.id.group_feeds);

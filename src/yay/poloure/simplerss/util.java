@@ -16,6 +16,7 @@ import android.support.v4.app.ListFragment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.PagerTabStrip;
 import android.support.v4.view.ViewPager;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.Toast;
@@ -29,17 +30,7 @@ import java.util.Arrays;
 
 public class util
 {
-   static final String[] media_error_messages = new String[]
-   {
-      "Media not mounted.",
-      "Unable to mount media.",
-      "Media is shared via USB mass storage.",
-      "Media does not exist.",
-      "Media contains unsupported filesystem.",
-      "Media mounted as read-only.",
-      "Media is being disk checked.",
-      "Media was removed before unmounted."
-   };
+   static final String[] media_error_messages = get_array(R.array.media_errors);
 
    static final String[] media_errors = new String[]
    {
@@ -106,8 +97,9 @@ public class util
       }
 
       update_groups();
-      fragment_manage_feed.feed_list_adapter.remove_item(pos);
-      fragment_manage_feed.feed_list_adapter.notifyDataSetChanged();
+      adapter_manage_feeds adapter = (adapter_manage_feeds) pageradapter_manage.fragments[1].getListAdapter();
+      adapter.remove_item(pos);
+      adapter.notifyDataSetChanged();
 
       update.manage_groups();
    }
@@ -196,7 +188,7 @@ public class util
 
       if(links == null)
       {
-         adapter_feeds_cards adp = get_card_adapter(page);
+         adapter_card adp = get_card_adapter(page);
          if(adp == null)
             return -1;
 
@@ -206,7 +198,7 @@ public class util
       for(i = links.length - 1; i >= 0; i--)
       {
          pos = links.length - i - 1;
-         if(!adapter_feeds_cards.read_items.contains(links[pos]))
+         if(!adapter_card.read_items.contains(links[pos]))
             break;
       }
 
@@ -304,13 +296,13 @@ public class util
 
    /* For these two functions, check for null. Should only really be
     * null if called from the service_update. */
-   static adapter_feeds_cards get_card_adapter(int page)
+   static adapter_card get_card_adapter(int page)
    {
       ListView list = get_listview(page);
       if(list == null)
          return null;
 
-      return (adapter_feeds_cards) list.getAdapter();
+      return (adapter_card) list.getAdapter();
    }
 
    /* This is the second one. */
@@ -337,6 +329,13 @@ public class util
 
       else /* This case should never happen because either must be running. */
          return null;
+   }
+
+   static LayoutInflater get_inflater()
+   {
+      String inflate = Context.LAYOUT_INFLATER_SERVICE;
+      Context con = get_context();
+      return (LayoutInflater) con.getSystemService(inflate);
    }
 
    /* Safe to call at anytime. */
@@ -397,12 +396,12 @@ public class util
       int total            = 0, unread, num;
       final int size       = cgroups.length;
       int[] unread_counts  = new int[size];
-      adapter_feeds_cards temp;
+      adapter_card temp;
 
       /* read_items == null when called from the service for notifications. */
-      if( adapter_feeds_cards.read_items == null )
+      if( adapter_card.read_items == null )
       {
-         adapter_feeds_cards.read_items = read.set(storage + main.READ_ITEMS);
+         adapter_card.read_items = read.set(storage + main.READ_ITEMS);
       }
 
       for(int i = 1; i < size; i++)
@@ -413,7 +412,7 @@ public class util
                                    main.CONTENT + main.URL);
          for(String url : urls)
          {
-            if(!adapter_feeds_cards.read_items.contains(url))
+            if(!adapter_card.read_items.contains(url))
                   unread++;
          }
 

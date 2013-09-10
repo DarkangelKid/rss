@@ -16,18 +16,18 @@ public class update
    public static void manage_feeds()
    {
       if(!main.HONEYCOMB)
-         new fragment_manage_feed.refresh().execute();
+         new fragment_manage_feeds.refresh().execute();
       else
-         new fragment_manage_feed.refresh()
+         new fragment_manage_feeds.refresh()
             .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
    }
 
    public static void manage_groups()
    {
       if(!main.HONEYCOMB)
-         new fragment_manage_group.refresh().execute();
+         new fragment_manage_groups.refresh().execute();
       else
-         new fragment_manage_group.refresh()
+         new fragment_manage_groups.refresh()
             .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
    }
 

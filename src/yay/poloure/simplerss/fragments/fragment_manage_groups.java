@@ -5,7 +5,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.support.v4.app.ListFragment;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -17,15 +17,14 @@ import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 
-class fragment_manage_group extends Fragment
+class fragment_manage_groups extends ListFragment
 {
-   static ListView manage_list;
    static boolean multi_mode = false;
    static ActionMode actionmode;
    static ActionMode.Callback actionmode_callback;
-   static adapter_manage_groups group_list_adapter;
 
    public void onCreate(Bundle savedInstanceState)
    {
@@ -34,20 +33,21 @@ class fragment_manage_group extends Fragment
    }
 
    @Override
-   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+   public View onCreateView(LayoutInflater inf, ViewGroup cont, Bundle b)
    {
-      final View view = inflater.inflate(R.layout.manage_listviews, container, false);
-      manage_list = (ListView) view.findViewById(R.id.manage_listview);
+      final View view = inf.inflate(R.layout.manage_listviews, cont, false);
 
-      group_list_adapter = new adapter_manage_groups(getActivity());
-      manage_list.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-      manage_list.setItemsCanFocus(false);
-      manage_list.setAdapter(group_list_adapter);
+      setListAdapter(new adapter_manage_groups());
+
+      final ListView listview = getListView();
+
+      listview.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+      listview.setItemsCanFocus(false);
 
       update.manage_groups();
 
       if(!main.HONEYCOMB)
-         registerForContextMenu(manage_list);
+         registerForContextMenu(listview);
       else
       {
          actionmode_callback = new ActionMode.Callback()
@@ -80,11 +80,11 @@ class fragment_manage_group extends Fragment
             @Override
             public void onDestroyActionMode(ActionMode mode)
             {
-               for(int i = 0; i < manage_list.getAdapter().getCount(); i++)
+               for(int i = 0; i < listview.getAdapter().getCount(); i++)
                {
-                  manage_list.setItemChecked(i, false);
+                  listview.setItemChecked(i, false);
                   try{
-                     manage_list.getChildAt(i).setBackgroundColor(Color.WHITE);
+                     listview.getChildAt(i).setBackgroundColor(Color.WHITE);
                   }
                   catch(Exception e){
                   }
@@ -96,7 +96,7 @@ class fragment_manage_group extends Fragment
          };
       }
 
-      manage_list.setOnItemLongClickListener
+      listview.setOnItemLongClickListener
       (
          new OnItemLongClickListener()
          {
@@ -105,13 +105,13 @@ class fragment_manage_group extends Fragment
             {
                if(pos == 0)
                {
-                  manage_list.setItemChecked(pos, false);
+                  listview.setItemChecked(pos, false);
                   return false;
                }
-               view = manage_list.getChildAt(pos);
+               view = listview.getChildAt(pos);
 
-               if(!manage_list.isItemChecked(pos))
-                  manage_list.setItemChecked(pos, true);
+               if(!listview.isItemChecked(pos))
+                  listview.setItemChecked(pos, true);
 
                if(!multi_mode)
                {
@@ -128,7 +128,7 @@ class fragment_manage_group extends Fragment
          }
       );
 
-      manage_list.setOnItemClickListener
+      listview.setOnItemClickListener
       (
          new OnItemClickListener()
          {
@@ -137,18 +137,18 @@ class fragment_manage_group extends Fragment
             {
                if(position == 0)
                {
-                  manage_list.setItemChecked(position, false);
+                  listview.setItemChecked(position, false);
                   return;
                }
-               view = manage_list.getChildAt(position);
+               view = listview.getChildAt(position);
 
                if(multi_mode)
                {
-                  if(!manage_list.isItemChecked(position))
+                  if(!listview.isItemChecked(position))
                   {
                      view.setBackgroundColor(Color.parseColor("#ffffffff"));
 
-                     if(manage_list.getCheckedItemPositions().indexOfValue(true) < 0)
+                     if(listview.getCheckedItemPositions().indexOfValue(true) < 0)
                      {
                         actionmode.finish();
                         multi_mode = false;
@@ -179,12 +179,12 @@ class fragment_manage_group extends Fragment
    static class refresh extends AsyncTask<Void, String[], Void>
    {
       Animation animFadeIn = AnimationUtils.loadAnimation(main.con, android.R.anim.fade_in);
-      ListView listview;
+      ListView listview   = pageradapter_manage.fragments[0].getListView();
+      adapter_manage_groups adapter = (adapter_manage_groups) pageradapter_manage.fragments[0].getListAdapter();
 
       public refresh()
       {
-         listview = fragment_manage_group.manage_list;
-         if(group_list_adapter.getCount() == 0)
+         if(adapter.getCount() == 0)
             listview.setVisibility(View.INVISIBLE);
       }
 
@@ -199,10 +199,10 @@ class fragment_manage_group extends Fragment
       @Override
       protected void onProgressUpdate(String[][] progress)
       {
-         if(group_list_adapter != null)
+         if(adapter != null)
          {
-            group_list_adapter.set_items(progress[0], progress[1]);
-            group_list_adapter.notifyDataSetChanged();
+            adapter.set_items(progress[0], progress[1]);
+            adapter.notifyDataSetChanged();
          }
       }
 

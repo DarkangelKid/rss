@@ -29,10 +29,10 @@ class fragment_feeds extends Fragment
    @Override
    public View onCreateView(LayoutInflater inf, ViewGroup cont, Bundle b)
    {
-      View v = inf.inflate(R.layout.viewpager_feeds, cont, false);
+      View v = inf.inflate(R.layout.viewpager, cont, false);
 
       main.viewpager = (ViewPager) v.findViewById(R.id.pager);
-      main.viewpager.setAdapter(new main.pageradapter_feeds(main.fman));
+      main.viewpager.setAdapter(new pageradapter_feeds(main.fman));
       main.viewpager.setOffscreenPageLimit(128);
       main.viewpager.setOnPageChangeListener(new ViewPager.OnPageChangeListener()
       {
@@ -54,7 +54,7 @@ class fragment_feeds extends Fragment
          }
       });
 
-      main.strips[0] = (PagerTabStrip) v.findViewById(R.id.pager_title_strip);
+      main.strips[0] = (PagerTabStrip) v.findViewById(R.id.pager_tab_strip);
       main.strips[0].setDrawFullUnderline(true);
       util.set_strip_colour(main.strips[0]);
 

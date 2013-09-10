@@ -14,28 +14,14 @@ import android.widget.TextView;
 public class adapter_settings_function extends BaseAdapter
 {
    TextView title_view;
-   String[] title_array;
-   String[] summary_array;
-
-   static final String[] refresh_times  = {"15m","30m","45m","1h","2h","3h","4h","8h","12h","24h"};
-   static final int[] times             = {15, 30, 45, 60, 120, 180, 240, 480, 720, 1440};
-   static final String[] file_names =
-   {
-      "null",
-      "auto_refresh_boolean",
-      "refresh_time",
-      "notifications_boolean",
-      "offline_mode"
-   };
-
-   static LayoutInflater inflater;
+   static final String[] title_array   = util.get_array(R.array.settings_function_titles);
+   static final String[] summary_array = util.get_array(R.array.settings_function_summaries);
+   static final String[] file_names    = util.get_array(R.array.settings_names);
+   static final String[] refresh_times = {"15m","30m","45m","1h","2h","3h","4h","8h","12h","24h"};
+   static final int[] times            = {15, 30, 45, 60, 120, 180, 240, 480, 720, 1440};
 
    public adapter_settings_function()
    {
-      Context con = util.get_context();
-      inflater = (LayoutInflater) con.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-      title_array   = util.get_array(R.array.settings_function_titles);
-      summary_array = util.get_array(R.array.settings_function_summaries);
    }
 
    @Override
@@ -87,6 +73,7 @@ public class adapter_settings_function extends BaseAdapter
       final String setting_path = util.get_storage() + main.SETTINGS
                                   + file_names[position] + main.TXT;
       String[] check;
+      LayoutInflater inflater = util.get_inflater();
 
       /* This type is the a heading. */
       if(view_type == 0)

@@ -11,12 +11,8 @@ class adapter_manage_filter extends BaseAdapter
 {
    static String[] title_list = new String[0];
 
-   static LayoutInflater inflater;
-
-   public adapter_manage_filter(Context context_main)
+   public adapter_manage_filter()
    {
-      if(inflater == null)
-         inflater = (LayoutInflater) context_main.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
    }
 
    void set_items(String[] new_titles)
@@ -39,6 +35,7 @@ class adapter_manage_filter extends BaseAdapter
    void remove_item(int position)
    {
       util.remove_element(title_list, position);
+      notifyDataSetChanged();
    }
 
    @Override
@@ -54,7 +51,7 @@ class adapter_manage_filter extends BaseAdapter
          if(convertView == null)
          {
 
-            convertView = inflater.inflate(R.layout.manage_feed_item, parent, false);
+            convertView = util.get_inflater().inflate(R.layout.manage_feed_item, parent, false);
             holder = new ViewHolder();
             holder.title_view = (TextView) convertView.findViewById(R.id.title_item);
             convertView.setTag(holder);

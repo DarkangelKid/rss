@@ -4,7 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,14 +15,12 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ListView;
+import android.widget.ListAdapter;
 
 import java.io.File;
 
-class fragment_manage_feed extends Fragment
+class fragment_manage_feeds extends ListFragment
 {
-   static ListView feed_list;
-   static adapter_manage_feeds feed_list_adapter;
-
    @Override
    public void onCreate(Bundle savedInstanceState)
    {
@@ -32,10 +30,11 @@ class fragment_manage_feed extends Fragment
    }
 
    @Override
-   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+   public View onCreateView(LayoutInflater inf, ViewGroup cont, Bundle b)
    {
-      final View view = inflater.inflate(R.layout.manage_listviews, container, false);
-      feed_list = (ListView) view.findViewById(R.id.manage_listview);
+      final View view = inf.inflate(R.layout.manage_listviews, cont, false);
+
+      ListView feed_list = getListView();
       feed_list.setOnItemClickListener
       (
          new OnItemClickListener()
@@ -48,8 +47,8 @@ class fragment_manage_feed extends Fragment
          }
       );
 
-      feed_list_adapter = new adapter_manage_feeds(getActivity());
-      feed_list.setAdapter(feed_list_adapter);
+      final adapter_manage_feeds adpt = new adapter_manage_feeds();
+      setListAdapter(adpt);
 
       update.manage_feeds();
 
@@ -71,9 +70,7 @@ class fragment_manage_feed extends Fragment
                      @Override
                      public void onClick(DialogInterface dialog, int id)
                      {
-                        util.delete_feed(feed_list_adapter.get_info(pos),
-                                         feed_list_adapter.getItem(pos),
-                                         pos                             );
+                        util.delete_feed(adpt.get_info(pos), adpt.getItem(pos), pos);
                      }
                   }
                )
@@ -91,12 +88,12 @@ class fragment_manage_feed extends Fragment
                         String g_dir    = util.get_storage() + main.GROUPS_DIR;
 
                         /* Parse for the group name from the info string. */
-                        String group    = feed_list_adapter.get_info(pos);
+                        String group    = adpt.get_info(pos);
                         int start       = group.indexOf('\n') + 1;
                         int end         = group.indexOf(' ');
                         group           = group.substring(start, end);
 
-                        String name      = feed_list_adapter.getItem(pos);
+                        String name      = adpt.getItem(pos);
                         String feed_path = g_dir + group + sep + name + sep;
                         String all_path  = g_dir + all + sep + all;
 
@@ -139,19 +136,19 @@ class fragment_manage_feed extends Fragment
    static class refresh extends AsyncTask<Void, String[], Void>
    {
       Animation fade_in = AnimationUtils.loadAnimation(main.con, android.R.anim.fade_in);
-      ListView listview;
+      ListView listview   = pageradapter_manage.fragments[1].getListView();
+      adapter_manage_feeds adapter = (adapter_manage_feeds) pageradapter_manage.fragments[1].getListAdapter();
 
       public refresh()
       {
-         listview = fragment_manage_feed.feed_list;
-         if(feed_list_adapter.getCount() == 0)
+         if(adapter.getCount() == 0)
             listview.setVisibility(View.INVISIBLE);
       }
 
       @Override
       protected Void doInBackground(Void... hey)
       {
-         if(feed_list_adapter != null)
+         if(adapter != null)
          {
             String storage = util.get_storage();
             String sep     = main.SEPAR;
@@ -182,8 +179,7 @@ class fragment_manage_feed extends Fragment
       @Override
       protected void onProgressUpdate(String[][] progress)
       {
-         feed_list_adapter.set_items(progress[0], progress[1]);
-         feed_list_adapter.notifyDataSetChanged();
+         adapter.set_items(progress[0], progress[1]);
       }
 
       @Override

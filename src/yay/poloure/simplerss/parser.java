@@ -70,6 +70,7 @@ class parser
       boolean c_mode        = false;
       Time time             = new Time();
 
+      /* TODO Replace reader method with read.file, char-by-char. */
       BufferedReader reader     = null;
       try
       {
