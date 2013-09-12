@@ -23,7 +23,7 @@ class fragment_manage_filters extends ListFragment
    @Override
    public View onCreateView(LayoutInflater inf, ViewGroup cont, Bundle b)
    {
-      final View view = inf.inflate(R.layout.manage_listviews, cont, false);
+      final View view = inf.inflate(R.layout.listview_cards, cont, false);
 
       ListView listview = getListView();
       final adapter_manage_filter adapter = new adapter_manage_filter();

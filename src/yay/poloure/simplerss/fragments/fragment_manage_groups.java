@@ -35,7 +35,7 @@ class fragment_manage_groups extends ListFragment
    @Override
    public View onCreateView(LayoutInflater inf, ViewGroup cont, Bundle b)
    {
-      final View view = inf.inflate(R.layout.manage_listviews, cont, false);
+      final View view = inf.inflate(R.layout.listview_cards, cont, false);
 
       setListAdapter(new adapter_manage_groups());
 

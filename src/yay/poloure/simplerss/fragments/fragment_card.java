@@ -22,6 +22,6 @@ class fragment_card extends ListFragment
    @Override
    public View onCreateView(LayoutInflater in, ViewGroup container, Bundle b)
    {
-      return in.inflate(R.layout.listview_feed, container, false);
+      return in.inflate(R.layout.listview_cards, container, false);
    }
 }
