@@ -24,19 +24,10 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
    protected Animation doInBackground(Integer... page)
    {
       page_number               = page[0];
-      String sep                = main.SEPAR;
       String group              = main.cgroups[page_number];
-      String group_path         = util.get_storage() + main.GROUPS_DIR + group + sep;
-      String group_file_path    = group_path + group + main.TXT;
-      String group_content_path = group_path + group + main.CONTENT;
       String thumbnail_path;
 
-      if( !util.exists(group_file_path) || !util.exists(group_content_path) )
-         return null;
-
-      write.single(main.storage + main.DUMP_FILE, group_content_path);
-
-      String[][] contenter  = read.csv(group_content_path, 't', 'd', 'l', 'i', 'w', 'h', 'g', 'f');
+      String[][] contenter  = read.csv(group, group, 't', 'd', 'l', 'i', 'w', 'h', 'g', 'f');
       String[] titles       = contenter[0];
       String[] descriptions = contenter[1];
       String[] links        = contenter[2];
@@ -93,8 +84,7 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
                if(width > 32)
                {
                   height = util.stoi(heights[m]);
-                  thumbnail_path = util.get_storage() + main.GROUPS_DIR
-                     + groups[m] + sep + sources[m] + sep + main.THUMBNAIL_DIR
+                  thumbnail_path = util.get_path(groups[m], sources[m], "thumbnails")
                      + images[m].substring(images[m].lastIndexOf(sep) + 1, images[m].length());
                }
                else

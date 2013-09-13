@@ -46,17 +46,13 @@ public class service_update extends IntentService
       String GROUPS_UNREADS = getString(R.string.notification_content_groups);
 
       int page     = intent.getIntExtra("GROUP_NUMBER", 0);
-      String sep   = main.SEPAR;
-      String g_dir = main.GROUPS_DIR;
-      String txt   = main.TXT;
 
       storage  = util.get_storage();
 
       String[] all_groups = read.file(storage + main.GROUP_LIST);
       String group        = all_groups[page];
-      String group_path   = storage + g_dir + group + sep + group + txt;
 
-      String[][] content  = read.csv(group_path, 'n', 'u', 'g');
+      String[][] content  = read.csv(group, 'n', 'u', 'g');
       String[] names      = content[0];
       String[] urls       = content[1];
       String[] groups     = content[2];

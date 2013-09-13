@@ -32,7 +32,13 @@ class fragment_manage_feeds extends ListFragment
    @Override
    public View onCreateView(LayoutInflater inf, ViewGroup cont, Bundle b)
    {
-      final View view = inf.inflate(R.layout.listview_cards, cont, false);
+      return inf.inflate(R.layout.listview_cards, cont, false);
+   }
+
+   @Override
+   public void onActivityCreated(Bundle savedInstanceState)
+   {
+      super.onActivityCreated(savedInstanceState);
 
       ListView feed_list = getListView();
       feed_list.setOnItemClickListener
@@ -117,7 +123,6 @@ class fragment_manage_feeds extends ListFragment
             }
          }
       );
-      return view;
    }
 
    @Override

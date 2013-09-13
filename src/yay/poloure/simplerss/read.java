@@ -25,7 +25,23 @@ public class read
       return (check.length == 0) ? "" : check[0];
    }
 
-   static String[][] csv(String file_path, char... type)
+   /* This is for the group index file. */
+   static String[][] csv(String group, char...type)
+   {
+      return csv_pr(util.get_path(group, main.TXT), type);
+   }
+
+   /* This is for reading an rss file. */
+   static String[][] csv(String group, String feed, char... type)
+   {
+      /* If we want the group content file. */
+      if(group.equals(feed))
+         return csv_pr(util.get_path(group, main.CONTENT), type);
+
+      return csv_pr(util.get_path(group, feed, main.CONTENT));
+   }
+
+   private static String[][] csv_pr(String file_path, char... type)
    {
       if(util.check_unmounted())
          return new String[0][0];
@@ -81,8 +97,7 @@ public class read
       /* If the path is not a count file, get the number of lines. */
       if(!path.contains(main.COUNT))
       {
-         String[] temp = file(count_path);
-         count = (temp.length == 0) ? count(path) : util.stoi(temp[0]);
+         count = count(path);
       }
       else
          count = 1;
@@ -133,6 +148,10 @@ public class read
    {
       if(util.check_unmounted())
          return 0;
+
+      String[] count = file(path + main.COUNT);
+      if(count.length != 0)
+         return stoi(count[0]);
 
       BufferedReader in = null;
       int i = 0;

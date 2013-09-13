@@ -16,12 +16,18 @@ class fragment_settings_function extends ListFragment
    public void onCreate(Bundle savedInstanceState)
    {
       super.onCreate(savedInstanceState);
-      setListAdapter(new adapter_settings_function());
    }
 
    @Override
    public View onCreateView(LayoutInflater inf, ViewGroup cont, Bundle b)
    {
       return inf.inflate(R.layout.listview_settings_function, cont, false);
+   }
+
+   @Override
+   public void onActivityCreated(Bundle savedInstanceState)
+   {
+      super.onActivityCreated(savedInstanceState);
+      setListAdapter(new adapter_settings_function());
    }
 }

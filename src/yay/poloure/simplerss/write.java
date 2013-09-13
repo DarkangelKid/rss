@@ -123,7 +123,7 @@ public class write
          try
          {
             out = util.use_sd() ? writer(path, true) :
-                                    writer(path, Context.MODE_APPEND);
+                                  writer(path, Context.MODE_APPEND);
             out.write(string);
          }
          finally
@@ -215,7 +215,7 @@ public class write
       String url_path           = group_content_path + main.URL;
       String url_count          = url_path + main.COUNT;
 
-      String[][] contents = read.csv(g_dir + group + main.TXT, 'n', 'g');
+      String[][] contents = read.csv(group, 'n', 'g');
       String[] names      = contents[0];
       String[] groups     = contents[1];
       String[] urls       = new String[0];
@@ -230,12 +230,11 @@ public class write
       for(int k = 0; k < names.length; k++)
       {
          /* "/storage/groups/Tumblr/mariam/mariam.content.txt" */
-         content_path = storage + main.GROUPS_DIR + groups[k] + sep + names[k]
-                        + sep + names[k] + main.CONTENT;
+         content_path = util.get_path(group[k], names[k], main.CONTENT);
 
-         if(util.exists(content_path))
+         temp = read.csv(groups[k], names[k], 'p', 'l');
+         if(temp.length > 0)
          {
-            temp     = read.csv(content_path, 'p', 'l');
             content  = read.file(content_path);
             pubDates = temp[0];
             urls     = util.concat(urls, temp[1]);

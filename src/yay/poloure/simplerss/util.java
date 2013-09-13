@@ -20,6 +20,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.Toast;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -233,18 +234,13 @@ public class util
 
       String count_path = content_path + main.COUNT;
 
-      String[] count = read.file(count_path);
-      if(count.length != 0)
-         total = stoi(count[0]);
-      else
-         total = read.count(content_path);
+      total = read.count(content_path);
 
       for(i = 0; i < size; i++)
       {
          group_array[i] = cgroups[i];
-         group_path     = g_dir + group_array[i] + sep + cgroups[i] + txt;
 
-         content = read.csv(group_path, 'n')[0];
+         content = read.csv(cgroups[i], 'n')[0];
          if(i == 0)
             info = (size == 1) ? "1 group" :  size + " groups";
          else
@@ -315,6 +311,31 @@ public class util
 
       String tag = "android:switcher:" + viewpager.getId() + ":" + page;
       return ((ListFragment) fman.findFragmentByTag(tag)).getListView();
+   }
+
+   /* For feed files. */
+   static String get_path(String group, String feed, String append)
+   {
+      return get_storage() + main.GROUPS_DIR + group + main.SEPAR + feed
+                           + main.SEPAR + feed + append;
+   }
+
+   /* For group files. */
+   static String get_path(String group, String append)
+   {
+      return get_storage() + main.GROUPS_DIR + group + main.SEPAR + group
+                           + append;
+   }
+
+   /* For image folders. */
+   static String get_path(String group, String feed, String folder)
+   {
+      String prepend = get_storage() + main.GROUPS_DIR + group + main.SEPAR + feed
+                                     + main.SEPAR + feed + main.SEPAR;
+      if(folder.equals("images"))
+         return prepend + main.IMAGE_DIR;
+      if(folder.equals("thumbnails"))
+         return prepend + main.THUMBNAIL_DIR;
    }
 
    /* This should never return null and so do not check. */
@@ -407,9 +428,7 @@ public class util
       for(int i = 1; i < size; i++)
       {
          unread = 0;
-         String[] urls = read.file(storage + main.GROUPS_DIR + cgroups[i]
-                                   + main.SEPAR + cgroups[i] +
-                                   main.CONTENT + main.URL);
+         String[] urls = read.file(util.get_path(cgroups[i], main.CONTENT + main.URL));
          for(String url : urls)
          {
             if(!adapter_card.read_items.contains(url))
@@ -508,6 +527,36 @@ public class util
       else if(state.equals("stop"))
       {
          am.cancel(pintent);
+      }
+   }
+
+   static void set_alpha(TextView title, TextView url, ImageView image,
+                                             TextView des, String link)
+   {
+      if(!main.HONEYCOMB)
+         return;
+
+      if(adapter_card.read_items.contains(link))
+      {
+         title .setTextColor(R.color.title_grey);
+         url   .setTextColor(R.color.link_grey);
+
+         if(des != null)
+            des.setTextColor(R.color.des_grey);
+
+         if(image != null)
+            image.setAlpha(0.5f);
+      }
+      else
+      {
+         title .setTextColor(R.color.title_black);
+         url   .setTextColor(R.color.link_black);
+
+         if(des!= null)
+            des.setTextColor(R.color.des_black);
+
+         if(image != null)
+            image.setAlpha(1.0f);
       }
    }
 
@@ -633,7 +682,7 @@ public class util
    static boolean use_sd()
    {
       /* Return true if force sd setting is true. */
-      return false;
+      return true;
    }
 
    static boolean strbol(String str)
@@ -658,9 +707,19 @@ public class util
       }
    }
 
-   static String getstr(TextView t)
+   static void set_text(String str, android.view.View v, int id)
    {
-      return t.getText().toString().trim();
+      ((TextView) v.findViewById(R.id.url)).setText(str);
+   }
+
+   static String getstr(android.view.View v, int id)
+   {
+      return ((TextView) v.findViewById(R.id.url)).getText().toString().trim();
+   }
+
+   static String getstr(TextView v)
+   {
+      return v.getText().toString().trim();
    }
 
    /* Returns a zero-length array if the resource is not found and logs the
@@ -678,5 +737,20 @@ public class util
          write.log(resource + " does not exist.");
       }
       return array;
+   }
+
+   static String get_string(int resource)
+   {
+      String  str = "";
+      Context con = get_context();
+      try
+      {
+         str = con.getString(resource);
+      }
+      catch(android.content.res.Resources.NotFoundException e)
+      {
+         write.log(resource + " does not exist.");
+      }
+      return str;
    }
 }

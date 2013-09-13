@@ -25,7 +25,7 @@ public class main extends ActionBarActivity
    static ViewPager            viewpager;
    static Context              con;
    static FragmentManager      fman;
-   static ActionBar            action_bar;
+   static ActionBar            bar;
    static Handler              service_handler;
 
    /* These must be set straight away in onCreate. */
@@ -34,28 +34,6 @@ public class main extends ActionBarActivity
    static String[] cgroups;
 
    static Fragment[] main_fragments;
-
-   /* Static final are best only when type is a primitive or a String.
-    * Static is also better than not static when primitive or String.
-    * Final is only desirable when complicated logic is in place or it
-    * must be accessed within an inner class.
-    *
-    * Nothing should be public, replace with nothing. Nothing is
-    * package-private which is basically public. Public is avialable ouside
-    * the package but all our classes are inside the same package.
-    *
-    * Unless you really do not want another class accessing a variable,
-    * there is no need to make it private, it makes no difference after
-    * compiling.
-    *
-    * Overriden functions from android have public because they are in an
-    * android package and we want to access them.
-    *
-    * A final method means it can not be overriden/overided but again,
-    * since we are not coding a library, there is no need.
-    *
-    * If an field is not initilised when static finaled, it can cause a
-    * NullPointerException and be carefull relying on it being not null. */
 
    static final String SEPAR = System.getProperty("file.separator");
    static final String NL    = System.getProperty("line.separator");
@@ -94,8 +72,9 @@ public class main extends ActionBarActivity
       setContentView(R.layout.navigation_drawer_and_content_frame);
 
       /* Save the other satic variables. */
-      fman    = getSupportFragmentManager();
-      con     = this;
+      fman = getSupportFragmentManager();
+      bar  = getSupportActionBar();
+      con  = this;
 
       /* Form the storage path. */
       storage = util.get_storage();
@@ -103,11 +82,6 @@ public class main extends ActionBarActivity
 
       /* Load String resources into static variables. */
       ALL     = getString(R.string.all_group);
-
-      /* Configure the action bar. */
-      action_bar = getSupportActionBar();
-      action_bar.setDisplayHomeAsUpEnabled(true);
-      action_bar.setHomeButtonEnabled(true);
 
       /* Create the navigation drawer and set all the listeners for it. */
       DrawerLayout dl      = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -130,7 +104,9 @@ public class main extends ActionBarActivity
          tran.add(frame, main_fragments[0])
              .add(frame, main_fragments[1])
              .add(frame, main_fragments[2])
-             .hide(main_fragments[1]).hide(main_fragments[2]).commit();
+             .hide(main_fragments[1])
+             .hide(main_fragments[2])
+             .commit();
       }
 
       util.update_groups();
@@ -144,7 +120,7 @@ public class main extends ActionBarActivity
       int    lock  = DrawerLayout.LOCK_MODE_UNLOCKED;
       String feeds = navigation_drawer.NAV_TITLES[0];
 
-      action_bar.setTitle(feeds);
+      bar.setTitle(feeds);
       navigation_drawer.drawer_layout.setDrawerLockMode(lock);
       navigation_drawer.drawer_toggle.setDrawerIndicatorEnabled(true);
    }
@@ -181,7 +157,7 @@ public class main extends ActionBarActivity
    public boolean onOptionsItemSelected(MenuItem item)
    {
       /* If the user has clicked the title and the tilte says "Offline". */
-      if(action_bar.getTitle().toString().equals("Offline"))
+      if(bar.getTitle().toString().equals("Offline"))
       {
          onBackPressed();
          return true;

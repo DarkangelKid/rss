@@ -207,7 +207,7 @@ public class adapter_manage_groups extends BaseAdapter
          if (motionEvent.getAction() == MotionEvent.ACTION_DOWN)
          {
             View parent = (View) view.getParent();
-            old_title = util.getstr(((TextView) parent.findViewById(R.id.group_item)));
+            old_title = util.getstr(parent, R.id.group_item);
             custom_drag_builder shadowBuilder = new custom_drag_builder(parent);
             parent.startDrag(null, shadowBuilder, parent, 0);
             return true;
@@ -248,10 +248,10 @@ public class adapter_manage_groups extends BaseAdapter
             last.setVisibility(View.VISIBLE);
 
             /* Save the position of the view that just faded out. */
-            new_title = util.getstr(((TextView) v.findViewById(R.id.group_item)));
+            new_title = util.getstr(v, R.id.group_item);
             for(int i = 0; i < listview.getChildCount(); i++)
             {
-               if(new_title.equals(util.getstr((TextView) listview.getChildAt(i).findViewById(R.id.group_item))));
+               if(new_title.equals(util.getstr(listview.getChildAt(i), R.id.group_item)));
                {
                   old_view = i;
                   break;

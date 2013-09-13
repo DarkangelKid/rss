@@ -3,9 +3,6 @@
    <string name="drawer_open">Open navigation drawer</string>
    <string name="drawer_close">Close navigation drawer</string>
 
-   <string name="feeds_title">Feeds</string>
-   <string name="manage_title">Manage</string>
-   <string name="settings_title">Settings</string>
    <string name="navigation_title">Navigation</string>
 
    <string name="delete_dialog">Delete</string>

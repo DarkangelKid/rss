@@ -14,8 +14,8 @@ class navigation_drawer
    ListView navigation_list;
 
    static String   current_title;
-   static String[] NAV_TITLES = new String[0];
-   static String   NAVIGATION;
+   static final String[] NAV_TITLES = util.get_array(R.array.nav_titles);
+   static final String   NAVIGATION = util.get_string(R.string.navigation_title);
 
    static adapter_navigation_drawer nav_adapter;
    static DrawerLayout              drawer_layout;
@@ -24,19 +24,10 @@ class navigation_drawer
    public navigation_drawer(DrawerLayout draw_layout, ListView nav_list)
    {
       Context con = util.get_context();
+      drawer_layout = draw_layout;
 
-      /* Get the main three fragment titles from the values resource. */
-      NAV_TITLES  = new String[]
-      {
-         con.getString(R.string.feeds_title),
-         con.getString(R.string.manage_title),
-         con.getString(R.string.settings_title)
-      };
-
-      NAVIGATION = con.getString(R.string.navigation_title);
-
-      /* Save the drawer layout to the public static variable then set the shadow of the drawer. */
-      (drawer_layout = draw_layout).setDrawerShadow(R.drawable.drawer_shadow, android.view.Gravity.END);
+      /* Set the shadow of the drawer. */
+      drawer_layout.setDrawerShadow(R.drawable.drawer_shadow, android.view.Gravity.END);
 
       /* Create the action bar toggle and set it as the drawer open/closer after. */
       drawer_toggle = new ActionBarDrawerToggle((Activity) con, drawer_layout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
@@ -45,15 +36,15 @@ class navigation_drawer
          public void onDrawerClosed(View drawerView)
          {
             /* If the title is still "Navigation", then change it back to current_title. */
-            if(((String) main.action_bar.getTitle()).equals(NAVIGATION))
-               main.action_bar.setTitle(current_title);
+            if(((String) main.bar.getTitle()).equals(NAVIGATION))
+               main.bar.setTitle(current_title);
          }
          @Override
          public void onDrawerOpened(View drawerView)
          {
             /* Save the action bar's title to current title. Then change the title to NAVIGATION. */
-            current_title = (String) main.action_bar.getTitle();
-            main.action_bar.setTitle(NAVIGATION);
+            current_title = (String) main.bar.getTitle();
+            main.bar.setTitle(NAVIGATION);
          }
       };
 
@@ -111,7 +102,7 @@ class navigation_drawer
          util.show_fragment(main.main_fragments[position]);
 
          /* Set the title text of the actionbar to the selected item. */
-         main.action_bar.setTitle(selected_title);
+         main.bar.setTitle(selected_title);
       }
    }
 }

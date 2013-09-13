@@ -194,11 +194,8 @@ public class add_edit_dialog
    {
       Context        con      = util.get_context();
       LayoutInflater inf      = LayoutInflater.from(con);
-      View add_rss_dialog     = inf.inflate(R.layout.add_rss_dialog, null);
+      final View add_rss_dialog = inf.inflate(R.layout.add_rss_dialog, null);
       String[] spinner_groups = Arrays.copyOfRange(cgroups, 1, cgroups.length);
-      final TextView group_edit     = (TextView) add_rss_dialog.findViewById(R.id.group_edit);
-      final TextView URL_edit       = (TextView) add_rss_dialog.findViewById(R.id.URL_edit);
-      final TextView name_edit      = (TextView) add_rss_dialog.findViewById(R.id.name_edit);
       final AdapterView<SpinnerAdapter> group_spinner = (AdapterView<SpinnerAdapter>) add_rss_dialog.findViewById(R.id.group_spinner);
 
       ArrayAdapter<String> adapter  = new ArrayAdapter<String>(con, R.layout.group_spinner_text, spinner_groups);
@@ -224,9 +221,11 @@ public class add_edit_dialog
          @Override
          public void onClick(DialogInterface dialog, int which)
          {
-            String new_group = util.getstr(group_edit).toLowerCase(Locale.getDefault());
-            String URL_check = util.getstr(URL_edit);
-            String feed_name = util.getstr(name_edit);
+            String new_group = util.getstr(add_rss_dialog, R.id.group_edit);
+            String URL_check = util.getstr(add_rss_dialog, R.id.URL_edit);
+            String feed_name = util.getstr(add_rss_dialog, R.id.name_edit);
+
+            new_group = new_group.toLowerCase(Locale.getDefault());
             String spinner_group;
             try
             {
@@ -236,7 +235,7 @@ public class add_edit_dialog
             {
                spinner_group = "";
             }
-            update.check_feed(add_feed_dialog, new_group, feed_name, "add", "", "", spinner_group, 0,URL_check);
+            update.check_feed(add_feed_dialog, new_group, feed_name, "add", "", "", spinner_group, 0, URL_check);
          }
       });
       add_feed_dialog.show();
@@ -246,15 +245,12 @@ public class add_edit_dialog
    {
       String storage             = util.get_storage();
       LayoutInflater inf         = LayoutInflater.from(con);
-      View edit_rss_dialog       = inf.inflate(R.layout.add_rss_dialog, null);
-      String[][] content         = read.csv(storage + main.GROUPS_DIR + cgroups[0] + main.SEPAR + cgroups[0] + main.TXT, 'n', 'u', 'g');
+      final View edit_rss_dialog = inf.inflate(R.layout.add_rss_dialog, null);
+      String[][] content         = read.csv(cgroups[0], 'n', 'u', 'g');
       final String current_title = content[0][position];
       final String current_url   = content[1][position];
       final String current_group = content[2][position];
 
-      final TextView group_edit  = (TextView) edit_rss_dialog.findViewById(R.id.group_edit);
-      final TextView URL_edit    = (TextView) edit_rss_dialog.findViewById(R.id.URL_edit);
-      final TextView name_edit   = (TextView) edit_rss_dialog.findViewById(R.id.name_edit);
       final AdapterView<SpinnerAdapter> group_spinner = (AdapterView<SpinnerAdapter>) edit_rss_dialog.findViewById(R.id.group_spinner);
 
       String[] spinner_groups    = Arrays.copyOfRange(cgroups, 1, cgroups.length);
@@ -262,8 +258,9 @@ public class add_edit_dialog
       ArrayAdapter<String> adapter = new ArrayAdapter<String>(con, R.layout.group_spinner_text, spinner_groups);
       adapter      .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
       group_spinner.setAdapter(adapter);
-      URL_edit     .setText(current_url);
-      name_edit    .setText(current_title);
+      util.set_text(current_url, edit_rss_dialog, R.id.URL_edit);
+      util.set_text(current_title, edit_rss_dialog, R.id.URL_edit);
+
       group_spinner.setSelection(util.index(spinner_groups, current_group));
 
       final AlertDialog edit_feed_dialog = new AlertDialog.Builder(con)
@@ -281,44 +278,40 @@ public class add_edit_dialog
          )
          .create();
 
-         edit_feed_dialog.setButton(
-            AlertDialog.BUTTON_POSITIVE,
-            con.getString(R.string.accept_dialog),
-            new DialogInterface.OnClickListener()
-            {
-               @Override
-               public void onClick(DialogInterface dialog, int which)
-               {
-                     String new_group     = util.getstr(group_edit).toLowerCase(Locale.getDefault());
-                     String URL_check     = util.getstr(URL_edit);
-                     String feed_name     = util.getstr(name_edit);
-                     String spinner_group = group_spinner.getSelectedItem().toString();
-                     update.check_feed(edit_feed_dialog, new_group, feed_name, "edit", current_title, current_group, spinner_group, position, URL_check);
-               }
-            });
+      edit_feed_dialog.setButton( AlertDialog.BUTTON_POSITIVE,
+                                    con.getString(R.string.accept_dialog),
+      new DialogInterface.OnClickListener()
+      {
+         @Override
+         public void onClick(DialogInterface dialog, int which)
+         {
+            String new_group = util.getstr(edit_rss_dialog, R.id.group_edit);
+            String URL_check = util.getstr(edit_rss_dialog, R.id.URL_edit);
+            String feed_name = util.getstr(edit_rss_dialog, R.id.name_edit);
+            String spinner_group = group_spinner.getSelectedItem().toString();
+            new_group = new_group.toLowerCase(Locale.getDefault());
 
-            edit_feed_dialog.show();
+            update.check_feed(edit_feed_dialog, new_group, feed_name, "edit", current_title, current_group, spinner_group, position, URL_check);
+         }
+      });
+
+      edit_feed_dialog.show();
    }
 
    static void add_feed(String name, String url, String group)
    {
-      String sep           = main.SEPAR;
-      String g_dir         = util.get_storage() + main.GROUPS_DIR;
       String all           = main.ALL;
 
-      /* storage/Groups/Mariam/Mariam.txt */
-      String group_index    = g_dir + group + sep + group + main.TXT;
-      /* storage/Groups/Mariam/mrm/ */
-      String feed_path      = g_dir + group + sep + name + sep;
-      /* storage/Groups/All/All.txt */
-      String all_index      = g_dir + all + sep + all + main.TXT;
+      /* storage/Groups/Mariam/Mariam.main.TXT */
+      String group_index    = util.get_path(group, main.TXT);
+
+      /* storage/Groups/All/All.main.TXT */
+      String all_index      = util.get_path(all, main.TXT);
 
       /* Create folders if they do not exist. */
-      util.mkdir(feed_path);
-      util.mkdir(g_dir + all);
-
-      util.mkdir(feed_path + "images");
-      util.mkdir(feed_path + "thumbnails");
+      util.mkdir(util.get_path(group, feed, "images"));
+      util.mkdir(util.get_path(group, feed, "thumbnails"));
+      util.mkdir(util.get_path(all,   feed, "images"));
 
       /* Create the csv. */
       String feed_info = "name|" +  name + "|url|" + url + "|group|"
@@ -326,12 +319,12 @@ public class add_edit_dialog
 
       /* Save the feed to the all file and the group file. */
       write.single(group_index, feed_info);
-      write.single(all_index, feed_info);
+      write.single(all_index,   feed_info);
 
       /* Update the manage listviews with the new information. */
       if(pageradapter_manage.fragments[1].getListAdapter() != null)
          update.manage_feeds();
-      if(pageradapter_manage.fragments[1].getListAdapter() != null)
+      if(pageradapter_manage.fragments[0].getListAdapter() != null)
          update.manage_groups();
    }
 
@@ -339,29 +332,19 @@ public class add_edit_dialog
    static void edit_feed(String old_name, String new_name, String new_url, String old_group, String new_group, int position)
    {
       String sep     = main.SEPAR;
-      String txt     = main.TXT;
       String count   = main.COUNT;
       String content = main.CONTENT;
       String storage = util.get_storage();
-      String g_dir   = storage + main.GROUPS_DIR;
-      String all     = main.ALL;
 
-      String all_index            = g_dir + all + sep + all + txt;
-      String old_group_folder     = g_dir + old_group;
-      String new_group_folder     = g_dir + new_group;
-      String old_index            = old_group_folder + sep + old_group + txt;
-      String new_index            = new_group_folder + sep + new_group + txt;
-      String old_feed_folder      = old_group_folder + sep + old_name;
-      String new_feed_folder      = new_group_folder + sep + new_name;
-      String old_feed_folder_post = new_group_folder + sep + old_name;
-      String new_feed_folder_post = new_group_folder + sep + new_name;
+      String old_feed_folder = old_group_folder + sep + old_name;
+      String new_feed_folder = new_group_folder + sep + new_name;
 
       if(!old_name.equals(new_name))
       {
-         util.mv(old_feed_folder + sep + old_name + txt,
-                 old_feed_folder + sep + new_name + txt );
-         util.mv(old_feed_folder + sep + old_name + content,
-                 old_feed_folder + sep + new_name + content );
+         util.mv(util.get_path(old_group, old_name, main.TXT),
+                 util.get_path(old_group, new_name, main.TXT));
+         util.mv(util.get_path(old_group, old_name, content),
+                 util.get_path(old_group, old_name, content));
       }
       if(!old_group.equals(new_group))
       {
@@ -379,7 +362,7 @@ public class add_edit_dialog
          }
       }
       if(!old_name.equals(new_name))
-         util.mv(old_feed_folder_post, new_feed_folder_post);
+         util.mv(old_feed_folder, new_feed_folder);
 
       /* Replace the new_group file with the new data. */
       write.remove_string(new_index, old_name, true);
@@ -392,15 +375,14 @@ public class add_edit_dialog
                    + "|group|" + new_group + "|" + main.NL);
 
       /// Delete the group count file and delete the group_content_file
-      String all_content_file = storage + main.GROUPS_DIR + all
-                                      + sep + all + content;
+      util.rm(util.get_path(new_group, content));
+      util.rm(util.get_path(new_group, content + count));
 
-      util.rm(new_group_folder + sep + new_group + content);
-      util.rm(new_group_folder + sep + new_group + content + count);
-      util.rm(old_group_folder + sep + old_group + content);
-      util.rm(old_group_folder + sep + old_group + content + count);
-      util.rm(all_content_file);
-      util.rm(all_content_file + count);
+      util.rm(util.get_path(old_group, content));
+      util.rm(util.get_path(old_group, content + count));
+
+      util.rm(util.get_path(all, content));
+      util.rm(util.get_path(all, content + count));
 
       /// This is because the group file contains the feed name and feed group (for location of images).
       if(util.exists(old_index))

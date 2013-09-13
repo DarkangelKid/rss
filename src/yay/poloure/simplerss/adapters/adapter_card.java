@@ -48,16 +48,7 @@ class adapter_card extends BaseAdapter
 
    static final Pattern thumb_img = Pattern.compile("thumbnails");
    static int two = 0, four = 0, eight = 0;
-   static int screen_width;
-
-   static final int link_black  = Color.rgb(128, 128, 128);
-   static final int link_grey   = Color.rgb(194, 194, 194);
-
-   static final int des_black   = Color.rgb(78, 78, 78);
-   static final int des_grey    = Color.rgb(167, 167, 167);
-
-   static final int title_black = Color.rgb(0, 0, 0);
-   static final int title_grey  = Color.rgb(128, 128, 128);
+   static final int screen_width = util.get_screen_width();
 
    boolean   first          = true;
    ListView  listview;
@@ -65,28 +56,26 @@ class adapter_card extends BaseAdapter
 
    public adapter_card()
    {
-      if(screen_width == 0)
+      if(two == 0)
       {
-         DisplayMetrics metrics  = util.get_context().getResources().getDisplayMetrics();
-         screen_width            = util.get_screen_width();
-         if(two == 0)
-         {
-            two      = (int) ((2  * (metrics.density) + 0.5f));
-            four     = (int) ((4  * (metrics.density) + 0.5f));
-            eight    = (int) ((8  * (metrics.density) + 0.5f));
-         }
+         float density = util.get_context().getResources().getDisplayMetrics().density;
+         two      = (int) (2  * density + 0.5f);
+         four     = two * 2;
+         eight    = two * 4;
       }
    }
 
-   void add_array(String[] new_title, String[] new_des, String[] new_link, String[] new_image, Integer[] new_height, Integer[] new_width)
+   void add_array(String[] new_title, String[] new_des, String[] new_link,
+                  String[] new_image, Integer[] new_height, Integer[] new_width)
    {
-      titles         = util.concat(titles,       new_title);
-      descriptions   = util.concat(descriptions, new_des);
-      links          = util.concat(links,        new_link);
-      images         = util.concat(images,       new_image);
-      heights        = util.concat(heights,      new_height);
-      widths         = util.concat(widths,       new_width);
+      titles       = util.concat(new_title,  titles      );
+      descriptions = util.concat(new_des,    descriptions);
+      links        = util.concat(new_link,   links       );
+      images       = util.concat(new_image,  images      );
+      heights      = util.concat(new_height, heights     );
+      widths       = util.concat(new_width,  widths      );
    }
+
 
    @Override
    public int getCount()
@@ -132,7 +121,6 @@ class adapter_card extends BaseAdapter
       return 3;
    }
 
-   /* If the listview starts at the very top of a list with 20 items, position 19 is the only on calling getView(). */
    @Override
    public View getView(int position, View cv, ViewGroup parent)
    {
@@ -145,24 +133,29 @@ class adapter_card extends BaseAdapter
          listview.setOnScrollListener(new AbsListView.OnScrollListener()
          {
             @Override
-            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount){
+            public void onScroll(AbsListView v, int first, int visible, int total)
+            {
             }
 
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState)
             {
-               /* The very top item is read only when the padding exists above it. */
-               /* links.get(0) == the last link in the list. position is always 76*/
-               if(listview.getChildAt(0).getTop() == eight && listview.getVisibility() == View.VISIBLE && touched)
-                  read_items.add(links[links.length - 1]);
+               if( listview.getChildAt(0).getTop() == eight &&
+                   listview.getVisibility() == View.VISIBLE && touched )
+               {
+                  read_items.add(links[0]);
+               }
 
                if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE)
                   update.navigation(null);
             }
          });
+         first = false;
       }
 
       LayoutInflater inflater = util.get_inflater();
+      String link  = links[position];
+      String title = titles[position];
 
       /* card_full.xml img && des. */
       if(view_type == 0)
@@ -185,9 +178,12 @@ class adapter_card extends BaseAdapter
 
          display_img(holder.image, position);
 
-         holder.title.setText(titles[position]);
+         holder.title.setText(title);
          holder.des  .setText(descriptions[position]);
-         holder.url  .setText(links[position]);
+         holder.url  .setText(link);
+
+         //util.set_alpha(holder.title, holder.url, holder.image,
+         //               holder.des, link);
       }
       /* card_no_des_img.xml no description, image, title. */
       else if(view_type == 1)
@@ -209,8 +205,10 @@ class adapter_card extends BaseAdapter
 
          display_img(holder.image, position);
 
-         holder.title.setText(titles[position]);
-         holder.url  .setText(links[position]);
+         holder.title.setText(title);
+         holder.url  .setText(link);
+
+         //util.set_alpha(holder.title, holder.url, holder.image, null, link);
       }
       /* card_des_no_img.xml no image, descirition, title. */
       else if(view_type == 2)
@@ -220,9 +218,9 @@ class adapter_card extends BaseAdapter
          {
             cv  = inflater.inflate(R.layout.card_des_no_img, parent, false);
             holder       = new no_img_des_holder();
-            holder.title = (TextView)  cv.findViewById(R.id.title);
-            holder.url   = (TextView)  cv.findViewById(R.id.url);
-            holder.des   = (TextView)  cv.findViewById(R.id.description);
+            holder.title = (TextView) cv.findViewById(R.id.title);
+            holder.url   = (TextView) cv.findViewById(R.id.url);
+            holder.des   = (TextView) cv.findViewById(R.id.description);
             cv.setOnClickListener(new webview_mode());
             cv.setOnLongClickListener(new long_press());
             cv.setTag(holder);
@@ -230,9 +228,11 @@ class adapter_card extends BaseAdapter
          else
             holder = (no_img_des_holder) cv.getTag();
 
-         holder.title.setText(titles[position]);
+         holder.title.setText(title);
          holder.des  .setText(descriptions[position]);
-         holder.url  .setText(links[position]);
+         holder.url  .setText(link);
+
+         //util.set_alpha(holder.title, holder.url, null, holder.des, link);
       }
       /* No description or image. */
       else if(view_type == 3)
@@ -251,33 +251,21 @@ class adapter_card extends BaseAdapter
          else
             holder = (no_img_no_des_holder) cv.getTag();
 
-         holder.title.setText(titles[position]);
-         holder.url  .setText(links[position]);
+         holder.title.setText(title);
+         holder.url  .setText(link);
+
+         //util.set_alpha(holder.title, holder.url, null, null, link);
       }
 
-      /* Stuff unrelated to the view creation below here. */
+      write.collection(main.storage + "test.txt", read_items);
 
-      /* Alpha MIN API 11 - Also may be a performance hog - If the item is read, grey it out
-       * int colour = holder.time_view.getCurrentTextColor();*/
-     /* if(main.HONEYCOMB)
+      if(main.HONEYCOMB)
       {
-         if(read_items.contains(links[position]))
-         {
-            holder.title_view       .setTextColor(title_grey);
-            holder.description_view .setTextColor(des_grey);
-            holder.time_view        .setTextColor(link_grey);
-            if(image_exists)
-               holder.image_view.setAlpha(0.5f);
-         }
+         if(read_items.contains(link))
+            cv.setAlpha(0.5f);
          else
-         {
-            holder.title_view       .setTextColor(title_black);
-            holder.description_view .setTextColor(des_black);
-            holder.time_view        .setTextColor(link_black);
-            if(image_exists)
-               holder.image_view.setAlpha(1.0f);
-         }
-      }*/
+            cv.setAlpha(1.0f);
+      }
 
       /* The logic that tells whether the item is read or not. */
       if(listview.getVisibility() == View.VISIBLE && position - 1 >= 0 && touched)
@@ -319,7 +307,8 @@ class adapter_card extends BaseAdapter
          Animation fadeIn = new AlphaAnimation(0, 1);
          fadeIn.setDuration(240);
          fadeIn.setInterpolator(new DecelerateInterpolator());
-         iv.setOnClickListener(new image_call(thumb_img.matcher(images[tag]).replaceAll("images")));
+         String image = thumb_img.matcher(images[tag]).replaceAll("images");
+         iv.setOnClickListener(new image_call(image));
          Object[] ob = {BitmapFactory.decodeFile(images[tag], o), fadeIn};
          return ob;
       }
@@ -374,10 +363,10 @@ class adapter_card extends BaseAdapter
       @Override
       public void onClick(View v)
       {
-         main.action_bar.setTitle("Offline");
+         main.bar.setTitle("Offline");
          navigation_drawer.drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
          navigation_drawer.drawer_toggle.setDrawerIndicatorEnabled(false);
-         main.action_bar.setDisplayHomeAsUpEnabled(true);
+         main.bar.setDisplayHomeAsUpEnabled(true);
          main.fman.beginTransaction()
                .hide(main.fman.findFragmentByTag(navigation_drawer.NAV_TITLES[0]))
                .add(R.id.drawer_layout, new fragment_webview(), "OFFLINE")
@@ -399,12 +388,15 @@ class adapter_card extends BaseAdapter
       {
          Intent intent = new Intent();
          intent.setAction(Intent.ACTION_VIEW);
-         String type = image_path.substring(image_path.lastIndexOf('.') + 1, image_path.length());
+         int index   = image_path.lastIndexOf('.') + 1;
+         String type = image_path.substring(index, image_path.length());
+
+         URI uri = Uri.fromFile(new File(image_path));
 
          if(!main.JELLYBEAN)
-            intent.setDataAndType(Uri.fromFile(new File(image_path)), "image/" + type);
+            intent.setDataAndType(uri, "image/" + type);
          else
-            intent.setDataAndTypeAndNormalize(Uri.fromFile(new File(image_path)), "image/" + type);
+            intent.setDataAndTypeAndNormalize(uri, "image/" + type);
 
          util.get_context().startActivity(intent);
       }
@@ -415,7 +407,7 @@ class adapter_card extends BaseAdapter
       @Override
       public boolean onLongClick(View v)
       {
-         String long_press_url = util.getstr((TextView) v.findViewById(R.id.url));
+         String long_press_url = util.getstr(v, R.id.url);
         /* show_card_dialog(context, long_press_url, ((ViewHolder) v.getTag()).image_view.getVisibility());*/
          return true;
       }

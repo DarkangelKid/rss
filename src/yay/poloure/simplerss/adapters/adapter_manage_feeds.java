@@ -11,8 +11,7 @@ import android.widget.TextView;
 class adapter_manage_feeds extends BaseAdapter
 {
    static String[] title_array = new String[0];
-   static String[] info_array = new String[0];
-
+   static String[] info_array  = new String[0];
 
    adapter_manage_feeds()
    {

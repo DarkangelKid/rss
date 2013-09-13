@@ -33,6 +33,12 @@
       <item>Interface</item>
    </string-array>
 
+   <string-array name="nav_titles">
+      <item>Feeds</item>
+      <item>Manage</item>
+      <item>Settings</item>
+   </string-array>
+
    <string-array name="settings_colours">
       <item>blue</item>
       <item>purple</item>

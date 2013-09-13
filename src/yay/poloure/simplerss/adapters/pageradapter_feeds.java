@@ -21,11 +21,7 @@ class pageradapter_feeds extends FragmentPagerAdapter
    @Override
    public Fragment getItem(int position)
    {
-      fragment_card f = new fragment_card();
-      Bundle args = new Bundle();
-      args.putInt("num", position);
-      f.setArguments(args);
-      return f;
+      return new fragment_card();
    }
 
    @Override
