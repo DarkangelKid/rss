@@ -74,11 +74,15 @@ public class main extends ActionBarActivity
       /* Save the other satic variables. */
       fman = getSupportFragmentManager();
       bar  = getSupportActionBar();
+      bar.setDisplayHomeAsUpEnabled(true);
+      bar.setHomeButtonEnabled(true);
       con  = this;
 
       /* Form the storage path. */
       storage = util.get_storage();
       cgroups = read.file(GROUP_LIST);
+
+      util.rm(main.DUMP_FILE);
 
       /* Load String resources into static variables. */
       ALL     = getString(R.string.all_group);
@@ -112,6 +116,15 @@ public class main extends ActionBarActivity
       util.update_groups();
       update.page(0);
    }
+
+   @Override
+   protected void onPostCreate(Bundle savedInstanceState)
+   {
+      super.onPostCreate(savedInstanceState);
+      // Sync the toggle state after onRestoreInstanceState has occurred.
+      navigation_drawer.drawer_toggle.syncState();
+    }
+
 
    @Override
    public void onBackPressed()

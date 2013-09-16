@@ -70,7 +70,7 @@ public class write
          return false;
 
       Context context = util.get_context();
-      path = util.get_storage() + path;
+      path            = util.get_storage() + path;
       String name     = util.create_internal_name(path);
 
       try
@@ -119,6 +119,8 @@ public class write
       /* If storage is unmounted OR if we force to use external. */
       if(util.check_unmounted())
          return false;
+
+      path = util.get_storage() + path;
 
       BufferedWriter out = null;
       try
@@ -210,8 +212,8 @@ public class write
       if(util.check_unmounted())
          return false;
 
-      String g_dir              = util.get_path(group, "");
       String group_content_path = util.get_path(group, main.CONTENT);
+      log(group_content_path);
       String group_count_file   = group_content_path + main.COUNT;
       String url_path           = group_content_path + main.URL;
       String url_count          = url_path + main.COUNT;
@@ -232,6 +234,7 @@ public class write
       {
          /* "/storage/groups/Tumblr/mariam/mariam.content.txt" */
          content_path = util.get_path(groups[k], names[k], main.CONTENT);
+         log(content_path);
 
          temp = read.csv(groups[k], names[k], 'p', 'l');
          if(temp.length > 0)

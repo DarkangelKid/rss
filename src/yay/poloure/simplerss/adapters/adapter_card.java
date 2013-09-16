@@ -306,9 +306,9 @@ class adapter_card extends BaseAdapter
          Animation fadeIn = new AlphaAnimation(0, 1);
          fadeIn.setDuration(240);
          fadeIn.setInterpolator(new DecelerateInterpolator());
-         String image = thumb_img.matcher(images[tag]).replaceAll("images");
+         String image = util.get_storage() + thumb_img.matcher(images[tag]).replaceAll("images");
          iv.setOnClickListener(new image_call(image));
-         Object[] ob = {BitmapFactory.decodeFile(images[tag], o), fadeIn};
+         Object[] ob = {BitmapFactory.decodeFile(util.get_storage() + images[tag], o), fadeIn};
          return ob;
       }
 

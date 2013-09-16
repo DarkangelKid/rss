@@ -306,17 +306,16 @@ public class util
    /* For feed files. */
    static String get_path(String group, String feed, String append)
    {
-      String sep     = main.SEPAR;
-      String prepend = main.GROUPS_DIR + group + sep + feed + sep + feed + sep;
+      String prepend = get_path(group, "") + feed + main.SEPAR;
 
       if(append.equals("images"))
-         return prepend + main.IMAGE_DIR + sep;
+         return prepend + main.IMAGE_DIR;
       if(append.equals("thumbnails"))
-         return prepend + main.THUMBNAIL_DIR + sep;
+         return prepend + main.THUMBNAIL_DIR;
       if(append.equals(""))
-         return main.GROUPS_DIR + group + sep + feed + sep;
+         return get_path(group, "");
 
-      return prepend + append;
+      return prepend + feed + append;
    }
 
    /* For group files. */
@@ -705,7 +704,7 @@ public class util
 
    static String getstr(android.view.View v, int id)
    {
-      return ((TextView) v.findViewById(R.id.url)).getText().toString().trim();
+      return ((TextView) v.findViewById(id)).getText().toString().trim();
    }
 
    static String getstr(TextView v)

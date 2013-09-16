@@ -41,7 +41,7 @@ public class read
       return csv_pr(util.get_path(group, feed, main.CONTENT));
    }
 
-   private static String[][] csv_pr(String file_path, char... type)
+   private static String[][] csv_pr(String path, char... type)
    {
       if(util.check_unmounted())
          return new String[0][0];
@@ -52,7 +52,7 @@ public class read
       String[] lines;
       char ch;
 
-      lines = file(file_path);
+      lines = file(path);
       if(lines.length == 0)
          return new String[0][0];
 
@@ -90,7 +90,10 @@ public class read
       if(util.check_unmounted())
          return new String[0];
 
-      path = util.get_storage() + path;
+      String storage = util.get_storage();
+      if(!path.contains(storage))
+         path = util.get_storage() + path;
+
       String count_path = path + main.COUNT;
       int count;
       String line;
@@ -150,7 +153,10 @@ public class read
       if(util.check_unmounted())
          return 0;
 
-      path = util.get_storage() + path;
+      String storage = util.get_storage();
+      if(!path.contains(storage))
+         path = util.get_storage() + path;
+
       String[] count = file(path + main.COUNT);
       if(count.length != 0)
          return util.stoi(count[0]);

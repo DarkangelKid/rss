@@ -53,7 +53,7 @@ class parser
    {
       dump_path             = "content.dump" + main.TXT;
       url_path              = "content.url"  + main.TXT;
-      String store_file     = feed + main.STORE;
+      String store_file     = util.get_storage() + feed + main.STORE;
       String content_file   = util.get_path(group, feed, main.CONTENT);
       String image_dir      = util.get_path(group, feed, "images");
       String thumbnail_dir  = util.get_path(group, feed, "thumbnails");
@@ -144,10 +144,10 @@ class parser
 
                /* If the image downloaded fine and a thumbnail does not exist. */
                else if(!util.exists(thumbnail_dir + image_name))
-                  compress_file(image_dir, thumbnail_dir, image_name);
+                  compress_file(util.get_storage() + image_dir, util.get_storage() + thumbnail_dir, image_name);
 
                /* ISSUE #194 */
-               BitmapFactory.decodeFile(thumbnail_dir + image_name, options);
+               BitmapFactory.decodeFile(util.get_storage() + thumbnail_dir + image_name, options);
                if(options.outWidth == 0)
                   write_mode = false;
                line.append("width|").append(options.outWidth).append('|')

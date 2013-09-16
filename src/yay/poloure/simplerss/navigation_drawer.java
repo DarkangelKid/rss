@@ -23,7 +23,7 @@ class navigation_drawer
 
    public navigation_drawer(DrawerLayout draw_layout, ListView nav_list)
    {
-      Context con = util.get_context();
+      Context con   = util.get_context();
       drawer_layout = draw_layout;
 
       /* Set the shadow of the drawer. */

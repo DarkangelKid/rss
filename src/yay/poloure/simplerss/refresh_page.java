@@ -23,9 +23,12 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
    @Override
    protected Animation doInBackground(Integer... page)
    {
-      page_number               = page[0];
-      String group              = main.cgroups[page_number];
+      page_number           = page[0];
+      String group          = main.cgroups[page_number];
       String thumbnail_path;
+
+      if(!util.exists(util.get_path(group, main.CONTENT)))
+         return null;
 
       String[][] contenter  = read.csv(group, group, 't', 'd', 'l', 'i', 'w', 'h', 'g', 'f');
       String[] titles       = contenter[0];
@@ -85,7 +88,7 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
                {
                   height = util.stoi(heights[m]);
                   thumbnail_path = util.get_path(groups[m], sources[m], "thumbnails")
-                     + images[m].substring(images[m].lastIndexOf(main.SEPAR) + 1, images[m].length());
+                     + images[m].substring(images[m].lastIndexOf(main.SEPAR) + 1);
                }
                else
                   width = 0;
@@ -181,6 +184,9 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
    @Override
    protected void onPostExecute(Animation tun)
    {
+      if(tun == null)
+         return;
+
       /* Update the unread counts in the navigation drawer. */
       update.navigation(null);
 
