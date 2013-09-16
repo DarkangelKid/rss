@@ -89,10 +89,6 @@ class fragment_manage_feeds extends ListFragment
                      @Override
                      public void onClick(DialogInterface dialog, int id)
                      {
-                        String all      = main.ALL;
-                        String sep      = main.SEPAR;
-                        String g_dir    = util.get_storage() + main.GROUPS_DIR;
-
                         /* Parse for the group name from the info string. */
                         String group    = adpt.get_info(pos);
                         int start       = group.indexOf('\n') + 1;
@@ -100,8 +96,8 @@ class fragment_manage_feeds extends ListFragment
                         group           = group.substring(start, end);
 
                         String name      = adpt.getItem(pos);
-                        String feed_path = g_dir + group + sep + name + sep;
-                        String all_path  = g_dir + all + sep + all;
+                        String feed_path = util.get_path(group, name, "");
+                        String all_content = util.get_path(main.ALL, main.CONTENT);
 
                         util.rmdir(new File(feed_path));
                         /* make the image and thumnail folders. */
@@ -109,8 +105,7 @@ class fragment_manage_feeds extends ListFragment
                         util.mkdir(feed_path + main.THUMBNAIL_DIR);
 
                         /* Delete the all content files. */
-                        util.rm(all_path + main.CONTENT);
-                        util.rm(all_path + main.COUNT);
+                        util.rm(all_content);
 
                         /* Refresh pages and update groups and stuff. */
                         util.update_groups();
@@ -155,11 +150,7 @@ class fragment_manage_feeds extends ListFragment
       {
          if(adapter != null)
          {
-            String storage = util.get_storage();
-            String sep     = main.SEPAR;
-            String g_dir   = main.GROUPS_DIR;
-            String all     = main.ALL;
-            String path = storage + g_dir + all + sep + all + main.TXT;
+            String path    = util.get_path(main.ALL, main.TXT);
 
             /* Read the all group file for names, urls, and groups. */
             String[][] content  = read.csv(path, 'n', 'u', 'g');
@@ -169,8 +160,7 @@ class fragment_manage_feeds extends ListFragment
             for(int i = 0; i < size; i++)
             {
                /* Form the path to the feed_content file. */
-               path = storage + g_dir + content[2][i] + sep + content[0][i]
-                      + sep + content[0][i] + main.CONTENT;
+               path = util.get_path(content[2][i], content[0][i], main.CONTENT);
 
                /* Build the info string. */
                info_array[i] = content[1][i] + main.NL + content[2][i] + " • "

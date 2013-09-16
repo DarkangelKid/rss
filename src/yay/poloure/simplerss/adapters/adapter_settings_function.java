@@ -70,8 +70,7 @@ public class adapter_settings_function extends BaseAdapter
    public View getView(final int position, View cv, ViewGroup parent)
    {
       final int view_type = getItemViewType(position);
-      final String setting_path = util.get_storage() + main.SETTINGS
-                                  + file_names[position] + main.TXT;
+      final String setting_path = main.SETTINGS + file_names[position] + main.TXT;
       String[] check;
       LayoutInflater inflater = util.get_inflater();
 

@@ -85,7 +85,7 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
                {
                   height = util.stoi(heights[m]);
                   thumbnail_path = util.get_path(groups[m], sources[m], "thumbnails")
-                     + images[m].substring(images[m].lastIndexOf(sep) + 1, images[m].length());
+                     + images[m].substring(images[m].lastIndexOf(main.SEPAR) + 1, images[m].length());
                }
                else
                   width = 0;

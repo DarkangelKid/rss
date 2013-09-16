@@ -90,6 +90,7 @@ public class read
       if(util.check_unmounted())
          return new String[0];
 
+      path = util.get_storage() + path;
       String count_path = path + main.COUNT;
       int count;
       String line;
@@ -149,9 +150,10 @@ public class read
       if(util.check_unmounted())
          return 0;
 
+      path = util.get_storage() + path;
       String[] count = file(path + main.COUNT);
       if(count.length != 0)
-         return stoi(count[0]);
+         return util.stoi(count[0]);
 
       BufferedReader in = null;
       int i = 0;

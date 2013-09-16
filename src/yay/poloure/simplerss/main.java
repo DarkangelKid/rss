@@ -78,7 +78,7 @@ public class main extends ActionBarActivity
 
       /* Form the storage path. */
       storage = util.get_storage();
-      cgroups = read.file(storage + GROUP_LIST);
+      cgroups = read.file(GROUP_LIST);
 
       /* Load String resources into static variables. */
       ALL     = getString(R.string.all_group);
@@ -141,7 +141,7 @@ public class main extends ActionBarActivity
       util.set_service(this, 0, "start");
 
       /* Save the read_items to file. */
-      write.collection(storage + READ_ITEMS, adapter_card.read_items);
+      write.collection(READ_ITEMS, adapter_card.read_items);
    }
 
    @Override

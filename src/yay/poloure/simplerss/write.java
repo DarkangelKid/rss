@@ -31,6 +31,8 @@ public class write
       if(util.check_unmounted())
          return false;
 
+      path = util.get_storage() + path;
+
       if(util.use_sd())
          util.rm(path);
 
@@ -68,6 +70,7 @@ public class write
          return false;
 
       Context context = util.get_context();
+      path = util.get_storage() + path;
       String name     = util.create_internal_name(path);
 
       try
@@ -148,6 +151,7 @@ public class write
          return false;
 
       String[] lines;
+      path = util.get_storage() + path;
       String temp_path = path + main.TEMP;
 
       BufferedWriter out = null;
@@ -202,15 +206,12 @@ public class write
 
    public static boolean sort_content(String group, String all_group)
    {
-      String storage  = util.get_storage();
-
       /* If storage is unmounted OR if we force to use external. */
       if(util.check_unmounted())
          return false;
 
-      String sep                = main.SEPAR;
-      String g_dir              = storage + main.GROUPS_DIR + group + sep;
-      String group_content_path = g_dir + group + main.CONTENT;
+      String g_dir              = util.get_path(group, "");
+      String group_content_path = util.get_path(group, main.CONTENT);
       String group_count_file   = group_content_path + main.COUNT;
       String url_path           = group_content_path + main.URL;
       String url_count          = url_path + main.COUNT;
@@ -230,7 +231,7 @@ public class write
       for(int k = 0; k < names.length; k++)
       {
          /* "/storage/groups/Tumblr/mariam/mariam.content.txt" */
-         content_path = util.get_path(group[k], names[k], main.CONTENT);
+         content_path = util.get_path(groups[k], names[k], main.CONTENT);
 
          temp = read.csv(groups[k], names[k], 'p', 'l');
          if(temp.length > 0)
@@ -275,7 +276,7 @@ public class write
 
    public static void log(String text)
    {
-      single(util.get_storage() + main.DUMP_FILE, text + main.NL);
+      single(main.DUMP_FILE, text + main.NL);
    }
 
    public static BufferedWriter writer(String p, boolean ap) throws IOException

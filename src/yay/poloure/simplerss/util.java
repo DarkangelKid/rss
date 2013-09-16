@@ -49,45 +49,44 @@ public class util
    static void delete_feed(String group, String feed, int pos)
    {
       /* Get strings to make things clearer. */
-      String storage = get_storage();
       String sep     = main.SEPAR;
       String txt     = main.TXT;
       String all     = main.ALL;
       String content = main.CONTENT;
       String count   = main.COUNT;
       String g_list  = main.GROUP_LIST;
-      String g_dir   = main.GROUPS_DIR;
 
       /* Parse the group name from the info string. */
       int start    = group.indexOf('\n') + 1;
       int end      = group.indexOf(' ');
       group        = group.substring(start, end);
 
-      String group_dir  = storage + g_dir + group;
-      String all_file   = storage + g_dir + all + sep + all;
-      String group_file = group_dir + sep + group;
+      String group_dir  = get_path(group, "");
+      String all_file   = main.GROUPS_DIR + all + sep + all;
+      String group_index = get_path(group, main.TXT);
+      String all_index   = get_path(all, main.TXT);
 
-      rmdir(new File(group_dir + sep + feed));
-      write.remove_string(group_file + txt, feed, true);
-      write.remove_string(all_file + txt, feed, true);
+      rmdir(new File(group_dir + feed));
+      write.remove_string(group_index, feed, true);
+      write.remove_string(all_index, feed, true);
 
-      rm_empty(group_file + txt);
-      if(!(new File(group_file + txt).exists()))
+      rm_empty(group_index);
+      if(!(new File(group_index).exists()))
       {
          rmdir(new File(group_dir));
-         write.remove_string(storage + g_list, group, false);
+         write.remove_string(g_list, group, false);
       }
       else
       {
          write.sort_content(group, all);
-         rm_empty(group_file + content);
-         rm_empty(group_file + count);
+         rm_empty(group_index + content);
+         rm_empty(group_index + count);
       }
 
-      String[] all_groups = read.file(storage + g_list);
+      String[] all_groups = read.file(g_list);
       if( all_groups.length == 1 )
       {
-         rmdir(new File(storage + g_dir + all));
+         rmdir(new File(get_storage() + main.GROUPS_DIR + all));
       }
       else if( all_groups.length != 0 )
       {
@@ -155,15 +154,14 @@ public class util
    {
       /* Since this function is static, we can not rely on the fields being
        * non-null. */
-      String storage = get_storage();
 
       /* Update cgroups. */
-      main.cgroups = read.file(storage + main.GROUP_LIST);
+      main.cgroups = read.file(main.GROUP_LIST);
 
       /* If no groups exists, add the ALL group. */
       if(main.cgroups.length == 0)
       {
-         write.single(storage + main.GROUP_LIST, main.ALL + main.NL);
+         write.single(main.GROUP_LIST, main.ALL + main.NL);
          main.cgroups = new String[]{main.ALL};
       }
 
@@ -219,22 +217,16 @@ public class util
    static String[][] create_info_arrays(String[] cgroups)
    {
       String info, group_path;
-      int number, i, j, total;
+      int number, i, j;
       String[] content;
 
       int size             = cgroups.length;
-      String sep           = main.SEPAR;
-      String all           = main.ALL;
-      String txt           = main.TXT;
-      String g_dir         = get_storage() + main.GROUPS_DIR;
       String[] group_array = new String[size];
       String[] info_array  = new String[size];
 
-      String content_path = g_dir + all + sep + all + main.CONTENT;
+      String content_path = get_path(main.ALL, main.CONTENT);
 
-      String count_path = content_path + main.COUNT;
-
-      total = read.count(content_path);
+      int total = read.count(content_path);
 
       for(i = 0; i < size; i++)
       {
@@ -264,8 +256,6 @@ public class util
 
    static boolean check_unmounted()
    {
-      String storage  = get_storage();
-
       /* TODO If setting to force sd is true, return false. */
       /*if(!internal.equals(storage))
          return false;*/
@@ -316,26 +306,26 @@ public class util
    /* For feed files. */
    static String get_path(String group, String feed, String append)
    {
-      return get_storage() + main.GROUPS_DIR + group + main.SEPAR + feed
-                           + main.SEPAR + feed + append;
+      String sep     = main.SEPAR;
+      String prepend = main.GROUPS_DIR + group + sep + feed + sep + feed + sep;
+
+      if(append.equals("images"))
+         return prepend + main.IMAGE_DIR + sep;
+      if(append.equals("thumbnails"))
+         return prepend + main.THUMBNAIL_DIR + sep;
+      if(append.equals(""))
+         return main.GROUPS_DIR + group + sep + feed + sep;
+
+      return prepend + append;
    }
 
    /* For group files. */
    static String get_path(String group, String append)
    {
-      return get_storage() + main.GROUPS_DIR + group + main.SEPAR + group
-                           + append;
-   }
+      if(append.equals(""))
+         return main.GROUPS_DIR + group + main.SEPAR;
 
-   /* For image folders. */
-   static String get_path(String group, String feed, String folder)
-   {
-      String prepend = get_storage() + main.GROUPS_DIR + group + main.SEPAR + feed
-                                     + main.SEPAR + feed + main.SEPAR;
-      if(folder.equals("images"))
-         return prepend + main.IMAGE_DIR;
-      if(folder.equals("thumbnails"))
-         return prepend + main.THUMBNAIL_DIR;
+      return main.GROUPS_DIR + group + main.SEPAR + group + append;
    }
 
    /* This should never return null and so do not check. */
@@ -413,16 +403,15 @@ public class util
 
    static int[] get_unread_counts(String[] cgroups)
    {
-      String storage       = get_storage();
       int total            = 0, unread, num;
-      final int size       = cgroups.length;
+      int size             = cgroups.length;
       int[] unread_counts  = new int[size];
       adapter_card temp;
 
       /* read_items == null when called from the service for notifications. */
       if( adapter_card.read_items == null )
       {
-         adapter_card.read_items = read.set(storage + main.READ_ITEMS);
+         adapter_card.read_items = read.set(main.READ_ITEMS);
       }
 
       for(int i = 1; i < size; i++)
@@ -445,8 +434,7 @@ public class util
 
    static void set_strip_colour(PagerTabStrip strip)
    {
-      String storage     = get_storage();
-      String colour_path = storage + main.SETTINGS + main.STRIP_COLOR;
+      String colour_path = main.SETTINGS + main.STRIP_COLOR;
 
       /* Read the colour from the settings/colour file, if blank, use blue. */
       String[] check  = read.file(colour_path);
@@ -481,7 +469,7 @@ public class util
    static Intent make_intent(Context context, int page)
    {
       /* Load notification boolean. */
-      String path    = get_storage() + main.SETTINGS
+      String path    = main.SETTINGS
                      + adapter_settings_function.file_names[3] + main.TXT;
       String[] check = read.file(path);
 
@@ -497,18 +485,16 @@ public class util
       String   alarm = Activity.ALARM_SERVICE;
       int      time  = adapter_settings_function.times[3];
       String[] names = adapter_settings_function.file_names;
-      String   pre   = get_storage() + main.SETTINGS;
-      String   txt   = main.TXT;
 
       /* Load the refresh boolean value from settings. */
-      String[] check  = read.file(pre + names[1] + txt);
+      String[] check  = read.file(main.SETTINGS + names[1] + main.TXT);
       boolean refresh = (check.length != 0) ? strbol(check[0]) : false;
 
       if(!refresh && state.equals("start"))
          return;
 
       /* Load the refresh time from settings. */
-      check = read.file(pre + names[2] + txt);
+      check = read.file(main.SETTINGS + names[2] + main.TXT);
       if(check.length != 0)
          time = stoi(check[0]);
 
@@ -637,15 +623,17 @@ public class util
       }
    }
 
-   static boolean rm(String file_path)
+   static boolean rm(String path)
    {
-      get_context().deleteFile(create_internal_name(file_path));
-      return (new File(file_path)).delete();
+      path = get_storage() + path;
+      get_context().deleteFile(create_internal_name(path));
+      return (new File(path)).delete();
    }
 
-   static void rm_empty(String file_path)
+   static void rm_empty(String path)
    {
-      File file = new File(file_path);
+      path = get_storage() + path;
+      File file = new File(path);
       if(file.exists() && file.length() == 0)
          file.delete();
    }
@@ -666,16 +654,18 @@ public class util
 
    static void mkdir(String path)
    {
+      path = get_storage() + path;
       File folder = new File(path);
       if(!folder.exists())
          folder.mkdirs();
    }
 
-
    /* Wrappers for neatness. */
 
    static boolean mv(String a, String b)
    {
+      a = get_storage() + a;
+      b = get_storage() + b;
       return (new File(a)).renameTo(new File(b));
    }
 
@@ -697,6 +687,7 @@ public class util
 
    static boolean exists(String path)
    {
+      path = get_storage() + path;
       if( use_sd() || path.contains(main.IMAGE_DIR) ||
                       path.contains(main.THUMBNAIL_DIR))
          return (new File(path)).exists();

@@ -56,7 +56,7 @@ public class add_edit_dialog
          String url = "", feed_title = "";
          if(group.length() > 0)
          {
-            String[] cgroups = read.file(util.get_storage() + main.GROUP_LIST);
+            String[] cgroups = read.file(main.GROUP_LIST);
             for(String gro : cgroups)
             {
                if((gro.toLowerCase(Locale.getDefault())).equals(group.toLowerCase(Locale.getDefault())))
@@ -178,12 +178,11 @@ public class add_edit_dialog
                public void onClick(DialogInterface dialog, int which)
                {
                   final String feed_name  = util.getstr((TextView) add_filter_layout);
-                  String filter_path      = util.get_storage() + main.FILTER_LIST;
+                  String filter_path      = main.FILTER_LIST;
                   String[] filters        = read.file(filter_path);
                   if(util.index(filters, feed_name) != -1)
                      write.single(filter_path, feed_name + main.NL);
-                  ((adapter_manage_filter) pageradapter_manage.fragments[2].getListAdapter()).set_items(read.file(filter_path));
-                  /*pageradapter_manage.fragments[2].getListAdapter().notifyDataSetChanged();*/
+                  ((adapter_manage_filter) pageradapter_manage.fragments[2].getListAdapter()).set_items(filters);
                   add_filter_dialog.hide();
                }
             });
@@ -243,7 +242,6 @@ public class add_edit_dialog
 
    static void show_edit_dialog(final String[] cgroups, Context con, final int position)
    {
-      String storage             = util.get_storage();
       LayoutInflater inf         = LayoutInflater.from(con);
       final View edit_rss_dialog = inf.inflate(R.layout.add_rss_dialog, null);
       String[][] content         = read.csv(cgroups[0], 'n', 'u', 'g');
@@ -309,9 +307,9 @@ public class add_edit_dialog
       String all_index      = util.get_path(all, main.TXT);
 
       /* Create folders if they do not exist. */
-      util.mkdir(util.get_path(group, feed, "images"));
-      util.mkdir(util.get_path(group, feed, "thumbnails"));
-      util.mkdir(util.get_path(all,   feed, "images"));
+      util.mkdir(util.get_path(group, name, "images"));
+      util.mkdir(util.get_path(group, name, "thumbnails"));
+      util.mkdir(util.get_path(all,   name, "images"));
 
       /* Create the csv. */
       String feed_info = "name|" +  name + "|url|" + url + "|group|"
@@ -331,20 +329,23 @@ public class add_edit_dialog
    /* TODO EDIT FEED UPDATE FOR INTERNAL. */
    static void edit_feed(String old_name, String new_name, String new_url, String old_group, String new_group, int position)
    {
-      String sep     = main.SEPAR;
+      String all     = main.ALL;
       String count   = main.COUNT;
       String content = main.CONTENT;
-      String storage = util.get_storage();
 
-      String old_feed_folder = old_group_folder + sep + old_name;
-      String new_feed_folder = new_group_folder + sep + new_name;
+      String all_index        = util.get_path(main.ALL,  main.ALL, main.TXT);
+      String old_index        = util.get_path(old_group, old_name, main.TXT);
+      String new_index        = util.get_path(old_group, new_name, main.TXT);
+
+      String old_group_folder = util.get_path(old_group, "");
+      String old_feed_folder  = util.get_path(old_group, old_name, "");
+      String new_feed_folder  = util.get_path(new_group, new_name, "");
 
       if(!old_name.equals(new_name))
       {
-         util.mv(util.get_path(old_group, old_name, main.TXT),
-                 util.get_path(old_group, new_name, main.TXT));
+         util.mv(old_index, new_index);
          util.mv(util.get_path(old_group, old_name, content),
-                 util.get_path(old_group, old_name, content));
+                 util.get_path(old_group, new_name, content));
       }
       if(!old_group.equals(new_group))
       {
@@ -358,7 +359,7 @@ public class add_edit_dialog
          if(!util.exists(old_index))
          {
             util.rmdir(new File(old_group_folder));
-            write.remove_string(storage + main.GROUP_LIST, old_group, false);
+            write.remove_string(main.GROUP_LIST, old_group, false);
          }
       }
       if(!old_name.equals(new_name))
@@ -393,7 +394,7 @@ public class add_edit_dialog
 
       adapter_manage_feeds adpt = ((adapter_manage_feeds) pageradapter_manage.fragments[1].getListAdapter());
 
-      adpt.set_position(position, new_name, new_url + main.NL + new_group + " • " + Integer.toString(read.count(storage + main.GROUPS_DIR + new_group + main.SEPAR + new_name + main.SEPAR + new_name + main.CONTENT) - 1) + " items");
+      adpt.set_position(position, new_name, new_url + main.NL + new_group + " • " + Integer.toString(read.count(main.GROUPS_DIR + new_group + main.SEPAR + new_name + main.SEPAR + new_name + main.CONTENT) - 1) + " items");
 
       /// To refresh the counts and the order of the groups.
       util.update_groups();
@@ -402,10 +403,9 @@ public class add_edit_dialog
 
    static void add_group(String group_name)
    {
-      String storage = util.get_storage();
-      write.single(storage + main.GROUP_LIST, group_name + main.NL);
+      write.single(main.GROUP_LIST, group_name + main.NL);
 
-      util.mkdir(storage + main.GROUPS_DIR + group_name);
+      util.mkdir(main.GROUPS_DIR + group_name);
 
       util.update_groups();
    }

@@ -51,15 +51,13 @@ class parser
 
    void parse_local_xml(String group, String feed)
    {
-      String storage  = util.get_storage();
-
-      dump_path             = storage + "content.dump" + txt;
-      url_path              = storage + "content.url"  + txt;
-      String store_file     = storage + feed + main.STORE;
+      dump_path             = "content.dump" + main.TXT;
+      url_path              = "content.url"  + main.TXT;
+      String store_file     = feed + main.STORE;
       String content_file   = util.get_path(group, feed, main.CONTENT);
       String image_dir      = util.get_path(group, feed, "images");
       String thumbnail_dir  = util.get_path(group, feed, "thumbnails");
-      String[] filters      = read.file(storage + main.FILTER_LIST);
+      String[] filters      = read.file(main.FILTER_LIST);
 
       Set<String> set       = new LinkedHashSet<String>();
       boolean write_mode    = false;

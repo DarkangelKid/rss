@@ -33,6 +33,7 @@ import android.widget.TextView;
 
 import java.io.File;
 import java.util.Set;
+import android.net.Uri;
 import java.util.regex.Pattern;
 
 class adapter_card extends BaseAdapter
@@ -44,7 +45,7 @@ class adapter_card extends BaseAdapter
    Integer[] heights     = new Integer[0];
    Integer[] widths      = new Integer[0];
 
-   static Set<String> read_items = read.set(main.storage + main.READ_ITEMS);
+   static Set<String> read_items = read.set(main.READ_ITEMS);
 
    static final Pattern thumb_img = Pattern.compile("thumbnails");
    static int two = 0, four = 0, eight = 0;
@@ -257,8 +258,6 @@ class adapter_card extends BaseAdapter
          //util.set_alpha(holder.title, holder.url, null, null, link);
       }
 
-      write.collection(main.storage + "test.txt", read_items);
-
       if(main.HONEYCOMB)
       {
          if(read_items.contains(link))
@@ -391,7 +390,7 @@ class adapter_card extends BaseAdapter
          int index   = image_path.lastIndexOf('.') + 1;
          String type = image_path.substring(index, image_path.length());
 
-         URI uri = Uri.fromFile(new File(image_path));
+         Uri uri = Uri.fromFile(new File(image_path));
 
          if(!main.JELLYBEAN)
             intent.setDataAndType(uri, "image/" + type);

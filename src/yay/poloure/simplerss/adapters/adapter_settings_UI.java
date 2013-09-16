@@ -105,7 +105,7 @@ public class adapter_settings_UI extends BaseAdapter
       int view_type       = getItemViewType(position);
       String title        = title_array[position];
       String summary      = summary_array[position];
-      final String setting_path = util.get_storage() + main.SETTINGS + title + main.TXT;
+      final String setting_path = main.SETTINGS + title + main.TXT;
 
       LayoutInflater inf = util.get_inflater();
 
@@ -145,8 +145,7 @@ public class adapter_settings_UI extends BaseAdapter
          holder.summary.setText(summary);
 
          /* Read the colour from settings, if null, set as blue. */
-         String   colour_path  = util.get_storage() + main.SETTINGS + main.STRIP_COLOR;
-         String[] colour_array = read.file(colour_path);
+         String[] colour_array = read.file(main.SETTINGS + main.STRIP_COLOR);
 
          String colour = (colour_array.length == 0) ? "blue" : colour_array[0];
 
@@ -257,7 +256,7 @@ public class adapter_settings_UI extends BaseAdapter
       public void onClick(View v)
       {
          /* Write the new colour to file. */
-         String colour_path = util.get_storage() + main.SETTINGS + main.STRIP_COLOR;
+         String colour_path = main.SETTINGS + main.STRIP_COLOR;
          util.rm(colour_path);
          write.single(colour_path, colours[clicked_colour]);
 

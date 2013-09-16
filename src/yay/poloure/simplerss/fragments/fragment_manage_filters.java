@@ -36,9 +36,7 @@ class fragment_manage_filters extends ListFragment
 
       setListAdapter(adapter);
 
-      final String filter_path = util.get_storage() + main.FILTER_LIST;
-
-      adapter.set_items(read.file(filter_path));
+      adapter.set_items(read.file(main.FILTER_LIST));
 
       listview.setOnItemLongClickListener
       (
@@ -54,7 +52,7 @@ class fragment_manage_filters extends ListFragment
                   @Override
                   public void onClick(DialogInterface dialog, int id)
                   {
-                     write.remove_string(filter_path, adapter.getItem(position), false);
+                     write.remove_string(main.FILTER_LIST, adapter.getItem(position), false);
                      adapter.remove_item(position);
                   }
                });

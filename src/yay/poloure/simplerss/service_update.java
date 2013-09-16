@@ -20,7 +20,6 @@ import android.support.v4.app.TaskStackBuilder;
 public class service_update extends IntentService
 {
    static Context service_context;
-
    static String storage;
 
    public service_update()
@@ -49,7 +48,7 @@ public class service_update extends IntentService
 
       storage  = util.get_storage();
 
-      String[] all_groups = read.file(storage + main.GROUP_LIST);
+      String[] all_groups = read.file(main.GROUP_LIST);
       String group        = all_groups[page];
 
       String[][] content  = read.csv(group, 'n', 'u', 'g');
@@ -61,7 +60,7 @@ public class service_update extends IntentService
       boolean success;
       for(int i = 0; i < names.length; i++)
       {
-         success = write.dl(urls[i], storage + names[i] + main.STORE);
+         success = write.dl(urls[i], names[i] + main.STORE);
          if(success)
             new parser(groups[i], names[i]);
          else
