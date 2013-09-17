@@ -21,17 +21,6 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
    ListView lv;
    int position = -3;
 
-   class data
-   {
-      String title;
-      String description;
-      String link;
-      String image;
-      int width;
-      int height;
-      long time;
-   }
-
    @Override
    protected Animation doInBackground(Integer... page)
    {
@@ -39,9 +28,9 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
       String tag          = main.ctags[page_number];
 
       String[] titles, descriptions, links, images, widths, heights, times;
-      data datum;
+      String[] datum;
       Time time               = new Time();
-      Map<Long, data> map     = new TreeMap<Long, data>();
+      Map<Long, String[]> map     = new TreeMap<Long, String[]>();
 
       String[][] contents   = read.csv(main.INDEX);
       if(contents.length == 0) return null;
@@ -122,14 +111,14 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
                      descriptions[i] = "";
                   else if( descriptions[i].length() >= 360 )
                      descriptions[i] = descriptions[i].substring(0, 360);
+                  if( titles[i] == null)
+                     titles[i] = "";
 
-                  datum             = new data();
-                  datum.title       = titles[i];
-                  datum.description = descriptions[i];
-                  datum.link        = links[i];
-                  datum.image       = (titles[i] == null) ? "" : images[i];
-                  datum.width  = (widths[i] == null) ? 0 : Integer.parseInt(widths[i]);
-                  datum.height = (heights[i] == null) ? 0 : Integer.parseInt(heights[i]);
+                  datum = new String[]
+                  {
+                     titles[i], descriptions[i], links[i], images[i], widths[i],
+                     heights[i], times[i]
+                  };
 
                   map.put(time.toMillis(false) - i, datum);
                }
@@ -140,8 +129,8 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
       /* Do not count items as read while we are updating the list. */
       ith.touched = false;
 
-      data[] list = map.values().toArray(new data[map.size()]);
-      int count   = map.size();
+      String[][] list = map.values().toArray(new String[map.size()][7]);
+      int count = list.length;
 
       titles             = new String[count];
       descriptions       = new String[count];
@@ -153,13 +142,13 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
       for(int i = count - 1; i >= 0; i--)
       {
          int a = count - 1 - i;
-         titles[a]       = list[i].title;
-         descriptions[a] = list[i].description;
-         links[a]        = list[i].link;
-         images[a]       = list[i].image;
-         iwidths[a]      = list[i].width;
-         iheights[a]     = list[i].height;
-         //times[i]        = list.get(i)[6]
+         titles[a]       = list[i][0];
+         descriptions[a] = list[i][1];
+         links[a]        = list[i][2];
+         images[a]       = list[i][3];
+         iwidths[a]  = (list[i][4] == null) ? 0 : Integer.parseInt(list[i][4]);
+         iheights[a] = (list[i][5] == null) ? 0 : Integer.parseInt(list[i][5]);
+         //times[a]      = list.get(i)[6]
       }
 
       if(titles.length > 0)
