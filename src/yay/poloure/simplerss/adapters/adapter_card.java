@@ -247,13 +247,13 @@ class adapter_card extends BaseAdapter
          holder.url  .setText(link);
       }
 
-      if(main.HONEYCOMB)
+      /*if(main.HONEYCOMB)
       {
          if(read_items.contains(link))
             cv.setAlpha(0.5f);
          else
             cv.setAlpha(1.0f);
-      }
+      }*[
 
       /* The logic that tells whether the item is read or not. */
       if(listview.getVisibility() == View.VISIBLE && position - 1 >= 0 && touched)
@@ -297,7 +297,6 @@ class adapter_card extends BaseAdapter
          fadeIn.setInterpolator(new DecelerateInterpolator());
          String image = util.get_storage() + thumb_img.matcher(images[tag]).replaceAll("images");
          iv.setOnClickListener(new image_call(image));
-         write.log(images[tag]);
          Object[] ob = {BitmapFactory.decodeFile(util.get_storage() + images[tag], o), fadeIn};
          return ob;
       }

@@ -21,6 +21,17 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
    ListView lv;
    int position = -3;
 
+   class data
+   {
+      String title;
+      String description;
+      String link;
+      String image;
+      int width;
+      int height;
+      long time;
+   }
+
    @Override
    protected Animation doInBackground(Integer... page)
    {
@@ -28,19 +39,16 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
       String tag          = main.ctags[page_number];
 
       String[] titles, descriptions, links, images, widths, heights, times;
+      data datum;
+      Time time               = new Time();
+      Map<Long, data> map     = new TreeMap<Long, data>();
 
-      String[] datum;
-      Time time = new Time();
-
-      Map<Long, String[]> map = new TreeMap<Long, String[]>();
       String[][] contents   = read.csv(main.INDEX);
       if(contents.length == 0) return null;
       String[]   feeds      = contents[0];
       String[]   tags       = contents[2];
 
       Animation animFadeIn = AnimationUtils.loadAnimation(util.get_context(), android.R.anim.fade_in);
-
-      /* Extract the data from the map. */
 
       while(lv == null)
       {
@@ -50,11 +58,11 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
          }
          catch(Exception e){
          }
-         if((main.viewpager != null)&&(l == null))
+         if( main.viewpager != null && l == null )
             l = (ListFragment) main.fman.findFragmentByTag("android:switcher:" + main.viewpager.getId() + ":" + Integer.toString(page_number));
-         if((l != null)&&(ith == null))
-            ith = ((adapter_card) l.getListAdapter());
-         if((l != null)&&(lv == null))
+         if( l != null && ith == null )
+            ith = (adapter_card) l.getListAdapter();
+         if( l != null && lv == null )
          {
             try
             {
@@ -114,14 +122,15 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
                      descriptions[i] = "";
                   else if( descriptions[i].length() >= 360 )
                      descriptions[i] = descriptions[i].substring(0, 360);
-                  if(titles[i] == null)
-                     titles[i] = "";
 
-                  datum = new String[]
-                  {
-                     titles[i], descriptions[i], links[i], images[i], widths[i],
-                     heights[i], times[i]
-                  };
+                  datum             = new data();
+                  datum.title       = titles[i];
+                  datum.description = descriptions[i];
+                  datum.link        = links[i];
+                  datum.image       = (titles[i] == null) ? "" : images[i];
+                  datum.width  = (widths[i] == null) ? 0 : Integer.parseInt(widths[i]);
+                  datum.height = (heights[i] == null) ? 0 : Integer.parseInt(heights[i]);
+
                   map.put(time.toMillis(false) - i, datum);
                }
             }
@@ -131,8 +140,8 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
       /* Do not count items as read while we are updating the list. */
       ith.touched = false;
 
-      String[][] list = map.values().toArray(new String[map.size()][7]);
-      final int count = list.length;
+      data[] list = map.values().toArray(new data[map.size()]);
+      int count   = map.size();
 
       titles             = new String[count];
       descriptions       = new String[count];
@@ -140,16 +149,16 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
       images             = new String[count];
       Integer[] iwidths  = new Integer[count];
       Integer[] iheights = new Integer[count];
-      //times      = new long[count];
 
       for(int i = count - 1; i >= 0; i--)
       {
-         titles[i]       = list[i][0];
-         descriptions[i] = list[i][1];
-         links[i]        = list[i][2];
-         images[i]       = list[i][3];
-         iwidths[i]  = (list[i][4] == null) ? 0 : Integer.parseInt(list[i][4]);
-         iheights[i] = (list[i][5] == null) ? 0 : Integer.parseInt(list[i][5]);
+         int a = count - 1 - i;
+         titles[a]       = list[i].title;
+         descriptions[a] = list[i].description;
+         links[a]        = list[i].link;
+         images[a]       = list[i].image;
+         iwidths[a]      = list[i].width;
+         iheights[a]     = list[i].height;
          //times[i]        = list.get(i)[6]
       }
 
