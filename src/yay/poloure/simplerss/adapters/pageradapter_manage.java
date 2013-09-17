@@ -8,7 +8,7 @@ class pageradapter_manage extends FragmentPagerAdapter
 {
    static final ListFragment[] fragments = new ListFragment[]
    {
-      new fragment_manage_groups(),
+      new fragment_manage_tags(),
       new fragment_manage_feeds(),
       new fragment_manage_filters(),
    };

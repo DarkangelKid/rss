@@ -14,9 +14,9 @@
    <string name="feed_name_hint">optional</string>
    <string name="feed_url_dialog">Feed URL</string>
    <string name="feed_url_hint">http://example.com/rss</string>
-   <string name="feed_group_dialog">Group</string>
-   <string name="feed_group_title">Groups</string>
-   <string name="feed_group_hint">new group</string>
+   <string name="feed_tag_dialog">Group</string>
+   <string name="feed_tag_title">Groups</string>
+   <string name="feed_tag_hint">new tag</string>
    <string name="cancel_dialog">Cancel</string>
    <string name="add_dialog">Add</string>
    <string name="accept_dialog">Accept</string>
@@ -31,12 +31,12 @@
    <string name="offline_cat_preferences">Offline Mode</string>
    <string name="offline_summary_preferences">Check to enable offline mode</string>
 
-   <string name="all_group">All</string>
+   <string name="all_tag">All</string>
 
    <string name="notification_title_singular">%d Unread Item</string>
    <string name="notification_title_plural">%d Unread Items</string>
-   <string name="notification_content_group_item">%d group has an unread item</string>
-   <string name="notification_content_group_items">%d group has unread items</string>
-   <string name="notification_content_groups">%d groups have unread items</string>
+   <string name="notification_content_tag_item">%d tag has an unread item</string>
+   <string name="notification_content_tag_items">%d tag has unread items</string>
+   <string name="notification_content_tags">%d tags have unread items</string>
 
 </resources>

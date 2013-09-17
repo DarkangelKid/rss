@@ -19,28 +19,28 @@ import android.widget.TextView;
 
 import java.util.Arrays;
 
-public class adapter_manage_groups extends BaseAdapter
+public class adapter_manage_tags extends BaseAdapter
 {
    String old_title = "";
    String new_title = "";
 
-   static String[] group_array = new String[0];
+   static String[] tag_array = new String[0];
    static String[] info_array = new String[0];
 
-   public adapter_manage_groups()
+   public adapter_manage_tags()
    {
    }
 
-   void set_items(String[] new_groups, String[] new_infos)
+   void set_items(String[] new_tags, String[] new_infos)
    {
-      group_array = new_groups;
+      tag_array = new_tags;
       info_array = new_infos;
    }
 
    @Override
    public int getCount()
    {
-      return group_array.length;
+      return tag_array.length;
    }
 
    @Override
@@ -52,7 +52,7 @@ public class adapter_manage_groups extends BaseAdapter
    @Override
    public String getItem(int position)
    {
-      return group_array[position];
+      return tag_array[position];
    }
 
    @Override
@@ -82,15 +82,15 @@ public class adapter_manage_groups extends BaseAdapter
          {
             convertView = util.get_inflater().inflate(R.layout.manage_group_item, parent, false);
             holder = new ViewHolder();
-            holder.group_view = (TextView) convertView.findViewById(R.id.group_item);
-            holder.info_view = (TextView) convertView.findViewById(R.id.group_feeds);
+            holder.tag_view = (TextView) convertView.findViewById(R.id.tag_item);
+            holder.info_view = (TextView) convertView.findViewById(R.id.tag_feeds);
             holder.image_view = (ImageView) convertView.findViewById(R.id.drag_image);
             convertView.setTag(holder);
          }
          else
             holder = (ViewHolder) convertView.getTag();
 
-         holder.group_view.setText(group_array[position]);
+         holder.tag_view.setText(tag_array[position]);
          holder.info_view.setText(info_array[position]);
          if( position != 0 && main.HONEYCOMB )
          {
@@ -111,8 +111,8 @@ public class adapter_manage_groups extends BaseAdapter
          {
             convertView = inflater.inflate(R.layout.old_manage_list_item, parent, false);
             holder = new OldViewHolder();
-            holder.group_view = (TextView) convertView.findViewById(R.id.group_item);
-            holder.info_view = (TextView) convertView.findViewById(R.id.group_feeds);
+            holder.tag_view = (TextView) convertView.findViewById(R.id.tag_item);
+            holder.info_view = (TextView) convertView.findViewById(R.id.tag_feeds);
             holder.up_image_view = (ImageView) convertView.findViewById(R.id.up_drag_image);
             holder.down_image_view = (ImageView) convertView.findViewById(R.id.down_drag_image);
             convertView.setTag(holder);
@@ -120,7 +120,7 @@ public class adapter_manage_groups extends BaseAdapter
          else
             holder = (OldViewHolder) convertView.getTag();
 
-         holder.group_view.setText(group_array[position]);
+         holder.tag_view.setText(tag_array[position]);
          holder.info_view.setText(info_array[position]);
          if(position != 0)
          {
@@ -140,14 +140,14 @@ public class adapter_manage_groups extends BaseAdapter
 
    static class ViewHolder
    {
-      TextView group_view;
+      TextView tag_view;
       TextView info_view;
       ImageView image_view;
    }
 
    /*static class OldViewHolder
    {
-      TextView group_view;
+      TextView tag_view;
       TextView info_view;
       ImageView up_image_view;
       ImageView down_image_view;
@@ -167,15 +167,15 @@ public class adapter_manage_groups extends BaseAdapter
          card.setAnimation(fadeOut);
          card.setVisibility(View.INVISIBLE);
 
-         String new_title = ((TextView) card.findViewById(R.id.group_item)).getText().toString();
+         String new_title = ((TextView) card.findViewById(R.id.tag_item)).getText().toString();
          String old_title = null;
          int pos = 0;
-         for(int i = 0; i < group_array.length; i++)
+         for(int i = 0; i < tag_array.length; i++)
          {
-            if(group_array[i].equals(new_title))
+            if(tag_array[i].equals(new_title))
             {
                pos = i - 1;
-               old_title = group_array[pos];
+               old_title = tag_array[pos];
                break;
             }
          }
@@ -183,7 +183,7 @@ public class adapter_manage_groups extends BaseAdapter
          View up_card = list.getChildAt(pos);
          up_card.setAnimation(fadeOut);
          up_card.setVisibility(View.INVISIBLE);
-         rearrange_groups(old_title, new_title);
+         rearrange_tags(old_title, new_title);
          notifyDataSetChanged();
 
          Animation fadeIn = new AlphaAnimation(0, 1);
@@ -194,8 +194,8 @@ public class adapter_manage_groups extends BaseAdapter
          card.setVisibility(View.VISIBLE);
          up_card.setVisibility(View.VISIBLE);
 
-         write.collection(main.GROUP_LIST, group_array);
-         util.update_groups();
+         write.collection(main.GROUP_LIST, tag_array);
+         util.update_tags();
       }
    }*/
 
@@ -207,7 +207,7 @@ public class adapter_manage_groups extends BaseAdapter
          if (motionEvent.getAction() == MotionEvent.ACTION_DOWN)
          {
             View parent = (View) view.getParent();
-            old_title = util.getstr(parent, R.id.group_item);
+            old_title = util.getstr(parent, R.id.tag_item);
             custom_drag_builder shadowBuilder = new custom_drag_builder(parent);
             parent.startDrag(null, shadowBuilder, parent, 0);
             return true;
@@ -248,10 +248,10 @@ public class adapter_manage_groups extends BaseAdapter
             last.setVisibility(View.VISIBLE);
 
             /* Save the position of the view that just faded out. */
-            new_title = util.getstr(v, R.id.group_item);
+            new_title = util.getstr(v, R.id.tag_item);
             for(int i = 0; i < listview.getChildCount(); i++)
             {
-               if(new_title.equals(util.getstr(listview.getChildAt(i), R.id.group_item)));
+               if(new_title.equals(util.getstr(listview.getChildAt(i), R.id.tag_item)));
                {
                   old_view = i;
                   break;
@@ -260,7 +260,7 @@ public class adapter_manage_groups extends BaseAdapter
 
             /* Change the information of the card that just disapeared. */
             /* Old title is the currently touched title and new_title is the one to be replaced */
-            rearrange_groups(old_title, new_title);
+            rearrange_tags(old_title, new_title);
             notifyDataSetChanged();
 
             v.getLocationOnScreen(position);
@@ -279,31 +279,31 @@ public class adapter_manage_groups extends BaseAdapter
             v.setAnimation(fadeIn2);
             v.setVisibility(View.VISIBLE);
 
-            write.collection(main.GROUP_LIST, Arrays.asList(group_array));
-            util.update_groups();
+            write.collection(main.GROUP_LIST, Arrays.asList(tag_array));
+            util.update_tags();
          }
          return true;
       }
    }
 
-   void rearrange_groups(String previous, String next)
+   void rearrange_tags(String previous, String next)
    {
       int i = 0;
-      while(!previous.equals(group_array[i])){
+      while(!previous.equals(tag_array[i])){
          i++;
       }
       int j = 0;
-      while(!next.equals(group_array[j])){
+      while(!next.equals(tag_array[j])){
          j++;
       }
       String old_info = info_array[i];
-      String old     = group_array[i];
+      String old     = tag_array[i];
 
       info_array[i]  = info_array[j];
-      group_array[i]    = group_array[j];
+      tag_array[i]    = tag_array[j];
 
       info_array[j]  = old_info;
-      group_array[j] = old;
+      tag_array[j] = old;
    }
 
    class custom_drag_builder extends View.DragShadowBuilder

@@ -46,7 +46,7 @@ public class util
    };
 
    /* TODO UPDATE FOR INTERNAL STORAGE. */
-   static void delete_feed(String group, String feed, int pos)
+   static void delete_feed(String tag, String feed, int pos)
    {
       /* Get strings to make things clearer. */
       String sep     = main.SEPAR;
@@ -56,52 +56,50 @@ public class util
       String count   = main.COUNT;
       String g_list  = main.GROUP_LIST;
 
-      /* Parse the group name from the info string. */
-      int start    = group.indexOf('\n') + 1;
-      int end      = group.indexOf(' ');
-      group        = group.substring(start, end);
+      /* Parse the tag name from the info string. */
+      int start    = tag.indexOf('\n') + 1;
+      int end      = tag.indexOf(' ');
+      tag        = tag.substring(start, end);
 
-      String group_dir  = get_path(group, "");
-      String all_file   = main.GROUPS_DIR + all + sep + all;
-      String group_index = get_path(group, main.TXT);
-      String all_index   = get_path(all, main.TXT);
+      String tag_dir  = get_path(tag, "");
+      String all_file   = get_path(all, "");
+      String tag_index = get_path(tag, main.INDEX);
+      String all_index   = main.INDEX;
 
-      rmdir(new File(group_dir + feed));
-      write.remove_string(group_index, feed, true);
+      rmdir(new File(get_storage() + tag_dir + feed));
+      write.remove_string(tag_index, feed, true);
       write.remove_string(all_index, feed, true);
 
-      rm_empty(group_index);
-      if(!(new File(group_index).exists()))
+      rm_empty(tag_index);
+      if(!exists(tag_index))
       {
-         rmdir(new File(group_dir));
-         write.remove_string(g_list, group, false);
+         rmdir(new File(tag_dir));
+         write.remove_string(g_list, tag, false);
       }
       else
       {
-         write.sort_content(group, all);
-         rm_empty(group_index + content);
-         rm_empty(group_index + count);
+         rm_empty(tag_index + content);
+         rm_empty(tag_index + count);
       }
 
-      String[] all_groups = read.file(g_list);
-      if( all_groups.length == 1 )
+      String[] all_tags = read.file(g_list);
+      if( all_tags.length == 1 )
       {
          rmdir(new File(get_storage() + main.GROUPS_DIR + all));
       }
-      else if( all_groups.length != 0 )
+      else if( all_tags.length != 0 )
       {
          /* This line may be broken. */
-         write.sort_content(all, all);
          rm_empty(all_file + content);
          rm_empty(all_file + count);
       }
 
-      update_groups();
+      update_tags();
       adapter_manage_feeds adapter = (adapter_manage_feeds) pageradapter_manage.fragments[1].getListAdapter();
       adapter.remove_item(pos);
       adapter.notifyDataSetChanged();
 
-      update.manage_groups();
+      update.manage_tags();
    }
 
    static <T> T[] concat(T[] first, T[] second)
@@ -150,19 +148,19 @@ public class util
       return b;
    }
 
-   static boolean update_groups()
+   static boolean update_tags()
    {
       /* Since this function is static, we can not rely on the fields being
        * non-null. */
 
-      /* Update cgroups. */
-      main.cgroups = read.file(main.GROUP_LIST);
+      /* Update ctags. */
+      main.ctags = read.file(main.GROUP_LIST);
 
-      /* If no groups exists, add the ALL group. */
-      if(main.cgroups.length == 0)
+      /* If no tags exists, add the ALL tag. */
+      if(main.ctags.length == 0)
       {
          write.single(main.GROUP_LIST, main.ALL + main.NL);
-         main.cgroups = new String[]{main.ALL};
+         main.ctags = new String[]{main.ALL};
       }
 
       if(main.viewpager != null)
@@ -214,14 +212,14 @@ public class util
       return i;
    }
 
-   static String[][] create_info_arrays(String[] cgroups)
+   static String[][] create_info_arrays(String[] ctags)
    {
-      String info, group_path;
+      String info, tag_path;
       int number, i, j;
       String[] content;
 
-      int size             = cgroups.length;
-      String[] group_array = new String[size];
+      int size             = ctags.length;
+      String[] tag_array = new String[size];
       String[] info_array  = new String[size];
 
       String content_path = get_path(main.ALL, main.CONTENT);
@@ -230,11 +228,11 @@ public class util
 
       for(i = 0; i < size; i++)
       {
-         group_array[i] = cgroups[i];
+         tag_array[i] = ctags[i];
 
-         content = read.csv(cgroups[i], 'n')[0];
+         content = read.csv(ctags[i], 'n')[0];
          if(i == 0)
-            info = (size == 1) ? "1 group" :  size + " groups";
+            info = (size == 1) ? "1 tag" :  size + " tags";
          else
          {
             info = "";
@@ -251,7 +249,7 @@ public class util
          info_array[i] = content.length + " feeds • " + info;
       }
       info_array[0] =  total + " items • " + info_array[0];
-      return (new String[][]{info_array, group_array});
+      return (new String[][]{info_array, tag_array});
    }
 
    static boolean check_unmounted()
@@ -304,27 +302,16 @@ public class util
    }
 
    /* For feed files. */
-   static String get_path(String group, String feed, String append)
+   static String get_path(String feed, String append)
    {
-      String prepend = get_path(group, "") + feed + main.SEPAR;
+      String feed_folder = feed + main.SEPAR;
 
       if(append.equals("images"))
-         return prepend + main.IMAGE_DIR;
+         return feed_folder + main.IMAGE_DIR;
       if(append.equals("thumbnails"))
-         return prepend + main.THUMBNAIL_DIR;
-      if(append.equals(""))
-         return get_path(group, "");
+         return feed_folder + main.THUMBNAIL_DIR;
 
-      return prepend + feed + append;
-   }
-
-   /* For group files. */
-   static String get_path(String group, String append)
-   {
-      if(append.equals(""))
-         return main.GROUPS_DIR + group + main.SEPAR;
-
-      return main.GROUPS_DIR + group + main.SEPAR + group + append;
+      return feed_folder + append;
    }
 
    /* This should never return null and so do not check. */
@@ -400,10 +387,10 @@ public class util
       return storage;
    }
 
-   static int[] get_unread_counts(String[] cgroups)
+   static int[] get_unread_counts(String[] ctags)
    {
       int total            = 0, unread, num;
-      int size             = cgroups.length;
+      int size             = ctags.length;
       int[] unread_counts  = new int[size];
       adapter_card temp;
 
@@ -416,7 +403,7 @@ public class util
       for(int i = 1; i < size; i++)
       {
          unread = 0;
-         String[] urls = read.file(util.get_path(cgroups[i], main.CONTENT + main.URL));
+         String[] urls = read.file(util.get_path(ctags[i], main.URL));
          for(String url : urls)
          {
             if(!adapter_card.read_items.contains(url))
@@ -563,7 +550,7 @@ public class util
          MenuItemCompat.setActionView(item, null);
    }
 
-   /* Updates and refreshes the groups with any new content. */
+   /* Updates and refreshes the tags with any new content. */
    static void refresh_feeds()
    {
       set_refresh(true);
@@ -596,7 +583,7 @@ public class util
          update.page(page);
       else
       {
-         for(int i = 1; i < main.cgroups.length; i++)
+         for(int i = 1; i < main.ctags.length; i++)
             update.page(i);
       }
    }

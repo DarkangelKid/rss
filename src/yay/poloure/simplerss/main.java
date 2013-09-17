@@ -31,28 +31,33 @@ public class main extends ActionBarActivity
    /* These must be set straight away in onCreate. */
    /* UI related strings. */
    static String storage, ALL;
-   static String[] cgroups;
+   static String[] ctags;
 
    static Fragment[] main_fragments;
 
    static final String SEPAR = System.getProperty("file.separator");
    static final String NL    = System.getProperty("line.separator");
 
-   /* File related names. */
+   /* Appends */
    static final String TXT           = ".txt";
-   static final String GROUPS_DIR    = "groups" + SEPAR;
+   static final String TEMP          = ".temp" + TXT;
+   static final String COUNT         = ".count" + TXT;
+   static final String STORE         = ".store" + TXT;
+
+   /* Folders */
+   static final String GROUPS_DIR    = "tags" + SEPAR;
    static final String THUMBNAIL_DIR = "thumbnails" + SEPAR;
    static final String IMAGE_DIR     = "images" + SEPAR;
    static final String SETTINGS      = "settings" + SEPAR;
+
+   /* Files */
    static final String INT_STORAGE   = "internal" + TXT;
    static final String STRIP_COLOR   = "pagertabstrip_colour" + TXT;
    static final String DUMP_FILE     = "dump" + TXT;
-   static final String TEMP          = ".temp" + TXT;
-   static final String STORE         = ".store" + TXT;
-   static final String CONTENT       = ".content" + TXT;
-   static final String URL           = ".urls" + TXT;
-   static final String COUNT         = ".count" + TXT;
-   static final String GROUP_LIST    = "group_list" + TXT;
+   static final String INDEX         = "index" + TXT;
+   static final String CONTENT       = "content" + TXT;
+   static final String URL           = "urls" + TXT;
+   static final String GROUP_LIST    = "tag_list" + TXT;
    static final String FILTER_LIST   = "filter_list" + TXT;
    static final String READ_ITEMS    = "read_items" + TXT;
 
@@ -80,12 +85,12 @@ public class main extends ActionBarActivity
 
       /* Form the storage path. */
       storage = util.get_storage();
-      cgroups = read.file(GROUP_LIST);
+      ctags = read.file(GROUP_LIST);
 
       util.rm(main.DUMP_FILE);
 
       /* Load String resources into static variables. */
-      ALL     = getString(R.string.all_group);
+      ALL     = getString(R.string.all_tag);
 
       /* Create the navigation drawer and set all the listeners for it. */
       DrawerLayout dl      = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -113,7 +118,7 @@ public class main extends ActionBarActivity
              .commit();
       }
 
-      util.update_groups();
+      util.update_tags();
       update.page(0);
    }
 

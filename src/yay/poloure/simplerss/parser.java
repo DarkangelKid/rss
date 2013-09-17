@@ -43,20 +43,20 @@ class parser
    String dump_path, url_path;
    int width;
 
-   public parser(String group, String feed)
+   public parser(String tag, String feed)
    {
       width = (int) Math.round(util.get_screen_width()*0.944);
-      parse_local_xml(group, feed);
+      parse_local_xml(tag, feed);
    }
 
-   void parse_local_xml(String group, String feed)
+   void parse_local_xml(String tag, String feed)
    {
       dump_path             = "content.dump" + main.TXT;
       url_path              = "content.url"  + main.TXT;
       String store_file     = util.get_storage() + feed + main.STORE;
-      String content_file   = util.get_path(group, feed, main.CONTENT);
-      String image_dir      = util.get_path(group, feed, "images");
-      String thumbnail_dir  = util.get_path(group, feed, "thumbnails");
+      String content_file   = util.get_path(feed, main.CONTENT);
+      String image_dir      = util.get_path(feed, "images");
+      String thumbnail_dir  = util.get_path(feed, "thumbnails");
       String[] filters      = read.file(main.FILTER_LIST);
 
       Set<String> set       = new LinkedHashSet<String>();

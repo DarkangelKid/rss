@@ -20,7 +20,7 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
-class fragment_manage_groups extends ListFragment
+class fragment_manage_tags extends ListFragment
 {
    static boolean multi_mode = false;
    static ActionMode actionmode;
@@ -43,14 +43,14 @@ class fragment_manage_groups extends ListFragment
    {
       super.onActivityCreated(savedInstanceState);
 
-      setListAdapter(new adapter_manage_groups());
+      setListAdapter(new adapter_manage_tags());
 
       final ListView listview = getListView();
 
       listview.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
       listview.setItemsCanFocus(false);
 
-      update.manage_groups();
+      update.manage_tags();
 
       if(!main.HONEYCOMB)
          registerForContextMenu(listview);
@@ -175,7 +175,7 @@ class fragment_manage_groups extends ListFragment
          return true;
       else if(item.getTitle().equals("add"))
       {
-         add_edit_dialog.show_add_dialog(main.cgroups);
+         add_edit_dialog.show_add_dialog(main.ctags);
          return true;
       }
       return super.onOptionsItemSelected(item);
@@ -185,7 +185,7 @@ class fragment_manage_groups extends ListFragment
    {
       Animation animFadeIn = AnimationUtils.loadAnimation(main.con, android.R.anim.fade_in);
       ListView listview   = pageradapter_manage.fragments[0].getListView();
-      adapter_manage_groups adapter = (adapter_manage_groups) pageradapter_manage.fragments[0].getListAdapter();
+      adapter_manage_tags adapter = (adapter_manage_tags) pageradapter_manage.fragments[0].getListAdapter();
 
       public refresh()
       {
@@ -196,7 +196,7 @@ class fragment_manage_groups extends ListFragment
       @Override
       protected Void doInBackground(Void... nothing)
       {
-         String[][] content = util.create_info_arrays(main.cgroups);
+         String[][] content = util.create_info_arrays(main.ctags);
          publishProgress(content[1], content[0]);
          return null;
       }

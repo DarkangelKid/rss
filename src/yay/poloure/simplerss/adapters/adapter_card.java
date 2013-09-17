@@ -48,7 +48,7 @@ class adapter_card extends BaseAdapter
    static Set<String> read_items = read.set(main.READ_ITEMS);
 
    static final Pattern thumb_img = Pattern.compile("thumbnails");
-   static int two = 0, four = 0, eight = 0;
+   static int eight = 0;
    static final int screen_width = util.get_screen_width();
 
    boolean   first          = true;
@@ -57,12 +57,10 @@ class adapter_card extends BaseAdapter
 
    public adapter_card()
    {
-      if(two == 0)
+      if(eight == 0)
       {
          float density = util.get_context().getResources().getDisplayMetrics().density;
-         two      = (int) (2  * density + 0.5f);
-         four     = two * 2;
-         eight    = two * 4;
+         eight    = (int) (8  * density + 0.5f);
       }
    }
 
@@ -105,8 +103,8 @@ class adapter_card extends BaseAdapter
    @Override
    public int getItemViewType(int position)
    {
-      boolean img = ( widths[position] != null &&
-                      widths[position] != 0 );
+      boolean img = ( widths[position] != null && widths[position] != 0 );
+
       boolean des = ( descriptions[position] != null &&
                      !descriptions[position].equals("") );
 
@@ -182,9 +180,6 @@ class adapter_card extends BaseAdapter
          holder.title.setText(title);
          holder.des  .setText(descriptions[position]);
          holder.url  .setText(link);
-
-         //util.set_alpha(holder.title, holder.url, holder.image,
-         //               holder.des, link);
       }
       /* card_no_des_img.xml no description, image, title. */
       else if(view_type == 1)
@@ -208,8 +203,6 @@ class adapter_card extends BaseAdapter
 
          holder.title.setText(title);
          holder.url  .setText(link);
-
-         //util.set_alpha(holder.title, holder.url, holder.image, null, link);
       }
       /* card_des_no_img.xml no image, descirition, title. */
       else if(view_type == 2)
@@ -232,8 +225,6 @@ class adapter_card extends BaseAdapter
          holder.title.setText(title);
          holder.des  .setText(descriptions[position]);
          holder.url  .setText(link);
-
-         //util.set_alpha(holder.title, holder.url, null, holder.des, link);
       }
       /* No description or image. */
       else if(view_type == 3)
@@ -254,8 +245,6 @@ class adapter_card extends BaseAdapter
 
          holder.title.setText(title);
          holder.url  .setText(link);
-
-         //util.set_alpha(holder.title, holder.url, null, null, link);
       }
 
       if(main.HONEYCOMB)
@@ -376,7 +365,7 @@ class adapter_card extends BaseAdapter
 
    class image_call implements View.OnClickListener
    {
-      private final String image_path;
+      String image_path;
       public image_call(String im)
       {
          image_path = im;

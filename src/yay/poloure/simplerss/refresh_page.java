@@ -7,9 +7,10 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ListView;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Collection;
+import java.util.Map;
+import java.util.TreeMap;
+import android.text.format.Time;
 
 class refresh_page extends AsyncTask<Integer, Object, Animation>
 {
@@ -23,92 +24,91 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
    @Override
    protected Animation doInBackground(Integer... page)
    {
-      page_number           = page[0];
-      String group          = main.cgroups[page_number];
+      page_number         = page[0];
+      String tag          = main.ctags[page_number];
       String thumbnail_path;
+      int width, height;
 
-      if(!util.exists(util.get_path(group, main.CONTENT)))
+      String[] titles, descriptions, links, images, widths, heights, times;
+
+      String[] datum;
+      Time time = new Time();
+
+      Map<Long, String[]> map = new TreeMap<Long, String[]>();
+      String[][] contents   = read.csv(main.INDEX);
+      if(contents.length == 0)
          return null;
 
-      String[][] contenter  = read.csv(group, group, 't', 'd', 'l', 'i', 'w', 'h', 'g', 'f');
-      String[] titles       = contenter[0];
-      String[] descriptions = contenter[1];
-      String[] links        = contenter[2];
-      String[] images       = contenter[3];
-      String[] widths       = contenter[4];
-      String[] heights      = contenter[5];
-      String[] groups       = contenter[6];
-      String[] sources      = contenter[7];
+      String[]   feeds      = contents[0];
+      String[]   tags       = contents[1];
 
-      if( links.length == 0 || links[0] == null )
-         return null;
+      for(int j = 0; j < feeds.length; j++)
+      {
+         if(tags[j].equals(tag))
+         {
+            String[][] content  = read.csv(feeds[j], 't', 'd', 'l', 'i', 'w', 'h', 'p');
+            titles       = content[0];
+            descriptions = content[1];
+            links        = content[2];
+            images       = content[3];
+            widths       = content[4];
+            heights      = content[5];
+            times        = content[6];
 
-      Set<String> existing_items = new HashSet<String>();
-      try
-      {
-         existing_items = new HashSet<String>();
-         Collections.addAll(existing_items, util.get_card_adapter(page_number).links);
+            if( links.length == 0 || links[0] == null )
+               return null;
+
+            for(int i = 0; i < times.length; i++)
+            {
+               try
+               {
+                  time.parse3339(times[i]);
+               }
+               catch(Exception e)
+               {
+                  util.post("Unable to parse date.");
+                  return null;
+               }
+               if(util.index(util.get_card_adapter(page_number).links, links[i]) != -1)
+               {
+                  /* Edit the data. */
+                  if(images[i] != null)
+                  {
+                     if(util.stoi(widths[i]) > 32)
+                     {
+                        thumbnail_path = images[i].replaceAll("images", "thumbnails");
+                     }
+                     else
+                     {
+                        thumbnail_path = "";
+                        widths[i]      = "";
+                        heights[i]     = "";
+                     }
+                  }
+
+                  if(descriptions[i] == null || descriptions[i].length() < 8)
+                     descriptions[i] = "";
+                  else if( descriptions[i].length() >= 360 )
+                     descriptions[i] = descriptions[i].substring(0, 360);
+                  if(titles[i] == null)
+                     titles[i] = "";
+
+                  datum = new String[]
+                  {
+                     titles[i], descriptions[i], links[i], images[i], widths[i],
+                     heights[i], times[i]
+                  };
+                  map.put(time.toMillis(false) - i, datum);
+               }
+            }
+         }
       }
-      catch(Exception e)
-      {
-      }
+
+      /* Map now contains all the items that should be on the list. */
 
       Animation animFadeIn = AnimationUtils.loadAnimation(util.get_context(), android.R.anim.fade_in);
 
-      int width, height, count = 0;
-
-      for(int i = 0; i < titles.length; i++)
-      {
-         if(!existing_items.contains(links[i]))
-            count++;
-      }
-
-      String[]  new_titles  = new String[count];
-      String[]  new_des     = new String[count];
-      String[]  new_images  = new String[count];
-      String[]  new_links   = new String[count];
-      Integer[] new_heights = new Integer[count];
-      Integer[] new_widths  = new Integer[count];
-
-      count = -1;
-
-      for(int m = titles.length - 1; m >= 0; m--)
-      {
-         if(existing_items.add(links[m]))
-         {
-            count++;
-            thumbnail_path = "";
-            width = 0;
-            height = 0;
-
-            if(images[m] != null)
-            {
-               width = util.stoi(widths[m]);
-               if(width > 32)
-               {
-                  height = util.stoi(heights[m]);
-                  thumbnail_path = util.get_path(groups[m], sources[m], "thumbnails")
-                     + images[m].substring(images[m].lastIndexOf(main.SEPAR) + 1);
-               }
-               else
-                  width = 0;
-            }
-
-            if(descriptions[m] == null || descriptions[m].length() < 8)
-               descriptions[m] = "";
-            else if( descriptions[m].length() >= 360 )
-               descriptions[m] = descriptions[m].substring(0, 360);
-            if(titles[m] == null)
-               titles[m] = "";
-
-            new_titles  [count] = titles[m];
-            new_links   [count] = links[m];
-            new_des     [count] = descriptions[m];
-            new_images  [count] = thumbnail_path;
-            new_heights [count] = height;
-            new_widths  [count] = width;
-         }
-      }
+      /* Extract the data from the map. */
 
       while(lv == null)
       {
@@ -138,8 +138,30 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
       /* Do not count items as read while we are updating the list. */
       ith.touched = false;
 
-      if(new_titles.length > 0)
-         publishProgress(new_titles, new_des, new_links, new_images, new_heights, new_widths);
+      String[][] list = map.values().toArray(new String[map.size()][7]);
+      final int count = list.length;
+
+      titles         = new String[count];
+      descriptions   = new String[count];
+      links          = new String[count];
+      images         = new String[count];
+      int[] iwidths  = new int[count];
+      int[] iheights = new int[count];
+      //times      = new long[count];
+
+      for(int i = count - 1; i >= 0; i--)
+      {
+         titles[i]       = list[i][0];
+         descriptions[i] = list[i][1];
+         links[i]        = list[i][2];
+         images[i]       = list[i][3];
+         iwidths[i]      = Integer.parseInt(list[i][4]);
+         iheights[i]     = Integer.parseInt(list[i][5]);
+         //times[i]        = list.get(i)[6]
+      }
+
+      if(titles.length > 0)
+         publishProgress(titles, descriptions, links, images, iheights, iwidths);
 
       return animFadeIn;
    }
@@ -178,7 +200,7 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
          position = util.jump_to_latest_unread(ith.links, false, page_number);
 
       if(top != 0)
-         lv.setSelectionFromTop(index, top - (ith.four*4));
+         lv.setSelectionFromTop(index, top - (ith.eight*2));
    }
 
    @Override

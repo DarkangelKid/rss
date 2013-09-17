@@ -48,7 +48,7 @@ class fragment_manage_feeds extends ListFragment
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
-               add_edit_dialog.show_edit_dialog(main.cgroups, main.con, position);
+               add_edit_dialog.show_edit_dialog(main.ctags, main.con, position);
             }
          }
       );
@@ -89,28 +89,18 @@ class fragment_manage_feeds extends ListFragment
                      @Override
                      public void onClick(DialogInterface dialog, int id)
                      {
-                        /* Parse for the group name from the info string. */
-                        String group    = adpt.get_info(pos);
-                        int start       = group.indexOf('\n') + 1;
-                        int end         = group.indexOf(' ');
-                        group           = group.substring(start, end);
-
-                        String name      = adpt.getItem(pos);
-                        String feed_path = util.get_path(group, name, "");
-                        String all_content = util.get_path(main.ALL, main.CONTENT);
+                        String name        = adpt.getItem(pos);
+                        String feed_path   = util.get_path(name, "");
 
                         util.rmdir(new File(feed_path));
                         /* make the image and thumnail folders. */
                         util.mkdir(feed_path + main.IMAGE_DIR);
                         util.mkdir(feed_path + main.THUMBNAIL_DIR);
 
-                        /* Delete the all content files. */
-                        util.rm(all_content);
-
-                        /* Refresh pages and update groups and stuff. */
-                        util.update_groups();
+                        /* Refresh pages and update tags and stuff. */
+                        util.update_tags();
                         update.manage_feeds();
-                        update.manage_groups();
+                        update.manage_tags();
                      }
                   }
                ).show();
@@ -127,7 +117,7 @@ class fragment_manage_feeds extends ListFragment
          return true;
       else if(item.getTitle().equals("add"))
       {
-         add_edit_dialog.show_add_dialog(main.cgroups);
+         add_edit_dialog.show_add_dialog(main.ctags);
          return true;
       }
       return super.onOptionsItemSelected(item);
@@ -150,17 +140,15 @@ class fragment_manage_feeds extends ListFragment
       {
          if(adapter != null)
          {
-            String path    = util.get_path(main.ALL, main.TXT);
-
-            /* Read the all group file for names, urls, and groups. */
-            String[][] content  = read.csv(path, 'n', 'u', 'g');
+            /* Read the all tag file for names, urls, and tags. */
+            String[][] content  = read.csv(main.INDEX, 'n', 'u', 'g');
             int size            = content[0].length;
             String[] info_array = new String[size];
 
             for(int i = 0; i < size; i++)
             {
                /* Form the path to the feed_content file. */
-               path = util.get_path(content[2][i], content[0][i], main.CONTENT);
+               String path = util.get_path(content[0][i], main.CONTENT);
 
                /* Build the info string. */
                info_array[i] = content[1][i] + main.NL + content[2][i] + " • "

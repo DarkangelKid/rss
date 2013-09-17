@@ -25,20 +25,15 @@ public class read
       return (check.length == 0) ? "" : check[0];
    }
 
-   /* This is for the group index file. */
-   static String[][] csv(String group, char...type)
+   static String[][] csv(String index)
    {
-      return csv_pr(util.get_path(group, main.TXT), type);
+      return csv_pr(index, 'n', 'g');
    }
 
    /* This is for reading an rss file. */
-   static String[][] csv(String group, String feed, char... type)
+   static String[][] csv(String feed, char... type)
    {
-      /* If we want the group content file. */
-      if(group.equals(feed))
-         return csv_pr(util.get_path(group, main.CONTENT), type);
-
-      return csv_pr(util.get_path(group, feed, main.CONTENT));
+      return csv_pr(util.get_path(feed, main.CONTENT), type);
    }
 
    private static String[][] csv_pr(String path, char... type)

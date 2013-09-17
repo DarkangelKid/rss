@@ -40,44 +40,34 @@ public class service_update extends IntentService
 
       String UNREAD_ITEM    = getString(R.string.notification_title_singular);
       String UNREAD_ITEMS   = getString(R.string.notification_title_plural);
-      String GROUP_UNREAD   = getString(R.string.notification_content_group_item);
-      String GROUP_UNREADS  = getString(R.string.notification_content_group_items);
-      String GROUPS_UNREADS = getString(R.string.notification_content_groups);
+      String GROUP_UNREAD   = getString(R.string.notification_content_tag_item);
+      String GROUP_UNREADS  = getString(R.string.notification_content_tag_items);
+      String GROUPS_UNREADS = getString(R.string.notification_content_tags);
 
       int page     = intent.getIntExtra("GROUP_NUMBER", 0);
 
       storage  = util.get_storage();
 
-      String[] all_groups = read.file(main.GROUP_LIST);
-      String group        = all_groups[page];
+      String[] all_tags = read.file(main.GROUP_LIST);
+      String tag        = all_tags[page];
 
-      String[][] content  = read.csv(group, 'n', 'u', 'g');
+      String[][] content  = read.csv(tag, 'n', 'u', 'g');
       String[] names      = content[0];
       String[] urls       = content[1];
-      String[] groups     = content[2];
+      String[] tags     = content[2];
 
-      /* Download and parse each feed in the group. */
+      /* Download and parse each feed in the tag. */
       boolean success;
       for(int i = 0; i < names.length; i++)
       {
          success = write.dl(urls[i], names[i] + main.STORE);
          if(success)
-            new parser(groups[i], names[i]);
+            new parser(tags[i], names[i]);
          else
             util.post("Download of " + urls[i] + " failed.");
       }
 
-      /* Always sort all & sort others too. */
-      write.sort_content(all_groups[0], all_groups[0]);
-      if(!group.equals(main.ALL))
-         write.sort_content(group, all_groups[0]);
-      else
-      {
-         for(int i = 1; i < all_groups.length; i++)
-            write.sort_content(all_groups[i], all_groups[0]);
-      }
-
-      int[] unread_counts = util.get_unread_counts(all_groups);
+      int[] unread_counts = util.get_unread_counts(all_tags);
 
       /* If activity is running. */
       if(main.service_handler != null)
@@ -90,15 +80,15 @@ public class service_update extends IntentService
       }
       else if(unread_counts[0] != 0 && intent.getBooleanExtra("NOTIFICATIONS", false))
       {
-         /* Calculate the number of groups with new items. */
-         int group_items = 1, count;
+         /* Calculate the number of tags with new items. */
+         int tag_items = 1, count;
          int sizes       = unread_counts.length;
 
          for(int i = 1 ; i < sizes; i++)
          {
             count = unread_counts[i];
             if(count != 0)
-               group_items++;
+               tag_items++;
          }
 
          String not_title;
@@ -106,12 +96,12 @@ public class service_update extends IntentService
                       String.format(UNREAD_ITEMS, unread_counts[0]);
 
          String not_content;
-         if(unread_counts[0] == 1 && (group_items - 1) == 1)
+         if(unread_counts[0] == 1 && (tag_items - 1) == 1)
             not_content = String.format(GROUP_UNREAD, 1);
-         else if(unread_counts[0] > 1 && (group_items - 1) == 1)
+         else if(unread_counts[0] > 1 && (tag_items - 1) == 1)
             not_content = String.format(GROUP_UNREADS, 1);
          else
-            not_content = String.format(GROUPS_UNREADS, (group_items - 1));
+            not_content = String.format(GROUPS_UNREADS, (tag_items - 1));
 
          NotificationCompat.Builder not_builder = new NotificationCompat.Builder(this)
                .setSmallIcon(R.drawable.rss_icon)

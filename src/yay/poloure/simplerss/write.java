@@ -13,10 +13,7 @@ import java.io.OutputStreamWriter;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.net.URL;
-import java.util.Map;
-import java.util.TreeMap;
 import java.io.FileNotFoundException;
-import android.text.format.Time;
 
 public class write
 {
@@ -203,77 +200,6 @@ public class write
          }
          return success;
       }
-      return true;
-   }
-
-   public static boolean sort_content(String group, String all_group)
-   {
-      /* If storage is unmounted OR if we force to use external. */
-      if(util.check_unmounted())
-         return false;
-
-      String group_content_path = util.get_path(group, main.CONTENT);
-      log(group_content_path);
-      String group_count_file   = group_content_path + main.COUNT;
-      String url_path           = group_content_path + main.URL;
-      String url_count          = url_path + main.COUNT;
-
-      String[][] contents = read.csv(group, 'n', 'g');
-      String[] names      = contents[0];
-      String[] groups     = contents[1];
-      String[] urls       = new String[0];
-      String[][] temp;
-
-      String content_path;
-      Time time = new Time();
-      String[] pubDates;
-      String[] content;
-      Map<Long, String> map = new TreeMap<Long, String>();
-
-      for(int k = 0; k < names.length; k++)
-      {
-         /* "/storage/groups/Tumblr/mariam/mariam.content.txt" */
-         content_path = util.get_path(groups[k], names[k], main.CONTENT);
-         log(content_path);
-
-         temp = read.csv(groups[k], names[k], 'p', 'l');
-         if(temp.length > 0)
-         {
-            content  = read.file(content_path);
-            pubDates = temp[0];
-            urls     = util.concat(urls, temp[1]);
-
-            for(int i = 0; i < pubDates.length; i++)
-            {
-               try
-               {
-                  time.parse3339(pubDates[i]);
-               }
-               catch(Exception e)
-               {
-                  util.post("Unable to parse date.");
-                  return false;
-               }
-               map.put(time.toMillis(false) - i, content[i] + "group|"
-                       + groups[k] + "|feed|" + names[k] + "|");
-            }
-         }
-      }
-
-      collection(group_content_path, map.values());
-
-      util.rm(group_count_file);
-      single(group_count_file, Integer.toString(map.size()));
-
-      collection(url_path, java.util.Arrays.asList(urls));
-
-      util.rm(url_count);
-      single(url_count, Integer.toString(urls.length));
-
-      /* Sorts the all_group every time another group is updated. */
-      if(!group.equals(all_group))
-         sort_content(all_group, all_group);
-
       return true;
    }
 

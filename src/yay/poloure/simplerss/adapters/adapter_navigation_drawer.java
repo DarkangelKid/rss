@@ -28,7 +28,7 @@ class adapter_navigation_drawer extends BaseAdapter
       ImageView divider_view;
    }
 
-   static class group_item
+   static class tag_item
    {
       TextView title;
       TextView unread_view;
@@ -134,20 +134,20 @@ class adapter_navigation_drawer extends BaseAdapter
                holder = (divider) cv.getTag();
             break;
 
-         /* This view is for the group items of the navigation drawer.
+         /* This view is for the tag items of the navigation drawer.
           * The one with unread counters. */
          default:
-            group_item holder2;
+            tag_item holder2;
             if(cv == null)
             {
                cv = inflater.inflate(R.layout.navigation_drawer_group_item, parent, false);
-               holder2 = new group_item();
-               holder2.title = (TextView) cv.findViewById(R.id.group_title);
+               holder2 = new tag_item();
+               holder2.title = (TextView) cv.findViewById(R.id.tag_title);
                holder2.unread_view = (TextView) cv.findViewById(R.id.unread_item);
                cv.setTag(holder2);
             }
             else
-               holder2 = (group_item) cv.getTag();
+               holder2 = (tag_item) cv.getTag();
 
             holder2.title.setText(menu_array[position - 4]);
             String number = Integer.toString(count_array[position - 4]);

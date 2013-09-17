@@ -81,7 +81,7 @@ class fragment_feeds extends Fragment
          return true;
       else if(item.getTitle().equals("add"))
       {
-         add_edit_dialog.show_add_dialog(main.cgroups);
+         add_edit_dialog.show_add_dialog(main.ctags);
          return true;
       }
       else if(item.getTitle().equals("unread"))

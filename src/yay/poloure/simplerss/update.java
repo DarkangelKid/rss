@@ -22,12 +22,12 @@ public class update
             .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
    }
 
-   public static void manage_groups()
+   public static void manage_tags()
    {
       if(!main.HONEYCOMB)
-         new fragment_manage_groups.refresh().execute();
+         new fragment_manage_tags.refresh().execute();
       else
-         new fragment_manage_groups.refresh()
+         new fragment_manage_tags.refresh()
             .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
    }
 
@@ -40,11 +40,11 @@ public class update
             .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, page_number);
    }
 
-   public static void check_feed(android.app.AlertDialog dlg, String ngroup, String fname, String mode, String ctitle, String cgroup, String sgroup, int pos, String URL_check)
+   public static void check_feed(android.app.AlertDialog dlg, String ntag, String fname, String mode, String ctitle, String ctag, String stag, int pos, String URL_check)
    {
       if(main.HONEYCOMB)
-         new add_edit_dialog.check_feed_exists(dlg, ngroup, fname, mode, ctitle, cgroup, sgroup, pos).execute(URL_check);
+         new add_edit_dialog.check_feed_exists(dlg, ntag, fname, mode, ctitle, ctag, stag, pos).execute(URL_check);
       else
-         new add_edit_dialog.check_feed_exists(dlg, ngroup, fname, mode, ctitle, cgroup, sgroup, pos).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
+         new add_edit_dialog.check_feed_exists(dlg, ntag, fname, mode, ctitle, ctag, stag, pos).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
    }
 }

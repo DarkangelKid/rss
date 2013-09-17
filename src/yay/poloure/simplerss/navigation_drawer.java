@@ -64,14 +64,14 @@ class navigation_drawer
       protected int[] doInBackground(int[]... counts)
       {
          /* If null was passed into the task, count the unread items. */
-         return (counts[0] != null) ? counts[0] : util.get_unread_counts(main.cgroups);
+         return (counts[0] != null) ? counts[0] : util.get_unread_counts(main.ctags);
       }
 
       @Override
       protected void onPostExecute(int[] pop)
       {
          /* Set the titles & counts arrays in this file and notifiy the adapter. */
-         nav_adapter.set_titles(main.cgroups);
+         nav_adapter.set_titles(main.ctags);
          nav_adapter.set_counts(pop);
          nav_adapter.notifyDataSetChanged();
       }
@@ -88,7 +88,7 @@ class navigation_drawer
          /* Determine the new title based on the position of the item clicked. */
          String selected_title = (position > 3) ? NAV_TITLES[0] : NAV_TITLES[position];
 
-         /* If the item selected was a group, change the viewpager to that group. */
+         /* If the item selected was a tag, change the viewpager to that tag. */
          if(position > 3)
             main.viewpager.setCurrentItem(position - 4);
 
