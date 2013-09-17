@@ -141,7 +141,7 @@ class fragment_manage_feeds extends ListFragment
          if(adapter != null)
          {
             /* Read the all tag file for names, urls, and tags. */
-            String[][] content  = read.csv(main.INDEX, 'n', 'u', 'g');
+            String[][] content  = read.csv(main.INDEX);
             int size            = content[0].length;
             String[] info_array = new String[size];
 

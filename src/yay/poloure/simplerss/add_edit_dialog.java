@@ -244,10 +244,10 @@ public class add_edit_dialog
    {
       LayoutInflater inf         = LayoutInflater.from(con);
       final View edit_rss_dialog = inf.inflate(R.layout.add_rss_dialog, null);
-      String[][] content         = read.csv(ctags[0], 'n', 'u', 'g');
+      String[][] content         = read.csv(main.INDEX);
       final String current_title = content[0][position];
       final String current_url   = content[1][position];
-      final String current_tag = content[2][position];
+      final String current_tag   = content[2][position];
 
       final AdapterView<SpinnerAdapter> tag_spinner = (AdapterView<SpinnerAdapter>) edit_rss_dialog.findViewById(R.id.tag_spinner);
 

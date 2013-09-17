@@ -14,20 +14,18 @@ import android.text.format.Time;
 
 class refresh_page extends AsyncTask<Integer, Object, Animation>
 {
-   private int page_number;
-   private boolean flash = false;
-   private ListFragment l;
-   private adapter_card ith;
-   private ListView lv;
-   private int position = -3;
+   int page_number;
+   boolean flash = false;
+   ListFragment l;
+   adapter_card ith;
+   ListView lv;
+   int position = -3;
 
    @Override
    protected Animation doInBackground(Integer... page)
    {
       page_number         = page[0];
       String tag          = main.ctags[page_number];
-      String thumbnail_path;
-      int width, height;
 
       String[] titles, descriptions, links, images, widths, heights, times;
 
@@ -36,75 +34,9 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
 
       Map<Long, String[]> map = new TreeMap<Long, String[]>();
       String[][] contents   = read.csv(main.INDEX);
-      if(contents.length == 0)
-         return null;
-
+      if(contents.length == 0) return null;
       String[]   feeds      = contents[0];
-      String[]   tags       = contents[1];
-
-      for(int j = 0; j < feeds.length; j++)
-      {
-         if(tags[j].equals(tag))
-         {
-            String[][] content  = read.csv(feeds[j], 't', 'd', 'l', 'i', 'w', 'h', 'p');
-            titles       = content[0];
-            descriptions = content[1];
-            links        = content[2];
-            images       = content[3];
-            widths       = content[4];
-            heights      = content[5];
-            times        = content[6];
-
-            if( links.length == 0 || links[0] == null )
-               return null;
-
-            for(int i = 0; i < times.length; i++)
-            {
-               try
-               {
-                  time.parse3339(times[i]);
-               }
-               catch(Exception e)
-               {
-                  util.post("Unable to parse date.");
-                  return null;
-               }
-               if(util.index(util.get_card_adapter(page_number).links, links[i]) != -1)
-               {
-                  /* Edit the data. */
-                  if(images[i] != null)
-                  {
-                     if(util.stoi(widths[i]) > 32)
-                     {
-                        thumbnail_path = images[i].replaceAll("images", "thumbnails");
-                     }
-                     else
-                     {
-                        thumbnail_path = "";
-                        widths[i]      = "";
-                        heights[i]     = "";
-                     }
-                  }
-
-                  if(descriptions[i] == null || descriptions[i].length() < 8)
-                     descriptions[i] = "";
-                  else if( descriptions[i].length() >= 360 )
-                     descriptions[i] = descriptions[i].substring(0, 360);
-                  if(titles[i] == null)
-                     titles[i] = "";
-
-                  datum = new String[]
-                  {
-                     titles[i], descriptions[i], links[i], images[i], widths[i],
-                     heights[i], times[i]
-                  };
-                  map.put(time.toMillis(false) - i, datum);
-               }
-            }
-         }
-      }
-
-      /* Map now contains all the items that should be on the list. */
+      String[]   tags       = contents[2];
 
       Animation animFadeIn = AnimationUtils.loadAnimation(util.get_context(), android.R.anim.fade_in);
 
@@ -135,18 +67,79 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
          }
       }
 
+      for(int j = 0; j < feeds.length; j++)
+      {
+         if(tags[j].equals(tag) || tag.equals(main.ALL))
+         {
+            String[][] content  = read.csv(feeds[j], 't', 'd', 'l', 'i', 'w', 'h', 'p');
+            if(content.length == 0) return null;
+            titles       = content[0];
+            descriptions = content[1];
+            links        = content[2];
+            images       = content[3];
+            widths       = content[4];
+            heights      = content[5];
+            times        = content[6];
+
+            for(int i = 0; i < times.length; i++)
+            {
+               try
+               {
+                  time.parse3339(times[i]);
+               }
+               catch(Exception e)
+               {
+                  util.post("Unable to parse date.");
+                  return null;
+               }
+               if(util.index(util.get_card_adapter(page_number).links, links[i]) == -1)
+               {
+                  /* Edit the data. */
+                  if(images[i] != null)
+                  {
+                     if(util.stoi(widths[i]) > 32)
+                     {
+                        images[i] = util.get_path(feeds[j], "thumbnails")
+                        + images[i].substring(images[i].lastIndexOf(main.SEPAR) + 1);
+                     }
+                     else
+                     {
+                        images[i]  = "";
+                        widths[i]  = "";
+                        heights[i] = "";
+                     }
+                  }
+
+                  if(descriptions[i] == null || descriptions[i].length() < 8)
+                     descriptions[i] = "";
+                  else if( descriptions[i].length() >= 360 )
+                     descriptions[i] = descriptions[i].substring(0, 360);
+                  if(titles[i] == null)
+                     titles[i] = "";
+
+                  datum = new String[]
+                  {
+                     titles[i], descriptions[i], links[i], images[i], widths[i],
+                     heights[i], times[i]
+                  };
+                  map.put(time.toMillis(false) - i, datum);
+               }
+            }
+         }
+      }
+
       /* Do not count items as read while we are updating the list. */
       ith.touched = false;
 
       String[][] list = map.values().toArray(new String[map.size()][7]);
       final int count = list.length;
 
-      titles         = new String[count];
-      descriptions   = new String[count];
-      links          = new String[count];
-      images         = new String[count];
-      int[] iwidths  = new int[count];
-      int[] iheights = new int[count];
+      titles             = new String[count];
+      descriptions       = new String[count];
+      links              = new String[count];
+      images             = new String[count];
+      Integer[] iwidths  = new Integer[count];
+      Integer[] iheights = new Integer[count];
       //times      = new long[count];
 
       for(int i = count - 1; i >= 0; i--)
@@ -155,8 +148,8 @@ class refresh_page extends AsyncTask<Integer, Object, Animation>
          descriptions[i] = list[i][1];
          links[i]        = list[i][2];
          images[i]       = list[i][3];
-         iwidths[i]      = Integer.parseInt(list[i][4]);
-         iheights[i]     = Integer.parseInt(list[i][5]);
+         iwidths[i]  = (list[i][4] == null) ? 0 : Integer.parseInt(list[i][4]);
+         iheights[i] = (list[i][5] == null) ? 0 : Integer.parseInt(list[i][5]);
          //times[i]        = list.get(i)[6]
       }
 

@@ -27,7 +27,7 @@ public class read
 
    static String[][] csv(String index)
    {
-      return csv_pr(index, 'n', 'g');
+      return csv_pr(index, 'f', 'u', 't');
    }
 
    /* This is for reading an rss file. */

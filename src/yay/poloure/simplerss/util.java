@@ -230,7 +230,7 @@ public class util
       {
          tag_array[i] = ctags[i];
 
-         content = read.csv(ctags[i], 'n')[0];
+         content = read.csv(main.INDEX)[0];
          if(i == 0)
             info = (size == 1) ? "1 tag" :  size + " tags";
          else

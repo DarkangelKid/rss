@@ -48,23 +48,26 @@ public class service_update extends IntentService
 
       storage  = util.get_storage();
 
-      String[] all_tags = read.file(main.GROUP_LIST);
-      String tag        = all_tags[page];
+      String[] all_tags  = read.file(main.GROUP_LIST);
+      String tag         = all_tags[page];
 
-      String[][] content  = read.csv(tag, 'n', 'u', 'g');
-      String[] names      = content[0];
-      String[] urls       = content[1];
-      String[] tags     = content[2];
+      String[][] content = read.csv(main.INDEX);
+      String[] names     = content[0];
+      String[] urls      = content[1];
+      String[] tags      = content[2];
 
       /* Download and parse each feed in the tag. */
       boolean success;
       for(int i = 0; i < names.length; i++)
       {
-         success = write.dl(urls[i], names[i] + main.STORE);
-         if(success)
-            new parser(tags[i], names[i]);
-         else
-            util.post("Download of " + urls[i] + " failed.");
+         if(tags[i].equals(tag) || tag.equals(main.ALL))
+         {
+            success = write.dl(urls[i], names[i] + main.STORE);
+            if(success)
+               new parser(tags[i], names[i]);
+            else
+               util.post("Download of " + urls[i] + " failed.");
+         }
       }
 
       int[] unread_counts = util.get_unread_counts(all_tags);

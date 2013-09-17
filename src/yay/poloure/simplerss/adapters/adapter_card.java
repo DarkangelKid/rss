@@ -297,6 +297,7 @@ class adapter_card extends BaseAdapter
          fadeIn.setInterpolator(new DecelerateInterpolator());
          String image = util.get_storage() + thumb_img.matcher(images[tag]).replaceAll("images");
          iv.setOnClickListener(new image_call(image));
+         write.log(images[tag]);
          Object[] ob = {BitmapFactory.decodeFile(util.get_storage() + images[tag], o), fadeIn};
          return ob;
       }
