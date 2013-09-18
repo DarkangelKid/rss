@@ -6,11 +6,6 @@
       <item>Save image to storage</item>
    </string-array>
 
-   <string-array name="card_menu">
-      <item>Copy URL to clipboard</item>
-      <item>Open in browser</item>
-   </string-array>
-
    <string-array name="media_errors">
       <item>Media not mounted.</item>
       <item>Unable to mount media.</item>

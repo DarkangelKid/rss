@@ -9,8 +9,9 @@
          android:textColor="#ff000000"
          android:paddingTop="2dp"
          android:paddingBottom="8dp"
+         android:paddingStart="8dp"
          android:paddingLeft="8dp"
+         android:paddingEnd="8dp"
          android:paddingRight="8dp"
          android:layout_below="@+id/image"/>
-
 </merge>

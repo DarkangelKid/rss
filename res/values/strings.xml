@@ -10,13 +10,19 @@
    <string name="add_dialog_title">Add Feed</string>
    <string name="edit_dialog_title">Edit Feed</string>
 
+   <string name="add_feed">Add</string>
+   <string name="unread">Unread</string>
+   <string name="refresh">Refresh</string>
+
    <string name="feed_name_dialog">Feed Name</string>
    <string name="feed_name_hint">optional</string>
    <string name="feed_url_dialog">Feed URL</string>
    <string name="feed_url_hint">http://example.com/rss</string>
-   <string name="feed_tag_dialog">Group</string>
-   <string name="feed_tag_title">Groups</string>
+   <string name="feed_tag_dialog">Tag</string>
+   <string name="feed_tag_title">Tags</string>
    <string name="feed_tag_hint">new tag</string>
+   <string name="filter_hint">new filter</string>
+
    <string name="cancel_dialog">Cancel</string>
    <string name="add_dialog">Add</string>
    <string name="accept_dialog">Accept</string>

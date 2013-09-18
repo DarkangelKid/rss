@@ -5,8 +5,7 @@
          android:background="#ffffff">
 
    <include layout="@layout/card_title_url"/>
-   <include layout="@layout/card_des"
-            android:layout_below="@+id/url"/>
+   <include layout="@layout/card_des"/>
    <include layout="@layout/top_shadow"/>
    <include layout="@layout/shadow"/>
 
