@@ -62,7 +62,7 @@ public class service_update extends IntentService
          {
             success = write.dl(urls[i], names[i] + main.STORE);
             if(success)
-               new parser(tags[i], names[i]);
+               new parser(names[i]);
             else
                util.post("Download of " + urls[i] + " failed.");
          }

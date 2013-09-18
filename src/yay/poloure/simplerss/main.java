@@ -87,7 +87,7 @@ public class main extends ActionBarActivity
       storage = util.get_storage();
       ctags = read.file(GROUP_LIST);
 
-      util.rm(main.DUMP_FILE);
+      util.rm(DUMP_FILE);
 
       /* Load String resources into static variables. */
       ALL     = getString(R.string.all_tag);
@@ -109,7 +109,7 @@ public class main extends ActionBarActivity
 
          int frame = R.id.content_frame;
 
-         FragmentTransaction tran = main.fman.beginTransaction();
+         FragmentTransaction tran = fman.beginTransaction();
          tran.add(frame, main_fragments[0])
              .add(frame, main_fragments[1])
              .add(frame, main_fragments[2])
@@ -156,7 +156,7 @@ public class main extends ActionBarActivity
    {
       super.onStop();
       /* Set the alarm service to go of starting now. */
-      util.set_service(this, 0, "start");
+      util.set_service("start");
 
       /* Save the read_items to file. */
       write.collection(READ_ITEMS, adapter_card.read_items);
@@ -168,7 +168,7 @@ public class main extends ActionBarActivity
       super.onStart();
 
       /* Stop the alarmservice and reset the time to 0. */
-      util.set_service(this, 0, "stop");
+      util.set_service("stop");
    }
 
    @Override
@@ -181,9 +181,7 @@ public class main extends ActionBarActivity
          return true;
       }
 
-      if(navigation_drawer.drawer_toggle.onOptionsItemSelected(item))
-         return true;
-
-      return super.onOptionsItemSelected(item);
+      return navigation_drawer.drawer_toggle.onOptionsItemSelected(item) ||
+             super.onOptionsItemSelected(item);
    }
 }

@@ -79,17 +79,17 @@ public class fragment_feeds extends Fragment
    {
       if(navigation_drawer.drawer_toggle.onOptionsItemSelected(item))
          return true;
-      else if(item.getTitle().equals(R.string.add_feed))
+      else if(item.getTitle().equals(util.get_string(R.string.add_feed)))
       {
          add_edit_dialog.show_add_dialog(main.ctags);
          return true;
       }
-      else if(item.getTitle().equals(R.string.unread))
+      else if(item.getTitle().equals(util.get_string(R.string.unread)))
       {
          util.jump_to_latest_unread(null, true, 0);
          return true;
       }
-      else if(item.getTitle().equals(R.string.refresh))
+      else if(item.getTitle().equals(util.get_string(R.string.refresh)))
       {
          util.refresh_feeds();
          return true;

@@ -76,7 +76,7 @@ public class add_edit_dialog
          else
          {
             tag = (spinner_tag.equals("")) ? "Unsorted" : spinner_tag;
-            existing_tag = (spinner_tag.equals("")) ? false : true;
+            existing_tag = spinner_tag.equals("");
          }
 
          String[] check_list = (!passed_url[0].contains("http")) ?
@@ -295,7 +295,6 @@ public class add_edit_dialog
 
    static void add_feed(String feed, String url, String tag)
    {
-      String all           = main.ALL;
       String index      = main.INDEX;
 
       /* Create folders if they do not exist. */
@@ -319,8 +318,6 @@ public class add_edit_dialog
    /* TODO EDIT FEED UPDATE FOR INTERNAL. */
    static void edit_feed(String old_name, String new_name, String new_url, String old_tag, String new_tag, int position)
    {
-      String all     = main.ALL;
-      String count   = main.COUNT;
       String index   = main.INDEX;
 
       String old_feed_folder  = util.get_path(old_name, "");

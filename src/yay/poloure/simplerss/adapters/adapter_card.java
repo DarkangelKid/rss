@@ -108,13 +108,10 @@ class adapter_card extends BaseAdapter
 
       if(img && des)
          return 0;
-      if(img && !des)
+      if(img)
          return 1;
-      if(!img && des)
+      if(des)
          return 2;
-      if(!img && !des)
-         return 3;
-
       return 3;
    }
 
@@ -244,14 +241,6 @@ class adapter_card extends BaseAdapter
          holder.title.setText(title);
          holder.url  .setText(link);
       }
-
-      /*if(main.HONEYCOMB)
-      {
-         if(read_items.contains(link))
-            cv.setAlpha(0.5f);
-         else
-            cv.setAlpha(1.0f);
-      }*[
 
       /* The logic that tells whether the item is read or not. */
       if(listview.getVisibility() == View.VISIBLE && position - 1 >= 0 && touched)

@@ -88,9 +88,7 @@ public class read
       if(!path.contains(storage))
          path = util.get_storage() + path;
 
-      String count_path = path + main.COUNT;
       int count;
-      String line;
 
       /* If the path is not a count file, get the number of lines. */
       if(!path.contains(main.COUNT))

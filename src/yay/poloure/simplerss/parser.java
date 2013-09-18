@@ -38,13 +38,13 @@ class parser
    String dump_path, url_path;
    int width;
 
-   public parser(String tag, String feed)
+   public parser(String feed)
    {
       width = (int) Math.round(util.get_screen_width()*0.944);
-      parse_local_xml(tag, feed);
+      parse_local_xml(feed);
    }
 
-   void parse_local_xml(String tag, String feed)
+   void parse_local_xml(String feed)
    {
       dump_path             = "content.dump" + main.TXT;
       url_path              = "content.url"  + main.TXT;

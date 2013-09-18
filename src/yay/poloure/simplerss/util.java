@@ -210,7 +210,7 @@ public class util
 
    static String[][] create_info_arrays(String[] ctags)
    {
-      String info, tag_path;
+      String info;
       int number, i, j;
       String[] content;
 
@@ -385,10 +385,9 @@ public class util
 
    static int[] get_unread_counts(String[] ctags)
    {
-      int total            = 0, unread, num;
+      int total            = 0, unread;
       int size             = ctags.length;
       int[] unread_counts  = new int[size];
-      adapter_card temp;
 
       /* read_items == null when called from the service for notifications. */
       if( adapter_card.read_items == null )
@@ -448,29 +447,31 @@ public class util
       tran.show(fragment).commit();
    }
 
-   static Intent make_intent(Context context, int page)
+   static Intent make_intent(int page)
    {
       /* Load notification boolean. */
       String path    = main.SETTINGS
                      + adapter_settings_function.file_names[3] + main.TXT;
       String[] check = read.file(path);
+      Context  con   = get_context();
 
-      boolean notif = (check.length != 0) ? strbol(check[0]) : false;
-      Intent intent = new Intent(context, service_update.class);
+      boolean notif = (check.length != 0) && strbol(check[0]);
+      Intent intent = new Intent(con, service_update.class);
       intent.putExtra("GROUP_NUMBER", page);
       intent.putExtra("NOTIFICATIONS", notif);
       return intent;
    }
 
-   static void set_service(Context con, int page, String state)
+   static void set_service(String state)
    {
+      Context  con   = get_context();
       String   alarm = Activity.ALARM_SERVICE;
       int      time  = adapter_settings_function.times[3];
       String[] names = adapter_settings_function.file_names;
 
       /* Load the refresh boolean value from settings. */
       String[] check  = read.file(main.SETTINGS + names[1] + main.TXT);
-      boolean refresh = (check.length != 0) ? strbol(check[0]) : false;
+      boolean refresh = (check.length != 0) && strbol(check[0]);
 
       if(!refresh && state.equals("start"))
          return;
@@ -481,7 +482,7 @@ public class util
          time = stoi(check[0]);
 
       /* Create intent, turn into pending intent, and get the alarmmanager. */
-      Intent        intent  = make_intent(con, 0);
+      Intent        intent  = make_intent(0);
       PendingIntent pintent = PendingIntent.getService(con, 0, intent, 0);
       AlarmManager  am      = (AlarmManager) con.getSystemService(alarm);
 
@@ -569,7 +570,7 @@ public class util
       };
       Context context = get_context();
       int current_page = main.viewpager.getCurrentItem();
-      Intent intent = make_intent(context, current_page);
+      Intent intent = make_intent(current_page);
       context.startService(intent);
    }
 
@@ -684,7 +685,7 @@ public class util
 
    static void set_text(String str, android.view.View v, int id)
    {
-      ((TextView) v.findViewById(R.id.url)).setText(str);
+      ((TextView) v.findViewById(id)).setText(str);
    }
 
    static String getstr(android.view.View v, int id)
