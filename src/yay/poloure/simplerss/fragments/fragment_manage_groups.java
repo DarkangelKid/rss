@@ -2,7 +2,6 @@ package yay.poloure.simplerss;
 
 import android.app.Activity;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
@@ -17,10 +16,9 @@ import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 
-class fragment_manage_tags extends ListFragment
+public class fragment_manage_groups extends ListFragment
 {
    static boolean multi_mode = false;
    static ActionMode actionmode;

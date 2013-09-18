@@ -1,14 +1,14 @@
 package yay.poloure.simplerss;
 
-import android.support.v4.app.ListFragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.ListFragment;
 
 class pageradapter_manage extends FragmentPagerAdapter
 {
    static final ListFragment[] fragments = new ListFragment[]
    {
-      new fragment_manage_tags(),
+      new fragment_manage_groups(),
       new fragment_manage_feeds(),
       new fragment_manage_filters(),
    };

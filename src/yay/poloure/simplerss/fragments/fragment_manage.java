@@ -2,17 +2,15 @@ package yay.poloure.simplerss;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.PagerTabStrip;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-class fragment_manage extends Fragment
+public class fragment_manage extends Fragment
 {
    public fragment_manage()
    {

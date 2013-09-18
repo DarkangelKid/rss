@@ -12,7 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-class fragment_feeds extends Fragment
+public class fragment_feeds extends Fragment
 {
    public fragment_feeds()
    {
@@ -79,17 +79,17 @@ class fragment_feeds extends Fragment
    {
       if(navigation_drawer.drawer_toggle.onOptionsItemSelected(item))
          return true;
-      else if(item.getTitle().equals("add"))
+      else if(item.getTitle().equals(R.string.add_feed))
       {
          add_edit_dialog.show_add_dialog(main.ctags);
          return true;
       }
-      else if(item.getTitle().equals("unread"))
+      else if(item.getTitle().equals(R.string.unread))
       {
          util.jump_to_latest_unread(null, true, 0);
          return true;
       }
-      else if(item.getTitle().equals("refresh"))
+      else if(item.getTitle().equals(R.string.refresh))
       {
          util.refresh_feeds();
          return true;

@@ -27,7 +27,7 @@ class navigation_drawer
       drawer_layout = draw_layout;
 
       /* Set the shadow of the drawer. */
-      drawer_layout.setDrawerShadow(R.drawable.drawer_shadow, android.view.Gravity.END);
+      /*drawer_layout.setDrawerShadow(R.drawable.drawer_shadow,  android.support.v4.view.GravityCompat.END);*/
 
       /* Create the action bar toggle and set it as the drawer open/closer after. */
       drawer_toggle = new ActionBarDrawerToggle((Activity) con, drawer_layout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)

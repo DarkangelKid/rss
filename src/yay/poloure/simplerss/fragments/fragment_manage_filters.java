@@ -12,7 +12,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ListView;
 
-class fragment_manage_filters extends ListFragment
+public class fragment_manage_filters extends ListFragment
 {
    public void onCreate(Bundle savedInstanceState)
    {

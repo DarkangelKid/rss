@@ -2,13 +2,13 @@ package yay.poloure.simplerss;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.PagerTabStrip;
+import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.support.v4.view.PagerTabStrip;
-import android.support.v4.view.ViewPager;
 
-class fragment_settings extends Fragment
+public class fragment_settings extends Fragment
 {
    public fragment_settings()
    {

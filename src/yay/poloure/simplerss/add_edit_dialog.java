@@ -14,13 +14,10 @@ import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.regex.Pattern;
-import java.util.Arrays;
 
 public class add_edit_dialog
 {
@@ -202,7 +199,7 @@ public class add_edit_dialog
       tag_spinner.setAdapter(adapter);
 
       final AlertDialog add_feed_dialog = new AlertDialog.Builder(con).create();
-      add_feed_dialog.setTitle("Add Feed");
+      add_feed_dialog.setTitle(R.string.add_dialog_title);
       add_feed_dialog.setView(add_rss_dialog);
       add_feed_dialog.setCancelable(true);
       add_feed_dialog.setButton(AlertDialog.BUTTON_NEGATIVE, con.getString(R.string.cancel_dialog),

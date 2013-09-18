@@ -2,15 +2,14 @@ package yay.poloure.simplerss;
 
 import android.os.AsyncTask;
 import android.support.v4.app.ListFragment;
+import android.text.format.Time;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ListView;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
-import android.text.format.Time;
 
 class refresh_page extends AsyncTask<Integer, Object, Animation>
 {

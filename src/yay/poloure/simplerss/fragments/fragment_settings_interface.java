@@ -6,7 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-class fragment_settings_interface extends ListFragment
+public class fragment_settings_interface extends ListFragment
 {
    public fragment_settings_interface()
    {

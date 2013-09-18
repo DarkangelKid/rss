@@ -1,14 +1,13 @@
 package yay.poloure.simplerss;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -18,13 +17,10 @@ import android.support.v4.view.PagerTabStrip;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.view.WindowManager;
-import android.widget.Toast;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-
-import android.graphics.Point;
+import android.widget.Toast;
 
 import java.io.File;
 import java.util.Arrays;
@@ -508,24 +504,26 @@ public class util
       if(!main.HONEYCOMB)
          return;
 
+      android.content.res.Resources res = get_context().getResources();
+
       if(adapter_card.read_items.contains(link))
       {
-         title .setTextColor(R.color.title_grey);
-         url   .setTextColor(R.color.link_grey);
+         title .setTextColor(res.getColor(R.color.title_grey));
+         url   .setTextColor(res.getColor(R.color.link_grey));
 
          if(des != null)
-            des.setTextColor(R.color.des_grey);
+            des.setTextColor(res.getColor(R.color.des_grey));
 
          if(image != null)
             image.setAlpha(0.5f);
       }
       else
       {
-         title .setTextColor(R.color.title_black);
-         url   .setTextColor(R.color.link_black);
+         title .setTextColor(res.getColor(R.color.title_black));
+         url   .setTextColor(res.getColor(R.color.link_black));
 
          if(des!= null)
-            des.setTextColor(R.color.des_black);
+            des.setTextColor(res.getColor(R.color.des_black));
 
          if(image != null)
             image.setAlpha(1.0f);

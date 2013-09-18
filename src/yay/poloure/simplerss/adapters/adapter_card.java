@@ -15,7 +15,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.DrawerLayout;
-import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,7 +32,6 @@ import android.widget.TextView;
 
 import java.io.File;
 import java.util.Set;
-import android.net.Uri;
 import java.util.regex.Pattern;
 
 class adapter_card extends BaseAdapter
@@ -262,22 +260,19 @@ class adapter_card extends BaseAdapter
       return cv;
    }
 
-   void display_img(ImageView view, int position)
+   void display_img(ImageView v, int p)
    {
-      int height  = heights[position];
-      int width   = widths[position];
+      v.setImageDrawable(new ColorDrawable(Color.WHITE));
+      ViewGroup.LayoutParams lp = v.getLayoutParams();
 
-      view.setImageDrawable(new ColorDrawable(Color.WHITE));
-      ViewGroup.LayoutParams iv = view.getLayoutParams();
-
-      iv.height = (int) ((((double) screen_width)/(width)) * (height));
-      view.setLayoutParams(iv);
-      view.setTag(position);
+      lp.height = (int) ((((double) screen_width)/widths[p]) * heights[p]);
+      v.setLayoutParams(lp);
+      v.setTag(p);
 
       if(!main.HONEYCOMB)
-         (new image()).execute(view, view.getTag());
+         (new image()).execute(v, p);
       else
-         (new image()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, view, view.getTag());
+         (new image()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, v, p);
    }
 
    class image extends AsyncTask<Object, Void, Object[]>
@@ -318,7 +313,7 @@ class adapter_card extends BaseAdapter
    }
 
 
-   static class full_holder
+   class full_holder
    {
       TextView title;
       TextView url;
@@ -326,21 +321,21 @@ class adapter_card extends BaseAdapter
       ImageView image;
    }
 
-   static class no_img_des_holder
+   class no_img_des_holder
    {
       TextView title;
       TextView url;
       TextView des;
    }
 
-   static class img_no_des_holder
+   class img_no_des_holder
    {
       TextView title;
       TextView url;
       ImageView image;
    }
 
-   static class no_img_no_des_holder
+   class no_img_no_des_holder
    {
       TextView title;
       TextView url;
@@ -396,19 +391,15 @@ class adapter_card extends BaseAdapter
       public boolean onLongClick(View v)
       {
          String long_press_url = util.getstr(v, R.id.url);
-        /* show_card_dialog(context, long_press_url, ((ViewHolder) v.getTag()).image_view.getVisibility());*/
+         show_card_dialog(long_press_url);
          return true;
       }
    }
 
-   static void show_card_dialog(final Context con, final String URL, final int image_visibility)
+   static void show_card_dialog(final String URL)
    {
-      String[] menu_items;
-      if(image_visibility != View.VISIBLE)
-         menu_items = util.get_array(R.array.card_menu);
-      else
-         menu_items = util.get_array(R.array.card_menu_image);
-
+      String[] menu_items = util.get_array(R.array.card_menu_image);
+      final Context con = util.get_context();
 
       final AlertDialog card_dialog = new AlertDialog.Builder(con)
             .setCancelable(true)
@@ -436,7 +427,7 @@ class adapter_card extends BaseAdapter
             card_dialog.show();
    }
 
-   class fragment_webview extends Fragment
+   public class fragment_webview extends Fragment
    {
       WebView web_view;
       FrameLayout view;

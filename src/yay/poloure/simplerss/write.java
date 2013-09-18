@@ -1,19 +1,14 @@
 package yay.poloure.simplerss;
 
-import android.os.Environment;
+import android.content.Context;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
-import android.content.Context;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.net.URL;
-import java.io.FileNotFoundException;
 
 public class write
 {

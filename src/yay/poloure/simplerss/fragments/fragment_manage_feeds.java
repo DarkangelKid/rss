@@ -15,11 +15,10 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ListView;
-import android.widget.ListAdapter;
 
 import java.io.File;
 
-class fragment_manage_feeds extends ListFragment
+public class fragment_manage_feeds extends ListFragment
 {
    @Override
    public void onCreate(Bundle savedInstanceState)

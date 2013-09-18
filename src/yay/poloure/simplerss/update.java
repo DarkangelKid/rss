@@ -25,9 +25,9 @@ public class update
    public static void manage_tags()
    {
       if(!main.HONEYCOMB)
-         new fragment_manage_tags.refresh().execute();
+         new fragment_manage_groups.refresh().execute();
       else
-         new fragment_manage_tags.refresh()
+         new fragment_manage_groups.refresh()
             .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
    }
 

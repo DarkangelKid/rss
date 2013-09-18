@@ -113,7 +113,7 @@ class adapter_navigation_drawer extends BaseAdapter
             main_item.setText(navigation_drawer.NAV_TITLES[position]);
 
             /* Set the item's image as a CompoundDrawable of the textview. */
-            main_item.setCompoundDrawablesWithIntrinsicBounds(title_array[position], 0, 0, 0);
+            main_item.setCompoundDrawablesRelativeWithIntrinsicBounds(title_array[position], 0, 0, 0);
             main_item.setCompoundDrawablePadding(twelve);
             break;
 

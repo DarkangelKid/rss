@@ -1,18 +1,17 @@
 package yay.poloure.simplerss;
 
 import android.graphics.Color;
-import android.widget.BaseAdapter;
+import android.support.v4.view.PagerTabStrip;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.widget.BaseAdapter;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
-import android.content.Context;
-import android.view.LayoutInflater;
-import android.widget.ImageView;
-import android.support.v4.view.PagerTabStrip;
+import android.widget.TextView;
 
 public class adapter_settings_UI extends BaseAdapter
 {

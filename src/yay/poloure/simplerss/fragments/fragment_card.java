@@ -6,7 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-class fragment_card extends ListFragment
+public class fragment_card extends ListFragment
 {
    public fragment_card()
    {
