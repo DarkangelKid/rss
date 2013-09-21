@@ -7,13 +7,13 @@ class Update
 {
    public static void navigation()
    {
-      if(!FeedsActivity.HONEYCOMB)
+      if(FeedsActivity.HONEYCOMB)
       {
-         new NavDrawer.RefreshNavAdapter().execute(null);
+         new NavDrawer.RefreshNavAdapter().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new int[0]);
       }
       else
       {
-         new NavDrawer.RefreshNavAdapter().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+         new NavDrawer.RefreshNavAdapter().execute(new int[0]);
       }
    }
 
@@ -59,13 +59,12 @@ class Update
    {
       if(FeedsActivity.HONEYCOMB)
       {
-         new FeedDialog.CheckFeed(dlg, ntag, fname, mode, ctitle, ctag, stag, pos)
-               .execute(URL_check);
+         new FeedDialog.CheckFeed(dlg, ntag, fname, mode, ctitle, stag, pos).execute(URL_check);
       }
       else
       {
-         new FeedDialog.CheckFeed(dlg, ntag, fname, mode, ctitle, ctag, stag, pos)
-               .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
+         new FeedDialog.CheckFeed(dlg, ntag, fname, mode, ctitle, stag, pos).executeOnExecutor(
+               AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
       }
    }
 }

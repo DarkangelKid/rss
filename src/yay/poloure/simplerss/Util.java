@@ -1,7 +1,5 @@
 package yay.poloure.simplerss;
 
-
-import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -27,12 +25,15 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Set;
 
 final class Util
 {
-   private static final String[] MEDIA_ERROR_MESSAGES = getArray(R.array.media_errors);
+   static String s_storage = "";
 
-   private static final String[] MEDIA_ERRORS = {
+   static final String[] MEDIA_ERROR_MESSAGES = getArray(R.array.media_errors);
+
+   static final String[] MEDIA_ERRORS = {
          Environment.MEDIA_UNMOUNTED,
          Environment.MEDIA_UNMOUNTABLE,
          Environment.MEDIA_SHARED,
@@ -56,21 +57,18 @@ final class Util
       Write.removeLine(FeedsActivity.INDEX, feed, true);
 
       updateTags();
-      AdapterManageFeeds adapter = (AdapterManageFeeds) PagerAdapterManage.MANAGE_FRAGMENTS[1]
-            .getListAdapter();
-      adapter.remove_item(pos);
-      adapter.notifyDataSetChanged();
+      AdapterManageFeeds.removeItem(pos);
 
       Update.manageTags();
    }
 
    static <T> T[] concat(T[] first, T... second)
    {
-      if(first == null)
+      if(null == first)
       {
          return second;
       }
-      if(second == null)
+      if(null == second)
       {
          return first;
       }
@@ -81,11 +79,11 @@ final class Util
 
    static byte[] concat(byte[] first, byte... second)
    {
-      if(first == null)
+      if(null == first)
       {
          return second;
       }
-      if(second == null)
+      if(null == second)
       {
          return first;
       }
@@ -97,6 +95,10 @@ final class Util
    /* index throws an ArrayOutOfBoundsException if not handled. */
    static <T> int index(T[] array, T value)
    {
+      if(array == null)
+      {
+         return -1;
+      }
       for(int i = 0; i < array.length; i++)
       {
          if(array[i].equals(value))
@@ -109,6 +111,10 @@ final class Util
 
    static int index(int[] array, int value)
    {
+      if(array == null)
+      {
+         return -1;
+      }
       for(int i = 0; i < array.length; i++)
       {
          if(array[i] == value)
@@ -121,6 +127,13 @@ final class Util
 
    static String[] arrayRemove(String[] a, int index)
    {
+      if(null == a || 0 == a.length)
+      {
+         {
+            return new String[0];
+         }
+      }
+
       String[] b = new String[a.length - 1];
       System.arraycopy(a, 0, b, 0, index);
       if(a.length != index)
@@ -130,7 +143,7 @@ final class Util
       return b;
    }
 
-   static boolean updateTags()
+   static void updateTags()
    {
       /* Since this function is static, we can not rely on the fields being
        * non-null. */
@@ -138,7 +151,7 @@ final class Util
       /* Update ctags. */
       FeedsActivity.ctags = Read.file(FeedsActivity.GROUP_LIST);
 
-      /* If no tags exists, add the all tag. */
+      /* If no tags exists, add the all m_imageViewTag. */
       if(0 == FeedsActivity.ctags.length)
       {
          Write.single(FeedsActivity.GROUP_LIST, FeedsActivity.all + FeedsActivity.NL);
@@ -150,12 +163,10 @@ final class Util
          FeedsActivity.viewpager.getAdapter().notifyDataSetChanged();
          /* Does not run on first Update. */
          Update.navigation();
-         return true;
       }
-      return false;
    }
 
-   static int gotoLatestUnread(String[] links, boolean update, int page)
+   static int gotoLatestUnread(Datum[] items, boolean update, int page)
    {
 
       if(null == FeedsActivity.viewpager)
@@ -168,7 +179,7 @@ final class Util
          page = FeedsActivity.viewpager.getCurrentItem();
       }
 
-      if(null == links)
+      if(null == items)
       {
          AdapterCard adp = getCardAdapter(page);
          if(null == adp)
@@ -176,14 +187,14 @@ final class Util
             return -1;
          }
 
-         links = adp.m_links;
+         items = adp.m_items;
       }
 
       int i;
-      for(i = links.length - 1; 0 <= i; i--)
+      for(i = items.length - 1; 0 <= i; i--)
       {
-         int pos = links.length - i - 1;
-         if(!AdapterCard.read_items.contains(links[pos]))
+         int pos = items.length - i - 1;
+         if(!SetHolder.read_items.contains(items[pos].url))
          {
             break;
          }
@@ -210,6 +221,7 @@ final class Util
       int size = ctags.length;
       String[] tag_array = new String[size];
       String[] info_array = new String[size];
+      StringBuilder info = new StringBuilder(40);
 
       String content_path = getPath(FeedsActivity.all, FeedsActivity.CONTENT);
 
@@ -217,31 +229,29 @@ final class Util
 
       for(int i = 0; i < size; i++)
       {
+         info.setLength(0);
          tag_array[i] = ctags[i];
-
          String[] content = Read.csv()[0];
-         String info;
          if(0 == i)
          {
-            info = 1 == size ? "1 tag" : size + " tags";
+            info = 1 == size ? info.append("1 m_imageViewTag") : info.append(size).append(" tags");
          }
          else
          {
-            info = "";
-            int number = content.length < 3 ? content.length : 3;
+            int number = 3 > content.length ? content.length : 3;
 
             for(int j = 0; j < number - 1; j++)
             {
-               info += content[j] + ", ";
+               info.append(content[j]).append(", ");
             }
 
             if(3 < content.length)
             {
-               info += "...";
+               info.append("...");
             }
             else if(0 < number)
             {
-               info += content[number - 1];
+               info.append(content[number - 1]);
             }
          }
          info_array[i] = content.length + " feeds • " + info;
@@ -253,7 +263,7 @@ final class Util
    static boolean isUnmounted()
    {
       /* TODO If setting to force sd is true, return false. */
-      /*if(!internal.equals(storage))
+      /*if(!internal.equals(s_storage))
          return false;*/
 
       /* Check to see if we can Write to the media. */
@@ -271,8 +281,8 @@ final class Util
     * data/data. */
    static String getInternalName(String path)
    {
-      String substring = path
-            .substring(path.indexOf(FeedsActivity.SEPAR + "files" + FeedsActivity.SEPAR) + 7);
+      String substring = path.substring(
+            path.indexOf(FeedsActivity.SEPAR + "files" + FeedsActivity.SEPAR) + 7);
       return substring.replaceAll(FeedsActivity.SEPAR, "-");
    }
 
@@ -331,7 +341,7 @@ final class Util
 
       else
       {
-         return ServiceUpdate.service_context != null ? ServiceUpdate.service_context : null;
+         return null != ServiceUpdate.s_serviceContext ? ServiceUpdate.s_serviceContext : null;
       }
    }
 
@@ -352,19 +362,12 @@ final class Util
     * It should be pretty safe and efficient to call all the time. */
    static String getStorage()
    {
-      /* First check to see if storage all ready exists in the service
-       * or activity. */
-      if(null != FeedsActivity.storage)
+      if(!s_storage.isEmpty())
       {
-         return FeedsActivity.storage;
+         return s_storage;
       }
-
-      if(null != ServiceUpdate.storage)
-      {
-         return ServiceUpdate.storage;
-      }
-
       /* Check the media state for any undesirable states. */
+      /* TODO Check to see if it is the desired first then skip these. */
       String state = Environment.getExternalStorageState();
       for(int i = 0; i < MEDIA_ERRORS.length; i++)
       {
@@ -376,30 +379,34 @@ final class Util
       }
 
       /* If it has reached here the state is MEDIA_MOUNTED and we can continue.
-         Build the storage string depending on android version. */
-      String storage;
-      String sep = FeedsActivity.SEPAR;
+         Build the s_storage string depending on android version. */
       Context context = getContext();
+      String sep = FeedsActivity.SEPAR;
 
       if(FeedsActivity.FROYO)
       {
-         storage = context.getExternalFilesDir(null).getAbsolutePath() + sep;
+         s_storage = context.getExternalFilesDir(null).getAbsolutePath() + sep;
       }
       else
       {
          String name = context.getPackageName();
          File ext = Environment.getExternalStorageDirectory();
-         storage = ext.getAbsolutePath() + sep + "Android" + sep + "data" + sep + name + sep +
-                   "files" + sep;
+         s_storage = ext.getAbsolutePath() + sep + "Android" + sep + "data" + sep + name + sep +
+                     "files" + sep;
 
          /* If the folder does not exist, create it. */
-         File storage_file = new File(storage);
+         File storage_file = new File(s_storage);
          if(!storage_file.exists())
          {
             storage_file.mkdirs();
          }
       }
-      return storage;
+      return s_storage;
+   }
+
+   static class SetHolder
+   {
+      static final Set<String> read_items = Read.set(FeedsActivity.READ_ITEMS);
    }
 
    static int[] getUnreadCounts(String... ctags)
@@ -408,10 +415,6 @@ final class Util
       int[] unread_counts = new int[size];
 
       /* read_items == null when called from the service for notifications. */
-      if(null == AdapterCard.read_items)
-      {
-         AdapterCard.read_items = Read.set(FeedsActivity.READ_ITEMS);
-      }
 
       int total = 0;
       for(int i = 1; i < size; i++)
@@ -420,7 +423,7 @@ final class Util
          String[] urls = Read.file(getPath(ctags[i], FeedsActivity.URL));
          for(String url : urls)
          {
-            if(!AdapterCard.read_items.contains(url))
+            if(!SetHolder.read_items.contains(url))
             {
                unread++;
             }
@@ -458,8 +461,11 @@ final class Util
          if(!frag.isHidden())
          {
             tran.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out, android.R.anim.fade_in,
-                                     android.R.anim.fade_out).hide(frag).show(fragment).commit();
+                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out,
+                                     android.R.anim.fade_in, android.R.anim.fade_out)
+                .hide(frag)
+                .show(fragment)
+                .commit();
             return;
          }
       }
@@ -489,7 +495,7 @@ final class Util
 
       /* Load the ManageRefresh boolean value from settings. */
       String[] check = Read.file(FeedsActivity.SETTINGS + names[1] + FeedsActivity.TXT);
-      boolean refresh = check.length == 0 || !strbol(check[0]);
+      boolean refresh = 0 == check.length || !strbol(check[0]);
 
       if(refresh && "start".equals(state))
       {
@@ -506,13 +512,13 @@ final class Util
       /* Create intent, turn into pending intent, and get the alarmmanager. */
       Intent intent = getServiceIntent(0);
       PendingIntent pintent = PendingIntent.getService(con, 0, intent, 0);
-      String alarm = Activity.ALARM_SERVICE;
+      String alarm = Context.ALARM_SERVICE;
       AlarmManager am = (AlarmManager) con.getSystemService(alarm);
 
       /* Depending on the state string, start or stop the service. */
       if("start".equals(state))
       {
-         long interval = (long) time * 60000L;
+         long interval = time * 60000L;
          long next = System.currentTimeMillis() + interval;
          am.setRepeating(AlarmManager.RTC_WAKEUP, next, interval, pintent);
       }
@@ -532,7 +538,7 @@ final class Util
 
       Resources res = getContext().getResources();
 
-      if(AdapterCard.read_items.contains(link))
+      if(SetHolder.read_items.contains(link))
       {
          title.setTextColor(res.getColor(R.color.title_grey));
          url.setTextColor(res.getColor(R.color.link_grey));
@@ -619,7 +625,7 @@ final class Util
    private static void refreshPages(int page)
    {
       Update.page(0);
-      if(page == 0)
+      if(0 == page)
       {
          for(int i = 1; i < FeedsActivity.ctags.length; i++)
          {
@@ -654,6 +660,7 @@ final class Util
       }
       catch(RuntimeException e)
       {
+         e.printStackTrace();
       }
    }
 
@@ -662,16 +669,6 @@ final class Util
       path = getStorage() + path;
       getContext().deleteFile(getInternalName(path));
       return new File(path).delete();
-   }
-
-   private static void removeIfEmpty(String path)
-   {
-      path = getStorage() + path;
-      File file = new File(path);
-      if(file.exists() && 0 == file.length())
-      {
-         file.delete();
-      }
    }
 
    static boolean rmdir(File directory)
@@ -709,7 +706,7 @@ final class Util
       return new File(a).renameTo(new File(b));
    }
 
-   static boolean useSd()
+   static boolean isUsingSd()
    {
       /* Return true if force sd setting is true. */
       return true;
@@ -728,15 +725,15 @@ final class Util
    static boolean exists(String path)
    {
       path = getStorage() + path;
-      if(useSd() || path.contains(FeedsActivity.IMAGE_DIR) ||
+      if(isUsingSd() || path.contains(FeedsActivity.IMAGE_DIR) ||
          path.contains(FeedsActivity.THUMBNAIL_DIR))
       {
-         return new File(path).exists();
+         return !new File(path).exists();
       }
       else
       {
          String in_path = getInternalName(path);
-         return getContext().getFileStreamPath(in_path).exists();
+         return !getContext().getFileStreamPath(in_path).exists();
       }
    }
 
@@ -767,6 +764,7 @@ final class Util
       }
       catch(Resources.NotFoundException e)
       {
+         e.printStackTrace();
          Write.log(resource + " does not exist.");
       }
       return array;
@@ -782,6 +780,7 @@ final class Util
       }
       catch(Resources.NotFoundException e)
       {
+         e.printStackTrace();
          Write.log(resource + " does not exist.");
       }
       return str;

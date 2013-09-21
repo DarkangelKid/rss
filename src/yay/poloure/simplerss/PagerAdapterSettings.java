@@ -12,7 +12,7 @@ class PagerAdapterSettings extends FragmentPagerAdapter
 
    private static final String[] SETTINGS_TITLES = Util.getArray(R.array.settings_titles);
 
-   public PagerAdapterSettings(FragmentManager fm)
+   PagerAdapterSettings(FragmentManager fm)
    {
       super(fm);
    }

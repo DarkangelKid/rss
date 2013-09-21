@@ -5,8 +5,10 @@ import android.graphics.BitmapFactory;
 import android.text.format.Time;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -15,22 +17,21 @@ import java.util.regex.Pattern;
 
 class FeedParser
 {
-   private static final SimpleDateFormat RSS_DATE           = new SimpleDateFormat(
+   static final SimpleDateFormat RSS_DATE           = new SimpleDateFormat(
          "EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
-   private static final SimpleDateFormat RFC3339            = new SimpleDateFormat(
+   static final SimpleDateFormat RFC3339            = new SimpleDateFormat(
          "yyyy-MM-dd'T'hh:mm:ss.SSS'Z'");
-   private static final Pattern          PATTERN_LTGT       = Pattern.compile("(&lt;).*?(&gt;)");
-   private static final Pattern          PATTERN_CDATA      = Pattern.compile("\\<.*?\\>");
-   private static final Pattern          PATTERN_WHITESPACE = Pattern
-         .compile("[\\t\\n\\x0B\\f\\r\\|]");
-   private final int width;
-   private String[] start    = {
+   static final Pattern          PATTERN_LTGT       = Pattern.compile("(&lt;).*?(&gt;)");
+   static final Pattern          PATTERN_CDATA      = Pattern.compile("\\<.*?\\>");
+   static final Pattern          PATTERN_WHITESPACE = Pattern.compile("[\\t\\n\\x0B\\f\\r\\|]");
+   final int width;
+   String[] start    = {
          "<link>", "<published>", "<pubDate>", "<description>", "<m_title", "<content"
    };
-   private String[] end      = {
+   String[] end      = {
          "/link", "/publ", "/pubD", "/desc", "/titl", "/cont"
    };
-   private String[] of_types = {
+   String[] of_types = {
          "<link>",
          "<published>",
          "<pubDate>",
@@ -48,12 +49,12 @@ class FeedParser
          "</entry",
          "</item"
    };
-   private String dump_path;
-   private String url_path;
+   String dump_path;
+   String url_path;
 
-   public FeedParser(String feed)
+   FeedParser(String feed)
    {
-      width = (int) Math.round((double) Util.getScreenWidth() * 0.944);
+      width = (int) Math.round(Util.getScreenWidth() * 0.944);
       parseFeed(feed);
    }
 
@@ -74,11 +75,15 @@ class FeedParser
       BufferedReader reader = null;
       try
       {
-         reader = Util.useSd() ? Read.reader(storeFile) : Read.reader(storeFile);
+         reader = Util.isUsingSd() ? Read.reader(storeFile) : Read.reader(storeFile, Read.UTF8);
       }
-      catch(Exception e)
+      catch(FileNotFoundException e)
       {
-         Util.post("Exception in FeedParser 1.");
+         e.printStackTrace();
+      }
+      catch(IOException e)
+      {
+         e.printStackTrace();
       }
 
       StringBuilder line = new StringBuilder();
@@ -98,6 +103,7 @@ class FeedParser
          }
          catch(IOException e)
          {
+            e.printStackTrace();
             Util.post("Could not reset reader.");
          }
 
@@ -106,10 +112,12 @@ class FeedParser
          {
             currentTag = getNextTag(reader, of_types);
          }
-         catch(Exception e)
+         catch(IOException e)
          {
+            e.printStackTrace();
             currentTag = "";
          }
+
          if(currentTag.contains("<entry") || currentTag.contains("<item"))
          {
             /// Add line to set and reset the line.
@@ -133,25 +141,25 @@ class FeedParser
             Util.post(image);
             if(!image.isEmpty())
             {
-               line.append("Image|").append(image).append('|');
-               String imageName = image
-                     .substring(image.lastIndexOf(FeedsActivity.SEPAR) + 1, image.length());
+               line.append(FeedsActivity.IMAGE).append(image).append('|');
+               String imageName = image.substring(image.lastIndexOf(FeedsActivity.SEPAR) + 1,
+                                                  image.length());
 
                boolean success = true;
-               /* If the Image does not exist, try to download it from the internet. */
-               if(!Util.exists(imageDir + imageName))
+               /* If the image does not exist, try to download it from the internet. */
+               if(Util.exists(imageDir + imageName))
                {
                   success = !Write.download(image, imageDir + imageName);
                }
 
-               /* If the Image failed to download. */
+               /* If the image failed to download. */
                if(success)
                {
-                  Write.log("Failed to download Image " + image);
+                  Write.log("Failed to download image " + image);
                }
 
-               /* If the Image downloaded fine and a thumbnail does not exist. */
-               else if(!Util.exists(thumbnailDir + imageName))
+               /* If the image downloaded fine and a thumbnail does not exist. */
+               else if(Util.exists(thumbnailDir + imageName))
                {
                   compressImage(Util.getStorage() + imageDir, Util.getStorage() + thumbnailDir,
                                 imageName);
@@ -163,8 +171,12 @@ class FeedParser
                {
                   writeMode = false;
                }
-               line.append("width|").append(options.outWidth).append('|').append("height|")
-                   .append(options.outHeight).append('|');
+               line.append(FeedsActivity.WIDTH)
+                   .append(options.outWidth)
+                   .append('|')
+                   .append(FeedsActivity.HEIGHT)
+                   .append(options.outHeight)
+                   .append('|');
             }
             line.append(checkForUrl());
          }
@@ -212,7 +224,7 @@ class FeedParser
 
                   content = content.replace("&amp;", "&").replace("&quot;", "\"");
 
-                  /// Save the Image m_url from content.
+                  /// Save the image m_url from content.
                   if(currentTag.contains("<description"))
                   {
                      int tem = content.indexOf("img src=");
@@ -242,11 +254,13 @@ class FeedParser
                      {
                         content = RFC3339.format(RSS_DATE.parse(content));
                      }
-                     catch(Exception e)
+                     catch(ParseException e)
                      {
+                        e.printStackTrace();
                         Write.log("BUG : atom-3339, looks like: " + content);
                         content = RFC3339.format(new Date());
                      }
+
                      line.append(content).append('|');
                      break;
                   }
@@ -259,8 +273,9 @@ class FeedParser
                         time.parse3339(content);
                         content = time.format3339(false);
                      }
-                     catch(Exception e)
+                     catch(RuntimeException e)
                      {
+                        e.printStackTrace();
                         Write.log("BUG : atom-3339, looks like: " + content);
                         content = RFC3339.format(new Date());
                      }
@@ -317,6 +332,7 @@ class FeedParser
          }
          catch(IOException e)
          {
+            e.printStackTrace();
             Util.post("IOException in testing next FeedParser char.");
          }
       }
@@ -348,11 +364,10 @@ class FeedParser
 
       float widthTmp = o.outWidth;
 
-      float insample = (float) (widthTmp > (float) width ? Math.round(widthTmp / (float) width)
-                                                         : 1);
+      float insample = widthTmp > width ? Math.round(widthTmp / width) : 1;
 
       BitmapFactory.Options o2 = new BitmapFactory.Options();
-      o2.inSampleSize = (int) insample;
+      o2.inSampleSize = Math.round(insample);
       Bitmap bitmap = BitmapFactory.decodeFile(img_dir + img, o2);
 
       try
@@ -360,8 +375,9 @@ class FeedParser
          FileOutputStream out = new FileOutputStream(thumb_dir + img);
          bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
       }
-      catch(Exception e)
+      catch(FileNotFoundException e)
       {
+         e.printStackTrace();
       }
    }
 
@@ -410,45 +426,46 @@ class FeedParser
 
          if(tag.contains("type=\"text/html") || tag.contains("type=\'text/html"))
          {
-            tem = tag.indexOf("href=");
-            if(-1 != tem)
+            int i = tag.indexOf("href=");
+            if(-1 != i)
             {
-               tem2 = tag.indexOf('\"', tem + 7);
+               tem2 = tag.indexOf('\"', i + 7);
                if(-1 == tem2)
                {
-                  tem2 = tag.indexOf('\'', tem + 7);
+                  tem2 = tag.indexOf('\'', i + 7);
                }
                else
                {
-                  tem3 = tag.indexOf('\'', tem + 7);
+                  tem3 = tag.indexOf('\'', i + 7);
                   if(-1 != tem3 && tem3 < tem2)
                   {
                      tem2 = tem3;
                   }
                }
-               Write.single(url_path, tag.substring(tem + 6, tem2) + FeedsActivity.NL);
+               Write.single(url_path, tag.substring(i + 6, tem2) + FeedsActivity.NL);
             }
          }
-         else if(tag.contains("type=\"Image/jpeg") || tag.contains("type=\'Image/jpeg"))
+         else if(tag.contains("type=\"image/jpeg") ||
+                 tag.contains("type=\'image/jpeg"))
          {
-            tem = tag.indexOf("href=");
-            if(-1 != tem)
+            int i = tag.indexOf("href=");
+            if(-1 != i)
             {
-               tem2 = tag.indexOf('\"', tem + 7);
+               tem2 = tag.indexOf('\"', i + 7);
                if(-1 == tem2)
                {
-                  tem2 = tag.indexOf('\'', tem + 7);
+                  tem2 = tag.indexOf('\'', i + 7);
                }
                else
                {
-                  tem3 = tag.indexOf('\'', tem + 7);
+                  tem3 = tag.indexOf('\'', i + 7);
                   if(-1 != tem3 && tem3 < tem2)
                   {
                      tem2 = tem3;
                   }
                }
                Util.remove(dump_path);
-               Write.single(dump_path, tag.substring(tem + 6, tem2) + FeedsActivity.NL);
+               Write.single(dump_path, tag.substring(i + 6, tem2) + FeedsActivity.NL);
             }
          }
 
@@ -479,8 +496,9 @@ class FeedParser
 
          return new String(build, 0, i + 1);
       }
-      catch(Exception e)
+      catch(IOException e)
       {
+         e.printStackTrace();
          return "";
       }
    }
@@ -493,7 +511,7 @@ class FeedParser
          return "";
       }
 
-      url[0] = url[0].length() > 6 ? "link|" + url[0] + '|' : "";
+      url[0] = 6 < url[0].length() ? "link|" + url[0] + '|' : "";
 
       Util.remove(url_path);
       return url[0];
@@ -534,10 +552,12 @@ class FeedParser
          /* hello my name is a penguin<link>blash stha */
          cont.deleteCharAt(cont.length() - 1);
       }
-      catch(Exception e)
+      catch(IOException e)
       {
+         e.printStackTrace();
          return "";
       }
+
       return cont.toString();
    }
 }

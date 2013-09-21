@@ -1,7 +1,6 @@
 package yay.poloure.simplerss;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.AsyncTask;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
@@ -9,62 +8,58 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-class NavDrawer
+ class NavDrawer
 {
-   private final ListView navigation_list;
+   static ListView s_navList;
+   static String current_title;
+   static DrawerLayout s_drawerLayout;
 
-   private static String current_title;
-   static final         String[] NAV_TITLES = Util.getArray(R.array.nav_titles);
-   private static final String   NAVIGATION = Util.getString(R.string.navigation_title);
+   static final String[] NAV_TITLES = Util.getArray(R.array.nav_titles);
+   static final String   NAVIGATION = Util.getString(R.string.navigation_title);
 
-   private static AdapterNavDrawer      nav_adapter;
-   static         DrawerLayout          drawer_layout;
-   static         ActionBarDrawerToggle drawer_toggle;
+   static ActionBarDrawerToggle DRAWER_TOGGLE;;
 
-   public NavDrawer(DrawerLayout draw_layout, ListView nav_list)
+   NavDrawer(ListView navList, DrawerLayout drawerLayout)
    {
-      drawer_layout = draw_layout;
-
-      /* Create the action bar toggle and set it as the drawer open/closer after. */
-      drawer_toggle = new DrawerToggleClick();
-
       /* Set the listeners (and save the navigation list to the public static variable). */
-      drawer_layout.setDrawerListener(drawer_toggle);
-      (navigation_list = nav_list).setOnItemClickListener(new NavDrawerItemClick());
+      (s_drawerLayout = drawerLayout).setDrawerListener(DRAWER_TOGGLE);
+      (s_navList = navList)          .setOnItemClickListener(new NavDrawerItemClick());
 
-      drawer_toggle.syncState();
+      (DRAWER_TOGGLE = new DrawerToggleClick()).syncState();
 
-      /* Save a new adapter as the public static nav_adapter variable and set it as this lists
-      adapter. */
-      navigation_list.setAdapter(nav_adapter = new AdapterNavDrawer());
+      s_navList.setAdapter(new AdapterNavDrawer());
+   }
+
+   static AdapterNavDrawer getAdapter()
+   {
+      return (AdapterNavDrawer) s_navList.getAdapter();
    }
 
    static class RefreshNavAdapter extends AsyncTask<int[], Void, int[]>
    {
-      @SuppressWarnings("ConstantOnRightSideOfComparison")
       @Override
       protected int[] doInBackground(int[]... counts)
       {
          /* If null was passed into the task, count the unread items. */
-         return null != counts[0] ? counts[0] : Util.getUnreadCounts(FeedsActivity.ctags);
+         return counts[0].length == 0 ? Util.getUnreadCounts(FeedsActivity.ctags) : counts[0];
       }
 
       @Override
       protected void onPostExecute(int[] pop)
       {
          /* Set the titles & counts arrays in this file and notifiy the adapter. */
-         nav_adapter.setTitles(FeedsActivity.ctags);
-         nav_adapter.setCounts(pop);
-         nav_adapter.notifyDataSetChanged();
+         AdapterNavDrawer.setTitles(FeedsActivity.ctags);
+         AdapterNavDrawer.setCounts(pop);
+         getAdapter().notifyDataSetChanged();
       }
    }
 
-   private static class DrawerToggleClick extends ActionBarDrawerToggle
+   static class DrawerToggleClick extends ActionBarDrawerToggle
    {
-      public DrawerToggleClick()
+      DrawerToggleClick()
       {
-         super((Activity) Util.getContext(), drawer_layout, R.drawable.ic_drawer, R.string.drawer_open,
-               R.string.drawer_close);
+         super((Activity) Util.getContext(), s_drawerLayout, R.drawable.ic_drawer,
+               R.string.drawer_open, R.string.drawer_close);
       }
 
       @Override
@@ -87,34 +82,33 @@ class NavDrawer
       }
    }
 
-   private class NavDrawerItemClick implements ListView.OnItemClickListener
+   class NavDrawerItemClick implements ListView.OnItemClickListener
    {
-      @SuppressWarnings("ConstantOnRightSideOfComparison")
       @Override
       public void onItemClick(AdapterView parent, View view, int position, long id)
       {
          /* Close the drawer on any click of a navigation item. */
-         drawer_layout.closeDrawer(navigation_list);
+         s_drawerLayout.closeDrawer(s_navList);
 
          /* Determine the new m_title based on the position of the item clicked. */
          String selectedTitle = 3 < position ? NAV_TITLES[0] : NAV_TITLES[position];
 
-         /* If the item selected was a tag, change the viewpager to that tag. */
+         /* If the item selected was a m_imageViewTag, change the viewpager to that
+         image. */
          if(3 < position)
          {
             FeedsActivity.viewpager.setCurrentItem(position - 4);
          }
 
-         position = 3 < position ? 0 : position;
-
-         /* If the selected m_title is the m_title of the current page, exit. */
+         /* If the selected title is the title of the current page, exit.
+          * This stops the animation from showing on page change.*/
          if(current_title.equals(selectedTitle))
          {
             return;
          }
 
          /* Hide the current fragment and display the selected one. */
-         Util.showFragment(FeedsActivity.main_fragments[position]);
+         Util.showFragment(FeedsActivity.main_fragments[3 < position ? 0 : position]);
 
          /* Set the m_title text of the actionbar to the selected item. */
          FeedsActivity.bar.setTitle(selectedTitle);

@@ -6,7 +6,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 
 class PagerAdapterFeeds extends FragmentPagerAdapter
 {
-   public PagerAdapterFeeds(FragmentManager fm)
+   PagerAdapterFeeds(FragmentManager fm)
    {
       super(fm);
    }

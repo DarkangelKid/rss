@@ -37,7 +37,11 @@ class FragmentManageFilters extends ListFragment
 
       setListAdapter(adapter);
 
-      adapter.set_items(Read.file(FeedsActivity.FILTER_LIST));
+      adapter.setTitles(Read.file(FeedsActivity.FILTER_LIST));
+
+      final AlertDialog.Builder build = new AlertDialog.Builder(getActivity());
+      build.setCancelable(true)
+           .setPositiveButton(getString(R.string.delete_dialog), new FilterDeleteClick(adapter));
 
       listview.setOnItemLongClickListener(new OnItemLongClickListener()
       {
@@ -45,24 +49,7 @@ class FragmentManageFilters extends ListFragment
          public boolean onItemLongClick(AdapterView<?> parent, View view, final int position,
                                         long id)
          {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setCancelable(true).setPositiveButton(getString(R.string.delete_dialog),
-                                                          new DialogInterface.OnClickListener()
-                                                          {
-                                                             @Override
-                                                             public void onClick(
-                                                                   DialogInterface dialog,
-                                                                   int id_no)
-                                                             {
-                                                                Write.removeLine(
-                                                                      FeedsActivity.FILTER_LIST,
-                                                                      adapter.getItem(position),
-                                                                      false);
-                                                                adapter.removePosition(position);
-                                                             }
-                                                          });
-            AlertDialog alert = builder.create();
-            alert.show();
+            build.show();
             return true;
          }
       });
@@ -71,13 +58,32 @@ class FragmentManageFilters extends ListFragment
    @Override
    public boolean onOptionsItemSelected(MenuItem item)
    {
-      if(NavDrawer.drawer_toggle.onOptionsItemSelected(item))
+      if(NavDrawer.DRAWER_TOGGLE.onOptionsItemSelected(item))
+      {
          return true;
-      if(item.getTitle().equals("add"))
+      }
+      if("add".equals(item.getTitle()))
       {
          FeedDialog.showAddFilterDialog();
          return true;
       }
       return super.onOptionsItemSelected(item);
+   }
+
+   static class FilterDeleteClick implements DialogInterface.OnClickListener
+   {
+      AdapterManageFilters m_adapter;
+
+      FilterDeleteClick(AdapterManageFilters adapter)
+      {
+         m_adapter = adapter;
+      }
+
+      @Override
+      public void onClick(DialogInterface dialog, int id_no)
+      {
+         Write.removeLine(FeedsActivity.FILTER_LIST, m_adapter.getItem(id_no), false);
+         m_adapter.removePosition(id_no);
+      }
    }
 }

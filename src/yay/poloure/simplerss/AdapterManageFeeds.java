@@ -5,76 +5,75 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-@SuppressWarnings("ConstantOnRightSideOfComparison")
 class AdapterManageFeeds extends BaseAdapter
 {
-   private static String[] title_array;
-   private static String[] info_array;
+   private static String[] s_titleArray;
+   private static String[] s_infoArray;
 
-   void setArrays(String[] new_titles, String... new_infos)
+   void setArrays(String[] titles, String... infos)
    {
-      title_array = new_titles;
-      info_array = new_infos;
+      s_titleArray = titles;
+      s_infoArray = infos;
       notifyDataSetChanged();
    }
 
-   void setPosition(int pos, String new_title, String new_info)
+   void setPosition(int pos, String title, String info)
    {
-      title_array[pos] = new_title;
-      info_array[pos] = new_info;
+      s_titleArray[pos] = title;
+      s_infoArray[pos] = info;
       notifyDataSetChanged();
    }
 
    @Override
    public int getCount()
    {
-      return title_array.length;
+      return s_titleArray.length;
    }
 
    @Override
    public long getItemId(int position)
    {
-      return (long) position;
+      return position;
    }
 
-   static void remove_item(int position)
+   static void removeItem(int position)
    {
-      title_array = Util.arrayRemove(title_array, position);
-      info_array = Util.arrayRemove(info_array, position);
+      s_titleArray = Util.arrayRemove(s_titleArray, position);
+      s_infoArray = Util.arrayRemove(s_infoArray, position);
    }
 
    @Override
    public String getItem(int position)
    {
-      return title_array[position];
+      return s_titleArray[position];
    }
 
-   static String get_info(int position)
+   static String getInfo(int position)
    {
-      return info_array[position];
+      return s_infoArray[position];
    }
 
    @Override
-   public View getView(int position, View cv, ViewGroup parent)
+   public View getView(int position, View view, ViewGroup parent)
    {
       ViewHolder holder;
-      if(null == cv)
+      if(null == view)
       {
-         cv = Util.getLayoutInflater().inflate(R.layout.manage_feed_item, parent, false);
+         view = Util.getLayoutInflater().inflate(R.layout.manage_feed_item, parent, false);
          holder = new ViewHolder();
-         holder.m_title = (TextView) cv.findViewById(R.id.title_item);
-         holder.m_info = (TextView) cv.findViewById(R.id.info_item);
-         cv.setTag(holder);
+         holder.m_title = (TextView) view.findViewById(R.id.title_item);
+         holder.m_info = (TextView) view.findViewById(R.id.info_item);
+         view.setTag(holder);
       }
       else
       {
-         holder = (ViewHolder) cv.getTag();
+         holder = (ViewHolder) view.getTag();
       }
 
-      holder.m_title.setText(title_array[position]);
-      holder.m_info.setText(info_array[position]);
+      holder.m_title.setText(s_titleArray[position]);
+      holder.m_info.setText(s_infoArray[position]);
 
-      return cv;
+      return view;
    }
 
    static class ViewHolder

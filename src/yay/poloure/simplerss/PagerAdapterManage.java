@@ -12,7 +12,7 @@ class PagerAdapterManage extends FragmentPagerAdapter
 
    private static final String[] MANAGE_TITLES = Util.getArray(R.array.manage_titles);
 
-   public PagerAdapterManage(FragmentManager fm)
+   PagerAdapterManage(FragmentManager fm)
    {
       super(fm);
    }

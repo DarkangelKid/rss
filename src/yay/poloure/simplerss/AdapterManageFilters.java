@@ -7,61 +7,57 @@ import android.widget.TextView;
 
 class AdapterManageFilters extends BaseAdapter
 {
-   private static String[] title_list;
+   static String[] s_filterTitles;
 
-   public AdapterManageFilters()
+   static void setTitles(String... titles)
    {
-   }
-
-   static void set_items(String... new_titles)
-   {
-      title_list = new_titles;
+      s_filterTitles = titles;
    }
 
    @Override
    public int getCount()
    {
-      return title_list.length;
+      return s_filterTitles == null ? 0 : s_filterTitles.length;
    }
 
    @Override
    public long getItemId(int position)
    {
-      return (long) position;
+      return position;
    }
 
    void removePosition(int position)
    {
-      Util.arrayRemove(title_list, position);
+      Util.arrayRemove(s_filterTitles, position);
       notifyDataSetChanged();
    }
 
    @Override
    public String getItem(int position)
    {
-      return title_list[position];
+      return s_filterTitles[position];
    }
 
    @Override
-   public View getView(int position, View convertView, ViewGroup parent)
+   public View getView(int position, View view, ViewGroup parent)
    {
       ViewHolder holder;
-      if(null == convertView)
+      if(null == view)
       {
 
-         convertView = Util.getLayoutInflater().inflate(R.layout.manage_feed_item, parent, false);
+         view = Util.getLayoutInflater().inflate(R.layout.manage_feed_item, parent, false);
          holder = new ViewHolder();
-         holder.m_title = (TextView) convertView.findViewById(R.id.title_item);
-         convertView.setTag(holder);
+         holder.m_title = (TextView) view.findViewById(R.id.title_item);
+         view.setTag(holder);
       }
       else
       {
-         holder = (ViewHolder) convertView.getTag();
+         holder = (ViewHolder) view.getTag();
       }
 
-      holder.m_title.setText(title_list[position]);
+      holder.m_title.setText(s_filterTitles[position]);
 
-      return convertView;
+      return view;
    }
 
    static class ViewHolder

@@ -11,20 +11,19 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.Process;
 
-class ServiceUpdate extends IntentService
+public class ServiceUpdate extends IntentService
 {
-   static Context service_context;
-   static String  storage;
+   static Context s_serviceContext;
 
    public ServiceUpdate()
    {
-      super("ServiceUpdate");
+      super("Service");
    }
 
    @Override
    protected void onHandleIntent(Intent intent)
    {
-      service_context = this;
+      s_serviceContext = this;
 
       PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
       PowerManager.WakeLock wakelock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SIMPLERSS");
@@ -34,8 +33,6 @@ class ServiceUpdate extends IntentService
 
       int page = intent.getIntExtra("GROUP_NUMBER", 0);
 
-      storage = Util.getStorage();
-
       String[] allTags = Read.file(FeedsActivity.GROUP_LIST);
       String tag = allTags[page];
 
@@ -44,7 +41,7 @@ class ServiceUpdate extends IntentService
       String[] urls = content[1];
       String[] tags = content[2];
 
-      /* Download and parse each feed in the tag. */
+      /* Download and parse each feed in the m_imageViewTag. */
       for(int i = 0; i < names.length; i++)
       {
          if(tags[i].equals(tag) || tag.equals(FeedsActivity.all))
@@ -72,7 +69,7 @@ class ServiceUpdate extends IntentService
          m.setData(b);
          FeedsActivity.service_handler.sendMessage(m);
       }
-      else if((0 != unreadCounts[0]) && intent.getBooleanExtra("NOTIFICATIONS", false))
+      else if(0 != unreadCounts[0] && intent.getBooleanExtra("NOTIFICATIONS", false))
       {
          /* Calculate the number of tags with new items. */
          int tagItems = 1;
@@ -128,8 +125,8 @@ class ServiceUpdate extends IntentService
 
    public static boolean isServiceRunning(Activity activity)
    {
-      ActivityManager manager = (ActivityManager) activity
-            .getSystemService(Context.ACTIVITY_SERVICE);
+      ActivityManager manager = (ActivityManager) activity.getSystemService(
+            Context.ACTIVITY_SERVICE);
       for(RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE))
       {
          if(ServiceUpdate.class.getName().equals(service.service.getClassName()))

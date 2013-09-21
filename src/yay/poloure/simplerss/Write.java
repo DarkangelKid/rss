@@ -4,10 +4,12 @@ import android.content.Context;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.util.Arrays;
 
@@ -24,7 +26,7 @@ final class Write
 
    public static boolean collection(String path, Iterable<?> content)
    {
-      /* If storage is unmounted OR if we force to use external. */
+      /* If s_storage is unmounted OR if we force to use external. */
       if(Util.isUnmounted())
       {
          return false;
@@ -32,7 +34,7 @@ final class Write
 
       path = Util.getStorage() + path;
 
-      if(Util.useSd())
+      if(Util.isUsingSd())
       {
          Util.remove(path);
       }
@@ -43,7 +45,7 @@ final class Write
          try
          {
             /* Create the buffered writer. */
-            out = Util.useSd() ? writer(path, false) : writer(path, Context.MODE_PRIVATE);
+            out = Util.isUsingSd() ? writer(path, false) : writer(path, Context.MODE_PRIVATE);
 
             for(Object item : content)
             {
@@ -58,8 +60,13 @@ final class Write
             }
          }
       }
-      catch(Exception e)
+      catch(FileNotFoundException e)
       {
+         e.printStackTrace();
+      }
+      catch(IOException e)
+      {
+         e.printStackTrace();
       }
       return true;
    }
@@ -67,7 +74,7 @@ final class Write
    /* Function should be safe, returns false if fails. */
    public static boolean download(String urler, String path)
    {
-      /* If storage is unmounted OR if we force to use external. */
+      /* If s_storage is unmounted OR if we force to use external. */
       if(Util.isUnmounted())
       {
          return false;
@@ -84,20 +91,14 @@ final class Write
          try
          {
             in = new BufferedInputStream(new URL(urler).openStream());
-            if(!Util.useSd() &&
-               !urler.contains(".jpg") &&
-               !urler.contains(".png") &&
-               !urler.contains(".gif") &&
-               !urler.contains(".JPEG") &&
-               !urler.contains(".JPG") &&
-               !urler.contains(".jpeg"))
-            {
-               fout = context.openFileOutput(name, Context.MODE_PRIVATE);
-            }
-            else
-            {
-               fout = new FileOutputStream(path);
-            }
+            fout = !Util.isUsingSd() &&
+                   !urler.contains(".jpg") &&
+                   !urler.contains(".png") &&
+                   !urler.contains(".gif") &&
+                   !urler.contains(".JPEG") &&
+                   !urler.contains(".JPG") &&
+                   !urler.contains(".jpeg") ? context.openFileOutput(name, Context.MODE_PRIVATE)
+                                            : new FileOutputStream(path);
 
             byte[] data = new byte[1024];
             int count;
@@ -118,11 +119,18 @@ final class Write
             }
          }
       }
-      catch(Exception e)
+      catch(FileNotFoundException e)
       {
+         e.printStackTrace();
+         return false;
+      }
+      catch(IOException e)
+      {
+         e.printStackTrace();
          Util.remove(path);
          return false;
       }
+
       /* TODO: if file exists. */
       return true;
    }
@@ -130,7 +138,7 @@ final class Write
    /* Function should be safe, returns false if fails. */
    public static boolean single(String path, String string)
    {
-      /* If storage is unmounted OR if we force to use external. */
+      /* If s_storage is unmounted OR if we force to use external. */
       if(Util.isUnmounted())
       {
          return false;
@@ -143,7 +151,7 @@ final class Write
          BufferedWriter out = null;
          try
          {
-            out = Util.useSd() ? writer(path, true) : writer(path, Context.MODE_APPEND);
+            out = Util.isUsingSd() ? writer(path, true) : writer(path, Context.MODE_APPEND);
             out.write(string);
          }
          finally
@@ -154,8 +162,14 @@ final class Write
             }
          }
       }
-      catch(Exception e)
+      catch(FileNotFoundException e)
       {
+         e.printStackTrace();
+         return false;
+      }
+      catch(IOException e)
+      {
+         e.printStackTrace();
          return false;
       }
       return true;
@@ -165,7 +179,7 @@ final class Write
     * NOT SAFE FOR INTERNAL IF FAILS. */
    static boolean removeLine(String path, CharSequence string, boolean contains)
    {
-      /* If storage is unmounted OR if we force to use external. */
+      /* If s_storage is unmounted OR if we force to use external. */
       if(Util.isUnmounted())
       {
          return false;
@@ -187,8 +201,8 @@ final class Write
                return false;
             }
 
-            /* No backup for internal storage. */
-            out = Util.useSd() ? writer(tempPath, false) : writer(path, Context.MODE_PRIVATE);
+            /* No backup for internal s_storage. */
+            out = Util.isUsingSd() ? writer(tempPath, false) : writer(path, Context.MODE_PRIVATE);
 
             for(String item : lines)
             {
@@ -207,9 +221,15 @@ final class Write
          }
       }
       /* If writing to the temp file fails, delete the temp file and return. */
-      catch(Exception e)
+      catch(FileNotFoundException e)
       {
-         if(Util.useSd())
+         e.printStackTrace();
+         return false;
+      }
+      catch(IOException e)
+      {
+         e.printStackTrace();
+         if(Util.isUsingSd())
          {
             Util.remove(tempPath);
          }
@@ -217,7 +237,7 @@ final class Write
       }
 
       /* If the rename failed, delete the file and Write the original. */
-      if(Util.useSd())
+      if(Util.isUsingSd())
       {
          boolean success = Util.move(tempPath, path);
          if(!success)
@@ -240,7 +260,8 @@ final class Write
       return new BufferedWriter(new FileWriter(p, ap));
    }
 
-   private static BufferedWriter writer(String path, int MODE) throws Exception
+   private static BufferedWriter writer(String path, int MODE)
+         throws FileNotFoundException, UnsupportedEncodingException
    {
       Context context = Util.getContext();
       path = Util.getInternalName(path);

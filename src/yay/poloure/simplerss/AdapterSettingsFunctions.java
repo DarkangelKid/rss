@@ -14,22 +14,22 @@ import android.widget.TextView;
 class AdapterSettingsFunctions extends BaseAdapter
 {
    private TextView title_view;
-   private static final String[] FUNCTION_TITLES    = Util
-         .getArray(R.array.settings_function_titles);
-   private static final String[] FUNCTION_SUMMARIES = Util
-         .getArray(R.array.settings_function_summaries);
-   static final String[] FILE_NAMES         = Util.getArray(R.array.settings_names);
-   static final String[] REFRESH_TIMES      = {
+   private static final String[] FUNCTION_TITLES    = Util.getArray(
+         R.array.settings_function_titles);
+   private static final String[] FUNCTION_SUMMARIES = Util.getArray(
+         R.array.settings_function_summaries);
+   static final         String[] FILE_NAMES         = Util.getArray(R.array.settings_names);
+   static final         String[] REFRESH_TIMES      = {
          "15m", "30m", "45m", "1h", "2h", "3h", "4h", "8h", "12h", "24h"
    };
-   static final int[]    TIMES              = {
+   static final         int[]    TIMES              = {
          15, 30, 45, 60, 120, 180, 240, 480, 720, 1440
    };
 
    @Override
    public long getItemId(int position)
    {
-      return (long) position;
+      return position;
    }
 
    @Override
@@ -60,10 +60,13 @@ class AdapterSettingsFunctions extends BaseAdapter
    public int getItemViewType(int position)
    {
       if(0 == position)
+      {
          return 0;
-
+      }
       else
+      {
          return position == 1 || position > 2 ? 1 : 2;
+      }
    }
 
    @Override
@@ -99,7 +102,9 @@ class AdapterSettingsFunctions extends BaseAdapter
             cv.setTag(holder);
          }
          else
+         {
             holder = (SettingsCheckHolder) cv.getTag();
+         }
 
          holder.title.setText(FUNCTION_TITLES[position]);
          holder.summary.setText(FUNCTION_SUMMARIES[position]);
@@ -123,7 +128,7 @@ class AdapterSettingsFunctions extends BaseAdapter
       /* Otherwise, the type will default to a seekbar. */
       else
       {
-         final SettingsSeekHolder holder;
+         SettingsSeekHolder holder;
          if(null == cv)
          {
             cv = inflater.inflate(R.layout.settings_seekbar, parent, false);
@@ -135,31 +140,14 @@ class AdapterSettingsFunctions extends BaseAdapter
             cv.setTag(holder);
          }
          else
+         {
             holder = (SettingsSeekHolder) cv.getTag();
+         }
 
          holder.title.setText(FUNCTION_TITLES[position]);
          holder.summary.setText(FUNCTION_SUMMARIES[position]);
          holder.seekbar.setMax(9);
-         holder.seekbar.setOnSeekBarChangeListener(new OnSeekBarChangeListener()
-         {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
-            {
-               holder.read.setText(REFRESH_TIMES[progress]);
-               Util.remove(settingPath);
-               Write.single(settingPath, Integer.toString(TIMES[progress]));
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar)
-            {
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar)
-            {
-            }
-         });
+         holder.seekbar.setOnSeekBarChangeListener(new SeekBarChangeListener(holder, settingPath));
 
          /* Load the saved value and set the progress.*/
          String checker = Read.setting(settingPath);
@@ -184,4 +172,33 @@ class AdapterSettingsFunctions extends BaseAdapter
       SeekBar  seekbar;
    }
 
+   private static class SeekBarChangeListener implements OnSeekBarChangeListener
+   {
+      private final SettingsSeekHolder holder;
+      private final String             settingPath;
+
+      public SeekBarChangeListener(SettingsSeekHolder holder, String settingPath)
+      {
+         this.holder = holder;
+         this.settingPath = settingPath;
+      }
+
+      @Override
+      public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
+      {
+         holder.read.setText(REFRESH_TIMES[progress]);
+         Util.remove(settingPath);
+         Write.single(settingPath, Integer.toString(TIMES[progress]));
+      }
+
+      @Override
+      public void onStartTrackingTouch(SeekBar seekBar)
+      {
+      }
+
+      @Override
+      public void onStopTrackingTouch(SeekBar seekBar)
+      {
+      }
+   }
 }

@@ -56,7 +56,7 @@ class FragmentFeeds extends Fragment
    @Override
    public boolean onOptionsItemSelected(MenuItem item)
    {
-      if(NavDrawer.drawer_toggle.onOptionsItemSelected(item))
+      if(NavDrawer.DRAWER_TOGGLE.onOptionsItemSelected(item))
       {
          return true;
       }
@@ -65,7 +65,7 @@ class FragmentFeeds extends Fragment
          FeedDialog.showAddDialog(FeedsActivity.ctags);
          return true;
       }
-      else if(item.getTitle().equals(Util.getString(R.string.unread)))
+      if(item.getTitle().equals(Util.getString(R.string.unread)))
       {
          Util.gotoLatestUnread(null, true, 0);
          return true;
@@ -78,7 +78,7 @@ class FragmentFeeds extends Fragment
       return super.onOptionsItemSelected(item);
    }
 
-   private static class PageChange implements ViewPager.OnPageChangeListener
+   static class PageChange implements ViewPager.OnPageChangeListener
    {
       @Override
       public void onPageScrollStateChanged(int state)
@@ -93,7 +93,7 @@ class FragmentFeeds extends Fragment
       @Override
       public void onPageSelected(int pos)
       {
-         if(Util.getCardAdapter(pos).getCount() == 0)
+         if(0 == Util.getCardAdapter(pos).getCount())
          {
             Update.page(pos);
          }

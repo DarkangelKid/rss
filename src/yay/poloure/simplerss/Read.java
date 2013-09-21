@@ -4,15 +4,19 @@ import android.content.Context;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 final class Read
 {
+   static final String UTF8 = "UTF-8";
+
    private Read()
    {
    }
@@ -99,10 +103,8 @@ final class Read
          path = Util.getStorage() + path;
       }
 
-      int count;
-
       /* If the path is not a count file, get the number of lines. */
-      count = !path.contains(FeedsActivity.COUNT) ? count(path) : 1;
+      int count = path.contains(FeedsActivity.COUNT) ? 1 : count(path);
 
       /* If the file is empty, return a zero length array. */
       if(0 == count)
@@ -119,7 +121,7 @@ final class Read
          BufferedReader in = null;
          try
          {
-            in = Util.useSd() ? reader(path) : reader(path);
+            in = Util.isUsingSd() ? reader(path) : reader(path, UTF8);
 
             for(int i = 0; i < lines.length; i++)
             {
@@ -134,10 +136,17 @@ final class Read
             }
          }
       }
-      catch(Exception e)
+      catch(FileNotFoundException e)
       {
+         e.printStackTrace();
          return new String[0];
       }
+      catch(IOException e)
+      {
+         e.printStackTrace();
+         return new String[0];
+      }
+
       return lines;
    }
 
@@ -179,7 +188,7 @@ final class Read
          BufferedReader in = null;
          try
          {
-            in = Util.useSd() ? reader(path) : reader(path);
+            in = Util.isUsingSd() ? reader(path) : reader(path, UTF8);
 
             while(null != in.readLine())
             {
@@ -194,24 +203,30 @@ final class Read
             }
          }
       }
-      catch(Exception e)
+      catch(FileNotFoundException e)
       {
+         e.printStackTrace();
+      }
+      catch(IOException e)
+      {
+         e.printStackTrace();
       }
       return i;
    }
 
    /* Wrapper for creating external BufferedReader. */
-   public static BufferedReader reader(String path) throws IOException
+   public static BufferedReader reader(String path) throws FileNotFoundException
    {
       return new BufferedReader(new FileReader(path));
    }
 
-   /* For reading from the internal storage. */
-   public static BufferedReader reader(String path, String UTF) throws Exception
+   /* For reading from the internal s_storage. */
+   public static BufferedReader reader(String path, String UTF)
+         throws FileNotFoundException, UnsupportedEncodingException
    {
       Context context = Util.getContext();
       path = Util.getInternalName(path);
       FileInputStream fis = context.openFileInput(path);
-      return new BufferedReader(new InputStreamReader(fis, "UTF-8"));
+      return new BufferedReader(new InputStreamReader(fis, UTF));
    }
 }

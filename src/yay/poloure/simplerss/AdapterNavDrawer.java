@@ -4,25 +4,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 class AdapterNavDrawer extends BaseAdapter
 {
-   private static String[] menu_array;
-   private static int[]    count_array;
-   private        int      twelve;
-   private static final int[] NAV_ICONS = {
+   static String[] s_menuArray;
+   static int[]    s_unreadArray;
+
+   static final int   TWELVE  = Math.round(12.0F * Util.getContext()
+                  .getResources().getDisplayMetrics().density + 0.5f);
+   static final int[] NAV_ICONS = {
          R.drawable.feeds, R.drawable.manage, R.drawable.feeds,
    };
 
-   private TextView NavItem;
-
-   static class NavDivider
-   {
-      TextView  title;
-      ImageView divider_view;
-   }
+   TextView NavItem;
 
    static class TagItem
    {
@@ -30,41 +25,32 @@ class AdapterNavDrawer extends BaseAdapter
       TextView unread_view;
    }
 
-   public AdapterNavDrawer()
+   static void setTitles(String[] titles)
    {
-      if(0 == twelve)
-      {
-         twelve = (int) (12.0F * Util.getContext().getResources().getDisplayMetrics().density +
-                         0.5f);
-      }
+      s_menuArray = titles;
    }
 
-   static void setTitles(String... new_titles)
+   static void setCounts(int[] counts)
    {
-      menu_array = new_titles;
-   }
-
-   static void setCounts(int... new_counts)
-   {
-      count_array = new_counts;
+      s_unreadArray = counts;
    }
 
    @Override
    public long getItemId(int position)
    {
-      return (long) position;
+      return position;
    }
 
    @Override
    public String getItem(int position)
    {
-      return menu_array[position];
+      return s_menuArray[position];
    }
 
    @Override
    public int getCount()
    {
-      return menu_array.length + 4;
+      return (null == s_menuArray) ? 4 : s_menuArray.length + 4;
    }
 
    @Override
@@ -89,7 +75,7 @@ class AdapterNavDrawer extends BaseAdapter
 
       else
       {
-         return position == 3 ? 1 : 2;
+         return 3 == position ? 1 : 2;
       }
    }
 
@@ -111,30 +97,21 @@ class AdapterNavDrawer extends BaseAdapter
 
             NavItem.setText(NavDrawer.NAV_TITLES[position]);
 
-            /* Set the item's Image as a CompoundDrawable of the textview. */
+            /* Set the item's image as a CompoundDrawable of the textview. */
             NavItem.setCompoundDrawablesRelativeWithIntrinsicBounds(NAV_ICONS[position], 0, 0, 0);
-            NavItem.setCompoundDrawablePadding(twelve);
+            NavItem.setCompoundDrawablePadding(TWELVE);
             break;
 
          /* This view is for the NavDivider and "Groups" subtitle.
           * The imageview NavDivider is below the subtitle. */
          case 1:
-            NavDivider holder;
             if(null == cv)
             {
                cv = inflater.inflate(R.layout.navigation_drawer_subtitle_divider, parent, false);
-               holder = new NavDivider();
-               holder.title = (TextView) cv.findViewById(R.id.title_item);
-               holder.divider_view = (ImageView) cv.findViewById(R.id.divider_item);
-               cv.setTag(holder);
-            }
-            else
-            {
-               holder = (NavDivider) cv.getTag();
             }
             break;
 
-         /* This view is for the tag items of the navigation drawer.
+         /* This view is for the m_imageViewTag items of the navigation drawer.
           * The one with unread counters. */
          default:
             TagItem holder2;
@@ -151,8 +128,8 @@ class AdapterNavDrawer extends BaseAdapter
                holder2 = (TagItem) cv.getTag();
             }
 
-            holder2.title.setText(menu_array[position - 4]);
-            String number = Integer.toString(count_array[position - 4]);
+            holder2.title.setText(s_menuArray[position - 4]);
+            String number = Integer.toString(s_unreadArray[position - 4]);
             holder2.unread_view.setText("0".equals(number) ? "" : number);
       }
       return cv;

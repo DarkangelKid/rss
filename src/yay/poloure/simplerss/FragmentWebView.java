@@ -23,7 +23,7 @@ public class FragmentWebView
       {
          if(null != web_view)
          {
-            this.web_view.destroy();
+            web_view.destroy();
          }
 
          view = new FrameLayout(Util.getContext());

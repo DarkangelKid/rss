@@ -18,8 +18,50 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
 
-class FeedsActivity extends ActionBarActivity
+import java.util.Locale;
+
+public class FeedsActivity extends ActionBarActivity
 {
+   static final String          SEPAR            = System.getProperty("file.separator");
+   static final String          NL               = System.getProperty("line.separator");
+   static final Locale          locale           = Locale.getDefault();
+   /* Formats */
+   static final String          INDEX_FORMAT     = "feed|%s|url|%s|tag|%s|";
+   static final String          FRAGMENT_TAG     = "android:switcher:%s:%d";
+   /* Appends */
+   static final String          TXT              = ".txt";
+   static final String          TEMP             = ".temp" + TXT;
+   static final String          COUNT            = ".count" + TXT;
+   static final String          STORE            = ".store" + TXT;
+   /* Parser saves */
+   static final String          IMAGE            = "image|";
+   static final String          HEIGHT           = "height|";
+   static final String          WIDTH            = "width|";
+   static final String          TAG_TITLE        = "<title";
+   static final String          ENDTAG_TITLE     = "</title>";
+   /* Folders */
+   static final String          GROUPS_DIR       = "tags" + SEPAR;
+   static final String          THUMBNAIL_DIR    = "thumbnails" + SEPAR;
+   static final String          IMAGE_DIR        = "images" + SEPAR;
+   static final String          SETTINGS         = "settings" + SEPAR;
+   /* Files */
+   static final String          INT_STORAGE      = "internal" + TXT;
+   static final String          STRIP_COLOR      = "pagertabstrip_colour" + TXT;
+   static final String          DUMP_FILE        = "dump" + TXT;
+   static final String          INDEX            = "index" + TXT;
+   static final String          CONTENT          = "content" + TXT;
+   static final String          URL              = "urls" + TXT;
+   static final String          GROUP_LIST       = "tag_list" + TXT;
+   static final String          FILTER_LIST      = "filter_list" + TXT;
+   static final String          READ_ITEMS       = "read_items" + TXT;
+   /* Else */
+   static final int             VER              = VERSION.SDK_INT;
+   static final String          IMAGE_TYPE       = "image" + SEPAR;
+   static final boolean         FROYO            = VERSION_CODES.FROYO <= VER;
+   static final boolean         HONEYCOMB        = VERSION_CODES.HONEYCOMB <= VER;
+   static final boolean         HONEYCOMB_MR2    = VERSION_CODES.HONEYCOMB_MR2 <= VER;
+   static final boolean         JELLYBEAN        = VERSION_CODES.JELLY_BEAN <= VER;
+   static final PagerTabStrip[] PAGER_TAB_STRIPS = new PagerTabStrip[3];
    /* Generally unsafe. */
    static Menu            optionsMenu;
    static ViewPager       viewpager;
@@ -27,48 +69,11 @@ class FeedsActivity extends ActionBarActivity
    static FragmentManager fman;
    static ActionBar       bar;
    static Handler         service_handler;
-
    /* These must be set straight away in onCreate. */
    /* UI related strings. */
-   static String   storage;
-   static String   all;
-   static String[] ctags;
-
-   static Fragment[] main_fragments;
-
-   static final String SEPAR = System.getProperty("file.separator");
-   static final String NL    = System.getProperty("line.separator");
-
-   /* Appends */
-   static final String TXT   = ".txt";
-   static final String TEMP  = ".temp" + TXT;
-   static final String COUNT = ".count" + TXT;
-   static final String STORE = ".store" + TXT;
-
-   /* Folders */
-   static final String GROUPS_DIR    = "tags" + SEPAR;
-   static final String THUMBNAIL_DIR = "thumbnails" + SEPAR;
-   static final String IMAGE_DIR     = "images" + SEPAR;
-   static final String SETTINGS      = "settings" + SEPAR;
-
-   /* Files */
-   static final String INT_STORAGE = "internal" + TXT;
-   static final String STRIP_COLOR = "pagertabstrip_colour" + TXT;
-   static final String DUMP_FILE   = "dump" + TXT;
-   static final String INDEX       = "index" + TXT;
-   static final String CONTENT     = "content" + TXT;
-   static final String URL         = "urls" + TXT;
-   static final String GROUP_LIST  = "tag_list" + TXT;
-   static final String FILTER_LIST = "filter_list" + TXT;
-   static final String READ_ITEMS  = "read_items" + TXT;
-
-   private static final int     VER           = VERSION.SDK_INT;
-   static final         boolean FROYO         = VERSION_CODES.FROYO <= VER;
-   static final         boolean HONEYCOMB     = VERSION_CODES.HONEYCOMB <= VER;
-   static final         boolean HONEYCOMB_MR2 = VERSION_CODES.HONEYCOMB_MR2 <= VER;
-   static final         boolean JELLYBEAN     = VERSION_CODES.JELLY_BEAN <= VER;
-
-   static final PagerTabStrip[] PAGER_TAB_STRIPS = new PagerTabStrip[3];
+   static String          all;
+   static String[]        ctags;
+   static Fragment[]      main_fragments;
 
    @Override
    public void onCreate(Bundle savedInstanceState)
@@ -84,19 +89,15 @@ class FeedsActivity extends ActionBarActivity
       bar.setHomeButtonEnabled(true);
       con = this;
 
-      /* Form the storage path. */
-      storage = Util.getStorage();
       ctags = Read.file(GROUP_LIST);
-
       Util.remove(DUMP_FILE);
 
       /* Load String resources into static variables. */
       all = getString(R.string.all_tag);
 
       /* Create the navigation drawer and set all the listeners for it. */
-      DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-      ListView navDrawerListView = (ListView) findViewById(R.id.left_drawer);
-      new NavDrawer(drawerLayout, navDrawerListView);
+      new NavDrawer((ListView) findViewById(R.id.left_drawer),
+                    (DrawerLayout) findViewById(R.id.drawer_layout));
 
       /* Create the MANAGE_FRAGMENTS that go inside the content frame. */
       if(null == savedInstanceState)
@@ -108,8 +109,11 @@ class FeedsActivity extends ActionBarActivity
          int frame = R.id.content_frame;
 
          FragmentTransaction tran = fman.beginTransaction();
-         tran.add(frame, main_fragments[0]).add(frame, main_fragments[1])
-             .add(frame, main_fragments[2]).hide(main_fragments[1]).hide(main_fragments[2])
+         tran.add(frame, main_fragments[0])
+             .add(frame, main_fragments[1])
+             .add(frame, main_fragments[2])
+             .hide(main_fragments[1])
+             .hide(main_fragments[2])
              .commit();
       }
 
@@ -117,33 +121,12 @@ class FeedsActivity extends ActionBarActivity
       Update.page(0);
    }
 
-   @Override
-   protected void onPostCreate(Bundle savedInstanceState)
-   {
-      super.onPostCreate(savedInstanceState);
-      // Sync the toggle state after onRestoreInstanceState has occurred.
-      NavDrawer.drawer_toggle.syncState();
-   }
-
-
-   @Override
-   public void onBackPressed()
-   {
-      super.onBackPressed();
-      String feeds = NavDrawer.NAV_TITLES[0];
-
-      bar.setTitle(feeds);
-      int lock = DrawerLayout.LOCK_MODE_UNLOCKED;
-      NavDrawer.drawer_layout.setDrawerLockMode(lock);
-      NavDrawer.drawer_toggle.setDrawerIndicatorEnabled(true);
-   }
-
    /* This is so the icon and text in the actionbar are selected. */
    @Override
    public void onConfigurationChanged(Configuration config)
    {
       super.onConfigurationChanged(config);
-      NavDrawer.drawer_toggle.onConfigurationChanged(config);
+      NavDrawer.DRAWER_TOGGLE.onConfigurationChanged(config);
    }
 
    @Override
@@ -154,16 +137,27 @@ class FeedsActivity extends ActionBarActivity
       Util.setServiceIntent("start");
 
       /* Save the read_items to file. */
-      Write.collection(READ_ITEMS, AdapterCard.read_items);
+      Write.collection(READ_ITEMS, Util.SetHolder.read_items);
    }
 
    @Override
-   protected void onStart()
+   public void onBackPressed()
    {
-      super.onStart();
+      super.onBackPressed();
+      String feeds = NavDrawer.NAV_TITLES[0];
 
-      /* Stop the alarmservice and reset the time to 0. */
-      Util.setServiceIntent("stop");
+      bar.setTitle(feeds);
+      int lock = DrawerLayout.LOCK_MODE_UNLOCKED;
+      NavDrawer.s_drawerLayout.setDrawerLockMode(lock);
+      NavDrawer.DRAWER_TOGGLE.setDrawerIndicatorEnabled(true);
+   }
+
+   @Override
+   protected void onPostCreate(Bundle savedInstanceState)
+   {
+      super.onPostCreate(savedInstanceState);
+      // Sync the toggle state after onRestoreInstanceState has occurred.
+      NavDrawer.DRAWER_TOGGLE.syncState();
    }
 
    @Override
@@ -176,7 +170,21 @@ class FeedsActivity extends ActionBarActivity
          return true;
       }
 
-      return NavDrawer.drawer_toggle.onOptionsItemSelected(item) ||
+      return NavDrawer.DRAWER_TOGGLE.onOptionsItemSelected(item) ||
              super.onOptionsItemSelected(item);
+   }
+
+   @Override
+   protected void onStart()
+   {
+      super.onStart();
+
+      /* Stop the alarmservice and reset the time to 0. */
+      Util.setServiceIntent("stop");
+   }
+
+   static String[] getTags()
+   {
+      return ctags;
    }
 }

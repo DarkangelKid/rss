@@ -16,39 +16,25 @@ import android.widget.TextView;
 
 class AdapterSettingsUi extends BaseAdapter
 {
-   private static final String[] INTERFACE_TITLES    = Util
-         .getArray(R.array.settings_interface_titles);
-   private static final String[] INTERFACE_SUMMARIES = Util
-         .getArray(R.array.settings_interface_summaries);
-   static final String[] HOLO_COLORS         = Util.getArray(R.array.settings_colours);
-
-   static final int[] COLOR_INTS = {
+   static final         String[] HOLO_COLORS         = Util.getArray(R.array.settings_colours);
+   static final         int[]    COLOR_INTS          = {
          Color.rgb(51, 181, 229), // blue
          Color.rgb(170, 102, 204), // purple
          Color.rgb(153, 204, 0), // green
          Color.rgb(255, 187, 51), // orange
          Color.rgb(255, 68, 68) // red
    };
-
+   private static final String[] INTERFACE_TITLES    = Util.getArray(
+         R.array.settings_interface_titles);
+   private static final String[] INTERFACE_SUMMARIES = Util.getArray(
+         R.array.settings_interface_summaries);
    private static ImageView[] colour_views;
-
-   private TextView settings_heading;
-
-   static class SettingsColorHolder
-   {
-      TextView  title;
-      TextView  summary;
-      ImageView blue;
-      ImageView purple;
-      ImageView green;
-      ImageView yellow;
-      ImageView red;
-   }
+   private        TextView    settings_heading;
 
    @Override
-   public long getItemId(int position)
+   public int getCount()
    {
-      return (long) position;
+      return INTERFACE_TITLES.length;
    }
 
    @Override
@@ -58,30 +44,11 @@ class AdapterSettingsUi extends BaseAdapter
    }
 
    @Override
-   public int getCount()
-   {
-      return INTERFACE_TITLES.length;
-   }
-
-   @Override
-   public boolean isEnabled(int position)
-   {
-      return false;
-   }
-
-   @Override
-   public int getViewTypeCount()
-   {
-      return 4;
-   }
-
-   @Override
-   public int getItemViewType(int position)
+   public long getItemId(int position)
    {
       return position;
    }
 
-   @SuppressWarnings("UnnecessaryParentheses")
    @Override
    public View getView(int position, View cv, ViewGroup parent)
    {
@@ -187,7 +154,7 @@ class AdapterSettingsUi extends BaseAdapter
       /* This is the seekbar. */
       else
       {
-         final AdapterSettingsFunctions.SettingsSeekHolder holder;
+         AdapterSettingsFunctions.SettingsSeekHolder holder;
          if(null == cv)
          {
             cv = inf.inflate(R.layout.settings_seekbar, parent, false);
@@ -206,35 +173,45 @@ class AdapterSettingsUi extends BaseAdapter
          holder.title.setText(title);
          holder.summary.setText(summary);
          holder.seekbar.setMax(9);
-         holder.seekbar.setOnSeekBarChangeListener(new OnSeekBarChangeListener()
-         {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
-            {
-               holder.read.setText("DICKS");
-               /* KIRSTY - refer to the seekbar in adapter_settings_fuction to see what happens
-               in onProgressChanged(). */
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar)
-            {
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar)
-            {
-            }
-         });
+         holder.seekbar.setOnSeekBarChangeListener(new SeekBarChangeListenerUi(holder));
       }
       return cv;
+   }
+
+   @Override
+   public boolean isEnabled(int position)
+   {
+      return false;
+   }
+
+   @Override
+   public int getItemViewType(int position)
+   {
+      return position;
+   }
+
+   @Override
+   public int getViewTypeCount()
+   {
+      return 4;
+   }
+
+   static class SettingsColorHolder
+   {
+      TextView  title;
+      TextView  summary;
+      ImageView blue;
+      ImageView purple;
+      ImageView green;
+      ImageView yellow;
+      ImageView red;
    }
 
    static class ColorClick implements OnClickListener
    {
       final int clicked_colour;
 
-      public ColorClick(int colour)
+      ColorClick(int colour)
       {
          clicked_colour = colour;
       }
@@ -259,6 +236,34 @@ class AdapterSettingsUi extends BaseAdapter
          {
             Util.setStripColor(strip);
          }
+      }
+   }
+
+   static class SeekBarChangeListenerUi implements OnSeekBarChangeListener
+   {
+      AdapterSettingsFunctions.SettingsSeekHolder holder;
+
+      public SeekBarChangeListenerUi(AdapterSettingsFunctions.SettingsSeekHolder holder)
+      {
+         this.holder = holder;
+      }
+
+      @Override
+      public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
+      {
+         holder.read.setText("DICKS");
+         /* KIRSTY - refer to the seekbar in adapter_settings_fuction to see what happens
+         in onProgressChanged(). */
+      }
+
+      @Override
+      public void onStartTrackingTouch(SeekBar seekBar)
+      {
+      }
+
+      @Override
+      public void onStopTrackingTouch(SeekBar seekBar)
+      {
       }
    }
 }
