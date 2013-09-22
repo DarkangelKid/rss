@@ -26,14 +26,16 @@ class FragmentManageTags extends ListFragment
    private static ActionMode.Callback actionmode_callback;
 
    @Override
-   public void onCreate(Bundle savedInstanceState)
+   public
+   void onCreate(Bundle savedInstanceState)
    {
       super.onCreate(savedInstanceState);
       setHasOptionsMenu(true);
    }
 
    @Override
-   public void onActivityCreated(Bundle savedInstanceState)
+   public
+   void onActivityCreated(Bundle savedInstanceState)
    {
       super.onActivityCreated(savedInstanceState);
 
@@ -48,15 +50,11 @@ class FragmentManageTags extends ListFragment
 
       if(FeedsActivity.HONEYCOMB)
       {
-         {
-            actionmode_callback = new ActionCallback(listview);
-         }
+         actionmode_callback = new ActionCallback(listview);
       }
       else
       {
-         {
-            registerForContextMenu(listview);
-         }
+         registerForContextMenu(listview);
       }
 
       listview.setOnItemLongClickListener(new ContextLongClick(listview));
@@ -64,7 +62,8 @@ class FragmentManageTags extends ListFragment
    }
 
    @Override
-   public boolean onOptionsItemSelected(MenuItem item)
+   public
+   boolean onOptionsItemSelected(MenuItem item)
    {
       if(NavDrawer.DRAWER_TOGGLE.onOptionsItemSelected(item))
       {
@@ -79,15 +78,17 @@ class FragmentManageTags extends ListFragment
    }
 
    @Override
-   public View onCreateView(LayoutInflater inf, ViewGroup cont, Bundle b)
+   public
+   View onCreateView(LayoutInflater inf, ViewGroup cont, Bundle b)
    {
       return inf.inflate(R.layout.listview_cards, cont, false);
    }
 
-   static class RefreshTags extends AsyncTask<Void, String[], Void>
+   static
+   class RefreshTags extends AsyncTask<Void, String[], Void>
    {
       final Animation          animFadeIn = AnimationUtils.loadAnimation(FeedsActivity.con,
-                                                                         android.R.anim.fade_in);
+            android.R.anim.fade_in);
       final ListView           listview   = PagerAdapterManage.MANAGE_FRAGMENTS[0].getListView();
       final AdapterManagerTags adapter
                                           = (AdapterManagerTags) PagerAdapterManage
@@ -102,43 +103,103 @@ class FragmentManageTags extends ListFragment
          }
       }
 
-      @Override
-      protected Void doInBackground(Void... nothing)
+      static
+      void setArrays(String[] tags, String... infos)
       {
-         String[][] content = Util.getInfoArrays(FeedsActivity.ctags);
+         AdapterManagerTags.s_tagArray = tags;
+         AdapterManagerTags.s_infoArray = infos;
+      }
+
+      static
+      String[][] getInfoArrays(String... ctags)
+      {
+
+         int size = ctags.length;
+         String[] tag_array = new String[size];
+         String[] info_array = new String[size];
+         StringBuilder info = new StringBuilder(40);
+
+         String content_path = Util.getPath(FeedsActivity.all, FeedsActivity.CONTENT);
+
+         int total = Read.count(content_path);
+
+         for(int i = 0; i < size; i++)
+         {
+            info.setLength(0);
+            tag_array[i] = ctags[i];
+            String[] content = Read.csv()[0];
+            if(0 == i)
+            {
+               info = 1 == size ? info.append("1 m_imageViewTag")
+                     : info.append(size).append(" tags");
+            }
+            else
+            {
+               int number = 3 > content.length ? content.length : 3;
+
+               for(int j = 0; j < number - 1; j++)
+               {
+                  info.append(content[j]).append(", ");
+               }
+
+               if(3 < content.length)
+               {
+                  info.append("...");
+               }
+               else if(0 < number)
+               {
+                  info.append(content[number - 1]);
+               }
+            }
+            info_array[i] = content.length + " feeds • " + info;
+         }
+         info_array[0] = total + " items • " + info_array[0];
+         return new String[][]{info_array, tag_array};
+      }
+
+      @Override
+      protected
+      Void doInBackground(Void... nothing)
+      {
+         String[][] content = getInfoArrays(FeedsActivity.ctags);
          publishProgress(content[1], content[0]);
          return null;
       }
 
       @Override
-      protected void onPostExecute(Void nothing)
+      protected
+      void onPostExecute(Void nothing)
       {
          listview.setAnimation(animFadeIn);
          listview.setVisibility(View.VISIBLE);
       }
 
       @Override
-      protected void onProgressUpdate(String[][] progress)
+      protected
+      void onProgressUpdate(String[][] progress)
       {
          if(null != adapter)
          {
-            adapter.setArrays(progress[0], progress[1]);
+            setArrays(progress[0], progress[1]);
             adapter.notifyDataSetChanged();
          }
       }
    }
 
-   private static class ContextLongClick implements OnItemLongClickListener
+   private static
+   class ContextLongClick implements OnItemLongClickListener
    {
       private final ListView listview;
 
-      public ContextLongClick(ListView listview)
+      public
+      ContextLongClick(ListView listview)
       {
          this.listview = listview;
       }
 
       @Override
-      public boolean onItemLongClick(AdapterView<?> parent, View view, int pos, long id)
+      public
+      boolean onItemLongClick(AdapterView<?> parent, View view, int pos, long id)
       {
          if(0 == pos)
          {
@@ -166,7 +227,8 @@ class FragmentManageTags extends ListFragment
       }
    }
 
-   static class ContextClick implements OnItemClickListener
+   static
+   class ContextClick implements OnItemClickListener
    {
       ListView m_listview;
 
@@ -176,7 +238,8 @@ class FragmentManageTags extends ListFragment
       }
 
       @Override
-      public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+      public
+      void onItemClick(AdapterView<?> parent, View view, int position, long id)
       {
          if(0 == position)
          {
@@ -205,7 +268,8 @@ class FragmentManageTags extends ListFragment
       }
    }
 
-   static class ActionCallback implements ActionMode.Callback
+   static
+   class ActionCallback implements ActionMode.Callback
    {
       ListView m_listview;
 
@@ -215,14 +279,16 @@ class FragmentManageTags extends ListFragment
       }
 
       @Override
-      public boolean onCreateActionMode(ActionMode mode, Menu menu)
+      public
+      boolean onCreateActionMode(ActionMode mode, Menu menu)
       {
          ((Activity) Util.getContext()).getMenuInflater().inflate(R.menu.context_menu, menu);
          return true;
       }
 
       @Override
-      public boolean onPrepareActionMode(ActionMode mode, Menu menu)
+      public
+      boolean onPrepareActionMode(ActionMode mode, Menu menu)
       {
          /// false only if nothing.
          return false;
@@ -230,7 +296,8 @@ class FragmentManageTags extends ListFragment
 
       // Called when the user selects a contextual menu item
       @Override
-      public boolean onActionItemClicked(ActionMode mode, MenuItem item)
+      public
+      boolean onActionItemClicked(ActionMode mode, MenuItem item)
       {
          switch(item.getItemId())
          {
@@ -240,7 +307,8 @@ class FragmentManageTags extends ListFragment
       }
 
       @Override
-      public void onDestroyActionMode(ActionMode mode)
+      public
+      void onDestroyActionMode(ActionMode mode)
       {
          for(int i = 0; i < m_listview.getAdapter().getCount(); i++)
          {

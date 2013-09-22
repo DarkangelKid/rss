@@ -32,25 +32,29 @@ class AdapterSettingsUi extends BaseAdapter
    private        TextView    settings_heading;
 
    @Override
-   public int getCount()
+   public
+   int getCount()
    {
       return INTERFACE_TITLES.length;
    }
 
    @Override
-   public String getItem(int position)
+   public
+   String getItem(int position)
    {
       return INTERFACE_TITLES[position];
    }
 
    @Override
-   public long getItemId(int position)
+   public
+   long getItemId(int position)
    {
       return position;
    }
 
    @Override
-   public View getView(int position, View cv, ViewGroup parent)
+   public
+   View getView(int position, View cv, ViewGroup parent)
    {
       int viewType = getItemViewType(position);
       String title = INTERFACE_TITLES[position];
@@ -139,7 +143,8 @@ class AdapterSettingsUi extends BaseAdapter
          holder.checkbox.setOnClickListener(new OnClickListener()
          {
             @Override
-            public void onClick(View v)
+            public
+            void onClick(View v)
             {
                /* Save the value of the checkbox to file on click. */
                Util.remove(settingPath);
@@ -179,24 +184,28 @@ class AdapterSettingsUi extends BaseAdapter
    }
 
    @Override
-   public boolean isEnabled(int position)
+   public
+   boolean isEnabled(int position)
    {
       return false;
    }
 
    @Override
-   public int getItemViewType(int position)
+   public
+   int getItemViewType(int position)
    {
       return position;
    }
 
    @Override
-   public int getViewTypeCount()
+   public
+   int getViewTypeCount()
    {
       return 4;
    }
 
-   static class SettingsColorHolder
+   static
+   class SettingsColorHolder
    {
       TextView  title;
       TextView  summary;
@@ -207,7 +216,8 @@ class AdapterSettingsUi extends BaseAdapter
       ImageView red;
    }
 
-   static class ColorClick implements OnClickListener
+   static
+   class ColorClick implements OnClickListener
    {
       final int clicked_colour;
 
@@ -217,7 +227,8 @@ class AdapterSettingsUi extends BaseAdapter
       }
 
       @Override
-      public void onClick(View v)
+      public
+      void onClick(View v)
       {
          /* Write the new colour to file. */
          String colorSettingsPath = FeedsActivity.SETTINGS + FeedsActivity.STRIP_COLOR;
@@ -239,17 +250,20 @@ class AdapterSettingsUi extends BaseAdapter
       }
    }
 
-   static class SeekBarChangeListenerUi implements OnSeekBarChangeListener
+   static
+   class SeekBarChangeListenerUi implements OnSeekBarChangeListener
    {
       AdapterSettingsFunctions.SettingsSeekHolder holder;
 
-      public SeekBarChangeListenerUi(AdapterSettingsFunctions.SettingsSeekHolder holder)
+      public
+      SeekBarChangeListenerUi(AdapterSettingsFunctions.SettingsSeekHolder holder)
       {
          this.holder = holder;
       }
 
       @Override
-      public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
+      public
+      void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
       {
          holder.read.setText("DICKS");
          /* KIRSTY - refer to the seekbar in adapter_settings_fuction to see what happens
@@ -257,12 +271,14 @@ class AdapterSettingsUi extends BaseAdapter
       }
 
       @Override
-      public void onStartTrackingTouch(SeekBar seekBar)
+      public
+      void onStartTrackingTouch(SeekBar seekBar)
       {
       }
 
       @Override
-      public void onStopTrackingTouch(SeekBar seekBar)
+      public
+      void onStopTrackingTouch(SeekBar seekBar)
       {
       }
    }

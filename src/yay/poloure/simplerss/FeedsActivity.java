@@ -1,6 +1,9 @@
 package yay.poloure.simplerss;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
@@ -20,7 +23,8 @@ import android.widget.ListView;
 
 import java.util.Locale;
 
-public class FeedsActivity extends ActionBarActivity
+public
+class FeedsActivity extends ActionBarActivity
 {
    static final String          SEPAR            = System.getProperty("file.separator");
    static final String          NL               = System.getProperty("line.separator");
@@ -75,8 +79,51 @@ public class FeedsActivity extends ActionBarActivity
    static String[]        ctags;
    static Fragment[]      main_fragments;
 
+   static
+   void setServiceIntent(String state)
+   {
+      Context con = Util.getContext();
+      int time = AdapterSettingsFunctions.TIMES[3];
+      String[] names = AdapterSettingsFunctions.FILE_NAMES;
+
+      /* Load the ManageRefresh boolean value from settings. */
+      String[] check = Read.file(SETTINGS + names[1] + TXT);
+      boolean refresh = 0 == check.length || !Util.strbol(check[0]);
+
+      if(refresh && "start".equals(state))
+      {
+         return;
+      }
+
+      /* Load the ManageRefresh time from settings. */
+      String[] settings = Read.file(SETTINGS + names[2] + TXT);
+      if(0 != settings.length)
+      {
+         time = Util.stoi(settings[0]);
+      }
+
+      /* Create intent, turn into pending intent, and get the alarmmanager. */
+      Intent intent = Util.getServiceIntent(0);
+      PendingIntent pintent = PendingIntent.getService(con, 0, intent, 0);
+      String alarm = ALARM_SERVICE;
+      AlarmManager am = (AlarmManager) con.getSystemService(alarm);
+
+      /* Depending on the state string, start or stop the service. */
+      if("start".equals(state))
+      {
+         long interval = time * 60000L;
+         long next = System.currentTimeMillis() + interval;
+         am.setRepeating(AlarmManager.RTC_WAKEUP, next, interval, pintent);
+      }
+      else if("stop".equals(state))
+      {
+         am.cancel(pintent);
+      }
+   }
+
    @Override
-   public void onCreate(Bundle savedInstanceState)
+   public
+   void onCreate(Bundle savedInstanceState)
    {
       super.onCreate(savedInstanceState);
 
@@ -97,7 +144,7 @@ public class FeedsActivity extends ActionBarActivity
 
       /* Create the navigation drawer and set all the listeners for it. */
       new NavDrawer((ListView) findViewById(R.id.left_drawer),
-                    (DrawerLayout) findViewById(R.id.drawer_layout));
+            (DrawerLayout) findViewById(R.id.drawer_layout));
 
       /* Create the MANAGE_FRAGMENTS that go inside the content frame. */
       if(null == savedInstanceState)
@@ -110,11 +157,11 @@ public class FeedsActivity extends ActionBarActivity
 
          FragmentTransaction tran = fman.beginTransaction();
          tran.add(frame, main_fragments[0])
-             .add(frame, main_fragments[1])
-             .add(frame, main_fragments[2])
-             .hide(main_fragments[1])
-             .hide(main_fragments[2])
-             .commit();
+               .add(frame, main_fragments[1])
+               .add(frame, main_fragments[2])
+               .hide(main_fragments[1])
+               .hide(main_fragments[2])
+               .commit();
       }
 
       Util.updateTags();
@@ -123,25 +170,28 @@ public class FeedsActivity extends ActionBarActivity
 
    /* This is so the icon and text in the actionbar are selected. */
    @Override
-   public void onConfigurationChanged(Configuration config)
+   public
+   void onConfigurationChanged(Configuration config)
    {
       super.onConfigurationChanged(config);
       NavDrawer.DRAWER_TOGGLE.onConfigurationChanged(config);
    }
 
    @Override
-   protected void onStop()
+   protected
+   void onStop()
    {
       super.onStop();
       /* Set the alarm service to go of starting now. */
-      Util.setServiceIntent("start");
+      setServiceIntent("start");
 
       /* Save the read_items to file. */
       Write.collection(READ_ITEMS, Util.SetHolder.read_items);
    }
 
    @Override
-   public void onBackPressed()
+   public
+   void onBackPressed()
    {
       super.onBackPressed();
       String feeds = NavDrawer.NAV_TITLES[0];
@@ -153,7 +203,8 @@ public class FeedsActivity extends ActionBarActivity
    }
 
    @Override
-   protected void onPostCreate(Bundle savedInstanceState)
+   protected
+   void onPostCreate(Bundle savedInstanceState)
    {
       super.onPostCreate(savedInstanceState);
       // Sync the toggle state after onRestoreInstanceState has occurred.
@@ -161,7 +212,8 @@ public class FeedsActivity extends ActionBarActivity
    }
 
    @Override
-   public boolean onOptionsItemSelected(MenuItem item)
+   public
+   boolean onOptionsItemSelected(MenuItem item)
    {
       /* If the user has clicked the m_title and the tilte says "Offline". */
       if("Offline".equals(bar.getTitle().toString()))
@@ -171,20 +223,16 @@ public class FeedsActivity extends ActionBarActivity
       }
 
       return NavDrawer.DRAWER_TOGGLE.onOptionsItemSelected(item) ||
-             super.onOptionsItemSelected(item);
+            super.onOptionsItemSelected(item);
    }
 
    @Override
-   protected void onStart()
+   protected
+   void onStart()
    {
       super.onStart();
 
       /* Stop the alarmservice and reset the time to 0. */
-      Util.setServiceIntent("stop");
-   }
-
-   static String[] getTags()
-   {
-      return ctags;
+      setServiceIntent("stop");
    }
 }

@@ -24,14 +24,15 @@ class FeedParser
    static final Pattern          PATTERN_LTGT       = Pattern.compile("(&lt;).*?(&gt;)");
    static final Pattern          PATTERN_CDATA      = Pattern.compile("\\<.*?\\>");
    static final Pattern          PATTERN_WHITESPACE = Pattern.compile("[\\t\\n\\x0B\\f\\r\\|]");
-   final int width;
-   String[] start    = {
+   static final int              width              = (int) Math.round(
+         Util.getScreenWidth() * 0.944);
+   static       String[]         start              = {
          "<link>", "<published>", "<pubDate>", "<description>", "<m_title", "<content"
    };
-   String[] end      = {
+   static       String[]         end                = {
          "/link", "/publ", "/pubD", "/desc", "/titl", "/cont"
    };
-   String[] of_types = {
+   static       String[]         of_types           = {
          "<link>",
          "<published>",
          "<pubDate>",
@@ -49,19 +50,12 @@ class FeedParser
          "</entry",
          "</item"
    };
-   String dump_path;
-   String url_path;
+   static final String           dump_path          = "content.dump" + FeedsActivity.TXT;
+   static final String           url_path           = "content.url" + FeedsActivity.TXT;
 
-   FeedParser(String feed)
-   {
-      width = (int) Math.round(Util.getScreenWidth() * 0.944);
-      parseFeed(feed);
-   }
-
+   static
    void parseFeed(String feed)
    {
-      dump_path = "content.dump" + FeedsActivity.TXT;
-      url_path = "content.m_url" + FeedsActivity.TXT;
       String storeFile = Util.getStorage() + feed + FeedsActivity.STORE;
       String contentFile = Util.getPath(feed, FeedsActivity.CONTENT);
       String imageDir = Util.getPath(feed, "images");
@@ -125,8 +119,8 @@ class FeedParser
             {
                tempLine = line.toString();
                if(!tempLine.contains("published|") &&
-                  !tempLine.contains("pubDate|") &&
-                  !set.contains(tempLine))
+                     !tempLine.contains("pubDate|") &&
+                     !set.contains(tempLine))
                {
                   tempLine = tempLine + "pubDate|" + RFC3339.format(new Date()) + '|';
                }
@@ -143,7 +137,7 @@ class FeedParser
             {
                line.append(FeedsActivity.IMAGE).append(image).append('|');
                String imageName = image.substring(image.lastIndexOf(FeedsActivity.SEPAR) + 1,
-                                                  image.length());
+                     image.length());
 
                boolean success = true;
                /* If the image does not exist, try to download it from the internet. */
@@ -162,7 +156,7 @@ class FeedParser
                else if(Util.exists(thumbnailDir + imageName))
                {
                   compressImage(Util.getStorage() + imageDir, Util.getStorage() + thumbnailDir,
-                                imageName);
+                        imageName);
                }
 
                /* ISSUE #194 */
@@ -172,11 +166,11 @@ class FeedParser
                   writeMode = false;
                }
                line.append(FeedsActivity.WIDTH)
-                   .append(options.outWidth)
-                   .append('|')
-                   .append(FeedsActivity.HEIGHT)
-                   .append(options.outHeight)
-                   .append('|');
+                     .append(options.outWidth)
+                     .append('|')
+                     .append(FeedsActivity.HEIGHT)
+                     .append(options.outHeight)
+                     .append('|');
             }
             line.append(checkForUrl());
          }
@@ -224,7 +218,7 @@ class FeedParser
 
                   content = content.replace("&amp;", "&").replace("&quot;", "\"");
 
-                  /// Save the image m_url from content.
+                  /// Save the image url from content.
                   if(currentTag.contains("<description"))
                   {
                      int tem = content.indexOf("img src=");
@@ -342,8 +336,8 @@ class FeedParser
       {
          tempLine = line.toString();
          if(!tempLine.contains("published|") &&
-            !tempLine.contains("pubDate|") &&
-            !set.contains(tempLine))
+               !tempLine.contains("pubDate|") &&
+               !set.contains(tempLine))
          {
             tempLine += "pubDate|" + RFC3339.format(new Date()) + '|';
          }
@@ -355,6 +349,7 @@ class FeedParser
       Write.collection(contentFile, set);
    }
 
+   static
    void compressImage(String img_dir, String thumb_dir, String img)
    {
 
@@ -381,6 +376,7 @@ class FeedParser
       }
    }
 
+   private static
    String getNextTag(BufferedReader reader, String... types) throws IOException
    {
       boolean found = true;
@@ -445,8 +441,7 @@ class FeedParser
                Write.single(url_path, tag.substring(i + 6, tem2) + FeedsActivity.NL);
             }
          }
-         else if(tag.contains("type=\"image/jpeg") ||
-                 tag.contains("type=\'image/jpeg"))
+         else if(tag.contains("type=\"image/jpeg") || tag.contains("type=\'image/jpeg"))
          {
             int i = tag.indexOf("href=");
             if(-1 != i)
@@ -480,7 +475,8 @@ class FeedParser
       return tag;
    }
 
-   static String getStringToNextChar(BufferedReader reader, char next)
+   private static
+   String getStringToNextChar(BufferedReader reader, char next)
    {
       try
       {
@@ -503,6 +499,7 @@ class FeedParser
       }
    }
 
+   private static
    String checkForUrl()
    {
       String[] url = Read.file(url_path);
@@ -517,6 +514,7 @@ class FeedParser
       return url[0];
    }
 
+   private static
    String checkForImage()
    {
       String[] imageUrl = Read.file(dump_path);
@@ -534,7 +532,8 @@ class FeedParser
       return imageUrl[0];
    }
 
-   static String getStringToTag(BufferedReader reader, String tag)
+   private static
+   String getStringToTag(BufferedReader reader, String tag)
    {
       /* </link> */
       StringBuilder cont = new StringBuilder();

@@ -6,12 +6,10 @@ import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.SpinnerAdapter;
-import android.widget.TextView;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -22,51 +20,9 @@ import java.util.regex.Pattern;
 
 class FeedDialog
 {
-   static void showAddFilterDialog()
-   {
-      Context con = Util.getContext();
-      LayoutInflater inf = LayoutInflater.from(con);
-      final View addFilterLayout = inf.inflate(R.layout.add_filter_dialog, null);
 
-      AlertDialog.Builder build = new AlertDialog.Builder(con);
-      build.setTitle("Add Filter")
-           .setView(addFilterLayout)
-           .setCancelable(true)
-           .setNegativeButton(con.getString(R.string.cancel_dialog),
-                              new DialogInterface.OnClickListener()
-                              {
-                                 @Override
-                                 public void onClick(DialogInterface dialog, int id)
-                                 {
-                                 }
-                              });
-      final AlertDialog addFilterDialog = build.create();
-
-      addFilterDialog.getWindow()
-                     .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-
-      addFilterDialog.setButton(DialogInterface.BUTTON_POSITIVE, con.getString(R.string.add_dialog),
-                                new DialogInterface.OnClickListener()
-                                {
-                                   @Override
-                                   public void onClick(DialogInterface dialog, int which)
-                                   {
-                                      String feed = Util.getText((TextView) addFilterLayout);
-                                      String path = FeedsActivity.FILTER_LIST;
-                                      String[] filters = Read.file(path);
-                                      if(-1 != Util.index(filters, feed))
-                                      {
-                                         Write.single(path, feed + FeedsActivity.NL);
-                                      }
-                                      ((AdapterManageFilters) PagerAdapterManage.MANAGE_FRAGMENTS[2]
-                                            .getListAdapter()).setTitles(filters);
-                                      addFilterDialog.hide();
-                                   }
-                                });
-      addFilterDialog.show();
-   }
-
-   static void showAddDialog(String... ctags)
+   static
+   void showAddDialog(String... ctags)
    {
       Context con = Util.getContext();
       LayoutInflater inf = LayoutInflater.from(con);
@@ -75,8 +31,8 @@ class FeedDialog
       final AdapterView<SpinnerAdapter> tag_spinner
             = (AdapterView<SpinnerAdapter>) add_rss_dialog.findViewById(R.id.tag_spinner);
 
-      ArrayAdapter<String> adapter = new ArrayAdapter<String>(con, R.layout.group_spinner_text,
-                                                              spinner_tags);
+      SpinnerAdapter adapter = new ArrayAdapter<String>(con, R.layout.group_spinner_text,
+            spinner_tags);
       //adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
       tag_spinner.setAdapter(adapter);
 
@@ -85,125 +41,46 @@ class FeedDialog
       add_feed_dialog.setView(add_rss_dialog);
       add_feed_dialog.setCancelable(true);
       add_feed_dialog.setButton(DialogInterface.BUTTON_NEGATIVE,
-                                con.getString(R.string.cancel_dialog),
-                                new DialogInterface.OnClickListener()
-                                {
-                                   @Override
-                                   public void onClick(DialogInterface dialog, int id)
-                                   {
-                                   }
-                                });
+            con.getString(R.string.cancel_dialog), new DialogInterface.OnClickListener()
+      {
+         @Override
+         public
+         void onClick(DialogInterface dialog, int id)
+         {
+         }
+      });
 
       add_feed_dialog.setButton(DialogInterface.BUTTON_POSITIVE, con.getString(R.string.add_dialog),
-                                new DialogInterface.OnClickListener()
-                                {
-                                   @Override
-                                   public void onClick(DialogInterface dialog, int which)
-                                   {
-                                      String new_tag = Util.getText(add_rss_dialog, R.id.tag_edit);
-                                      String URL_check = Util.getText(add_rss_dialog,
-                                                                      R.id.URL_edit);
-                                      String feed_name = Util.getText(add_rss_dialog,
-                                                                      R.id.name_edit);
+            new DialogInterface.OnClickListener()
+            {
+               @Override
+               public
+               void onClick(DialogInterface dialog, int which)
+               {
+                  String new_tag = Util.getText(add_rss_dialog, R.id.tag_edit);
+                  String URL_check = Util.getText(add_rss_dialog, R.id.URL_edit);
+                  String feed_name = Util.getText(add_rss_dialog, R.id.name_edit);
 
-                                      new_tag = new_tag.toLowerCase(FeedsActivity.locale);
-                                      String spinner_tag;
-                                      try
-                                      {
-                                         spinner_tag = tag_spinner.getSelectedItem().toString();
-                                      }
-                                      catch(RuntimeException e)
-                                      {
-                                         e.printStackTrace();
-                                         spinner_tag = "";
-                                      }
-                                      Update.checkFeedExists(add_feed_dialog, new_tag, feed_name,
-                                                             "add", "", "", spinner_tag, 0,
-                                                             URL_check);
-                                   }
-                                });
+                  new_tag = new_tag.toLowerCase(FeedsActivity.locale);
+                  String spinner_tag;
+                  try
+                  {
+                     spinner_tag = tag_spinner.getSelectedItem().toString();
+                  }
+                  catch(RuntimeException e)
+                  {
+                     e.printStackTrace();
+                     spinner_tag = "";
+                  }
+                  Update.checkFeedExists(add_feed_dialog, new_tag, feed_name, "add", "",
+                        spinner_tag, 0, URL_check);
+               }
+            });
       add_feed_dialog.show();
    }
 
-   static void showEditDialog(String[] ctags, Context con, final int position)
-   {
-      LayoutInflater inf = LayoutInflater.from(con);
-      final View edit_rss_dialog = inf.inflate(R.layout.add_rss_dialog, null);
-      String[][] content = Read.csv();
-      final String current_title = content[0][position];
-      String current_url = content[1][position];
-      final String current_tag = content[2][position];
-
-      final AdapterView<SpinnerAdapter> tag_spinner
-            = (AdapterView<SpinnerAdapter>) edit_rss_dialog.findViewById(R.id.tag_spinner);
-
-      String[] spinner_tags = Arrays.copyOfRange(ctags, 1, ctags.length);
-
-      ArrayAdapter<String> adapter = new ArrayAdapter<String>(con, R.layout.group_spinner_text,
-                                                              spinner_tags);
-      //adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
-      tag_spinner.setAdapter(adapter);
-      Util.setText(current_url, edit_rss_dialog, R.id.URL_edit);
-      Util.setText(current_title, edit_rss_dialog, R.id.URL_edit);
-
-      tag_spinner.setSelection(Util.index(spinner_tags, current_tag));
-
-      final AlertDialog.Builder build = new AlertDialog.Builder(con);
-      build.setTitle(con.getString(R.string.edit_dialog_title))
-           .setView(edit_rss_dialog)
-           .setCancelable(true)
-           .setNegativeButton(con.getString(R.string.cancel_dialog),
-                              new DialogInterface.OnClickListener()
-                              {
-                                 @Override
-                                 public void onClick(DialogInterface dialog, int id)
-                                 {
-                                 }
-                              });
-
-      AlertDialog edit_feed_dialog = build.create();
-      edit_feed_dialog.setButton(DialogInterface.BUTTON_POSITIVE,
-                                 con.getString(R.string.accept_dialog),
-                                 new addFeedClick(edit_rss_dialog, tag_spinner, edit_feed_dialog,
-                                                  current_title, current_tag, position));
-
-      edit_feed_dialog.show();
-   }
-
-   static void editFeed(String oldFeed, String newFeed, String newUrl, String newTag, int position)
-   {
-
-      String oldFeedFolder = Util.getPath(oldFeed, "");
-      String newFeedFolder = Util.getPath(newFeed, "");
-
-      if(!oldFeed.equals(newFeed))
-      {
-         Util.move(oldFeedFolder, newFeedFolder);
-      }
-
-      /* Replace the all_tag file with the new image and data. */
-      String index = FeedsActivity.INDEX;
-      String entry = String.format(FeedsActivity.INDEX_FORMAT, newFeed, newUrl, newTag);
-
-      Write.removeLine(index, oldFeed, true);
-      Write.single(index, entry + FeedsActivity.NL);
-
-      AdapterManageFeeds adpt
-            = (AdapterManageFeeds) PagerAdapterManage.MANAGE_FRAGMENTS[1].getListAdapter();
-
-      adpt.setPosition(position, newFeed, newUrl + FeedsActivity.NL + newTag + " • " +
-                                          Integer.toString(
-                                                Read.count(FeedsActivity.GROUPS_DIR + newTag +
-                                                           FeedsActivity.SEPAR + newFeed +
-                                                           FeedsActivity.SEPAR + newFeed +
-                                                           FeedsActivity.CONTENT) - 1) + " items");
-
-      /// To ManageRefresh the counts and the order of the tags.
-      Util.updateTags();
-      Update.manageTags();
-   }
-
-   static class CheckFeed extends AsyncTask<String, Void, String[]>
+   static
+   class CheckFeed extends AsyncTask<String, Void, String[]>
    {
       static final Pattern ILLEGAL_FILE_CHARS = Pattern.compile("[/\\?%*|<>:]");
       static final Pattern SPLIT_SPACE        = Pattern.compile(" ");
@@ -219,7 +96,7 @@ class FeedDialog
 
 
       CheckFeed(AlertDialog edit_dialog, String new_tag, String feed_name, String moder,
-                String current_tit, String spin_tag, int position)
+            String current_tit, String spin_tag, int position)
       {
          dialog = edit_dialog;
          tag = new_tag;
@@ -235,8 +112,59 @@ class FeedDialog
          }
       }
 
+      static
+      void editFeed(String oldFeed, String newFeed, String newUrl, String newTag, int position)
+      {
+
+         String oldFeedFolder = Util.getPath(oldFeed, "");
+         String newFeedFolder = Util.getPath(newFeed, "");
+
+         if(!oldFeed.equals(newFeed))
+         {
+            Util.move(oldFeedFolder, newFeedFolder);
+         }
+
+         /* Replace the all_tag file with the new image and data. */
+         String index = FeedsActivity.INDEX;
+         String entry = String.format(FeedsActivity.INDEX_FORMAT, newFeed, newUrl, newTag);
+
+         Write.removeLine(index, oldFeed, true);
+         Write.single(index, entry + FeedsActivity.NL);
+
+         AdapterManageFeeds adpt
+               = (AdapterManageFeeds) PagerAdapterManage.MANAGE_FRAGMENTS[1].getListAdapter();
+
+         adpt.setPosition(position, newFeed, newUrl + FeedsActivity.NL + newTag + " • " +
+               Integer.toString(Read.count(FeedsActivity.GROUPS_DIR + newTag +
+                     FeedsActivity.SEPAR + newFeed +
+                     FeedsActivity.SEPAR + newFeed +
+                     FeedsActivity.CONTENT) - 1) +
+               " items");
+
+         /// To ManageRefresh the counts and the order of the tags.
+         Util.updateTags();
+         Update.manageTags();
+      }
+
+      static
+      byte[] concat(byte[] first, byte... second)
+      {
+         if(null == first)
+         {
+            return second;
+         }
+         if(null == second)
+         {
+            return first;
+         }
+         byte[] result = Arrays.copyOf(first, first.length + second.length);
+         System.arraycopy(second, 0, result, first.length, second.length);
+         return result;
+      }
+
       @Override
-      protected String[] doInBackground(String... passed_url)
+      protected
+      String[] doInBackground(String... passed_url)
       {
          /* If the m_imageViewTag entry has text, check to see if it is an old m_imageViewTag
           * or if it is new. */
@@ -265,7 +193,7 @@ class FeedDialog
                for(String word : words)
                {
                   tag += word.substring(0, 1).toUpperCase(FeedsActivity.locale) +
-                         word.substring(1).toLowerCase(FeedsActivity.locale) + ' ';
+                        word.substring(1).toLowerCase(FeedsActivity.locale) + ' ';
                }
                tag = tag.substring(0, tag.length() - 1);
             }
@@ -273,10 +201,9 @@ class FeedDialog
          }
 
          String[] checkList = passed_url[0].contains("http") ? new String[]{passed_url[0]}
-                                                             : new String[]{
-                                                                   "http://" + passed_url[0],
-                                                                   "https://" + passed_url[0]
-                                                             };
+               : new String[]{
+                     "http://" + passed_url[0], "https://" + passed_url[0]
+               };
 
          String url = "";
          String feed_title = "";
@@ -301,7 +228,7 @@ class FeedDialog
                         {
                            byte[] data2 = new byte[512];
                            in.read(data2, 0, 512);
-                           data = Util.concat(data, data2);
+                           data = concat(data, data2);
                            line = new String(data);
                         }
                         int ind = line.indexOf('>', line.indexOf(FeedsActivity.TAG_TITLE) + 1);
@@ -337,7 +264,8 @@ class FeedDialog
       }
 
       @Override
-      protected void onPostExecute(String[] ton)
+      protected
+      void onPostExecute(String[] ton)
       {
          if(real)
          {
@@ -366,7 +294,7 @@ class FeedDialog
 
       /* Create the csv. */
                String feedInfo = String.format(FeedsActivity.INDEX_FORMAT, name, ton[0], tag) +
-                                 FeedsActivity.NL;
+                     FeedsActivity.NL;
 
       /* Save the feed to the index. */
                String index = FeedsActivity.INDEX;
@@ -397,29 +325,29 @@ class FeedDialog
       }
    }
 
-   private static class addFeedClick implements DialogInterface.OnClickListener
+   static
+   class addFeedClick implements DialogInterface.OnClickListener
    {
-      private final View                        edit_rss_dialog;
-      private final AdapterView<SpinnerAdapter> tag_spinner;
-      private final AlertDialog                 edit_feed_dialog;
-      private final String                      current_title;
-      private final String                      current_tag;
-      private final int                         position;
+      View                        edit_rss_dialog;
+      AdapterView<SpinnerAdapter> tag_spinner;
+      AlertDialog                 edit_feed_dialog;
+      String                      current_title;
+      int                         position;
 
-      public addFeedClick(View edit_rss_dialog, AdapterView<SpinnerAdapter> tag_spinner,
-                          AlertDialog edit_feed_dialog, String current_title, String current_tag,
-                          int position)
+      public
+      addFeedClick(View edit_rss_dialog, AdapterView<SpinnerAdapter> tag_spinner,
+            AlertDialog edit_feed_dialog, String current_title, String current_tag, int position)
       {
          this.edit_rss_dialog = edit_rss_dialog;
          this.tag_spinner = tag_spinner;
          this.edit_feed_dialog = edit_feed_dialog;
          this.current_title = current_title;
-         this.current_tag = current_tag;
          this.position = position;
       }
 
       @Override
-      public void onClick(DialogInterface dialog, int which)
+      public
+      void onClick(DialogInterface dialog, int which)
       {
          String new_tag = Util.getText(edit_rss_dialog, R.id.tag_edit);
          String URL_check = Util.getText(edit_rss_dialog, R.id.URL_edit);
@@ -428,7 +356,7 @@ class FeedDialog
          new_tag = new_tag.toLowerCase(FeedsActivity.locale);
 
          Update.checkFeedExists(edit_feed_dialog, new_tag, feed_name, "edit", current_title,
-                                current_tag, spinner_tag, position, URL_check);
+               spinner_tag, position, URL_check);
       }
    }
 }

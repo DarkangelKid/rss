@@ -12,7 +12,8 @@ class FragmentSettings extends Fragment
 {
 
    @Override
-   public View onCreateView(LayoutInflater in, ViewGroup container, Bundle b)
+   public
+   View onCreateView(LayoutInflater in, ViewGroup container, Bundle b)
    {
       View v = in.inflate(R.layout.viewpager, container, false);
       ViewPager vp = (ViewPager) v.findViewById(R.id.pager);

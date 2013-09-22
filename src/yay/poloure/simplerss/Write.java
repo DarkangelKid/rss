@@ -13,18 +13,21 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.util.Arrays;
 
-final class Write
+final
+class Write
 {
    static final String MEDIA_UNMOUNTED = "Media not mounted.";
 
-   private Write()
+   private
+   Write()
    {
    }
 
    /* All functions in here must check that the media is available before
     * continuing. */
 
-   public static boolean collection(String path, Iterable<?> content)
+   static
+   boolean collection(String path, Iterable<?> content)
    {
       /* If s_storage is unmounted OR if we force to use external. */
       if(Util.isUnmounted())
@@ -72,7 +75,8 @@ final class Write
    }
 
    /* Function should be safe, returns false if fails. */
-   public static boolean download(String urler, String path)
+   static
+   boolean download(String urler, String path)
    {
       /* If s_storage is unmounted OR if we force to use external. */
       if(Util.isUnmounted())
@@ -92,13 +96,13 @@ final class Write
          {
             in = new BufferedInputStream(new URL(urler).openStream());
             fout = !Util.isUsingSd() &&
-                   !urler.contains(".jpg") &&
-                   !urler.contains(".png") &&
-                   !urler.contains(".gif") &&
-                   !urler.contains(".JPEG") &&
-                   !urler.contains(".JPG") &&
-                   !urler.contains(".jpeg") ? context.openFileOutput(name, Context.MODE_PRIVATE)
-                                            : new FileOutputStream(path);
+                  !urler.contains(".jpg") &&
+                  !urler.contains(".png") &&
+                  !urler.contains(".gif") &&
+                  !urler.contains(".JPEG") &&
+                  !urler.contains(".JPG") &&
+                  !urler.contains(".jpeg") ? context.openFileOutput(name, Context.MODE_PRIVATE)
+                  : new FileOutputStream(path);
 
             byte[] data = new byte[1024];
             int count;
@@ -136,7 +140,8 @@ final class Write
    }
 
    /* Function should be safe, returns false if fails. */
-   public static boolean single(String path, String string)
+   static
+   boolean single(String path, String string)
    {
       /* If s_storage is unmounted OR if we force to use external. */
       if(Util.isUnmounted())
@@ -177,7 +182,8 @@ final class Write
 
    /* This function should be safe, returns false if it failed.
     * NOT SAFE FOR INTERNAL IF FAILS. */
-   static boolean removeLine(String path, CharSequence string, boolean contains)
+   static
+   boolean removeLine(String path, CharSequence string, boolean contains)
    {
       /* If s_storage is unmounted OR if we force to use external. */
       if(Util.isUnmounted())
@@ -250,17 +256,20 @@ final class Write
       return true;
    }
 
-   public static void log(String text)
+   static
+   void log(String text)
    {
       single(FeedsActivity.DUMP_FILE, text + FeedsActivity.NL);
    }
 
-   private static BufferedWriter writer(String p, boolean ap) throws IOException
+   private static
+   BufferedWriter writer(String p, boolean ap) throws IOException
    {
       return new BufferedWriter(new FileWriter(p, ap));
    }
 
-   private static BufferedWriter writer(String path, int MODE)
+   private static
+   BufferedWriter writer(String path, int MODE)
          throws FileNotFoundException, UnsupportedEncodingException
    {
       Context context = Util.getContext();

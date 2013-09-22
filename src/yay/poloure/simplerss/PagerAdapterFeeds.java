@@ -12,19 +12,22 @@ class PagerAdapterFeeds extends FragmentPagerAdapter
    }
 
    @Override
-   public int getCount()
+   public
+   int getCount()
    {
       return FeedsActivity.ctags.length;
    }
 
    @Override
-   public Fragment getItem(int position)
+   public
+   Fragment getItem(int position)
    {
       return new FragmentCard();
    }
 
    @Override
-   public String getPageTitle(int position)
+   public
+   String getPageTitle(int position)
    {
       return FeedsActivity.ctags[position];
    }

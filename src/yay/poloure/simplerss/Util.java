@@ -1,16 +1,10 @@
 package yay.poloure.simplerss;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.Message;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.ListFragment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.PagerTabStrip;
@@ -24,12 +18,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Set;
 
-final class Util
+final
+class Util
 {
-   static String s_storage = "";
+   static       String     s_storage                 = "";
+   static final int[]      EMPTY_INT_ARRAY           = new int[0];
+   static final String[]   EMPTY_STRING_ARRAY        = new String[0];
+   static final String[][] EMPTY_STRING_STRING_ARRAY = new String[0][0];
 
    static final String[] MEDIA_ERROR_MESSAGES = getArray(R.array.media_errors);
 
@@ -44,58 +41,16 @@ final class Util
          Environment.MEDIA_BAD_REMOVAL
    };
 
-   private Util()
+   private
+   Util()
    {
-   }
-
-   static void deleteFeed(String feed, int pos)
-   {
-      /* Delete the feed's folder. */
-      rmdir(new File(getStorage() + getPath(feed, "")));
-
-      /* Remove the feed from the index file. */
-      Write.removeLine(FeedsActivity.INDEX, feed, true);
-
-      updateTags();
-      AdapterManageFeeds.removeItem(pos);
-
-      Update.manageTags();
-   }
-
-   static <T> T[] concat(T[] first, T... second)
-   {
-      if(null == first)
-      {
-         return second;
-      }
-      if(null == second)
-      {
-         return first;
-      }
-      T[] result = Arrays.copyOf(first, first.length + second.length);
-      System.arraycopy(second, 0, result, first.length, second.length);
-      return result;
-   }
-
-   static byte[] concat(byte[] first, byte... second)
-   {
-      if(null == first)
-      {
-         return second;
-      }
-      if(null == second)
-      {
-         return first;
-      }
-      byte[] result = Arrays.copyOf(first, first.length + second.length);
-      System.arraycopy(second, 0, result, first.length, second.length);
-      return result;
    }
 
    /* index throws an ArrayOutOfBoundsException if not handled. */
-   static <T> int index(T[] array, T value)
+   static
+   <T> int index(T[] array, T value)
    {
-      if(array == null)
+      if(null == array)
       {
          return -1;
       }
@@ -109,29 +64,12 @@ final class Util
       return -1;
    }
 
-   static int index(int[] array, int value)
-   {
-      if(array == null)
-      {
-         return -1;
-      }
-      for(int i = 0; i < array.length; i++)
-      {
-         if(array[i] == value)
-         {
-            return i;
-         }
-      }
-      return -1;
-   }
-
-   static String[] arrayRemove(String[] a, int index)
+   static
+   String[] arrayRemove(String[] a, int index)
    {
       if(null == a || 0 == a.length)
       {
-         {
-            return new String[0];
-         }
+         return Util.EMPTY_STRING_ARRAY;
       }
 
       String[] b = new String[a.length - 1];
@@ -143,7 +81,8 @@ final class Util
       return b;
    }
 
-   static void updateTags()
+   static
+   void updateTags()
    {
       /* Since this function is static, we can not rely on the fields being
        * non-null. */
@@ -166,7 +105,8 @@ final class Util
       }
    }
 
-   static int gotoLatestUnread(Datum[] items, boolean update, int page)
+   static
+   int gotoLatestUnread(Datum[] items, boolean update, int page)
    {
 
       if(null == FeedsActivity.viewpager)
@@ -215,52 +155,8 @@ final class Util
       return i;
    }
 
-   static String[][] getInfoArrays(String... ctags)
-   {
-
-      int size = ctags.length;
-      String[] tag_array = new String[size];
-      String[] info_array = new String[size];
-      StringBuilder info = new StringBuilder(40);
-
-      String content_path = getPath(FeedsActivity.all, FeedsActivity.CONTENT);
-
-      int total = Read.count(content_path);
-
-      for(int i = 0; i < size; i++)
-      {
-         info.setLength(0);
-         tag_array[i] = ctags[i];
-         String[] content = Read.csv()[0];
-         if(0 == i)
-         {
-            info = 1 == size ? info.append("1 m_imageViewTag") : info.append(size).append(" tags");
-         }
-         else
-         {
-            int number = 3 > content.length ? content.length : 3;
-
-            for(int j = 0; j < number - 1; j++)
-            {
-               info.append(content[j]).append(", ");
-            }
-
-            if(3 < content.length)
-            {
-               info.append("...");
-            }
-            else if(0 < number)
-            {
-               info.append(content[number - 1]);
-            }
-         }
-         info_array[i] = content.length + " feeds • " + info;
-      }
-      info_array[0] = total + " items • " + info_array[0];
-      return new String[][]{info_array, tag_array};
-   }
-
-   static boolean isUnmounted()
+   static
+   boolean isUnmounted()
    {
       /* TODO If setting to force sd is true, return false. */
       /*if(!internal.equals(s_storage))
@@ -279,7 +175,8 @@ final class Util
 
    /* Replaces all '/'s with '-' to emulate a folder directory layout in
     * data/data. */
-   static String getInternalName(String path)
+   static
+   String getInternalName(String path)
    {
       String substring = path.substring(
             path.indexOf(FeedsActivity.SEPAR + "files" + FeedsActivity.SEPAR) + 7);
@@ -288,7 +185,8 @@ final class Util
 
    /* For these two functions, check for null. Should only really be
     * null if called from the ServiceUpdate. */
-   static AdapterCard getCardAdapter(int page)
+   static
+   AdapterCard getCardAdapter(int page)
    {
       ListView list = getListView(page);
       if(null == list)
@@ -300,7 +198,8 @@ final class Util
    }
 
    /* This is the second one. */
-   private static ListView getListView(int page)
+   private static
+   ListView getListView(int page)
    {
       FragmentManager fman = FeedsActivity.fman;
       ViewPager viewpager = FeedsActivity.viewpager;
@@ -314,7 +213,8 @@ final class Util
    }
 
    /* For feed files. */
-   static String getPath(String feed, String append)
+   static
+   String getPath(String feed, String append)
    {
       String feed_folder = feed + FeedsActivity.SEPAR;
 
@@ -331,7 +231,8 @@ final class Util
    }
 
    /* This should never return null and so do not check. */
-   static Context getContext()
+   static
+   Context getContext()
    {
       /* If running get the context from the activity, else ask the service. */
       if(null != FeedsActivity.con)
@@ -345,7 +246,8 @@ final class Util
       }
    }
 
-   static LayoutInflater getLayoutInflater()
+   static
+   LayoutInflater getLayoutInflater()
    {
       String inflate = Context.LAYOUT_INFLATER_SERVICE;
       Context con = getContext();
@@ -353,14 +255,16 @@ final class Util
    }
 
    /* Safe to call at anytime. */
-   static int getScreenWidth()
+   static
+   int getScreenWidth()
    {
       return getContext().getResources().getDisplayMetrics().widthPixels;
    }
 
    /* This function will return null if it fails. Check for null each time.
     * It should be pretty safe and efficient to call all the time. */
-   static String getStorage()
+   static
+   String getStorage()
    {
       if(!s_storage.isEmpty())
       {
@@ -392,7 +296,7 @@ final class Util
          String name = context.getPackageName();
          File ext = Environment.getExternalStorageDirectory();
          s_storage = ext.getAbsolutePath() + sep + "Android" + sep + "data" + sep + name + sep +
-                     "files" + sep;
+               "files" + sep;
 
          /* If the folder does not exist, create it. */
          File storage_file = new File(s_storage);
@@ -404,12 +308,14 @@ final class Util
       return s_storage;
    }
 
-   static class SetHolder
+   static
+   class SetHolder
    {
       static final Set<String> read_items = Read.set(FeedsActivity.READ_ITEMS);
    }
 
-   static int[] getUnreadCounts(String... ctags)
+   static
+   int[] getUnreadCounts(String... ctags)
    {
       int size = ctags.length;
       int[] unread_counts = new int[size];
@@ -437,7 +343,8 @@ final class Util
       return unread_counts;
    }
 
-   static void setStripColor(PagerTabStrip strip)
+   static
+   void setStripColor(PagerTabStrip strip)
    {
       String colorSettingsPath = FeedsActivity.SETTINGS + FeedsActivity.STRIP_COLOR;
 
@@ -453,30 +360,12 @@ final class Util
       }
    }
 
-   static void showFragment(Fragment fragment)
-   {
-      FragmentTransaction tran = FeedsActivity.fman.beginTransaction();
-      for(Fragment frag : FeedsActivity.main_fragments)
-      {
-         if(!frag.isHidden())
-         {
-            tran.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out,
-                                     android.R.anim.fade_in, android.R.anim.fade_out)
-                .hide(frag)
-                .show(fragment)
-                .commit();
-            return;
-         }
-      }
-      tran.show(fragment).commit();
-   }
-
-   private static Intent getServiceIntent(int page)
+   static
+   Intent getServiceIntent(int page)
    {
       /* Load notification boolean. */
       String path = FeedsActivity.SETTINGS + AdapterSettingsFunctions.FILE_NAMES[3] +
-                    FeedsActivity.TXT;
+            FeedsActivity.TXT;
       String[] check = Read.file(path);
       Context con = getContext();
 
@@ -487,49 +376,8 @@ final class Util
       return intent;
    }
 
-   static void setServiceIntent(String state)
-   {
-      Context con = getContext();
-      int time = AdapterSettingsFunctions.TIMES[3];
-      String[] names = AdapterSettingsFunctions.FILE_NAMES;
-
-      /* Load the ManageRefresh boolean value from settings. */
-      String[] check = Read.file(FeedsActivity.SETTINGS + names[1] + FeedsActivity.TXT);
-      boolean refresh = 0 == check.length || !strbol(check[0]);
-
-      if(refresh && "start".equals(state))
-      {
-         return;
-      }
-
-      /* Load the ManageRefresh time from settings. */
-      String[] settings = Read.file(FeedsActivity.SETTINGS + names[2] + FeedsActivity.TXT);
-      if(0 != settings.length)
-      {
-         time = stoi(settings[0]);
-      }
-
-      /* Create intent, turn into pending intent, and get the alarmmanager. */
-      Intent intent = getServiceIntent(0);
-      PendingIntent pintent = PendingIntent.getService(con, 0, intent, 0);
-      String alarm = Context.ALARM_SERVICE;
-      AlarmManager am = (AlarmManager) con.getSystemService(alarm);
-
-      /* Depending on the state string, start or stop the service. */
-      if("start".equals(state))
-      {
-         long interval = time * 60000L;
-         long next = System.currentTimeMillis() + interval;
-         am.setRepeating(AlarmManager.RTC_WAKEUP, next, interval, pintent);
-      }
-      else if("stop".equals(state))
-      {
-         am.cancel(pintent);
-      }
-   }
-
-   static void setCardAlpha(TextView title, TextView url, ImageView image, TextView des,
-                            String link)
+   static
+   void setCardAlpha(TextView title, TextView url, ImageView image, TextView des, String link)
    {
       if(!FeedsActivity.HONEYCOMB)
       {
@@ -571,7 +419,8 @@ final class Util
    }
 
    /* Changes the ManageRefresh menu item to an animation if mode = true. */
-   static void setRefreshingIcon(boolean mode)
+   static
+   void setRefreshingIcon(boolean mode)
    {
       if(null == FeedsActivity.optionsMenu)
       {
@@ -596,33 +445,9 @@ final class Util
       }
    }
 
-   /* Updates and refreshes the tags with any new content. */
-   static void refreshFeeds()
-   {
-      setRefreshingIcon(true);
-
-      /* Set the service handler in FeedsActivity so we can check and call it
-       * from ServiceUpdate. */
-
-      FeedsActivity.service_handler = new Handler()
-      {
-         /* The stuff we would like to run when the service completes. */
-         @Override
-         public void handleMessage(Message msg)
-         {
-            setRefreshingIcon(false);
-            int page = msg.getData().getInt("page_number");
-            refreshPages(page);
-         }
-      };
-      Context context = getContext();
-      int current_page = FeedsActivity.viewpager.getCurrentItem();
-      Intent intent = getServiceIntent(current_page);
-      context.startService(intent);
-   }
-
    /* Use this after content has been updated and you need to ManageRefresh */
-   private static void refreshPages(int page)
+   static
+   void refreshPages(int page)
    {
       Update.page(0);
       if(0 == page)
@@ -639,7 +464,8 @@ final class Util
    }
 
    /* This will log and toast any message. */
-   static void post(CharSequence message)
+   static
+   void post(CharSequence message)
    {
       /* If this is called from off the UI thread, it will die. */
       try
@@ -664,14 +490,16 @@ final class Util
       }
    }
 
-   static boolean remove(String path)
+   static
+   boolean remove(String path)
    {
       path = getStorage() + path;
       getContext().deleteFile(getInternalName(path));
       return new File(path).delete();
    }
 
-   static boolean rmdir(File directory)
+   static
+   boolean rmdir(File directory)
    {
       if(directory.isDirectory())
       {
@@ -687,7 +515,8 @@ final class Util
       return directory.delete();
    }
 
-   static void mkdir(String path)
+   static
+   void mkdir(String path)
    {
       path = getStorage() + path;
       File folder = new File(path);
@@ -699,34 +528,39 @@ final class Util
 
    /* Wrappers for neatness. */
 
-   static boolean move(String a, String b)
+   static
+   boolean move(String a, String b)
    {
       a = getStorage() + a;
       b = getStorage() + b;
       return new File(a).renameTo(new File(b));
    }
 
-   static boolean isUsingSd()
+   static
+   boolean isUsingSd()
    {
       /* Return true if force sd setting is true. */
       return true;
    }
 
-   static boolean strbol(String str)
+   static
+   boolean strbol(String str)
    {
       return Boolean.parseBoolean(str);
    }
 
-   static int stoi(String str)
+   static
+   int stoi(String str)
    {
       return Integer.parseInt(str);
    }
 
-   static boolean exists(String path)
+   static
+   boolean exists(String path)
    {
       path = getStorage() + path;
       if(isUsingSd() || path.contains(FeedsActivity.IMAGE_DIR) ||
-         path.contains(FeedsActivity.THUMBNAIL_DIR))
+            path.contains(FeedsActivity.THUMBNAIL_DIR))
       {
          return !new File(path).exists();
       }
@@ -737,24 +571,28 @@ final class Util
       }
    }
 
-   static void setText(CharSequence str, View v, int id)
+   static
+   void setText(CharSequence str, View v, int id)
    {
       ((TextView) v.findViewById(id)).setText(str);
    }
 
-   static String getText(View v, int id)
+   static
+   String getText(View v, int id)
    {
       return ((TextView) v.findViewById(id)).getText().toString().trim();
    }
 
-   static String getText(TextView v)
+   static
+   String getText(TextView v)
    {
       return v.getText().toString().trim();
    }
 
    /* Returns a zero-length array if the resource is not found and logs the
     * event in log. */
-   static String[] getArray(int resource)
+   static
+   String[] getArray(int resource)
    {
       String[] array = new String[0];
       Context con = getContext();
@@ -770,7 +608,8 @@ final class Util
       return array;
    }
 
-   static String getString(int resource)
+   static
+   String getString(int resource)
    {
       String str = "";
       Context con = getContext();

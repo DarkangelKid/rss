@@ -14,7 +14,8 @@ class FragmentManage extends Fragment
 {
 
    @Override
-   public void onCreate(Bundle savedInstanceState)
+   public
+   void onCreate(Bundle savedInstanceState)
    {
       super.onCreate(savedInstanceState);
       setRetainInstance(false);
@@ -22,7 +23,8 @@ class FragmentManage extends Fragment
    }
 
    @Override
-   public View onCreateView(LayoutInflater inf, ViewGroup container, Bundle b)
+   public
+   View onCreateView(LayoutInflater inf, ViewGroup container, Bundle b)
    {
       View v = inf.inflate(R.layout.viewpager, container, false);
 
@@ -37,7 +39,8 @@ class FragmentManage extends Fragment
    }
 
    @Override
-   public void onCreateOptionsMenu(Menu menu, MenuInflater inf)
+   public
+   void onCreateOptionsMenu(Menu menu, MenuInflater inf)
    {
       FeedsActivity.optionsMenu = menu;
       FeedsActivity.optionsMenu.clear();

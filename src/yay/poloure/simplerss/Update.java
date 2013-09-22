@@ -5,19 +5,22 @@ import android.os.AsyncTask;
 
 class Update
 {
-   public static void navigation()
+   public static
+   void navigation()
    {
       if(FeedsActivity.HONEYCOMB)
       {
-         new NavDrawer.RefreshNavAdapter().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new int[0]);
+         new NavDrawer.RefreshNavAdapter().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
+               Util.EMPTY_INT_ARRAY);
       }
       else
       {
-         new NavDrawer.RefreshNavAdapter().execute(new int[0]);
+         new NavDrawer.RefreshNavAdapter().execute(Util.EMPTY_INT_ARRAY);
       }
    }
 
-   public static void manageFeeds()
+   public static
+   void manageFeeds()
    {
       if(FeedsActivity.HONEYCOMB)
       {
@@ -29,7 +32,8 @@ class Update
       }
    }
 
-   public static void manageTags()
+   public static
+   void manageTags()
    {
       if(FeedsActivity.HONEYCOMB)
       {
@@ -41,7 +45,8 @@ class Update
       }
    }
 
-   public static void page(int page_number)
+   public static
+   void page(int page_number)
    {
       if(FeedsActivity.HONEYCOMB)
       {
@@ -53,9 +58,9 @@ class Update
       }
    }
 
-   public static void checkFeedExists(AlertDialog dlg, String ntag, String fname, String mode,
-                                      String ctitle, String ctag, String stag, int pos,
-                                      String URL_check)
+   public static
+   void checkFeedExists(AlertDialog dlg, String ntag, String fname, String mode, String ctitle,
+         String stag, int pos, String URL_check)
    {
       if(FeedsActivity.HONEYCOMB)
       {

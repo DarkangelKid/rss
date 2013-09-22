@@ -9,19 +9,22 @@ class AdapterManageFilters extends BaseAdapter
 {
    static String[] s_filterTitles;
 
-   static void setTitles(String... titles)
+   static
+   void setTitles(String... titles)
    {
       s_filterTitles = titles;
    }
 
    @Override
-   public int getCount()
+   public
+   int getCount()
    {
-      return s_filterTitles == null ? 0 : s_filterTitles.length;
+      return null == s_filterTitles ? 0 : s_filterTitles.length;
    }
 
    @Override
-   public long getItemId(int position)
+   public
+   long getItemId(int position)
    {
       return position;
    }
@@ -33,13 +36,15 @@ class AdapterManageFilters extends BaseAdapter
    }
 
    @Override
-   public String getItem(int position)
+   public
+   String getItem(int position)
    {
       return s_filterTitles[position];
    }
 
    @Override
-   public View getView(int position, View view, ViewGroup parent)
+   public
+   View getView(int position, View view, ViewGroup parent)
    {
       ViewHolder holder;
       if(null == view)
@@ -60,7 +65,8 @@ class AdapterManageFilters extends BaseAdapter
       return view;
    }
 
-   static class ViewHolder
+   static
+   class ViewHolder
    {
       TextView m_title;
    }

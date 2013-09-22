@@ -9,17 +9,19 @@ import android.webkit.WebView;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-public class FragmentWebView
+public
+class FragmentWebView
 {
-   static class fragment_webview extends Fragment
+   static
+   class fragment_webview extends Fragment
    {
       WebView     web_view;
       FrameLayout view;
       TextView    text;
 
       @Override
-      public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                               Bundle savedInstanceState)
+      public
+      View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
       {
          if(null != web_view)
          {
@@ -40,7 +42,8 @@ public class FragmentWebView
       }
 
       @Override
-      public void onPause()
+      public
+      void onPause()
       {
       /* min api 11. */
          web_view.onPause();
@@ -48,7 +51,8 @@ public class FragmentWebView
       }
 
       @Override
-      public void onResume()
+      public
+      void onResume()
       {
          /* min api 11. */
          web_view.onResume();
@@ -56,7 +60,8 @@ public class FragmentWebView
       }
 
       @Override
-      public void onDestroy()
+      public
+      void onDestroy()
       {
          if(null != web_view)
          {

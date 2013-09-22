@@ -1,27 +1,31 @@
 package yay.poloure.simplerss;
 
-import android.app.Activity;
-import android.app.ActivityManager;
-import android.app.ActivityManager.RunningServiceInfo;
 import android.app.IntentService;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.Process;
+import android.support.v4.app.NotificationCompat.Builder;
+import android.support.v4.app.TaskStackBuilder;
 
-public class ServiceUpdate extends IntentService
+public
+class ServiceUpdate extends IntentService
 {
    static Context s_serviceContext;
 
-   public ServiceUpdate()
+   public
+   ServiceUpdate()
    {
       super("Service");
    }
 
    @Override
-   protected void onHandleIntent(Intent intent)
+   protected
+   void onHandleIntent(Intent intent)
    {
       s_serviceContext = this;
 
@@ -49,7 +53,7 @@ public class ServiceUpdate extends IntentService
             boolean success = Write.download(urls[i], names[i] + FeedsActivity.STORE);
             if(success)
             {
-               new FeedParser(names[i]);
+               FeedParser.parseFeed(names[i]);
             }
             else
             {
@@ -84,26 +88,31 @@ public class ServiceUpdate extends IntentService
             }
          }
 
-         /* TODO replace with R.string values for UNREAD etc. */
-         /*String not_title = (unreadCounts[0] == 1) ? String.format(UNREAD_ITEM, 1)
-                                                    : String.format(UNREAD_ITEMS, unreadCounts[0]);
+         String titleSingle = Util.getString(R.string.notification_title_singular);
+         String titlePlural = Util.getString(R.string.notification_title_plural);
+         String contentSingleItem = Util.getString(R.string.notification_content_tag_item);
+         String contentSingleTag = Util.getString(R.string.notification_content_tag_items);
+         String contentPluralTag = Util.getString(R.string.notification_content_tags);
+
+         String not_title = 1 == unreadCounts[0] ? String.format(titleSingle, 1)
+               : String.format(titlePlural, unreadCounts[0]);
 
          String not_content;
-         if((1 == unreadCounts[0]) && (1 == (tagItems - 1)))
+         if(1 == unreadCounts[0] && 1 == tagItems - 1)
          {
-            not_content = String.format(GROUP_UNREAD, 1);
+            not_content = contentSingleItem;
          }
          else
          {
-            not_content = unreadCounts[0] > 1 && (tagItems - 1) == 1 ? String
-                  .format(GROUP_UNREADS, 1) : String.format(GROUPS_UNREADS,
+            not_content = 1 < unreadCounts[0] && 1 == (tagItems - 1) ? contentSingleTag
+                  : String.format(contentPluralTag, tagItems - 1);
+         }
 
-                                                            tagItems - 1);
-         }*/
-
-         /*NotificationCompat.Builder not_builder = new NotificationCompat.Builder(this)
-               .setSmallIcon(R.drawable.rss_icon).setContentTitle(not_title)
-               .setContentText(not_content).setAutoCancel(true);
+         Builder not_builder = new Builder(this);
+         not_builder.setSmallIcon(R.drawable.rss_icon)
+               .setContentTitle(not_title)
+               .setContentText(not_content)
+               .setAutoCancel(true);
 
          Intent result_intent = new Intent(this, FeedsActivity.class);
 
@@ -111,29 +120,15 @@ public class ServiceUpdate extends IntentService
 
          stack_builder.addParentStack(FeedsActivity.class);
          stack_builder.addNextIntent(result_intent);
-         PendingIntent result_pending_intent = stack_builder
-               .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+         PendingIntent result_pending_intent = stack_builder.getPendingIntent(0,
+               PendingIntent.FLAG_UPDATE_CURRENT);
          not_builder.setContentIntent(result_pending_intent);
          NotificationManager notification_manager = (NotificationManager) getSystemService(
                Context.NOTIFICATION_SERVICE);
-         notification_manager.notify(1, not_builder.build());*/
+         notification_manager.notify(1, not_builder.build());
       }
 
       wakelock.release();
       stopSelf();
-   }
-
-   public static boolean isServiceRunning(Activity activity)
-   {
-      ActivityManager manager = (ActivityManager) activity.getSystemService(
-            Context.ACTIVITY_SERVICE);
-      for(RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE))
-      {
-         if(ServiceUpdate.class.getName().equals(service.service.getClassName()))
-         {
-            return true;
-         }
-      }
-      return false;
    }
 }

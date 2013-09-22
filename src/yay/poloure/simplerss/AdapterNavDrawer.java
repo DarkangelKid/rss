@@ -11,62 +11,59 @@ class AdapterNavDrawer extends BaseAdapter
    static String[] s_menuArray;
    static int[]    s_unreadArray;
 
-   static final int   TWELVE  = Math.round(12.0F * Util.getContext()
-                  .getResources().getDisplayMetrics().density + 0.5f);
+   static final int   TWELVE    = Math.round(
+         12.0F * Util.getContext().getResources().getDisplayMetrics().density + 0.5f);
    static final int[] NAV_ICONS = {
          R.drawable.feeds, R.drawable.manage, R.drawable.feeds,
    };
 
    TextView NavItem;
 
-   static class TagItem
+   static
+   class TagItem
    {
       TextView title;
       TextView unread_view;
    }
 
-   static void setTitles(String[] titles)
-   {
-      s_menuArray = titles;
-   }
-
-   static void setCounts(int[] counts)
-   {
-      s_unreadArray = counts;
-   }
-
    @Override
-   public long getItemId(int position)
+   public
+   long getItemId(int position)
    {
       return position;
    }
 
    @Override
-   public String getItem(int position)
+   public
+   String getItem(int position)
    {
       return s_menuArray[position];
    }
 
    @Override
-   public int getCount()
+   public
+   int getCount()
    {
       return (null == s_menuArray) ? 4 : s_menuArray.length + 4;
    }
 
    @Override
-   public boolean isEnabled(int position)
+   public
+   boolean isEnabled(int position)
    {
       return 3 != position;
    }
 
    @Override
-   public int getViewTypeCount()
+   public
+   int getViewTypeCount()
    {
       return 3;
    }
 
    @Override
-   public int getItemViewType(int position)
+   public
+   int getItemViewType(int position)
    {
       if(3 > position)
       {
@@ -80,7 +77,8 @@ class AdapterNavDrawer extends BaseAdapter
    }
 
    @Override
-   public View getView(int position, View cv, ViewGroup parent)
+   public
+   View getView(int position, View cv, ViewGroup parent)
    {
       int viewType = getItemViewType(position);
       LayoutInflater inflater = Util.getLayoutInflater();

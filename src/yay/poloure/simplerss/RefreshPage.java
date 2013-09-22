@@ -20,8 +20,16 @@ class RefreshPage extends AsyncTask<Integer, Datum, Animation>
    ListView     lv;
    int position = -3;
 
+   /* This is for reading an rss file. */
+   static
+   String[][] csv(String feed, char... type)
+   {
+      return Read.csv_private(Util.getPath(feed, FeedsActivity.CONTENT), type);
+   }
+
    @Override
-   protected Animation doInBackground(Integer... page)
+   protected
+   Animation doInBackground(Integer... page)
    {
       page_number = page[0];
       String tag = FeedsActivity.ctags[page_number];
@@ -38,7 +46,7 @@ class RefreshPage extends AsyncTask<Integer, Datum, Animation>
       String[] tags = contents[2];
 
       Animation animFadeIn = AnimationUtils.loadAnimation(Util.getContext(),
-                                                          android.R.anim.fade_in);
+            android.R.anim.fade_in);
 
       while(null == lv)
       {
@@ -55,7 +63,7 @@ class RefreshPage extends AsyncTask<Integer, Datum, Animation>
          if(null != FeedsActivity.viewpager && null == l)
          {
             String fragmentTag = String.format(FeedsActivity.FRAGMENT_TAG,
-                                               FeedsActivity.viewpager.getId(), page_number);
+                  FeedsActivity.viewpager.getId(), page_number);
             l = (ListFragment) FeedsActivity.fman.findFragmentByTag(fragmentTag);
          }
          if(null != l && null == ith)
@@ -76,23 +84,19 @@ class RefreshPage extends AsyncTask<Integer, Datum, Animation>
          }
       }
 
-      String[] titles;
-      String[] descriptions;
-      String[] links;
-      String[] images;
       for(int j = 0; j < feeds.length; j++)
       {
          if(tags[j].equals(tag) || tag.equals(FeedsActivity.all))
          {
-            String[][] content = Read.csv(feeds[j], 't', 'd', 'l', 'i', 'w', 'h', 'p');
+            String[][] content = csv(feeds[j], 't', 'd', 'l', 'i', 'w', 'h', 'p');
             if(0 == content.length)
             {
                return null;
             }
-            titles = content[0];
-            descriptions = content[1];
-            links = content[2];
-            images = content[3];
+            String[] titles = content[0];
+            String[] descriptions = content[1];
+            String[] links = content[2];
+            String[] images = content[3];
             String[] widths = content[4];
             Write.log(widths[0]);
             String[] heights = content[5];
@@ -118,8 +122,8 @@ class RefreshPage extends AsyncTask<Integer, Datum, Animation>
                   {
                      if(32 < Util.stoi(widths[i]))
                      {
-                        images[i] = Util.getPath(feeds[j], "thumbnails") + images[i].substring(
-                              images[i].lastIndexOf(FeedsActivity.SEPAR) + 1);
+                        images[i] = Util.getPath(feeds[j], "thumbnails") +
+                              images[i].substring(images[i].lastIndexOf(FeedsActivity.SEPAR) + 1);
                      }
                      else
                      {
@@ -142,13 +146,13 @@ class RefreshPage extends AsyncTask<Integer, Datum, Animation>
                      titles[i] = "";
                   }
 
-                  Datum data       = new Datum();
-                  data.title       = titles[i];
-                  data.url         = links[i];
+                  Datum data = new Datum();
+                  data.title = titles[i];
+                  data.url = links[i];
                   data.description = descriptions[i];
-                  data.image       = images[i];
-                  data.width       = widths[i]  == null ? 0 : Integer.parseInt(widths[i]);
-                  data.height      = heights[i] == null ? 0 : Integer.parseInt(heights[i]);
+                  data.image = images[i];
+                  data.width = null == widths[i] ? 0 : Integer.parseInt(widths[i]);
+                  data.height = null == heights[i] ? 0 : Integer.parseInt(heights[i]);
 
                   map.put(time.toMillis(false) - i, data);
                }
@@ -170,7 +174,8 @@ class RefreshPage extends AsyncTask<Integer, Datum, Animation>
    }
 
    @Override
-   protected void onProgressUpdate(Datum[] items)
+   protected
+   void onProgressUpdate(Datum[] items)
    {
       /* If these are the first items to be added to the list. */
       if(0 == lv.getCount())
@@ -209,12 +214,13 @@ class RefreshPage extends AsyncTask<Integer, Datum, Animation>
 
       if(0 != top)
       {
-         lv.setSelectionFromTop(index, top - (ith.s_eight << 1));
+         lv.setSelectionFromTop(index, top - (AdapterCard.EIGHT << 1));
       }
    }
 
    @Override
-   protected void onPostExecute(Animation tun)
+   protected
+   void onPostExecute(Animation tun)
    {
       if(null == tun)
       {

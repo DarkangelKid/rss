@@ -28,31 +28,30 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.regex.Pattern;
 
 class AdapterCard extends BaseAdapter
 {
    static final Pattern PATTERN_THUMBNAILS = Pattern.compile("thumbnails");
    static final int     SCREEN_WIDTH       = Util.getScreenWidth();
-   static int s_eight;
+   static final int     EIGHT              = Math.round(
+         8.0F * Util.getContext().getResources().getDisplayMetrics().density + 0.5f);
+
    boolean m_touchedScreen = true;
-   Datum[]  m_items;
+   Datum[] m_items;
    boolean m_firstGetItem = true;
    ListView m_listview;
 
    AdapterCard()
    {
-      if(0 == s_eight)
-      {
-         float density = Util.getContext().getResources().getDisplayMetrics().density;
-         s_eight = Math.round(8.0F * density + 0.5f);
-      }
    }
 
-   private static void show_card_dialog(String URL)
+   private static
+   void show_card_dialog(String URL)
    {
       String[] menuItems = Util.getArray(R.array.card_menu_image);
-      Context con        = Util.getContext();
+      Context con = Util.getContext();
 
       Builder build = new Builder(con);
       build.setCancelable(true).setItems(menuItems, new CardMenuClick(URL));
@@ -60,31 +59,51 @@ class AdapterCard extends BaseAdapter
       cardDialog.show();
    }
 
+   static
+   <T> T[] concat(T[] first, T... second)
+   {
+      if(null == first)
+      {
+         return second;
+      }
+      if(null == second)
+      {
+         return first;
+      }
+      T[] result = Arrays.copyOf(first, first.length + second.length);
+      System.arraycopy(second, 0, result, first.length, second.length);
+      return result;
+   }
+
    void prependArray(Datum[] items)
    {
-      m_items = Util.concat(items, m_items);
+      m_items = concat(items, m_items);
    }
 
    @Override
-   public int getCount()
+   public
+   int getCount()
    {
-      return (m_items == null) ? 0 : m_items.length;
+      return null == m_items ? 0 : m_items.length;
    }
 
    @Override
-   public String getItem(int position)
+   public
+   String getItem(int position)
    {
       return m_items[position].title;
    }
 
    @Override
-   public long getItemId(int position)
+   public
+   long getItemId(int position)
    {
       return position;
    }
 
    @Override
-   public View getView(int position, View cv, ViewGroup parent)
+   public
+   View getView(int position, View cv, ViewGroup parent)
    {
       int viewType = getItemViewType(position);
 
@@ -228,11 +247,13 @@ class AdapterCard extends BaseAdapter
    }
 
    @Override
-   public int getItemViewType(int position)
+   public
+   int getItemViewType(int position)
    {
       boolean img = 0 != m_items[position].width;
 
-      boolean des = null != m_items[position].description && !m_items[position].description.isEmpty();
+      boolean des = null != m_items[position].description &&
+            !m_items[position].description.isEmpty();
 
       if(img && des)
       {
@@ -250,12 +271,14 @@ class AdapterCard extends BaseAdapter
    }
 
    @Override
-   public int getViewTypeCount()
+   public
+   int getViewTypeCount()
    {
       return 4;
    }
 
-   static class FullHolder
+   static
+   class FullHolder
    {
       TextView  m_title;
       TextView  m_url;
@@ -263,45 +286,51 @@ class AdapterCard extends BaseAdapter
       ImageView m_imageView;
    }
 
-   static class DesHolder
+   static
+   class DesHolder
    {
       TextView title;
       TextView url;
       TextView des;
    }
 
-   static class ImgHolder
+   static
+   class ImgHolder
    {
       TextView  title;
       TextView  url;
       ImageView image;
    }
 
-   static class BlankHolder
+   static
+   class BlankHolder
    {
       TextView title;
       TextView url;
    }
 
-   static class WebviewMode implements View.OnClickListener
+   static
+   class WebviewMode implements View.OnClickListener
    {
       @Override
-      public void onClick(View v)
+      public
+      void onClick(View v)
       {
          FeedsActivity.bar.setTitle("Offline");
          NavDrawer.s_drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
          NavDrawer.DRAWER_TOGGLE.setDrawerIndicatorEnabled(false);
          FeedsActivity.bar.setDisplayHomeAsUpEnabled(true);
          FeedsActivity.fman
-                      .beginTransaction()
-                      .hide(FeedsActivity.fman.findFragmentByTag(NavDrawer.NAV_TITLES[0]))
-                      .add(R.id.drawer_layout, new FragmentWebView.fragment_webview(), "OFFLINE")
-                      .addToBackStack("BACK")
-                      .commit();
+               .beginTransaction()
+               .hide(FeedsActivity.fman.findFragmentByTag(NavDrawer.NAV_TITLES[0]))
+               .add(R.id.drawer_layout, new FragmentWebView.fragment_webview(), "OFFLINE")
+               .addToBackStack("BACK")
+               .commit();
       }
    }
 
-   static class ImageClick implements View.OnClickListener
+   static
+   class ImageClick implements View.OnClickListener
    {
       final String m_imagePath;
 
@@ -311,7 +340,8 @@ class AdapterCard extends BaseAdapter
       }
 
       @Override
-      public void onClick(View v)
+      public
+      void onClick(View v)
       {
          Intent intent = new Intent();
          intent.setAction(Intent.ACTION_VIEW);
@@ -333,10 +363,12 @@ class AdapterCard extends BaseAdapter
       }
    }
 
-   static class CardLongClick implements View.OnLongClickListener
+   static
+   class CardLongClick implements View.OnLongClickListener
    {
       @Override
-      public boolean onLongClick(View v)
+      public
+      boolean onLongClick(View v)
       {
          String longPressUrl = Util.getText(v, R.id.url);
          show_card_dialog(longPressUrl);
@@ -344,17 +376,20 @@ class AdapterCard extends BaseAdapter
       }
    }
 
-   static class CardMenuClick implements DialogInterface.OnClickListener
+   static
+   class CardMenuClick implements DialogInterface.OnClickListener
    {
       String m_URL;
 
-      public CardMenuClick(String URL)
+      public
+      CardMenuClick(String URL)
       {
          m_URL = URL;
       }
 
       @Override
-      public void onClick(DialogInterface dialog, int position)
+      public
+      void onClick(DialogInterface dialog, int position)
       {
          Context con = Util.getContext();
          switch(position)
@@ -379,7 +414,8 @@ class AdapterCard extends BaseAdapter
       int       m_imageViewTag;
 
       @Override
-      protected Object[] doInBackground(Object... params)
+      protected
+      Object[] doInBackground(Object... params)
       {
          m_imageView = (ImageView) params[0];
          m_imageViewTag = (Integer) params[1];
@@ -390,15 +426,17 @@ class AdapterCard extends BaseAdapter
          fadeIn.setInterpolator(new DecelerateInterpolator());
          Write.log(m_items.length + "|" + m_items[0].image);
          String image = Util.getStorage() +
-                        PATTERN_THUMBNAILS.matcher(m_items[m_imageViewTag].image).replaceAll("images");
+               PATTERN_THUMBNAILS.matcher(m_items[m_imageViewTag].image).replaceAll("images");
          m_imageView.setOnClickListener(new ImageClick(image));
          return new Object[]{
-               BitmapFactory.decodeFile(Util.getStorage() + m_items[m_imageViewTag].image, o), fadeIn
+               BitmapFactory.decodeFile(Util.getStorage() + m_items[m_imageViewTag].image, o),
+               fadeIn
          };
       }
 
       @Override
-      protected void onPostExecute(Object... result)
+      protected
+      void onPostExecute(Object... result)
       {
          if((Integer) m_imageView.getTag() != m_imageViewTag)
          {
@@ -420,15 +458,17 @@ class AdapterCard extends BaseAdapter
    class CardScrollListener implements AbsListView.OnScrollListener
    {
       @Override
-      public void onScroll(AbsListView v, int fir, int visible, int total)
+      public
+      void onScroll(AbsListView v, int fir, int visible, int total)
       {
       }
 
       @Override
-      public void onScrollStateChanged(AbsListView view, int scrollState)
+      public
+      void onScrollStateChanged(AbsListView view, int scrollState)
       {
-         if(m_listview.getChildAt(0).getTop() == s_eight &&
-            View.VISIBLE == m_listview.getVisibility() && m_touchedScreen)
+         if(m_listview.getChildAt(0).getTop() == EIGHT &&
+               View.VISIBLE == m_listview.getVisibility() && m_touchedScreen)
          {
             Util.SetHolder.read_items.add(m_items[0].url);
          }

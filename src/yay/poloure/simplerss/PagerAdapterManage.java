@@ -18,19 +18,22 @@ class PagerAdapterManage extends FragmentPagerAdapter
    }
 
    @Override
-   public int getCount()
+   public
+   int getCount()
    {
       return MANAGE_FRAGMENTS.length;
    }
 
    @Override
-   public ListFragment getItem(int position)
+   public
+   ListFragment getItem(int position)
    {
       return MANAGE_FRAGMENTS[position];
    }
 
    @Override
-   public String getPageTitle(int position)
+   public
+   String getPageTitle(int position)
    {
       return MANAGE_TITLES[position];
    }

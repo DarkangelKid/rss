@@ -13,17 +13,20 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-final class Read
+final
+class Read
 {
    static final String UTF8 = "UTF-8";
 
-   private Read()
+   private
+   Read()
    {
    }
    /* All functions in here must check that the media is available before
     * continuing. */
 
-   static String setting(String path)
+   static
+   String setting(String path)
    {
       if(Util.isUnmounted())
       {
@@ -34,28 +37,24 @@ final class Read
       return 0 == check.length ? "" : check[0];
    }
 
-   static String[][] csv()
+   static
+   String[][] csv()
    {
       return csv_private(FeedsActivity.INDEX, 'f', 'u', 't');
    }
 
-   /* This is for reading an rss file. */
-   static String[][] csv(String feed, char... type)
-   {
-      return csv_private(Util.getPath(feed, FeedsActivity.CONTENT), type);
-   }
-
-   private static String[][] csv_private(String path, char... type)
+   static
+   String[][] csv_private(String path, char... type)
    {
       if(Util.isUnmounted())
       {
-         return new String[0][0];
+         return Util.EMPTY_STRING_STRING_ARRAY;
       }
 
       String[] lines = file(path);
       if(0 == lines.length)
       {
-         return new String[0][0];
+         return Util.EMPTY_STRING_STRING_ARRAY;
       }
 
       String[][] types = new String[type.length][lines.length];
@@ -90,11 +89,12 @@ final class Read
    }
 
    /* This function is now safe. It will return a zero length array on error. */
-   static String[] file(String path)
+   static
+   String[] file(String path)
    {
       if(Util.isUnmounted())
       {
-         return new String[0];
+         return Util.EMPTY_STRING_ARRAY;
       }
 
       String storage = Util.getStorage();
@@ -109,7 +109,7 @@ final class Read
       /* If the file is empty, return a zero length array. */
       if(0 == count)
       {
-         return new String[0];
+         return Util.EMPTY_STRING_ARRAY;
       }
 
       /* Use the count to allocate memory for the array. */
@@ -139,18 +139,19 @@ final class Read
       catch(FileNotFoundException e)
       {
          e.printStackTrace();
-         return new String[0];
+         return Util.EMPTY_STRING_ARRAY;
       }
       catch(IOException e)
       {
          e.printStackTrace();
-         return new String[0];
+         return Util.EMPTY_STRING_ARRAY;
       }
 
       return lines;
    }
 
-   static Set set(String file_path)
+   static
+   Set set(String file_path)
    {
       Set set = new HashSet<String>();
 
@@ -163,7 +164,8 @@ final class Read
       return set;
    }
 
-   static int count(String path)
+   static
+   int count(String path)
    {
       if(Util.isUnmounted())
       {
@@ -215,13 +217,15 @@ final class Read
    }
 
    /* Wrapper for creating external BufferedReader. */
-   public static BufferedReader reader(String path) throws FileNotFoundException
+   public static
+   BufferedReader reader(String path) throws FileNotFoundException
    {
       return new BufferedReader(new FileReader(path));
    }
 
    /* For reading from the internal s_storage. */
-   public static BufferedReader reader(String path, String UTF)
+   public static
+   BufferedReader reader(String path, String UTF)
          throws FileNotFoundException, UnsupportedEncodingException
    {
       Context context = Util.getContext();

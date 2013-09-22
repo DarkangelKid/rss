@@ -26,38 +26,61 @@ class AdapterSettingsFunctions extends BaseAdapter
          15, 30, 45, 60, 120, 180, 240, 480, 720, 1440
    };
 
+   static
+   int index(int[] array, int value)
+   {
+      if(array == null)
+      {
+         return -1;
+      }
+      for(int i = 0; i < array.length; i++)
+      {
+         if(array[i] == value)
+         {
+            return i;
+         }
+      }
+      return -1;
+   }
+
    @Override
-   public long getItemId(int position)
+   public
+   long getItemId(int position)
    {
       return position;
    }
 
    @Override
-   public String getItem(int position)
+   public
+   String getItem(int position)
    {
       return FUNCTION_TITLES[position];
    }
 
    @Override
-   public int getCount()
+   public
+   int getCount()
    {
       return 5;
    }
 
    @Override
-   public boolean isEnabled(int position)
+   public
+   boolean isEnabled(int position)
    {
       return false;
    }
 
    @Override
-   public int getViewTypeCount()
+   public
+   int getViewTypeCount()
    {
       return 3;
    }
 
    @Override
-   public int getItemViewType(int position)
+   public
+   int getItemViewType(int position)
    {
       if(0 == position)
       {
@@ -65,12 +88,13 @@ class AdapterSettingsFunctions extends BaseAdapter
       }
       else
       {
-         return position == 1 || position > 2 ? 1 : 2;
+         return 1 == position || 2 < position ? 1 : 2;
       }
    }
 
    @Override
-   public View getView(int position, View cv, ViewGroup parent)
+   public
+   View getView(int position, View cv, ViewGroup parent)
    {
       int viewType = getItemViewType(position);
       final String settingPath = FeedsActivity.SETTINGS + FILE_NAMES[position] + FeedsActivity.TXT;
@@ -113,7 +137,8 @@ class AdapterSettingsFunctions extends BaseAdapter
          holder.checkbox.setOnClickListener(new OnClickListener()
          {
             @Override
-            public void onClick(View v)
+            public
+            void onClick(View v)
             {
                Util.remove(settingPath);
                String value = Boolean.toString(((Checkable) v).isChecked());
@@ -152,19 +177,21 @@ class AdapterSettingsFunctions extends BaseAdapter
          /* Load the saved value and set the progress.*/
          String checker = Read.setting(settingPath);
          int time = checker.isEmpty() ? 3 : Util.stoi(checker);
-         holder.seekbar.setProgress(Util.index(TIMES, time));
+         holder.seekbar.setProgress(index(TIMES, time));
       }
       return cv;
    }
 
-   static class SettingsCheckHolder
+   static
+   class SettingsCheckHolder
    {
       TextView title;
       TextView summary;
       CheckBox checkbox;
    }
 
-   static class SettingsSeekHolder
+   static
+   class SettingsSeekHolder
    {
       TextView title;
       TextView summary;
@@ -172,19 +199,22 @@ class AdapterSettingsFunctions extends BaseAdapter
       SeekBar  seekbar;
    }
 
-   private static class SeekBarChangeListener implements OnSeekBarChangeListener
+   private static
+   class SeekBarChangeListener implements OnSeekBarChangeListener
    {
       private final SettingsSeekHolder holder;
       private final String             settingPath;
 
-      public SeekBarChangeListener(SettingsSeekHolder holder, String settingPath)
+      public
+      SeekBarChangeListener(SettingsSeekHolder holder, String settingPath)
       {
          this.holder = holder;
          this.settingPath = settingPath;
       }
 
       @Override
-      public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
+      public
+      void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
       {
          holder.read.setText(REFRESH_TIMES[progress]);
          Util.remove(settingPath);
@@ -192,12 +222,14 @@ class AdapterSettingsFunctions extends BaseAdapter
       }
 
       @Override
-      public void onStartTrackingTouch(SeekBar seekBar)
+      public
+      void onStartTrackingTouch(SeekBar seekBar)
       {
       }
 
       @Override
-      public void onStopTrackingTouch(SeekBar seekBar)
+      public
+      void onStopTrackingTouch(SeekBar seekBar)
       {
       }
    }

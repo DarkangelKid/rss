@@ -18,19 +18,22 @@ class PagerAdapterSettings extends FragmentPagerAdapter
    }
 
    @Override
-   public int getCount()
+   public
+   int getCount()
    {
       return SETTINGS_TITLES.length;
    }
 
    @Override
-   public Fragment getItem(int position)
+   public
+   Fragment getItem(int position)
    {
       return SETTINGS_FRAGMENTS[position];
    }
 
    @Override
-   public String getPageTitle(int position)
+   public
+   String getPageTitle(int position)
    {
       return SETTINGS_TITLES[position];
    }

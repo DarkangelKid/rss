@@ -19,38 +19,35 @@ import java.util.Arrays;
 
 class AdapterManagerTags extends BaseAdapter
 {
-   private String old_title = "";
-   private String new_title = "";
+   String old_title = "";
 
-   private static String[] s_tagArray;
-   private static String[] s_infoArray;
-
-   static void setArrays(String[] tags, String... infos)
-   {
-      s_tagArray = tags;
-      s_infoArray = infos;
-   }
+   static String[] s_tagArray;
+   static String[] s_infoArray;
 
    @Override
-   public int getCount()
+   public
+   int getCount()
    {
       return s_tagArray.length;
    }
 
    @Override
-   public long getItemId(int pos)
+   public
+   long getItemId(int pos)
    {
       return pos;
    }
 
    @Override
-   public String getItem(int pos)
+   public
+   String getItem(int pos)
    {
       return s_tagArray[pos];
    }
 
    @Override
-   public int getViewTypeCount()
+   public
+   int getViewTypeCount()
    {
       return 2;
    }
@@ -67,7 +64,8 @@ class AdapterManagerTags extends BaseAdapter
 
 
    @Override
-   public View getView(int position, View view, ViewGroup parent)
+   public
+   View getView(int position, View view, ViewGroup parent)
    {
       /*int view_type = getItemViewType(position);
       if(view_type == 0)*/
@@ -103,7 +101,8 @@ class AdapterManagerTags extends BaseAdapter
       return view;
    }
 
-   static class ViewHolder
+   static
+   class ViewHolder
    {
       TextView  tag_view;
       TextView  info_view;
@@ -113,7 +112,8 @@ class AdapterManagerTags extends BaseAdapter
    class MyTouchListener implements OnTouchListener
    {
       @Override
-      public boolean onTouch(View view, MotionEvent motionEvent)
+      public
+      boolean onTouch(View view, MotionEvent motionEvent)
       {
          if(MotionEvent.ACTION_DOWN == motionEvent.getAction())
          {
@@ -129,14 +129,37 @@ class AdapterManagerTags extends BaseAdapter
 
    int old_view;
    int[] position = new int[2];
-   static final int SCREEN_HEIGHT = (int) FeedsActivity.con
-                                                       .getResources()
-                                                       .getDisplayMetrics().heightPixels;
+   static final int SCREEN_HEIGHT = (int) Util.getContext()
+         .getResources()
+         .getDisplayMetrics().heightPixels;
 
    class MyDragListener implements OnDragListener
    {
+      void rearrangeTags(String previous, String next)
+      {
+         int i = 0;
+         while(!previous.equals(s_tagArray[i]))
+         {
+            i++;
+         }
+         int j = 0;
+         while(!next.equals(s_tagArray[j]))
+         {
+            j++;
+         }
+         String oldInfo = s_infoArray[i];
+         String old = s_tagArray[i];
+
+         s_infoArray[i] = s_infoArray[j];
+         s_tagArray[i] = s_tagArray[j];
+
+         s_infoArray[j] = oldInfo;
+         s_tagArray[j] = old;
+      }
+
       @Override
-      public boolean onDrag(View v, DragEvent event)
+      public
+      boolean onDrag(View v, DragEvent event)
       {
          int action = event.getAction();
          ListView listview = (ListView) v.getParent();
@@ -160,7 +183,7 @@ class AdapterManagerTags extends BaseAdapter
             last.setVisibility(View.VISIBLE);
 
             /* Save the position of the view that just faded out. */
-            new_title = Util.getText(v, R.id.tag_item);
+            String new_title = Util.getText(v, R.id.tag_item);
             for(int i = 0; i < listview.getChildCount(); i++)
             {
                if(new_title.equals(Util.getText(listview.getChildAt(i), R.id.tag_item)))
@@ -202,29 +225,8 @@ class AdapterManagerTags extends BaseAdapter
       }
    }
 
-   static void rearrangeTags(String previous, String next)
-   {
-      int i = 0;
-      while(!previous.equals(s_tagArray[i]))
-      {
-         i++;
-      }
-      int j = 0;
-      while(!next.equals(s_tagArray[j]))
-      {
-         j++;
-      }
-      String oldInfo = s_infoArray[i];
-      String old = s_tagArray[i];
-
-      s_infoArray[i] = s_infoArray[j];
-      s_tagArray[i] = s_tagArray[j];
-
-      s_infoArray[j] = oldInfo;
-      s_tagArray[j] = old;
-   }
-
-   static class CardShadowBuilder extends View.DragShadowBuilder
+   static
+   class CardShadowBuilder extends View.DragShadowBuilder
    {
       final View view_store;
 
@@ -235,7 +237,8 @@ class AdapterManagerTags extends BaseAdapter
       }
 
       @Override
-      public void onProvideShadowMetrics(Point shadowSize, Point shadowTouchPoint)
+      public
+      void onProvideShadowMetrics(Point shadowSize, Point shadowTouchPoint)
       {
          shadowSize.x = view_store.getWidth();
          shadowSize.y = view_store.getHeight();

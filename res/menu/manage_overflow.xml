@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu
-		xmlns:android="http://schemas.android.com/apk/res/android"
-		xmlns:app="http://schemas.android.com/apk/res-auto">
-	<item
-			android:id="@+id/add_feed_manage"
-			android:title="add"
-			android:icon="@drawable/add"
-			app:showAsAction="ifRoom"/>
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/add_feed_manage"
+        android:title="@string/add_feed"
+        android:icon="@drawable/add"
+        app:showAsAction="ifRoom"/>
 </menu>

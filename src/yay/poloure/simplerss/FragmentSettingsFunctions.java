@@ -10,13 +10,15 @@ class FragmentSettingsFunctions extends ListFragment
 {
 
    @Override
-   public View onCreateView(LayoutInflater inf, ViewGroup cont, Bundle b)
+   public
+   View onCreateView(LayoutInflater inf, ViewGroup cont, Bundle b)
    {
       return inf.inflate(R.layout.listview_settings_function, cont, false);
    }
 
    @Override
-   public void onActivityCreated(Bundle savedInstanceState)
+   public
+   void onActivityCreated(Bundle savedInstanceState)
    {
       super.onActivityCreated(savedInstanceState);
       setListAdapter(new AdapterSettingsFunctions());
