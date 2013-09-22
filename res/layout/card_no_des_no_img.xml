@@ -4,10 +4,10 @@
                 android:layout_height="match_parent"
                 android:background="#ffffff">
 
-    <include layout="@layout/card_title_url"/>
+   <include layout="@layout/card_title_url"/>
 
-    <include layout="@layout/top_shadow"/>
+   <include layout="@layout/top_shadow"/>
 
-    <include layout="@layout/shadow"/>
+   <include layout="@layout/shadow"/>
 
 </RelativeLayout>

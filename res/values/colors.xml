@@ -1,30 +1,30 @@
 <resources>
-    <color name="custom_theme_color">#ffe5e5e5</color>
-    <color name="bar_colour">#ff212021</color>
-    <color name="white">#ffffffff</color>
-    <color name="cab">#ff002c36</color>
+   <color name="custom_theme_color">#ffe5e5e5</color>
+   <color name="bar_colour">#ff212021</color>
+   <color name="white">#ffffffff</color>
+   <color name="cab">#ff002c36</color>
 
-    <color name="title_grey">#ff808080</color>
-    <color name="title_black">#ff000000</color>
+   <color name="title_grey">#ff808080</color>
+   <color name="title_black">#ff000000</color>
 
-    <color name="des_grey">#ffa7a7a7</color>
-    <color name="des_black">#ff4e4e4e</color>
+   <color name="des_grey">#ffa7a7a7</color>
+   <color name="des_black">#ff4e4e4e</color>
 
-    <color name="link_grey">#ffc2c2c2</color>
-    <color name="link_black">#ff808080</color>
+   <color name="link_grey">#ffc2c2c2</color>
+   <color name="link_black">#ff808080</color>
 
-    <drawable name="divider_settings_dark">#cccccc</drawable>
-    <drawable name="divider_settings_light">#e5e5e5</drawable>
+   <drawable name="divider_settings_dark">#cccccc</drawable>
+   <drawable name="divider_settings_light">#e5e5e5</drawable>
 
-    <drawable name="colour_blue_bold">#0099cc</drawable>
-    <drawable name="colour_purple_bold">#9933cc</drawable>
-    <drawable name="colour_green_bold">#669900</drawable>
-    <drawable name="colour_yellow_bold">#ff8800</drawable>
-    <drawable name="colour_red_bold">#cc0000</drawable>
+   <drawable name="colour_blue_bold">#0099cc</drawable>
+   <drawable name="colour_purple_bold">#9933cc</drawable>
+   <drawable name="colour_green_bold">#669900</drawable>
+   <drawable name="colour_yellow_bold">#ff8800</drawable>
+   <drawable name="colour_red_bold">#cc0000</drawable>
 
-    <drawable name="colour_blue_light">#33b5e5</drawable>
-    <drawable name="colour_purple_light">#aa66cc</drawable>
-    <drawable name="colour_green_light">#99cc00</drawable>
-    <drawable name="colour_yellow_light">#ffbb33</drawable>
-    <drawable name="colour_red_light">#ff4444</drawable>
+   <drawable name="colour_blue_light">#33b5e5</drawable>
+   <drawable name="colour_purple_light">#aa66cc</drawable>
+   <drawable name="colour_green_light">#99cc00</drawable>
+   <drawable name="colour_yellow_light">#ffbb33</drawable>
+   <drawable name="colour_red_light">#ff4444</drawable>
 </resources>
