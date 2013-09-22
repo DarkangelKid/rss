@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+   <string name="drawer_open">Open navigation drawer</string>
+   <string name="drawer_close">Close navigation drawer</string>
+
+   <string name="navigation_title">ملاحة</string>
+
+   <string name="delete_dialog">حذف</string>
+   <string name="clear_dialog">Clear Content</string>
+   <string name="add_dialog_title">Add Feed</string>
+   <string name="edit_dialog_title">Edit Feed</string>
+
+   <string name="add_feed">اضافة</string>
+   <string name="unread">غير مقروء</string>
+   <string name="refresh">إعادة التحميل‎</string>
+
+   <string name="feed_name_dialog">Feed Name</string>
+   <string name="feed_name_hint">إختياري‎</string>
+   <string name="feed_url_dialog">Feed URL</string>
+   <string name="feed_url_hint">http://example.com/rss</string>
+   <string name="feed_tag_dialog">Tag</string>
+   <string name="feed_tag_title">Tags</string>
+   <string name="feed_tag_hint">new tag</string>
+   <string name="cancel_dialog">إلغاء‎</string>
+   <string name="add_dialog">اضافة</string>
+   <string name="accept_dialog">قبول</string>
+   <string name="feed_invalid">Invalid Feed URL</string>
+
+   <string name="refresh_cat_preferences">اعادة التحميل تلقائياً‎</string>
+   <string name="refresh_summary_preferences">Check to enable auto refresh</string>
+   <string name="refresh_time_preferences">Refresh Time</string>
+   <string name="refresh_time_summary_preferences">Adjust auto refresh interval</string>
+   <string name="notifications_preferences">إشعارات‎</string>
+   <string name="notifications_summary_preferences">Check to enable notifications</string>
+   <string name="offline_cat_preferences">Offline Mode</string>
+   <string name="offline_summary_preferences">Check to enable offline mode</string>
+
+   <string name="all_tag">All</string>
+
+   <string name="notification_title_singular">%d Unread Item</string>
+   <string name="notification_title_plural">%d Unread Items</string>
+   <string name="notification_content_tag_item">%d tag has an unread item</string>
+   <string name="notification_content_tag_items">%d tag has unread items</string>
+   <string name="notification_content_tags">%d tags have unread items</string>
+
+</resources>

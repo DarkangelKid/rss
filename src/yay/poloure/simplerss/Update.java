@@ -8,7 +8,7 @@ class Update
    public static
    void navigation()
    {
-      if(FeedsActivity.HONEYCOMB)
+      if(Constants.HONEYCOMB)
       {
          new NavDrawer.RefreshNavAdapter().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
                Util.EMPTY_INT_ARRAY);
@@ -22,7 +22,7 @@ class Update
    public static
    void manageFeeds()
    {
-      if(FeedsActivity.HONEYCOMB)
+      if(Constants.HONEYCOMB)
       {
          new FragmentManageFeeds.ManageRefresh().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
       }
@@ -35,7 +35,7 @@ class Update
    public static
    void manageTags()
    {
-      if(FeedsActivity.HONEYCOMB)
+      if(Constants.HONEYCOMB)
       {
          new FragmentManageTags.RefreshTags().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
       }
@@ -46,30 +46,30 @@ class Update
    }
 
    public static
-   void page(int page_number)
+   void page(int pageNumber)
    {
-      if(FeedsActivity.HONEYCOMB)
+      if(Constants.HONEYCOMB)
       {
-         new RefreshPage().execute(page_number);
+         new RefreshPage().execute(pageNumber);
       }
       else
       {
-         new RefreshPage().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, page_number);
+         new RefreshPage().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, pageNumber);
       }
    }
 
    public static
-   void checkFeedExists(AlertDialog dlg, String ntag, String fname, String mode, String ctitle,
-         String stag, int pos, String URL_check)
+   void executeFeedCheck(AlertDialog dlg, String ntag, String fname, String mode, String ctitle,
+         String stag, int pos, String url)
    {
-      if(FeedsActivity.HONEYCOMB)
+      if(Constants.HONEYCOMB)
       {
-         new FeedDialog.CheckFeed(dlg, ntag, fname, mode, ctitle, stag, pos).execute(URL_check);
+         new FeedDialog.CheckFeed(dlg, ntag, fname, mode, ctitle, stag, pos).execute(url);
       }
       else
       {
          new FeedDialog.CheckFeed(dlg, ntag, fname, mode, ctitle, stag, pos).executeOnExecutor(
-               AsyncTask.THREAD_POOL_EXECUTOR, URL_check);
+               AsyncTask.THREAD_POOL_EXECUTOR, url);
       }
    }
 }

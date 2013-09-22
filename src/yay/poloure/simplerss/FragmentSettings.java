@@ -13,15 +13,15 @@ class FragmentSettings extends Fragment
 
    @Override
    public
-   View onCreateView(LayoutInflater in, ViewGroup container, Bundle b)
+   View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
-      View v = in.inflate(R.layout.viewpager, container, false);
+      View v = inflater.inflate(R.layout.viewpager, container, false);
       ViewPager vp = (ViewPager) v.findViewById(R.id.pager);
-      vp.setAdapter(new PagerAdapterSettings(FeedsActivity.fman));
+      vp.setAdapter(new PagerAdapterSettings(FeedsActivity.s_fragmentManager));
 
-      FeedsActivity.PAGER_TAB_STRIPS[2] = (PagerTabStrip) v.findViewById(R.id.pager_tab_strip);
-      FeedsActivity.PAGER_TAB_STRIPS[2].setDrawFullUnderline(true);
-      Util.setStripColor(FeedsActivity.PAGER_TAB_STRIPS[2]);
+      Constants.PAGER_TAB_STRIPS[2] = (PagerTabStrip) v.findViewById(R.id.pager_tab_strip);
+      Constants.PAGER_TAB_STRIPS[2].setDrawFullUnderline(true);
+      Util.setStripColor(Constants.PAGER_TAB_STRIPS[2]);
 
       return v;
    }

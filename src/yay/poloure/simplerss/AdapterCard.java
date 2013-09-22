@@ -1,11 +1,5 @@
 package yay.poloure.simplerss;
 
-import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -33,33 +27,19 @@ import java.util.regex.Pattern;
 
 class AdapterCard extends BaseAdapter
 {
-   static final Pattern PATTERN_THUMBNAILS = Pattern.compile("thumbnails");
-   static final int     SCREEN_WIDTH       = Util.getScreenWidth();
-   static final int     EIGHT              = Math.round(
+   private static final Pattern PATTERN_THUMBNAILS = Pattern.compile(Constants.THUMBNAILS);
+   private static final int     SCREEN_WIDTH       = Util.getScreenWidth();
+   static final         int     EIGHT              = Math.round(
          8.0F * Util.getContext().getResources().getDisplayMetrics().density + 0.5f);
 
    boolean m_touchedScreen = true;
-   Datum[] m_items;
-   boolean m_firstGetItem = true;
-   ListView m_listview;
+   FeedItem[] m_items;
+   private boolean m_firstGetItem = true;
+   private ListView m_listview;
 
-   AdapterCard()
-   {
-   }
+   private static final int VIEW_TYPE_COUNT = 4;
 
    private static
-   void show_card_dialog(String URL)
-   {
-      String[] menuItems = Util.getArray(R.array.card_menu_image);
-      Context con = Util.getContext();
-
-      Builder build = new Builder(con);
-      build.setCancelable(true).setItems(menuItems, new CardMenuClick(URL));
-      AlertDialog cardDialog = build.create();
-      cardDialog.show();
-   }
-
-   static
    <T> T[] concat(T[] first, T... second)
    {
       if(null == first)
@@ -75,7 +55,7 @@ class AdapterCard extends BaseAdapter
       return result;
    }
 
-   void prependArray(Datum[] items)
+   void prependArray(FeedItem... items)
    {
       m_items = concat(items, m_items);
    }
@@ -132,7 +112,7 @@ class AdapterCard extends BaseAdapter
             holder.m_des = (TextView) cv.findViewById(R.id.description);
             holder.m_imageView = (ImageView) cv.findViewById(R.id.image);
             cv.setOnClickListener(new WebviewMode());
-            cv.setOnLongClickListener(new CardLongClick());
+            cv.setOnLongClickListener(new OnCardLongClick());
             cv.setTag(holder);
          }
          else
@@ -158,7 +138,7 @@ class AdapterCard extends BaseAdapter
             holder.url = (TextView) cv.findViewById(R.id.url);
             holder.image = (ImageView) cv.findViewById(R.id.image);
             cv.setOnClickListener(new WebviewMode());
-            cv.setOnLongClickListener(new CardLongClick());
+            cv.setOnLongClickListener(new OnCardLongClick());
             cv.setTag(holder);
          }
          else
@@ -183,7 +163,7 @@ class AdapterCard extends BaseAdapter
             holder.url = (TextView) cv.findViewById(R.id.url);
             holder.des = (TextView) cv.findViewById(R.id.description);
             cv.setOnClickListener(new WebviewMode());
-            cv.setOnLongClickListener(new CardLongClick());
+            cv.setOnLongClickListener(new OnCardLongClick());
             cv.setTag(holder);
          }
          else
@@ -206,7 +186,7 @@ class AdapterCard extends BaseAdapter
             holder.title = (TextView) cv.findViewById(R.id.title);
             holder.url = (TextView) cv.findViewById(R.id.url);
             cv.setOnClickListener(new WebviewMode());
-            cv.setOnLongClickListener(new CardLongClick());
+            cv.setOnLongClickListener(new OnCardLongClick());
             cv.setTag(holder);
          }
          else
@@ -221,12 +201,13 @@ class AdapterCard extends BaseAdapter
       /* The logic that tells whether the item is Read or not. */
       if(View.VISIBLE == m_listview.getVisibility() && 0 <= position - 1 && m_touchedScreen)
       {
-         Util.SetHolder.read_items.add(m_items[position - 1].url);
+         Util.SetHolder.READ_ITEMS.add(m_items[position - 1].url);
       }
 
       return cv;
    }
 
+   private
    void displayImage(ImageView v, int p)
    {
       v.setImageDrawable(new ColorDrawable(Color.WHITE));
@@ -236,7 +217,7 @@ class AdapterCard extends BaseAdapter
       v.setLayoutParams(lp);
       v.setTag(p);
 
-      if(FeedsActivity.HONEYCOMB)
+      if(Constants.HONEYCOMB)
       {
          new AsyncLoadImage().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, v, v.getTag());
       }
@@ -274,7 +255,7 @@ class AdapterCard extends BaseAdapter
    public
    int getViewTypeCount()
    {
-      return 4;
+      return VIEW_TYPE_COUNT;
    }
 
    static
@@ -309,21 +290,25 @@ class AdapterCard extends BaseAdapter
       TextView url;
    }
 
-   static
+   private static
    class WebviewMode implements View.OnClickListener
    {
+      WebviewMode()
+      {
+      }
+
       @Override
       public
       void onClick(View v)
       {
-         FeedsActivity.bar.setTitle("Offline");
+         FeedsActivity.s_actionBar.setTitle(Constants.OFFLINE);
          NavDrawer.s_drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-         NavDrawer.DRAWER_TOGGLE.setDrawerIndicatorEnabled(false);
-         FeedsActivity.bar.setDisplayHomeAsUpEnabled(true);
-         FeedsActivity.fman
+         NavDrawer.s_drawerToggle.setDrawerIndicatorEnabled(false);
+         FeedsActivity.s_actionBar.setDisplayHomeAsUpEnabled(true);
+         FeedsActivity.s_fragmentManager
                .beginTransaction()
-               .hide(FeedsActivity.fman.findFragmentByTag(NavDrawer.NAV_TITLES[0]))
-               .add(R.id.drawer_layout, new FragmentWebView.fragment_webview(), "OFFLINE")
+               .hide(FeedsActivity.s_fragmentManager.findFragmentByTag(NavDrawer.NAV_TITLES[0]))
+               .add(R.id.drawer_layout, new FragmentWebView(), Constants.OFFLINE)
                .addToBackStack("BACK")
                .commit();
       }
@@ -350,61 +335,16 @@ class AdapterCard extends BaseAdapter
 
          Uri uri = Uri.fromFile(new File(m_imagePath));
 
-         if(FeedsActivity.JELLYBEAN)
+         if(Constants.JELLYBEAN)
          {
-            intent.setDataAndTypeAndNormalize(uri, FeedsActivity.IMAGE_TYPE + type);
+            intent.setDataAndTypeAndNormalize(uri, Constants.IMAGE_TYPE + type);
          }
          else
          {
-            intent.setDataAndType(uri, FeedsActivity.IMAGE_TYPE + type);
+            intent.setDataAndType(uri, Constants.IMAGE_TYPE + type);
          }
 
          Util.getContext().startActivity(intent);
-      }
-   }
-
-   static
-   class CardLongClick implements View.OnLongClickListener
-   {
-      @Override
-      public
-      boolean onLongClick(View v)
-      {
-         String longPressUrl = Util.getText(v, R.id.url);
-         show_card_dialog(longPressUrl);
-         return true;
-      }
-   }
-
-   static
-   class CardMenuClick implements DialogInterface.OnClickListener
-   {
-      String m_URL;
-
-      public
-      CardMenuClick(String URL)
-      {
-         m_URL = URL;
-      }
-
-      @Override
-      public
-      void onClick(DialogInterface dialog, int position)
-      {
-         Context con = Util.getContext();
-         switch(position)
-         {
-            case 0:
-               ClipboardManager clipboard = (ClipboardManager) con.getSystemService(
-                     Context.CLIPBOARD_SERVICE);
-               ClipData clip = ClipData.newPlainText("label", m_URL);
-               clipboard.setPrimaryClip(clip);
-               break;
-            case 1:
-               con.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(m_URL)));
-            /*case(2):
-              break;*/
-         }
       }
    }
 
@@ -426,7 +366,8 @@ class AdapterCard extends BaseAdapter
          fadeIn.setInterpolator(new DecelerateInterpolator());
          Write.log(m_items.length + "|" + m_items[0].image);
          String image = Util.getStorage() +
-               PATTERN_THUMBNAILS.matcher(m_items[m_imageViewTag].image).replaceAll("images");
+               PATTERN_THUMBNAILS.matcher(m_items[m_imageViewTag].image)
+                     .replaceAll(Constants.IMAGES);
          m_imageView.setOnClickListener(new ImageClick(image));
          return new Object[]{
                BitmapFactory.decodeFile(Util.getStorage() + m_items[m_imageViewTag].image, o),
@@ -455,8 +396,13 @@ class AdapterCard extends BaseAdapter
       }
    }
 
+   private
    class CardScrollListener implements AbsListView.OnScrollListener
    {
+      CardScrollListener()
+      {
+      }
+
       @Override
       public
       void onScroll(AbsListView v, int fir, int visible, int total)
@@ -470,7 +416,7 @@ class AdapterCard extends BaseAdapter
          if(m_listview.getChildAt(0).getTop() == EIGHT &&
                View.VISIBLE == m_listview.getVisibility() && m_touchedScreen)
          {
-            Util.SetHolder.read_items.add(m_items[0].url);
+            Util.SetHolder.READ_ITEMS.add(m_items[0].url);
          }
 
          if(AbsListView.OnScrollListener.SCROLL_STATE_IDLE == scrollState)

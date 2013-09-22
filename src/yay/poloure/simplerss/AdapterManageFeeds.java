@@ -38,24 +38,11 @@ class AdapterManageFeeds extends BaseAdapter
       return position;
    }
 
-   static
-   void removeItem(int position)
-   {
-      s_titleArray = Util.arrayRemove(s_titleArray, position);
-      s_infoArray = Util.arrayRemove(s_infoArray, position);
-   }
-
    @Override
    public
    String getItem(int position)
    {
       return s_titleArray[position];
-   }
-
-   static
-   String getInfo(int position)
-   {
-      return s_infoArray[position];
    }
 
    @Override

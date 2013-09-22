@@ -9,28 +9,24 @@ import android.webkit.WebView;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-public
-class FragmentWebView
+class FragmentWebView extends Fragment
 {
-   static
-   class fragment_webview extends Fragment
+   private WebView     m_webView;
+   private FrameLayout view;
+   private TextView    text;
+
+   @Override
+   public
+   View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
-      WebView     web_view;
-      FrameLayout view;
-      TextView    text;
-
-      @Override
-      public
-      View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+      if(null != m_webView)
       {
-         if(null != web_view)
-         {
-            web_view.destroy();
-         }
+         m_webView.destroy();
+      }
 
-         view = new FrameLayout(Util.getContext());
-         web_view = new WebView(Util.getContext());
-         //view.addView(web_view, LayoutParams.MATCH_PARENT);
+      view = new FrameLayout(Util.getContext());
+      m_webView = new WebView(Util.getContext());
+      //view.addView(m_webView, LayoutParams.MATCH_PARENT);
 
          /*text = new TextView();
          text.setText("webview");
@@ -38,45 +34,42 @@ class FragmentWebView
          text.setVisibility(View.GONE);
          view.addView(text, android.widget.FrameLayout.LayoutParams.WRAP_CONTENT);*/
 
-         return view;
-      }
+      return view;
+   }
 
-      @Override
-      public
-      void onPause()
-      {
+   @Override
+   public
+   void onPause()
+   {
       /* min api 11. */
-         web_view.onPause();
-         super.onPause();
-      }
+      m_webView.onPause();
+      super.onPause();
+   }
 
-      @Override
-      public
-      void onResume()
-      {
+   @Override
+   public
+   void onResume()
+   {
          /* min api 11. */
-         web_view.onResume();
-         super.onResume();
-      }
+      m_webView.onResume();
+      super.onResume();
+   }
 
-      @Override
-      public
-      void onDestroy()
+   @Override
+   public
+   void onDestroy()
+   {
+      if(null != m_webView)
       {
-         if(null != web_view)
-         {
-            view.removeAllViews();
-            web_view.removeAllViews();
-            web_view.destroy();
-            web_view = null;
-            view = null;
-         }
-         super.onDestroy();
+         view.removeAllViews();
+         m_webView.removeAllViews();
+         m_webView.destroy();
       }
+      super.onDestroy();
+   }
 
-      WebView get_webview()
-      {
-         return web_view;
-      }
+   WebView getWebView()
+   {
+      return m_webView;
    }
 }

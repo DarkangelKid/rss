@@ -19,7 +19,7 @@ import java.util.Arrays;
 
 class AdapterManagerTags extends BaseAdapter
 {
-   String old_title = "";
+   private String old_title = "";
 
    static String[] s_tagArray;
    static String[] s_infoArray;
@@ -86,7 +86,7 @@ class AdapterManagerTags extends BaseAdapter
 
       holder.tag_view.setText(s_tagArray[position]);
       holder.info_view.setText(s_infoArray[position]);
-      if(0 != position && FeedsActivity.HONEYCOMB)
+      if(0 != position && Constants.HONEYCOMB)
       {
          holder.image_view.setVisibility(View.VISIBLE);
          holder.image_view.setOnTouchListener(new MyTouchListener());
@@ -109,8 +109,13 @@ class AdapterManagerTags extends BaseAdapter
       ImageView image_view;
    }
 
+   private
    class MyTouchListener implements OnTouchListener
    {
+      MyTouchListener()
+      {
+      }
+
       @Override
       public
       boolean onTouch(View view, MotionEvent motionEvent)
@@ -127,9 +132,9 @@ class AdapterManagerTags extends BaseAdapter
       }
    }
 
-   int old_view;
-   int[] position = new int[2];
-   static final int SCREEN_HEIGHT = (int) Util.getContext()
+   private int old_view;
+   private              int[] position      = new int[2];
+   private static final int   SCREEN_HEIGHT = (int) Util.getContext()
          .getResources()
          .getDisplayMetrics().heightPixels;
 
@@ -183,10 +188,10 @@ class AdapterManagerTags extends BaseAdapter
             last.setVisibility(View.VISIBLE);
 
             /* Save the position of the view that just faded out. */
-            String new_title = Util.getText(v, R.id.tag_item);
+            String newTitle = Util.getText(v, R.id.tag_item);
             for(int i = 0; i < listview.getChildCount(); i++)
             {
-               if(new_title.equals(Util.getText(listview.getChildAt(i), R.id.tag_item)))
+               if(newTitle.equals(Util.getText(listview.getChildAt(i), R.id.tag_item)))
                {
                   old_view = i;
                }
@@ -196,7 +201,7 @@ class AdapterManagerTags extends BaseAdapter
             /* Change the information of the card that just disapeared. */
             /* Old m_title is the currently touched m_title and new_title is the one to be 
             replaced */
-            rearrangeTags(old_title, new_title);
+            rearrangeTags(old_title, newTitle);
             notifyDataSetChanged();
 
             v.getLocationOnScreen(position);
@@ -218,7 +223,7 @@ class AdapterManagerTags extends BaseAdapter
             v.setAnimation(fadeIn2);
             v.setVisibility(View.VISIBLE);
 
-            Write.collection(FeedsActivity.GROUP_LIST, Arrays.asList(s_tagArray));
+            Write.collection(Constants.TAG_LIST, Arrays.asList(s_tagArray));
             Util.updateTags();
          }
          return true;

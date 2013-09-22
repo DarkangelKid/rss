@@ -6,11 +6,11 @@ import android.support.v4.app.FragmentPagerAdapter;
 
 class PagerAdapterSettings extends FragmentPagerAdapter
 {
-   private static final Fragment[] SETTINGS_FRAGMENTS = {
+   private static final Fragment[] SETTINGS_DIR_FRAGMENTS = {
          new FragmentSettingsFunctions(), new FragmentSettingsUi(),
    };
 
-   private static final String[] SETTINGS_TITLES = Util.getArray(R.array.settings_titles);
+   private static final String[] SETTINGS_DIR_TITLES = Util.getArray(R.array.settings_titles);
 
    PagerAdapterSettings(FragmentManager fm)
    {
@@ -21,20 +21,20 @@ class PagerAdapterSettings extends FragmentPagerAdapter
    public
    int getCount()
    {
-      return SETTINGS_TITLES.length;
+      return SETTINGS_DIR_TITLES.length;
    }
 
    @Override
    public
    Fragment getItem(int position)
    {
-      return SETTINGS_FRAGMENTS[position];
+      return SETTINGS_DIR_FRAGMENTS[position];
    }
 
    @Override
    public
    String getPageTitle(int position)
    {
-      return SETTINGS_TITLES[position];
+      return SETTINGS_DIR_TITLES[position];
    }
 }

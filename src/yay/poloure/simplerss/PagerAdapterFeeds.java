@@ -15,7 +15,7 @@ class PagerAdapterFeeds extends FragmentPagerAdapter
    public
    int getCount()
    {
-      return FeedsActivity.ctags.length;
+      return FeedsActivity.s_currentTags.length;
    }
 
    @Override
@@ -29,6 +29,6 @@ class PagerAdapterFeeds extends FragmentPagerAdapter
    public
    String getPageTitle(int position)
    {
-      return FeedsActivity.ctags[position];
+      return FeedsActivity.s_currentTags[position];
    }
 }

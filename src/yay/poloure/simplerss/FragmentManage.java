@@ -24,28 +24,28 @@ class FragmentManage extends Fragment
 
    @Override
    public
-   View onCreateView(LayoutInflater inf, ViewGroup container, Bundle b)
+   View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
-      View v = inf.inflate(R.layout.viewpager, container, false);
+      View v = inflater.inflate(R.layout.viewpager, container, false);
 
       ViewPager pager = (ViewPager) v.findViewById(R.id.pager);
-      pager.setAdapter(new PagerAdapterManage(FeedsActivity.fman));
+      pager.setAdapter(new PagerAdapterManage(FeedsActivity.s_fragmentManager));
 
-      FeedsActivity.PAGER_TAB_STRIPS[1] = (PagerTabStrip) v.findViewById(R.id.pager_tab_strip);
-      FeedsActivity.PAGER_TAB_STRIPS[1].setDrawFullUnderline(true);
-      Util.setStripColor(FeedsActivity.PAGER_TAB_STRIPS[1]);
+      Constants.PAGER_TAB_STRIPS[1] = (PagerTabStrip) v.findViewById(R.id.pager_tab_strip);
+      Constants.PAGER_TAB_STRIPS[1].setDrawFullUnderline(true);
+      Util.setStripColor(Constants.PAGER_TAB_STRIPS[1]);
 
       return v;
    }
 
    @Override
    public
-   void onCreateOptionsMenu(Menu menu, MenuInflater inf)
+   void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
    {
-      FeedsActivity.optionsMenu = menu;
-      FeedsActivity.optionsMenu.clear();
+      FeedsActivity.s_optionsMenu = menu;
+      FeedsActivity.s_optionsMenu.clear();
 
-      inf.inflate(R.menu.manage_overflow, FeedsActivity.optionsMenu);
-      super.onCreateOptionsMenu(FeedsActivity.optionsMenu, inf);
+      inflater.inflate(R.menu.manage_overflow, FeedsActivity.s_optionsMenu);
+      super.onCreateOptionsMenu(FeedsActivity.s_optionsMenu, inflater);
    }
 }

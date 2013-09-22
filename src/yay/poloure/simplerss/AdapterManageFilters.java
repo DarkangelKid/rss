@@ -7,7 +7,7 @@ import android.widget.TextView;
 
 class AdapterManageFilters extends BaseAdapter
 {
-   static String[] s_filterTitles;
+   private static String[] s_filterTitles;
 
    static
    void setTitles(String... titles)

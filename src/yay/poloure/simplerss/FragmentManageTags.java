@@ -21,9 +21,9 @@ import android.widget.ListView;
 
 class FragmentManageTags extends ListFragment
 {
-   private static boolean             multi_mode;
-   private static ActionMode          actionmode;
-   private static ActionMode.Callback actionmode_callback;
+   private static boolean             s_multiMode;
+   private static ActionMode          s_actionmode;
+   private static ActionMode.Callback s_actionmode_callback;
 
    @Override
    public
@@ -48,9 +48,9 @@ class FragmentManageTags extends ListFragment
 
       Update.manageTags();
 
-      if(FeedsActivity.HONEYCOMB)
+      if(Constants.HONEYCOMB)
       {
-         actionmode_callback = new ActionCallback(listview);
+         s_actionmode_callback = new ActionCallback(listview);
       }
       else
       {
@@ -65,13 +65,13 @@ class FragmentManageTags extends ListFragment
    public
    boolean onOptionsItemSelected(MenuItem item)
    {
-      if(NavDrawer.DRAWER_TOGGLE.onOptionsItemSelected(item))
+      if(NavDrawer.s_drawerToggle.onOptionsItemSelected(item))
       {
          return true;
       }
       if(Util.getString(R.string.add_feed).equals(item.getTitle()))
       {
-         FeedDialog.showAddDialog(FeedsActivity.ctags);
+         FeedDialog.showAddDialog(FeedsActivity.s_currentTags);
          return true;
       }
       return super.onOptionsItemSelected(item);
@@ -79,15 +79,15 @@ class FragmentManageTags extends ListFragment
 
    @Override
    public
-   View onCreateView(LayoutInflater inf, ViewGroup cont, Bundle b)
+   View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
-      return inf.inflate(R.layout.listview_cards, cont, false);
+      return inflater.inflate(R.layout.listview_cards, container, false);
    }
 
    static
    class RefreshTags extends AsyncTask<Void, String[], Void>
    {
-      final Animation          animFadeIn = AnimationUtils.loadAnimation(FeedsActivity.con,
+      final Animation          animFadeIn = AnimationUtils.loadAnimation(Util.getContext(),
             android.R.anim.fade_in);
       final ListView           listview   = PagerAdapterManage.MANAGE_FRAGMENTS[0].getListView();
       final AdapterManagerTags adapter
@@ -115,23 +115,23 @@ class FragmentManageTags extends ListFragment
       {
 
          int size = ctags.length;
-         String[] tag_array = new String[size];
-         String[] info_array = new String[size];
+         String[] tagArray = new String[size];
+         String[] infoArray = new String[size];
          StringBuilder info = new StringBuilder(40);
 
-         String content_path = Util.getPath(FeedsActivity.all, FeedsActivity.CONTENT);
+         String contentPath = Util.getPath(Constants.ALL_TAG, Constants.CONTENT);
 
-         int total = Read.count(content_path);
+         int total = Read.count(contentPath);
 
          for(int i = 0; i < size; i++)
          {
             info.setLength(0);
-            tag_array[i] = ctags[i];
+            tagArray[i] = ctags[i];
             String[] content = Read.csv()[0];
             if(0 == i)
             {
-               info = 1 == size ? info.append("1 m_imageViewTag")
-                     : info.append(size).append(" tags");
+               /* Not sure about the images string. */
+               info = 1 == size ? info.append(" images") : info.append(size).append(" tags");
             }
             else
             {
@@ -151,24 +151,24 @@ class FragmentManageTags extends ListFragment
                   info.append(content[number - 1]);
                }
             }
-            info_array[i] = content.length + " feeds • " + info;
+            infoArray[i] = content.length + " feeds • " + info;
          }
-         info_array[0] = total + " items • " + info_array[0];
-         return new String[][]{info_array, tag_array};
+         infoArray[0] = total + " items • " + infoArray[0];
+         return new String[][]{infoArray, tagArray};
       }
 
       @Override
       protected
       Void doInBackground(Void... nothing)
       {
-         String[][] content = getInfoArrays(FeedsActivity.ctags);
+         String[][] content = getInfoArrays(FeedsActivity.s_currentTags);
          publishProgress(content[1], content[0]);
          return null;
       }
 
       @Override
       protected
-      void onPostExecute(Void nothing)
+      void onPostExecute(Void result)
       {
          listview.setAnimation(animFadeIn);
          listview.setVisibility(View.VISIBLE);
@@ -176,11 +176,11 @@ class FragmentManageTags extends ListFragment
 
       @Override
       protected
-      void onProgressUpdate(String[][] progress)
+      void onProgressUpdate(String[][] values)
       {
          if(null != adapter)
          {
-            setArrays(progress[0], progress[1]);
+            setArrays(values[0], values[1]);
             adapter.notifyDataSetChanged();
          }
       }
@@ -213,13 +213,13 @@ class FragmentManageTags extends ListFragment
             listview.setItemChecked(pos, true);
          }
 
-         if(!multi_mode)
+         if(!s_multiMode)
          {
-            multi_mode = true;
-            if(!FeedsActivity.HONEYCOMB)
+            s_multiMode = true;
+            if(!Constants.HONEYCOMB)
             {
                Activity activity = (Activity) Util.getContext();
-               actionmode = activity.startActionMode(actionmode_callback);
+               s_actionmode = activity.startActionMode(s_actionmode_callback);
             }
          }
          view.setBackgroundColor(Color.parseColor("#8033b5e5"));
@@ -248,7 +248,7 @@ class FragmentManageTags extends ListFragment
          }
          view = m_listview.getChildAt(position);
 
-         if(multi_mode)
+         if(s_multiMode)
          {
             if(m_listview.isItemChecked(position))
             {
@@ -260,8 +260,8 @@ class FragmentManageTags extends ListFragment
 
                if(0 > m_listview.getCheckedItemPositions().indexOfValue(true))
                {
-                  actionmode.finish();
-                  multi_mode = false;
+                  s_actionmode.finish();
+                  s_multiMode = false;
                }
             }
          }
@@ -323,8 +323,8 @@ class FragmentManageTags extends ListFragment
             }
          }
 
-         multi_mode = false;
-         actionmode = null;
+         s_multiMode = false;
+         s_actionmode = null;
       }
    }
 }

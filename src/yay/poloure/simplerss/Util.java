@@ -23,14 +23,15 @@ import java.util.Set;
 final
 class Util
 {
-   static       String     s_storage                 = "";
+   private static String s_storage = "";
+   private static Context s_context;
    static final int[]      EMPTY_INT_ARRAY           = new int[0];
    static final String[]   EMPTY_STRING_ARRAY        = new String[0];
    static final String[][] EMPTY_STRING_STRING_ARRAY = new String[0][0];
 
-   static final String[] MEDIA_ERROR_MESSAGES = getArray(R.array.media_errors);
+   private static final String[] MEDIA_ERROR_MESSAGES = getArray(R.array.media_errors);
 
-   static final String[] MEDIA_ERRORS = {
+   private static final String[] MEDIA_ERRORS = {
          Environment.MEDIA_UNMOUNTED,
          Environment.MEDIA_UNMOUNTABLE,
          Environment.MEDIA_SHARED,
@@ -54,7 +55,9 @@ class Util
       {
          return -1;
       }
-      for(int i = 0; i < array.length; i++)
+
+      int arrayLength = array.length;
+      for(int i = 0; i < arrayLength; i++)
       {
          if(array[i].equals(value))
          {
@@ -65,20 +68,20 @@ class Util
    }
 
    static
-   String[] arrayRemove(String[] a, int index)
+   String[] arrayRemove(String[] first, int index)
    {
-      if(null == a || 0 == a.length)
+      if(null == first || 0 == first.length)
       {
-         return Util.EMPTY_STRING_ARRAY;
+         return EMPTY_STRING_ARRAY;
       }
 
-      String[] b = new String[a.length - 1];
-      System.arraycopy(a, 0, b, 0, index);
-      if(a.length != index)
+      String[] resultArray = new String[first.length - 1];
+      System.arraycopy(first, 0, resultArray, 0, index);
+      if(first.length != index)
       {
-         System.arraycopy(a, index + 1, b, index, a.length - index - 1);
+         System.arraycopy(first, index + 1, resultArray, index, first.length - index - 1);
       }
-      return b;
+      return resultArray;
    }
 
    static
@@ -87,36 +90,36 @@ class Util
       /* Since this function is static, we can not rely on the fields being
        * non-null. */
 
-      /* Update ctags. */
-      FeedsActivity.ctags = Read.file(FeedsActivity.GROUP_LIST);
+      /* Update s_currentTags. */
+      FeedsActivity.s_currentTags = Read.file(Constants.TAG_LIST);
 
-      /* If no tags exists, add the all m_imageViewTag. */
-      if(0 == FeedsActivity.ctags.length)
+      /* If no tags exists, add the ALL_TAG m_imageViewTag. */
+      if(0 == FeedsActivity.s_currentTags.length)
       {
-         Write.single(FeedsActivity.GROUP_LIST, FeedsActivity.all + FeedsActivity.NL);
-         FeedsActivity.ctags = new String[]{FeedsActivity.all};
+         Write.single(Constants.TAG_LIST, Constants.ALL_TAG + Constants.NL);
+         FeedsActivity.s_currentTags = new String[]{Constants.ALL_TAG};
       }
 
-      if(null != FeedsActivity.viewpager)
+      if(null != FeedsActivity.s_ViewPager)
       {
-         FeedsActivity.viewpager.getAdapter().notifyDataSetChanged();
+         FeedsActivity.s_ViewPager.getAdapter().notifyDataSetChanged();
          /* Does not run on first Update. */
          Update.navigation();
       }
    }
 
    static
-   int gotoLatestUnread(Datum[] items, boolean update, int page)
+   int gotoLatestUnread(FeedItem[] items, boolean update, int page)
    {
 
-      if(null == FeedsActivity.viewpager)
+      if(null == FeedsActivity.s_ViewPager)
       {
          return -1;
       }
 
       if(update)
       {
-         page = FeedsActivity.viewpager.getCurrentItem();
+         page = FeedsActivity.s_ViewPager.getCurrentItem();
       }
 
       if(null == items)
@@ -134,7 +137,7 @@ class Util
       for(i = items.length - 1; 0 <= i; i--)
       {
          int pos = items.length - i - 1;
-         if(!SetHolder.read_items.contains(items[pos].url))
+         if(!SetHolder.READ_ITEMS.contains(items[pos].url))
          {
             break;
          }
@@ -173,14 +176,14 @@ class Util
       return false;
    }
 
-   /* Replaces all '/'s with '-' to emulate a folder directory layout in
+   /* Replaces ALL_TAG '/'s with '-' to emulate a folder directory layout in
     * data/data. */
    static
-   String getInternalName(String path)
+   String getInternalPath(String externalPath)
    {
-      String substring = path.substring(
-            path.indexOf(FeedsActivity.SEPAR + "files" + FeedsActivity.SEPAR) + 7);
-      return substring.replaceAll(FeedsActivity.SEPAR, "-");
+      String substring = externalPath.substring(
+            externalPath.indexOf(Constants.SEPAR + "files" + Constants.SEPAR) + 7);
+      return substring.replaceAll(Constants.SEPAR, "-");
    }
 
    /* For these two functions, check for null. Should only really be
@@ -201,8 +204,8 @@ class Util
    private static
    ListView getListView(int page)
    {
-      FragmentManager fman = FeedsActivity.fman;
-      ViewPager viewpager = FeedsActivity.viewpager;
+      FragmentManager fman = FeedsActivity.s_fragmentManager;
+      ViewPager viewpager = FeedsActivity.s_ViewPager;
       if(null == fman || null == viewpager)
       {
          return null;
@@ -216,34 +219,31 @@ class Util
    static
    String getPath(String feed, String append)
    {
-      String feed_folder = feed + FeedsActivity.SEPAR;
+      String feedFolder = feed + Constants.SEPAR;
 
-      if("images".equals(append))
+      if(Constants.IMAGES.equals(append))
       {
-         return feed_folder + FeedsActivity.IMAGE_DIR;
+         return feedFolder + Constants.IMAGE_DIR;
       }
-      if("thumbnails".equals(append))
+      if(Constants.THUMBNAILS.equals(append))
       {
-         return feed_folder + FeedsActivity.THUMBNAIL_DIR;
+         return feedFolder + Constants.THUMBNAIL_DIR;
       }
 
-      return feed_folder + append;
+      return feedFolder + append;
    }
 
    /* This should never return null and so do not check. */
    static
    Context getContext()
    {
-      /* If running get the context from the activity, else ask the service. */
-      if(null != FeedsActivity.con)
-      {
-         return FeedsActivity.con;
-      }
+      return null != s_context ? s_context : null;
+   }
 
-      else
-      {
-         return null != ServiceUpdate.s_serviceContext ? ServiceUpdate.s_serviceContext : null;
-      }
+   static
+   void setContext(Context context)
+   {
+      s_context = context;
    }
 
    static
@@ -262,7 +262,7 @@ class Util
    }
 
    /* This function will return null if it fails. Check for null each time.
-    * It should be pretty safe and efficient to call all the time. */
+    * It should be pretty safe and efficient to call ALL_TAG the time. */
    static
    String getStorage()
    {
@@ -273,7 +273,9 @@ class Util
       /* Check the media state for any undesirable states. */
       /* TODO Check to see if it is the desired first then skip these. */
       String state = Environment.getExternalStorageState();
-      for(int i = 0; i < MEDIA_ERRORS.length; i++)
+
+      int errorsLength = MEDIA_ERRORS.length;
+      for(int i = 0; i < errorsLength; i++)
       {
          if(state.equals(MEDIA_ERRORS[i]))
          {
@@ -285,9 +287,9 @@ class Util
       /* If it has reached here the state is MEDIA_MOUNTED and we can continue.
          Build the s_storage string depending on android version. */
       Context context = getContext();
-      String sep = FeedsActivity.SEPAR;
+      String sep = Constants.SEPAR;
 
-      if(FeedsActivity.FROYO)
+      if(Constants.FROYO)
       {
          s_storage = context.getExternalFilesDir(null).getAbsolutePath() + sep;
       }
@@ -299,10 +301,10 @@ class Util
                "files" + sep;
 
          /* If the folder does not exist, create it. */
-         File storage_file = new File(s_storage);
-         if(!storage_file.exists())
+         File storageFile = new File(s_storage);
+         if(!storageFile.exists())
          {
-            storage_file.mkdirs();
+            storageFile.mkdirs();
          }
       }
       return s_storage;
@@ -311,42 +313,42 @@ class Util
    static
    class SetHolder
    {
-      static final Set<String> read_items = Read.set(FeedsActivity.READ_ITEMS);
+      static final Set<String> READ_ITEMS = Read.set(Constants.READ_ITEMS);
    }
 
    static
    int[] getUnreadCounts(String... ctags)
    {
       int size = ctags.length;
-      int[] unread_counts = new int[size];
+      int[] unreadCounts = new int[size];
 
-      /* read_items == null when called from the service for notifications. */
+      /* READ_ITEMS == null when called from the service for notifications. */
 
       int total = 0;
       for(int i = 1; i < size; i++)
       {
          int unread = 0;
-         String[] urls = Read.file(getPath(ctags[i], FeedsActivity.URL));
+         String[] urls = Read.file(getPath(ctags[i], Constants.URL));
          for(String url : urls)
          {
-            if(!SetHolder.read_items.contains(url))
+            if(!SetHolder.READ_ITEMS.contains(url))
             {
                unread++;
             }
          }
 
          total += unread;
-         unread_counts[i] = unread;
+         unreadCounts[i] = unread;
       }
 
-      unread_counts[0] = total;
-      return unread_counts;
+      unreadCounts[0] = total;
+      return unreadCounts;
    }
 
    static
    void setStripColor(PagerTabStrip strip)
    {
-      String colorSettingsPath = FeedsActivity.SETTINGS + FeedsActivity.STRIP_COLOR;
+      String colorSettingsPath = Constants.SETTINGS_DIR + Constants.STRIP_COLOR;
 
       /* Read the colour from the settings/colour file, if blank, use blue. */
       String[] check = Read.file(colorSettingsPath);
@@ -364,8 +366,8 @@ class Util
    Intent getServiceIntent(int page)
    {
       /* Load notification boolean. */
-      String path = FeedsActivity.SETTINGS + AdapterSettingsFunctions.FILE_NAMES[3] +
-            FeedsActivity.TXT;
+      String path = Constants.SETTINGS_DIR + AdapterSettingsFunctions.FILE_NAMES[3] +
+            Constants.TXT;
       String[] check = Read.file(path);
       Context con = getContext();
 
@@ -379,14 +381,14 @@ class Util
    static
    void setCardAlpha(TextView title, TextView url, ImageView image, TextView des, String link)
    {
-      if(!FeedsActivity.HONEYCOMB)
+      if(!Constants.HONEYCOMB)
       {
          return;
       }
 
       Resources res = getContext().getResources();
 
-      if(SetHolder.read_items.contains(link))
+      if(SetHolder.READ_ITEMS.contains(link))
       {
          title.setTextColor(res.getColor(R.color.title_grey));
          url.setTextColor(res.getColor(R.color.link_grey));
@@ -418,23 +420,23 @@ class Util
       }
    }
 
-   /* Changes the ManageRefresh menu item to an animation if mode = true. */
+   /* Changes the ManageRefresh menu item to an animation if m_mode = true. */
    static
    void setRefreshingIcon(boolean mode)
    {
-      if(null == FeedsActivity.optionsMenu)
+      if(null == FeedsActivity.s_optionsMenu)
       {
          return;
       }
 
       /* Find the menu item by ID caled ManageRefresh. */
-      MenuItem item = FeedsActivity.optionsMenu.findItem(R.id.refresh);
+      MenuItem item = FeedsActivity.s_optionsMenu.findItem(R.id.refresh);
       if(null == item)
       {
          return;
       }
 
-      /* Change it depending on the mode. */
+      /* Change it depending on the m_mode. */
       if(mode)
       {
          MenuItemCompat.setActionView(item, R.layout.progress_circle);
@@ -442,24 +444,6 @@ class Util
       else
       {
          MenuItemCompat.setActionView(item, null);
-      }
-   }
-
-   /* Use this after content has been updated and you need to ManageRefresh */
-   static
-   void refreshPages(int page)
-   {
-      Update.page(0);
-      if(0 == page)
-      {
-         for(int i = 1; i < FeedsActivity.ctags.length; i++)
-         {
-            Update.page(i);
-         }
-      }
-      else
-      {
-         Update.page(page);
       }
    }
 
@@ -472,9 +456,9 @@ class Util
       {
          /* If the activity is running, make a toast notification.
             * Log the event regardless. */
-         if(null != FeedsActivity.service_handler)
+         if(null != FeedsActivity.s_serviceHandler)
          {
-            Toast.makeText(FeedsActivity.con, message, Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
          }
 
          /* This function can be called when no media, so this is optional. */
@@ -494,7 +478,7 @@ class Util
    boolean remove(String path)
    {
       path = getStorage() + path;
-      getContext().deleteFile(getInternalName(path));
+      getContext().deleteFile(getInternalPath(path));
       return new File(path).delete();
    }
 
@@ -529,11 +513,11 @@ class Util
    /* Wrappers for neatness. */
 
    static
-   boolean move(String a, String b)
+   boolean move(String originalFile, String resultingFile)
    {
-      a = getStorage() + a;
-      b = getStorage() + b;
-      return new File(a).renameTo(new File(b));
+      originalFile = getStorage() + originalFile;
+      resultingFile = getStorage() + resultingFile;
+      return new File(originalFile).renameTo(new File(resultingFile));
    }
 
    static
@@ -559,34 +543,34 @@ class Util
    boolean exists(String path)
    {
       path = getStorage() + path;
-      if(isUsingSd() || path.contains(FeedsActivity.IMAGE_DIR) ||
-            path.contains(FeedsActivity.THUMBNAIL_DIR))
+      if(isUsingSd() || path.contains(Constants.IMAGE_DIR) ||
+            path.contains(Constants.THUMBNAIL_DIR))
       {
          return !new File(path).exists();
       }
       else
       {
-         String in_path = getInternalName(path);
-         return !getContext().getFileStreamPath(in_path).exists();
+         String internalPath = getInternalPath(path);
+         return !getContext().getFileStreamPath(internalPath).exists();
       }
    }
 
    static
-   void setText(CharSequence str, View v, int id)
+   void setText(CharSequence charSequence, View view, int id)
    {
-      ((TextView) v.findViewById(id)).setText(str);
+      ((TextView) view.findViewById(id)).setText(charSequence);
    }
 
    static
-   String getText(View v, int id)
+   String getText(View view, int id)
    {
-      return ((TextView) v.findViewById(id)).getText().toString().trim();
+      return ((TextView) view.findViewById(id)).getText().toString().trim();
    }
 
    static
-   String getText(TextView v)
+   String getText(TextView view)
    {
-      return v.getText().toString().trim();
+      return view.getText().toString().trim();
    }
 
    /* Returns a zero-length array if the resource is not found and logs the
@@ -594,7 +578,7 @@ class Util
    static
    String[] getArray(int resource)
    {
-      String[] array = new String[0];
+      String[] array = EMPTY_STRING_ARRAY;
       Context con = getContext();
       try
       {

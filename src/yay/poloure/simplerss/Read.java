@@ -40,11 +40,11 @@ class Read
    static
    String[][] csv()
    {
-      return csv_private(FeedsActivity.INDEX, 'f', 'u', 't');
+      return csv(Constants.INDEX, 'f', 'u', 't');
    }
 
    static
-   String[][] csv_private(String path, char... type)
+   String[][] csv(String path, char... type)
    {
       if(Util.isUnmounted())
       {
@@ -59,7 +59,8 @@ class Read
 
       String[][] types = new String[type.length][lines.length];
 
-      for(int j = 0; j < lines.length; j++)
+      int linesLength = lines.length;
+      for(int j = 0; j < linesLength; j++)
       {
          int offset = 0;
          String line = lines[j];
@@ -73,7 +74,9 @@ class Read
 
             char ch = line.charAt(offset);
             offset = next + 1;
-            for(int i = 0; i < type.length; i++)
+
+            int typeLength = type.length;
+            for(int i = 0; i < typeLength; i++)
             {
                if(ch == type[i])
                {
@@ -104,7 +107,7 @@ class Read
       }
 
       /* If the path is not a count file, get the number of lines. */
-      int count = path.contains(FeedsActivity.COUNT) ? 1 : count(path);
+      int count = path.contains(Constants.COUNT) ? 1 : count(path);
 
       /* If the file is empty, return a zero length array. */
       if(0 == count)
@@ -123,7 +126,8 @@ class Read
          {
             in = Util.isUsingSd() ? reader(path) : reader(path, UTF8);
 
-            for(int i = 0; i < lines.length; i++)
+            int linesLength = lines.length;
+            for(int i = 0; i < linesLength; i++)
             {
                lines[i] = in.readLine();
             }
@@ -151,7 +155,7 @@ class Read
    }
 
    static
-   Set set(String file_path)
+   Set set(String filePath)
    {
       Set set = new HashSet<String>();
 
@@ -160,7 +164,7 @@ class Read
          return set;
       }
 
-      Collections.addAll(set, file(file_path));
+      Collections.addAll(set, file(filePath));
       return set;
    }
 
@@ -178,7 +182,7 @@ class Read
          path = Util.getStorage() + path;
       }
 
-      String[] count = file(path + FeedsActivity.COUNT);
+      String[] count = file(path + Constants.COUNT);
       if(0 != count.length)
       {
          return Util.stoi(count[0]);
@@ -225,12 +229,12 @@ class Read
 
    /* For reading from the internal s_storage. */
    public static
-   BufferedReader reader(String path, String UTF)
+   BufferedReader reader(String path, String fileEncoding)
          throws FileNotFoundException, UnsupportedEncodingException
    {
       Context context = Util.getContext();
-      path = Util.getInternalName(path);
+      path = Util.getInternalPath(path);
       FileInputStream fis = context.openFileInput(path);
-      return new BufferedReader(new InputStreamReader(fis, UTF));
+      return new BufferedReader(new InputStreamReader(fis, fileEncoding));
    }
 }

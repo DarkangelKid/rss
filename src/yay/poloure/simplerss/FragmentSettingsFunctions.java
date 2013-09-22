@@ -11,9 +11,9 @@ class FragmentSettingsFunctions extends ListFragment
 
    @Override
    public
-   View onCreateView(LayoutInflater inf, ViewGroup cont, Bundle b)
+   View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
-      return inf.inflate(R.layout.listview_settings_function, cont, false);
+      return inflater.inflate(R.layout.listview_settings_function, container, false);
    }
 
    @Override

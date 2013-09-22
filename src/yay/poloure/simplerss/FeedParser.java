@@ -17,22 +17,25 @@ import java.util.regex.Pattern;
 
 class FeedParser
 {
-   static final SimpleDateFormat RSS_DATE           = new SimpleDateFormat(
+   private static final SimpleDateFormat RSS_DATE           = new SimpleDateFormat(
          "EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
-   static final SimpleDateFormat RFC3339            = new SimpleDateFormat(
+   private static final SimpleDateFormat RFC3339            = new SimpleDateFormat(
          "yyyy-MM-dd'T'hh:mm:ss.SSS'Z'");
-   static final Pattern          PATTERN_LTGT       = Pattern.compile("(&lt;).*?(&gt;)");
-   static final Pattern          PATTERN_CDATA      = Pattern.compile("\\<.*?\\>");
-   static final Pattern          PATTERN_WHITESPACE = Pattern.compile("[\\t\\n\\x0B\\f\\r\\|]");
-   static final int              width              = (int) Math.round(
+   private static final Pattern          PATTERN_LTGT       = Pattern.compile("(&lt;).*?(&gt;)");
+   private static final Pattern          PATTERN_CDATA      = Pattern.compile("\\<.*?\\>");
+   private static final Pattern          PATTERN_WHITESPACE = Pattern.compile(
+         "[\\t\\n\\x0B\\f\\r\\|]");
+   private static final int              SCREEN_WIDTH       = (int) Math.round(
          Util.getScreenWidth() * 0.944);
-   static       String[]         start              = {
+   private static final String           DUMP_PATH          = "content.dump" + Constants.TXT;
+   private static final String           URL_PATH           = "content.url" + Constants.TXT;
+   private static       String[]         s_startTags        = {
          "<link>", "<published>", "<pubDate>", "<description>", "<m_title", "<content"
    };
-   static       String[]         end                = {
+   private static       String[]         s_endTags          = {
          "/link", "/publ", "/pubD", "/desc", "/titl", "/cont"
    };
-   static       String[]         of_types           = {
+   private static       String[]         s_allTags          = {
          "<link>",
          "<published>",
          "<pubDate>",
@@ -50,17 +53,15 @@ class FeedParser
          "</entry",
          "</item"
    };
-   static final String           dump_path          = "content.dump" + FeedsActivity.TXT;
-   static final String           url_path           = "content.url" + FeedsActivity.TXT;
 
    static
    void parseFeed(String feed)
    {
-      String storeFile = Util.getStorage() + feed + FeedsActivity.STORE;
-      String contentFile = Util.getPath(feed, FeedsActivity.CONTENT);
-      String imageDir = Util.getPath(feed, "images");
-      String thumbnailDir = Util.getPath(feed, "thumbnails");
-      String[] filters = Read.file(FeedsActivity.FILTER_LIST);
+      String storeFile = Util.getStorage() + feed + Constants.STORE;
+      String contentFile = Util.getPath(feed, Constants.CONTENT);
+      String imageDir = Util.getPath(feed, Constants.IMAGES);
+      String thumbnailDir = Util.getPath(feed, Constants.THUMBNAILS);
+      String[] filters = Read.file(Constants.FILTER_LIST);
 
       Set<String> set = Read.set(contentFile);
       Time time = new Time();
@@ -104,7 +105,7 @@ class FeedParser
          String currentTag;
          try
          {
-            currentTag = getNextTag(reader, of_types);
+            currentTag = getNextTag(reader, s_allTags);
          }
          catch(IOException e)
          {
@@ -131,12 +132,12 @@ class FeedParser
          }
          else if(currentTag.contains("</entry") || currentTag.contains("</item"))
          {
-            String image = checkForImage();
+            String image = saveImageName();
             Util.post(image);
             if(!image.isEmpty())
             {
-               line.append(FeedsActivity.IMAGE).append(image).append('|');
-               String imageName = image.substring(image.lastIndexOf(FeedsActivity.SEPAR) + 1,
+               line.append(Constants.IMAGE).append(image).append('|');
+               String imageName = image.substring(image.lastIndexOf(Constants.SEPAR) + 1,
                      image.length());
 
                boolean success = true;
@@ -165,20 +166,21 @@ class FeedParser
                {
                   writeMode = false;
                }
-               line.append(FeedsActivity.WIDTH)
+               line.append(Constants.WIDTH)
                      .append(options.outWidth)
                      .append('|')
-                     .append(FeedsActivity.HEIGHT)
+                     .append(Constants.HEIGHT)
                      .append(options.outHeight)
                      .append('|');
             }
-            line.append(checkForUrl());
+            line.append(saveUrl());
          }
          else
          {
-            for(int i = 0; i < start.length; i++)
+            int startLength = s_startTags.length;
+            for(int i = 0; i < startLength; i++)
             {
-               if(currentTag.contains(start[i]))
+               if(currentTag.contains(s_startTags[i]))
                {
                   int desLength = 0;
 
@@ -189,12 +191,12 @@ class FeedParser
                   else if(currentTag.contains("<description"))
                   {
                      /// remove content
-                     if(6 == start.length)
+                     if(6 == s_startTags.length)
                      {
-                        start = Util.arrayRemove(start, 5);
-                        end = Util.arrayRemove(end, 5);
-                        of_types = Util.arrayRemove(of_types, 5);
-                        of_types = Util.arrayRemove(of_types, 10);
+                        s_startTags = Util.arrayRemove(s_startTags, 5);
+                        s_endTags = Util.arrayRemove(s_endTags, 5);
+                        s_allTags = Util.arrayRemove(s_allTags, 5);
+                        s_allTags = Util.arrayRemove(s_allTags, 10);
                      }
                      desLength = -2048;
                   }
@@ -206,7 +208,7 @@ class FeedParser
                   /// Write description| to the line buffer.
                   line.append(currentTag.substring(1, currentTag.length() - 1)).append('|');
 
-                  String content = getStringToTag(reader, end[i]).trim();
+                  String content = getStringToTag(reader, s_endTags[i]).trim();
                   int contentLength = content.length();
 
                   /// remove <![CDATA[ if it exists.
@@ -237,8 +239,8 @@ class FeedParser
                               tem2 = tem3;
                            }
                         }
-                        String imgstr = content.substring(tem + 9, tem2) + FeedsActivity.NL;
-                        Write.single(dump_path, imgstr);
+                        String imgstr = content.substring(tem + 9, tem2) + Constants.NL;
+                        Write.single(DUMP_PATH, imgstr);
                      }
                   }
                   /* If it follows the rss 2.0 specification for rfc882. */
@@ -277,7 +279,7 @@ class FeedParser
                      break;
                   }
 
-                  /// Replace all <x> with nothing.
+                  /// Replace ALL_TAG <x> with nothing.
                   if(cdataMode)
                   {
                      content = PATTERN_CDATA.matcher(content).replaceAll("");
@@ -349,31 +351,65 @@ class FeedParser
       Write.collection(contentFile, set);
    }
 
-   static
-   void compressImage(String img_dir, String thumb_dir, String img)
+   private static
+   String getStringToTag(BufferedReader reader, String tag)
    {
-
-      BitmapFactory.Options o = new BitmapFactory.Options();
-      o.inJustDecodeBounds = true;
-      BitmapFactory.decodeFile(img_dir + img, o);
-
-      float widthTmp = o.outWidth;
-
-      float insample = widthTmp > width ? Math.round(widthTmp / width) : 1;
-
-      BitmapFactory.Options o2 = new BitmapFactory.Options();
-      o2.inSampleSize = Math.round(insample);
-      Bitmap bitmap = BitmapFactory.decodeFile(img_dir + img, o2);
-
+      /* </link> */
+      StringBuilder cont = new StringBuilder();
       try
       {
-         FileOutputStream out = new FileOutputStream(thumb_dir + img);
-         bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
+         char[] buffer = new char[5];
+         while(!new String(buffer).equals(tag))
+         {
+            cont.append(getStringToNextChar(reader, '<'));
+            /* hello my name is a penguin< */
+            reader.mark(6);
+            reader.read(buffer, 0, 5);
+            reader.reset();
+         }
+         /* hello my name is a penguin<link>blash stha */
+         cont.deleteCharAt(cont.length() - 1);
       }
-      catch(FileNotFoundException e)
+      catch(IOException e)
       {
          e.printStackTrace();
+         return "";
       }
+
+      return cont.toString();
+   }
+
+   private static
+   String saveImageName()
+   {
+      String[] imageUrl = Read.file(DUMP_PATH);
+      if(0 == imageUrl.length)
+      {
+         return "";
+      }
+
+      if(6 >= imageUrl[0].length())
+      {
+         imageUrl[0] = "";
+      }
+
+      Util.remove(DUMP_PATH);
+      return imageUrl[0];
+   }
+
+   private static
+   String saveUrl()
+   {
+      String[] url = Read.file(URL_PATH);
+      if(0 == url.length)
+      {
+         return "";
+      }
+
+      url[0] = 6 < url[0].length() ? "link|" + url[0] + '|' : "";
+
+      Util.remove(URL_PATH);
+      return url[0];
    }
 
    private static
@@ -417,7 +453,7 @@ class FeedParser
                   tem2 = tem3;
                }
             }
-            Write.single(dump_path, tag.substring(tem + 9, tem2) + FeedsActivity.NL);
+            Write.single(DUMP_PATH, tag.substring(tem + 9, tem2) + Constants.NL);
          }
 
          if(tag.contains("type=\"text/html") || tag.contains("type=\'text/html"))
@@ -438,7 +474,7 @@ class FeedParser
                      tem2 = tem3;
                   }
                }
-               Write.single(url_path, tag.substring(i + 6, tem2) + FeedsActivity.NL);
+               Write.single(URL_PATH, tag.substring(i + 6, tem2) + Constants.NL);
             }
          }
          else if(tag.contains("type=\"image/jpeg") || tag.contains("type=\'image/jpeg"))
@@ -459,8 +495,8 @@ class FeedParser
                      tem2 = tem3;
                   }
                }
-               Util.remove(dump_path);
-               Write.single(dump_path, tag.substring(i + 6, tem2) + FeedsActivity.NL);
+               Util.remove(DUMP_PATH);
+               Write.single(DUMP_PATH, tag.substring(i + 6, tem2) + Constants.NL);
             }
          }
 
@@ -500,63 +536,29 @@ class FeedParser
    }
 
    private static
-   String checkForUrl()
+   void compressImage(String imageDir, String thumbnailDir, String img)
    {
-      String[] url = Read.file(url_path);
-      if(0 == url.length)
-      {
-         return "";
-      }
 
-      url[0] = 6 < url[0].length() ? "link|" + url[0] + '|' : "";
+      BitmapFactory.Options o = new BitmapFactory.Options();
+      o.inJustDecodeBounds = true;
+      BitmapFactory.decodeFile(imageDir + img, o);
 
-      Util.remove(url_path);
-      return url[0];
-   }
+      float widthTmp = o.outWidth;
 
-   private static
-   String checkForImage()
-   {
-      String[] imageUrl = Read.file(dump_path);
-      if(0 == imageUrl.length)
-      {
-         return "";
-      }
+      float insample = widthTmp > SCREEN_WIDTH ? Math.round(widthTmp / SCREEN_WIDTH) : 1;
 
-      if(6 >= imageUrl[0].length())
-      {
-         imageUrl[0] = "";
-      }
+      BitmapFactory.Options o2 = new BitmapFactory.Options();
+      o2.inSampleSize = Math.round(insample);
+      Bitmap bitmap = BitmapFactory.decodeFile(imageDir + img, o2);
 
-      Util.remove(dump_path);
-      return imageUrl[0];
-   }
-
-   private static
-   String getStringToTag(BufferedReader reader, String tag)
-   {
-      /* </link> */
-      StringBuilder cont = new StringBuilder();
       try
       {
-         char[] buffer = new char[5];
-         while(!new String(buffer).equals(tag))
-         {
-            cont.append(getStringToNextChar(reader, '<'));
-            /* hello my name is a penguin< */
-            reader.mark(6);
-            reader.read(buffer, 0, 5);
-            reader.reset();
-         }
-         /* hello my name is a penguin<link>blash stha */
-         cont.deleteCharAt(cont.length() - 1);
+         FileOutputStream out = new FileOutputStream(thumbnailDir + img);
+         bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
       }
-      catch(IOException e)
+      catch(FileNotFoundException e)
       {
          e.printStackTrace();
-         return "";
       }
-
-      return cont.toString();
    }
 }

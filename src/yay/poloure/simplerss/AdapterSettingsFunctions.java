@@ -2,52 +2,29 @@ package yay.poloure.simplerss;
 
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
-import android.widget.Checkable;
 import android.widget.SeekBar;
-import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
 class AdapterSettingsFunctions extends BaseAdapter
 {
-   private TextView title_view;
+   static final         String[] FILE_NAMES         = Util.getArray(R.array.settings_names);
+   static final         int[]    TIMES              = Util.getContext()
+         .getResources()
+         .getIntArray(R.array.refresh_integers);
    private static final String[] FUNCTION_TITLES    = Util.getArray(
          R.array.settings_function_titles);
    private static final String[] FUNCTION_SUMMARIES = Util.getArray(
          R.array.settings_function_summaries);
-   static final         String[] FILE_NAMES         = Util.getArray(R.array.settings_names);
-   static final         String[] REFRESH_TIMES      = {
-         "15m", "30m", "45m", "1h", "2h", "3h", "4h", "8h", "12h", "24h"
-   };
-   static final         int[]    TIMES              = {
-         15, 30, 45, 60, 120, 180, 240, 480, 720, 1440
-   };
-
-   static
-   int index(int[] array, int value)
-   {
-      if(array == null)
-      {
-         return -1;
-      }
-      for(int i = 0; i < array.length; i++)
-      {
-         if(array[i] == value)
-         {
-            return i;
-         }
-      }
-      return -1;
-   }
+   private TextView m_titleView;
 
    @Override
    public
-   long getItemId(int position)
+   int getCount()
    {
-      return position;
+      return 5;
    }
 
    @Override
@@ -59,37 +36,9 @@ class AdapterSettingsFunctions extends BaseAdapter
 
    @Override
    public
-   int getCount()
+   long getItemId(int position)
    {
-      return 5;
-   }
-
-   @Override
-   public
-   boolean isEnabled(int position)
-   {
-      return false;
-   }
-
-   @Override
-   public
-   int getViewTypeCount()
-   {
-      return 3;
-   }
-
-   @Override
-   public
-   int getItemViewType(int position)
-   {
-      if(0 == position)
-      {
-         return 0;
-      }
-      else
-      {
-         return 1 == position || 2 < position ? 1 : 2;
-      }
+      return position;
    }
 
    @Override
@@ -97,7 +46,7 @@ class AdapterSettingsFunctions extends BaseAdapter
    View getView(int position, View cv, ViewGroup parent)
    {
       int viewType = getItemViewType(position);
-      final String settingPath = FeedsActivity.SETTINGS + FILE_NAMES[position] + FeedsActivity.TXT;
+      String settingPath = Constants.SETTINGS_DIR + FILE_NAMES[position] + Constants.TXT;
       LayoutInflater inflater = Util.getLayoutInflater();
 
       /* This type is the a heading. */
@@ -106,10 +55,10 @@ class AdapterSettingsFunctions extends BaseAdapter
          if(null == cv)
          {
             cv = inflater.inflate(R.layout.settings_heading, parent, false);
-            title_view = (TextView) cv.findViewById(R.id.settings_heading);
+            m_titleView = (TextView) cv.findViewById(R.id.settings_heading);
          }
 
-         title_view.setText(FUNCTION_TITLES[position]);
+         m_titleView.setText(FUNCTION_TITLES[position]);
       }
 
       /* This type is a checkbox setting. */
@@ -134,17 +83,7 @@ class AdapterSettingsFunctions extends BaseAdapter
          holder.summary.setText(FUNCTION_SUMMARIES[position]);
 
          /* On click, save the value of the click to a settings file. */
-         holder.checkbox.setOnClickListener(new OnClickListener()
-         {
-            @Override
-            public
-            void onClick(View v)
-            {
-               Util.remove(settingPath);
-               String value = Boolean.toString(((Checkable) v).isChecked());
-               Write.single(settingPath, value);
-            }
-         });
+         holder.checkbox.setOnClickListener(new SettingBooleanChecked(settingPath));
 
          /* Load the saved boolean value and set the box as checked if true. */
          holder.checkbox.setChecked(Util.strbol(Read.setting(settingPath)));
@@ -172,7 +111,8 @@ class AdapterSettingsFunctions extends BaseAdapter
          holder.title.setText(FUNCTION_TITLES[position]);
          holder.summary.setText(FUNCTION_SUMMARIES[position]);
          holder.seekbar.setMax(9);
-         holder.seekbar.setOnSeekBarChangeListener(new SeekBarChangeListener(holder, settingPath));
+         holder.seekbar
+               .setOnSeekBarChangeListener(new SeekBarRefreshTimeChange(holder, settingPath));
 
          /* Load the saved value and set the progress.*/
          String checker = Read.setting(settingPath);
@@ -180,6 +120,52 @@ class AdapterSettingsFunctions extends BaseAdapter
          holder.seekbar.setProgress(index(TIMES, time));
       }
       return cv;
+   }
+
+   private static
+   int index(int[] array, int value)
+   {
+      if(null == array)
+      {
+         return -1;
+      }
+      int arrayLength = array.length;
+      for(int i = 0; i < arrayLength; i++)
+      {
+         if(array[i] == value)
+         {
+            return i;
+         }
+      }
+      return -1;
+   }
+
+   @Override
+   public
+   boolean isEnabled(int position)
+   {
+      return false;
+   }
+
+   @Override
+   public
+   int getItemViewType(int position)
+   {
+      if(0 == position)
+      {
+         return 0;
+      }
+      else
+      {
+         return 1 == position || 2 < position ? 1 : 2;
+      }
+   }
+
+   @Override
+   public
+   int getViewTypeCount()
+   {
+      return 3;
    }
 
    static
@@ -199,38 +185,4 @@ class AdapterSettingsFunctions extends BaseAdapter
       SeekBar  seekbar;
    }
 
-   private static
-   class SeekBarChangeListener implements OnSeekBarChangeListener
-   {
-      private final SettingsSeekHolder holder;
-      private final String             settingPath;
-
-      public
-      SeekBarChangeListener(SettingsSeekHolder holder, String settingPath)
-      {
-         this.holder = holder;
-         this.settingPath = settingPath;
-      }
-
-      @Override
-      public
-      void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
-      {
-         holder.read.setText(REFRESH_TIMES[progress]);
-         Util.remove(settingPath);
-         Write.single(settingPath, Integer.toString(TIMES[progress]));
-      }
-
-      @Override
-      public
-      void onStartTrackingTouch(SeekBar seekBar)
-      {
-      }
-
-      @Override
-      public
-      void onStopTrackingTouch(SeekBar seekBar)
-      {
-      }
-   }
 }

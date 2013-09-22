@@ -52,7 +52,7 @@ class Write
 
             for(Object item : content)
             {
-               out.write(item + FeedsActivity.NL);
+               out.write(item + Constants.NL);
             }
          }
          finally
@@ -86,7 +86,7 @@ class Write
 
       Context context = Util.getContext();
       path = Util.getStorage() + path;
-      String name = Util.getInternalName(path);
+      String name = Util.getInternalPath(path);
 
       try
       {
@@ -141,7 +141,7 @@ class Write
 
    /* Function should be safe, returns false if fails. */
    static
-   boolean single(String path, String string)
+   boolean single(String path, String stringToWrite)
    {
       /* If s_storage is unmounted OR if we force to use external. */
       if(Util.isUnmounted())
@@ -157,7 +157,7 @@ class Write
          try
          {
             out = Util.isUsingSd() ? writer(path, true) : writer(path, Context.MODE_APPEND);
-            out.write(string);
+            out.write(stringToWrite);
          }
          finally
          {
@@ -183,7 +183,7 @@ class Write
    /* This function should be safe, returns false if it failed.
     * NOT SAFE FOR INTERNAL IF FAILS. */
    static
-   boolean removeLine(String path, CharSequence string, boolean contains)
+   boolean removeLine(String path, CharSequence stringSearch, boolean contains)
    {
       /* If s_storage is unmounted OR if we force to use external. */
       if(Util.isUnmounted())
@@ -192,7 +192,7 @@ class Write
       }
 
       path = Util.getStorage() + path;
-      String tempPath = path + FeedsActivity.TEMP;
+      String tempPath = path + Constants.TEMP;
 
       String[] lines;
       try
@@ -212,9 +212,10 @@ class Write
 
             for(String item : lines)
             {
-               if(contains && !item.contains(string) || !contains && !item.equals(string))
+               if(contains && !item.contains(stringSearch) ||
+                     !contains && !item.equals(stringSearch))
                {
-                  out.write(item + FeedsActivity.NL);
+                  out.write(item + Constants.NL);
                }
             }
          }
@@ -259,7 +260,7 @@ class Write
    static
    void log(String text)
    {
-      single(FeedsActivity.DUMP_FILE, text + FeedsActivity.NL);
+      single(Constants.DUMP_FILE, text + Constants.NL);
    }
 
    private static
@@ -269,12 +270,12 @@ class Write
    }
 
    private static
-   BufferedWriter writer(String path, int MODE)
+   BufferedWriter writer(String path, int writeMode)
          throws FileNotFoundException, UnsupportedEncodingException
    {
       Context context = Util.getContext();
-      path = Util.getInternalName(path);
-      FileOutputStream f = context.openFileOutput(path, MODE);
-      return new BufferedWriter(new OutputStreamWriter(f, "UTF8"));
+      path = Util.getInternalPath(path);
+      FileOutputStream fileOutputStream = context.openFileOutput(path, writeMode);
+      return new BufferedWriter(new OutputStreamWriter(fileOutputStream, "UTF8"));
    }
 }

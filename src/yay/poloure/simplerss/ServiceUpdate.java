@@ -15,8 +15,6 @@ import android.support.v4.app.TaskStackBuilder;
 public
 class ServiceUpdate extends IntentService
 {
-   static Context s_serviceContext;
-
    public
    ServiceUpdate()
    {
@@ -27,7 +25,7 @@ class ServiceUpdate extends IntentService
    protected
    void onHandleIntent(Intent intent)
    {
-      s_serviceContext = this;
+      Util.setContext(this);
 
       PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
       PowerManager.WakeLock wakelock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SIMPLERSS");
@@ -37,7 +35,7 @@ class ServiceUpdate extends IntentService
 
       int page = intent.getIntExtra("GROUP_NUMBER", 0);
 
-      String[] allTags = Read.file(FeedsActivity.GROUP_LIST);
+      String[] allTags = Read.file(Constants.TAG_LIST);
       String tag = allTags[page];
 
       String[][] content = Read.csv();
@@ -46,11 +44,12 @@ class ServiceUpdate extends IntentService
       String[] tags = content[2];
 
       /* Download and parse each feed in the m_imageViewTag. */
-      for(int i = 0; i < names.length; i++)
+      int namesLength = names.length;
+      for(int i = 0; i < namesLength; i++)
       {
-         if(tags[i].equals(tag) || tag.equals(FeedsActivity.all))
+         if(tags[i].equals(tag) || tag.equals(Constants.ALL_TAG))
          {
-            boolean success = Write.download(urls[i], names[i] + FeedsActivity.STORE);
+            boolean success = Write.download(urls[i], names[i] + Constants.STORE);
             if(success)
             {
                FeedParser.parseFeed(names[i]);
@@ -65,13 +64,13 @@ class ServiceUpdate extends IntentService
       int[] unreadCounts = Util.getUnreadCounts(allTags);
 
       /* If activity is running. */
-      if(null != FeedsActivity.service_handler)
+      if(null != FeedsActivity.s_serviceHandler)
       {
-         Message m = new Message();
-         Bundle b = new Bundle();
-         b.putInt("page_number", page);
-         m.setData(b);
-         FeedsActivity.service_handler.sendMessage(m);
+         Message message = new Message();
+         Bundle bundle = new Bundle();
+         bundle.putInt("page_number", page);
+         message.setData(bundle);
+         FeedsActivity.s_serviceHandler.sendMessage(message);
       }
       else if(0 != unreadCounts[0] && intent.getBooleanExtra("NOTIFICATIONS", false))
       {
@@ -94,38 +93,38 @@ class ServiceUpdate extends IntentService
          String contentSingleTag = Util.getString(R.string.notification_content_tag_items);
          String contentPluralTag = Util.getString(R.string.notification_content_tags);
 
-         String not_title = 1 == unreadCounts[0] ? String.format(titleSingle, 1)
+         String notificationTitle = 1 == unreadCounts[0] ? String.format(titleSingle, 1)
                : String.format(titlePlural, unreadCounts[0]);
 
-         String not_content;
+         String notificationContent;
          if(1 == unreadCounts[0] && 1 == tagItems - 1)
          {
-            not_content = contentSingleItem;
+            notificationContent = contentSingleItem;
          }
          else
          {
-            not_content = 1 < unreadCounts[0] && 1 == (tagItems - 1) ? contentSingleTag
+            notificationContent = 1 < unreadCounts[0] && 1 == tagItems - 1 ? contentSingleTag
                   : String.format(contentPluralTag, tagItems - 1);
          }
 
-         Builder not_builder = new Builder(this);
-         not_builder.setSmallIcon(R.drawable.rss_icon)
-               .setContentTitle(not_title)
-               .setContentText(not_content)
+         Builder notificationBuilder = new Builder(this);
+         notificationBuilder.setSmallIcon(R.drawable.rss_icon)
+               .setContentTitle(notificationTitle)
+               .setContentText(notificationContent)
                .setAutoCancel(true);
 
-         Intent result_intent = new Intent(this, FeedsActivity.class);
+         Intent notificationIntent = new Intent(this, FeedsActivity.class);
 
-         TaskStackBuilder stack_builder = TaskStackBuilder.create(this);
+         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
 
-         stack_builder.addParentStack(FeedsActivity.class);
-         stack_builder.addNextIntent(result_intent);
-         PendingIntent result_pending_intent = stack_builder.getPendingIntent(0,
+         stackBuilder.addParentStack(FeedsActivity.class);
+         stackBuilder.addNextIntent(notificationIntent);
+         PendingIntent pendingIntent = stackBuilder.getPendingIntent(0,
                PendingIntent.FLAG_UPDATE_CURRENT);
-         not_builder.setContentIntent(result_pending_intent);
-         NotificationManager notification_manager = (NotificationManager) getSystemService(
+         notificationBuilder.setContentIntent(pendingIntent);
+         NotificationManager notificationManager = (NotificationManager) getSystemService(
                Context.NOTIFICATION_SERVICE);
-         notification_manager.notify(1, not_builder.build());
+         notificationManager.notify(1, notificationBuilder.build());
       }
 
       wakelock.release();

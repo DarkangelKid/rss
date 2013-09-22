@@ -12,22 +12,22 @@ import android.widget.ListView;
 
 class NavDrawer
 {
-   static ListView     s_navList;
-   static String       s_currentTitle;
-   static DrawerLayout s_drawerLayout;
+   private static ListView              s_navList;
+   private static String                s_currentTitle;
+   static         DrawerLayout          s_drawerLayout;
+   static         ActionBarDrawerToggle s_drawerToggle;
 
-   static final String[] NAV_TITLES = Util.getArray(R.array.nav_titles);
-   static final String   NAVIGATION = Util.getString(R.string.navigation_title);
 
-   static ActionBarDrawerToggle DRAWER_TOGGLE;
+   static final         String[] NAV_TITLES = Util.getArray(R.array.nav_titles);
+   private static final String   NAVIGATION = Util.getString(R.string.navigation_title);
 
    NavDrawer(ListView navList, DrawerLayout drawerLayout)
    {
       /* Set the listeners (and save the navigation list to the public static variable). */
-      (s_drawerLayout = drawerLayout).setDrawerListener(DRAWER_TOGGLE);
+      (s_drawerLayout = drawerLayout).setDrawerListener(s_drawerToggle);
       (s_navList = navList).setOnItemClickListener(new NavDrawerItemClick());
 
-      (DRAWER_TOGGLE = new DrawerToggleClick()).syncState();
+      (s_drawerToggle = new DrawerToggleClick()).syncState();
 
       s_navList.setAdapter(new AdapterNavDrawer());
    }
@@ -36,13 +36,13 @@ class NavDrawer
    class RefreshNavAdapter extends AsyncTask<int[], Void, int[]>
    {
       static
-      void setTitles(String[] titles)
+      void setTitles(String... titles)
       {
          AdapterNavDrawer.s_menuArray = titles;
       }
 
       static
-      void setCounts(int[] counts)
+      void setCounts(int... counts)
       {
          AdapterNavDrawer.s_unreadArray = counts;
       }
@@ -58,16 +58,17 @@ class NavDrawer
       int[] doInBackground(int[]... counts)
       {
          /* If null was passed into the task, count the unread items. */
-         return 0 == counts[0].length ? Util.getUnreadCounts(FeedsActivity.ctags) : counts[0];
+         return 0 == counts[0].length ? Util.getUnreadCounts(FeedsActivity.s_currentTags)
+               : counts[0];
       }
 
       @Override
       protected
-      void onPostExecute(int[] pop)
+      void onPostExecute(int[] result)
       {
          /* Set the titles & counts arrays in this file and notifiy the adapter. */
-         setTitles(FeedsActivity.ctags);
-         setCounts(pop);
+         setTitles(FeedsActivity.s_currentTags);
+         setCounts(result);
          getAdapter().notifyDataSetChanged();
       }
    }
@@ -86,9 +87,9 @@ class NavDrawer
       void onDrawerClosed(View drawerView)
       {
            /* If the m_title is still "Navigation", then change it back to s_currentTitle. */
-         if(FeedsActivity.bar.getTitle().equals(NAVIGATION))
+         if(FeedsActivity.s_actionBar.getTitle().equals(NAVIGATION))
          {
-            FeedsActivity.bar.setTitle(s_currentTitle);
+            FeedsActivity.s_actionBar.setTitle(s_currentTitle);
          }
       }
 
@@ -96,10 +97,10 @@ class NavDrawer
       public
       void onDrawerOpened(View drawerView)
       {
-           /* Save the action bar's m_title to current m_title. Then change the m_title to
+           /* Save the action s_actionBar's m_title to current m_title. Then change the m_title to
            NAVIGATION. */
-         s_currentTitle = (String) FeedsActivity.bar.getTitle();
-         FeedsActivity.bar.setTitle(NAVIGATION);
+         s_currentTitle = (String) FeedsActivity.s_actionBar.getTitle();
+         FeedsActivity.s_actionBar.setTitle(NAVIGATION);
       }
    }
 
@@ -109,8 +110,8 @@ class NavDrawer
       static
       void showFragment(Fragment fragment)
       {
-         FragmentTransaction tran = FeedsActivity.fman.beginTransaction();
-         for(Fragment frag : FeedsActivity.main_fragments)
+         FragmentTransaction tran = FeedsActivity.s_fragmentManager.beginTransaction();
+         for(Fragment frag : FeedsActivity.s_mainFragments)
          {
             if(!frag.isHidden())
             {
@@ -136,11 +137,11 @@ class NavDrawer
          /* Determine the new m_title based on the position of the item clicked. */
          String selectedTitle = 3 < position ? NAV_TITLES[0] : NAV_TITLES[position];
 
-         /* If the item selected was a m_imageViewTag, change the viewpager to that
+         /* If the item selected was a m_imageViewTag, change the s_ViewPager to that
          image. */
          if(3 < position)
          {
-            FeedsActivity.viewpager.setCurrentItem(position - 4);
+            FeedsActivity.s_ViewPager.setCurrentItem(position - 4);
          }
 
          /* If the selected title is the title of the current page, exit.
@@ -153,10 +154,10 @@ class NavDrawer
          }*/
 
          /* Hide the current fragment and display the selected one. */
-         showFragment(FeedsActivity.main_fragments[3 < position ? 0 : position]);
+         showFragment(FeedsActivity.s_mainFragments[3 < position ? 0 : position]);
 
          /* Set the m_title text of the actionbar to the selected item. */
-         FeedsActivity.bar.setTitle(selectedTitle);
+         FeedsActivity.s_actionBar.setTitle(selectedTitle);
       }
    }
 }

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#ffffff">
+
+   <include layout="@layout/card_title_url"/>
+
+   <include layout="@layout/card_des"/>
+
+   <include layout="@layout/top_shadow"/>
+
+   <include layout="@layout/shadow"/>
+
+</RelativeLayout>

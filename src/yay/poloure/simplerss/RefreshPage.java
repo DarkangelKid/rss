@@ -11,31 +11,31 @@ import android.widget.ListView;
 import java.util.Map;
 import java.util.TreeMap;
 
-class RefreshPage extends AsyncTask<Integer, Datum, Animation>
+class RefreshPage extends AsyncTask<Integer, FeedItem, Animation>
 {
-   int          page_number;
-   boolean      flash;
-   ListFragment l;
-   AdapterCard  ith;
-   ListView     lv;
-   int position = -3;
+   private int          m_pageNumber;
+   private boolean      m_flash;
+   private ListFragment m_listFragment;
+   private AdapterCard  m_adapterCard;
+   private ListView     m_listView;
+   private int position = -3;
 
    /* This is for reading an rss file. */
-   static
+   private static
    String[][] csv(String feed, char... type)
    {
-      return Read.csv_private(Util.getPath(feed, FeedsActivity.CONTENT), type);
+      return Read.csv(Util.getPath(feed, Constants.CONTENT), type);
    }
 
    @Override
    protected
    Animation doInBackground(Integer... page)
    {
-      page_number = page[0];
-      String tag = FeedsActivity.ctags[page_number];
+      m_pageNumber = page[0];
+      String tag = FeedsActivity.s_currentTags[m_pageNumber];
 
       Time time = new Time();
-      Map<Long, Datum> map = new TreeMap<Long, Datum>();
+      Map<Long, FeedItem> map = new TreeMap<Long, FeedItem>();
 
       String[][] contents = Read.csv();
       if(0 == contents.length)
@@ -48,7 +48,7 @@ class RefreshPage extends AsyncTask<Integer, Datum, Animation>
       Animation animFadeIn = AnimationUtils.loadAnimation(Util.getContext(),
             android.R.anim.fade_in);
 
-      while(null == lv)
+      while(null == m_listView)
       {
          /* Anti-pattern. */
          try
@@ -60,33 +60,35 @@ class RefreshPage extends AsyncTask<Integer, Datum, Animation>
             e.printStackTrace();
          }
 
-         if(null != FeedsActivity.viewpager && null == l)
+         if(null != FeedsActivity.s_ViewPager && null == m_listFragment)
          {
-            String fragmentTag = String.format(FeedsActivity.FRAGMENT_TAG,
-                  FeedsActivity.viewpager.getId(), page_number);
-            l = (ListFragment) FeedsActivity.fman.findFragmentByTag(fragmentTag);
+            String fragmentTag = String.format(Constants.FRAGMENT_TAG,
+                  FeedsActivity.s_ViewPager.getId(), m_pageNumber);
+            m_listFragment = (ListFragment) FeedsActivity.s_fragmentManager
+                  .findFragmentByTag(fragmentTag);
          }
-         if(null != l && null == ith)
+         if(null != m_listFragment && null == m_adapterCard)
          {
-            ith = (AdapterCard) l.getListAdapter();
+            m_adapterCard = (AdapterCard) m_listFragment.getListAdapter();
          }
-         if(null != l && null == lv)
+         if(null != m_listFragment && null == m_listView)
          {
             try
             {
-               lv = l.getListView();
+               m_listView = m_listFragment.getListView();
             }
             catch(IllegalStateException e)
             {
                e.printStackTrace();
-               lv = null;
+               m_listView = null;
             }
          }
       }
 
-      for(int j = 0; j < feeds.length; j++)
+      int feedsLength = feeds.length;
+      for(int j = 0; j < feedsLength; j++)
       {
-         if(tags[j].equals(tag) || tag.equals(FeedsActivity.all))
+         if(tags[j].equals(tag) || tag.equals(Constants.ALL_TAG))
          {
             String[][] content = csv(feeds[j], 't', 'd', 'l', 'i', 'w', 'h', 'p');
             if(0 == content.length)
@@ -98,11 +100,11 @@ class RefreshPage extends AsyncTask<Integer, Datum, Animation>
             String[] links = content[2];
             String[] images = content[3];
             String[] widths = content[4];
-            Write.log(widths[0]);
             String[] heights = content[5];
             String[] times = content[6];
 
-            for(int i = 0; i < times.length; i++)
+            int timesLength = times.length;
+            for(int i = 0; i < timesLength; i++)
             {
                try
                {
@@ -115,15 +117,15 @@ class RefreshPage extends AsyncTask<Integer, Datum, Animation>
                   return null;
                }
                /* TODO Do not allow duplicates in the adapter. */
-               /*if(-1 == Util.index(Util.getCardAdapter(page_number).m_links, links[i]))*/
+               /*if(-1 == Util.index(Util.getCardAdapter(m_pageNumber).m_links, links[i]))*/
                {
                   /* Edit the data. */
                   if(null != images[i])
                   {
                      if(32 < Util.stoi(widths[i]))
                      {
-                        images[i] = Util.getPath(feeds[j], "thumbnails") +
-                              images[i].substring(images[i].lastIndexOf(FeedsActivity.SEPAR) + 1);
+                        images[i] = Util.getPath(feeds[j], Constants.THUMBNAILS) +
+                              images[i].substring(images[i].lastIndexOf(Constants.SEPAR) + 1);
                      }
                      else
                      {
@@ -146,7 +148,7 @@ class RefreshPage extends AsyncTask<Integer, Datum, Animation>
                      titles[i] = "";
                   }
 
-                  Datum data = new Datum();
+                  FeedItem data = new FeedItem();
                   data.title = titles[i];
                   data.url = links[i];
                   data.description = descriptions[i];
@@ -161,9 +163,9 @@ class RefreshPage extends AsyncTask<Integer, Datum, Animation>
       }
 
       /* Do not count items as Read while we are updating the list. */
-      ith.m_touchedScreen = false;
+      m_adapterCard.m_touchedScreen = false;
 
-      Datum[] items = map.values().toArray(new Datum[map.size()]);
+      FeedItem[] items = map.values().toArray(new FeedItem[map.size()]);
 
       if(0 < items.length)
       {
@@ -175,54 +177,54 @@ class RefreshPage extends AsyncTask<Integer, Datum, Animation>
 
    @Override
    protected
-   void onProgressUpdate(Datum[] items)
+   void onProgressUpdate(FeedItem[] values)
    {
       /* If these are the first items to be added to the list. */
-      if(0 == lv.getCount())
+      if(0 == m_listView.getCount())
       {
-         lv.setVisibility(View.INVISIBLE);
-         flash = true;
+         m_listView.setVisibility(View.INVISIBLE);
+         m_flash = true;
       }
 
       int index = 0;
       int top = 0;
       /* Find the exact position in the list. */
-      if(!flash)
+      if(!m_flash)
       {
-         index = lv.getFirstVisiblePosition() + 1;
-         View v = lv.getChildAt(0);
+         index = m_listView.getFirstVisiblePosition() + 1;
+         View v = m_listView.getChildAt(0);
          top = null == v ? 0 : v.getTop();
          if(0 == top)
          {
             index++;
          }
-         else if(0 > top && null != lv.getChildAt(1))
+         else if(0 > top && null != m_listView.getChildAt(1))
          {
             index++;
-            View childAt = lv.getChildAt(1);
+            View childAt = m_listView.getChildAt(1);
             top = childAt.getTop();
          }
       }
 
-      ith.prependArray(items);
-      ith.notifyDataSetChanged();
+      m_adapterCard.prependArray(values);
+      m_adapterCard.notifyDataSetChanged();
 
-      if(flash)
+      if(m_flash)
       {
-         position = Util.gotoLatestUnread(ith.m_items, false, page_number);
+         position = Util.gotoLatestUnread(m_adapterCard.m_items, false, m_pageNumber);
       }
 
       if(0 != top)
       {
-         lv.setSelectionFromTop(index, top - (AdapterCard.EIGHT << 1));
+         m_listView.setSelectionFromTop(index, top - (AdapterCard.EIGHT << 1));
       }
    }
 
    @Override
    protected
-   void onPostExecute(Animation tun)
+   void onPostExecute(Animation result)
    {
-      if(null == tun)
+      if(null == result)
       {
          return;
       }
@@ -230,19 +232,19 @@ class RefreshPage extends AsyncTask<Integer, Datum, Animation>
       /* Update the unread counts in the navigation drawer. */
       Update.navigation();
 
-      if(null == lv)
+      if(null == m_listView)
       {
          return;
       }
 
       /* If there were no items to start with (the m_listview is invisible).*/
-      if(flash)
+      if(m_flash)
       {
-         lv.setSelection(position);
-         lv.setAnimation(tun);
-         lv.setVisibility(View.VISIBLE);
+         m_listView.setSelection(position);
+         m_listView.setAnimation(result);
+         m_listView.setVisibility(View.VISIBLE);
       }
       /* Resume Read item checking. */
-      ith.m_touchedScreen = true;
+      m_adapterCard.m_touchedScreen = true;
    }
 }

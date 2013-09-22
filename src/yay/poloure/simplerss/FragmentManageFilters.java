@@ -10,56 +10,29 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ListView;
-import android.widget.TextView;
 
 class FragmentManageFilters extends ListFragment
 {
-   static
+   private static
    void showAddFilterDialog()
    {
       Context con = Util.getContext();
       LayoutInflater inf = LayoutInflater.from(con);
-      final View addFilterLayout = inf.inflate(R.layout.add_filter_dialog, null);
+      View addFilterLayout = inf.inflate(R.layout.add_filter_dialog, null);
 
       AlertDialog.Builder build = new AlertDialog.Builder(con);
       build.setTitle("Add Filter")
             .setView(addFilterLayout)
             .setCancelable(true)
-            .setNegativeButton(con.getString(R.string.cancel_dialog),
-                  new DialogInterface.OnClickListener()
-                  {
-                     @Override
-                     public
-                     void onClick(DialogInterface dialog, int id)
-                     {
-                     }
-                  });
-      final AlertDialog addFilterDialog = build.create();
+            .setNegativeButton(con.getString(R.string.cancel_dialog), new OnDialogClickCancel());
+      AlertDialog addFilterDialog = build.create();
 
       addFilterDialog.getWindow()
             .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
 
       addFilterDialog.setButton(DialogInterface.BUTTON_POSITIVE, con.getString(R.string.add_dialog),
-            new DialogInterface.OnClickListener()
-            {
-               @Override
-               public
-               void onClick(DialogInterface dialog, int which)
-               {
-                  String feed = Util.getText((TextView) addFilterLayout);
-                  String path = FeedsActivity.FILTER_LIST;
-                  String[] filters = Read.file(path);
-                  if(-1 != Util.index(filters, feed))
-                  {
-                     Write.single(path, feed + FeedsActivity.NL);
-                  }
-                  AdapterManageFilters.setTitles(filters);
-                  addFilterDialog.hide();
-               }
-            });
+            new OnFilterDialogClickAdd(addFilterLayout, addFilterDialog));
       addFilterDialog.show();
    }
 
@@ -73,9 +46,9 @@ class FragmentManageFilters extends ListFragment
 
    @Override
    public
-   View onCreateView(LayoutInflater inf, ViewGroup cont, Bundle b)
+   View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
-      return inf.inflate(R.layout.listview_cards, cont, false);
+      return inflater.inflate(R.layout.listview_cards, container, false);
    }
 
    @Override
@@ -89,33 +62,20 @@ class FragmentManageFilters extends ListFragment
 
       setListAdapter(adapter);
 
-      AdapterManageFilters.setTitles(Read.file(FeedsActivity.FILTER_LIST));
+      AdapterManageFilters.setTitles(Read.file(Constants.FILTER_LIST));
 
-      final AlertDialog.Builder build = new AlertDialog.Builder(getActivity());
-      build.setCancelable(true)
-            .setPositiveButton(getString(R.string.delete_dialog), new FilterDeleteClick(adapter));
-
-      listview.setOnItemLongClickListener(new OnItemLongClickListener()
-      {
-         @Override
-         public
-         boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id)
-         {
-            build.show();
-            return true;
-         }
-      });
+      listview.setOnItemLongClickListener(new OnFilterLongClick(this, adapter));
    }
 
    @Override
    public
    boolean onOptionsItemSelected(MenuItem item)
    {
-      if(NavDrawer.DRAWER_TOGGLE.onOptionsItemSelected(item))
+      if(NavDrawer.s_drawerToggle.onOptionsItemSelected(item))
       {
          return true;
       }
-      if("add".equals(item.getTitle()))
+      if(Util.getString(R.string.add_feed).equals(item.getTitle()))
       {
          showAddFilterDialog();
          return true;
@@ -123,22 +83,4 @@ class FragmentManageFilters extends ListFragment
       return super.onOptionsItemSelected(item);
    }
 
-   static
-   class FilterDeleteClick implements DialogInterface.OnClickListener
-   {
-      AdapterManageFilters m_adapter;
-
-      FilterDeleteClick(AdapterManageFilters adapter)
-      {
-         m_adapter = adapter;
-      }
-
-      @Override
-      public
-      void onClick(DialogInterface dialog, int id_no)
-      {
-         Write.removeLine(FeedsActivity.FILTER_LIST, m_adapter.getItem(id_no), false);
-         m_adapter.removePosition(id_no);
-      }
-   }
 }
