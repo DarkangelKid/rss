@@ -22,7 +22,7 @@ class PagerAdapterManage extends FragmentPagerAdapter
    int getCount()
    {
      /* return MANAGE_FRAGMENTS.length;*/
-      return 3;
+      return MANAGE_FRAGMENTS.length;
    }
 
    @Override

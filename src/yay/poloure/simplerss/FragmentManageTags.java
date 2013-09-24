@@ -220,8 +220,7 @@ class FragmentManageTags extends ListFragment
             s_multiMode = true;
             if(!Constants.HONEYCOMB)
             {
-               Activity activity = (Activity) Util.getContext();
-               s_actionmode = activity.startActionMode(s_actionmode_callback);
+               s_actionmode = FeedsActivity.getActivity().startActionMode(s_actionmode_callback);
             }
          }
          view.setBackgroundColor(Color.parseColor("#8033b5e5"));
@@ -284,7 +283,7 @@ class FragmentManageTags extends ListFragment
       public
       boolean onCreateActionMode(ActionMode mode, Menu menu)
       {
-         ((Activity) Util.getContext()).getMenuInflater().inflate(R.menu.context_menu, menu);
+         Util.getLayoutInflater().inflate(R.menu.context_menu, menu);
          return true;
       }
 

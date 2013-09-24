@@ -89,8 +89,7 @@ class FragmentFeeds extends Fragment
       inflater.inflate(R.menu.main_overflow, FeedsActivity.s_optionsMenu);
       super.onCreateOptionsMenu(FeedsActivity.s_optionsMenu, inflater);
 
-      Activity activity = (Activity) Util.getContext();
-      Util.setRefreshingIcon(isServiceRunning(activity));
+      Util.setRefreshingIcon(isServiceRunning(FeedsActivity.getActivity()));
    }
 
    @Override

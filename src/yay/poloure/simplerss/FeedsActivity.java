@@ -1,6 +1,7 @@
 package yay.poloure.simplerss;
 
 import android.app.AlarmManager;
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -29,6 +30,7 @@ class FeedsActivity extends ActionBarActivity
    static ViewPager       s_ViewPager;
    static FragmentManager s_fragmentManager;
    static ActionBar       s_actionBar;
+   static Activity        s_activity;
    static Handler         s_serviceHandler;
    static String[]        s_currentTags;
 
@@ -42,6 +44,7 @@ class FeedsActivity extends ActionBarActivity
 
       /* Save the other static variables. */
       Util.setContext(this);
+      s_activity = this;
       s_fragmentManager = getSupportFragmentManager();
       s_actionBar = getSupportActionBar();
       s_actionBar.setDisplayHomeAsUpEnabled(true);
@@ -80,6 +83,12 @@ class FeedsActivity extends ActionBarActivity
    Fragment getFragmentByTag(String fragmentTag)
    {
       return s_fragmentManager.findFragmentByTag(fragmentTag);
+   }
+
+   static
+   Activity getActivity()
+   {
+      return s_activity;
    }
 
    /* This is so the icon and text in the actionbar are selected. */

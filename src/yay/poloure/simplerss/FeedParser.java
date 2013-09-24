@@ -30,7 +30,7 @@ class FeedParser
    private static final String           DUMP_PATH          = "content.dump" + Constants.TXT;
    private static final String           URL_PATH           = "content.url" + Constants.TXT;
    private static       String[]         s_startTags        = {
-         "<link>", "<published>", "<pubDate>", "<description>", "<m_title", "<content"
+         "<link>", "<published>", "<pubDate>", "<description>", "<title", "<content"
    };
    private static       String[]         s_endTags          = {
          "/link", "/publ", "/pubD", "/desc", "/titl", "/cont"
@@ -40,13 +40,13 @@ class FeedParser
          "<published>",
          "<pubDate>",
          "<description>",
-         "<m_title",
+         "<title",
          "<content",
          "</link>",
          "</published>",
          "</pubDate>",
          "</description>",
-         "</m_title",
+         "</title",
          "</content",
          "<entry",
          "<item",
@@ -184,9 +184,9 @@ class FeedParser
                {
                   int desLength = 0;
 
-                  if(currentTag.contains("<m_title"))
+                  if(currentTag.contains("<title"))
                   {
-                     currentTag = "<m_title>";
+                     currentTag = "<title>";
                   }
                   else if(currentTag.contains("<description"))
                   {
@@ -291,7 +291,7 @@ class FeedParser
                   }
                   content = PATTERN_WHITESPACE.matcher(content).replaceAll(" ");
 
-                  if(currentTag.contains("<m_title>"))
+                  if(currentTag.contains("<title>"))
                   {
                      String cont2 = content.toLowerCase();
                      for(String filter : filters)

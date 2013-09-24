@@ -42,7 +42,8 @@ class FragmentManageFeeds extends ListFragment
       }
       if(Util.getString(R.string.add_feed).equals(item.getTitle()))
       {
-         FeedDialog.showAddDialog(FeedsActivity.s_currentTags);
+         //FeedDialog.showAddDialog(FeedsActivity.s_currentTags);
+         new ManageRefresh().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
          return true;
       }
       return super.onOptionsItemSelected(item);

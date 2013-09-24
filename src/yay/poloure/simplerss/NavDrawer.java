@@ -82,7 +82,7 @@ class NavDrawer
    {
       DrawerToggleClick()
       {
-         super((Activity) Util.getContext(), s_drawerLayout, R.drawable.ic_drawer,
+         super(FeedsActivity.getActivity(), s_drawerLayout, R.drawable.ic_drawer,
                R.string.drawer_open, R.string.drawer_close);
       }
 
