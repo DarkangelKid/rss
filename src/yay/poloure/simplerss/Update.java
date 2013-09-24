@@ -21,7 +21,7 @@ class Update
 
    public static
    void manageFeeds()
-   {
+   {/*
       if(Constants.HONEYCOMB)
       {
          new FragmentManageFeeds.ManageRefresh().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -29,7 +29,7 @@ class Update
       else
       {
          new FragmentManageFeeds.ManageRefresh().execute();
-      }
+      }*/
    }
 
    public static
@@ -59,16 +59,15 @@ class Update
    }
 
    public static
-   void executeFeedCheck(AlertDialog dlg, String ntag, String fname, String mode, String ctitle,
-         String stag, int pos, String url)
+   void executeFeedCheck(AlertDialog dlg, String ntag, String fname, String mode, String ctitle, String url)
    {
       if(Constants.HONEYCOMB)
       {
-         new FeedDialog.CheckFeed(dlg, ntag, fname, mode, ctitle, stag, pos).execute(url);
+         new FeedDialog.CheckFeed(dlg, ntag, fname, mode, ctitle).execute(url);
       }
       else
       {
-         new FeedDialog.CheckFeed(dlg, ntag, fname, mode, ctitle, stag, pos).executeOnExecutor(
+         new FeedDialog.CheckFeed(dlg, ntag, fname, mode, ctitle).executeOnExecutor(
                AsyncTask.THREAD_POOL_EXECUTOR, url);
       }
    }

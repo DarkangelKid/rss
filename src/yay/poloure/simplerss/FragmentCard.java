@@ -8,7 +8,6 @@ import android.view.ViewGroup;
 
 class FragmentCard extends ListFragment
 {
-
    @Override
    public
    void onCreate(Bundle savedInstanceState)

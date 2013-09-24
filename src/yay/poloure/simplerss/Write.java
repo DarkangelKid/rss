@@ -263,6 +263,12 @@ class Write
       single(Constants.DUMP_FILE, text + Constants.NL);
    }
 
+   static
+   void log(int integer)
+   {
+      single(Constants.DUMP_FILE, integer + Constants.NL);
+   }
+
    private static
    BufferedWriter writer(String p, boolean ap) throws IOException
    {

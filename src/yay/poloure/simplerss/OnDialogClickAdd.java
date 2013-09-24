@@ -8,7 +8,7 @@ import android.widget.SpinnerAdapter;
 class OnDialogClickAdd implements DialogInterface.OnClickListener
 {
    private final View                        m_addRssDialog;
-   private final AdapterView<SpinnerAdapter> m_tag;
+   private final AdapterView<SpinnerAdapter> m_tagMenu;
    private final AlertDialog                 m_addFeedDialog;
 
    public
@@ -16,7 +16,7 @@ class OnDialogClickAdd implements DialogInterface.OnClickListener
          AlertDialog addFeedDialog)
    {
       m_addRssDialog = addRssDialog;
-      m_tag = spinnerTag;
+      m_tagMenu = spinnerTag;
       m_addFeedDialog = addFeedDialog;
    }
 
@@ -28,17 +28,21 @@ class OnDialogClickAdd implements DialogInterface.OnClickListener
       String url = Util.getText(m_addRssDialog, R.id.URL_edit);
       String name = Util.getText(m_addRssDialog, R.id.name_edit);
 
-      tag = tag.toLowerCase(Constants.LOCALE);
-      String spinnerTag;
-      try
+      if(tag.isEmpty())
       {
-         spinnerTag = m_tag.getSelectedItem().toString();
+         try
+         {
+            tag = m_tagMenu.getSelectedItem().toString();
+         }
+         catch(RuntimeException e)
+         {
+            e.printStackTrace();
+            tag = Constants.UNSORTED_TAG;
+         }
       }
-      catch(RuntimeException e)
-      {
-         e.printStackTrace();
-         spinnerTag = "";
-      }
-      Update.executeFeedCheck(m_addFeedDialog, tag, name, Constants.ADD, "", spinnerTag, 0, url);
+      else
+         tag = tag.toLowerCase(Constants.LOCALE);
+
+      Update.executeFeedCheck(m_addFeedDialog, tag, name, Constants.ADD, "", url);
    }
 }

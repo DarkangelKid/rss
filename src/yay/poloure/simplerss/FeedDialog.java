@@ -54,27 +54,22 @@ class FeedDialog
    {
       static final Pattern ILLEGAL_FILE_CHARS = Pattern.compile("[/\\?%*|<>:]");
       static final Pattern SPLIT_SPACE        = Pattern.compile(" ");
-      final AlertDialog m_dialog;
-      final String      m_mode;
-      final String      m_tag;
-      final String      m_title;
-      final int         m_position;
-      boolean m_feedExists;
-      String  tag;
-      String  name;
-      private boolean m_existingTag;
+      AlertDialog m_dialog;
+      String      m_mode;
+      String      m_tag;
+      String      m_title;
+      boolean     m_feedExists;
+      String      name;
+      private boolean m_existingTag = false;
 
 
-      CheckFeed(AlertDialog dialog, String tag, String feedName, String mode, String currentTitle,
-            String spinnerTag, int position)
+      CheckFeed(AlertDialog dialog, String tag, String feedName, String mode, String currentTitle)
       {
          m_dialog = dialog;
-         this.tag = tag;
+         m_tag = tag;
          name = feedName;
          m_mode = mode;
-         m_tag = spinnerTag;
          m_title = currentTitle;
-         m_position = position;
          Button button = m_dialog.getButton(DialogInterface.BUTTON_POSITIVE);
          if(null != button)
          {
@@ -88,36 +83,21 @@ class FeedDialog
       {
          /* If the m_imageViewTag entry has text, check to see if it is an old m_imageViewTag
           * or if it is new. */
-         if(tag.isEmpty())
-         {
-            tag = m_tag.isEmpty() ? Constants.UNSORTED_TAG : m_tag;
-            m_existingTag = !m_tag.isEmpty();
-         }
-         else
-         {
-            String[] ctags = Read.file(Constants.TAG_LIST);
-            for(String gro : ctags)
-            {
-               if(gro.toLowerCase(Constants.LOCALE).equals(tag.toLowerCase(Constants.LOCALE)))
-               {
-                  tag = gro;
-                  m_existingTag = false;
-               }
-            }
-            if(m_existingTag)
-            {
-               String[] words = SPLIT_SPACE.split(tag);
-               tag = "";
 
-               for(String word : words)
-               {
-                  tag += word.substring(0, 1).toUpperCase(Constants.LOCALE) +
-                        word.substring(1).toLowerCase(Constants.LOCALE) + ' ';
-               }
-               tag = tag.substring(0, tag.length() - 1);
-            }
+         /* Capitalise each word. */
+         String[] words = SPLIT_SPACE.split(m_tag);
+         m_tag = "";
 
+         for(String word : words)
+         {
+            m_tag += word.substring(0, 1).toUpperCase(Constants.LOCALE) +
+                  word.substring(1).toLowerCase(Constants.LOCALE) + ' ';
          }
+         m_tag = m_tag.substring(0, m_tag.length() - 1);
+
+         /* Check to see if the tag already exists. */
+         String[] currentTags = Read.file(Constants.TAG_LIST);
+         if(Util.index(currentTags, m_tag) != -1) m_existingTag = true;
 
          String[] checkList = url[0].contains("http") ? new String[]{url[0]} : new String[]{
                "http://" + url[0], "https://" + url[0]
@@ -125,58 +105,51 @@ class FeedDialog
 
          String feedUrl = "";
          String feedTitle = "";
-         try
+
+         for(String check : checkList)
          {
-            for(String check : checkList)
+            try
             {
+               BufferedInputStream in = null;
                try
                {
-                  BufferedInputStream in = null;
-                  try
-                  {
-                     in = new BufferedInputStream(new URL(check).openStream());
-                     byte[] data = new byte[512];
-                     in.read(data, 0, 512);
+                  in = new BufferedInputStream(new URL(check).openStream());
+                  byte[] data = new byte[512];
+                  in.read(data, 0, 512);
 
-                     String line = new String(data);
-                     if(line.contains("rss") || line.contains("Atom") || line.contains("atom"))
-                     {
-                        while(!line.contains(Constants.TAG_TITLE) &&
-                              !line.contains(Constants.ENDTAG_TITLE))
-                        {
-                           byte[] data2 = new byte[512];
-                           in.read(data2, 0, 512);
-                           data = concat(data, data2);
-                           line = new String(data);
-                        }
-                        int ind = line.indexOf('>', line.indexOf(Constants.TAG_TITLE) + 1);
-                        feedTitle = line.substring(ind, line.indexOf("</", ind));
-                        m_feedExists = true;
-                        feedUrl = check;
-                        break;
-                     }
-                  }
-                  finally
+                  String line = new String(data);
+                  if(line.contains("rss") || line.contains("Atom") || line.contains("atom"))
                   {
-                     if(null != in)
+                     while(!line.contains(Constants.TAG_TITLE) &&
+                           !line.contains(Constants.ENDTAG_TITLE))
                      {
-                        in.close();
+                        byte[] data2 = new byte[512];
+                        in.read(data2, 0, 512);
+                        data = concat(data, data2);
+                        line = new String(data);
                      }
+                     int ind = line.indexOf('>', line.indexOf(Constants.TAG_TITLE) + 1);
+                     feedTitle = line.substring(ind, line.indexOf("</", ind));
+                     m_feedExists = true;
+                     feedUrl = check;
                   }
                }
-               catch(MalformedURLException e)
+               finally
                {
-                  e.printStackTrace();
-               }
-               catch(IOException e)
-               {
-                  e.printStackTrace();
+                  if(null != in)
+                  {
+                     in.close();
+                  }
                }
             }
-         }
-         catch(RuntimeException e)
-         {
-            e.printStackTrace();
+            catch(MalformedURLException e)
+            {
+               e.printStackTrace();
+            }
+            catch(IOException e)
+            {
+               e.printStackTrace();
+            }
          }
          return new String[]{feedUrl, feedTitle};
       }
@@ -185,53 +158,7 @@ class FeedDialog
       protected
       void onPostExecute(String[] result)
       {
-         if(m_feedExists)
-         {
-            if(m_existingTag)
-            {
-               Write.single(Constants.TAG_LIST, tag + Constants.NL);
-               Util.updateTags();
-            }
-            if(name.isEmpty())
-            {
-               name = result[1];
-            }
-
-            name = ILLEGAL_FILE_CHARS.matcher(name).replaceAll("");
-
-            if(Constants.EDIT.equals(m_mode))
-            {
-               editFeed(m_title, name, result[0], tag, m_position);
-            }
-            else if(Constants.ADD.equals(m_mode))
-            {
-
-      /* Create folders if they do not exist. */
-               Util.mkdir(Util.getPath(name, Constants.IMAGES));
-               Util.mkdir(Util.getPath(name, Constants.THUMBNAILS));
-
-      /* Create the csv. */
-               String feedInfo = String.format(Constants.INDEX_FORMAT, name, result[0], tag) +
-                     Constants.NL;
-
-      /* Save the feed to the index. */
-               String index = Constants.INDEX;
-               Write.single(index, feedInfo);
-
-      /* Update the manage listviews with the new information. */
-               if(null != PagerAdapterManage.MANAGE_FRAGMENTS[1].getListAdapter())
-               {
-                  Update.manageFeeds();
-               }
-               if(null != PagerAdapterManage.MANAGE_FRAGMENTS[0].getListAdapter())
-               {
-                  Update.manageTags();
-               }
-            }
-
-            m_dialog.dismiss();
-         }
-         else
+         if(!m_feedExists)
          {
             Util.post(Util.getString(R.string.feed_invalid));
             Button button = m_dialog.getButton(DialogInterface.BUTTON_POSITIVE);
@@ -239,11 +166,55 @@ class FeedDialog
             {
                button.setEnabled(true);
             }
+            return;
          }
+
+         if(!m_existingTag)
+         {
+            Write.single(Constants.TAG_LIST, m_tag + Constants.NL);
+            Util.updateTags();
+         }
+         if(name.isEmpty())
+         {
+            name = result[1];
+         }
+
+         name = ILLEGAL_FILE_CHARS.matcher(name).replaceAll("");
+
+         if(Constants.EDIT.equals(m_mode))
+         {
+            editFeed(m_title, name, result[0], m_tag);
+         }
+         else if(Constants.ADD.equals(m_mode))
+         {
+
+      /* Create folders if they do not exist. */
+            Util.mkdir(Util.getPath(name, Constants.IMAGES));
+            Util.mkdir(Util.getPath(name, Constants.THUMBNAILS));
+
+      /* Create the csv. */
+            String feedInfo = String.format(Constants.INDEX_FORMAT, name, result[0], m_tag) +
+                  Constants.NL;
+
+      /* Save the feed to the index. */
+            Write.single(Constants.INDEX, feedInfo);
+
+      /* Update the manage listviews with the new information. */
+            //if(null != PagerAdapterManage.MANAGE_FRAGMENTS[1].getListAdapter())
+            {
+               //  Update.manageFeeds();
+            }
+            // if(null != PagerAdapterManage.MANAGE_FRAGMENTS[0].getListAdapter())
+            {
+               //    Update.manageTags();
+            }
+         }
+
+         m_dialog.dismiss();
       }
 
       static
-      void editFeed(String oldFeed, String newFeed, String newUrl, String newTag, int position)
+      void editFeed(String oldFeed, String newFeed, String newUrl, String newTag)
       {
 
          String oldFeedFolder = Util.getPath(oldFeed, "");
@@ -261,12 +232,12 @@ class FeedDialog
          Write.removeLine(index, oldFeed, true);
          Write.single(index, entry + Constants.NL);
 
-         AdapterManageFeeds adpt
-               = (AdapterManageFeeds) PagerAdapterManage.MANAGE_FRAGMENTS[1].getListAdapter();
+         //AdapterManageFeeds adpt
+         //      = (AdapterManageFeeds) PagerAdapterManage.MANAGE_FRAGMENTS[1].getListAdapter();
 
-         adpt.setPosition(position, newFeed,
+         /*adpt.setPosition(position, newFeed,
                String.format(Constants.LOCALE, Constants.FEED_INFO, newUrl, newTag,
-                     Read.count(Util.getPath(newFeed, Constants.CONTENT)) - 1));
+                     Read.count(Util.getPath(newFeed, Constants.CONTENT)) - 1));*/
 
          /// To ManageRefresh the counts and the order of the tags.
          Util.updateTags();

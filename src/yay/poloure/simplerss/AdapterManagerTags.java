@@ -28,7 +28,7 @@ class AdapterManagerTags extends BaseAdapter
    public
    int getCount()
    {
-      return s_tagArray.length;
+      return null == s_tagArray ? 0 : s_tagArray.length;
    }
 
    @Override

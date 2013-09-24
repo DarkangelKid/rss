@@ -7,14 +7,13 @@ import android.widget.TextView;
 
 class AdapterManageFeeds extends BaseAdapter
 {
-   static String[] s_titleArray;
-   static String[] s_infoArray;
+   String[] s_titleArray = Util.EMPTY_STRING_ARRAY;
+   String[] s_infoArray  = Util.EMPTY_STRING_ARRAY;
 
    void setArrays(String[] titles, String... infos)
    {
       s_titleArray = titles;
       s_infoArray = infos;
-      notifyDataSetChanged();
    }
 
    void setPosition(int pos, String title, String info)
@@ -65,6 +64,8 @@ class AdapterManageFeeds extends BaseAdapter
 
       holder.m_title.setText(s_titleArray[position]);
       holder.m_info.setText(s_infoArray[position]);
+
+      Write.log(view.toString() + "Hey");
 
       return view;
    }

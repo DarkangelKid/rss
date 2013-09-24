@@ -32,9 +32,11 @@ class OnDialogClickEdit implements DialogInterface.OnClickListener
       String newUrl = Util.getText(m_editRssDialog, R.id.URL_edit);
       String newName = Util.getText(m_editRssDialog, R.id.name_edit);
       String spinnerTag = m_tag.getSelectedItem().toString();
-      spinnerTag = spinnerTag.toLowerCase(Constants.LOCALE);
+      if(editTag.isEmpty())
+         editTag = spinnerTag.toLowerCase(Constants.LOCALE);
+      if(editTag.isEmpty())
+         editTag = Constants.UNSORTED_TAG;
 
-      Update.executeFeedCheck(m_editFeedDialog, editTag, newName, Constants.EDIT, m_title,
-            spinnerTag, m_position, newUrl);
+      Update.executeFeedCheck(m_editFeedDialog, editTag, newName, Constants.EDIT, m_title, newUrl);
    }
 }

@@ -29,19 +29,6 @@ class Util
    static final String[]   EMPTY_STRING_ARRAY        = new String[0];
    static final String[][] EMPTY_STRING_STRING_ARRAY = new String[0][0];
 
-   private static final String[] MEDIA_ERROR_MESSAGES = getArray(R.array.media_errors);
-
-   private static final String[] MEDIA_ERRORS = {
-         Environment.MEDIA_UNMOUNTED,
-         Environment.MEDIA_UNMOUNTABLE,
-         Environment.MEDIA_SHARED,
-         Environment.MEDIA_REMOVED,
-         Environment.MEDIA_NOFS,
-         Environment.MEDIA_MOUNTED_READ_ONLY,
-         Environment.MEDIA_CHECKING,
-         Environment.MEDIA_BAD_REMOVAL
-   };
-
    private
    Util()
    {
@@ -274,12 +261,12 @@ class Util
       /* TODO Check to see if it is the desired first then skip these. */
       String state = Environment.getExternalStorageState();
 
-      int errorsLength = MEDIA_ERRORS.length;
+      int errorsLength = Constants.MEDIA_ERRORS.length;
       for(int i = 0; i < errorsLength; i++)
       {
-         if(state.equals(MEDIA_ERRORS[i]))
+         if(state.equals(Constants.MEDIA_ERRORS[i]))
          {
-            post(MEDIA_ERROR_MESSAGES[i]);
+            post(Constants.MEDIA_ERROR_MESSAGES[i]);
             return null;
          }
       }

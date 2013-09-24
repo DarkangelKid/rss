@@ -364,7 +364,6 @@ class AdapterCard extends BaseAdapter
          Animation fadeIn = new AlphaAnimation(0.0F, 1.0F);
          fadeIn.setDuration(240L);
          fadeIn.setInterpolator(new DecelerateInterpolator());
-         Write.log(m_items.length + "|" + m_items[0].image);
          String image = Util.getStorage() +
                PATTERN_THUMBNAILS.matcher(m_items[m_imageViewTag].image)
                      .replaceAll(Constants.IMAGES);

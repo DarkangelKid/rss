@@ -1,6 +1,7 @@
 package yay.poloure.simplerss;
 
 import android.os.Build;
+import android.os.Environment;
 import android.support.v4.view.PagerTabStrip;
 
 import java.util.Locale;
@@ -59,4 +60,17 @@ class Constants
    /* UI related strings. */
    static final         String          ALL_TAG          = Util.getString(R.string.all_tag);
    static final         String          OFFLINE          = Util.getString(R.string.offline);
+
+   static final String[] MEDIA_ERROR_MESSAGES = Util.getArray(R.array.media_errors);
+
+   static final String[] MEDIA_ERRORS = {
+         Environment.MEDIA_UNMOUNTED,
+         Environment.MEDIA_UNMOUNTABLE,
+         Environment.MEDIA_SHARED,
+         Environment.MEDIA_REMOVED,
+         Environment.MEDIA_NOFS,
+         Environment.MEDIA_MOUNTED_READ_ONLY,
+         Environment.MEDIA_CHECKING,
+         Environment.MEDIA_BAD_REMOVAL
+   };
 }

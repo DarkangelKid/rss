@@ -6,21 +6,24 @@
    <string name="navigation_title">ملاحة</string>
 
    <string name="delete_dialog">حذف</string>
-   <string name="clear_dialog">Clear Content</string>
-   <string name="add_dialog_title">Add Feed</string>
-   <string name="edit_dialog_title">Edit Feed</string>
+   <string name="clear_dialog">مسح المحتوى‎</string>
+   <string name="add_dialog_title">إضافة موجز</string>
+   <string name="edit_dialog_title">تعديل موجز‎</string>
 
    <string name="add_feed">اضافة</string>
    <string name="unread">غير مقروء</string>
    <string name="refresh">إعادة التحميل‎</string>
+   <string name="offline">Offline</string>
 
-   <string name="feed_name_dialog">Feed Name</string>
+   <string name="feed_name_dialog">إسم الموجز‎</string>
    <string name="feed_name_hint">إختياري‎</string>
-   <string name="feed_url_dialog">Feed URL</string>
+   <string name="feed_url_dialog">رابط الموجز‎</string>
    <string name="feed_url_hint">http://example.com/rss</string>
    <string name="feed_tag_dialog">Tag</string>
    <string name="feed_tag_title">Tags</string>
    <string name="feed_tag_hint">new tag</string>
+   <string name="filter_hint">new filter</string>
+
    <string name="cancel_dialog">إلغاء‎</string>
    <string name="add_dialog">اضافة</string>
    <string name="accept_dialog">قبول</string>

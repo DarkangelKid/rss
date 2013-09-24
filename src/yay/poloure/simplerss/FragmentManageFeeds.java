@@ -29,25 +29,7 @@ class FragmentManageFeeds extends ListFragment
    void onCreate(Bundle savedInstanceState)
    {
       super.onCreate(savedInstanceState);
-      setHasOptionsMenu(true);
-      setRetainInstance(false);
-   }
-
-   @Override
-   public
-   void onActivityCreated(Bundle savedInstanceState)
-   {
-      super.onActivityCreated(savedInstanceState);
-
-      ListView feedList = getListView();
-      feedList.setOnItemClickListener(new FeedClick());
-
-      AdapterManageFeeds adapterManageFeeds = new AdapterManageFeeds();
-      setListAdapter(adapterManageFeeds);
-
-      Update.manageFeeds();
-
-      feedList.setOnItemLongClickListener(new FeedItemLongClick(adapterManageFeeds));
+      setListAdapter(new AdapterManageFeeds());
    }
 
    @Override
@@ -58,7 +40,7 @@ class FragmentManageFeeds extends ListFragment
       {
          return true;
       }
-      if("add".equals(item.getTitle()))
+      if(Util.getString(R.string.add_feed).equals(item.getTitle()))
       {
          FeedDialog.showAddDialog(FeedsActivity.s_currentTags);
          return true;
@@ -66,29 +48,37 @@ class FragmentManageFeeds extends ListFragment
       return super.onOptionsItemSelected(item);
    }
 
+   /* onListItemClick */
+
    @Override
    public
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
+      /*feedList.setOnItemClickListener(new FeedClick());
+      feedList.setOnItemLongClickListener(new FeedItemLongClick(adapterManageFeeds));*/
+
+      // Update.manageFeeds();
       return inflater.inflate(R.layout.listview_cards, container, false);
    }
 
-   static
+   @Override
+   public
+   void onActivityCreated(Bundle savedInstanceState)
+   {
+      super.onActivityCreated(savedInstanceState);
+      new ManageRefresh().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+   }
+
    class ManageRefresh extends AsyncTask<Void, String[], Void>
    {
       final Animation          fade_in  = AnimationUtils.loadAnimation(Util.getContext(),
             android.R.anim.fade_in);
-      final ListView           listview = PagerAdapterManage.MANAGE_FRAGMENTS[1].getListView();
-      final AdapterManageFeeds adapter
-                                        = (AdapterManageFeeds) PagerAdapterManage
-            .MANAGE_FRAGMENTS[1]
-            .getListAdapter();
 
       ManageRefresh()
       {
-         if(0 == adapter.getCount())
+         if(0 == getListAdapter().getCount())
          {
-            listview.setVisibility(View.INVISIBLE);
+           /* feedList.setVisibility(View.INVISIBLE);*/
          }
       }
 
@@ -96,7 +86,7 @@ class FragmentManageFeeds extends ListFragment
       protected
       Void doInBackground(Void... hey)
       {
-         if(null != adapter)
+         if(null != getListAdapter())
          {
             /* Read the ALL_TAG m_imageViewTag file for names, urls, and tags. */
             String[][] content = Read.csv();
@@ -122,15 +112,17 @@ class FragmentManageFeeds extends ListFragment
       protected
       void onPostExecute(Void result)
       {
-         listview.setAnimation(fade_in);
-         listview.setVisibility(View.VISIBLE);
+         Write.log("Setting visibility.");
+         getListView().setAnimation(fade_in);
+         getListView().setVisibility(View.VISIBLE);
       }
 
       @Override
       protected
-      void onProgressUpdate(String[][] values)
+      void onProgressUpdate(String[]... values)
       {
-         adapter.setArrays(values[0], values[1]);
+         ((AdapterManageFeeds) getListAdapter()).setArrays(values[0], values[1]);
+         ((AdapterManageFeeds) getListAdapter()).notifyDataSetChanged();
       }
    }
 
@@ -212,10 +204,10 @@ class FragmentManageFeeds extends ListFragment
       static
       void removeItem(int position)
       {
-         AdapterManageFeeds.s_titleArray = Util.arrayRemove(AdapterManageFeeds.s_titleArray,
+        /* AdapterManageFeeds.s_titleArray = Util.arrayRemove(AdapterManageFeeds.s_titleArray,
                position);
          AdapterManageFeeds.s_infoArray = Util.arrayRemove(AdapterManageFeeds.s_infoArray,
-               position);
+               position);*/
       }
 
       /* Delete the feed. */

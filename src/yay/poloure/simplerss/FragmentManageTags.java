@@ -30,6 +30,7 @@ class FragmentManageTags extends ListFragment
    void onCreate(Bundle savedInstanceState)
    {
       super.onCreate(savedInstanceState);
+      Write.log("ManageTagFragment created.");
       setHasOptionsMenu(true);
    }
 
@@ -46,6 +47,7 @@ class FragmentManageTags extends ListFragment
       listview.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
       listview.setItemsCanFocus(false);
 
+      Write.log("Calling update asynctask.");
       Update.manageTags();
 
       if(Constants.HONEYCOMB)
@@ -81,6 +83,7 @@ class FragmentManageTags extends ListFragment
    public
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
+      Write.log("OnCreateView called for manageTags");
       return inflater.inflate(R.layout.listview_cards, container, false);
    }
 
@@ -89,17 +92,17 @@ class FragmentManageTags extends ListFragment
    {
       final Animation          animFadeIn = AnimationUtils.loadAnimation(Util.getContext(),
             android.R.anim.fade_in);
-      final ListView           listview   = PagerAdapterManage.MANAGE_FRAGMENTS[0].getListView();
-      final AdapterManagerTags adapter
+      //final ListView           listview   = PagerAdapterManage.MANAGE_FRAGMENTS[0].getListView();
+      /*final AdapterManagerTags adapter
                                           = (AdapterManagerTags) PagerAdapterManage
             .MANAGE_FRAGMENTS[0]
-            .getListAdapter();
+            .getListAdapter();*/
 
       RefreshTags()
       {
-         if(0 == adapter.getCount())
+         //if(0 == adapter.getCount())
          {
-            listview.setVisibility(View.INVISIBLE);
+           // listview.setVisibility(View.INVISIBLE);
          }
       }
 
@@ -113,15 +116,13 @@ class FragmentManageTags extends ListFragment
       static
       String[][] getInfoArrays(String... ctags)
       {
-
+         Write.log("Making info array.");
          int size = ctags.length;
          String[] tagArray = new String[size];
          String[] infoArray = new String[size];
          StringBuilder info = new StringBuilder(40);
 
-         String contentPath = Util.getPath(Constants.ALL_TAG, Constants.CONTENT);
-
-         int total = Read.count(contentPath);
+         int total;
 
          for(int i = 0; i < size; i++)
          {
@@ -153,7 +154,8 @@ class FragmentManageTags extends ListFragment
             }
             infoArray[i] = content.length + " feeds • " + info;
          }
-         infoArray[0] = total + " items • " + infoArray[0];
+         /* 0 is meant to be total. */
+         infoArray[0] = 0 + " items • " + infoArray[0];
          return new String[][]{infoArray, tagArray};
       }
 
@@ -170,18 +172,18 @@ class FragmentManageTags extends ListFragment
       protected
       void onPostExecute(Void result)
       {
-         listview.setAnimation(animFadeIn);
-         listview.setVisibility(View.VISIBLE);
+         //listview.setAnimation(animFadeIn);
+         //listview.setVisibility(View.VISIBLE);
       }
 
       @Override
       protected
       void onProgressUpdate(String[][] values)
       {
-         if(null != adapter)
+         //if(null != adapter)
          {
-            setArrays(values[0], values[1]);
-            adapter.notifyDataSetChanged();
+            //setArrays(values[0], values[1]);
+            //adapter.notifyDataSetChanged();
          }
       }
    }

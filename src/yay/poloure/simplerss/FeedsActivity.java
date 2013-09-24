@@ -24,14 +24,13 @@ class FeedsActivity extends ActionBarActivity
    private static final String ALARM_SERVICE_START = "start";
    private static final String ALARM_SERVICE_STOP  = "stop";
 
-   /* Only intialized when the activity is running. */
+   /* Only initialized when the activity is running. */
    static Menu            s_optionsMenu;
    static ViewPager       s_ViewPager;
    static FragmentManager s_fragmentManager;
    static ActionBar       s_actionBar;
    static Handler         s_serviceHandler;
    static String[]        s_currentTags;
-   static Fragment[]      s_mainFragments;
 
    @Override
    public
@@ -41,7 +40,7 @@ class FeedsActivity extends ActionBarActivity
 
       setContentView(R.layout.navigation_drawer_and_content_frame);
 
-      /* Save the other satic variables. */
+      /* Save the other static variables. */
       Util.setContext(this);
       s_fragmentManager = getSupportFragmentManager();
       s_actionBar = getSupportActionBar();
@@ -58,23 +57,29 @@ class FeedsActivity extends ActionBarActivity
       /* Create the MANAGE_FRAGMENTS that go inside the content frame. */
       if(null == savedInstanceState)
       {
-         s_mainFragments = new Fragment[]{
+         Fragment[] mainFragments = new Fragment[]{
                new FragmentFeeds(), new FragmentManage(), new FragmentSettings(),
          };
 
          int frame = R.id.content_frame;
 
          FragmentTransaction tran = s_fragmentManager.beginTransaction();
-         tran.add(frame, s_mainFragments[0])
-               .add(frame, s_mainFragments[1])
-               .add(frame, s_mainFragments[2])
-               .hide(s_mainFragments[1])
-               .hide(s_mainFragments[2])
+         tran.add(frame, mainFragments[0], NavDrawer.NAV_TITLES[0])
+               .add(frame, mainFragments[1], NavDrawer.NAV_TITLES[1])
+               .add(frame, mainFragments[2], NavDrawer.NAV_TITLES[2])
+               .hide(mainFragments[1])
+               .hide(mainFragments[2])
                .commit();
       }
 
       Util.updateTags();
       Update.page(0);
+   }
+
+   static
+   Fragment getFragmentByTag(String fragmentTag)
+   {
+      return s_fragmentManager.findFragmentByTag(fragmentTag);
    }
 
    /* This is so the icon and text in the actionbar are selected. */

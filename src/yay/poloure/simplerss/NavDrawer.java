@@ -24,10 +24,14 @@ class NavDrawer
    NavDrawer(ListView navList, DrawerLayout drawerLayout)
    {
       /* Set the listeners (and save the navigation list to the public static variable). */
-      (s_drawerLayout = drawerLayout).setDrawerListener(s_drawerToggle);
-      (s_navList = navList).setOnItemClickListener(new NavDrawerItemClick());
+      s_drawerLayout = drawerLayout;
+      s_drawerLayout.setDrawerListener(s_drawerToggle);
 
-      (s_drawerToggle = new DrawerToggleClick()).syncState();
+      s_navList = navList;
+      s_navList.setOnItemClickListener(new NavDrawerItemClick());
+
+      s_drawerToggle = new DrawerToggleClick();
+      s_drawerLayout.setDrawerListener(s_drawerToggle);
 
       s_navList.setAdapter(new AdapterNavDrawer());
    }
@@ -86,19 +90,15 @@ class NavDrawer
       public
       void onDrawerClosed(View drawerView)
       {
-           /* If the m_title is still "Navigation", then change it back to s_currentTitle. */
-         if(FeedsActivity.s_actionBar.getTitle().equals(NAVIGATION))
-         {
+         /* Change it back to s_currentTitle. */
+         if(NAVIGATION.equals(FeedsActivity.s_actionBar.getTitle()))
             FeedsActivity.s_actionBar.setTitle(s_currentTitle);
-         }
       }
 
       @Override
       public
       void onDrawerOpened(View drawerView)
       {
-           /* Save the action s_actionBar's m_title to current m_title. Then change the m_title to
-           NAVIGATION. */
          s_currentTitle = (String) FeedsActivity.s_actionBar.getTitle();
          FeedsActivity.s_actionBar.setTitle(NAVIGATION);
       }
@@ -111,8 +111,10 @@ class NavDrawer
       void showFragment(Fragment fragment)
       {
          FragmentTransaction tran = FeedsActivity.s_fragmentManager.beginTransaction();
-         for(Fragment frag : FeedsActivity.s_mainFragments)
+         int fragmentCount = NAV_TITLES.length;
+         for(int i = 0; i < fragmentCount; i++)
          {
+            Fragment frag = FeedsActivity.getFragmentByTag(NAV_TITLES[i]);
             if(!frag.isHidden())
             {
                tran.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
@@ -146,15 +148,13 @@ class NavDrawer
 
          /* If the selected title is the title of the current page, exit.
           * This stops the animation from showing on page change.*/
-
-         /* s_currentTitle causes crash because the setTitle functions are not working. */
-         /*if(s_currentTitle.equals(selectedTitle))
+         if(s_currentTitle.equals(selectedTitle))
          {
             return;
-         }*/
+         }
 
          /* Hide the current fragment and display the selected one. */
-         showFragment(FeedsActivity.s_mainFragments[3 < position ? 0 : position]);
+         showFragment(FeedsActivity.getFragmentByTag(selectedTitle));
 
          /* Set the m_title text of the actionbar to the selected item. */
          FeedsActivity.s_actionBar.setTitle(selectedTitle);
