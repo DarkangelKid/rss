@@ -1,30 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="yay.poloure.simplerss"
-      android:versionCode="1"
-      android:versionName="0.8">
-   <uses-permission android:name="android.permission.INTERNET" />
+          package="yay.poloure.simplerss"
+          android:versionCode="1"
+          android:versionName="0.9">
+
+   <uses-permission android:name="android.permission.INTERNET"/>
    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-   <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+   <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
    <uses-permission android:name="android.permission.WAKE_LOCK"/>
-   <uses-sdk android:minSdkVersion="7" android:targetSdkVersion="18" />
+
+   <uses-sdk
+      android:minSdkVersion="7"
+      android:targetSdkVersion="18"/>
    <application
-         android:label="Simple RSS"
-         android:icon="@drawable/ic_launcher"
-         android:theme="@style/Brownie.Net"
-         android:hardwareAccelerated="true">
+      android:label="Simple RSS"
+      android:icon="@drawable/ic_launcher"
+      android:theme="@style/Brownie.Net"
+      android:allowBackup="true"
+      android:hardwareAccelerated="true"
+      android:supportsRtl="true">
       <activity
-         android:name="main"
+         android:name="FeedsActivity"
          android:label="Simple RSS">
          <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
-            <category android:name="android.intent.category.LAUNCHER" />
+            <action android:name="android.intent.action.MAIN"/>
+            <category android:name="android.intent.category.LAUNCHER"/>
          </intent-filter>
       </activity>
       <service
          android:enabled="true"
-         android:name="yay.poloure.simplerss.service_update"/>
+         android:name="yay.poloure.simplerss.ServiceUpdate"/>
    </application>
 </manifest>
 
