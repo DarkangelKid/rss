@@ -88,7 +88,7 @@ class RefreshPage extends AsyncTask<Integer, FeedItem, Animation>
       int feedsLength = feeds.length;
       for(int j = 0; j < feedsLength; j++)
       {
-         if(tags[j].equals(tag) || tag.equals(Constants.ALL_TAG))
+         if(tags[j].contains(tag) || tag.equals(Constants.ALL_TAG))
          {
             String[][] content = csv(feeds[j], 't', 'd', 'l', 'i', 'w', 'h', 'p');
             if(0 == content.length)

@@ -60,16 +60,18 @@ class FeedDialog
       String      m_title;
       boolean     m_feedExists;
       String      name;
+      int         m_position;
       private boolean m_existingTag;
 
 
-      CheckFeed(AlertDialog dialog, String tag, String feedName, String mode, String currentTitle)
+      CheckFeed(AlertDialog dialog, String tag, String feedName, String mode, String currentTitle, int position)
       {
          m_dialog = dialog;
          m_tag = tag;
          name = feedName;
          m_mode = mode;
          m_title = currentTitle;
+         m_position = position;
          Button button = m_dialog.getButton(DialogInterface.BUTTON_POSITIVE);
          if(null != button)
          {
@@ -232,19 +234,20 @@ class FeedDialog
          String index = Constants.INDEX;
          String entry = String.format(Constants.INDEX_FORMAT, newFeed, newUrl, newTag);
 
-         Write.removeLine(index, oldFeed, true);
+         int position = Write.removeLine(index, oldFeed, true);
          Write.single(index, entry + Constants.NL);
 
-         //AdapterManageFeeds adpt
-         //      = (AdapterManageFeeds) PagerAdapterManage.MANAGE_FRAGMENTS[1].getListAdapter();
+         FragmentManageFeeds fragmentManageFeeds = (FragmentManageFeeds) PagerAdapterManage.MANAGE_FRAGMENTS[1];
+         AdapterManageFeeds adapterManageFeeds
+               = (AdapterManageFeeds) fragmentManageFeeds.getListAdapter();
 
-         /*adpt.setPosition(position, newFeed,
+         adapterManageFeeds.setPosition(position, newFeed,
                String.format(Constants.LOCALE, Constants.FEED_INFO, newUrl, newTag,
-                     Read.count(Util.getPath(newFeed, Constants.CONTENT)) - 1));*/
+                     Read.count(Util.getPath(newFeed, Constants.CONTENT))));
 
          /// To ManageFeedsRefresh the counts and the order of the tags.
          Util.updateTags();
-         // TODO Update.manageTags();
+         Update.manageTags(fragmentManageFeeds.getListView(), adapterManageFeeds);
       }
 
       static

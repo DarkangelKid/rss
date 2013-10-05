@@ -197,12 +197,14 @@ class Write
    /* This function should be safe, returns false if it failed.
     * NOT SAFE FOR INTERNAL IF FAILS. */
    static
-   boolean removeLine(String path, CharSequence stringSearch, boolean contains)
+   int removeLine(String path, CharSequence stringSearch, boolean contains)
    {
+      int line = 0;
+      int pos  = -1;
       /* If s_storage is unmounted OR if we force to use external. */
       if(Util.isUnmounted())
       {
-         return false;
+         return -1;
       }
 
       String path1 = Util.getStorage() + path;
@@ -218,7 +220,7 @@ class Write
             lines = Read.file(path1);
             if(0 == lines.length)
             {
-               return false;
+               return -1;
             }
 
             /* No backup for internal s_storage. */
@@ -230,6 +232,11 @@ class Write
                      !contains && !item.equals(stringSearch))
                {
                   out.write(item + Constants.NL);
+                  line++;
+               }
+               else
+               {
+                  pos = line;
                }
             }
          }
@@ -245,12 +252,12 @@ class Write
       catch(FileNotFoundException e)
       {
          e.printStackTrace();
-         return false;
+         return -1;
       }
       catch(UnsupportedEncodingException e)
       {
          e.printStackTrace();
-         return false;
+         return -1;
       }
       catch(IOException e)
       {
@@ -259,21 +266,20 @@ class Write
          {
             Util.remove(tempPath);
          }
-         return false;
+         return -1;
       }
 
       /* If the rename failed, delete the file and Write the original. */
       if(Util.isUsingSd())
       {
-         boolean success = Util.move(tempPath, path1);
+         boolean success = Util.move(path + Constants.TEMP, path);
          if(!success)
          {
-            Util.remove(path1);
-            collection(path1, Arrays.asList(lines));
+            Util.remove(path);
+            collection(path, Arrays.asList(lines));
          }
-         return success;
       }
-      return true;
+      return pos;
    }
 
    static

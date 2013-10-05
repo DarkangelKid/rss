@@ -85,7 +85,7 @@ class FragmentManageFeeds extends ListFragment
          //adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
          spinnerTag.setAdapter(adapter);
          Util.setText(url, editRssLayout, R.id.URL_edit);
-         Util.setText(title, editRssLayout, R.id.URL_edit);
+         Util.setText(title, editRssLayout, R.id.name_edit);
 
          spinnerTag.setSelection(Util.index(spinnerTags, tag));
 
@@ -98,7 +98,7 @@ class FragmentManageFeeds extends ListFragment
          AlertDialog editFeedDialog = build.create();
          editFeedDialog.setButton(DialogInterface.BUTTON_POSITIVE,
                con.getString(R.string.accept_dialog),
-               new OnDialogClickEdit(editRssLayout, spinnerTag, editFeedDialog, title, position));
+               new OnDialogClickEdit(editRssLayout, spinnerTag, editFeedDialog, title));
 
          editFeedDialog.show();
       }

@@ -14,7 +14,7 @@ class OnDialogClickEdit implements DialogInterface.OnClickListener
 
    public
    OnDialogClickEdit(View editRssDialog, AdapterView<SpinnerAdapter> spinnerTag,
-         AlertDialog editFeedDialog, String title, int position)
+         AlertDialog editFeedDialog, String title)
    {
       m_editRssDialog = editRssDialog;
       m_tag = spinnerTag;
@@ -39,6 +39,6 @@ class OnDialogClickEdit implements DialogInterface.OnClickListener
          editTag = Constants.UNSORTED_TAG;
       }
 
-      Update.executeFeedCheck(m_editFeedDialog, editTag, newName, Constants.EDIT, m_title, newUrl);
+      Update.executeFeedCheck(m_editFeedDialog, editTag, newName, Constants.EDIT, m_title, newUrl, which);
    }
 }

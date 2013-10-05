@@ -16,6 +16,13 @@ class AdapterManageFeeds extends BaseAdapter
       s_infoArray = infos;
    }
 
+   void setPosition(int pos, String title, String info)
+     {
+         s_titleArray[pos] = title;
+         s_infoArray[pos] = info;
+         notifyDataSetChanged();
+     }
+
    @Override
    public
    int getCount()
