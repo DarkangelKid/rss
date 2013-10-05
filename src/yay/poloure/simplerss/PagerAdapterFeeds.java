@@ -3,6 +3,7 @@ package yay.poloure.simplerss;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.PagerAdapter;
 
 class PagerAdapterFeeds extends FragmentPagerAdapter
 {
@@ -31,13 +32,4 @@ class PagerAdapterFeeds extends FragmentPagerAdapter
    {
       return FeedsActivity.s_currentTags[position];
    }
-
-   /*TODO @Override
-   public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-   }
-
-   @Override
-   public void onPageSelected(int position) {
-      mActionBar.setSelectedNavigationItem(position);
-   }*/
 }

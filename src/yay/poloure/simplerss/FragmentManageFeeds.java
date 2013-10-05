@@ -132,18 +132,18 @@ class FragmentManageFeeds extends ListFragment
          Write.removeLine(Constants.INDEX, feed, true);
 
          Util.updateTags();
-         /* TODO removeItem(pos);
+         removeItem(pos);
 
-         Update.manageTags();*/
+         /* Update.manageTags();*/
       }
 
       static
       void removeItem(int position)
       {
-        /* AdapterManageFeeds.s_titleArray = Util.arrayRemove(AdapterManageFeeds.s_titleArray,
+        AdapterManageFeeds.s_titleArray = Util.arrayRemove(AdapterManageFeeds.s_titleArray,
                position);
-         AdapterManageFeeds.s_infoArray = Util.arrayRemove(AdapterManageFeeds.s_infoArray,
-               position);*/
+        AdapterManageFeeds.s_infoArray = Util.arrayRemove(AdapterManageFeeds.s_infoArray,
+               position);
       }
 
       /* Delete the feed. */

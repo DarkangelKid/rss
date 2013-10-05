@@ -96,6 +96,7 @@ class Util
    static
    int gotoLatestUnread(FeedItem[] items, boolean update, int page)
    {
+      int page1 = page;
 
       if(null == FeedsActivity.s_ViewPager)
       {
@@ -104,12 +105,12 @@ class Util
 
       if(update)
       {
-         page = FeedsActivity.s_ViewPager.getCurrentItem();
+         page1 = FeedsActivity.s_ViewPager.getCurrentItem();
       }
 
       if(null == items)
       {
-         AdapterCard adp = getCardAdapter(page);
+         AdapterCard adp = getCardAdapter(page1);
          if(null == adp)
          {
             return -1;
@@ -132,7 +133,7 @@ class Util
        * May not be true anymore.*/
       if(update)
       {
-         ListView lv = getFeedListView(page);
+         ListView lv = getFeedListView(page1);
          if(null == lv)
          {
             return -1;
@@ -462,9 +463,9 @@ class Util
    static
    boolean remove(String path)
    {
-      path = getStorage() + path;
-      getContext().deleteFile(getInternalPath(path));
-      return new File(path).delete();
+      String path1 = getStorage() + path;
+      getContext().deleteFile(getInternalPath(path1));
+      return new File(path1).delete();
    }
 
    static
@@ -487,8 +488,8 @@ class Util
    static
    void mkdir(String path)
    {
-      path = getStorage() + path;
-      File folder = new File(path);
+      String path1 = getStorage() + path;
+      File folder = new File(path1);
       if(!folder.exists())
       {
          folder.mkdirs();
@@ -500,9 +501,9 @@ class Util
    static
    boolean move(String originalFile, String resultingFile)
    {
-      originalFile = getStorage() + originalFile;
+      String originalFile1 = getStorage() + originalFile;
       resultingFile = getStorage() + resultingFile;
-      return new File(originalFile).renameTo(new File(resultingFile));
+      return new File(originalFile1).renameTo(new File(resultingFile));
    }
 
    static
@@ -527,15 +528,15 @@ class Util
    static
    boolean exists(String path)
    {
-      path = getStorage() + path;
-      if(isUsingSd() || path.contains(Constants.IMAGE_DIR) ||
-            path.contains(Constants.THUMBNAIL_DIR))
+      String path1 = getStorage() + path;
+      if(isUsingSd() || path1.contains(Constants.IMAGE_DIR) ||
+            path1.contains(Constants.THUMBNAIL_DIR))
       {
-         return !new File(path).exists();
+         return !new File(path1).exists();
       }
       else
       {
-         String internalPath = getInternalPath(path);
+         String internalPath = getInternalPath(path1);
          return !getContext().getFileStreamPath(internalPath).exists();
       }
    }

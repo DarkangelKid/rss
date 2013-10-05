@@ -27,12 +27,14 @@ class AsyncManageTagsRefresh extends AsyncTask<Void, String[], Void>
       }
    }
 
+   static
    void setArrays(String[] tags, String... infos)
    {
       AdapterManagerTags.s_tagArray = tags;
       AdapterManagerTags.s_infoArray = infos;
    }
 
+   static
    String[][] getInfoArrays(String... ctags)
    {
       int tagCount = ctags.length;

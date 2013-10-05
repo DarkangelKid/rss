@@ -99,7 +99,7 @@ class FragmentManageTags extends ListFragment
             m_listview.setItemChecked(0, false);
             return false;
          }
-         view = m_listview.getChildAt(pos);
+         View view1 = m_listview.getChildAt(pos);
 
          if(!m_listview.isItemChecked(pos))
          {
@@ -114,7 +114,7 @@ class FragmentManageTags extends ListFragment
                s_actionmode = FeedsActivity.getActivity().startActionMode(s_actionmode_callback);
             }
          }
-         view.setBackgroundColor(Color.parseColor("#8033b5e5"));
+         view1.setBackgroundColor(Color.parseColor("#8033b5e5"));
          return true;
       }
    }
@@ -138,17 +138,17 @@ class FragmentManageTags extends ListFragment
             m_listview.setItemChecked(0, false);
             return;
          }
-         view = m_listview.getChildAt(position);
+         View view1 = m_listview.getChildAt(position);
 
          if(s_multiMode)
          {
             if(m_listview.isItemChecked(position))
             {
-               view.setBackgroundColor(Color.parseColor("#8033b5e5"));
+               view1.setBackgroundColor(Color.parseColor("#8033b5e5"));
             }
             else
             {
-               view.setBackgroundColor(Color.parseColor("#ffffffff"));
+               view1.setBackgroundColor(Color.parseColor("#ffffffff"));
 
                if(0 > m_listview.getCheckedItemPositions().indexOfValue(true))
                {

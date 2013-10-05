@@ -67,21 +67,22 @@ class AdapterManagerTags extends BaseAdapter
    public
    View getView(int position, View view, ViewGroup parent)
    {
+      View view1 = view;
       /*int view_type = getItemViewType(position);
       if(view_type == 0)*/
       ViewHolder holder;
-      if(null == view)
+      if(null == view1)
       {
-         view = Util.getLayoutInflater().inflate(R.layout.manage_group_item, parent, false);
+         view1 = Util.getLayoutInflater().inflate(R.layout.manage_group_item, parent, false);
          holder = new ViewHolder();
-         holder.tag_view = (TextView) view.findViewById(R.id.tag_item);
-         holder.info_view = (TextView) view.findViewById(R.id.tag_feeds);
-         holder.image_view = (ImageView) view.findViewById(R.id.drag_image);
-         view.setTag(holder);
+         holder.tag_view = (TextView) view1.findViewById(R.id.tag_item);
+         holder.info_view = (TextView) view1.findViewById(R.id.tag_feeds);
+         holder.image_view = (ImageView) view1.findViewById(R.id.drag_image);
+         view1.setTag(holder);
       }
       else
       {
-         holder = (ViewHolder) view.getTag();
+         holder = (ViewHolder) view1.getTag();
       }
 
       holder.tag_view.setText(s_tagArray[position]);
@@ -90,7 +91,7 @@ class AdapterManagerTags extends BaseAdapter
       {
          holder.image_view.setVisibility(View.VISIBLE);
          holder.image_view.setOnTouchListener(new MyTouchListener());
-         view.setOnDragListener(new MyDragListener());
+         view1.setOnDragListener(new MyDragListener());
       }
       else
       {
@@ -98,7 +99,7 @@ class AdapterManagerTags extends BaseAdapter
       }
 
 
-      return view;
+      return view1;
    }
 
    static
@@ -189,13 +190,15 @@ class AdapterManagerTags extends BaseAdapter
 
             /* Save the position of the view that just faded out. */
             String newTitle = Util.getText(v, R.id.tag_item);
-            for(int i = 0; i < listview.getChildCount(); i++)
+
+            int childCount = listview.getChildCount();
+            for(int i = 0; i < childCount; i++)
             {
                if(newTitle.equals(Util.getText(listview.getChildAt(i), R.id.tag_item)))
                {
                   old_view = i;
+                  break;
                }
-               break;
             }
 
             /* Change the information of the card that just disapeared. */

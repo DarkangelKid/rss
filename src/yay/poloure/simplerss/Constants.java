@@ -53,7 +53,6 @@ class Constants
    /* Else */
    private static final int             VER              = Build.VERSION.SDK_INT;
    static final         boolean         JELLYBEAN        = Build.VERSION_CODES.JELLY_BEAN <= VER;
-   static final         boolean         HONEYCOMB_MR2    = Build.VERSION_CODES.HONEYCOMB_MR2 <= VER;
    static final         boolean         HONEYCOMB        = Build.VERSION_CODES.HONEYCOMB <= VER;
    static final         boolean         FROYO            = Build.VERSION_CODES.FROYO <= VER;
    /* These must be set straight away in onCreate. */

@@ -45,6 +45,7 @@ class AdapterSettingsFunctions extends BaseAdapter
    public
    View getView(int position, View cv, ViewGroup parent)
    {
+      View cv1 = cv;
       int viewType = getItemViewType(position);
       String settingPath = Constants.SETTINGS_DIR + FILE_NAMES[position] + Constants.TXT;
       LayoutInflater inflater = Util.getLayoutInflater();
@@ -52,10 +53,10 @@ class AdapterSettingsFunctions extends BaseAdapter
       /* This type is the a heading. */
       if(0 == viewType)
       {
-         if(null == cv)
+         if(null == cv1)
          {
-            cv = inflater.inflate(R.layout.settings_heading, parent, false);
-            m_titleView = (TextView) cv.findViewById(R.id.settings_heading);
+            cv1 = inflater.inflate(R.layout.settings_heading, parent, false);
+            m_titleView = (TextView) cv1.findViewById(R.id.settings_heading);
          }
 
          m_titleView.setText(FUNCTION_TITLES[position]);
@@ -65,18 +66,18 @@ class AdapterSettingsFunctions extends BaseAdapter
       else if(1 == viewType)
       {
          SettingsCheckHolder holder;
-         if(null == cv)
+         if(null == cv1)
          {
-            cv = inflater.inflate(R.layout.settings_checkbox, parent, false);
+            cv1 = inflater.inflate(R.layout.settings_checkbox, parent, false);
             holder = new SettingsCheckHolder();
-            holder.title = (TextView) cv.findViewById(R.id.check_title);
-            holder.summary = (TextView) cv.findViewById(R.id.check_summary);
-            holder.checkbox = (CheckBox) cv.findViewById(R.id.checkbox);
-            cv.setTag(holder);
+            holder.title = (TextView) cv1.findViewById(R.id.check_title);
+            holder.summary = (TextView) cv1.findViewById(R.id.check_summary);
+            holder.checkbox = (CheckBox) cv1.findViewById(R.id.checkbox);
+            cv1.setTag(holder);
          }
          else
          {
-            holder = (SettingsCheckHolder) cv.getTag();
+            holder = (SettingsCheckHolder) cv1.getTag();
          }
 
          holder.title.setText(FUNCTION_TITLES[position]);
@@ -93,19 +94,19 @@ class AdapterSettingsFunctions extends BaseAdapter
       else
       {
          SettingsSeekHolder holder;
-         if(null == cv)
+         if(null == cv1)
          {
-            cv = inflater.inflate(R.layout.settings_seekbar, parent, false);
+            cv1 = inflater.inflate(R.layout.settings_seekbar, parent, false);
             holder = new SettingsSeekHolder();
-            holder.title = (TextView) cv.findViewById(R.id.seek_title);
-            holder.summary = (TextView) cv.findViewById(R.id.seek_summary);
-            holder.seekbar = (SeekBar) cv.findViewById(R.id.seekbar);
-            holder.read = (TextView) cv.findViewById(R.id.seek_read);
-            cv.setTag(holder);
+            holder.title = (TextView) cv1.findViewById(R.id.seek_title);
+            holder.summary = (TextView) cv1.findViewById(R.id.seek_summary);
+            holder.seekbar = (SeekBar) cv1.findViewById(R.id.seekbar);
+            holder.read = (TextView) cv1.findViewById(R.id.seek_read);
+            cv1.setTag(holder);
          }
          else
          {
-            holder = (SettingsSeekHolder) cv.getTag();
+            holder = (SettingsSeekHolder) cv1.getTag();
          }
 
          holder.title.setText(FUNCTION_TITLES[position]);
@@ -119,7 +120,7 @@ class AdapterSettingsFunctions extends BaseAdapter
          int time = checker.isEmpty() ? 3 : Util.stoi(checker);
          holder.seekbar.setProgress(index(TIMES, time));
       }
-      return cv;
+      return cv1;
    }
 
    private static

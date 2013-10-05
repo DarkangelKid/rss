@@ -36,11 +36,11 @@ class Write
          return false;
       }
 
-      path = Util.getStorage() + path;
+      String path1 = Util.getStorage() + path;
 
       if(Util.isUsingSd())
       {
-         Util.remove(path);
+         Util.remove(path1);
       }
 
       try
@@ -49,7 +49,7 @@ class Write
          try
          {
             /* Create the buffered writer. */
-            out = Util.isUsingSd() ? writer(path, false) : writer(path, Context.MODE_PRIVATE);
+            out = Util.isUsingSd() ? writer(path1, false) : writer(path1, Context.MODE_PRIVATE);
 
             for(Object item : content)
             {
@@ -90,8 +90,8 @@ class Write
       }
 
       Context context = Util.getContext();
-      path = Util.getStorage() + path;
-      String name = Util.getInternalPath(path);
+      String path1 = Util.getStorage() + path;
+      String name = Util.getInternalPath(path1);
 
       try
       {
@@ -107,7 +107,7 @@ class Write
                   !urler.contains(".JPEG") &&
                   !urler.contains(".JPG") &&
                   !urler.contains(".jpeg") ? context.openFileOutput(name, Context.MODE_PRIVATE)
-                  : new FileOutputStream(path);
+                  : new FileOutputStream(path1);
 
             byte[] data = new byte[1024];
             int count;
@@ -140,7 +140,7 @@ class Write
       catch(IOException e)
       {
          e.printStackTrace();
-         Util.remove(path);
+         Util.remove(path1);
          return false;
       }
 
@@ -158,14 +158,14 @@ class Write
          return false;
       }
 
-      path = Util.getStorage() + path;
+      String path1 = Util.getStorage() + path;
 
       try
       {
          BufferedWriter out = null;
          try
          {
-            out = Util.isUsingSd() ? writer(path, true) : writer(path, Context.MODE_APPEND);
+            out = Util.isUsingSd() ? writer(path1, true) : writer(path1, Context.MODE_APPEND);
             out.write(stringToWrite);
          }
          finally
@@ -205,8 +205,8 @@ class Write
          return false;
       }
 
-      path = Util.getStorage() + path;
-      String tempPath = path + Constants.TEMP;
+      String path1 = Util.getStorage() + path;
+      String tempPath = path1 + Constants.TEMP;
 
       String[] lines = new String[0];
       try
@@ -215,14 +215,14 @@ class Write
          try
          {
             /* Read the file to an array, if the file does not exist, return. */
-            lines = Read.file(path);
+            lines = Read.file(path1);
             if(0 == lines.length)
             {
                return false;
             }
 
             /* No backup for internal s_storage. */
-            out = Util.isUsingSd() ? writer(tempPath, false) : writer(path, Context.MODE_PRIVATE);
+            out = Util.isUsingSd() ? writer(tempPath, false) : writer(path1, Context.MODE_PRIVATE);
 
             for(String item : lines)
             {
@@ -265,11 +265,11 @@ class Write
       /* If the rename failed, delete the file and Write the original. */
       if(Util.isUsingSd())
       {
-         boolean success = Util.move(tempPath, path);
+         boolean success = Util.move(tempPath, path1);
          if(!success)
          {
-            Util.remove(path);
-            collection(path, Arrays.asList(lines));
+            Util.remove(path1);
+            collection(path1, Arrays.asList(lines));
          }
          return success;
       }
@@ -299,8 +299,8 @@ class Write
          throws FileNotFoundException, UnsupportedEncodingException
    {
       Context context = Util.getContext();
-      path = Util.getInternalPath(path);
-      FileOutputStream fileOutputStream = context.openFileOutput(path, writeMode);
+      String path1 = Util.getInternalPath(path);
+      FileOutputStream fileOutputStream = context.openFileOutput(path1, writeMode);
       return new BufferedWriter(new OutputStreamWriter(fileOutputStream, "UTF8"));
    }
 }

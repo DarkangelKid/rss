@@ -85,6 +85,7 @@ class AdapterCard extends BaseAdapter
    public
    View getView(int position, View cv, ViewGroup parent)
    {
+      View cv1 = cv;
       int viewType = getItemViewType(position);
 
       if(m_firstGetItem)
@@ -103,21 +104,21 @@ class AdapterCard extends BaseAdapter
       if(0 == viewType)
       {
          FullHolder holder;
-         if(null == cv)
+         if(null == cv1)
          {
-            cv = inflater.inflate(R.layout.card_full, parent, false);
+            cv1 = inflater.inflate(R.layout.card_full, parent, false);
             holder = new FullHolder();
-            holder.m_title = (TextView) cv.findViewById(R.id.title);
-            holder.m_url = (TextView) cv.findViewById(R.id.url);
-            holder.m_des = (TextView) cv.findViewById(R.id.description);
-            holder.m_imageView = (ImageView) cv.findViewById(R.id.image);
-            cv.setOnClickListener(new WebviewMode());
-            cv.setOnLongClickListener(new OnCardLongClick());
-            cv.setTag(holder);
+            holder.m_title = (TextView) cv1.findViewById(R.id.title);
+            holder.m_url = (TextView) cv1.findViewById(R.id.url);
+            holder.m_des = (TextView) cv1.findViewById(R.id.description);
+            holder.m_imageView = (ImageView) cv1.findViewById(R.id.image);
+            cv1.setOnClickListener(new WebviewMode());
+            cv1.setOnLongClickListener(new OnCardLongClick());
+            cv1.setTag(holder);
          }
          else
          {
-            holder = (FullHolder) cv.getTag();
+            holder = (FullHolder) cv1.getTag();
          }
 
          displayImage(holder.m_imageView, position);
@@ -130,20 +131,20 @@ class AdapterCard extends BaseAdapter
       else if(1 == viewType)
       {
          ImgHolder holder;
-         if(null == cv)
+         if(null == cv1)
          {
-            cv = inflater.inflate(R.layout.card_no_des_img, parent, false);
+            cv1 = inflater.inflate(R.layout.card_no_des_img, parent, false);
             holder = new ImgHolder();
-            holder.title = (TextView) cv.findViewById(R.id.title);
-            holder.url = (TextView) cv.findViewById(R.id.url);
-            holder.image = (ImageView) cv.findViewById(R.id.image);
-            cv.setOnClickListener(new WebviewMode());
-            cv.setOnLongClickListener(new OnCardLongClick());
-            cv.setTag(holder);
+            holder.title = (TextView) cv1.findViewById(R.id.title);
+            holder.url = (TextView) cv1.findViewById(R.id.url);
+            holder.image = (ImageView) cv1.findViewById(R.id.image);
+            cv1.setOnClickListener(new WebviewMode());
+            cv1.setOnLongClickListener(new OnCardLongClick());
+            cv1.setTag(holder);
          }
          else
          {
-            holder = (ImgHolder) cv.getTag();
+            holder = (ImgHolder) cv1.getTag();
          }
 
          displayImage(holder.image, position);
@@ -155,20 +156,20 @@ class AdapterCard extends BaseAdapter
       else if(2 == viewType)
       {
          DesHolder holder;
-         if(null == cv)
+         if(null == cv1)
          {
-            cv = inflater.inflate(R.layout.card_des_no_img, parent, false);
+            cv1 = inflater.inflate(R.layout.card_des_no_img, parent, false);
             holder = new DesHolder();
-            holder.title = (TextView) cv.findViewById(R.id.title);
-            holder.url = (TextView) cv.findViewById(R.id.url);
-            holder.des = (TextView) cv.findViewById(R.id.description);
-            cv.setOnClickListener(new WebviewMode());
-            cv.setOnLongClickListener(new OnCardLongClick());
-            cv.setTag(holder);
+            holder.title = (TextView) cv1.findViewById(R.id.title);
+            holder.url = (TextView) cv1.findViewById(R.id.url);
+            holder.des = (TextView) cv1.findViewById(R.id.description);
+            cv1.setOnClickListener(new WebviewMode());
+            cv1.setOnLongClickListener(new OnCardLongClick());
+            cv1.setTag(holder);
          }
          else
          {
-            holder = (DesHolder) cv.getTag();
+            holder = (DesHolder) cv1.getTag();
          }
 
          holder.title.setText(title);
@@ -179,19 +180,19 @@ class AdapterCard extends BaseAdapter
       else if(3 == viewType)
       {
          BlankHolder holder;
-         if(null == cv)
+         if(null == cv1)
          {
-            cv = inflater.inflate(R.layout.card_no_des_no_img, parent, false);
+            cv1 = inflater.inflate(R.layout.card_no_des_no_img, parent, false);
             holder = new BlankHolder();
-            holder.title = (TextView) cv.findViewById(R.id.title);
-            holder.url = (TextView) cv.findViewById(R.id.url);
-            cv.setOnClickListener(new WebviewMode());
-            cv.setOnLongClickListener(new OnCardLongClick());
-            cv.setTag(holder);
+            holder.title = (TextView) cv1.findViewById(R.id.title);
+            holder.url = (TextView) cv1.findViewById(R.id.url);
+            cv1.setOnClickListener(new WebviewMode());
+            cv1.setOnLongClickListener(new OnCardLongClick());
+            cv1.setTag(holder);
          }
          else
          {
-            holder = (BlankHolder) cv.getTag();
+            holder = (BlankHolder) cv1.getTag();
          }
 
          holder.title.setText(title);
@@ -204,7 +205,7 @@ class AdapterCard extends BaseAdapter
          Util.SetHolder.READ_ITEMS.add(m_items[position - 1].url);
       }
 
-      return cv;
+      return cv1;
    }
 
    private

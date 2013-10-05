@@ -54,6 +54,7 @@ class AdapterSettingsUi extends BaseAdapter
    public
    View getView(int position, View cv, ViewGroup parent)
    {
+      View cv1 = cv;
       int viewType = getItemViewType(position);
       String title = INTERFACE_TITLES[position];
       String summary = INTERFACE_SUMMARIES[position];
@@ -64,10 +65,10 @@ class AdapterSettingsUi extends BaseAdapter
       /* This type is a heading. */
       if(0 == viewType)
       {
-         if(null == cv)
+         if(null == cv1)
          {
-            cv = inf.inflate(R.layout.settings_heading, parent, false);
-            settings_heading = (TextView) cv.findViewById(R.id.settings_heading);
+            cv1 = inf.inflate(R.layout.settings_heading, parent, false);
+            settings_heading = (TextView) cv1.findViewById(R.id.settings_heading);
          }
 
          settings_heading.setText(title);
@@ -77,22 +78,22 @@ class AdapterSettingsUi extends BaseAdapter
       else if(1 == viewType)
       {
          SettingsColorHolder holder;
-         if(null == cv)
+         if(null == cv1)
          {
-            cv = inf.inflate(R.layout.settings_holocolour_select, parent, false);
+            cv1 = inf.inflate(R.layout.settings_holocolour_select, parent, false);
             holder = new SettingsColorHolder();
-            holder.title = (TextView) cv.findViewById(R.id.colour_title);
-            holder.summary = (TextView) cv.findViewById(R.id.colour_summary);
-            holder.blue = (ImageView) cv.findViewById(R.id.blue_image);
-            holder.purple = (ImageView) cv.findViewById(R.id.purple_image);
-            holder.green = (ImageView) cv.findViewById(R.id.green_image);
-            holder.yellow = (ImageView) cv.findViewById(R.id.yellow_image);
-            holder.red = (ImageView) cv.findViewById(R.id.red_image);
-            cv.setTag(holder);
+            holder.title = (TextView) cv1.findViewById(R.id.colour_title);
+            holder.summary = (TextView) cv1.findViewById(R.id.colour_summary);
+            holder.blue = (ImageView) cv1.findViewById(R.id.blue_image);
+            holder.purple = (ImageView) cv1.findViewById(R.id.purple_image);
+            holder.green = (ImageView) cv1.findViewById(R.id.green_image);
+            holder.yellow = (ImageView) cv1.findViewById(R.id.yellow_image);
+            holder.red = (ImageView) cv1.findViewById(R.id.red_image);
+            cv1.setTag(holder);
          }
          else
          {
-            holder = (SettingsColorHolder) cv.getTag();
+            holder = (SettingsColorHolder) cv1.getTag();
          }
 
          holder.title.setText(title);
@@ -123,18 +124,18 @@ class AdapterSettingsUi extends BaseAdapter
       else if(2 == viewType)
       {
          AdapterSettingsFunctions.SettingsCheckHolder holder;
-         if(null == cv)
+         if(null == cv1)
          {
-            cv = inf.inflate(R.layout.settings_checkbox, parent, false);
+            cv1 = inf.inflate(R.layout.settings_checkbox, parent, false);
             holder = new AdapterSettingsFunctions.SettingsCheckHolder();
-            holder.title = (TextView) cv.findViewById(R.id.check_title);
-            holder.summary = (TextView) cv.findViewById(R.id.check_summary);
-            holder.checkbox = (CheckBox) cv.findViewById(R.id.checkbox);
-            cv.setTag(holder);
+            holder.title = (TextView) cv1.findViewById(R.id.check_title);
+            holder.summary = (TextView) cv1.findViewById(R.id.check_summary);
+            holder.checkbox = (CheckBox) cv1.findViewById(R.id.checkbox);
+            cv1.setTag(holder);
          }
          else
          {
-            holder = (AdapterSettingsFunctions.SettingsCheckHolder) cv.getTag();
+            holder = (AdapterSettingsFunctions.SettingsCheckHolder) cv1.getTag();
          }
 
          holder.title.setText(title);
@@ -144,7 +145,7 @@ class AdapterSettingsUi extends BaseAdapter
          /* Load the saved boolean value and set the box as checked if true. */
          holder.checkbox.setChecked(Util.strbol(Read.setting(settingPath)));
       }
-      return cv;
+      return cv1;
    }
 
    @Override
@@ -158,7 +159,7 @@ class AdapterSettingsUi extends BaseAdapter
    public
    int getItemViewType(int position)
    {
-      return position > 2 ? 2 : position;
+      return 2 < position ? 2 : position;
    }
 
    @Override

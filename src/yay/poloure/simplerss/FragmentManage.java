@@ -32,8 +32,8 @@ class FragmentManage extends Fragment
       Constants.PAGER_TAB_STRIPS[1] = new PagerTabStrip(Util.getContext());
 
       ViewPager.LayoutParams layoutParams = new ViewPager.LayoutParams();
-      layoutParams.height = ViewPager.LayoutParams.WRAP_CONTENT;
-      layoutParams.width = ViewPager.LayoutParams.MATCH_PARENT;
+      layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+      layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
       layoutParams.gravity = Gravity.TOP;
 
       pager.addView(Constants.PAGER_TAB_STRIPS[1], layoutParams);

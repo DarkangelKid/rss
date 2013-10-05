@@ -95,19 +95,20 @@ class Read
    static
    String[] file(String path)
    {
+      String path1 = path;
       if(Util.isUnmounted())
       {
          return Util.EMPTY_STRING_ARRAY;
       }
 
       String storage = Util.getStorage();
-      if(!path.contains(storage))
+      if(!path1.contains(storage))
       {
-         path = Util.getStorage() + path;
+         path1 = Util.getStorage() + path1;
       }
 
       /* If the path is not a count file, get the number of lines. */
-      int count = path.contains(Constants.COUNT) ? 1 : count(path);
+      int count = path1.contains(Constants.COUNT) ? 1 : count(path1);
 
       /* If the file is empty, return a zero length array. */
       if(0 == count)
@@ -124,7 +125,7 @@ class Read
          BufferedReader in = null;
          try
          {
-            in = Util.isUsingSd() ? reader(path) : reader(path, UTF8);
+            in = Util.isUsingSd() ? reader(path1) : reader(path1, UTF8);
 
             int linesLength = lines.length;
             for(int i = 0; i < linesLength; i++)
@@ -175,18 +176,19 @@ class Read
    static
    int count(String path)
    {
+      String path1 = path;
       if(Util.isUnmounted())
       {
          return 0;
       }
 
       String storage = Util.getStorage();
-      if(!path.contains(storage))
+      if(!path1.contains(storage))
       {
-         path = Util.getStorage() + path;
+         path1 = Util.getStorage() + path1;
       }
 
-      String[] count = file(path + Constants.COUNT);
+      String[] count = file(path1 + Constants.COUNT);
       if(0 != count.length)
       {
          return Util.stoi(count[0]);
@@ -198,7 +200,7 @@ class Read
          BufferedReader in = null;
          try
          {
-            in = Util.isUsingSd() ? reader(path) : reader(path, UTF8);
+            in = Util.isUsingSd() ? reader(path1) : reader(path1, UTF8);
 
             while(null != in.readLine())
             {
@@ -241,8 +243,8 @@ class Read
          throws FileNotFoundException, UnsupportedEncodingException
    {
       Context context = Util.getContext();
-      path = Util.getInternalPath(path);
-      FileInputStream fis = context.openFileInput(path);
+      String path1 = Util.getInternalPath(path);
+      FileInputStream fis = context.openFileInput(path1);
       return new BufferedReader(new InputStreamReader(fis, fileEncoding));
    }
 }
