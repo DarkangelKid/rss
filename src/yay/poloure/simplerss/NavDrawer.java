@@ -1,6 +1,5 @@
 package yay.poloure.simplerss;
 
-import android.app.Activity;
 import android.os.AsyncTask;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
@@ -92,7 +91,9 @@ class NavDrawer
       {
          /* Change it back to s_currentTitle. */
          if(NAVIGATION.equals(FeedsActivity.s_actionBar.getTitle()))
+         {
             FeedsActivity.s_actionBar.setTitle(s_currentTitle);
+         }
       }
 
       @Override
@@ -111,19 +112,12 @@ class NavDrawer
       void showFragment(Fragment fragment)
       {
          FragmentTransaction tran = FeedsActivity.s_fragmentManager.beginTransaction();
-         int fragmentCount = NAV_TITLES.length;
-         for(int i = 0; i < fragmentCount; i++)
+         for(String NAV_TITLE : NAV_TITLES)
          {
-            Fragment frag = FeedsActivity.getFragmentByTag(NAV_TITLES[i]);
-            if(!frag.isHidden())
+            Fragment frag = FeedsActivity.getFragmentByTag(NAV_TITLE);
+            if(null != frag && !frag.equals(fragment) && !frag.isHidden())
             {
-               tran.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                     .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out,
-                           android.R.anim.fade_in, android.R.anim.fade_out)
-                     .hide(frag)
-                     .show(fragment)
-                     .commit();
-               return;
+               tran.hide(frag);
             }
          }
          tran.show(fragment).commit();

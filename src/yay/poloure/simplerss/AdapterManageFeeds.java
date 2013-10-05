@@ -65,8 +65,6 @@ class AdapterManageFeeds extends BaseAdapter
       holder.m_title.setText(s_titleArray[position]);
       holder.m_info.setText(s_infoArray[position]);
 
-      Write.log(view.toString() + "Hey");
-
       return view;
    }
 

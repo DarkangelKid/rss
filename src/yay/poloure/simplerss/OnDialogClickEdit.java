@@ -11,7 +11,6 @@ class OnDialogClickEdit implements DialogInterface.OnClickListener
    private AdapterView<SpinnerAdapter> m_tag;
    private AlertDialog                 m_editFeedDialog;
    private String                      m_title;
-   private int                         m_position;
 
    public
    OnDialogClickEdit(View editRssDialog, AdapterView<SpinnerAdapter> spinnerTag,
@@ -21,7 +20,6 @@ class OnDialogClickEdit implements DialogInterface.OnClickListener
       m_tag = spinnerTag;
       m_editFeedDialog = editFeedDialog;
       m_title = title;
-      m_position = position;
    }
 
    @Override
@@ -33,9 +31,13 @@ class OnDialogClickEdit implements DialogInterface.OnClickListener
       String newName = Util.getText(m_editRssDialog, R.id.name_edit);
       String spinnerTag = m_tag.getSelectedItem().toString();
       if(editTag.isEmpty())
+      {
          editTag = spinnerTag.toLowerCase(Constants.LOCALE);
+      }
       if(editTag.isEmpty())
+      {
          editTag = Constants.UNSORTED_TAG;
+      }
 
       Update.executeFeedCheck(m_editFeedDialog, editTag, newName, Constants.EDIT, m_title, newUrl);
    }

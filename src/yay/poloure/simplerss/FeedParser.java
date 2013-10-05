@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -73,6 +74,10 @@ class FeedParser
          reader = Util.isUsingSd() ? Read.reader(storeFile) : Read.reader(storeFile, Read.UTF8);
       }
       catch(FileNotFoundException e)
+      {
+         e.printStackTrace();
+      }
+      catch(UnsupportedEncodingException e)
       {
          e.printStackTrace();
       }

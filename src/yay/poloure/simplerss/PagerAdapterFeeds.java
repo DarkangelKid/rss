@@ -31,4 +31,13 @@ class PagerAdapterFeeds extends FragmentPagerAdapter
    {
       return FeedsActivity.s_currentTags[position];
    }
+
+   /*TODO @Override
+   public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+   }
+
+   @Override
+   public void onPageSelected(int position) {
+      mActionBar.setSelectedNavigationItem(position);
+   }*/
 }

@@ -133,7 +133,7 @@ class AdapterManagerTags extends BaseAdapter
    }
 
    private int old_view;
-   private              int[] position      = new int[2];
+   private              int[] m_position    = new int[2];
    private static final int   SCREEN_HEIGHT = (int) Util.getContext()
          .getResources()
          .getDisplayMetrics().heightPixels;
@@ -204,13 +204,13 @@ class AdapterManagerTags extends BaseAdapter
             rearrangeTags(old_title, newTitle);
             notifyDataSetChanged();
 
-            v.getLocationOnScreen(position);
+            v.getLocationOnScreen(m_position);
 
-            if(position[1] > 4.0 / 5.0 * SCREEN_HEIGHT)
+            if(m_position[1] > 4.0 / 5.0 * SCREEN_HEIGHT)
             {
                listview.smoothScrollBy(v.getHeight(), 400);
             }
-            else if(position[1] < 1.0 / 5.0 * SCREEN_HEIGHT)
+            else if(m_position[1] < 1.0 / 5.0 * SCREEN_HEIGHT)
             {
                listview.smoothScrollBy((int) (-1.0 * v.getHeight()), 400);
             }

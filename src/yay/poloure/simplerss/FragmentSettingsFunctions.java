@@ -8,6 +8,13 @@ import android.view.ViewGroup;
 
 class FragmentSettingsFunctions extends ListFragment
 {
+   @Override
+   public
+   void onCreate(Bundle savedInstanceState)
+   {
+      super.onCreate(savedInstanceState);
+      setHasOptionsMenu(false);
+   }
 
    @Override
    public

@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Environment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.ListFragment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.PagerTabStrip;
 import android.support.v4.view.ViewPager;
@@ -90,9 +89,8 @@ class Util
       if(null != FeedsActivity.s_ViewPager)
       {
          FeedsActivity.s_ViewPager.getAdapter().notifyDataSetChanged();
-         /* Does not run on first Update. */
-         Update.navigation();
       }
+      Update.navigation();
    }
 
    static
@@ -134,7 +132,7 @@ class Util
        * May not be true anymore.*/
       if(update)
       {
-         ListView lv = getListView(page);
+         ListView lv = getFeedListView(page);
          if(null == lv)
          {
             return -1;
@@ -178,7 +176,7 @@ class Util
    static
    AdapterCard getCardAdapter(int page)
    {
-      ListView list = getListView(page);
+      ListView list = getFeedListView(page);
       if(null == list)
       {
          return null;
@@ -189,7 +187,7 @@ class Util
 
    /* This is the second one. */
    private static
-   ListView getListView(int page)
+   ListView getFeedListView(int page)
    {
       FragmentManager fman = FeedsActivity.s_fragmentManager;
       ViewPager viewpager = FeedsActivity.s_ViewPager;
@@ -198,8 +196,8 @@ class Util
          return null;
       }
 
-      String tag = "android:switcher:" + viewpager.getId() + ':' + page;
-      return ((ListFragment) fman.findFragmentByTag(tag)).getListView();
+      String tag = String.format(Constants.FRAGMENT_TAG, viewpager.getId(), page);
+      return ((FragmentCard) fman.findFragmentByTag(tag)).getListView();
    }
 
    /* For feed files. */
@@ -407,7 +405,7 @@ class Util
       }
    }
 
-   /* Changes the ManageRefresh menu item to an animation if m_mode = true. */
+   /* Changes the ManageFeedsRefresh menu item to an animation if m_mode = true. */
    static
    void setRefreshingIcon(boolean mode)
    {
@@ -416,7 +414,7 @@ class Util
          return;
       }
 
-      /* Find the menu item by ID caled ManageRefresh. */
+      /* Find the menu item by ID called ManageFeedsRefresh. */
       MenuItem item = FeedsActivity.s_optionsMenu.findItem(R.id.refresh);
       if(null == item)
       {

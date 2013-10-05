@@ -60,7 +60,7 @@ class FeedDialog
       String      m_title;
       boolean     m_feedExists;
       String      name;
-      private boolean m_existingTag = false;
+      private boolean m_existingTag;
 
 
       CheckFeed(AlertDialog dialog, String tag, String feedName, String mode, String currentTitle)
@@ -97,7 +97,10 @@ class FeedDialog
 
          /* Check to see if the tag already exists. */
          String[] currentTags = Read.file(Constants.TAG_LIST);
-         if(Util.index(currentTags, m_tag) != -1) m_existingTag = true;
+         if(-1 != Util.index(currentTags, m_tag))
+         {
+            m_existingTag = true;
+         }
 
          String[] checkList = url[0].contains("http") ? new String[]{url[0]} : new String[]{
                "http://" + url[0], "https://" + url[0]
@@ -239,9 +242,9 @@ class FeedDialog
                String.format(Constants.LOCALE, Constants.FEED_INFO, newUrl, newTag,
                      Read.count(Util.getPath(newFeed, Constants.CONTENT)) - 1));*/
 
-         /// To ManageRefresh the counts and the order of the tags.
+         /// To ManageFeedsRefresh the counts and the order of the tags.
          Util.updateTags();
-         Update.manageTags();
+         // TODO Update.manageTags();
       }
 
       static

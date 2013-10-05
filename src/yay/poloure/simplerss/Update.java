@@ -2,6 +2,8 @@ package yay.poloure.simplerss;
 
 import android.app.AlertDialog;
 import android.os.AsyncTask;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 
 class Update
 {
@@ -20,28 +22,30 @@ class Update
    }
 
    public static
-   void manageFeeds()
-   {/*
-      if(Constants.HONEYCOMB)
-      {
-         new FragmentManageFeeds.ManageRefresh().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-      }
-      else
-      {
-         new FragmentManageFeeds.ManageRefresh().execute();
-      }*/
-   }
-
-   public static
-   void manageTags()
+   void manageFeeds(ListView listView, ListAdapter listAdapter)
    {
       if(Constants.HONEYCOMB)
       {
-         new FragmentManageTags.RefreshTags().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+         new AsyncManageFeedsRefresh(listView, listAdapter).executeOnExecutor(
+               AsyncTask.THREAD_POOL_EXECUTOR);
       }
       else
       {
-         new FragmentManageTags.RefreshTags().execute();
+         new AsyncManageFeedsRefresh(listView, listAdapter).execute();
+      }
+   }
+
+   public static
+   void manageTags(ListView listView, ListAdapter listAdapter)
+   {
+      if(Constants.HONEYCOMB)
+      {
+         new AsyncManageTagsRefresh(listView, listAdapter).executeOnExecutor(
+               AsyncTask.THREAD_POOL_EXECUTOR);
+      }
+      else
+      {
+         new AsyncManageTagsRefresh(listView, listAdapter).execute();
       }
    }
 
@@ -59,7 +63,8 @@ class Update
    }
 
    public static
-   void executeFeedCheck(AlertDialog dlg, String ntag, String fname, String mode, String ctitle, String url)
+   void executeFeedCheck(AlertDialog dlg, String ntag, String fname, String mode, String ctitle,
+         String url)
    {
       if(Constants.HONEYCOMB)
       {

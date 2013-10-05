@@ -57,10 +57,10 @@ class FragmentManageFilters extends ListFragment
    {
       super.onActivityCreated(savedInstanceState);
 
-      ListView listview = getListView();
       AdapterManageFilters adapter = new AdapterManageFilters();
-
       setListAdapter(adapter);
+
+      ListView listview = getListView();
 
       AdapterManageFilters.setTitles(Read.file(Constants.FILTER_LIST));
 

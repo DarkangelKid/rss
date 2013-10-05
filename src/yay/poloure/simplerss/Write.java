@@ -10,6 +10,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 
@@ -64,6 +65,10 @@ class Write
          }
       }
       catch(FileNotFoundException e)
+      {
+         e.printStackTrace();
+      }
+      catch(UnsupportedEncodingException e)
       {
          e.printStackTrace();
       }
@@ -128,6 +133,10 @@ class Write
          e.printStackTrace();
          return false;
       }
+      catch(MalformedURLException e)
+      {
+         e.printStackTrace();
+      }
       catch(IOException e)
       {
          e.printStackTrace();
@@ -172,6 +181,11 @@ class Write
          e.printStackTrace();
          return false;
       }
+      catch(UnsupportedEncodingException e)
+      {
+         e.printStackTrace();
+         return false;
+      }
       catch(IOException e)
       {
          e.printStackTrace();
@@ -194,7 +208,7 @@ class Write
       path = Util.getStorage() + path;
       String tempPath = path + Constants.TEMP;
 
-      String[] lines;
+      String[] lines = new String[0];
       try
       {
          BufferedWriter out = null;
@@ -229,6 +243,11 @@ class Write
       }
       /* If writing to the temp file fails, delete the temp file and return. */
       catch(FileNotFoundException e)
+      {
+         e.printStackTrace();
+         return false;
+      }
+      catch(UnsupportedEncodingException e)
       {
          e.printStackTrace();
          return false;

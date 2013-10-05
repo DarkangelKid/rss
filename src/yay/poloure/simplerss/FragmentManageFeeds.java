@@ -3,20 +3,16 @@ package yay.poloure.simplerss;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.SpinnerAdapter;
 
 import java.io.File;
@@ -29,7 +25,6 @@ class FragmentManageFeeds extends ListFragment
    void onCreate(Bundle savedInstanceState)
    {
       super.onCreate(savedInstanceState);
-      setListAdapter(new AdapterManageFeeds());
    }
 
    @Override
@@ -42,23 +37,16 @@ class FragmentManageFeeds extends ListFragment
       }
       if(Util.getString(R.string.add_feed).equals(item.getTitle()))
       {
-         //FeedDialog.showAddDialog(FeedsActivity.s_currentTags);
-         new ManageRefresh().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+         FeedDialog.showAddDialog(FeedsActivity.s_currentTags);
          return true;
       }
       return super.onOptionsItemSelected(item);
    }
 
-   /* onListItemClick */
-
    @Override
    public
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
-      /*feedList.setOnItemClickListener(new FeedClick());
-      feedList.setOnItemLongClickListener(new FeedItemLongClick(adapterManageFeeds));*/
-
-      // Update.manageFeeds();
       return inflater.inflate(R.layout.listview_cards, container, false);
    }
 
@@ -67,64 +55,11 @@ class FragmentManageFeeds extends ListFragment
    void onActivityCreated(Bundle savedInstanceState)
    {
       super.onActivityCreated(savedInstanceState);
-      new ManageRefresh().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-   }
-
-   class ManageRefresh extends AsyncTask<Void, String[], Void>
-   {
-      final Animation          fade_in  = AnimationUtils.loadAnimation(Util.getContext(),
-            android.R.anim.fade_in);
-
-      ManageRefresh()
-      {
-         if(0 == getListAdapter().getCount())
-         {
-           /* feedList.setVisibility(View.INVISIBLE);*/
-         }
-      }
-
-      @Override
-      protected
-      Void doInBackground(Void... hey)
-      {
-         if(null != getListAdapter())
-         {
-            /* Read the ALL_TAG m_imageViewTag file for names, urls, and tags. */
-            String[][] content = Read.csv();
-            int size = content[0].length;
-            String[] infoArray = new String[size];
-
-            for(int i = 0; i < size; i++)
-            {
-               /* Form the path to the feed_content file. */
-               String path = Util.getPath(content[0][i], Constants.CONTENT);
-
-               /* Build the info string. */
-               infoArray[i] = content[1][i] + Constants.NL + content[2][i] + " • " +
-                     Read.count(path) +
-                     " items";
-            }
-            publishProgress(content[0], infoArray);
-         }
-         return null;
-      }
-
-      @Override
-      protected
-      void onPostExecute(Void result)
-      {
-         Write.log("Setting visibility.");
-         getListView().setAnimation(fade_in);
-         getListView().setVisibility(View.VISIBLE);
-      }
-
-      @Override
-      protected
-      void onProgressUpdate(String[]... values)
-      {
-         ((AdapterManageFeeds) getListAdapter()).setArrays(values[0], values[1]);
-         ((AdapterManageFeeds) getListAdapter()).notifyDataSetChanged();
-      }
+      setListAdapter(new AdapterManageFeeds());
+      getListView().setOnItemClickListener(new FeedClick());
+      getListView().setOnItemLongClickListener(
+            new FeedItemLongClick((AdapterManageFeeds) getListAdapter()));
+      Update.manageFeeds(getListView(), getListAdapter());
    }
 
    static
@@ -179,12 +114,12 @@ class FragmentManageFeeds extends ListFragment
    private static
    class FeedDeleteClick implements DialogInterface.OnClickListener
    {
-      private final AdapterManageFeeds adpt;
+      private final AdapterManageFeeds m_adapter;
 
       public
       FeedDeleteClick(AdapterManageFeeds adpt)
       {
-         this.adpt = adpt;
+         m_adapter = adpt;
       }
 
       static
@@ -197,9 +132,9 @@ class FragmentManageFeeds extends ListFragment
          Write.removeLine(Constants.INDEX, feed, true);
 
          Util.updateTags();
-         removeItem(pos);
+         /* TODO removeItem(pos);
 
-         Update.manageTags();
+         Update.manageTags();*/
       }
 
       static
@@ -216,7 +151,7 @@ class FragmentManageFeeds extends ListFragment
       public
       void onClick(DialogInterface dialog, int position)
       {
-         deleteFeed(adpt.getItem(position), position);
+         deleteFeed(m_adapter.getItem(position), position);
       }
    }
 
@@ -246,8 +181,8 @@ class FragmentManageFeeds extends ListFragment
 
 /* Refresh pages and Update tags and stuff. */
          Util.updateTags();
-         Update.manageFeeds();
-         Update.manageTags();
+         // TODO Update.manageFeeds();
+         // TODO Update.manageTags();
       }
    }
 

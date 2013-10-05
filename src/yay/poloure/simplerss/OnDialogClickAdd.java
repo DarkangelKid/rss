@@ -41,7 +41,9 @@ class OnDialogClickAdd implements DialogInterface.OnClickListener
          }
       }
       else
+      {
          tag = tag.toLowerCase(Constants.LOCALE);
+      }
 
       Update.executeFeedCheck(m_addFeedDialog, tag, name, Constants.ADD, "", url);
    }

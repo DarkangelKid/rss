@@ -4,12 +4,14 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.PagerTabStrip;
 import android.support.v4.view.ViewPager;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -19,7 +21,6 @@ import android.view.ViewGroup;
 
 class FragmentFeeds extends Fragment
 {
-
    private static
    boolean isServiceRunning(Activity activity)
    {
@@ -65,18 +66,29 @@ class FragmentFeeds extends Fragment
    public
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
-      View v = inflater.inflate(R.layout.viewpager, container, false);
+      ViewPager pager = new ViewPager(Util.getContext());
+      Constants.PAGER_TAB_STRIPS[0] = new PagerTabStrip(Util.getContext());
 
-      FeedsActivity.s_ViewPager = (ViewPager) v.findViewById(R.id.pager);
+      ViewPager.LayoutParams layoutParams = new ViewPager.LayoutParams();
+      layoutParams.height = ViewPager.LayoutParams.WRAP_CONTENT;
+      layoutParams.width = ViewPager.LayoutParams.MATCH_PARENT;
+      layoutParams.gravity = Gravity.TOP;
+
+      FeedsActivity.s_ViewPager = pager;
+      FeedsActivity.s_ViewPager.addView(Constants.PAGER_TAB_STRIPS[0], layoutParams);
       FeedsActivity.s_ViewPager.setAdapter(new PagerAdapterFeeds(FeedsActivity.s_fragmentManager));
       FeedsActivity.s_ViewPager.setOffscreenPageLimit(128);
       FeedsActivity.s_ViewPager.setOnPageChangeListener(new PageChange());
+      FeedsActivity.s_ViewPager.setId(0x1000);
 
-      Constants.PAGER_TAB_STRIPS[0] = (PagerTabStrip) v.findViewById(R.id.pager_tab_strip);
       Constants.PAGER_TAB_STRIPS[0].setDrawFullUnderline(true);
+      Constants.PAGER_TAB_STRIPS[0].setGravity(Gravity.START);
+      Constants.PAGER_TAB_STRIPS[0].setPadding(0, AdapterCard.EIGHT / 2, 0, AdapterCard.EIGHT / 2);
+      Constants.PAGER_TAB_STRIPS[0].setTextColor(Color.WHITE);
+      Constants.PAGER_TAB_STRIPS[0].setBackgroundColor(Color.parseColor("#404040"));
       Util.setStripColor(Constants.PAGER_TAB_STRIPS[0]);
 
-      return v;
+      return pager;
    }
 
    @Override
@@ -151,7 +163,7 @@ class FragmentFeeds extends Fragment
    static
    class OnFinishService extends Handler
    {
-      /* Use this after content has been updated and you need to ManageRefresh */
+      /* Use this after content has been updated and you need to ManageFeedsRefresh */
       private static
       void refreshPages(int page)
       {

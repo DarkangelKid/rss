@@ -158,14 +158,14 @@ class AdapterSettingsUi extends BaseAdapter
    public
    int getItemViewType(int position)
    {
-      return position;
+      return position > 2 ? 2 : position;
    }
 
    @Override
    public
    int getViewTypeCount()
    {
-      return 4;
+      return 3;
    }
 
    static

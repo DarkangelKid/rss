@@ -1,8 +1,6 @@
 package yay.poloure.simplerss;
 
-import android.app.Activity;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.ActionMode;
@@ -11,8 +9,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -30,7 +26,6 @@ class FragmentManageTags extends ListFragment
    void onCreate(Bundle savedInstanceState)
    {
       super.onCreate(savedInstanceState);
-      Write.log("ManageTagFragment created.");
       setHasOptionsMenu(true);
    }
 
@@ -47,9 +42,6 @@ class FragmentManageTags extends ListFragment
       listview.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
       listview.setItemsCanFocus(false);
 
-      Write.log("Calling update asynctask.");
-      Update.manageTags();
-
       if(Constants.HONEYCOMB)
       {
          s_actionmode_callback = new ActionCallback(listview);
@@ -61,6 +53,7 @@ class FragmentManageTags extends ListFragment
 
       listview.setOnItemLongClickListener(new ContextLongClick(listview));
       listview.setOnItemClickListener(new ContextClick(listview));
+      Update.manageTags(getListView(), getListAdapter());
    }
 
    @Override
@@ -83,120 +76,18 @@ class FragmentManageTags extends ListFragment
    public
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
-      Write.log("OnCreateView called for manageTags");
       return inflater.inflate(R.layout.listview_cards, container, false);
-   }
-
-   static
-   class RefreshTags extends AsyncTask<Void, String[], Void>
-   {
-      final Animation          animFadeIn = AnimationUtils.loadAnimation(Util.getContext(),
-            android.R.anim.fade_in);
-      //final ListView           listview   = PagerAdapterManage.MANAGE_FRAGMENTS[0].getListView();
-      /*final AdapterManagerTags adapter
-                                          = (AdapterManagerTags) PagerAdapterManage
-            .MANAGE_FRAGMENTS[0]
-            .getListAdapter();*/
-
-      RefreshTags()
-      {
-         //if(0 == adapter.getCount())
-         {
-           // listview.setVisibility(View.INVISIBLE);
-         }
-      }
-
-      static
-      void setArrays(String[] tags, String... infos)
-      {
-         AdapterManagerTags.s_tagArray = tags;
-         AdapterManagerTags.s_infoArray = infos;
-      }
-
-      static
-      String[][] getInfoArrays(String... ctags)
-      {
-         Write.log("Making info array.");
-         int size = ctags.length;
-         String[] tagArray = new String[size];
-         String[] infoArray = new String[size];
-         StringBuilder info = new StringBuilder(40);
-
-         int total;
-
-         for(int i = 0; i < size; i++)
-         {
-            info.setLength(0);
-            tagArray[i] = ctags[i];
-            String[] content = Read.csv()[0];
-            if(0 == i)
-            {
-               /* Not sure about the images string. */
-               info = 1 == size ? info.append(" images") : info.append(size).append(" tags");
-            }
-            else
-            {
-               int number = 3 > content.length ? content.length : 3;
-
-               for(int j = 0; j < number - 1; j++)
-               {
-                  info.append(content[j]).append(", ");
-               }
-
-               if(3 < content.length)
-               {
-                  info.append("...");
-               }
-               else if(0 < number)
-               {
-                  info.append(content[number - 1]);
-               }
-            }
-            infoArray[i] = content.length + " feeds • " + info;
-         }
-         /* 0 is meant to be total. */
-         infoArray[0] = 0 + " items • " + infoArray[0];
-         return new String[][]{infoArray, tagArray};
-      }
-
-      @Override
-      protected
-      Void doInBackground(Void... nothing)
-      {
-         String[][] content = getInfoArrays(FeedsActivity.s_currentTags);
-         publishProgress(content[1], content[0]);
-         return null;
-      }
-
-      @Override
-      protected
-      void onPostExecute(Void result)
-      {
-         //listview.setAnimation(animFadeIn);
-         //listview.setVisibility(View.VISIBLE);
-      }
-
-      @Override
-      protected
-      void onProgressUpdate(String[][] values)
-      {
-         //if(null != adapter)
-         {
-            //setArrays(values[0], values[1]);
-            //adapter.notifyDataSetChanged();
-         }
-      }
    }
 
    private static
    class ContextLongClick implements OnItemLongClickListener
    {
-      private final ListView listview;
+      private final ListView m_listview;
 
       public
       ContextLongClick(ListView listview)
       {
-         this.listview = listview;
+         m_listview = listview;
       }
 
       @Override
@@ -205,14 +96,14 @@ class FragmentManageTags extends ListFragment
       {
          if(0 == pos)
          {
-            listview.setItemChecked(0, false);
+            m_listview.setItemChecked(0, false);
             return false;
          }
-         view = listview.getChildAt(pos);
+         view = m_listview.getChildAt(pos);
 
-         if(!listview.isItemChecked(pos))
+         if(!m_listview.isItemChecked(pos))
          {
-            listview.setItemChecked(pos, true);
+            m_listview.setItemChecked(pos, true);
          }
 
          if(!s_multiMode)
@@ -283,7 +174,7 @@ class FragmentManageTags extends ListFragment
       public
       boolean onCreateActionMode(ActionMode mode, Menu menu)
       {
-         Util.getLayoutInflater().inflate(R.menu.context_menu, menu);
+         //Util.getLayoutInflater().inflate(R.menu.context_menu, menu);
          return true;
       }
 

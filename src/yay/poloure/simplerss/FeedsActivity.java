@@ -1,7 +1,7 @@
 package yay.poloure.simplerss;
 
-import android.app.AlarmManager;
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -53,6 +53,8 @@ class FeedsActivity extends ActionBarActivity
       s_currentTags = Read.file(Constants.TAG_LIST);
       Util.remove(Constants.DUMP_FILE);
 
+      Util.mkdir(Constants.SETTINGS_DIR);
+
       /* Create the navigation drawer and set all the listeners for it. */
       new NavDrawer((ListView) findViewById(R.id.left_drawer),
             (DrawerLayout) findViewById(R.id.drawer_layout));
@@ -60,7 +62,7 @@ class FeedsActivity extends ActionBarActivity
       /* Create the MANAGE_FRAGMENTS that go inside the content frame. */
       if(null == savedInstanceState)
       {
-         Fragment[] mainFragments = new Fragment[]{
+         Fragment[] mainFragments = {
                new FragmentFeeds(), new FragmentManage(), new FragmentSettings(),
          };
 
@@ -166,7 +168,7 @@ class FeedsActivity extends ActionBarActivity
       int time = AdapterSettingsFunctions.TIMES[3];
       String[] names = AdapterSettingsFunctions.FILE_NAMES;
 
-      /* Load the ManageRefresh boolean value from settings. */
+      /* Load the ManageFeedsRefresh boolean value from settings. */
       String[] check = Read.file(Constants.SETTINGS_DIR + names[1] + Constants.TXT);
       boolean refresh = 0 == check.length || !Util.strbol(check[0]);
 
@@ -175,7 +177,7 @@ class FeedsActivity extends ActionBarActivity
          return;
       }
 
-      /* Load the ManageRefresh time from settings. */
+      /* Load the ManageFeedsRefresh time from settings. */
       String[] settings = Read.file(Constants.SETTINGS_DIR + names[2] + Constants.TXT);
       if(0 != settings.length)
       {

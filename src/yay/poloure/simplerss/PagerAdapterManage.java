@@ -1,8 +1,8 @@
 package yay.poloure.simplerss;
 
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.Fragment;
 
 class PagerAdapterManage extends FragmentPagerAdapter
 {
@@ -21,7 +21,6 @@ class PagerAdapterManage extends FragmentPagerAdapter
    public
    int getCount()
    {
-     /* return MANAGE_FRAGMENTS.length;*/
       return MANAGE_FRAGMENTS.length;
    }
 
