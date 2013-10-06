@@ -1,6 +1,5 @@
 package yay.poloure.simplerss;
 
-import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -9,9 +8,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -24,15 +21,16 @@ class FeedsActivity extends ActionBarActivity
 {
    private static final String ALARM_SERVICE_START = "start";
    private static final String ALARM_SERVICE_STOP  = "stop";
-
+   static         Menu          s_optionsMenu;
+   static         Handler       s_serviceHandler;
    /* Only initialized when the activity is running. */
-   static Menu            s_optionsMenu;
-   static ViewPager       s_ViewPager;
-   static FragmentManager s_fragmentManager;
-   static ActionBar       s_actionBar;
-   static Activity        s_activity;
-   static Handler         s_serviceHandler;
-   static String[]        s_currentTags;
+   private static FeedsActivity s_activity;
+
+   static
+   FeedsActivity getActivity()
+   {
+      return s_activity;
+   }
 
    @Override
    public
@@ -45,12 +43,12 @@ class FeedsActivity extends ActionBarActivity
       /* Save the other static variables. */
       Util.setContext(this);
       s_activity = this;
-      s_fragmentManager = getSupportFragmentManager();
-      s_actionBar = getSupportActionBar();
-      s_actionBar.setDisplayHomeAsUpEnabled(true);
-      s_actionBar.setHomeButtonEnabled(true);
 
-      s_currentTags = Read.file(Constants.TAG_LIST);
+      ActionBar actionBar = getSupportActionBar();
+      actionBar.setIcon(R.drawable.rss_icon);
+      actionBar.setDisplayHomeAsUpEnabled(true);
+      actionBar.setHomeButtonEnabled(true);
+
       Util.remove(Constants.DUMP_FILE);
 
       Util.mkdir(Constants.SETTINGS_DIR);
@@ -68,7 +66,7 @@ class FeedsActivity extends ActionBarActivity
 
          int frame = R.id.content_frame;
 
-         FragmentTransaction tran = s_fragmentManager.beginTransaction();
+         FragmentTransaction tran = getSupportFragmentManager().beginTransaction();
          tran.add(frame, mainFragments[0], NavDrawer.NAV_TITLES[0])
                .add(frame, mainFragments[1], NavDrawer.NAV_TITLES[1])
                .add(frame, mainFragments[2], NavDrawer.NAV_TITLES[2])
@@ -79,18 +77,6 @@ class FeedsActivity extends ActionBarActivity
 
       Util.updateTags();
       Update.page(0);
-   }
-
-   static
-   Fragment getFragmentByTag(String fragmentTag)
-   {
-      return s_fragmentManager.findFragmentByTag(fragmentTag);
-   }
-
-   static
-   Activity getActivity()
-   {
-      return s_activity;
    }
 
    /* This is so the icon and text in the actionbar are selected. */
@@ -121,44 +107,10 @@ class FeedsActivity extends ActionBarActivity
       super.onBackPressed();
       String feeds = NavDrawer.NAV_TITLES[0];
 
-      s_actionBar.setTitle(feeds);
+      getSupportActionBar().setTitle(feeds);
       int lock = DrawerLayout.LOCK_MODE_UNLOCKED;
       NavDrawer.s_drawerLayout.setDrawerLockMode(lock);
       NavDrawer.s_drawerToggle.setDrawerIndicatorEnabled(true);
-   }
-
-   @Override
-   protected
-   void onPostCreate(Bundle savedInstanceState)
-   {
-      super.onPostCreate(savedInstanceState);
-      // Sync the toggle state after onRestoreInstanceState has occurred.
-      NavDrawer.s_drawerToggle.syncState();
-   }
-
-   @Override
-   public
-   boolean onOptionsItemSelected(MenuItem item)
-   {
-      /* If the user has clicked the m_title and the tilte says Constants.OFFLINE. */
-      if(Constants.OFFLINE.equals(s_actionBar.getTitle().toString()))
-      {
-         onBackPressed();
-         return true;
-      }
-
-      return NavDrawer.s_drawerToggle.onOptionsItemSelected(item) ||
-            super.onOptionsItemSelected(item);
-   }
-
-   @Override
-   protected
-   void onStart()
-   {
-      super.onStart();
-
-      /* Stop the alarmservice and reset the time to 0. */
-      setServiceIntent(ALARM_SERVICE_STOP);
    }
 
    private static
@@ -184,7 +136,7 @@ class FeedsActivity extends ActionBarActivity
          time = Util.stoi(settings[0]);
       }
 
-      /* Create intent, turn into pending intent, and get the alarmmanager. */
+      /* Create intent, turn into pending intent, and get the alarm manager. */
       Intent intent = Util.getServiceIntent(0);
       PendingIntent pintent = PendingIntent.getService(con, 0, intent, 0);
       String alarm = ALARM_SERVICE;
@@ -201,5 +153,44 @@ class FeedsActivity extends ActionBarActivity
       {
          am.cancel(pintent);
       }
+   }
+
+   Fragment getFragmentByTag(String fragmentTag)
+   {
+      return getSupportFragmentManager().findFragmentByTag(fragmentTag);
+   }
+
+   @Override
+   protected
+   void onPostCreate(Bundle savedInstanceState)
+   {
+      super.onPostCreate(savedInstanceState);
+      // Sync the toggle state after onRestoreInstanceState has occurred.
+      NavDrawer.s_drawerToggle.syncState();
+   }
+
+   @Override
+   public
+   boolean onOptionsItemSelected(MenuItem item)
+   {
+      /* If the user has clicked the title and the title says Constants.OFFLINE. */
+      if(Constants.OFFLINE.equals(getSupportActionBar().getTitle().toString()))
+      {
+         onBackPressed();
+         return true;
+      }
+
+      return NavDrawer.s_drawerToggle.onOptionsItemSelected(item) ||
+            super.onOptionsItemSelected(item);
+   }
+
+   @Override
+   protected
+   void onStart()
+   {
+      super.onStart();
+
+      /* Stop the alarm service and reset the time to 0. */
+      setServiceIntent(ALARM_SERVICE_STOP);
    }
 }

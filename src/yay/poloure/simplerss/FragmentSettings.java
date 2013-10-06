@@ -3,6 +3,7 @@ package yay.poloure.simplerss;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.PagerTabStrip;
 import android.support.v4.view.ViewPager;
 import android.view.Gravity;
@@ -14,17 +15,10 @@ class FragmentSettings extends Fragment
 {
    @Override
    public
-   void onCreate(Bundle savedInstanceState)
-   {
-      super.onCreate(savedInstanceState);
-      setRetainInstance(false);
-      setHasOptionsMenu(true);
-   }
-
-   @Override
-   public
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
+      super.onCreateView(inflater, container, savedInstanceState);
+
       ViewPager pager = new ViewPager(Util.getContext());
       Constants.PAGER_TAB_STRIPS[2] = new PagerTabStrip(Util.getContext());
 
@@ -33,8 +27,9 @@ class FragmentSettings extends Fragment
       layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
       layoutParams.gravity = Gravity.TOP;
 
+      FragmentManager fragmentManager = FeedsActivity.getActivity().getSupportFragmentManager();
+      pager.setAdapter(new PagerAdapterSettings(fragmentManager));
       pager.addView(Constants.PAGER_TAB_STRIPS[2], layoutParams);
-      pager.setAdapter(new PagerAdapterSettings(FeedsActivity.s_fragmentManager));
       pager.setId(0x3000);
 
       Constants.PAGER_TAB_STRIPS[2].setDrawFullUnderline(true);

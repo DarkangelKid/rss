@@ -28,15 +28,14 @@ class ServiceUpdate extends IntentService
       Util.setContext(this);
 
       PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-      PowerManager.WakeLock wakelock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SIMPLERSS");
-      wakelock.acquire();
+      PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SIMPLERSS");
+      wakeLock.acquire();
 
       Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
       int page = intent.getIntExtra("GROUP_NUMBER", 0);
 
-      String[] allTags = Read.file(Constants.TAG_LIST);
-      String tag = allTags[page];
+      String tag = Read.file(Constants.TAG_LIST)[page];
 
       String[][] content = Read.csv();
       String[] names = content[0];
@@ -61,7 +60,7 @@ class ServiceUpdate extends IntentService
          }
       }
 
-      int[] unreadCounts = Util.getUnreadCounts(allTags);
+      int[] unreadCounts = Util.getUnreadCounts();
 
       /* If activity is running. */
       if(null != FeedsActivity.s_serviceHandler)
@@ -129,7 +128,7 @@ class ServiceUpdate extends IntentService
          notificationManager.notify(1, notificationBuilder.build());
       }
 
-      wakelock.release();
+      wakeLock.release();
       stopSelf();
    }
 }

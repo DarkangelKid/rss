@@ -7,18 +7,15 @@ import android.widget.SpinnerAdapter;
 
 class OnDialogClickEdit implements DialogInterface.OnClickListener
 {
-   private View                        m_editRssDialog;
-   private AdapterView<SpinnerAdapter> m_tag;
-   private AlertDialog                 m_editFeedDialog;
-   private String                      m_title;
+   private final View                        m_editRssDialog;
+   private final AdapterView<SpinnerAdapter> m_tag;
+   private final String                      m_title;
 
    public
-   OnDialogClickEdit(View editRssDialog, AdapterView<SpinnerAdapter> spinnerTag,
-         AlertDialog editFeedDialog, String title)
+   OnDialogClickEdit(View editRssDialog, AdapterView<SpinnerAdapter> spinnerTag, String title)
    {
       m_editRssDialog = editRssDialog;
       m_tag = spinnerTag;
-      m_editFeedDialog = editFeedDialog;
       m_title = title;
    }
 
@@ -30,16 +27,16 @@ class OnDialogClickEdit implements DialogInterface.OnClickListener
       String newUrl = Util.getText(m_editRssDialog, R.id.URL_edit);
       String newName = Util.getText(m_editRssDialog, R.id.name_edit);
       String spinnerTag = m_tag.getSelectedItem().toString();
-      if(editTag.isEmpty())
+      if(0 == editTag.length())
       {
          editTag = spinnerTag.toLowerCase(Constants.LOCALE);
       }
-      if(editTag.isEmpty())
+      if(0 == editTag.length())
       {
          editTag = Constants.UNSORTED_TAG;
       }
 
-      Update.executeFeedCheck(m_editFeedDialog, editTag, newName, Constants.EDIT, m_title, newUrl,
-            which);
+      Update.executeFeedCheck((AlertDialog) dialog, editTag, newName, Constants.EDIT, m_title,
+            newUrl);
    }
 }

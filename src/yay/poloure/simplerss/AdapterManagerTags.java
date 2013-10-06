@@ -19,37 +19,20 @@ import java.util.Arrays;
 
 class AdapterManagerTags extends BaseAdapter
 {
-   private String old_title = "";
-
+   private static final int SCREEN_HEIGHT = (int) Util.getContext()
+         .getResources()
+         .getDisplayMetrics().heightPixels;
    static String[] s_tagArray;
    static String[] s_infoArray;
+   private final int[]  m_position = new int[2];
+   private       String old_title  = "";
+   private int old_view;
 
    @Override
    public
    int getCount()
    {
       return null == s_tagArray ? 0 : s_tagArray.length;
-   }
-
-   @Override
-   public
-   long getItemId(int pos)
-   {
-      return pos;
-   }
-
-   @Override
-   public
-   String getItem(int pos)
-   {
-      return s_tagArray[pos];
-   }
-
-   @Override
-   public
-   int getViewTypeCount()
-   {
-      return 2;
    }
 
    /*@Override
@@ -62,6 +45,19 @@ class AdapterManagerTags extends BaseAdapter
          return 1;
    }*/
 
+   @Override
+   public
+   String getItem(int pos)
+   {
+      return s_tagArray[pos];
+   }
+
+   @Override
+   public
+   long getItemId(int pos)
+   {
+      return pos;
+   }
 
    @Override
    public
@@ -102,7 +98,14 @@ class AdapterManagerTags extends BaseAdapter
       return view1;
    }
 
-   static
+   @Override
+   public
+   int getViewTypeCount()
+   {
+      return 2;
+   }
+
+   private static
    class ViewHolder
    {
       TextView  tag_view;
@@ -110,13 +113,32 @@ class AdapterManagerTags extends BaseAdapter
       ImageView image_view;
    }
 
+   static private
+   class CardShadowBuilder extends View.DragShadowBuilder
+   {
+      final View view_store;
+
+      CardShadowBuilder(View v)
+      {
+         super(v);
+         view_store = v;
+      }
+
+      @Override
+      public
+      void onProvideShadowMetrics(Point shadowSize, Point shadowTouchPoint)
+      {
+         shadowSize.x = view_store.getWidth();
+         shadowSize.y = view_store.getHeight();
+
+         shadowTouchPoint.x = (int) (shadowSize.x * 19.0 / 20.0);
+         shadowTouchPoint.y = shadowSize.y / 2;
+      }
+   }
+
    private
    class MyTouchListener implements OnTouchListener
    {
-      MyTouchListener()
-      {
-      }
-
       @Override
       public
       boolean onTouch(View view, MotionEvent motionEvent)
@@ -133,36 +155,9 @@ class AdapterManagerTags extends BaseAdapter
       }
    }
 
-   private int old_view;
-   private              int[] m_position    = new int[2];
-   private static final int   SCREEN_HEIGHT = (int) Util.getContext()
-         .getResources()
-         .getDisplayMetrics().heightPixels;
-
+   private
    class MyDragListener implements OnDragListener
    {
-      void rearrangeTags(String previous, String next)
-      {
-         int i = 0;
-         while(!previous.equals(s_tagArray[i]))
-         {
-            i++;
-         }
-         int j = 0;
-         while(!next.equals(s_tagArray[j]))
-         {
-            j++;
-         }
-         String oldInfo = s_infoArray[i];
-         String old = s_tagArray[i];
-
-         s_infoArray[i] = s_infoArray[j];
-         s_tagArray[i] = s_tagArray[j];
-
-         s_infoArray[j] = oldInfo;
-         s_tagArray[j] = old;
-      }
-
       @Override
       public
       boolean onDrag(View v, DragEvent event)
@@ -202,7 +197,7 @@ class AdapterManagerTags extends BaseAdapter
             }
 
             /* Change the information of the card that just disapeared. */
-            /* Old m_title is the currently touched m_title and new_title is the one to be 
+            /* Old m_title is the currently touched m_title and new_title is the one to be
             replaced */
             rearrangeTags(old_title, newTitle);
             notifyDataSetChanged();
@@ -231,28 +226,27 @@ class AdapterManagerTags extends BaseAdapter
          }
          return true;
       }
-   }
 
-   static
-   class CardShadowBuilder extends View.DragShadowBuilder
-   {
-      final View view_store;
-
-      CardShadowBuilder(View v)
+      void rearrangeTags(String previous, String next)
       {
-         super(v);
-         view_store = v;
-      }
+         int i = 0;
+         while(!previous.equals(s_tagArray[i]))
+         {
+            i++;
+         }
+         int j = 0;
+         while(!next.equals(s_tagArray[j]))
+         {
+            j++;
+         }
+         String oldInfo = s_infoArray[i];
+         String old = s_tagArray[i];
 
-      @Override
-      public
-      void onProvideShadowMetrics(Point shadowSize, Point shadowTouchPoint)
-      {
-         shadowSize.x = view_store.getWidth();
-         shadowSize.y = view_store.getHeight();
+         s_infoArray[i] = s_infoArray[j];
+         s_tagArray[i] = s_tagArray[j];
 
-         shadowTouchPoint.x = (int) (shadowSize.x * 19.0 / 20.0);
-         shadowTouchPoint.y = shadowSize.y / 2;
+         s_infoArray[j] = oldInfo;
+         s_tagArray[j] = old;
       }
    }
 }

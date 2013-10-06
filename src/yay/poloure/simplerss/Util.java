@@ -5,13 +5,13 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Environment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.ListFragment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.PagerTabStrip;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,7 +19,6 @@ import android.widget.Toast;
 import java.io.File;
 import java.util.Set;
 
-final
 class Util
 {
    static final   int[]      EMPTY_INT_ARRAY           = new int[0];
@@ -27,11 +26,6 @@ class Util
    static final   String[][] EMPTY_STRING_STRING_ARRAY = new String[0][0];
    private static String     s_storage                 = "";
    private static Context s_context;
-
-   private
-   Util()
-   {
-   }
 
    static
    String[] arrayRemove(String[] first, int index)
@@ -53,39 +47,37 @@ class Util
    static
    void updateTags()
    {
-      /* Since this function is static, we can not rely on the fields being
-       * non-null. */
-
-      /* Update s_currentTags. */
-      FeedsActivity.s_currentTags = Read.file(Constants.TAG_LIST);
-
-      /* If no tags exists, add the ALL_TAG m_imageViewTag. */
-      if(0 == FeedsActivity.s_currentTags.length)
+      /* If no tags exists, add the ALL_TAG. */
+      if(0 == Read.file(Constants.TAG_LIST).length)
       {
          Write.single(Constants.TAG_LIST, Constants.ALL_TAG + Constants.NL);
-         FeedsActivity.s_currentTags = new String[]{Constants.ALL_TAG};
       }
 
-      if(null != FeedsActivity.s_ViewPager)
+      if(null != FragmentFeeds.VIEW_PAGER && null != FragmentFeeds.VIEW_PAGER.getAdapter())
       {
-         FeedsActivity.s_ViewPager.getAdapter().notifyDataSetChanged();
+         PagerAdapterFeeds pagerAdapterFeeds = (PagerAdapterFeeds) FragmentFeeds.VIEW_PAGER
+               .getAdapter();
+         pagerAdapterFeeds.updatePages();
+         pagerAdapterFeeds.notifyDataSetChanged();
       }
+
       Update.navigation();
    }
 
    static
-   int gotoLatestUnread(FeedItem[] items, boolean update, int page)
+   int gotoLatestUnread(FeedItem[] p_items, boolean update, int page)
    {
+      FeedItem[] items = p_items;
       int page1 = page;
 
-      if(null == FeedsActivity.s_ViewPager)
+      if(null == FragmentFeeds.VIEW_PAGER)
       {
          return -1;
       }
 
       if(update)
       {
-         page1 = FeedsActivity.s_ViewPager.getCurrentItem();
+         page1 = FragmentFeeds.VIEW_PAGER.getCurrentItem();
       }
 
       if(null == items)
@@ -101,7 +93,7 @@ class Util
 
       int i;
       int itemCount = items.length - 1;
-      for(i = itemCount; i >= 0; i--)
+      for(i = itemCount; 0 <= i; i--)
       {
          if(!AdapterCard.s_readLinks.contains(items[i].url))
          {
@@ -128,15 +120,16 @@ class Util
    private static
    ListView getFeedListView(int page)
    {
-      FragmentManager fman = FeedsActivity.s_fragmentManager;
-      ViewPager viewpager = FeedsActivity.s_ViewPager;
-      if(null == fman || null == viewpager)
+      FragmentManager fragmentManager = FeedsActivity.getActivity().getSupportFragmentManager();
+      ViewPager viewpager = FragmentFeeds.VIEW_PAGER;
+      if(null == fragmentManager)
       {
          return null;
       }
 
-      String tag = String.format(Constants.FRAGMENT_TAG, viewpager.getId(), page);
-      return ((FragmentCard) fman.findFragmentByTag(tag)).getListView();
+      int viewpagerId = viewpager.getId();
+      String tag = String.format(Constants.FRAGMENT_TAG, viewpagerId, page);
+      return ((ListFragment) fragmentManager.findFragmentByTag(tag)).getListView();
    }
 
    /* For these two functions, check for null. Should only really be
@@ -182,7 +175,7 @@ class Util
             * Log the event regardless. */
          if(null != FeedsActivity.s_serviceHandler)
          {
-            Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+            Toast.makeText(s_context, message, Toast.LENGTH_LONG).show();
          }
 
          /* This function can be called when no media, so this is optional. */
@@ -202,7 +195,7 @@ class Util
    static
    Context getContext()
    {
-      return null != s_context ? s_context : null;
+      return s_context;
    }
 
    static
@@ -215,46 +208,45 @@ class Util
    LayoutInflater getLayoutInflater()
    {
       String inflate = Context.LAYOUT_INFLATER_SERVICE;
-      Context con = getContext();
-      return (LayoutInflater) con.getSystemService(inflate);
+      return (LayoutInflater) s_context.getSystemService(inflate);
    }
 
    /* Safe to call at anytime. */
    static
    int getScreenWidth()
    {
-      return getContext().getResources().getDisplayMetrics().widthPixels;
+      return s_context.getResources().getDisplayMetrics().widthPixels;
    }
 
    static
-   int[] getUnreadCounts(String... ctags)
+   int[] getUnreadCounts()
    {
       Set<String> readLinks = AdapterCard.s_readLinks;
+      String[] currentTags = Read.file(Constants.TAG_LIST);
+
       String[][] content = Read.csv();
       String[] names = content[0];
       String[] urls = content[1];
       String[] tags = content[2];
 
-      /* READ_ITEMS == null when called from the service for notifications. */
-
       int total = 0;
-      int cTagsSize = ctags.length;
-      int[] unreadCounts = new int[cTagsSize];
-      int[] totalCounts = new int[cTagsSize];
+      int currentTagsCount = currentTags.length;
+      int[] unreadCounts = new int[currentTagsCount];
+      int[] totalCounts = new int[currentTagsCount];
 
-      for(int i = 1; i < cTagsSize; i++)
+      for(int i = 1; i < currentTagsCount; i++)
       {
          int read = 0;
-         for(int j = 0; j < tags.length; j++)
+         int tagsCount = tags.length;
+         for(int j = 0; j < tagsCount; j++)
          {
-            if(tags[j].equals(ctags[i]))
+            if(tags[j].equals(currentTags[i]))
             {
                totalCounts[i] += Read.count(getPath(names[j], Constants.CONTENT));
-               for(String readUrl : AdapterCard.s_readLinks)
+               for(String readUrl : readLinks)
                {
                   int pos = readUrl.indexOf('/') + 1;
                   readUrl = readUrl.substring(pos, readUrl.indexOf('/', pos + 1));
-                  Write.log(readUrl + "::" + urls[j]);
                   if(urls[j].contains(readUrl))
                   {
                      read++;
@@ -297,7 +289,7 @@ class Util
       String[] check = Read.file(colorSettingsPath);
       String color = 0 == check.length ? "blue" : check[0];
 
-      /* Find the colour stored in adapter_stettings_interface that we want. */
+      /* Find the colour stored in adapter_settings_interface that we want. */
       int pos = index(AdapterSettingsUi.HOLO_COLORS, color);
       if(-1 != pos)
       {
@@ -332,10 +324,9 @@ class Util
       String path = Constants.SETTINGS_DIR + AdapterSettingsFunctions.FILE_NAMES[3] +
             Constants.TXT;
       String[] check = Read.file(path);
-      Context con = getContext();
 
       boolean notif = 0 != check.length && strbol(check[0]);
-      Intent intent = new Intent(con, ServiceUpdate.class);
+      Intent intent = new Intent(s_context, ServiceUpdate.class);
       intent.putExtra("GROUP_NUMBER", page);
       intent.putExtra("NOTIFICATIONS", notif);
       return intent;
@@ -345,44 +336,6 @@ class Util
    boolean strbol(String str)
    {
       return Boolean.parseBoolean(str);
-   }
-
-   static
-   void setCardAlpha(TextView title, TextView url, ImageView image, TextView des, String link)
-   {
-      Resources res = getContext().getResources();
-
-      if(AdapterCard.s_readLinks.contains(link))
-      {
-         title.setTextColor(res.getColor(R.color.title_grey));
-         url.setTextColor(res.getColor(R.color.link_grey));
-
-         if(null != des)
-         {
-            des.setTextColor(res.getColor(R.color.des_grey));
-         }
-
-         if(null != image)
-         {
-            image.setAlpha(0.5f);
-         }
-      }
-      else
-      {
-         Write.log("Not read.");
-         title.setTextColor(res.getColor(R.color.title_black));
-         url.setTextColor(res.getColor(R.color.link_black));
-
-         if(null != des)
-         {
-            des.setTextColor(res.getColor(R.color.des_black));
-         }
-
-         if(null != image)
-         {
-            image.setAlpha(1.0f);
-         }
-      }
    }
 
    /* Changes the ManageFeedsRefresh menu item to an animation if m_mode = true. */
@@ -413,11 +366,11 @@ class Util
    }
 
    static
-   boolean remove(String path)
+   void remove(String path)
    {
       String path1 = getStorage() + path;
-      getContext().deleteFile(getInternalPath(path1));
-      return new File(path1).delete();
+      s_context.deleteFile(getInternalPath(path1));
+      new File(path1).delete();
    }
 
    /* This function will return null if it fails. Check for null each time.
@@ -425,7 +378,7 @@ class Util
    static
    String getStorage()
    {
-      if(!s_storage.isEmpty())
+      if(0 != s_storage.length())
       {
          return s_storage;
       }
@@ -445,16 +398,15 @@ class Util
 
       /* If it has reached here the state is MEDIA_MOUNTED and we can continue.
          Build the s_storage string depending on android version. */
-      Context context = getContext();
       String sep = Constants.SEPAR;
 
       if(Constants.FROYO)
       {
-         s_storage = context.getExternalFilesDir(null).getAbsolutePath() + sep;
+         s_storage = s_context.getExternalFilesDir(null).getAbsolutePath() + sep;
       }
       else
       {
-         String name = context.getPackageName();
+         String name = s_context.getPackageName();
          File ext = Environment.getExternalStorageDirectory();
          s_storage = ext.getAbsolutePath() + sep + "Android" + sep + "data" + sep + name + sep +
                "files" + sep;
@@ -510,11 +462,11 @@ class Util
    }
 
    static
-   boolean move(String originalFile, String resultingFile)
+   boolean move(String p_originalFile, String p_resultingFile)
    {
-      String originalFile1 = getStorage() + originalFile;
-      resultingFile = getStorage() + resultingFile;
-      return new File(originalFile1).renameTo(new File(resultingFile));
+      String originalFile = getStorage() + p_originalFile;
+      String resultingFile = getStorage() + p_resultingFile;
+      return new File(originalFile).renameTo(new File(resultingFile));
    }
 
    static
@@ -535,7 +487,7 @@ class Util
       else
       {
          String internalPath = getInternalPath(path1);
-         return !getContext().getFileStreamPath(internalPath).exists();
+         return !s_context.getFileStreamPath(internalPath).exists();
       }
    }
 
@@ -570,10 +522,9 @@ class Util
    String[] getArray(int resource)
    {
       String[] array = EMPTY_STRING_ARRAY;
-      Context con = getContext();
       try
       {
-         array = con.getResources().getStringArray(resource);
+         array = s_context.getResources().getStringArray(resource);
       }
       catch(Resources.NotFoundException e)
       {
@@ -587,10 +538,9 @@ class Util
    String getString(int resource)
    {
       String str = "";
-      Context con = getContext();
       try
       {
-         str = con.getString(resource);
+         str = s_context.getString(resource);
       }
       catch(Resources.NotFoundException e)
       {

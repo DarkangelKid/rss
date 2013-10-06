@@ -3,16 +3,16 @@ import android.os.AsyncTask;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
-public
 class AsyncManageFeedsRefresh extends AsyncTask<Void, String[], Void>
 {
-   final Animation fade_in = AnimationUtils.loadAnimation(Util.getContext(),
+   private final Animation fade_in = AnimationUtils.loadAnimation(Util.getContext(),
          android.R.anim.fade_in);
-   ListView    m_listView;
-   ListAdapter m_adapter;
+   private final ListView    m_listView;
+   private final ListAdapter m_adapter;
 
    AsyncManageFeedsRefresh(ListView listView, ListAdapter adapter)
    {
@@ -63,6 +63,6 @@ class AsyncManageFeedsRefresh extends AsyncTask<Void, String[], Void>
    void onProgressUpdate(String[]... values)
    {
       ((AdapterManageFeeds) m_adapter).setArrays(values[0], values[1]);
-      ((AdapterManageFeeds) m_adapter).notifyDataSetChanged();
+      ((BaseAdapter) m_adapter).notifyDataSetChanged();
    }
 }

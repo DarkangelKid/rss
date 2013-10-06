@@ -1,33 +1,30 @@
 package yay.poloure.simplerss;
-import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.view.View;
 import android.widget.TextView;
 
 class OnFilterDialogClickAdd implements DialogInterface.OnClickListener
 {
-   private final View        m_addFilterLayout;
-   private final AlertDialog m_addFilterDialog;
+   private final View m_addFilterLayout;
 
-   public
-   OnFilterDialogClickAdd(View addFilterLayout, AlertDialog addFilterDialog)
+   OnFilterDialogClickAdd(View addFilterLayout)
    {
       m_addFilterLayout = addFilterLayout;
-      m_addFilterDialog = addFilterDialog;
    }
 
    @Override
    public
    void onClick(DialogInterface dialog, int which)
    {
-      String feed = Util.getText((TextView) m_addFilterLayout);
+      String filter = Util.getText((TextView) m_addFilterLayout);
       String path = Constants.FILTER_LIST;
       String[] filters = Read.file(path);
-      if(-1 != Util.index(filters, feed))
+      if(-1 == Util.index(filters, filter))
       {
-         Write.single(path, feed + Constants.NL);
+         Write.single(path, filter + Constants.NL);
       }
       AdapterManageFilters.setTitles(filters);
-      m_addFilterDialog.hide();
+      ((Dialog) dialog).hide();
    }
 }

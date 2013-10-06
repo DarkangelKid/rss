@@ -9,8 +9,7 @@ class PagerAdapterSettings extends FragmentPagerAdapter
    private static final Fragment[] SETTINGS_DIR_FRAGMENTS = {
          new FragmentSettingsFunctions(), new FragmentSettingsUi(),
    };
-
-   private static final String[] SETTINGS_DIR_TITLES = Util.getArray(R.array.settings_titles);
+   private static final String[]   SETTINGS_DIR_TITLES    = Util.getArray(R.array.settings_titles);
 
    PagerAdapterSettings(FragmentManager fm)
    {
@@ -26,15 +25,15 @@ class PagerAdapterSettings extends FragmentPagerAdapter
 
    @Override
    public
-   Fragment getItem(int position)
+   String getPageTitle(int position)
    {
-      return SETTINGS_DIR_FRAGMENTS[position];
+      return SETTINGS_DIR_TITLES[position];
    }
 
    @Override
    public
-   String getPageTitle(int position)
+   Fragment getItem(int position)
    {
-      return SETTINGS_DIR_TITLES[position];
+      return SETTINGS_DIR_FRAGMENTS[position];
    }
 }

@@ -20,19 +20,12 @@ class RefreshPage extends AsyncTask<Integer, FeedItem, Animation>
    private ListView     m_listView;
    private int position = -3;
 
-   /* This is for reading an rss file. */
-   private static
-   String[][] csv(String feed, char... type)
-   {
-      return Read.csv(Util.getPath(feed, Constants.CONTENT), type);
-   }
-
    @Override
    protected
    Animation doInBackground(Integer... page)
    {
       m_pageNumber = page[0];
-      String tag = FeedsActivity.s_currentTags[m_pageNumber];
+      String tag = Read.file(Constants.TAG_LIST)[m_pageNumber];
 
       Time time = new Time();
       Map<Long, FeedItem> map = new TreeMap<Long, FeedItem>();
@@ -60,11 +53,12 @@ class RefreshPage extends AsyncTask<Integer, FeedItem, Animation>
             e.printStackTrace();
          }
 
-         if(null != FeedsActivity.s_ViewPager && null == m_listFragment)
+         if(null != FragmentFeeds.VIEW_PAGER && null == m_listFragment)
          {
             String fragmentTag = String.format(Constants.FRAGMENT_TAG,
-                  FeedsActivity.s_ViewPager.getId(), m_pageNumber);
-            m_listFragment = (ListFragment) FeedsActivity.s_fragmentManager
+                  FragmentFeeds.VIEW_PAGER.getId(), m_pageNumber);
+            m_listFragment = (ListFragment) FeedsActivity.getActivity()
+                  .getSupportFragmentManager()
                   .findFragmentByTag(fragmentTag);
          }
          if(null != m_listFragment && null == m_adapterCard)
@@ -175,6 +169,41 @@ class RefreshPage extends AsyncTask<Integer, FeedItem, Animation>
       return animFadeIn;
    }
 
+   /* This is for reading an rss file. */
+   private static
+   String[][] csv(String feed, char... type)
+   {
+      return Read.csv(Util.getPath(feed, Constants.CONTENT), type);
+   }
+
+   @Override
+   protected
+   void onPostExecute(Animation result)
+   {
+      if(null == result)
+      {
+         return;
+      }
+
+      /* Update the unread counts in the navigation drawer. */
+      Update.navigation();
+
+      if(null == m_listView)
+      {
+         return;
+      }
+
+      /* If there were no items to start with (the m_listview is invisible).*/
+      if(m_flash)
+      {
+         m_listView.setSelection(position);
+         m_listView.setAnimation(result);
+         m_listView.setVisibility(View.VISIBLE);
+      }
+      /* Resume Read item checking. */
+      m_adapterCard.m_touchedScreen = true;
+   }
+
    @Override
    protected
    void onProgressUpdate(FeedItem[] values)
@@ -218,33 +247,5 @@ class RefreshPage extends AsyncTask<Integer, FeedItem, Animation>
       {
          m_listView.setSelectionFromTop(index, top - (AdapterCard.EIGHT << 1));
       }
-   }
-
-   @Override
-   protected
-   void onPostExecute(Animation result)
-   {
-      if(null == result)
-      {
-         return;
-      }
-
-      /* Update the unread counts in the navigation drawer. */
-      Update.navigation();
-
-      if(null == m_listView)
-      {
-         return;
-      }
-
-      /* If there were no items to start with (the m_listview is invisible).*/
-      if(m_flash)
-      {
-         m_listView.setSelection(position);
-         m_listView.setAnimation(result);
-         m_listView.setVisibility(View.VISIBLE);
-      }
-      /* Resume Read item checking. */
-      m_adapterCard.m_touchedScreen = true;
    }
 }

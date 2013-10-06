@@ -3,7 +3,7 @@ import android.content.DialogInterface;
 
 class OnFilterClickDelete implements DialogInterface.OnClickListener
 {
-   private AdapterManageFilters m_adapter;
+   private final AdapterManageFilters m_adapter;
 
    OnFilterClickDelete(AdapterManageFilters adapter)
    {
@@ -16,5 +16,6 @@ class OnFilterClickDelete implements DialogInterface.OnClickListener
    {
       Write.removeLine(Constants.FILTER_LIST, m_adapter.getItem(position), false);
       m_adapter.removePosition(position);
+      m_adapter.notifyDataSetChanged();
    }
 }

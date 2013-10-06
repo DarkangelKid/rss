@@ -64,15 +64,15 @@ class Update
 
    public static
    void executeFeedCheck(AlertDialog dlg, String ntag, String fname, String mode, String ctitle,
-         String url, int position)
+         String url)
    {
       if(Constants.HONEYCOMB)
       {
-         new FeedDialog.CheckFeed(dlg, ntag, fname, mode, ctitle, position).execute(url);
+         new FeedDialog.CheckFeed(dlg, ntag, fname, mode, ctitle).execute(url);
       }
       else
       {
-         new FeedDialog.CheckFeed(dlg, ntag, fname, mode, ctitle, position).executeOnExecutor(
+         new FeedDialog.CheckFeed(dlg, ntag, fname, mode, ctitle).executeOnExecutor(
                AsyncTask.THREAD_POOL_EXECUTOR, url);
       }
    }

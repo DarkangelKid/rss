@@ -24,22 +24,16 @@ class AdapterManageFilters extends BaseAdapter
 
    @Override
    public
-   long getItemId(int position)
+   String getItem(int position)
    {
-      return position;
-   }
-
-   void removePosition(int position)
-   {
-      Util.arrayRemove(s_filterTitles, position);
-      notifyDataSetChanged();
+      return s_filterTitles[position];
    }
 
    @Override
    public
-   String getItem(int position)
+   long getItemId(int position)
    {
-      return s_filterTitles[position];
+      return position;
    }
 
    @Override
@@ -66,7 +60,13 @@ class AdapterManageFilters extends BaseAdapter
       return view1;
    }
 
-   static
+   void removePosition(int position)
+   {
+      Util.arrayRemove(s_filterTitles, position);
+      notifyDataSetChanged();
+   }
+
+   private static
    class ViewHolder
    {
       TextView m_title;

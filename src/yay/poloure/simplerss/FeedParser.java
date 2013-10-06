@@ -139,7 +139,7 @@ class FeedParser
          {
             String image = saveImageName();
             Util.post(image);
-            if(!image.isEmpty())
+            if(0 != image.length())
             {
                line.append(Constants.IMAGE).append(image).append('|');
                String imageName = image.substring(image.lastIndexOf(Constants.SEPAR) + 1,

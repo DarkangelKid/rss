@@ -5,6 +5,7 @@ import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
@@ -42,9 +43,7 @@ class NavDrawer
       int[] doInBackground(int[]... counts)
       {
          /* If null was passed into the task, count the unread items. */
-         return 0 == counts[0].length
-               ? Util.getUnreadCounts(FeedsActivity.s_currentTags)
-               : counts[0];
+         return 0 == counts[0].length ? Util.getUnreadCounts() : counts[0];
       }
 
       @Override
@@ -52,15 +51,18 @@ class NavDrawer
       void onPostExecute(int[] result)
       {
          /* Set the titles & counts arrays in this file and notify the adapter. */
-         AdapterNavDrawer.s_tagArray    = FeedsActivity.s_currentTags;
+         AdapterNavDrawer.s_tagArray = Read.file(Constants.TAG_LIST);
          AdapterNavDrawer.s_unreadArray = result;
          ((BaseAdapter) s_navList.getAdapter()).notifyDataSetChanged();
       }
    }
 
-   static
+   private static
    class DrawerToggleClick extends ActionBarDrawerToggle
    {
+      private final ActionBar m_actionBar = FeedsActivity.getActivity().getSupportActionBar();
+
+      private
       DrawerToggleClick()
       {
          super(FeedsActivity.getActivity(), s_drawerLayout, R.drawable.ic_drawer,
@@ -71,8 +73,8 @@ class NavDrawer
       public
       void onDrawerOpened(View drawerView)
       {
-         s_currentTitle = (String) FeedsActivity.s_actionBar.getTitle();
-         FeedsActivity.s_actionBar.setTitle(NAVIGATION);
+         s_currentTitle = (String) m_actionBar.getTitle();
+         m_actionBar.setTitle(NAVIGATION);
       }
 
       @Override
@@ -80,14 +82,14 @@ class NavDrawer
       void onDrawerClosed(View drawerView)
       {
          /* Change it back to s_currentTitle. */
-         if(NAVIGATION.equals(FeedsActivity.s_actionBar.getTitle()))
+         if(NAVIGATION.equals(m_actionBar.getTitle()))
          {
-            FeedsActivity.s_actionBar.setTitle(s_currentTitle);
+            m_actionBar.setTitle(s_currentTitle);
          }
       }
    }
 
-   static
+   static private
    class NavDrawerItemClick implements AdapterView.OnItemClickListener
    {
       @Override
@@ -100,11 +102,11 @@ class NavDrawer
          /* Determine the new m_title based on the position of the item clicked. */
          String selectedTitle = 3 < position ? NAV_TITLES[0] : NAV_TITLES[position];
 
-         /* If the item selected was a m_imageViewTag, change the s_ViewPager to that
+         /* If the item selected was a m_imageViewTag, change the VIEW_PAGER to that
          image. */
          if(3 < position)
          {
-            FeedsActivity.s_ViewPager.setCurrentItem(position - 4);
+            FragmentFeeds.VIEW_PAGER.setCurrentItem(position - 4);
          }
 
          /* If the selected title is the title of the current page, exit.
@@ -115,19 +117,22 @@ class NavDrawer
          }
 
          /* Hide the current fragment and display the selected one. */
-         showFragment(FeedsActivity.getFragmentByTag(selectedTitle));
+         showFragment(FeedsActivity.getActivity().getFragmentByTag(selectedTitle));
 
          /* Set the m_title text of the actionbar to the selected item. */
-         FeedsActivity.s_actionBar.setTitle(selectedTitle);
+         ActionBar actionBar = FeedsActivity.getActivity().getSupportActionBar();
+         actionBar.setTitle(selectedTitle);
       }
 
       static
       void showFragment(Fragment fragment)
       {
-         FragmentTransaction tran = FeedsActivity.s_fragmentManager.beginTransaction();
+         FragmentTransaction tran = FeedsActivity.getActivity()
+               .getSupportFragmentManager()
+               .beginTransaction();
          for(String NAV_TITLE : NAV_TITLES)
          {
-            Fragment frag = FeedsActivity.getFragmentByTag(NAV_TITLE);
+            Fragment frag = FeedsActivity.getActivity().getFragmentByTag(NAV_TITLE);
             if(null != frag && !frag.equals(fragment) && !frag.isHidden())
             {
                tran.hide(frag);

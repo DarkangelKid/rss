@@ -6,11 +6,10 @@ import android.support.v4.app.FragmentPagerAdapter;
 
 class PagerAdapterManage extends FragmentPagerAdapter
 {
-   static final Fragment[] MANAGE_FRAGMENTS = {
+   static final         Fragment[] MANAGE_FRAGMENTS = {
          new FragmentManageTags(), new FragmentManageFeeds(), new FragmentManageFilters(),
    };
-
-   private static final String[] MANAGE_TITLES = Util.getArray(R.array.manage_titles);
+   private static final String[]   MANAGE_TITLES    = Util.getArray(R.array.manage_titles);
 
    PagerAdapterManage(FragmentManager fm)
    {
@@ -26,15 +25,15 @@ class PagerAdapterManage extends FragmentPagerAdapter
 
    @Override
    public
-   Fragment getItem(int position)
+   String getPageTitle(int position)
    {
-      return MANAGE_FRAGMENTS[position];
+      return MANAGE_TITLES[position];
    }
 
    @Override
    public
-   String getPageTitle(int position)
+   Fragment getItem(int position)
    {
-      return MANAGE_TITLES[position];
+      return MANAGE_FRAGMENTS[position];
    }
 }

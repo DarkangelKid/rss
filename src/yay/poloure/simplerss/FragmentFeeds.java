@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.PagerTabStrip;
 import android.support.v4.view.ViewPager;
 import android.view.Gravity;
@@ -21,6 +22,62 @@ import android.view.ViewGroup;
 
 class FragmentFeeds extends Fragment
 {
+   static final         ViewPager VIEW_PAGER            = new ViewPager(Util.getContext());
+   private static final int       OFF_SCREEN_PAGE_LIMIT = 128;
+
+   @Override
+   public
+   void onCreate(Bundle savedInstanceState)
+   {
+      super.onCreate(savedInstanceState);
+      setRetainInstance(false);
+      setHasOptionsMenu(true);
+   }
+
+   @Override
+   public
+   View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+   {
+      super.onCreateView(inflater, container, savedInstanceState);
+
+      Constants.PAGER_TAB_STRIPS[0] = new PagerTabStrip(Util.getContext());
+
+      ViewPager.LayoutParams layoutParams = new ViewPager.LayoutParams();
+      layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+      layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+      layoutParams.gravity = Gravity.TOP;
+
+      VIEW_PAGER.addView(Constants.PAGER_TAB_STRIPS[0], layoutParams);
+
+      FragmentManager fragmentManager = FeedsActivity.getActivity().getSupportFragmentManager();
+      VIEW_PAGER.setAdapter(new PagerAdapterFeeds(fragmentManager));
+      VIEW_PAGER.setOffscreenPageLimit(OFF_SCREEN_PAGE_LIMIT);
+      VIEW_PAGER.setOnPageChangeListener(new PageChange());
+      VIEW_PAGER.setId(0x1000);
+
+      Constants.PAGER_TAB_STRIPS[0].setDrawFullUnderline(true);
+      Constants.PAGER_TAB_STRIPS[0].setGravity(Gravity.START);
+      Constants.PAGER_TAB_STRIPS[0].setPadding(0, AdapterCard.EIGHT / 2, 0, AdapterCard.EIGHT / 2);
+      Constants.PAGER_TAB_STRIPS[0].setTextColor(Color.WHITE);
+      Constants.PAGER_TAB_STRIPS[0].setBackgroundColor(Color.parseColor("#404040"));
+      Util.setStripColor(Constants.PAGER_TAB_STRIPS[0]);
+
+      return VIEW_PAGER;
+   }
+
+   @Override
+   public
+   void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
+   {
+      FeedsActivity.s_optionsMenu = menu;
+      FeedsActivity.s_optionsMenu.clear();
+
+      inflater.inflate(R.menu.main_overflow, FeedsActivity.s_optionsMenu);
+      super.onCreateOptionsMenu(FeedsActivity.s_optionsMenu, inflater);
+
+      Util.setRefreshingIcon(isServiceRunning(FeedsActivity.getActivity()));
+   }
+
    private static
    boolean isServiceRunning(Activity activity)
    {
@@ -37,73 +94,6 @@ class FragmentFeeds extends Fragment
       return false;
    }
 
-   /* Updates and refreshes the tags with any new content. */
-   private static
-   void refreshFeeds()
-   {
-      Util.setRefreshingIcon(true);
-
-      /* Set the service handler in FeedsActivity so we can check and call it
-       * from ServiceUpdate. */
-
-      FeedsActivity.s_serviceHandler = new OnFinishService();
-      Context context = Util.getContext();
-      int currentPage = FeedsActivity.s_ViewPager.getCurrentItem();
-      Intent intent = Util.getServiceIntent(currentPage);
-      context.startService(intent);
-   }
-
-   @Override
-   public
-   void onCreate(Bundle savedInstanceState)
-   {
-      super.onCreate(savedInstanceState);
-      setRetainInstance(false);
-      setHasOptionsMenu(true);
-   }
-
-   @Override
-   public
-   View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
-   {
-      ViewPager pager = new ViewPager(Util.getContext());
-      Constants.PAGER_TAB_STRIPS[0] = new PagerTabStrip(Util.getContext());
-
-      ViewPager.LayoutParams layoutParams = new ViewPager.LayoutParams();
-      layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-      layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
-      layoutParams.gravity = Gravity.TOP;
-
-      FeedsActivity.s_ViewPager = pager;
-      FeedsActivity.s_ViewPager.addView(Constants.PAGER_TAB_STRIPS[0], layoutParams);
-      FeedsActivity.s_ViewPager.setAdapter(new PagerAdapterFeeds(FeedsActivity.s_fragmentManager));
-      FeedsActivity.s_ViewPager.setOffscreenPageLimit(128);
-      FeedsActivity.s_ViewPager.setOnPageChangeListener(new PageChange());
-      FeedsActivity.s_ViewPager.setId(0x1000);
-
-      Constants.PAGER_TAB_STRIPS[0].setDrawFullUnderline(true);
-      Constants.PAGER_TAB_STRIPS[0].setGravity(Gravity.START);
-      Constants.PAGER_TAB_STRIPS[0].setPadding(0, AdapterCard.EIGHT / 2, 0, AdapterCard.EIGHT / 2);
-      Constants.PAGER_TAB_STRIPS[0].setTextColor(Color.WHITE);
-      Constants.PAGER_TAB_STRIPS[0].setBackgroundColor(Color.parseColor("#404040"));
-      Util.setStripColor(Constants.PAGER_TAB_STRIPS[0]);
-
-      return pager;
-   }
-
-   @Override
-   public
-   void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
-   {
-      FeedsActivity.s_optionsMenu = menu;
-      FeedsActivity.s_optionsMenu.clear();
-
-      inflater.inflate(R.menu.main_overflow, FeedsActivity.s_optionsMenu);
-      super.onCreateOptionsMenu(FeedsActivity.s_optionsMenu, inflater);
-
-      Util.setRefreshingIcon(isServiceRunning(FeedsActivity.getActivity()));
-   }
-
    @Override
    public
    boolean onOptionsItemSelected(MenuItem item)
@@ -114,7 +104,7 @@ class FragmentFeeds extends Fragment
       }
       if(item.getTitle().equals(Util.getString(R.string.add_feed)))
       {
-         FeedDialog.showAddDialog(FeedsActivity.s_currentTags);
+         FeedDialog.showAddDialog();
          return true;
       }
       if(item.getTitle().equals(Util.getString(R.string.unread)))
@@ -130,16 +120,24 @@ class FragmentFeeds extends Fragment
       return super.onOptionsItemSelected(item);
    }
 
+   /* Updates and refreshes the tags with any new content. */
+   private static
+   void refreshFeeds()
+   {
+      Util.setRefreshingIcon(true);
+
+      /* Set the service handler in FeedsActivity so we can check and call it
+       * from ServiceUpdate. */
+      FeedsActivity.s_serviceHandler = new OnFinishService();
+      int currentPage = VIEW_PAGER.getCurrentItem();
+      Intent intent = Util.getServiceIntent(currentPage);
+      Util.getContext().startService(intent);
+   }
+
    private static
    class PageChange implements ViewPager.OnPageChangeListener
    {
       PageChange()
-      {
-      }
-
-      @Override
-      public
-      void onPageScrollStateChanged(int state)
       {
       }
 
@@ -158,31 +156,17 @@ class FragmentFeeds extends Fragment
             Update.page(pos);
          }
       }
+
+      @Override
+      public
+      void onPageScrollStateChanged(int state)
+      {
+      }
    }
 
-   static
+   static private
    class OnFinishService extends Handler
    {
-      /* Use this after content has been updated and you need to ManageFeedsRefresh */
-      private static
-      void refreshPages(int page)
-      {
-         Update.page(0);
-
-         int tagsLength = FeedsActivity.s_currentTags.length;
-         if(0 == page)
-         {
-            for(int i = 1; i < tagsLength; i++)
-            {
-               Update.page(i);
-            }
-         }
-         else
-         {
-            Update.page(page);
-         }
-      }
-
       /* The stuff we would like to run when the service completes. */
       @Override
       public
@@ -191,6 +175,26 @@ class FragmentFeeds extends Fragment
          Util.setRefreshingIcon(false);
          int page = msg.getData().getInt("page_number");
          refreshPages(page);
+      }
+
+      /* Use this after content has been updated and you need to ManageFeedsRefresh */
+      private static
+      void refreshPages(int page)
+      {
+         Update.page(0);
+
+         int tagsCount = Read.count(Constants.TAG_LIST);
+         if(0 == page)
+         {
+            for(int i = 1; i < tagsCount; i++)
+            {
+               Update.page(i);
+            }
+         }
+         else
+         {
+            Update.page(page);
+         }
       }
    }
 }

@@ -1,13 +1,13 @@
 package yay.poloure.simplerss;
+
 import android.widget.SeekBar;
 
 class SeekBarRefreshTimeChange implements SeekBar.OnSeekBarChangeListener
 {
+   private static final String[] REFRESH_TIMES = Util.getArray(R.array.refresh_times);
    private final AdapterSettingsFunctions.SettingsSeekHolder m_holder;
    private final String                                      m_settingsPath;
-   private static final String[] REFRESH_TIMES = Util.getArray(R.array.refresh_times);
 
-   public
    SeekBarRefreshTimeChange(AdapterSettingsFunctions.SettingsSeekHolder holder, String settingPath)
    {
       m_holder = holder;

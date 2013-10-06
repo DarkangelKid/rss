@@ -10,9 +10,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.SpinnerAdapter;
 
 import java.io.File;
@@ -22,11 +22,66 @@ class FragmentManageFeeds extends ListFragment
 {
    @Override
    public
-   void onCreate(Bundle savedInstanceState)
+   View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
-      super.onCreate(savedInstanceState);
+      return inflater.inflate(R.layout.listview_cards, container, false);
    }
 
+   /* Edit the feed. */
+   @Override
+   public
+   void onListItemClick(ListView l, View v, int position, long id)
+   {
+      super.onListItemClick(l, v, position, id);
+      Context con = Util.getContext();
+      LayoutInflater inf = LayoutInflater.from(con);
+      View editRssLayout = inf.inflate(R.layout.add_rss_dialog, null);
+      String[][] content = Read.csv();
+      String title = content[0][position];
+      String url = content[1][position];
+      String tag = content[2][position];
+
+      AdapterView<SpinnerAdapter> spinnerTag
+            = (AdapterView<SpinnerAdapter>) editRssLayout.findViewById(R.id.tag_spinner);
+
+      String[] currentTags = Read.file(Constants.TAG_LIST);
+      String[] spinnerTags = Arrays.copyOfRange(currentTags, 1, currentTags.length);
+
+      SpinnerAdapter adapter = new ArrayAdapter<String>(con, R.layout.group_spinner_text,
+            spinnerTags);
+      //adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
+      spinnerTag.setAdapter(adapter);
+      Util.setText(url, editRssLayout, R.id.URL_edit);
+      Util.setText(title, editRssLayout, R.id.name_edit);
+
+      spinnerTag.setSelection(Util.index(spinnerTags, tag));
+
+      AlertDialog.Builder build = new AlertDialog.Builder(con);
+      build.setTitle(con.getString(R.string.edit_dialog_title))
+            .setView(editRssLayout)
+            .setCancelable(true)
+            .setNegativeButton(con.getString(R.string.cancel_dialog), new OnDialogClickCancel());
+
+      AlertDialog editFeedDialog = build.create();
+      editFeedDialog.setButton(DialogInterface.BUTTON_POSITIVE,
+            con.getString(R.string.accept_dialog),
+            new OnDialogClickEdit(editRssLayout, spinnerTag, title));
+
+      editFeedDialog.show();
+   }
+
+   @Override
+   public
+   void onActivityCreated(Bundle savedInstanceState)
+   {
+      super.onActivityCreated(savedInstanceState);
+      setListAdapter(new AdapterManageFeeds());
+      getListView().setOnItemLongClickListener(
+            new FeedItemLongClick((AdapterManageFeeds) getListAdapter()));
+      Update.manageFeeds(getListView(), getListAdapter());
+   }
+
+   /* Add a new feed. */
    @Override
    public
    boolean onOptionsItemSelected(MenuItem item)
@@ -37,78 +92,10 @@ class FragmentManageFeeds extends ListFragment
       }
       if(Util.getString(R.string.add_feed).equals(item.getTitle()))
       {
-         FeedDialog.showAddDialog(FeedsActivity.s_currentTags);
+         FeedDialog.showAddDialog();
          return true;
       }
       return super.onOptionsItemSelected(item);
-   }
-
-   @Override
-   public
-   View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
-   {
-      return inflater.inflate(R.layout.listview_cards, container, false);
-   }
-
-   @Override
-   public
-   void onActivityCreated(Bundle savedInstanceState)
-   {
-      super.onActivityCreated(savedInstanceState);
-      setListAdapter(new AdapterManageFeeds());
-      getListView().setOnItemClickListener(new FeedClick());
-      getListView().setOnItemLongClickListener(
-            new FeedItemLongClick((AdapterManageFeeds) getListAdapter()));
-      Update.manageFeeds(getListView(), getListAdapter());
-   }
-
-   static
-   class FeedClick implements OnItemClickListener
-   {
-      static
-      void showEditDialog(String[] ctags, Context con, int position)
-      {
-         LayoutInflater inf = LayoutInflater.from(con);
-         View editRssLayout = inf.inflate(R.layout.add_rss_dialog, null);
-         String[][] content = Read.csv();
-         String title = content[0][position];
-         String url = content[1][position];
-         String tag = content[2][position];
-
-         AdapterView<SpinnerAdapter> spinnerTag
-               = (AdapterView<SpinnerAdapter>) editRssLayout.findViewById(R.id.tag_spinner);
-
-         String[] spinnerTags = Arrays.copyOfRange(ctags, 1, ctags.length);
-
-         SpinnerAdapter adapter = new ArrayAdapter<String>(con, R.layout.group_spinner_text,
-               spinnerTags);
-         //adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
-         spinnerTag.setAdapter(adapter);
-         Util.setText(url, editRssLayout, R.id.URL_edit);
-         Util.setText(title, editRssLayout, R.id.name_edit);
-
-         spinnerTag.setSelection(Util.index(spinnerTags, tag));
-
-         AlertDialog.Builder build = new AlertDialog.Builder(con);
-         build.setTitle(con.getString(R.string.edit_dialog_title))
-               .setView(editRssLayout)
-               .setCancelable(true)
-               .setNegativeButton(con.getString(R.string.cancel_dialog), new OnDialogClickCancel());
-
-         AlertDialog editFeedDialog = build.create();
-         editFeedDialog.setButton(DialogInterface.BUTTON_POSITIVE,
-               con.getString(R.string.accept_dialog),
-               new OnDialogClickEdit(editRssLayout, spinnerTag, editFeedDialog, title));
-
-         editFeedDialog.show();
-      }
-
-      @Override
-      public
-      void onItemClick(AdapterView<?> parent, View view, int position, long id)
-      {
-         showEditDialog(FeedsActivity.s_currentTags, Util.getContext(), position);
-      }
    }
 
    private static
@@ -116,34 +103,9 @@ class FragmentManageFeeds extends ListFragment
    {
       private final AdapterManageFeeds m_adapter;
 
-      public
       FeedDeleteClick(AdapterManageFeeds adpt)
       {
          m_adapter = adpt;
-      }
-
-      void deleteFeed(String feed, int pos)
-      {
-         /* Delete the feed's folder. */
-         Util.rmdir(new File(Util.getStorage() + Util.getPath(feed, "")));
-
-         /* Remove the feed from the index file. */
-         Write.removeLine(Constants.INDEX, feed, true);
-
-         Util.updateTags();
-         removeItem(pos);
-         m_adapter.notifyDataSetChanged();
-
-         /*Update.manageTags();*/
-      }
-
-      static
-      void removeItem(int position)
-      {
-         AdapterManageFeeds.s_titleArray = Util.arrayRemove(AdapterManageFeeds.s_titleArray,
-               position);
-         AdapterManageFeeds.s_infoArray = Util.arrayRemove(AdapterManageFeeds.s_infoArray,
-               position);
       }
 
       /* Delete the feed. */
@@ -151,16 +113,32 @@ class FragmentManageFeeds extends ListFragment
       public
       void onClick(DialogInterface dialog, int position)
       {
-         deleteFeed(m_adapter.getItem(position), position);
+         String feed = m_adapter.getItem(position);
+         /* Delete the feed's folder. */
+         Util.rmdir(new File(Util.getStorage() + Util.getPath(feed, "")));
+
+         /* Remove the feed from the index file. */
+         Write.removeLine(Constants.INDEX, feed, true);
+
+         Util.updateTags();
+         removeItem(position);
+         m_adapter.notifyDataSetChanged();
+
+         /*Update.manageTags();*/
+      }
+
+      void removeItem(int position)
+      {
+         m_adapter.m_titleArray = Util.arrayRemove(m_adapter.m_infoArray, position);
+         m_adapter.m_infoArray = Util.arrayRemove(m_adapter.m_infoArray, position);
       }
    }
 
-   static
+   static private
    class FeedClearCacheClick implements DialogInterface.OnClickListener
    {
       private final AdapterManageFeeds m_adapterManageFeeds;
 
-      public
       FeedClearCacheClick(AdapterManageFeeds adapterManageFeeds)
       {
          m_adapterManageFeeds = adapterManageFeeds;
@@ -175,7 +153,7 @@ class FragmentManageFeeds extends ListFragment
          String path = Util.getPath(feedName, "");
 
          Util.rmdir(new File(path));
-/* make the AsyncLoadImage and thumnail folders. */
+/* make the image and thumbnail folders. */
          Util.mkdir(path + Constants.IMAGE_DIR);
          Util.mkdir(path + Constants.THUMBNAIL_DIR);
 
@@ -186,11 +164,12 @@ class FragmentManageFeeds extends ListFragment
       }
    }
 
-   static
+   static private
    class FeedItemLongClick implements OnItemLongClickListener
    {
-      private AlertDialog.Builder m_build;
+      private final AlertDialog.Builder m_build;
 
+      private
       FeedItemLongClick(AdapterManageFeeds adapterManageFeeds)
       {
          m_build = new AlertDialog.Builder(Util.getContext());

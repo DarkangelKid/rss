@@ -8,29 +8,20 @@ import android.widget.TextView;
 
 class AdapterNavDrawer extends BaseAdapter
 {
-   static String[] s_tagArray;
-   static int[]    s_unreadArray;
-
    private static final int   TWELVE    = Math.round(
          12.0F * Util.getContext().getResources().getDisplayMetrics().density + 0.5f);
    private static final int[] NAV_ICONS = {
          R.drawable.feeds, R.drawable.manage, R.drawable.feeds,
    };
-
+   static  String[] s_tagArray;
+   static  int[]    s_unreadArray;
    private TextView m_navigationMainItem;
-
-   static
-   class NavigationTagItem
-   {
-      TextView title;
-      TextView m_unreadCountView;
-   }
 
    @Override
    public
-   long getItemId(int position)
+   int getCount()
    {
-      return position;
+      return null == s_tagArray ? 4 : s_tagArray.length + 4;
    }
 
    @Override
@@ -42,38 +33,9 @@ class AdapterNavDrawer extends BaseAdapter
 
    @Override
    public
-   int getCount()
+   long getItemId(int position)
    {
-      return null == s_tagArray ? 4 : s_tagArray.length + 4;
-   }
-
-   @Override
-   public
-   boolean isEnabled(int position)
-   {
-      return 3 != position;
-   }
-
-   @Override
-   public
-   int getViewTypeCount()
-   {
-      return 3;
-   }
-
-   @Override
-   public
-   int getItemViewType(int position)
-   {
-      if(3 > position)
-      {
-         return 0;
-      }
-
-      else
-      {
-         return 3 == position ? 1 : 2;
-      }
+      return position;
    }
 
    @Override
@@ -130,5 +92,41 @@ class AdapterNavDrawer extends BaseAdapter
          holder2.m_unreadCountView.setText("0".equals(number) ? "" : number);
       }
       return view;
+   }
+
+   @Override
+   public
+   boolean isEnabled(int position)
+   {
+      return 3 != position;
+   }
+
+   @Override
+   public
+   int getItemViewType(int position)
+   {
+      if(3 > position)
+      {
+         return 0;
+      }
+
+      else
+      {
+         return 3 == position ? 1 : 2;
+      }
+   }
+
+   @Override
+   public
+   int getViewTypeCount()
+   {
+      return 3;
+   }
+
+   private static
+   class NavigationTagItem
+   {
+      TextView title;
+      TextView m_unreadCountView;
    }
 }

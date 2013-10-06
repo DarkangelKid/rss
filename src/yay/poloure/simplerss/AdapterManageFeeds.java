@@ -7,26 +7,33 @@ import android.widget.TextView;
 
 class AdapterManageFeeds extends BaseAdapter
 {
-   static String[] s_titleArray = Util.EMPTY_STRING_ARRAY;
-   static String[] s_infoArray  = Util.EMPTY_STRING_ARRAY;
+   String[] m_titleArray = Util.EMPTY_STRING_ARRAY;
+   String[] m_infoArray  = Util.EMPTY_STRING_ARRAY;
 
    void setArrays(String[] titles, String... infos)
    {
-      s_titleArray = titles;
-      s_infoArray = infos;
+      m_titleArray = titles;
+      m_infoArray = infos;
    }
 
    void setPosition(int pos, String title, String info)
    {
-      s_titleArray[pos] = title;
-      s_infoArray[pos] = info;
+      m_titleArray[pos] = title;
+      m_infoArray[pos] = info;
    }
 
    @Override
    public
    int getCount()
    {
-      return s_titleArray.length;
+      return m_titleArray.length;
+   }
+
+   @Override
+   public
+   String getItem(int position)
+   {
+      return m_titleArray[position];
    }
 
    @Override
@@ -34,13 +41,6 @@ class AdapterManageFeeds extends BaseAdapter
    long getItemId(int position)
    {
       return position;
-   }
-
-   @Override
-   public
-   String getItem(int position)
-   {
-      return s_titleArray[position];
    }
 
    @Override
@@ -62,13 +62,13 @@ class AdapterManageFeeds extends BaseAdapter
          holder = (ViewHolder) view1.getTag();
       }
 
-      holder.m_title.setText(s_titleArray[position]);
-      holder.m_info.setText(s_infoArray[position]);
+      holder.m_title.setText(m_titleArray[position]);
+      holder.m_info.setText(m_infoArray[position]);
 
       return view1;
    }
 
-   static
+   private static
    class ViewHolder
    {
       TextView m_title;

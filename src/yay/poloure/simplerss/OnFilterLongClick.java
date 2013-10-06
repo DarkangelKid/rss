@@ -5,8 +5,8 @@ import android.widget.AdapterView;
 
 class OnFilterLongClick implements AdapterView.OnItemLongClickListener
 {
-   private AdapterManageFilters  m_filterAdapter;
-   private FragmentManageFilters m_filters;
+   private final AdapterManageFilters  m_filterAdapter;
+   private final FragmentManageFilters m_filters;
 
    public
    OnFilterLongClick(FragmentManageFilters filters, AdapterManageFilters adapter)

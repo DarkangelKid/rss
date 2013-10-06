@@ -6,16 +6,26 @@ import android.support.v4.app.FragmentPagerAdapter;
 
 class PagerAdapterFeeds extends FragmentPagerAdapter
 {
+   private String[] m_currentTags;
+
    PagerAdapterFeeds(FragmentManager fm)
    {
       super(fm);
+      m_currentTags = Read.file(Constants.TAG_LIST);
    }
 
    @Override
    public
    int getCount()
    {
-      return FeedsActivity.s_currentTags.length;
+      return m_currentTags.length;
+   }
+
+   @Override
+   public
+   String getPageTitle(int position)
+   {
+      return m_currentTags[position];
    }
 
    @Override
@@ -25,10 +35,8 @@ class PagerAdapterFeeds extends FragmentPagerAdapter
       return new FragmentCard();
    }
 
-   @Override
-   public
-   String getPageTitle(int position)
+   void updatePages()
    {
-      return FeedsActivity.s_currentTags[position];
+      m_currentTags = Read.file(Constants.TAG_LIST);
    }
 }

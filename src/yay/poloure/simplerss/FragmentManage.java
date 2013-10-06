@@ -3,6 +3,7 @@ package yay.poloure.simplerss;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.PagerTabStrip;
 import android.support.v4.view.ViewPager;
 import android.view.Gravity;
@@ -14,7 +15,6 @@ import android.view.ViewGroup;
 
 class FragmentManage extends Fragment
 {
-
    @Override
    public
    void onCreate(Bundle savedInstanceState)
@@ -28,6 +28,8 @@ class FragmentManage extends Fragment
    public
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
+      super.onCreateView(inflater, container, savedInstanceState);
+
       ViewPager pager = new ViewPager(Util.getContext());
       Constants.PAGER_TAB_STRIPS[1] = new PagerTabStrip(Util.getContext());
 
@@ -36,8 +38,9 @@ class FragmentManage extends Fragment
       layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
       layoutParams.gravity = Gravity.TOP;
 
+      FragmentManager fragmentManager = FeedsActivity.getActivity().getSupportFragmentManager();
+      pager.setAdapter(new PagerAdapterManage(fragmentManager));
       pager.addView(Constants.PAGER_TAB_STRIPS[1], layoutParams);
-      pager.setAdapter(new PagerAdapterManage(FeedsActivity.s_fragmentManager));
       pager.setId(0x2000);
 
       Constants.PAGER_TAB_STRIPS[1].setDrawFullUnderline(true);
@@ -54,7 +57,6 @@ class FragmentManage extends Fragment
    public
    void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
    {
-      FeedsActivity.s_optionsMenu = menu;
       FeedsActivity.s_optionsMenu.clear();
 
       inflater.inflate(R.menu.manage_overflow, FeedsActivity.s_optionsMenu);

@@ -1,13 +1,13 @@
 package yay.poloure.simplerss;
 
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.support.v4.widget.DrawerLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,45 +22,49 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.io.File;
-import java.util.Arrays;
+import java.lang.reflect.Array;
 import java.util.Set;
 import java.util.regex.Pattern;
 
 class AdapterCard extends BaseAdapter
 {
-   private static final Pattern PATTERN_THUMBNAILS = Pattern.compile(Constants.THUMBNAILS);
-   private static final int     SCREEN_WIDTH       = Util.getScreenWidth();
-   static final         int     EIGHT              = Math.round(
+   static final         int         EIGHT              = Math.round(
          8.0F * Util.getContext().getResources().getDisplayMetrics().density + 0.5f);
-
-   static Set<String> s_readLinks = Read.set(Constants.READ_ITEMS);
-
-   boolean m_touchedScreen = true;
-   FeedItem[] m_items;
+   static final         Set<String> s_readLinks        = Read.set(Constants.READ_ITEMS);
+   private static final Pattern     PATTERN_THUMBNAILS = Pattern.compile(Constants.THUMBNAILS);
+   private static final int         SCREEN_WIDTH       = Util.getScreenWidth();
+   private static final int         VIEW_TYPE_COUNT    = 4;
+   boolean    m_touchedScreen = true;
+   FeedItem[] m_items         = new FeedItem[0];
    private boolean m_firstGetItem = true;
-   private ListView m_listview;
-
-   private static final int VIEW_TYPE_COUNT = 4;
-
-   private static
-   <T> T[] concat(T[] first, T... second)
-   {
-      if(null == first)
-      {
-         return second;
-      }
-      if(null == second)
-      {
-         return first;
-      }
-      T[] result = Arrays.copyOf(first, first.length + second.length);
-      System.arraycopy(second, 0, result, first.length, second.length);
-      return result;
-   }
+   private ListView m_listView;
 
    void prependArray(FeedItem... items)
    {
       m_items = concat(items, m_items);
+   }
+
+   private static
+   <T> T[] concat(T[] first, T[]... rest)
+   {
+      int length = first.length;
+      for(T[] array : rest)
+      {
+         length += array.length;
+      }
+
+      @SuppressWarnings("unchecked") T[] result = (T[]) Array.newInstance(
+            first.getClass().getComponentType(), length);
+      System.arraycopy(first, 0, result, 0, first.length);
+
+      int offset = first.length;
+      for(T[] array : rest)
+      {
+         System.arraycopy(array, 0, result, offset, array.length);
+         offset += array.length;
+      }
+
+      return result;
    }
 
    @Override
@@ -93,9 +97,9 @@ class AdapterCard extends BaseAdapter
 
       if(m_firstGetItem)
       {
-         m_listview = (ListView) parent;
-         m_listview.setScrollingCacheEnabled(false);
-         m_listview.setOnScrollListener(new CardScrollListener());
+         m_listView = (ListView) parent;
+         m_listView.setScrollingCacheEnabled(false);
+         m_listView.setOnScrollListener(new CardScrollListener());
          m_firstGetItem = false;
       }
 
@@ -115,7 +119,6 @@ class AdapterCard extends BaseAdapter
             holder.m_url = (TextView) cv1.findViewById(R.id.url);
             holder.m_des = (TextView) cv1.findViewById(R.id.description);
             holder.m_imageView = (ImageView) cv1.findViewById(R.id.image);
-            cv1.setOnClickListener(new WebviewMode());
             cv1.setOnLongClickListener(new OnCardLongClick());
             cv1.setTag(holder);
          }
@@ -129,7 +132,7 @@ class AdapterCard extends BaseAdapter
          holder.m_title.setText(title);
          holder.m_des.setText(m_items[position].description);
          holder.m_url.setText(link);
-         Util.setCardAlpha(holder.m_title, holder.m_url, holder.m_imageView, holder.m_des, link);
+         setCardAlpha(holder.m_title, holder.m_url, holder.m_imageView, holder.m_des, link);
       }
       /* card_no_des_img.xml no description, image, m_title. */
       else if(1 == viewType)
@@ -142,7 +145,6 @@ class AdapterCard extends BaseAdapter
             holder.title = (TextView) cv1.findViewById(R.id.title);
             holder.url = (TextView) cv1.findViewById(R.id.url);
             holder.image = (ImageView) cv1.findViewById(R.id.image);
-            cv1.setOnClickListener(new WebviewMode());
             cv1.setOnLongClickListener(new OnCardLongClick());
             cv1.setTag(holder);
          }
@@ -155,7 +157,7 @@ class AdapterCard extends BaseAdapter
 
          holder.title.setText(title);
          holder.url.setText(link);
-         Util.setCardAlpha(holder.title, holder.url, holder.image, null, link);
+         setCardAlpha(holder.title, holder.url, holder.image, null, link);
       }
       /* card_des_no_img.xml no image, description, title. */
       else if(2 == viewType)
@@ -168,7 +170,6 @@ class AdapterCard extends BaseAdapter
             holder.title = (TextView) cv1.findViewById(R.id.title);
             holder.url = (TextView) cv1.findViewById(R.id.url);
             holder.des = (TextView) cv1.findViewById(R.id.description);
-            cv1.setOnClickListener(new WebviewMode());
             cv1.setOnLongClickListener(new OnCardLongClick());
             cv1.setTag(holder);
          }
@@ -180,7 +181,7 @@ class AdapterCard extends BaseAdapter
          holder.title.setText(title);
          holder.des.setText(m_items[position].description);
          holder.url.setText(link);
-         Util.setCardAlpha(holder.title, holder.url, null, holder.des, link);
+         setCardAlpha(holder.title, holder.url, null, holder.des, link);
       }
       /* No description or image. */
       else if(3 == viewType)
@@ -192,7 +193,6 @@ class AdapterCard extends BaseAdapter
             holder = new BlankHolder();
             holder.title = (TextView) cv1.findViewById(R.id.title);
             holder.url = (TextView) cv1.findViewById(R.id.url);
-            cv1.setOnClickListener(new WebviewMode());
             cv1.setOnLongClickListener(new OnCardLongClick());
             cv1.setTag(holder);
          }
@@ -204,37 +204,17 @@ class AdapterCard extends BaseAdapter
          holder.title.setText(title);
          holder.url.setText(link);
 
-         Util.setCardAlpha(holder.title, holder.url, null, null, link);
+         setCardAlpha(holder.title, holder.url, null, null, link);
       }
 
       /* The logic that tells whether the item is Read or not. */
-      if(View.VISIBLE == m_listview.getVisibility() && position + 1 < m_items.length &&
+      if(View.VISIBLE == m_listView.getVisibility() && position + 1 < m_items.length &&
             m_touchedScreen)
       {
          s_readLinks.add(m_items[position + 1].url);
       }
 
       return cv1;
-   }
-
-   private
-   void displayImage(ImageView v, int p)
-   {
-      v.setImageDrawable(new ColorDrawable(Color.WHITE));
-      LayoutParams lp = v.getLayoutParams();
-
-      lp.height = (int) Math.round((double) SCREEN_WIDTH / m_items[p].width * m_items[p].height);
-      v.setLayoutParams(lp);
-      v.setTag(p);
-
-      if(Constants.HONEYCOMB)
-      {
-         new AsyncLoadImage().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, v, v.getTag());
-      }
-      else
-      {
-         new AsyncLoadImage().execute(v, v.getTag());
-      }
    }
 
    @Override
@@ -244,7 +224,7 @@ class AdapterCard extends BaseAdapter
       boolean img = 0 != m_items[position].width;
 
       boolean des = null != m_items[position].description &&
-            !m_items[position].description.isEmpty();
+            0 != m_items[position].description.length();
 
       if(img && des)
       {
@@ -268,7 +248,66 @@ class AdapterCard extends BaseAdapter
       return VIEW_TYPE_COUNT;
    }
 
-   static
+   private
+   void displayImage(ImageView v, int p)
+   {
+      v.setImageDrawable(new ColorDrawable(Color.WHITE));
+      LayoutParams lp = v.getLayoutParams();
+
+      lp.height = (int) Math.round((double) SCREEN_WIDTH / m_items[p].width * m_items[p].height);
+      v.setLayoutParams(lp);
+      v.setTag(p);
+
+      if(Constants.HONEYCOMB)
+      {
+
+         new AsyncLoadImage().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, v, v.getTag());
+      }
+      else
+      {
+         new AsyncLoadImage().execute(v, v.getTag());
+      }
+   }
+
+   private static
+   void setCardAlpha(TextView title, TextView url, ImageView image, TextView des, String link)
+   {
+      Resources res = Util.getContext().getResources();
+
+      if(s_readLinks.contains(link))
+      {
+         title.setTextColor(res.getColor(R.color.title_grey));
+         url.setTextColor(res.getColor(R.color.link_grey));
+
+         if(null != des)
+         {
+            des.setTextColor(res.getColor(R.color.des_grey));
+         }
+
+         if(null != image)
+         {
+            image.setAlpha(0.5f);
+         }
+      }
+      else
+      {
+         Write.log("Not read.");
+         title.setTextColor(res.getColor(R.color.title_black));
+         url.setTextColor(res.getColor(R.color.link_black));
+
+         if(null != des)
+         {
+            des.setTextColor(res.getColor(R.color.des_black));
+         }
+
+         if(null != image)
+         {
+            image.setAlpha(1.0f);
+         }
+      }
+   }
+
+   private static
    class FullHolder
    {
       TextView  m_title;
@@ -277,7 +316,7 @@ class AdapterCard extends BaseAdapter
       ImageView m_imageView;
    }
 
-   static
+   private static
    class DesHolder
    {
       TextView title;
@@ -285,7 +324,7 @@ class AdapterCard extends BaseAdapter
       TextView des;
    }
 
-   static
+   private static
    class ImgHolder
    {
       TextView  title;
@@ -293,38 +332,14 @@ class AdapterCard extends BaseAdapter
       ImageView image;
    }
 
-   static
+   private static
    class BlankHolder
    {
       TextView title;
       TextView url;
    }
 
-   private static
-   class WebviewMode implements View.OnClickListener
-   {
-      WebviewMode()
-      {
-      }
-
-      @Override
-      public
-      void onClick(View v)
-      {
-         FeedsActivity.s_actionBar.setTitle(Constants.OFFLINE);
-         NavDrawer.s_drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-         NavDrawer.s_drawerToggle.setDrawerIndicatorEnabled(false);
-         FeedsActivity.s_actionBar.setDisplayHomeAsUpEnabled(true);
-         FeedsActivity.s_fragmentManager
-               .beginTransaction()
-               .hide(FeedsActivity.s_fragmentManager.findFragmentByTag(NavDrawer.NAV_TITLES[0]))
-               .add(R.id.drawer_layout, new FragmentWebView(), Constants.OFFLINE)
-               .addToBackStack("BACK")
-               .commit();
-      }
-   }
-
-   static
+   static private
    class ImageClick implements View.OnClickListener
    {
       final String m_imagePath;
@@ -358,6 +373,7 @@ class AdapterCard extends BaseAdapter
       }
    }
 
+   private
    class AsyncLoadImage extends AsyncTask<Object, Void, Object[]>
    {
       ImageView m_imageView;
@@ -408,22 +424,12 @@ class AdapterCard extends BaseAdapter
    private
    class CardScrollListener implements AbsListView.OnScrollListener
    {
-      CardScrollListener()
-      {
-      }
-
-      @Override
-      public
-      void onScroll(AbsListView v, int fir, int visible, int total)
-      {
-      }
-
       @Override
       public
       void onScrollStateChanged(AbsListView view, int scrollState)
       {
-         if(m_listview.getChildAt(0).getTop() == EIGHT &&
-               View.VISIBLE == m_listview.getVisibility() && m_touchedScreen)
+         if(m_listView.getChildAt(0).getTop() == EIGHT &&
+               View.VISIBLE == m_listView.getVisibility() && m_touchedScreen)
          {
             s_readLinks.add(m_items[0].url);
          }
@@ -432,6 +438,12 @@ class AdapterCard extends BaseAdapter
          {
             Update.navigation();
          }
+      }
+
+      @Override
+      public
+      void onScroll(AbsListView v, int fir, int visible, int total)
+      {
       }
    }
 }

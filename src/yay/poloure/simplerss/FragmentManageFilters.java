@@ -14,41 +14,12 @@ import android.widget.ListView;
 
 class FragmentManageFilters extends ListFragment
 {
-   private static
-   void showAddFilterDialog()
-   {
-      Context con = Util.getContext();
-      LayoutInflater inf = LayoutInflater.from(con);
-      View addFilterLayout = inf.inflate(R.layout.add_filter_dialog, null);
-
-      AlertDialog.Builder build = new AlertDialog.Builder(con);
-      build.setTitle("Add Filter")
-            .setView(addFilterLayout)
-            .setCancelable(true)
-            .setNegativeButton(con.getString(R.string.cancel_dialog), new OnDialogClickCancel());
-      AlertDialog addFilterDialog = build.create();
-
-      addFilterDialog.getWindow()
-            .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-
-      addFilterDialog.setButton(DialogInterface.BUTTON_POSITIVE, con.getString(R.string.add_dialog),
-            new OnFilterDialogClickAdd(addFilterLayout, addFilterDialog));
-      addFilterDialog.show();
-   }
-
    @Override
    public
    void onCreate(Bundle savedInstanceState)
    {
       super.onCreate(savedInstanceState);
       setHasOptionsMenu(true);
-   }
-
-   @Override
-   public
-   View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
-   {
-      return inflater.inflate(R.layout.listview_cards, container, false);
    }
 
    @Override
@@ -81,6 +52,35 @@ class FragmentManageFilters extends ListFragment
          return true;
       }
       return super.onOptionsItemSelected(item);
+   }
+
+   private static
+   void showAddFilterDialog()
+   {
+      Context con = Util.getContext();
+      LayoutInflater inf = LayoutInflater.from(con);
+      View addFilterLayout = inf.inflate(R.layout.add_filter_dialog, null);
+
+      AlertDialog.Builder build = new AlertDialog.Builder(con);
+      build.setTitle("Add Filter")
+            .setView(addFilterLayout)
+            .setCancelable(true)
+            .setNegativeButton(con.getString(R.string.cancel_dialog), new OnDialogClickCancel());
+      AlertDialog addFilterDialog = build.create();
+
+      addFilterDialog.getWindow()
+            .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+
+      addFilterDialog.setButton(DialogInterface.BUTTON_POSITIVE, con.getString(R.string.add_dialog),
+            new OnFilterDialogClickAdd(addFilterLayout));
+      addFilterDialog.show();
+   }
+
+   @Override
+   public
+   View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+   {
+      return inflater.inflate(R.layout.listview_cards, container, false);
    }
 
 }

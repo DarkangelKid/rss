@@ -117,7 +117,7 @@ class AdapterSettingsFunctions extends BaseAdapter
 
          /* Load the saved value and set the progress.*/
          String checker = Read.setting(settingPath);
-         int time = checker.isEmpty() ? 3 : Util.stoi(checker);
+         int time = 0 == checker.length() ? 3 : Util.stoi(checker);
          holder.seekbar.setProgress(index(TIMES, time));
       }
       return cv1;

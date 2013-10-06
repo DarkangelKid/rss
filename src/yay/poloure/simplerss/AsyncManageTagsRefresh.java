@@ -7,14 +7,12 @@ import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
-public
 class AsyncManageTagsRefresh extends AsyncTask<Void, String[], Void>
 {
-   final Animation animFadeIn = AnimationUtils.loadAnimation(Util.getContext(),
+   private final Animation animFadeIn = AnimationUtils.loadAnimation(Util.getContext(),
          android.R.anim.fade_in);
-
-   ListView    m_listView;
-   ListAdapter m_adapter;
+   private final ListView    m_listView;
+   private final ListAdapter m_adapter;
 
    AsyncManageTagsRefresh(ListView listView, ListAdapter adapter)
    {
@@ -27,17 +25,20 @@ class AsyncManageTagsRefresh extends AsyncTask<Void, String[], Void>
       }
    }
 
-   static
-   void setArrays(String[] tags, String... infos)
+   @Override
+   protected
+   Void doInBackground(Void... nothing)
    {
-      AdapterManagerTags.s_tagArray = tags;
-      AdapterManagerTags.s_infoArray = infos;
+      String[][] content = getInfoArrays();
+      publishProgress(content[1], content[0]);
+      return null;
    }
 
-   static
-   String[][] getInfoArrays(String... ctags)
+   private static
+   String[][] getInfoArrays()
    {
-      int tagCount = ctags.length;
+      String[] currentTags = Read.file(Constants.TAG_LIST);
+      int tagCount = currentTags.length;
       String[] tagArray = new String[tagCount];
       String[] infoArray = new String[tagCount];
       StringBuilder info = new StringBuilder(40);
@@ -49,7 +50,7 @@ class AsyncManageTagsRefresh extends AsyncTask<Void, String[], Void>
       for(int i = 0; i < tagCount; i++)
       {
          info.setLength(0);
-         tagArray[i] = ctags[i];
+         tagArray[i] = currentTags[i];
 
          if(0 == i)
          {
@@ -60,7 +61,7 @@ class AsyncManageTagsRefresh extends AsyncTask<Void, String[], Void>
             int feedsCount = feeds.length;
             for(int j = 0; j < feedsCount; j++)
             {
-               if(ctags[i].equals(tags[j]))
+               if(currentTags[i].equals(tags[j]))
                {
                   info.append(feeds[j]).append(", ");
                }
@@ -71,15 +72,6 @@ class AsyncManageTagsRefresh extends AsyncTask<Void, String[], Void>
          /* 0 is meant to be total. */
       infoArray[0] = 0 + " items • " + infoArray[0];
       return new String[][]{infoArray, tagArray};
-   }
-
-   @Override
-   protected
-   Void doInBackground(Void... nothing)
-   {
-      String[][] content = getInfoArrays(FeedsActivity.s_currentTags);
-      publishProgress(content[1], content[0]);
-      return null;
    }
 
    @Override
@@ -99,5 +91,12 @@ class AsyncManageTagsRefresh extends AsyncTask<Void, String[], Void>
          setArrays(values[0], values[1]);
          ((BaseAdapter) m_adapter).notifyDataSetChanged();
       }
+   }
+
+   private static
+   void setArrays(String[] tags, String... infos)
+   {
+      AdapterManagerTags.s_tagArray = tags;
+      AdapterManagerTags.s_infoArray = infos;
    }
 }

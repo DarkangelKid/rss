@@ -9,15 +9,11 @@ class OnDialogClickAdd implements DialogInterface.OnClickListener
 {
    private final View                        m_addRssDialog;
    private final AdapterView<SpinnerAdapter> m_tagMenu;
-   private final AlertDialog                 m_addFeedDialog;
 
-   public
-   OnDialogClickAdd(View addRssDialog, AdapterView<SpinnerAdapter> spinnerTag,
-         AlertDialog addFeedDialog)
+   OnDialogClickAdd(View addRssDialog, AdapterView<SpinnerAdapter> spinnerTag)
    {
       m_addRssDialog = addRssDialog;
       m_tagMenu = spinnerTag;
-      m_addFeedDialog = addFeedDialog;
    }
 
    @Override
@@ -28,7 +24,7 @@ class OnDialogClickAdd implements DialogInterface.OnClickListener
       String url = Util.getText(m_addRssDialog, R.id.URL_edit);
       String name = Util.getText(m_addRssDialog, R.id.name_edit);
 
-      if(tag.isEmpty())
+      if(0 == tag.length())
       {
          try
          {
@@ -45,6 +41,6 @@ class OnDialogClickAdd implements DialogInterface.OnClickListener
          tag = tag.toLowerCase(Constants.LOCALE);
       }
 
-      Update.executeFeedCheck(m_addFeedDialog, tag, name, Constants.ADD, "", url, which);
+      Update.executeFeedCheck((AlertDialog) dialog, tag, name, Constants.ADD, "", url);
    }
 }

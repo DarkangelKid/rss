@@ -21,13 +21,13 @@ class AdapterSettingsUi extends BaseAdapter
          Color.rgb(255, 187, 51), // orange
          Color.rgb(255, 68, 68) // red
    };
-   private static final float    COLOR_SELECT_OPACITY = 0.5f;
+   private static final float    COLOR_SELECT_OPACITY = 0.3f;
    private static final String[] INTERFACE_TITLES     = Util.getArray(
          R.array.settings_interface_titles);
    private static final String[] INTERFACE_SUMMARIES  = Util.getArray(
          R.array.settings_interface_summaries);
-   private static ImageView[] s_colorViews;
-   private        TextView    settings_heading;
+   private ImageView[] m_colorViews;
+   private TextView    settings_heading;
 
    @Override
    public
@@ -104,19 +104,19 @@ class AdapterSettingsUi extends BaseAdapter
 
          String colour = 0 == colorArray.length ? "blue" : colorArray[0];
 
-         /* Save the private static variable s_colorViews. */
-         s_colorViews = new ImageView[]{
+         /* Save the private static variable m_colorViews. */
+         m_colorViews = new ImageView[]{
                holder.blue, holder.purple, holder.green, holder.yellow, holder.red,
          };
 
          /* Set the alpha to 0.5 if not the currently selected colour. */
-         int viewsLength = s_colorViews.length;
+         int viewsLength = m_colorViews.length;
          for(int i = 0; i < viewsLength; i++)
          {
-            s_colorViews[i].setOnClickListener(new ColorClick(i));
+            m_colorViews[i].setOnClickListener(new ColorClick(i));
 
             float alpha = colour.equals(HOLO_COLORS[i]) ? 1.0f : COLOR_SELECT_OPACITY;
-            s_colorViews[i].setAlpha(alpha);
+            m_colorViews[i].setAlpha(alpha);
          }
       }
 
@@ -169,7 +169,7 @@ class AdapterSettingsUi extends BaseAdapter
       return 3;
    }
 
-   static
+   private static
    class SettingsColorHolder
    {
       TextView  title;
@@ -181,14 +181,14 @@ class AdapterSettingsUi extends BaseAdapter
       ImageView red;
    }
 
-   static
    class ColorClick implements OnClickListener
    {
-      final int clicked_colour;
+      private final int m_clickedColour;
 
+      private
       ColorClick(int colour)
       {
-         clicked_colour = colour;
+         m_clickedColour = colour;
       }
 
       @Override
@@ -198,12 +198,12 @@ class AdapterSettingsUi extends BaseAdapter
          /* Write the new colour to file. */
          String colorSettingsPath = Constants.SETTINGS_DIR + Constants.STRIP_COLOR;
          Util.remove(colorSettingsPath);
-         Write.single(colorSettingsPath, HOLO_COLORS[clicked_colour]);
+         Write.single(colorSettingsPath, HOLO_COLORS[m_clickedColour]);
 
          /* Change the selected square to alpha 1 and the rest to 0.5. */
-         for(ImageView colour : s_colorViews)
+         for(ImageView colour : m_colorViews)
          {
-            colour.setAlpha(0.5f);
+            colour.setAlpha(COLOR_SELECT_OPACITY);
          }
          v.setAlpha(1.0f);
 

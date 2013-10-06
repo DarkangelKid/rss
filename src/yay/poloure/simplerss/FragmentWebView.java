@@ -7,13 +7,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
-import android.widget.TextView;
 
 class FragmentWebView extends Fragment
 {
    private WebView     m_webView;
    private FrameLayout view;
-   private TextView    text;
 
    @Override
    public
@@ -26,24 +24,8 @@ class FragmentWebView extends Fragment
 
       view = new FrameLayout(Util.getContext());
       m_webView = new WebView(Util.getContext());
-      //view.addView(m_webView, LayoutParams.MATCH_PARENT);
-
-         /*text = new TextView();
-         text.setText("webview");
-         text.setGravity(Gravity.CENTER);
-         text.setVisibility(View.GONE);
-         view.addView(text, android.widget.FrameLayout.LayoutParams.WRAP_CONTENT);*/
 
       return view;
-   }
-
-   @Override
-   public
-   void onPause()
-   {
-      /* min api 11. */
-      m_webView.onPause();
-      super.onPause();
    }
 
    @Override
@@ -57,6 +39,15 @@ class FragmentWebView extends Fragment
 
    @Override
    public
+   void onPause()
+   {
+      /* min api 11. */
+      m_webView.onPause();
+      super.onPause();
+   }
+
+   @Override
+   public
    void onDestroy()
    {
       if(null != m_webView)
@@ -66,10 +57,5 @@ class FragmentWebView extends Fragment
          m_webView.destroy();
       }
       super.onDestroy();
-   }
-
-   WebView getWebView()
-   {
-      return m_webView;
    }
 }

@@ -8,7 +8,7 @@ import android.net.Uri;
 
 class OnCardContextMenuClick implements DialogInterface.OnClickListener
 {
-   private String m_url;
+   private final String m_url;
 
    public
    OnCardContextMenuClick(String url)
@@ -21,18 +21,24 @@ class OnCardContextMenuClick implements DialogInterface.OnClickListener
    void onClick(DialogInterface dialog, int position)
    {
       Context con = Util.getContext();
-      switch(position)
+      if(0 == position)
       {
-         case 0:
-            ClipboardManager clipboard = (ClipboardManager) con.getSystemService(
-                  Context.CLIPBOARD_SERVICE);
-            ClipData clip = ClipData.newPlainText("label", m_url);
+         ClipboardManager clipboard = (ClipboardManager) con.getSystemService(
+               Context.CLIPBOARD_SERVICE);
+
+         if(Constants.HONEYCOMB)
+         {
+            ClipData clip = ClipData.newPlainText("Url", m_url);
             clipboard.setPrimaryClip(clip);
-            break;
-         case 1:
-            con.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(m_url)));
-         /*case(2):
-           break;*/
+         }
+         else
+         {
+            clipboard.setText(m_url);
+         }
+      }
+      else if(1 == position)
+      {
+         con.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(m_url)));
       }
    }
 }

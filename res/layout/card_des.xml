@@ -5,7 +5,7 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:text="@+id/description"
-      android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small"
+      android:textAppearance="@android:style/TextAppearance.Small"
       android:textColor="#ff000000"
       android:paddingTop="2dp"
       android:paddingBottom="8dp"

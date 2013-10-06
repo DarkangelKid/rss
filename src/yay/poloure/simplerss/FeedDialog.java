@@ -21,12 +21,16 @@ import java.util.regex.Pattern;
 class FeedDialog
 {
    static
-   void showAddDialog(String... ctags)
+   void showAddDialog()
    {
       Context con = Util.getContext();
       LayoutInflater inf = LayoutInflater.from(con);
       View addFeedLayout = inf.inflate(R.layout.add_rss_dialog, null);
-      String[] spinnerTags = Arrays.copyOfRange(ctags, 1, ctags.length);
+
+      /* Remove all from the spinner. */
+      String[] currentTags = Read.file(Constants.TAG_LIST);
+      String[] spinnerTags = Arrays.copyOfRange(currentTags, 1, currentTags.length);
+
       AdapterView<SpinnerAdapter> spinnerTag
             = (AdapterView<SpinnerAdapter>) addFeedLayout.findViewById(R.id.tag_spinner);
 
@@ -44,7 +48,7 @@ class FeedDialog
             con.getString(R.string.cancel_dialog), new OnDialogClickCancel());
 
       addFeedDialog.setButton(DialogInterface.BUTTON_POSITIVE, con.getString(R.string.add_dialog),
-            new OnDialogClickAdd(addFeedLayout, spinnerTag, addFeedDialog));
+            new OnDialogClickAdd(addFeedLayout, spinnerTag));
 
       addFeedDialog.show();
    }
@@ -54,25 +58,22 @@ class FeedDialog
    {
       static final Pattern ILLEGAL_FILE_CHARS = Pattern.compile("[/\\?%*|<>:]");
       static final Pattern SPLIT_SPACE        = Pattern.compile(" ");
-      AlertDialog m_dialog;
-      String      m_mode;
-      String      m_tag;
-      String      m_title;
-      boolean     m_feedExists;
-      String      name;
-      int         m_position;
+      final AlertDialog m_dialog;
+      final String      m_mode;
+      final String      m_title;
+      String  m_tag;
+      boolean m_feedExists;
+      String  name;
       private boolean m_existingTag;
 
 
-      CheckFeed(AlertDialog dialog, String tag, String feedName, String mode, String currentTitle,
-            int position)
+      CheckFeed(AlertDialog dialog, String tag, String feedName, String mode, String currentTitle)
       {
          m_dialog = dialog;
          m_tag = tag;
          name = feedName;
          m_mode = mode;
          m_title = currentTitle;
-         m_position = position;
          Button button = m_dialog.getButton(DialogInterface.BUTTON_POSITIVE);
          if(null != button)
          {
@@ -102,7 +103,7 @@ class FeedDialog
          String[] currentTags = Read.file(Constants.TAG_LIST);
          if(-1 != Util.index(currentTags, m_tag))
          {
-            m_existingTag = true;
+            m_existingTag = false;
          }
 
          String[] checkList = url[0].contains("http") ? new String[]{url[0]} : new String[]{
@@ -160,6 +161,23 @@ class FeedDialog
          return new String[]{feedUrl, feedTitle};
       }
 
+      static
+      byte[] concat(byte[] first, byte... second)
+      {
+         if(null == first)
+         {
+            return second;
+         }
+         if(null == second)
+         {
+            return first;
+         }
+         byte[] result = new byte[first.length + second.length];
+         System.arraycopy(first, 0, result, 0, first.length);
+         System.arraycopy(second, 0, result, first.length, second.length);
+         return result;
+      }
+
       @Override
       protected
       void onPostExecute(String[] result)
@@ -175,12 +193,12 @@ class FeedDialog
             return;
          }
 
-         if(!m_existingTag)
+         if(m_existingTag)
          {
             Write.single(Constants.TAG_LIST, m_tag + Constants.NL);
             Util.updateTags();
          }
-         if(name.isEmpty())
+         if(0 == name.length())
          {
             name = result[1];
          }
@@ -205,7 +223,7 @@ class FeedDialog
       /* Save the feed to the index. */
             Write.single(Constants.INDEX, feedInfo);
 
-      /* Update the manage listviews with the new information. */
+      /* TODO Update the manage listviews with the new information. */
             //if(null != PagerAdapterManage.MANAGE_FRAGMENTS[1].getListAdapter())
             {
                //  Update.manageFeeds();
@@ -250,22 +268,6 @@ class FeedDialog
          /// To ManageFeedsRefresh the counts and the order of the tags.
          Util.updateTags();
          Update.manageTags(fragmentManageFeeds.getListView(), adapterManageFeeds);
-      }
-
-      static
-      byte[] concat(byte[] first, byte... second)
-      {
-         if(null == first)
-         {
-            return second;
-         }
-         if(null == second)
-         {
-            return first;
-         }
-         byte[] result = Arrays.copyOf(first, first.length + second.length);
-         System.arraycopy(second, 0, result, first.length, second.length);
-         return result;
       }
    }
 
