@@ -42,20 +42,24 @@ class ServiceUpdate extends IntentService
       String[] urls = content[1];
       String[] tags = content[2];
 
-      /* Download and parse each feed in the m_imageViewTag. */
+      /* Download and parse each feed in the index. */
       int namesLength = names.length;
       for(int i = 0; i < namesLength; i++)
       {
          if(tags[i].equals(tag) || tag.equals(Constants.ALL_TAG))
          {
+            String feedPath = Util.getPath(names[i], "");
+            if(Util.isNonExisting(feedPath))
+            {
+               Write.log(256);
+               Util.mkdir(feedPath + Constants.IMAGE_DIR);
+               Util.mkdir(feedPath + Constants.THUMBNAIL_DIR);
+            }
+
             boolean success = Write.download(urls[i], names[i] + Constants.STORE);
             if(success)
             {
                FeedParser.parseFeed(names[i]);
-            }
-            else
-            {
-               Util.post("Download of " + urls[i] + " failed.");
             }
          }
       }

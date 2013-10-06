@@ -89,7 +89,7 @@ class Read
       }
       catch(FileNotFoundException e)
       {
-         e.printStackTrace();
+         //e.printStackTrace();
          return Util.EMPTY_STRING_ARRAY;
       }
       catch(UnsupportedEncodingException e)
@@ -144,7 +144,7 @@ class Read
       }
       catch(FileNotFoundException e)
       {
-         e.printStackTrace();
+         //e.printStackTrace();
       }
       catch(UnsupportedEncodingException e)
       {

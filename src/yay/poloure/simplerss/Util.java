@@ -14,10 +14,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.File;
-import java.util.Set;
+import java.util.Collection;
+import java.util.HashSet;
 
 class Util
 {
@@ -158,38 +158,10 @@ class Util
       String mounted = Environment.MEDIA_MOUNTED;
       if(!mounted.equals(Environment.getExternalStorageState()))
       {
-         post(Write.MEDIA_UNMOUNTED);
          return true;
       }
 
       return false;
-   }
-
-   /* This will log and toast any message. */
-   static
-   void post(CharSequence message)
-   {
-      /* If this is called from off the UI thread, it will die. */
-      try
-      {
-         /* If the activity is running, make a toast notification.
-            * Log the event regardless. */
-         if(null != FeedsActivity.s_serviceHandler)
-         {
-            Toast.makeText(s_context, message, Toast.LENGTH_LONG).show();
-         }
-
-         /* This function can be called when no media, so this is optional. */
-         String mounted = Environment.MEDIA_MOUNTED;
-         if(mounted.equals(Environment.getExternalStorageState()))
-         {
-            Write.log((String) message);
-         }
-      }
-      catch(RuntimeException e)
-      {
-         e.printStackTrace();
-      }
    }
 
    static
@@ -229,7 +201,9 @@ class Util
    static
    int[] getUnreadCounts()
    {
-      Set<String> readLinks = AdapterCard.s_readLinks;
+      Collection<String> readLinks = new HashSet<String>(AdapterCard.s_readLinks.size());
+      readLinks.addAll(AdapterCard.s_readLinks);
+
       String[] currentTags = Read.file(Constants.TAG_LIST);
 
       String[][] content = Read.csv();
@@ -394,14 +368,10 @@ class Util
       /* TODO Check to see if it is the desired first then skip these. */
       String state = Environment.getExternalStorageState();
 
-      int errorsLength = Constants.MEDIA_ERRORS.length;
-      for(int i = 0; i < errorsLength; i++)
+      String mounted = Environment.MEDIA_MOUNTED;
+      if(!mounted.equals(state))
       {
-         if(state.equals(Constants.MEDIA_ERRORS[i]))
-         {
-            post(Constants.MEDIA_ERROR_MESSAGES[i]);
-            return null;
-         }
+         return null;
       }
 
       /* If it has reached here the state is MEDIA_MOUNTED and we can continue.
@@ -484,7 +454,7 @@ class Util
    }
 
    static
-   boolean exists(String path)
+   boolean isNonExisting(String path)
    {
       String path1 = getStorage() + path;
       if(isUsingSd() || path1.contains(Constants.IMAGE_DIR) ||

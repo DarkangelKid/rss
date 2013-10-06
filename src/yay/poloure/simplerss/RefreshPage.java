@@ -107,7 +107,6 @@ class RefreshPage extends AsyncTask<Integer, FeedItem, Animation>
                catch(RuntimeException e)
                {
                   e.printStackTrace();
-                  Util.post("Unable to parse date.");
                   return null;
                }
                /* TODO Do not allow duplicates in the adapter. */
@@ -147,8 +146,12 @@ class RefreshPage extends AsyncTask<Integer, FeedItem, Animation>
                   data.url = links[i];
                   data.description = descriptions[i];
                   data.image = images[i];
-                  data.width = null == widths[i] ? 0 : Integer.parseInt(widths[i]);
-                  data.height = null == heights[i] ? 0 : Integer.parseInt(heights[i]);
+                  data.width = null == widths[i] || 2 > widths[i].length()
+                        ? 0
+                        : Integer.parseInt(widths[i]);
+                  data.height = null == heights[i] || 2 > widths[i].length()
+                        ? 0
+                        : Integer.parseInt(heights[i]);
 
                   map.put(time.toMillis(false) - i, data);
                }

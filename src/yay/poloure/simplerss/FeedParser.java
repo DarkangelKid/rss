@@ -104,7 +104,6 @@ class FeedParser
          catch(IOException e)
          {
             e.printStackTrace();
-            Util.post("Could not reset reader.");
          }
 
          String currentTag;
@@ -138,7 +137,6 @@ class FeedParser
          else if(currentTag.contains("</entry") || currentTag.contains("</item"))
          {
             String image = saveImageName();
-            Util.post(image);
             if(0 != image.length())
             {
                line.append(Constants.IMAGE).append(image).append('|');
@@ -147,7 +145,7 @@ class FeedParser
 
                boolean success = true;
                /* If the image does not exist, try to download it from the internet. */
-               if(Util.exists(imageDir + imageName))
+               if(Util.isNonExisting(imageDir + imageName))
                {
                   success = !Write.download(image, imageDir + imageName);
                }
@@ -159,7 +157,7 @@ class FeedParser
                }
 
                /* If the image downloaded fine and a thumbnail does not exist. */
-               else if(Util.exists(thumbnailDir + imageName))
+               else if(Util.isNonExisting(thumbnailDir + imageName))
                {
                   compressImage(Util.getStorage() + imageDir, Util.getStorage() + thumbnailDir,
                         imageName);
@@ -334,7 +332,6 @@ class FeedParser
          catch(IOException e)
          {
             e.printStackTrace();
-            Util.post("IOException in testing next FeedParser char.");
          }
       }
 
@@ -526,6 +523,10 @@ class FeedParser
          int i = 0;
          while((current = (char) reader.read()) != next)
          {
+            if(4094 == i)
+            {
+               break;
+            }
             build[i] = current;
             i++;
          }

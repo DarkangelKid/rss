@@ -184,7 +184,6 @@ class FeedDialog
       {
          if(!m_feedExists)
          {
-            Util.post(Util.getString(R.string.feed_invalid));
             Button button = m_dialog.getButton(DialogInterface.BUTTON_POSITIVE);
             if(null != button)
             {
@@ -211,10 +210,6 @@ class FeedDialog
          }
          else if(Constants.ADD.equals(m_mode))
          {
-
-      /* Create folders if they do not exist. */
-            Util.mkdir(Util.getPath(name, Constants.IMAGES));
-            Util.mkdir(Util.getPath(name, Constants.THUMBNAILS));
 
       /* Create the csv. */
             String feedInfo = String.format(Constants.INDEX_FORMAT, name, result[0], m_tag) +
