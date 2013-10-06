@@ -37,60 +37,6 @@ class Read
       return 0 == check.length ? "" : check[0];
    }
 
-   static
-   String[][] csv()
-   {
-      return csv(Constants.INDEX, 'f', 'u', 't');
-   }
-
-   static
-   String[][] csv(String path, char... type)
-   {
-      if(Util.isUnmounted())
-      {
-         return Util.EMPTY_STRING_STRING_ARRAY;
-      }
-
-      String[] lines = file(path);
-      if(0 == lines.length)
-      {
-         return Util.EMPTY_STRING_STRING_ARRAY;
-      }
-
-      String[][] types = new String[type.length][lines.length];
-
-      int linesLength = lines.length;
-      for(int j = 0; j < linesLength; j++)
-      {
-         int offset = 0;
-         String line = lines[j];
-         int next;
-         while(-1 != (next = line.indexOf('|', offset)))
-         {
-            if(offset == line.length())
-            {
-               break;
-            }
-
-            char ch = line.charAt(offset);
-            offset = next + 1;
-
-            int typeLength = type.length;
-            for(int i = 0; i < typeLength; i++)
-            {
-               if(ch == type[i])
-               {
-                  next = line.indexOf('|', offset);
-                  types[i][j] = line.substring(offset, next);
-                  break;
-               }
-            }
-            offset = line.indexOf('|', offset) + 1;
-         }
-      }
-      return types;
-   }
-
    /* This function is now safe. It will return a zero length array on error. */
    static
    String[] file(String path)
@@ -107,8 +53,8 @@ class Read
          path1 = Util.getStorage() + path1;
       }
 
-      /* If the path is not a count file, get the number of lines. */
-      int count = path1.contains(Constants.COUNT) ? 1 : count(path1);
+      /* Get the number of lines. */
+      int count = count(path1);
 
       /* If the file is empty, return a zero length array. */
       if(0 == count)
@@ -149,6 +95,7 @@ class Read
       catch(UnsupportedEncodingException e)
       {
          e.printStackTrace();
+         return Util.EMPTY_STRING_ARRAY;
       }
       catch(IOException e)
       {
@@ -157,20 +104,6 @@ class Read
       }
 
       return lines;
-   }
-
-   static
-   Set set(String filePath)
-   {
-      Set set = new HashSet<String>();
-
-      if(Util.isUnmounted())
-      {
-         return set;
-      }
-
-      Collections.addAll(set, file(filePath));
-      return set;
    }
 
    static
@@ -186,12 +119,6 @@ class Read
       if(!path1.contains(storage))
       {
          path1 = Util.getStorage() + path1;
-      }
-
-      String[] count = file(path1 + Constants.COUNT);
-      if(0 != count.length)
-      {
-         return Util.stoi(count[0]);
       }
 
       int i = 0;
@@ -246,5 +173,73 @@ class Read
       String path1 = Util.getInternalPath(path);
       FileInputStream fis = context.openFileInput(path1);
       return new BufferedReader(new InputStreamReader(fis, fileEncoding));
+   }
+
+   static
+   String[][] csv()
+   {
+      return csv(Constants.INDEX, 'f', 'u', 't');
+   }
+
+   static
+   String[][] csv(String path, char... type)
+   {
+      if(Util.isUnmounted())
+      {
+         return Util.EMPTY_STRING_STRING_ARRAY;
+      }
+
+      String[] lines = file(path);
+      if(0 == lines.length)
+      {
+         return Util.EMPTY_STRING_STRING_ARRAY;
+      }
+
+      String[][] types = new String[type.length][lines.length];
+
+      int linesLength = lines.length;
+      for(int j = 0; j < linesLength; j++)
+      {
+         int offset = 0;
+         String line = lines[j];
+         int next;
+         while(-1 != (next = line.indexOf('|', offset)))
+         {
+            if(offset == line.length())
+            {
+               break;
+            }
+
+            char ch = line.charAt(offset);
+            offset = next + 1;
+
+            int typeLength = type.length;
+            for(int i = 0; i < typeLength; i++)
+            {
+               if(ch == type[i])
+               {
+                  next = line.indexOf('|', offset);
+                  types[i][j] = line.substring(offset, next);
+                  break;
+               }
+            }
+            offset = line.indexOf('|', offset) + 1;
+         }
+      }
+      return types;
+   }
+
+   static
+   Set set(String filePath)
+   {
+      Set set = new HashSet<String>();
+
+      if(Util.isUnmounted())
+      {
+         return set;
+      }
+
+      Collections.addAll(set, file(filePath));
+      return set;
    }
 }

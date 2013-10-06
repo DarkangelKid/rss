@@ -149,9 +149,10 @@ class Util
    static
    boolean isUnmounted()
    {
-      /* TODO If setting to force sd is true, return false. */
-      /*if(!internal.equals(s_storage))
-         return false;*/
+      if(!isUsingSd())
+      {
+         return false;
+      }
 
       /* Check to see if we can Write to the media. */
       String mounted = Environment.MEDIA_MOUNTED;
@@ -189,6 +190,13 @@ class Util
       {
          e.printStackTrace();
       }
+   }
+
+   static
+   boolean isUsingSd()
+   {
+      /* Return true if force sd setting is true. */
+      return true;
    }
 
    /* This should never return null and so do not check. */
@@ -431,6 +439,8 @@ class Util
       return substring.replaceAll(Constants.SEPAR, "-");
    }
 
+   /* Wrappers for neatness. */
+
    static
    boolean rmdir(File directory)
    {
@@ -447,8 +457,6 @@ class Util
       }
       return directory.delete();
    }
-
-   /* Wrappers for neatness. */
 
    static
    void mkdir(String path)
@@ -489,13 +497,6 @@ class Util
          String internalPath = getInternalPath(path1);
          return !s_context.getFileStreamPath(internalPath).exists();
       }
-   }
-
-   static
-   boolean isUsingSd()
-   {
-      /* Return true if force sd setting is true. */
-      return true;
    }
 
    static
