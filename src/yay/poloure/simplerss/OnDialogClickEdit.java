@@ -39,6 +39,7 @@ class OnDialogClickEdit implements DialogInterface.OnClickListener
          editTag = Constants.UNSORTED_TAG;
       }
 
-      Update.executeFeedCheck(m_editFeedDialog, editTag, newName, Constants.EDIT, m_title, newUrl, which);
+      Update.executeFeedCheck(m_editFeedDialog, editTag, newName, Constants.EDIT, m_title, newUrl,
+            which);
    }
 }

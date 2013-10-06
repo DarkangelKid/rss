@@ -64,7 +64,8 @@ class FeedDialog
       private boolean m_existingTag;
 
 
-      CheckFeed(AlertDialog dialog, String tag, String feedName, String mode, String currentTitle, int position)
+      CheckFeed(AlertDialog dialog, String tag, String feedName, String mode, String currentTitle,
+            int position)
       {
          m_dialog = dialog;
          m_tag = tag;
@@ -237,7 +238,8 @@ class FeedDialog
          int position = Write.removeLine(index, oldFeed, true);
          Write.single(index, entry + Constants.NL);
 
-         FragmentManageFeeds fragmentManageFeeds = (FragmentManageFeeds) PagerAdapterManage.MANAGE_FRAGMENTS[1];
+         FragmentManageFeeds fragmentManageFeeds
+               = (FragmentManageFeeds) PagerAdapterManage.MANAGE_FRAGMENTS[1];
          AdapterManageFeeds adapterManageFeeds
                = (AdapterManageFeeds) fragmentManageFeeds.getListAdapter();
 

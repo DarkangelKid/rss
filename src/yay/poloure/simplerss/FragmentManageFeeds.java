@@ -122,7 +122,6 @@ class FragmentManageFeeds extends ListFragment
          m_adapter = adpt;
       }
 
-      static
       void deleteFeed(String feed, int pos)
       {
          /* Delete the feed's folder. */
@@ -133,16 +132,17 @@ class FragmentManageFeeds extends ListFragment
 
          Util.updateTags();
          removeItem(pos);
+         m_adapter.notifyDataSetChanged();
 
-         /* Update.manageTags();*/
+         /*Update.manageTags();*/
       }
 
       static
       void removeItem(int position)
       {
-        AdapterManageFeeds.s_titleArray = Util.arrayRemove(AdapterManageFeeds.s_titleArray,
+         AdapterManageFeeds.s_titleArray = Util.arrayRemove(AdapterManageFeeds.s_titleArray,
                position);
-        AdapterManageFeeds.s_infoArray = Util.arrayRemove(AdapterManageFeeds.s_infoArray,
+         AdapterManageFeeds.s_infoArray = Util.arrayRemove(AdapterManageFeeds.s_infoArray,
                position);
       }
 

@@ -8,7 +8,7 @@ import android.widget.TextView;
 
 class AdapterNavDrawer extends BaseAdapter
 {
-   static String[] s_menuArray;
+   static String[] s_tagArray;
    static int[]    s_unreadArray;
 
    private static final int   TWELVE    = Math.round(
@@ -23,7 +23,7 @@ class AdapterNavDrawer extends BaseAdapter
    class NavigationTagItem
    {
       TextView title;
-      TextView unread_view;
+      TextView m_unreadCountView;
    }
 
    @Override
@@ -37,14 +37,14 @@ class AdapterNavDrawer extends BaseAdapter
    public
    String getItem(int position)
    {
-      return s_menuArray[position];
+      return s_tagArray[position];
    }
 
    @Override
    public
    int getCount()
    {
-      return null == s_menuArray ? 4 : s_menuArray.length + 4;
+      return null == s_tagArray ? 4 : s_tagArray.length + 4;
    }
 
    @Override
@@ -78,60 +78,57 @@ class AdapterNavDrawer extends BaseAdapter
 
    @Override
    public
-   View getView(int position, View cv, ViewGroup parent)
+   View getView(int position, View convertView, ViewGroup parent)
    {
-      View cv1 = cv;
+      View view = convertView;
       int viewType = getItemViewType(position);
       LayoutInflater inflater = Util.getLayoutInflater();
 
-      switch(viewType)
-      {
          /* This view is for the FeedsActivity items Feeds, Manage, & Settings. */
-         case 0:
-            if(null == cv1)
-            {
-               cv1 = inflater.inflate(R.layout.navigation_drawer_main_item, parent, false);
-               m_navigationMainItem = (TextView) cv1.findViewById(R.id.menu_item);
-            }
+      if(0 == viewType)
+      {
+         if(null == view)
+         {
+            view = inflater.inflate(R.layout.navigation_drawer_main_item, parent, false);
+            m_navigationMainItem = (TextView) view.findViewById(R.id.menu_item);
+         }
 
-            m_navigationMainItem.setText(NavDrawer.NAV_TITLES[position]);
+         m_navigationMainItem.setText(NavDrawer.NAV_TITLES[position]);
 
-            /* Set the item's image as a CompoundDrawable of the textview. */
-            m_navigationMainItem.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                  NAV_ICONS[position], 0, 0, 0);
-            m_navigationMainItem.setCompoundDrawablePadding(TWELVE);
-            break;
+         /* Set the item's image as a CompoundDrawable of the textview. */
+         m_navigationMainItem.setCompoundDrawablesRelativeWithIntrinsicBounds(NAV_ICONS[position],
+               0, 0, 0);
+         m_navigationMainItem.setCompoundDrawablePadding(TWELVE);
+      }
 
-         /* This view is for the NavDivider and "Groups" subtitle.
-          * The imageview NavDivider is below the subtitle. */
-         case 1:
-            if(null == cv1)
-            {
-               cv1 = inflater.inflate(R.layout.navigation_drawer_subtitle_divider, parent, false);
-            }
-            break;
-
+      /* This view is for the NavDivider and "Groups" subtitle.
+       * The imageView NavDivider is below the subtitle. */
+      if(1 == viewType && null == view)
+      {
+         view = inflater.inflate(R.layout.navigation_drawer_subtitle_divider, parent, false);
+      }
          /* This view is for the m_imageViewTag items of the navigation drawer.
           * The one with unread counters. */
-         default:
-            NavigationTagItem holder2;
-            if(null == cv1)
-            {
-               cv1 = inflater.inflate(R.layout.navigation_drawer_group_item, parent, false);
-               holder2 = new NavigationTagItem();
-               holder2.title = (TextView) cv1.findViewById(R.id.tag_title);
-               holder2.unread_view = (TextView) cv1.findViewById(R.id.unread_item);
-               cv1.setTag(holder2);
-            }
-            else
-            {
-               holder2 = (NavigationTagItem) cv1.getTag();
-            }
+      else if(2 == viewType)
+      {
+         NavigationTagItem holder2;
+         if(null == view)
+         {
+            view = inflater.inflate(R.layout.navigation_drawer_group_item, parent, false);
+            holder2 = new NavigationTagItem();
+            holder2.title = (TextView) view.findViewById(R.id.tag_title);
+            holder2.m_unreadCountView = (TextView) view.findViewById(R.id.unread_item);
+            view.setTag(holder2);
+         }
+         else
+         {
+            holder2 = (NavigationTagItem) view.getTag();
+         }
 
-            holder2.title.setText(s_menuArray[position - 4]);
-            String number = Integer.toString(s_unreadArray[position - 4]);
-            holder2.unread_view.setText("0".equals(number) ? "" : number);
+         holder2.title.setText(s_tagArray[position - 4]);
+         String number = Integer.toString(s_unreadArray[position - 4]);
+         holder2.m_unreadCountView.setText("0".equals(number) ? "" : number);
       }
-      return cv1;
+      return view;
    }
 }

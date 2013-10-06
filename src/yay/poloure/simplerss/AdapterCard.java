@@ -23,6 +23,7 @@ import android.widget.TextView;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 class AdapterCard extends BaseAdapter
@@ -31,6 +32,8 @@ class AdapterCard extends BaseAdapter
    private static final int     SCREEN_WIDTH       = Util.getScreenWidth();
    static final         int     EIGHT              = Math.round(
          8.0F * Util.getContext().getResources().getDisplayMetrics().density + 0.5f);
+
+   static Set<String> s_readLinks = Read.set(Constants.READ_ITEMS);
 
    boolean m_touchedScreen = true;
    FeedItem[] m_items;
@@ -126,6 +129,7 @@ class AdapterCard extends BaseAdapter
          holder.m_title.setText(title);
          holder.m_des.setText(m_items[position].description);
          holder.m_url.setText(link);
+         Util.setCardAlpha(holder.m_title, holder.m_url, holder.m_imageView, holder.m_des, link);
       }
       /* card_no_des_img.xml no description, image, m_title. */
       else if(1 == viewType)
@@ -151,8 +155,9 @@ class AdapterCard extends BaseAdapter
 
          holder.title.setText(title);
          holder.url.setText(link);
+         Util.setCardAlpha(holder.title, holder.url, holder.image, null, link);
       }
-      /* card_des_no_img.xml no image, descirition, m_title. */
+      /* card_des_no_img.xml no image, description, title. */
       else if(2 == viewType)
       {
          DesHolder holder;
@@ -175,6 +180,7 @@ class AdapterCard extends BaseAdapter
          holder.title.setText(title);
          holder.des.setText(m_items[position].description);
          holder.url.setText(link);
+         Util.setCardAlpha(holder.title, holder.url, null, holder.des, link);
       }
       /* No description or image. */
       else if(3 == viewType)
@@ -197,12 +203,15 @@ class AdapterCard extends BaseAdapter
 
          holder.title.setText(title);
          holder.url.setText(link);
+
+         Util.setCardAlpha(holder.title, holder.url, null, null, link);
       }
 
       /* The logic that tells whether the item is Read or not. */
-      if(View.VISIBLE == m_listview.getVisibility() && 0 <= position - 1 && m_touchedScreen)
+      if(View.VISIBLE == m_listview.getVisibility() && position + 1 < m_items.length &&
+            m_touchedScreen)
       {
-         Util.SetHolder.READ_ITEMS.add(m_items[position - 1].url);
+         s_readLinks.add(m_items[position + 1].url);
       }
 
       return cv1;
@@ -416,7 +425,7 @@ class AdapterCard extends BaseAdapter
          if(m_listview.getChildAt(0).getTop() == EIGHT &&
                View.VISIBLE == m_listview.getVisibility() && m_touchedScreen)
          {
-            Util.SetHolder.READ_ITEMS.add(m_items[0].url);
+            s_readLinks.add(m_items[0].url);
          }
 
          if(AbsListView.OnScrollListener.SCROLL_STATE_IDLE == scrollState)

@@ -22,35 +22,15 @@ import java.util.Set;
 final
 class Util
 {
-   private static String s_storage = "";
+   static final   int[]      EMPTY_INT_ARRAY           = new int[0];
+   static final   String[]   EMPTY_STRING_ARRAY        = new String[0];
+   static final   String[][] EMPTY_STRING_STRING_ARRAY = new String[0][0];
+   private static String     s_storage                 = "";
    private static Context s_context;
-   static final int[]      EMPTY_INT_ARRAY           = new int[0];
-   static final String[]   EMPTY_STRING_ARRAY        = new String[0];
-   static final String[][] EMPTY_STRING_STRING_ARRAY = new String[0][0];
 
    private
    Util()
    {
-   }
-
-   /* index throws an ArrayOutOfBoundsException if not handled. */
-   static
-   <T> int index(T[] array, T value)
-   {
-      if(null == array)
-      {
-         return -1;
-      }
-
-      int arrayLength = array.length;
-      for(int i = 0; i < arrayLength; i++)
-      {
-         if(array[i].equals(value))
-         {
-            return i;
-         }
-      }
-      return -1;
    }
 
    static
@@ -120,10 +100,10 @@ class Util
       }
 
       int i;
-      for(i = items.length - 1; 0 <= i; i--)
+      int itemCount = items.length - 1;
+      for(i = itemCount; i >= 0; i--)
       {
-         int pos = items.length - i - 1;
-         if(!SetHolder.READ_ITEMS.contains(items[pos].url))
+         if(!AdapterCard.s_readLinks.contains(items[i].url))
          {
             break;
          }
@@ -144,6 +124,35 @@ class Util
       return i;
    }
 
+   /* This is the second one. */
+   private static
+   ListView getFeedListView(int page)
+   {
+      FragmentManager fman = FeedsActivity.s_fragmentManager;
+      ViewPager viewpager = FeedsActivity.s_ViewPager;
+      if(null == fman || null == viewpager)
+      {
+         return null;
+      }
+
+      String tag = String.format(Constants.FRAGMENT_TAG, viewpager.getId(), page);
+      return ((FragmentCard) fman.findFragmentByTag(tag)).getListView();
+   }
+
+   /* For these two functions, check for null. Should only really be
+    * null if called from the ServiceUpdate. */
+   static
+   AdapterCard getCardAdapter(int page)
+   {
+      ListView list = getFeedListView(page);
+      if(null == list)
+      {
+         return null;
+      }
+
+      return (AdapterCard) list.getAdapter();
+   }
+
    static
    boolean isUnmounted()
    {
@@ -162,61 +171,31 @@ class Util
       return false;
    }
 
-   /* Replaces ALL_TAG '/'s with '-' to emulate a folder directory layout in
-    * data/data. */
+   /* This will log and toast any message. */
    static
-   String getInternalPath(String externalPath)
+   void post(CharSequence message)
    {
-      String substring = externalPath.substring(
-            externalPath.indexOf(Constants.SEPAR + "files" + Constants.SEPAR) + 7);
-      return substring.replaceAll(Constants.SEPAR, "-");
-   }
-
-   /* For these two functions, check for null. Should only really be
-    * null if called from the ServiceUpdate. */
-   static
-   AdapterCard getCardAdapter(int page)
-   {
-      ListView list = getFeedListView(page);
-      if(null == list)
+      /* If this is called from off the UI thread, it will die. */
+      try
       {
-         return null;
+         /* If the activity is running, make a toast notification.
+            * Log the event regardless. */
+         if(null != FeedsActivity.s_serviceHandler)
+         {
+            Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+         }
+
+         /* This function can be called when no media, so this is optional. */
+         String mounted = Environment.MEDIA_MOUNTED;
+         if(mounted.equals(Environment.getExternalStorageState()))
+         {
+            Write.log((String) message);
+         }
       }
-
-      return (AdapterCard) list.getAdapter();
-   }
-
-   /* This is the second one. */
-   private static
-   ListView getFeedListView(int page)
-   {
-      FragmentManager fman = FeedsActivity.s_fragmentManager;
-      ViewPager viewpager = FeedsActivity.s_ViewPager;
-      if(null == fman || null == viewpager)
+      catch(RuntimeException e)
       {
-         return null;
+         e.printStackTrace();
       }
-
-      String tag = String.format(Constants.FRAGMENT_TAG, viewpager.getId(), page);
-      return ((FragmentCard) fman.findFragmentByTag(tag)).getListView();
-   }
-
-   /* For feed files. */
-   static
-   String getPath(String feed, String append)
-   {
-      String feedFolder = feed + Constants.SEPAR;
-
-      if(Constants.IMAGES.equals(append))
-      {
-         return feedFolder + Constants.IMAGE_DIR;
-      }
-      if(Constants.THUMBNAILS.equals(append))
-      {
-         return feedFolder + Constants.THUMBNAIL_DIR;
-      }
-
-      return feedFolder + append;
    }
 
    /* This should never return null and so do not check. */
@@ -245,6 +224,200 @@ class Util
    int getScreenWidth()
    {
       return getContext().getResources().getDisplayMetrics().widthPixels;
+   }
+
+   static
+   int[] getUnreadCounts(String... ctags)
+   {
+      Set<String> readLinks = AdapterCard.s_readLinks;
+      String[][] content = Read.csv();
+      String[] names = content[0];
+      String[] urls = content[1];
+      String[] tags = content[2];
+
+      /* READ_ITEMS == null when called from the service for notifications. */
+
+      int total = 0;
+      int cTagsSize = ctags.length;
+      int[] unreadCounts = new int[cTagsSize];
+      int[] totalCounts = new int[cTagsSize];
+
+      for(int i = 1; i < cTagsSize; i++)
+      {
+         int read = 0;
+         for(int j = 0; j < tags.length; j++)
+         {
+            if(tags[j].equals(ctags[i]))
+            {
+               totalCounts[i] += Read.count(getPath(names[j], Constants.CONTENT));
+               for(String readUrl : AdapterCard.s_readLinks)
+               {
+                  int pos = readUrl.indexOf('/') + 1;
+                  readUrl = readUrl.substring(pos, readUrl.indexOf('/', pos + 1));
+                  Write.log(readUrl + "::" + urls[j]);
+                  if(urls[j].contains(readUrl))
+                  {
+                     read++;
+                  }
+               }
+            }
+         }
+         unreadCounts[i] = totalCounts[i] - read;
+         total += unreadCounts[i];
+      }
+
+      unreadCounts[0] = total;
+      return unreadCounts;
+   }
+
+   /* For feed files. */
+   static
+   String getPath(String feed, String append)
+   {
+      String feedFolder = feed + Constants.SEPAR;
+
+      if(Constants.IMAGES.equals(append))
+      {
+         return feedFolder + Constants.IMAGE_DIR;
+      }
+      if(Constants.THUMBNAILS.equals(append))
+      {
+         return feedFolder + Constants.THUMBNAIL_DIR;
+      }
+
+      return feedFolder + append;
+   }
+
+   static
+   void setStripColor(PagerTabStrip strip)
+   {
+      String colorSettingsPath = Constants.SETTINGS_DIR + Constants.STRIP_COLOR;
+
+      /* Read the colour from the settings/colour file, if blank, use blue. */
+      String[] check = Read.file(colorSettingsPath);
+      String color = 0 == check.length ? "blue" : check[0];
+
+      /* Find the colour stored in adapter_stettings_interface that we want. */
+      int pos = index(AdapterSettingsUi.HOLO_COLORS, color);
+      if(-1 != pos)
+      {
+         strip.setTabIndicatorColor(AdapterSettingsUi.COLOR_INTS[pos]);
+      }
+   }
+
+   /* index throws an ArrayOutOfBoundsException if not handled. */
+   static
+   <T> int index(T[] array, T value)
+   {
+      if(null == array)
+      {
+         return -1;
+      }
+
+      int arrayLength = array.length;
+      for(int i = 0; i < arrayLength; i++)
+      {
+         if(array[i].equals(value))
+         {
+            return i;
+         }
+      }
+      return -1;
+   }
+
+   static
+   Intent getServiceIntent(int page)
+   {
+      /* Load notification boolean. */
+      String path = Constants.SETTINGS_DIR + AdapterSettingsFunctions.FILE_NAMES[3] +
+            Constants.TXT;
+      String[] check = Read.file(path);
+      Context con = getContext();
+
+      boolean notif = 0 != check.length && strbol(check[0]);
+      Intent intent = new Intent(con, ServiceUpdate.class);
+      intent.putExtra("GROUP_NUMBER", page);
+      intent.putExtra("NOTIFICATIONS", notif);
+      return intent;
+   }
+
+   static
+   boolean strbol(String str)
+   {
+      return Boolean.parseBoolean(str);
+   }
+
+   static
+   void setCardAlpha(TextView title, TextView url, ImageView image, TextView des, String link)
+   {
+      Resources res = getContext().getResources();
+
+      if(AdapterCard.s_readLinks.contains(link))
+      {
+         title.setTextColor(res.getColor(R.color.title_grey));
+         url.setTextColor(res.getColor(R.color.link_grey));
+
+         if(null != des)
+         {
+            des.setTextColor(res.getColor(R.color.des_grey));
+         }
+
+         if(null != image)
+         {
+            image.setAlpha(0.5f);
+         }
+      }
+      else
+      {
+         Write.log("Not read.");
+         title.setTextColor(res.getColor(R.color.title_black));
+         url.setTextColor(res.getColor(R.color.link_black));
+
+         if(null != des)
+         {
+            des.setTextColor(res.getColor(R.color.des_black));
+         }
+
+         if(null != image)
+         {
+            image.setAlpha(1.0f);
+         }
+      }
+   }
+
+   /* Changes the ManageFeedsRefresh menu item to an animation if m_mode = true. */
+   static
+   void setRefreshingIcon(boolean mode)
+   {
+      if(null == FeedsActivity.s_optionsMenu)
+      {
+         return;
+      }
+
+      /* Find the menu item by ID called ManageFeedsRefresh. */
+      MenuItem item = FeedsActivity.s_optionsMenu.findItem(R.id.refresh);
+      if(null == item)
+      {
+         return;
+      }
+
+      /* Change it depending on the m_mode. */
+      if(mode)
+      {
+         MenuItemCompat.setActionView(item, R.layout.progress_circle);
+      }
+      else
+      {
+         MenuItemCompat.setActionView(item, null);
+      }
+   }
+
+   static
+   boolean remove(String path)
+   {
+      String path1 = getStorage() + path;
+      getContext().deleteFile(getInternalPath(path1));
+      return new File(path1).delete();
    }
 
    /* This function will return null if it fails. Check for null each time.
@@ -296,176 +469,14 @@ class Util
       return s_storage;
    }
 
+   /* Replaces ALL_TAG '/'s with '-' to emulate a folder directory layout in
+    * data/data. */
    static
-   class SetHolder
+   String getInternalPath(String externalPath)
    {
-      static final Set<String> READ_ITEMS = Read.set(Constants.READ_ITEMS);
-   }
-
-   static
-   int[] getUnreadCounts(String... ctags)
-   {
-      int size = ctags.length;
-      int[] unreadCounts = new int[size];
-
-      /* READ_ITEMS == null when called from the service for notifications. */
-
-      int total = 0;
-      for(int i = 1; i < size; i++)
-      {
-         int unread = 0;
-         String[] urls = Read.file(getPath(ctags[i], Constants.URL));
-         for(String url : urls)
-         {
-            if(!SetHolder.READ_ITEMS.contains(url))
-            {
-               unread++;
-            }
-         }
-
-         total += unread;
-         unreadCounts[i] = unread;
-      }
-
-      unreadCounts[0] = total;
-      return unreadCounts;
-   }
-
-   static
-   void setStripColor(PagerTabStrip strip)
-   {
-      String colorSettingsPath = Constants.SETTINGS_DIR + Constants.STRIP_COLOR;
-
-      /* Read the colour from the settings/colour file, if blank, use blue. */
-      String[] check = Read.file(colorSettingsPath);
-      String color = 0 == check.length ? "blue" : check[0];
-
-      /* Find the colour stored in adapter_stettings_interface that we want. */
-      int pos = index(AdapterSettingsUi.HOLO_COLORS, color);
-      if(-1 != pos)
-      {
-         strip.setTabIndicatorColor(AdapterSettingsUi.COLOR_INTS[pos]);
-      }
-   }
-
-   static
-   Intent getServiceIntent(int page)
-   {
-      /* Load notification boolean. */
-      String path = Constants.SETTINGS_DIR + AdapterSettingsFunctions.FILE_NAMES[3] +
-            Constants.TXT;
-      String[] check = Read.file(path);
-      Context con = getContext();
-
-      boolean notif = 0 != check.length && strbol(check[0]);
-      Intent intent = new Intent(con, ServiceUpdate.class);
-      intent.putExtra("GROUP_NUMBER", page);
-      intent.putExtra("NOTIFICATIONS", notif);
-      return intent;
-   }
-
-   static
-   void setCardAlpha(TextView title, TextView url, ImageView image, TextView des, String link)
-   {
-      if(!Constants.HONEYCOMB)
-      {
-         return;
-      }
-
-      Resources res = getContext().getResources();
-
-      if(SetHolder.READ_ITEMS.contains(link))
-      {
-         title.setTextColor(res.getColor(R.color.title_grey));
-         url.setTextColor(res.getColor(R.color.link_grey));
-
-         if(null != des)
-         {
-            des.setTextColor(res.getColor(R.color.des_grey));
-         }
-
-         if(null != image)
-         {
-            image.setAlpha(0.5f);
-         }
-      }
-      else
-      {
-         title.setTextColor(res.getColor(R.color.title_black));
-         url.setTextColor(res.getColor(R.color.link_black));
-
-         if(null != des)
-         {
-            des.setTextColor(res.getColor(R.color.des_black));
-         }
-
-         if(null != image)
-         {
-            image.setAlpha(1.0f);
-         }
-      }
-   }
-
-   /* Changes the ManageFeedsRefresh menu item to an animation if m_mode = true. */
-   static
-   void setRefreshingIcon(boolean mode)
-   {
-      if(null == FeedsActivity.s_optionsMenu)
-      {
-         return;
-      }
-
-      /* Find the menu item by ID called ManageFeedsRefresh. */
-      MenuItem item = FeedsActivity.s_optionsMenu.findItem(R.id.refresh);
-      if(null == item)
-      {
-         return;
-      }
-
-      /* Change it depending on the m_mode. */
-      if(mode)
-      {
-         MenuItemCompat.setActionView(item, R.layout.progress_circle);
-      }
-      else
-      {
-         MenuItemCompat.setActionView(item, null);
-      }
-   }
-
-   /* This will log and toast any message. */
-   static
-   void post(CharSequence message)
-   {
-      /* If this is called from off the UI thread, it will die. */
-      try
-      {
-         /* If the activity is running, make a toast notification.
-            * Log the event regardless. */
-         if(null != FeedsActivity.s_serviceHandler)
-         {
-            Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
-         }
-
-         /* This function can be called when no media, so this is optional. */
-         String mounted = Environment.MEDIA_MOUNTED;
-         if(mounted.equals(Environment.getExternalStorageState()))
-         {
-            Write.log((String) message);
-         }
-      }
-      catch(RuntimeException e)
-      {
-         e.printStackTrace();
-      }
-   }
-
-   static
-   boolean remove(String path)
-   {
-      String path1 = getStorage() + path;
-      getContext().deleteFile(getInternalPath(path1));
-      return new File(path1).delete();
+      String substring = externalPath.substring(
+            externalPath.indexOf(Constants.SEPAR + "files" + Constants.SEPAR) + 7);
+      return substring.replaceAll(Constants.SEPAR, "-");
    }
 
    static
@@ -485,6 +496,8 @@ class Util
       return directory.delete();
    }
 
+   /* Wrappers for neatness. */
+
    static
    void mkdir(String path)
    {
@@ -496,27 +509,12 @@ class Util
       }
    }
 
-   /* Wrappers for neatness. */
-
    static
    boolean move(String originalFile, String resultingFile)
    {
       String originalFile1 = getStorage() + originalFile;
       resultingFile = getStorage() + resultingFile;
       return new File(originalFile1).renameTo(new File(resultingFile));
-   }
-
-   static
-   boolean isUsingSd()
-   {
-      /* Return true if force sd setting is true. */
-      return true;
-   }
-
-   static
-   boolean strbol(String str)
-   {
-      return Boolean.parseBoolean(str);
    }
 
    static
@@ -539,6 +537,13 @@ class Util
          String internalPath = getInternalPath(path1);
          return !getContext().getFileStreamPath(internalPath).exists();
       }
+   }
+
+   static
+   boolean isUsingSd()
+   {
+      /* Return true if force sd setting is true. */
+      return true;
    }
 
    static

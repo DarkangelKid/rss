@@ -93,7 +93,8 @@ class ServiceUpdate extends IntentService
          String contentSingleTag = Util.getString(R.string.notification_content_tag_items);
          String contentPluralTag = Util.getString(R.string.notification_content_tags);
 
-         String notificationTitle = 1 == unreadCounts[0] ? String.format(titleSingle, 1)
+         String notificationTitle = 1 == unreadCounts[0]
+               ? String.format(titleSingle, 1)
                : String.format(titlePlural, unreadCounts[0]);
 
          String notificationContent;
@@ -103,7 +104,8 @@ class ServiceUpdate extends IntentService
          }
          else
          {
-            notificationContent = 1 < unreadCounts[0] && 1 == tagItems - 1 ? contentSingleTag
+            notificationContent = 1 < unreadCounts[0] && 1 == tagItems - 1
+                  ? contentSingleTag
                   : String.format(contentPluralTag, tagItems - 1);
          }
 

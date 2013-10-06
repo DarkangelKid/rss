@@ -106,7 +106,8 @@ class Write
                   !urler.contains(".gif") &&
                   !urler.contains(".JPEG") &&
                   !urler.contains(".JPG") &&
-                  !urler.contains(".jpeg") ? context.openFileOutput(name, Context.MODE_PRIVATE)
+                  !urler.contains(".jpeg")
+                  ? context.openFileOutput(name, Context.MODE_PRIVATE)
                   : new FileOutputStream(path1);
 
             byte[] data = new byte[1024];
@@ -200,7 +201,7 @@ class Write
    int removeLine(String path, CharSequence stringSearch, boolean contains)
    {
       int line = 0;
-      int pos  = -1;
+      int pos = -1;
       /* If s_storage is unmounted OR if we force to use external. */
       if(Util.isUnmounted())
       {
@@ -292,6 +293,12 @@ class Write
    void log(int integer)
    {
       single(Constants.DUMP_FILE, integer + Constants.NL);
+   }
+
+   static
+   void log(Iterable<?> content)
+   {
+      collection(Constants.DUMP_FILE + ".iter.txt", content);
    }
 
    private static

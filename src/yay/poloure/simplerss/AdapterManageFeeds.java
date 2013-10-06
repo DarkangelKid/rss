@@ -17,11 +17,10 @@ class AdapterManageFeeds extends BaseAdapter
    }
 
    void setPosition(int pos, String title, String info)
-     {
-         s_titleArray[pos] = title;
-         s_infoArray[pos] = info;
-         notifyDataSetChanged();
-     }
+   {
+      s_titleArray[pos] = title;
+      s_infoArray[pos] = info;
+   }
 
    @Override
    public
