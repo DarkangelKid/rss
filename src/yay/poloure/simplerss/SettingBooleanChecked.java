@@ -6,7 +6,6 @@ class SettingBooleanChecked implements View.OnClickListener
 {
    private final String m_settingPath;
 
-   public
    SettingBooleanChecked(String settingPath)
    {
       m_settingPath = settingPath;

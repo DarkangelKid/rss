@@ -1,10 +1,8 @@
 package yay.poloure.simplerss;
 
 import android.graphics.Color;
-import android.support.v4.view.PagerTabStrip;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
@@ -21,13 +19,13 @@ class AdapterSettingsUi extends BaseAdapter
          Color.rgb(255, 187, 51), // orange
          Color.rgb(255, 68, 68) // red
    };
-   private static final float    COLOR_SELECT_OPACITY = 0.3f;
+   static final         float    COLOR_SELECT_OPACITY = 0.3f;
    private static final String[] INTERFACE_TITLES     = Util.getArray(
          R.array.settings_interface_titles);
    private static final String[] INTERFACE_SUMMARIES  = Util.getArray(
          R.array.settings_interface_summaries);
-   private ImageView[] m_colorViews;
-   private TextView    settings_heading;
+   ImageView[] m_colorViews;
+   private TextView settings_heading;
 
    @Override
    public
@@ -113,7 +111,7 @@ class AdapterSettingsUi extends BaseAdapter
          int viewsLength = m_colorViews.length;
          for(int i = 0; i < viewsLength; i++)
          {
-            m_colorViews[i].setOnClickListener(new ColorClick(i));
+            m_colorViews[i].setOnClickListener(new OnClickSettingsColor(this, i));
 
             float alpha = colour.equals(HOLO_COLORS[i]) ? 1.0f : COLOR_SELECT_OPACITY;
             m_colorViews[i].setAlpha(alpha);
@@ -123,11 +121,11 @@ class AdapterSettingsUi extends BaseAdapter
       /* This type is a checkbox setting. */
       else if(2 == viewType)
       {
-         AdapterSettingsFunctions.SettingsCheckHolder holder;
+         HolderSettingsCheckBox holder;
          if(null == cv1)
          {
             cv1 = inf.inflate(R.layout.settings_checkbox, parent, false);
-            holder = new AdapterSettingsFunctions.SettingsCheckHolder();
+            holder = new HolderSettingsCheckBox();
             holder.title = (TextView) cv1.findViewById(R.id.check_title);
             holder.summary = (TextView) cv1.findViewById(R.id.check_summary);
             holder.checkbox = (CheckBox) cv1.findViewById(R.id.checkbox);
@@ -135,7 +133,7 @@ class AdapterSettingsUi extends BaseAdapter
          }
          else
          {
-            holder = (AdapterSettingsFunctions.SettingsCheckHolder) cv1.getTag();
+            holder = (HolderSettingsCheckBox) cv1.getTag();
          }
 
          holder.title.setText(title);
@@ -179,39 +177,5 @@ class AdapterSettingsUi extends BaseAdapter
       ImageView green;
       ImageView yellow;
       ImageView red;
-   }
-
-   class ColorClick implements OnClickListener
-   {
-      private final int m_clickedColour;
-
-      private
-      ColorClick(int colour)
-      {
-         m_clickedColour = colour;
-      }
-
-      @Override
-      public
-      void onClick(View v)
-      {
-         /* Write the new colour to file. */
-         String colorSettingsPath = Constants.SETTINGS_DIR + Constants.STRIP_COLOR;
-         Util.remove(colorSettingsPath);
-         Write.single(colorSettingsPath, HOLO_COLORS[m_clickedColour]);
-
-         /* Change the selected square to alpha 1 and the rest to 0.5. */
-         for(ImageView colour : m_colorViews)
-         {
-            colour.setAlpha(COLOR_SELECT_OPACITY);
-         }
-         v.setAlpha(1.0f);
-
-         /* Set the new colour. */
-         for(PagerTabStrip strip : Constants.PAGER_TAB_STRIPS)
-         {
-            Util.setStripColor(strip);
-         }
-      }
    }
 }

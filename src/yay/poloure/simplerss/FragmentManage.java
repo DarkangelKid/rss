@@ -12,9 +12,17 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 
 class FragmentManage extends Fragment
 {
+   private final BaseAdapter m_navigationAdapter;
+
+   FragmentManage(BaseAdapter baseAdapter)
+   {
+      m_navigationAdapter = baseAdapter;
+   }
+
    @Override
    public
    void onCreate(Bundle savedInstanceState)
@@ -39,7 +47,7 @@ class FragmentManage extends Fragment
       layoutParams.gravity = Gravity.TOP;
 
       FragmentManager fragmentManager = FeedsActivity.getActivity().getSupportFragmentManager();
-      pager.setAdapter(new PagerAdapterManage(fragmentManager));
+      pager.setAdapter(new PagerAdapterManage(m_navigationAdapter, fragmentManager));
       pager.addView(Constants.PAGER_TAB_STRIPS[1], layoutParams);
       pager.setId(0x2000);
 

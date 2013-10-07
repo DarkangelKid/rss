@@ -14,6 +14,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.BaseAdapter;
 import android.widget.ListView;
 
 public
@@ -40,7 +41,6 @@ class FeedsActivity extends ActionBarActivity
 
       setContentView(R.layout.navigation_drawer_and_content_frame);
 
-      /* Save the other static variables. */
       Util.setContext(this);
       s_activity = this;
 
@@ -54,14 +54,17 @@ class FeedsActivity extends ActionBarActivity
       Util.mkdir(Constants.SETTINGS_DIR);
 
       /* Create the navigation drawer and set all the listeners for it. */
-      new NavDrawer((ListView) findViewById(R.id.left_drawer),
+      NavDrawer navDrawer = new NavDrawer((ListView) findViewById(R.id.left_drawer),
             (DrawerLayout) findViewById(R.id.drawer_layout));
 
       /* Create the MANAGE_FRAGMENTS that go inside the content frame. */
+      BaseAdapter navigationDrawer = navDrawer.getAdapter();
       if(null == savedInstanceState)
       {
          Fragment[] mainFragments = {
-               new FragmentFeeds(), new FragmentManage(), new FragmentSettings(),
+               new FragmentFeeds(navigationDrawer),
+               new FragmentManage(navigationDrawer),
+               new FragmentSettings(),
          };
 
          int frame = R.id.content_frame;
@@ -75,8 +78,8 @@ class FeedsActivity extends ActionBarActivity
                .commit();
       }
 
-      Util.updateTags();
-      Update.page(0);
+      Util.updateTags(navigationDrawer);
+      Update.page(navigationDrawer, 0);
    }
 
    /* This is so the icon and text in the actionbar are selected. */
@@ -153,11 +156,6 @@ class FeedsActivity extends ActionBarActivity
       {
          am.cancel(pintent);
       }
-   }
-
-   Fragment getFragmentByTag(String fragmentTag)
-   {
-      return getSupportFragmentManager().findFragmentByTag(fragmentTag);
    }
 
    @Override

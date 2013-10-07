@@ -5,16 +5,24 @@ import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.ListView;
 
 class FragmentCard extends ListFragment
 {
+   private final BaseAdapter m_navigationAdapter;
+
+   FragmentCard(BaseAdapter navigationAdapter)
+   {
+      m_navigationAdapter = navigationAdapter;
+   }
+
    @Override
    public
    void onCreate(Bundle savedInstanceState)
    {
       super.onCreate(savedInstanceState);
-      setListAdapter(new AdapterCard());
+      setListAdapter(new AdapterCard(m_navigationAdapter));
    }
 
    @Override

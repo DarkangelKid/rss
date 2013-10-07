@@ -6,10 +6,6 @@ import android.view.View;
 
 class WebViewMode implements View.OnClickListener
 {
-   WebViewMode()
-   {
-   }
-
    @Override
    public
    void onClick(View v)

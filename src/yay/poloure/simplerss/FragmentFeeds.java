@@ -19,11 +19,18 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 
 class FragmentFeeds extends Fragment
 {
    static final         ViewPager VIEW_PAGER            = new ViewPager(Util.getContext());
    private static final int       OFF_SCREEN_PAGE_LIMIT = 128;
+   private final BaseAdapter m_navigationAdapter;
+
+   FragmentFeeds(BaseAdapter navigationAdapter)
+   {
+      m_navigationAdapter = navigationAdapter;
+   }
 
    @Override
    public
@@ -50,7 +57,7 @@ class FragmentFeeds extends Fragment
       VIEW_PAGER.addView(Constants.PAGER_TAB_STRIPS[0], layoutParams);
 
       FragmentManager fragmentManager = FeedsActivity.getActivity().getSupportFragmentManager();
-      VIEW_PAGER.setAdapter(new PagerAdapterFeeds(fragmentManager));
+      VIEW_PAGER.setAdapter(new PagerAdapterFeeds(m_navigationAdapter, fragmentManager));
       VIEW_PAGER.setOffscreenPageLimit(OFF_SCREEN_PAGE_LIMIT);
       VIEW_PAGER.setOnPageChangeListener(new PageChange());
       VIEW_PAGER.setId(0x1000);
@@ -76,22 +83,6 @@ class FragmentFeeds extends Fragment
       super.onCreateOptionsMenu(FeedsActivity.s_optionsMenu, inflater);
 
       Util.setRefreshingIcon(isServiceRunning(FeedsActivity.getActivity()));
-   }
-
-   private static
-   boolean isServiceRunning(Activity activity)
-   {
-      ActivityManager manager = (ActivityManager) activity.getSystemService(
-            Context.ACTIVITY_SERVICE);
-      for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(
-            Integer.MAX_VALUE))
-      {
-         if(ServiceUpdate.class.getName().equals(service.service.getClassName()))
-         {
-            return true;
-         }
-      }
-      return false;
    }
 
    @Override
@@ -121,7 +112,7 @@ class FragmentFeeds extends Fragment
    }
 
    /* Updates and refreshes the tags with any new content. */
-   private static
+   private
    void refreshFeeds()
    {
       Util.setRefreshingIcon(true);
@@ -135,6 +126,56 @@ class FragmentFeeds extends Fragment
    }
 
    private static
+   boolean isServiceRunning(Activity activity)
+   {
+      ActivityManager manager = (ActivityManager) activity.getSystemService(
+            Context.ACTIVITY_SERVICE);
+      for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(
+            Integer.MAX_VALUE))
+      {
+         if(ServiceUpdate.class.getName().equals(service.service.getClassName()))
+         {
+            return true;
+         }
+      }
+      return false;
+   }
+
+   private
+   class OnFinishService extends Handler
+   {
+      /* The stuff we would like to run when the service completes. */
+      @Override
+      public
+      void handleMessage(Message msg)
+      {
+         Util.setRefreshingIcon(false);
+         int page = msg.getData().getInt("page_number");
+         refreshPages(page);
+      }
+
+      /* Use this after content has been updated and you need to ManageFeedsRefresh */
+      private
+      void refreshPages(int page)
+      {
+         Update.page(m_navigationAdapter, 0);
+
+         int tagsCount = Read.count(Constants.TAG_LIST);
+         if(0 == page)
+         {
+            for(int i = 1; i < tagsCount; i++)
+            {
+               Update.page(m_navigationAdapter, i);
+            }
+         }
+         else
+         {
+            Update.page(m_navigationAdapter, page);
+         }
+      }
+   }
+
+   private
    class PageChange implements ViewPager.OnPageChangeListener
    {
       PageChange()
@@ -153,7 +194,7 @@ class FragmentFeeds extends Fragment
       {
          if(0 == Util.getCardAdapter(pos).getCount())
          {
-            Update.page(pos);
+            Update.page(m_navigationAdapter, pos);
          }
       }
 
@@ -161,40 +202,6 @@ class FragmentFeeds extends Fragment
       public
       void onPageScrollStateChanged(int state)
       {
-      }
-   }
-
-   static private
-   class OnFinishService extends Handler
-   {
-      /* The stuff we would like to run when the service completes. */
-      @Override
-      public
-      void handleMessage(Message msg)
-      {
-         Util.setRefreshingIcon(false);
-         int page = msg.getData().getInt("page_number");
-         refreshPages(page);
-      }
-
-      /* Use this after content has been updated and you need to ManageFeedsRefresh */
-      private static
-      void refreshPages(int page)
-      {
-         Update.page(0);
-
-         int tagsCount = Read.count(Constants.TAG_LIST);
-         if(0 == page)
-         {
-            for(int i = 1; i < tagsCount; i++)
-            {
-               Update.page(i);
-            }
-         }
-         else
-         {
-            Update.page(page);
-         }
       }
    }
 }

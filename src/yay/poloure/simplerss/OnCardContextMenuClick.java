@@ -10,7 +10,6 @@ class OnCardContextMenuClick implements DialogInterface.OnClickListener
 {
    private final String m_url;
 
-   public
    OnCardContextMenuClick(String url)
    {
       m_url = url;

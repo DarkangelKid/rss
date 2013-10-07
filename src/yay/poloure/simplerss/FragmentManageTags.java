@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
 
 class FragmentManageTags extends ListFragment
 {
@@ -26,18 +25,15 @@ class FragmentManageTags extends ListFragment
 
       setListAdapter(new AdapterManagerTags());
 
-      Update.manageTags(getListView(), getListAdapter());
+      Update.AsyncCompatManageTagsRefresh(getListView(), getListAdapter());
    }
 
    @Override
    public
    boolean onOptionsItemSelected(MenuItem item)
    {
-      if(NavDrawer.s_drawerToggle.onOptionsItemSelected(item))
-      {
-         return true;
-      }
-      return Util.getString(R.string.add_feed).equals(item.getTitle()) ||
+      return NavDrawer.s_drawerToggle.onOptionsItemSelected(item) ||
+            Util.getString(R.string.add_feed).equals(item.getTitle()) ||
             super.onOptionsItemSelected(item);
    }
 
@@ -48,10 +44,4 @@ class FragmentManageTags extends ListFragment
       return inflater.inflate(R.layout.listview_cards, container, false);
    }
 
-   @Override
-   public
-   void onListItemClick(ListView l, View v, int position, long id)
-   {
-      super.onListItemClick(l, v, position, id);
-   }
 }

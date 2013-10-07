@@ -3,17 +3,20 @@ package yay.poloure.simplerss;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.ListFragment;
+import android.widget.BaseAdapter;
 
 class PagerAdapterManage extends FragmentPagerAdapter
 {
-   static final         Fragment[] MANAGE_FRAGMENTS = {
-         new FragmentManageTags(), new FragmentManageFeeds(), new FragmentManageFilters(),
-   };
-   private static final String[]   MANAGE_TITLES    = Util.getArray(R.array.manage_titles);
+   static final         ListFragment[] MANAGE_FRAGMENTS = new ListFragment[3];
+   private static final String[]       MANAGE_TITLES    = Util.getArray(R.array.manage_titles);
 
-   PagerAdapterManage(FragmentManager fm)
+   PagerAdapterManage(BaseAdapter navigationAdapter, FragmentManager fm)
    {
       super(fm);
+      MANAGE_FRAGMENTS[0] = new FragmentManageTags();
+      MANAGE_FRAGMENTS[1] = new FragmentManageFeeds(navigationAdapter);
+      MANAGE_FRAGMENTS[2] = new FragmentManageFilters();
    }
 
    @Override

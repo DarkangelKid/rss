@@ -5,10 +5,10 @@ import android.widget.SeekBar;
 class SeekBarRefreshTimeChange implements SeekBar.OnSeekBarChangeListener
 {
    private static final String[] REFRESH_TIMES = Util.getArray(R.array.refresh_times);
-   private final AdapterSettingsFunctions.SettingsSeekHolder m_holder;
-   private final String                                      m_settingsPath;
+   private final HolderSettingsSeekBar m_holder;
+   private final String                m_settingsPath;
 
-   SeekBarRefreshTimeChange(AdapterSettingsFunctions.SettingsSeekHolder holder, String settingPath)
+   SeekBarRefreshTimeChange(HolderSettingsSeekBar holder, String settingPath)
    {
       m_holder = holder;
       m_settingsPath = settingPath;

@@ -51,7 +51,6 @@ class ServiceUpdate extends IntentService
             String feedPath = Util.getPath(names[i], "");
             if(Util.isNonExisting(feedPath))
             {
-               Write.log(256);
                Util.mkdir(feedPath + Constants.IMAGE_DIR);
                Util.mkdir(feedPath + Constants.THUMBNAIL_DIR);
             }

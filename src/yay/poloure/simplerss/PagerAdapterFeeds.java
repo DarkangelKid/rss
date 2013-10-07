@@ -3,14 +3,17 @@ package yay.poloure.simplerss;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.widget.BaseAdapter;
 
 class PagerAdapterFeeds extends FragmentPagerAdapter
 {
-   private String[] m_currentTags;
+   private       String[]    m_currentTags;
+   private final BaseAdapter m_navigationAdapter;
 
-   PagerAdapterFeeds(FragmentManager fm)
+   PagerAdapterFeeds(BaseAdapter navigationAdapter, FragmentManager fm)
    {
       super(fm);
+      m_navigationAdapter = navigationAdapter;
       m_currentTags = Read.file(Constants.TAG_LIST);
    }
 
@@ -32,7 +35,7 @@ class PagerAdapterFeeds extends FragmentPagerAdapter
    public
    Fragment getItem(int position)
    {
-      return new FragmentCard();
+      return new FragmentCard(m_navigationAdapter);
    }
 
    void updatePages()

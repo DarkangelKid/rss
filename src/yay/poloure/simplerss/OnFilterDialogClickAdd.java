@@ -13,11 +13,17 @@ class OnFilterDialogClickAdd implements DialogInterface.OnClickListener
       m_addFilterLayout = addFilterLayout;
    }
 
+   private static
+   String getText(TextView view)
+   {
+      return view.getText().toString().trim();
+   }
+
    @Override
    public
    void onClick(DialogInterface dialog, int which)
    {
-      String filter = Util.getText((TextView) m_addFilterLayout);
+      String filter = getText((TextView) m_addFilterLayout);
       String path = Constants.FILTER_LIST;
       String[] filters = Read.file(path);
       if(-1 == Util.index(filters, filter))

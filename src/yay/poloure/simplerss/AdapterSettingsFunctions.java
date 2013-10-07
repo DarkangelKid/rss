@@ -65,11 +65,11 @@ class AdapterSettingsFunctions extends BaseAdapter
       /* This type is a checkbox setting. */
       else if(1 == viewType)
       {
-         SettingsCheckHolder holder;
+         HolderSettingsCheckBox holder;
          if(null == cv1)
          {
             cv1 = inflater.inflate(R.layout.settings_checkbox, parent, false);
-            holder = new SettingsCheckHolder();
+            holder = new HolderSettingsCheckBox();
             holder.title = (TextView) cv1.findViewById(R.id.check_title);
             holder.summary = (TextView) cv1.findViewById(R.id.check_summary);
             holder.checkbox = (CheckBox) cv1.findViewById(R.id.checkbox);
@@ -77,7 +77,7 @@ class AdapterSettingsFunctions extends BaseAdapter
          }
          else
          {
-            holder = (SettingsCheckHolder) cv1.getTag();
+            holder = (HolderSettingsCheckBox) cv1.getTag();
          }
 
          holder.title.setText(FUNCTION_TITLES[position]);
@@ -90,14 +90,14 @@ class AdapterSettingsFunctions extends BaseAdapter
          holder.checkbox.setChecked(Util.strbol(Read.setting(settingPath)));
       }
 
-      /* Otherwise, the type will default to a seekbar. */
+      /* Otherwise, the type will default to a SeekBar. */
       else
       {
-         SettingsSeekHolder holder;
+         HolderSettingsSeekBar holder;
          if(null == cv1)
          {
             cv1 = inflater.inflate(R.layout.settings_seekbar, parent, false);
-            holder = new SettingsSeekHolder();
+            holder = new HolderSettingsSeekBar();
             holder.title = (TextView) cv1.findViewById(R.id.seek_title);
             holder.summary = (TextView) cv1.findViewById(R.id.seek_summary);
             holder.seekbar = (SeekBar) cv1.findViewById(R.id.seekbar);
@@ -106,7 +106,7 @@ class AdapterSettingsFunctions extends BaseAdapter
          }
          else
          {
-            holder = (SettingsSeekHolder) cv1.getTag();
+            holder = (HolderSettingsSeekBar) cv1.getTag();
          }
 
          holder.title.setText(FUNCTION_TITLES[position]);
@@ -168,22 +168,4 @@ class AdapterSettingsFunctions extends BaseAdapter
    {
       return 3;
    }
-
-   static
-   class SettingsCheckHolder
-   {
-      TextView title;
-      TextView summary;
-      CheckBox checkbox;
-   }
-
-   static
-   class SettingsSeekHolder
-   {
-      TextView title;
-      TextView summary;
-      TextView read;
-      SeekBar  seekbar;
-   }
-
 }

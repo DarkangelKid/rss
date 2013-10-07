@@ -11,7 +11,6 @@ class OnDialogClickEdit implements DialogInterface.OnClickListener
    private final AdapterView<SpinnerAdapter> m_tag;
    private final String                      m_title;
 
-   public
    OnDialogClickEdit(View editRssDialog, AdapterView<SpinnerAdapter> spinnerTag, String title)
    {
       m_editRssDialog = editRssDialog;

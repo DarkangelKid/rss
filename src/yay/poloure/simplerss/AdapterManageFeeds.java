@@ -7,8 +7,8 @@ import android.widget.TextView;
 
 class AdapterManageFeeds extends BaseAdapter
 {
-   String[] m_titleArray = Util.EMPTY_STRING_ARRAY;
-   String[] m_infoArray  = Util.EMPTY_STRING_ARRAY;
+   private String[] m_titleArray = Util.EMPTY_STRING_ARRAY;
+   private String[] m_infoArray  = Util.EMPTY_STRING_ARRAY;
 
    void setArrays(String[] titles, String... infos)
    {
@@ -20,6 +20,12 @@ class AdapterManageFeeds extends BaseAdapter
    {
       m_titleArray[pos] = title;
       m_infoArray[pos] = info;
+   }
+
+   void removeItem(int position)
+   {
+      m_titleArray = Util.arrayRemove(m_infoArray, position);
+      m_infoArray = Util.arrayRemove(m_infoArray, position);
    }
 
    @Override

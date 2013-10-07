@@ -19,31 +19,21 @@ import java.util.Arrays;
 
 class AdapterManagerTags extends BaseAdapter
 {
-   private static final int SCREEN_HEIGHT = (int) Util.getContext()
+   private static final int      SCREEN_HEIGHT = (int) Util.getContext()
          .getResources()
          .getDisplayMetrics().heightPixels;
-   static String[] s_tagArray;
-   static String[] s_infoArray;
-   private final int[]  m_position = new int[2];
-   private       String old_title  = "";
+   static               String[] s_tagArray    = Util.EMPTY_STRING_ARRAY;
+   static               String[] s_infoArray   = Util.EMPTY_STRING_ARRAY;
+   private final        int[]    m_position    = new int[2];
+   private              String   old_title     = "";
    private int old_view;
 
    @Override
    public
    int getCount()
    {
-      return null == s_tagArray ? 0 : s_tagArray.length;
+      return s_tagArray.length;
    }
-
-   /*@Override
-   public int getItemViewType(int position)
-   {
-      if(FeedsActivity.HONEYCOMB)
-         return 0;
-
-      else
-         return 1;
-   }*/
 
    @Override
    public
@@ -61,24 +51,22 @@ class AdapterManagerTags extends BaseAdapter
 
    @Override
    public
-   View getView(int position, View view, ViewGroup parent)
+   View getView(int position, View convertView, ViewGroup parent)
    {
-      View view1 = view;
-      /*int view_type = getItemViewType(position);
-      if(view_type == 0)*/
+      View view = convertView;
       ViewHolder holder;
-      if(null == view1)
+      if(null == view)
       {
-         view1 = Util.getLayoutInflater().inflate(R.layout.manage_group_item, parent, false);
+         view = Util.getLayoutInflater().inflate(R.layout.manage_group_item, parent, false);
          holder = new ViewHolder();
-         holder.tag_view = (TextView) view1.findViewById(R.id.tag_item);
-         holder.info_view = (TextView) view1.findViewById(R.id.tag_feeds);
-         holder.image_view = (ImageView) view1.findViewById(R.id.drag_image);
-         view1.setTag(holder);
+         holder.tag_view = (TextView) view.findViewById(R.id.tag_item);
+         holder.info_view = (TextView) view.findViewById(R.id.tag_feeds);
+         holder.image_view = (ImageView) view.findViewById(R.id.drag_image);
+         view.setTag(holder);
       }
       else
       {
-         holder = (ViewHolder) view1.getTag();
+         holder = (ViewHolder) view.getTag();
       }
 
       holder.tag_view.setText(s_tagArray[position]);
@@ -87,7 +75,7 @@ class AdapterManagerTags extends BaseAdapter
       {
          holder.image_view.setVisibility(View.VISIBLE);
          holder.image_view.setOnTouchListener(new MyTouchListener());
-         view1.setOnDragListener(new MyDragListener());
+         view.setOnDragListener(new MyDragListener());
       }
       else
       {
@@ -95,14 +83,7 @@ class AdapterManagerTags extends BaseAdapter
       }
 
 
-      return view1;
-   }
-
-   @Override
-   public
-   int getViewTypeCount()
-   {
-      return 2;
+      return view;
    }
 
    private static
@@ -113,7 +94,7 @@ class AdapterManagerTags extends BaseAdapter
       ImageView image_view;
    }
 
-   static private
+   private static
    class CardShadowBuilder extends View.DragShadowBuilder
    {
       final View view_store;
@@ -196,7 +177,7 @@ class AdapterManagerTags extends BaseAdapter
                }
             }
 
-            /* Change the information of the card that just disapeared. */
+            /* Change the information of the card that just disappeared. */
             /* Old m_title is the currently touched m_title and new_title is the one to be
             replaced */
             rearrangeTags(old_title, newTitle);
@@ -222,23 +203,16 @@ class AdapterManagerTags extends BaseAdapter
             v.setVisibility(View.VISIBLE);
 
             Write.collection(Constants.TAG_LIST, Arrays.asList(s_tagArray));
-            Util.updateTags();
+            // TODO Util.updateTags();
          }
          return true;
       }
 
       void rearrangeTags(String previous, String next)
       {
-         int i = 0;
-         while(!previous.equals(s_tagArray[i]))
-         {
-            i++;
-         }
-         int j = 0;
-         while(!next.equals(s_tagArray[j]))
-         {
-            j++;
-         }
+         int i = Util.index(s_tagArray, previous);
+         int j = Util.index(s_tagArray, next);
+
          String oldInfo = s_infoArray[i];
          String old = s_tagArray[i];
 

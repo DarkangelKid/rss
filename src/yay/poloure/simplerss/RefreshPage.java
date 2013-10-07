@@ -6,6 +6,7 @@ import android.text.format.Time;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.BaseAdapter;
 import android.widget.ListView;
 
 import java.util.Map;
@@ -13,12 +14,18 @@ import java.util.TreeMap;
 
 class RefreshPage extends AsyncTask<Integer, FeedItem, Animation>
 {
-   private int          m_pageNumber;
-   private boolean      m_flash;
-   private ListFragment m_listFragment;
-   private AdapterCard  m_adapterCard;
-   private ListView     m_listView;
+   private final BaseAdapter  m_navigationAdapter;
+   private       int          m_pageNumber;
+   private       boolean      m_flash;
+   private       ListFragment m_listFragment;
+   private       AdapterCard  m_adapterCard;
+   private       ListView     m_listView;
    private int position = -3;
+
+   RefreshPage(BaseAdapter navigationAdapter)
+   {
+      m_navigationAdapter = navigationAdapter;
+   }
 
    @Override
    protected
@@ -189,7 +196,7 @@ class RefreshPage extends AsyncTask<Integer, FeedItem, Animation>
       }
 
       /* Update the unread counts in the navigation drawer. */
-      Update.navigation();
+      Update.navigation(m_navigationAdapter);
 
       if(null == m_listView)
       {

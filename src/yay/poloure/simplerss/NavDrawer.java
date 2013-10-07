@@ -1,6 +1,5 @@
 package yay.poloure.simplerss;
 
-import android.os.AsyncTask;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -17,8 +16,8 @@ class NavDrawer
    private static final String   NAVIGATION = Util.getString(R.string.navigation_title);
    static         DrawerLayout          s_drawerLayout;
    static         ActionBarDrawerToggle s_drawerToggle;
-   private static ListView              s_navList;
    private static String                s_currentTitle;
+   private final  ListView              m_navList;
 
    NavDrawer(ListView navList, DrawerLayout drawerLayout)
    {
@@ -26,35 +25,18 @@ class NavDrawer
       s_drawerLayout = drawerLayout;
       s_drawerLayout.setDrawerListener(s_drawerToggle);
 
-      s_navList = navList;
-      s_navList.setOnItemClickListener(new NavDrawerItemClick());
+      m_navList = navList;
+      m_navList.setOnItemClickListener(new NavDrawerItemClick());
 
       s_drawerToggle = new DrawerToggleClick();
       s_drawerLayout.setDrawerListener(s_drawerToggle);
 
-      s_navList.setAdapter(new AdapterNavDrawer());
+      m_navList.setAdapter(new AdapterNavDrawer());
    }
 
-   static
-   class RefreshNavAdapter extends AsyncTask<int[], Void, int[]>
+   BaseAdapter getAdapter()
    {
-      @Override
-      protected
-      int[] doInBackground(int[]... counts)
-      {
-         /* If null was passed into the task, count the unread items. */
-         return 0 == counts[0].length ? Util.getUnreadCounts() : counts[0];
-      }
-
-      @Override
-      protected
-      void onPostExecute(int[] result)
-      {
-         /* Set the titles & counts arrays in this file and notify the adapter. */
-         AdapterNavDrawer.s_tagArray = Read.file(Constants.TAG_LIST);
-         AdapterNavDrawer.s_unreadArray = result;
-         ((BaseAdapter) s_navList.getAdapter()).notifyDataSetChanged();
-      }
+      return (BaseAdapter) m_navList.getAdapter();
    }
 
    private static
@@ -89,7 +71,7 @@ class NavDrawer
       }
    }
 
-   static private
+   private
    class NavDrawerItemClick implements AdapterView.OnItemClickListener
    {
       @Override
@@ -97,7 +79,7 @@ class NavDrawer
       void onItemClick(AdapterView parent, View view, int position, long id)
       {
          /* Close the drawer on any click of a navigation item. */
-         s_drawerLayout.closeDrawer(s_navList);
+         s_drawerLayout.closeDrawer(m_navList);
 
          /* Determine the new m_title based on the position of the item clicked. */
          String selectedTitle = 3 < position ? NAV_TITLES[0] : NAV_TITLES[position];
@@ -117,14 +99,15 @@ class NavDrawer
          }
 
          /* Hide the current fragment and display the selected one. */
-         showFragment(FeedsActivity.getActivity().getFragmentByTag(selectedTitle));
+         showFragment(FeedsActivity.getActivity()
+               .getSupportFragmentManager()
+               .findFragmentByTag(selectedTitle));
 
          /* Set the m_title text of the actionbar to the selected item. */
          ActionBar actionBar = FeedsActivity.getActivity().getSupportActionBar();
          actionBar.setTitle(selectedTitle);
       }
 
-      static
       void showFragment(Fragment fragment)
       {
          FragmentTransaction tran = FeedsActivity.getActivity()
@@ -132,7 +115,9 @@ class NavDrawer
                .beginTransaction();
          for(String NAV_TITLE : NAV_TITLES)
          {
-            Fragment frag = FeedsActivity.getActivity().getFragmentByTag(NAV_TITLE);
+            Fragment frag = FeedsActivity.getActivity()
+                  .getSupportFragmentManager()
+                  .findFragmentByTag(NAV_TITLE);
             if(null != frag && !frag.equals(fragment) && !frag.isHidden())
             {
                tran.hide(frag);

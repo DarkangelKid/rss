@@ -17,13 +17,6 @@ import java.util.Arrays;
 final
 class Write
 {
-   static final String MEDIA_UNMOUNTED = "Media not mounted.";
-
-   private
-   Write()
-   {
-   }
-
    /* All functions in here must check that the media is available before
     * continuing. */
 

@@ -2,41 +2,28 @@ package yay.poloure.simplerss;
 
 import android.app.AlertDialog;
 import android.os.AsyncTask;
+import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
 class Update
 {
    public static
-   void navigation()
+   void navigation(BaseAdapter navigationAdapter)
    {
       if(Constants.HONEYCOMB)
       {
-         new NavDrawer.RefreshNavAdapter().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
-               Util.EMPTY_INT_ARRAY);
+         new AsyncRefreshNavigationAdapter(navigationAdapter).executeOnExecutor(
+               AsyncTask.THREAD_POOL_EXECUTOR, Util.EMPTY_INT_ARRAY);
       }
       else
       {
-         new NavDrawer.RefreshNavAdapter().execute(Util.EMPTY_INT_ARRAY);
+         new AsyncRefreshNavigationAdapter(navigationAdapter).execute(Util.EMPTY_INT_ARRAY);
       }
    }
 
    public static
-   void manageFeeds(ListView listView, ListAdapter listAdapter)
-   {
-      if(Constants.HONEYCOMB)
-      {
-         new AsyncManageFeedsRefresh(listView, listAdapter).executeOnExecutor(
-               AsyncTask.THREAD_POOL_EXECUTOR);
-      }
-      else
-      {
-         new AsyncManageFeedsRefresh(listView, listAdapter).execute();
-      }
-   }
-
-   public static
-   void manageTags(ListView listView, ListAdapter listAdapter)
+   void AsyncCompatManageTagsRefresh(ListView listView, ListAdapter listAdapter)
    {
       if(Constants.HONEYCOMB)
       {
@@ -50,15 +37,16 @@ class Update
    }
 
    public static
-   void page(int pageNumber)
+   void page(BaseAdapter navigationAdapter, int pageNumber)
    {
       if(Constants.HONEYCOMB)
       {
-         new RefreshPage().execute(pageNumber);
+         new RefreshPage(navigationAdapter).execute(pageNumber);
       }
       else
       {
-         new RefreshPage().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, pageNumber);
+         new RefreshPage(navigationAdapter).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
+               pageNumber);
       }
    }
 
@@ -68,11 +56,11 @@ class Update
    {
       if(Constants.HONEYCOMB)
       {
-         new FeedDialog.CheckFeed(dlg, ntag, fname, mode, ctitle).execute(url);
+         new AsyncCheckFeed(dlg, ntag, fname, mode, ctitle).execute(url);
       }
       else
       {
-         new FeedDialog.CheckFeed(dlg, ntag, fname, mode, ctitle).executeOnExecutor(
+         new AsyncCheckFeed(dlg, ntag, fname, mode, ctitle).executeOnExecutor(
                AsyncTask.THREAD_POOL_EXECUTOR, url);
       }
    }

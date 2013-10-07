@@ -1,15 +1,16 @@
 package yay.poloure.simplerss;
 import android.app.AlertDialog;
+import android.support.v4.app.ListFragment;
 import android.view.View;
+import android.widget.Adapter;
 import android.widget.AdapterView;
 
 class OnFilterLongClick implements AdapterView.OnItemLongClickListener
 {
-   private final AdapterManageFilters  m_filterAdapter;
-   private final FragmentManageFilters m_filters;
+   private final Adapter      m_filterAdapter;
+   private final ListFragment m_filters;
 
-   public
-   OnFilterLongClick(FragmentManageFilters filters, AdapterManageFilters adapter)
+   OnFilterLongClick(ListFragment filters, Adapter adapter)
    {
       m_filters = filters;
       m_filterAdapter = adapter;

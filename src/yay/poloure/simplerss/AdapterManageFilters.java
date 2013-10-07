@@ -7,7 +7,7 @@ import android.widget.TextView;
 
 class AdapterManageFilters extends BaseAdapter
 {
-   private static String[] s_filterTitles;
+   private static String[] s_filterTitles = Util.EMPTY_STRING_ARRAY;
 
    static
    void setTitles(String... titles)
@@ -19,7 +19,7 @@ class AdapterManageFilters extends BaseAdapter
    public
    int getCount()
    {
-      return null == s_filterTitles ? 0 : s_filterTitles.length;
+      return s_filterTitles.length;
    }
 
    @Override

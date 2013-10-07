@@ -1,11 +1,13 @@
 package yay.poloure.simplerss;
 import android.content.DialogInterface;
+import android.widget.Adapter;
+import android.widget.BaseAdapter;
 
 class OnFilterClickDelete implements DialogInterface.OnClickListener
 {
-   private final AdapterManageFilters m_adapter;
+   private final Adapter m_adapter;
 
-   OnFilterClickDelete(AdapterManageFilters adapter)
+   OnFilterClickDelete(Adapter adapter)
    {
       m_adapter = adapter;
    }
@@ -14,8 +16,8 @@ class OnFilterClickDelete implements DialogInterface.OnClickListener
    public
    void onClick(DialogInterface dialog, int position)
    {
-      Write.removeLine(Constants.FILTER_LIST, m_adapter.getItem(position), false);
-      m_adapter.removePosition(position);
-      m_adapter.notifyDataSetChanged();
+      Write.removeLine(Constants.FILTER_LIST, (CharSequence) m_adapter.getItem(position), false);
+      ((AdapterManageFilters) m_adapter).removePosition(position);
+      ((BaseAdapter) m_adapter).notifyDataSetChanged();
    }
 }

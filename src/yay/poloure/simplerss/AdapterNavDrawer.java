@@ -13,22 +13,22 @@ class AdapterNavDrawer extends BaseAdapter
    private static final int[] NAV_ICONS = {
          R.drawable.feeds, R.drawable.manage, R.drawable.feeds,
    };
-   static  String[] s_tagArray;
-   static  int[]    s_unreadArray;
+   String[] m_tagArray    = Util.EMPTY_STRING_ARRAY;
+   int[]    m_unreadArray = Util.EMPTY_INT_ARRAY;
    private TextView m_navigationMainItem;
 
    @Override
    public
    int getCount()
    {
-      return null == s_tagArray ? 4 : s_tagArray.length + 4;
+      return m_tagArray.length + 4;
    }
 
    @Override
    public
    String getItem(int position)
    {
-      return s_tagArray[position];
+      return m_tagArray[position];
    }
 
    @Override
@@ -69,8 +69,8 @@ class AdapterNavDrawer extends BaseAdapter
       {
          view = inflater.inflate(R.layout.navigation_drawer_subtitle_divider, parent, false);
       }
-         /* This view is for the m_imageViewTag items of the navigation drawer.
-          * The one with unread counters. */
+      /* This view is for the m_imageViewTag items of the navigation drawer.
+       * The one with unread counters. */
       else if(2 == viewType)
       {
          NavigationTagItem holder2;
@@ -87,8 +87,8 @@ class AdapterNavDrawer extends BaseAdapter
             holder2 = (NavigationTagItem) view.getTag();
          }
 
-         holder2.title.setText(s_tagArray[position - 4]);
-         String number = Integer.toString(s_unreadArray[position - 4]);
+         holder2.title.setText(m_tagArray[position - 4]);
+         String number = Integer.toString(m_unreadArray[position - 4]);
          holder2.m_unreadCountView.setText("0".equals(number) ? "" : number);
       }
       return view;

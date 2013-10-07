@@ -34,10 +34,16 @@ class AdapterCard extends BaseAdapter
    private static final Pattern     PATTERN_THUMBNAILS = Pattern.compile(Constants.THUMBNAILS);
    private static final int         SCREEN_WIDTH       = Util.getScreenWidth();
    private static final int         VIEW_TYPE_COUNT    = 4;
+   private final BaseAdapter m_navigationAdapter;
    boolean    m_touchedScreen = true;
    FeedItem[] m_items         = new FeedItem[0];
    private boolean m_firstGetItem = true;
    private ListView m_listView;
+
+   AdapterCard(BaseAdapter navigationAdapter)
+   {
+      m_navigationAdapter = navigationAdapter;
+   }
 
    void prependArray(FeedItem... items)
    {
@@ -307,7 +313,7 @@ class AdapterCard extends BaseAdapter
       }
    }
 
-   private static
+   static
    class FullHolder
    {
       TextView  m_title;
@@ -339,7 +345,7 @@ class AdapterCard extends BaseAdapter
       TextView url;
    }
 
-   static private
+   private static
    class ImageClick implements View.OnClickListener
    {
       final String m_imagePath;
@@ -436,7 +442,7 @@ class AdapterCard extends BaseAdapter
 
          if(AbsListView.OnScrollListener.SCROLL_STATE_IDLE == scrollState)
          {
-            Update.navigation();
+            Update.navigation(m_navigationAdapter);
          }
       }
 

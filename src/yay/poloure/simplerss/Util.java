@@ -7,11 +7,13 @@ import android.os.Environment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.PagerTabStrip;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -45,23 +47,23 @@ class Util
    }
 
    static
-   void updateTags()
+   void updateTags(BaseAdapter navigationAdapter)
    {
       /* If no tags exists, add the ALL_TAG. */
-      if(0 == Read.file(Constants.TAG_LIST).length)
+      if(0 == Read.count(Constants.TAG_LIST))
       {
          Write.single(Constants.TAG_LIST, Constants.ALL_TAG + Constants.NL);
       }
 
-      if(null != FragmentFeeds.VIEW_PAGER && null != FragmentFeeds.VIEW_PAGER.getAdapter())
+      PagerAdapter pagerAdapter = FragmentFeeds.VIEW_PAGER.getAdapter();
+
+      if(null != pagerAdapter)
       {
-         PagerAdapterFeeds pagerAdapterFeeds = (PagerAdapterFeeds) FragmentFeeds.VIEW_PAGER
-               .getAdapter();
-         pagerAdapterFeeds.updatePages();
-         pagerAdapterFeeds.notifyDataSetChanged();
+         ((PagerAdapterFeeds) pagerAdapter).updatePages();
+         pagerAdapter.notifyDataSetChanged();
       }
 
-      Update.navigation();
+      Update.navigation(navigationAdapter);
    }
 
    static
@@ -82,13 +84,13 @@ class Util
 
       if(null == items)
       {
-         AdapterCard adp = getCardAdapter(page1);
-         if(null == adp)
+         AdapterCard cardAdapter = getCardAdapter(page1);
+         if(null == cardAdapter)
          {
             return -1;
          }
 
-         items = adp.m_items;
+         items = cardAdapter.m_items;
       }
 
       int i;
@@ -156,12 +158,7 @@ class Util
 
       /* Check to see if we can Write to the media. */
       String mounted = Environment.MEDIA_MOUNTED;
-      if(!mounted.equals(Environment.getExternalStorageState()))
-      {
-         return true;
-      }
-
-      return false;
+      return !mounted.equals(Environment.getExternalStorageState());
    }
 
    static
@@ -207,9 +204,9 @@ class Util
       String[] currentTags = Read.file(Constants.TAG_LIST);
 
       String[][] content = Read.csv();
-      String[] names = content[0];
-      String[] urls = content[1];
-      String[] tags = content[2];
+      String[] indexNames = content[0];
+      String[] indexUrls = content[1];
+      String[] indexTags = content[2];
 
       int total = 0;
       int currentTagsCount = currentTags.length;
@@ -219,17 +216,17 @@ class Util
       for(int i = 1; i < currentTagsCount; i++)
       {
          int read = 0;
-         int tagsCount = tags.length;
-         for(int j = 0; j < tagsCount; j++)
+         int indexTagsCount = indexTags.length;
+         for(int j = 0; j < indexTagsCount; j++)
          {
-            if(tags[j].equals(currentTags[i]))
+            if(indexTags[j].equals(currentTags[i]))
             {
-               totalCounts[i] += Read.count(getPath(names[j], Constants.CONTENT));
+               totalCounts[i] += Read.count(getPath(indexNames[j], Constants.CONTENT));
                for(String readUrl : readLinks)
                {
                   int pos = readUrl.indexOf('/') + 1;
                   readUrl = readUrl.substring(pos, readUrl.indexOf('/', pos + 1));
-                  if(urls[j].contains(readUrl))
+                  if(indexUrls[j].contains(readUrl))
                   {
                      read++;
                   }
@@ -307,10 +304,10 @@ class Util
             Constants.TXT;
       String[] check = Read.file(path);
 
-      boolean notif = 0 != check.length && strbol(check[0]);
+      boolean notificationsEnabled = 0 != check.length && strbol(check[0]);
       Intent intent = new Intent(s_context, ServiceUpdate.class);
       intent.putExtra("GROUP_NUMBER", page);
-      intent.putExtra("NOTIFICATIONS", notif);
+      intent.putExtra("NOTIFICATIONS", notificationsEnabled);
       return intent;
    }
 
@@ -481,12 +478,6 @@ class Util
       return ((TextView) view.findViewById(id)).getText().toString().trim();
    }
 
-   static
-   String getText(TextView view)
-   {
-      return view.getText().toString().trim();
-   }
-
    /* Returns a zero-length array if the resource is not found and logs the
     * event in log. */
    static
@@ -500,7 +491,7 @@ class Util
       catch(Resources.NotFoundException e)
       {
          e.printStackTrace();
-         Write.log(resource + " does not exist.");
+         Write.log(resource + " array does not exist.");
       }
       return array;
    }
@@ -516,7 +507,7 @@ class Util
       catch(Resources.NotFoundException e)
       {
          e.printStackTrace();
-         Write.log(resource + " does not exist.");
+         Write.log(resource + " string does not exist.");
       }
       return str;
    }

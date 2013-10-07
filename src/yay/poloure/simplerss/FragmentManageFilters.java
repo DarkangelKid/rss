@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 
 class FragmentManageFilters extends ListFragment
@@ -28,14 +29,14 @@ class FragmentManageFilters extends ListFragment
    {
       super.onActivityCreated(savedInstanceState);
 
-      AdapterManageFilters adapter = new AdapterManageFilters();
-      setListAdapter(adapter);
+      ListAdapter listAdapter = new AdapterManageFilters();
+      setListAdapter(listAdapter);
 
       ListView listview = getListView();
 
       AdapterManageFilters.setTitles(Read.file(Constants.FILTER_LIST));
 
-      listview.setOnItemLongClickListener(new OnFilterLongClick(this, adapter));
+      listview.setOnItemLongClickListener(new OnFilterLongClick(this, listAdapter));
    }
 
    @Override

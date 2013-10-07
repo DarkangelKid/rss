@@ -3,15 +3,19 @@ package yay.poloure.simplerss;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SpinnerAdapter;
 
@@ -20,6 +24,13 @@ import java.util.Arrays;
 
 class FragmentManageFeeds extends ListFragment
 {
+   private final BaseAdapter m_navigationAdapter;
+
+   FragmentManageFeeds(BaseAdapter navigationAdapter)
+   {
+      m_navigationAdapter = navigationAdapter;
+   }
+
    @Override
    public
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -76,9 +87,22 @@ class FragmentManageFeeds extends ListFragment
    {
       super.onActivityCreated(savedInstanceState);
       setListAdapter(new AdapterManageFeeds());
-      getListView().setOnItemLongClickListener(
-            new FeedItemLongClick((AdapterManageFeeds) getListAdapter()));
-      Update.manageFeeds(getListView(), getListAdapter());
+      getListView().setOnItemLongClickListener(new FeedItemLongClick(getListAdapter()));
+      manageFeeds(getListView(), getListAdapter());
+   }
+
+   private static
+   void manageFeeds(ListView listView, ListAdapter listAdapter)
+   {
+      if(Constants.HONEYCOMB)
+      {
+         new AsyncManageFeedsRefresh(listView, listAdapter).executeOnExecutor(
+               AsyncTask.THREAD_POOL_EXECUTOR);
+      }
+      else
+      {
+         new AsyncManageFeedsRefresh(listView, listAdapter).execute();
+      }
    }
 
    /* Add a new feed. */
@@ -98,87 +122,21 @@ class FragmentManageFeeds extends ListFragment
       return super.onOptionsItemSelected(item);
    }
 
-   private static
-   class FeedDeleteClick implements DialogInterface.OnClickListener
-   {
-      private final AdapterManageFeeds m_adapter;
-
-      FeedDeleteClick(AdapterManageFeeds adpt)
-      {
-         m_adapter = adpt;
-      }
-
-      /* Delete the feed. */
-      @Override
-      public
-      void onClick(DialogInterface dialog, int position)
-      {
-         String feed = m_adapter.getItem(position);
-         /* Delete the feed's folder. */
-         Util.rmdir(new File(Util.getStorage() + Util.getPath(feed, "")));
-
-         /* Remove the feed from the index file. */
-         Write.removeLine(Constants.INDEX, feed, true);
-
-         Util.updateTags();
-         removeItem(position);
-         m_adapter.notifyDataSetChanged();
-
-         /*Update.manageTags();*/
-      }
-
-      void removeItem(int position)
-      {
-         m_adapter.m_titleArray = Util.arrayRemove(m_adapter.m_infoArray, position);
-         m_adapter.m_infoArray = Util.arrayRemove(m_adapter.m_infoArray, position);
-      }
-   }
-
-   static private
-   class FeedClearCacheClick implements DialogInterface.OnClickListener
-   {
-      private final AdapterManageFeeds m_adapterManageFeeds;
-
-      FeedClearCacheClick(AdapterManageFeeds adapterManageFeeds)
-      {
-         m_adapterManageFeeds = adapterManageFeeds;
-      }
-
-      /// Delete the cache.
-      @Override
-      public
-      void onClick(DialogInterface dialog, int position)
-      {
-         String feedName = m_adapterManageFeeds.getItem(position);
-         String path = Util.getPath(feedName, "");
-
-         Util.rmdir(new File(path));
-/* make the image and thumbnail folders. */
-         Util.mkdir(path + Constants.IMAGE_DIR);
-         Util.mkdir(path + Constants.THUMBNAIL_DIR);
-
-/* Refresh pages and Update tags and stuff. */
-         Util.updateTags();
-         // TODO Update.manageFeeds();
-         // TODO Update.manageTags();
-      }
-   }
-
-   static private
+   private
    class FeedItemLongClick implements OnItemLongClickListener
    {
       private final AlertDialog.Builder m_build;
 
       private
-      FeedItemLongClick(AdapterManageFeeds adapterManageFeeds)
+      FeedItemLongClick(Adapter p_adapter)
       {
          m_build = new AlertDialog.Builder(Util.getContext());
 
          m_build.setCancelable(true)
                .setNegativeButton(Util.getString(R.string.delete_dialog),
-                     new FeedDeleteClick(adapterManageFeeds))
+                     new FeedDeleteClick(p_adapter))
                .setPositiveButton(Util.getString(R.string.clear_dialog),
-                     new FeedClearCacheClick(adapterManageFeeds));
+                     new FeedClearCacheClick(p_adapter));
       }
 
       @Override
@@ -187,6 +145,63 @@ class FragmentManageFeeds extends ListFragment
       {
          m_build.show();
          return true;
+      }
+   }
+
+   private
+   class FeedClearCacheClick implements DialogInterface.OnClickListener
+   {
+      private final Adapter m_adapter;
+
+      FeedClearCacheClick(Adapter p_adapter)
+      {
+         m_adapter = p_adapter;
+      }
+
+      /// Delete the cache.
+      @Override
+      public
+      void onClick(DialogInterface dialog, int position)
+      {
+         String feedName = (String) m_adapter.getItem(position);
+         String path = Util.getPath(feedName, "");
+
+         Util.rmdir(new File(path));
+
+         /* Refresh pages and navigation counts. */
+         Update.navigation(m_navigationAdapter);
+         // TODO Update.manageFeeds();
+         // TODO Update.manageTags();
+      }
+   }
+
+   private
+   class FeedDeleteClick implements DialogInterface.OnClickListener
+   {
+      private final Adapter m_adapter;
+
+      FeedDeleteClick(Adapter p_adapter)
+      {
+         m_adapter = p_adapter;
+      }
+
+      /* Delete the feed. */
+      @Override
+      public
+      void onClick(DialogInterface dialog, int position)
+      {
+         String feed = (String) m_adapter.getItem(position);
+         /* Delete the feed's folder. */
+         Util.rmdir(new File(Util.getStorage() + Util.getPath(feed, "")));
+
+         /* Remove the feed from the index file. */
+         Write.removeLine(Constants.INDEX, feed, true);
+
+         Util.updateTags(m_navigationAdapter);
+         ((AdapterManageFeeds) m_adapter).removeItem(position);
+         ((BaseAdapter) m_adapter).notifyDataSetChanged();
+
+         /*Update.manageTags();*/
       }
    }
 }
