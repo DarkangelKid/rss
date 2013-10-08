@@ -1,5 +1,6 @@
 package yay.poloure.simplerss;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
@@ -8,13 +9,15 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 
-class FragmentCard extends ListFragment
+class FragmentTag extends ListFragment
 {
    private final BaseAdapter m_navigationAdapter;
+   private final BaseAdapter m_tagAdapter;
 
-   FragmentCard(BaseAdapter navigationAdapter)
+   FragmentTag(BaseAdapter navigationAdapter, Context context)
    {
       m_navigationAdapter = navigationAdapter;
+      m_tagAdapter = new AdapterTag(context);
    }
 
    @Override
@@ -22,7 +25,16 @@ class FragmentCard extends ListFragment
    void onCreate(Bundle savedInstanceState)
    {
       super.onCreate(savedInstanceState);
-      setListAdapter(new AdapterCard(m_navigationAdapter));
+      setListAdapter(m_tagAdapter);
+   }
+
+   @Override
+   public
+   void onActivityCreated(Bundle savedInstanceState)
+   {
+      super.onActivityCreated(savedInstanceState);
+      ListView listView = getListView();
+      listView.setOnScrollListener(new onScrollFeedListener(m_navigationAdapter, m_tagAdapter));
    }
 
    @Override

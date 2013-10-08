@@ -39,7 +39,7 @@ class NavDrawer
       return (BaseAdapter) m_navList.getAdapter();
    }
 
-   private static
+   static
    class DrawerToggleClick extends ActionBarDrawerToggle
    {
       private final ActionBar m_actionBar = FeedsActivity.getActivity().getSupportActionBar();
@@ -71,7 +71,6 @@ class NavDrawer
       }
    }
 
-   private
    class NavDrawerItemClick implements AdapterView.OnItemClickListener
    {
       @Override

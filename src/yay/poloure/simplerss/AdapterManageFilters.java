@@ -1,5 +1,7 @@
 package yay.poloure.simplerss;
 
+import android.content.Context;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -45,7 +47,9 @@ class AdapterManageFilters extends BaseAdapter
       if(null == view1)
       {
 
-         view1 = Util.getLayoutInflater().inflate(R.layout.manage_feed_item, parent, false);
+         String inflate = Context.LAYOUT_INFLATER_SERVICE;
+         view1 = ((LayoutInflater) Util.getContext().getSystemService(inflate)).inflate(
+               R.layout.manage_feed_item, parent, false);
          holder = new ViewHolder();
          holder.m_title = (TextView) view1.findViewById(R.id.title_item);
          view1.setTag(holder);
@@ -66,9 +70,10 @@ class AdapterManageFilters extends BaseAdapter
       notifyDataSetChanged();
    }
 
-   private static
+   static
    class ViewHolder
    {
+      // TODO
       TextView m_title;
    }
 

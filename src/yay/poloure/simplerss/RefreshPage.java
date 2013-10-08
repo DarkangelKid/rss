@@ -18,7 +18,7 @@ class RefreshPage extends AsyncTask<Integer, FeedItem, Animation>
    private       int          m_pageNumber;
    private       boolean      m_flash;
    private       ListFragment m_listFragment;
-   private       AdapterCard  m_adapterCard;
+   private       AdapterTag   m_adapterCard;
    private       ListView     m_listView;
    private int position = -3;
 
@@ -70,7 +70,7 @@ class RefreshPage extends AsyncTask<Integer, FeedItem, Animation>
          }
          if(null != m_listFragment && null == m_adapterCard)
          {
-            m_adapterCard = (AdapterCard) m_listFragment.getListAdapter();
+            m_adapterCard = (AdapterTag) m_listFragment.getListAdapter();
          }
          if(null != m_listFragment && null == m_listView)
          {
@@ -255,7 +255,7 @@ class RefreshPage extends AsyncTask<Integer, FeedItem, Animation>
 
       if(0 != top)
       {
-         m_listView.setSelectionFromTop(index, top - (AdapterCard.EIGHT << 1));
+         m_listView.setSelectionFromTop(index, top - (/* TODO 8 */ 16 << 1));
       }
    }
 }

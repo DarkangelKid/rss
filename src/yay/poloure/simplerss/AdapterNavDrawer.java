@@ -1,5 +1,6 @@
 package yay.poloure.simplerss;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,7 +45,8 @@ class AdapterNavDrawer extends BaseAdapter
    {
       View view = convertView;
       int viewType = getItemViewType(position);
-      LayoutInflater inflater = Util.getLayoutInflater();
+      String inflate = Context.LAYOUT_INFLATER_SERVICE;
+      LayoutInflater inflater = (LayoutInflater) Util.getContext().getSystemService(inflate);
 
          /* This view is for the FeedsActivity items Feeds, Manage, & Settings. */
       if(0 == viewType)
@@ -123,7 +125,7 @@ class AdapterNavDrawer extends BaseAdapter
       return 3;
    }
 
-   private static
+   static
    class NavigationTagItem
    {
       TextView title;

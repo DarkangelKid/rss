@@ -1,7 +1,9 @@
 package yay.poloure.simplerss;
 
+import android.content.Context;
 import android.graphics.Point;
 import android.view.DragEvent;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnDragListener;
@@ -57,7 +59,9 @@ class AdapterManagerTags extends BaseAdapter
       ViewHolder holder;
       if(null == view)
       {
-         view = Util.getLayoutInflater().inflate(R.layout.manage_group_item, parent, false);
+         String inflate = Context.LAYOUT_INFLATER_SERVICE;
+         view = ((LayoutInflater) Util.getContext().getSystemService(inflate)).inflate(
+               R.layout.manage_group_item, parent, false);
          holder = new ViewHolder();
          holder.tag_view = (TextView) view.findViewById(R.id.tag_item);
          holder.info_view = (TextView) view.findViewById(R.id.tag_feeds);
@@ -86,7 +90,7 @@ class AdapterManagerTags extends BaseAdapter
       return view;
    }
 
-   private static
+   static
    class ViewHolder
    {
       TextView  tag_view;
@@ -109,6 +113,7 @@ class AdapterManagerTags extends BaseAdapter
       public
       void onProvideShadowMetrics(Point shadowSize, Point shadowTouchPoint)
       {
+         super.onProvideShadowMetrics(shadowSize, shadowTouchPoint);
          shadowSize.x = view_store.getWidth();
          shadowSize.y = view_store.getHeight();
 
@@ -117,7 +122,6 @@ class AdapterManagerTags extends BaseAdapter
       }
    }
 
-   private
    class MyTouchListener implements OnTouchListener
    {
       @Override
@@ -136,7 +140,6 @@ class AdapterManagerTags extends BaseAdapter
       }
    }
 
-   private
    class MyDragListener implements OnDragListener
    {
       @Override

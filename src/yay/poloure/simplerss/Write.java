@@ -14,7 +14,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 
-final
 class Write
 {
    /* All functions in here must check that the media is available before

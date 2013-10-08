@@ -45,5 +45,4 @@ class FeedDialog
 
       addFeedDialog.show();
    }
-
 }

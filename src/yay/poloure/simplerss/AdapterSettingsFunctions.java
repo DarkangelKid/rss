@@ -1,5 +1,6 @@
 package yay.poloure.simplerss;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +25,7 @@ class AdapterSettingsFunctions extends BaseAdapter
    public
    int getCount()
    {
-      return 5;
+      return FUNCTION_TITLES.length;
    }
 
    @Override
@@ -48,7 +49,8 @@ class AdapterSettingsFunctions extends BaseAdapter
       View cv1 = cv;
       int viewType = getItemViewType(position);
       String settingPath = Constants.SETTINGS_DIR + FILE_NAMES[position] + Constants.TXT;
-      LayoutInflater inflater = Util.getLayoutInflater();
+      String inflate = Context.LAYOUT_INFLATER_SERVICE;
+      LayoutInflater inflater = (LayoutInflater) Util.getContext().getSystemService(inflate);
 
       /* This type is the a heading. */
       if(0 == viewType)
@@ -118,22 +120,22 @@ class AdapterSettingsFunctions extends BaseAdapter
          /* Load the saved value and set the progress.*/
          String checker = Read.setting(settingPath);
          int time = 0 == checker.length() ? 3 : Util.stoi(checker);
-         holder.seekbar.setProgress(index(TIMES, time));
+         holder.seekbar.setProgress(getIndexOfTime(time));
       }
       return cv1;
    }
 
    private static
-   int index(int[] array, int value)
+   int getIndexOfTime(int value)
    {
-      if(null == array)
+      if(null == TIMES)
       {
          return -1;
       }
-      int arrayLength = array.length;
+      int arrayLength = TIMES.length;
       for(int i = 0; i < arrayLength; i++)
       {
-         if(array[i] == value)
+         if(TIMES[i] == value)
          {
             return i;
          }

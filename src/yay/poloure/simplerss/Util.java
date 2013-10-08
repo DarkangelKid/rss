@@ -3,6 +3,7 @@ package yay.poloure.simplerss;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.os.Environment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
@@ -10,7 +11,7 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.PagerTabStrip;
 import android.support.v4.view.ViewPager;
-import android.view.LayoutInflater;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.BaseAdapter;
@@ -84,7 +85,7 @@ class Util
 
       if(null == items)
       {
-         AdapterCard cardAdapter = getCardAdapter(page1);
+         AdapterTag cardAdapter = getCardAdapter(page1);
          if(null == cardAdapter)
          {
             return -1;
@@ -97,7 +98,7 @@ class Util
       int itemCount = items.length - 1;
       for(i = itemCount; 0 <= i; i--)
       {
-         if(!AdapterCard.s_readLinks.contains(items[i].url))
+         if(!AdapterTag.s_readLinks.contains(items[i].url))
          {
             break;
          }
@@ -137,7 +138,7 @@ class Util
    /* For these two functions, check for null. Should only really be
     * null if called from the ServiceUpdate. */
    static
-   AdapterCard getCardAdapter(int page)
+   AdapterTag getCardAdapter(int page)
    {
       ListView list = getFeedListView(page);
       if(null == list)
@@ -145,7 +146,7 @@ class Util
          return null;
       }
 
-      return (AdapterCard) list.getAdapter();
+      return (AdapterTag) list.getAdapter();
    }
 
    static
@@ -181,13 +182,6 @@ class Util
       s_context = context;
    }
 
-   static
-   LayoutInflater getLayoutInflater()
-   {
-      String inflate = Context.LAYOUT_INFLATER_SERVICE;
-      return (LayoutInflater) s_context.getSystemService(inflate);
-   }
-
    /* Safe to call at anytime. */
    static
    int getScreenWidth()
@@ -198,8 +192,8 @@ class Util
    static
    int[] getUnreadCounts()
    {
-      Collection<String> readLinks = new HashSet<String>(AdapterCard.s_readLinks.size());
-      readLinks.addAll(AdapterCard.s_readLinks);
+      Collection<String> readLinks = new HashSet<String>(AdapterTag.s_readLinks.size());
+      readLinks.addAll(AdapterTag.s_readLinks);
 
       String[] currentTags = Read.file(Constants.TAG_LIST);
 
@@ -257,43 +251,6 @@ class Util
       }
 
       return feedFolder + append;
-   }
-
-   static
-   void setStripColor(PagerTabStrip strip)
-   {
-      String colorSettingsPath = Constants.SETTINGS_DIR + Constants.STRIP_COLOR;
-
-      /* Read the colour from the settings/colour file, if blank, use blue. */
-      String[] check = Read.file(colorSettingsPath);
-      String color = 0 == check.length ? "blue" : check[0];
-
-      /* Find the colour stored in adapter_settings_interface that we want. */
-      int pos = index(AdapterSettingsUi.HOLO_COLORS, color);
-      if(-1 != pos)
-      {
-         strip.setTabIndicatorColor(AdapterSettingsUi.COLOR_INTS[pos]);
-      }
-   }
-
-   /* index throws an ArrayOutOfBoundsException if not handled. */
-   static
-   <T> int index(T[] array, T value)
-   {
-      if(null == array)
-      {
-         return -1;
-      }
-
-      int arrayLength = array.length;
-      for(int i = 0; i < arrayLength; i++)
-      {
-         if(array[i].equals(value))
-         {
-            return i;
-         }
-      }
-      return -1;
    }
 
    static
@@ -406,8 +363,6 @@ class Util
       return substring.replaceAll(Constants.SEPAR, "-");
    }
 
-   /* Wrappers for neatness. */
-
    static
    boolean rmdir(File directory)
    {
@@ -443,6 +398,8 @@ class Util
       String resultingFile = getStorage() + p_resultingFile;
       return new File(originalFile).renameTo(new File(resultingFile));
    }
+
+   /* Wrappers for neatness. */
 
    static
    int stoi(String str)
@@ -510,5 +467,58 @@ class Util
          Write.log(resource + " string does not exist.");
       }
       return str;
+   }
+
+   static
+   PagerTabStrip newPagerTabStrip(Context context)
+   {
+      PagerTabStrip pagerTabStrip = new PagerTabStrip(context);
+      int fourDp = Math.round(4.0F * context.getResources().getDisplayMetrics().density);
+
+      pagerTabStrip.setDrawFullUnderline(true);
+      pagerTabStrip.setGravity(Gravity.START);
+      pagerTabStrip.setPadding(0, fourDp, 0, fourDp);
+      pagerTabStrip.setTextColor(Color.WHITE);
+      pagerTabStrip.setBackgroundColor(Color.parseColor("#404040"));
+      setStripColor(pagerTabStrip);
+
+      return pagerTabStrip;
+   }
+
+   static
+   void setStripColor(PagerTabStrip strip)
+   {
+      String colorSettingsPath = Constants.SETTINGS_DIR + Constants.STRIP_COLOR;
+
+      /* Read the colour from the settings/colour file, if blank, use blue. */
+      String[] check = Read.file(colorSettingsPath);
+      String color = 0 == check.length ? "blue" : check[0];
+
+      /* Find the colour stored in adapter_settings_interface that we want. */
+      int pos = index(FeedsActivity.HOLO_COLORS, color);
+      if(-1 != pos)
+      {
+         strip.setTabIndicatorColor(FeedsActivity.COLOR_INTS[pos]);
+      }
+   }
+
+   /* index throws an ArrayOutOfBoundsException if not handled. */
+   static
+   <T> int index(T[] array, T value)
+   {
+      if(null == array)
+      {
+         return -1;
+      }
+
+      int arrayLength = array.length;
+      for(int i = 0; i < arrayLength; i++)
+      {
+         if(array[i].equals(value))
+         {
+            return i;
+         }
+      }
+      return -1;
    }
 }

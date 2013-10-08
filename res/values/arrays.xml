@@ -6,17 +6,6 @@
       <item>Save image to storage</item>
    </string-array>
 
-   <string-array name="media_errors">
-      <item>Media not mounted.</item>
-      <item>Unable to mount media.</item>
-      <item>Media is shared via USB mass storage.</item>
-      <item>Media does not exist.</item>
-      <item>Media contains unsupported filesystem.</item>
-      <item>Media mounted as read-only.</item>
-      <item>Media is being disk checked.</item>
-      <item>Media was removed before unmounted.</item>
-   </string-array>
-
    <string-array name="manage_titles">
       <item>Groups</item>
       <item>Feeds</item>

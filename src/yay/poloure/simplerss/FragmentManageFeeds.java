@@ -127,7 +127,6 @@ class FragmentManageFeeds extends ListFragment
    {
       private final AlertDialog.Builder m_build;
 
-      private
       FeedItemLongClick(Adapter p_adapter)
       {
          m_build = new AlertDialog.Builder(Util.getContext());

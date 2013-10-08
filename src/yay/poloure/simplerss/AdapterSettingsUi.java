@@ -1,6 +1,6 @@
 package yay.poloure.simplerss;
 
-import android.graphics.Color;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,14 +11,6 @@ import android.widget.TextView;
 
 class AdapterSettingsUi extends BaseAdapter
 {
-   static final         String[] HOLO_COLORS          = Util.getArray(R.array.settings_colours);
-   static final         int[]    COLOR_INTS           = {
-         Color.rgb(51, 181, 229), // blue
-         Color.rgb(170, 102, 204), // purple
-         Color.rgb(153, 204, 0), // green
-         Color.rgb(255, 187, 51), // orange
-         Color.rgb(255, 68, 68) // red
-   };
    static final         float    COLOR_SELECT_OPACITY = 0.3f;
    private static final String[] INTERFACE_TITLES     = Util.getArray(
          R.array.settings_interface_titles);
@@ -58,7 +50,8 @@ class AdapterSettingsUi extends BaseAdapter
       String summary = INTERFACE_SUMMARIES[position];
       String settingPath = Constants.SETTINGS_DIR + title + Constants.TXT;
 
-      LayoutInflater inf = Util.getLayoutInflater();
+      String inflate = Context.LAYOUT_INFLATER_SERVICE;
+      LayoutInflater inf = (LayoutInflater) Util.getContext().getSystemService(inflate);
 
       /* This type is a heading. */
       if(0 == viewType)
@@ -75,11 +68,11 @@ class AdapterSettingsUi extends BaseAdapter
       /* This type is the colour selector. */
       else if(1 == viewType)
       {
-         SettingsColorHolder holder;
+         HolderSettingsColor holder;
          if(null == cv1)
          {
             cv1 = inf.inflate(R.layout.settings_holocolour_select, parent, false);
-            holder = new SettingsColorHolder();
+            holder = new HolderSettingsColor();
             holder.title = (TextView) cv1.findViewById(R.id.colour_title);
             holder.summary = (TextView) cv1.findViewById(R.id.colour_summary);
             holder.blue = (ImageView) cv1.findViewById(R.id.blue_image);
@@ -91,7 +84,7 @@ class AdapterSettingsUi extends BaseAdapter
          }
          else
          {
-            holder = (SettingsColorHolder) cv1.getTag();
+            holder = (HolderSettingsColor) cv1.getTag();
          }
 
          holder.title.setText(title);
@@ -113,7 +106,7 @@ class AdapterSettingsUi extends BaseAdapter
          {
             m_colorViews[i].setOnClickListener(new OnClickSettingsColor(this, i));
 
-            float alpha = colour.equals(HOLO_COLORS[i]) ? 1.0f : COLOR_SELECT_OPACITY;
+            float alpha = colour.equals(FeedsActivity.HOLO_COLORS[i]) ? 1.0f : COLOR_SELECT_OPACITY;
             m_colorViews[i].setAlpha(alpha);
          }
       }
@@ -167,15 +160,4 @@ class AdapterSettingsUi extends BaseAdapter
       return 3;
    }
 
-   private static
-   class SettingsColorHolder
-   {
-      TextView  title;
-      TextView  summary;
-      ImageView blue;
-      ImageView purple;
-      ImageView green;
-      ImageView yellow;
-      ImageView red;
-   }
 }

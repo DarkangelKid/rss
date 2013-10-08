@@ -518,18 +518,15 @@ class FeedParser
    {
       try
       {
-         char current;
          char[] build = new char[4096];
          int i = 0;
-         while((current = (char) reader.read()) != next)
+         do
          {
-            if(4094 == i)
-            {
-               break;
-            }
-            build[i] = current;
+            build[i] = (char) reader.read();
             i++;
          }
+         while(build[i] != next && 4094 != i);
+
          build[i] = next;
 
          return new String(build, 0, i + 1);

@@ -4,13 +4,11 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.view.PagerTabStrip;
 import android.support.v4.view.ViewPager;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -26,10 +24,12 @@ class FragmentFeeds extends Fragment
    static final         ViewPager VIEW_PAGER            = new ViewPager(Util.getContext());
    private static final int       OFF_SCREEN_PAGE_LIMIT = 128;
    private final BaseAdapter m_navigationAdapter;
+   private final Context     m_context;
 
-   FragmentFeeds(BaseAdapter navigationAdapter)
+   FragmentFeeds(BaseAdapter navigationAdapter, Context context)
    {
       m_navigationAdapter = navigationAdapter;
+      m_context = context;
    }
 
    @Override
@@ -47,7 +47,7 @@ class FragmentFeeds extends Fragment
    {
       super.onCreateView(inflater, container, savedInstanceState);
 
-      Constants.PAGER_TAB_STRIPS[0] = new PagerTabStrip(Util.getContext());
+      Constants.PAGER_TAB_STRIPS[0] = Util.newPagerTabStrip(Util.getContext());
 
       ViewPager.LayoutParams layoutParams = new ViewPager.LayoutParams();
       layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -57,17 +57,10 @@ class FragmentFeeds extends Fragment
       VIEW_PAGER.addView(Constants.PAGER_TAB_STRIPS[0], layoutParams);
 
       FragmentManager fragmentManager = FeedsActivity.getActivity().getSupportFragmentManager();
-      VIEW_PAGER.setAdapter(new PagerAdapterFeeds(m_navigationAdapter, fragmentManager));
+      VIEW_PAGER.setAdapter(new PagerAdapterFeeds(m_navigationAdapter, fragmentManager, m_context));
       VIEW_PAGER.setOffscreenPageLimit(OFF_SCREEN_PAGE_LIMIT);
       VIEW_PAGER.setOnPageChangeListener(new PageChange());
       VIEW_PAGER.setId(0x1000);
-
-      Constants.PAGER_TAB_STRIPS[0].setDrawFullUnderline(true);
-      Constants.PAGER_TAB_STRIPS[0].setGravity(Gravity.START);
-      Constants.PAGER_TAB_STRIPS[0].setPadding(0, AdapterCard.EIGHT / 2, 0, AdapterCard.EIGHT / 2);
-      Constants.PAGER_TAB_STRIPS[0].setTextColor(Color.WHITE);
-      Constants.PAGER_TAB_STRIPS[0].setBackgroundColor(Color.parseColor("#404040"));
-      Util.setStripColor(Constants.PAGER_TAB_STRIPS[0]);
 
       return VIEW_PAGER;
    }
@@ -141,7 +134,6 @@ class FragmentFeeds extends Fragment
       return false;
    }
 
-   private
    class OnFinishService extends Handler
    {
       /* The stuff we would like to run when the service completes. */

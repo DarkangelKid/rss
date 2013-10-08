@@ -23,7 +23,7 @@ class OnClickSettingsColor implements View.OnClickListener
          /* Write the new colour to file. */
       String colorSettingsPath = Constants.SETTINGS_DIR + Constants.STRIP_COLOR;
       Util.remove(colorSettingsPath);
-      Write.single(colorSettingsPath, AdapterSettingsUi.HOLO_COLORS[m_clickedColour]);
+      Write.single(colorSettingsPath, FeedsActivity.HOLO_COLORS[m_clickedColour]);
 
          /* Change the selected square to alpha 1 and the rest to 0.5. */
       for(ImageView colour : ((AdapterSettingsUi) m_adapter).m_colorViews)

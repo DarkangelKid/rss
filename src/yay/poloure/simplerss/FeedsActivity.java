@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -20,8 +21,16 @@ import android.widget.ListView;
 public
 class FeedsActivity extends ActionBarActivity
 {
+   static final         int[]  COLOR_INTS          = {
+         Color.rgb(51, 181, 229), // blue
+         Color.rgb(170, 102, 204), // purple
+         Color.rgb(153, 204, 0), // green
+         Color.rgb(255, 187, 51), // orange
+         Color.rgb(255, 68, 68) // red
+   };
    private static final String ALARM_SERVICE_START = "start";
    private static final String ALARM_SERVICE_STOP  = "stop";
+   static         String[]      HOLO_COLORS;
    static         Menu          s_optionsMenu;
    static         Handler       s_serviceHandler;
    /* Only initialized when the activity is running. */
@@ -44,6 +53,8 @@ class FeedsActivity extends ActionBarActivity
       Util.setContext(this);
       s_activity = this;
 
+      HOLO_COLORS = Util.getArray(R.array.settings_colours);
+
       ActionBar actionBar = getSupportActionBar();
       actionBar.setIcon(R.drawable.rss_icon);
       actionBar.setDisplayHomeAsUpEnabled(true);
@@ -62,7 +73,7 @@ class FeedsActivity extends ActionBarActivity
       if(null == savedInstanceState)
       {
          Fragment[] mainFragments = {
-               new FragmentFeeds(navigationDrawer),
+               new FragmentFeeds(navigationDrawer, this),
                new FragmentManage(navigationDrawer),
                new FragmentSettings(),
          };
@@ -100,7 +111,7 @@ class FeedsActivity extends ActionBarActivity
       setServiceIntent(ALARM_SERVICE_START);
 
       /* Save the READ_ITEMS to file. */
-      Write.collection(Constants.READ_ITEMS, AdapterCard.s_readLinks);
+      Write.collection(Constants.READ_ITEMS, AdapterTag.s_readLinks);
    }
 
    @Override

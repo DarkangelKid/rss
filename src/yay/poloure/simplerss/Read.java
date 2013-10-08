@@ -13,15 +13,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-final
 class Read
 {
    static final String UTF8 = "UTF-8";
 
-   private
-   Read()
-   {
-   }
    /* All functions in here must check that the media is available before
     * continuing. */
 

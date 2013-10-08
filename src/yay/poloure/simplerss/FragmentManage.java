@@ -1,10 +1,8 @@
 package yay.poloure.simplerss;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.view.PagerTabStrip;
 import android.support.v4.view.ViewPager;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -39,7 +37,7 @@ class FragmentManage extends Fragment
       super.onCreateView(inflater, container, savedInstanceState);
 
       ViewPager pager = new ViewPager(Util.getContext());
-      Constants.PAGER_TAB_STRIPS[1] = new PagerTabStrip(Util.getContext());
+      Constants.PAGER_TAB_STRIPS[1] = Util.newPagerTabStrip(Util.getContext());
 
       ViewPager.LayoutParams layoutParams = new ViewPager.LayoutParams();
       layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -50,13 +48,6 @@ class FragmentManage extends Fragment
       pager.setAdapter(new PagerAdapterManage(m_navigationAdapter, fragmentManager));
       pager.addView(Constants.PAGER_TAB_STRIPS[1], layoutParams);
       pager.setId(0x2000);
-
-      Constants.PAGER_TAB_STRIPS[1].setDrawFullUnderline(true);
-      Constants.PAGER_TAB_STRIPS[1].setGravity(Gravity.START);
-      Constants.PAGER_TAB_STRIPS[1].setPadding(0, AdapterCard.EIGHT / 2, 0, AdapterCard.EIGHT / 2);
-      Constants.PAGER_TAB_STRIPS[1].setTextColor(Color.WHITE);
-      Constants.PAGER_TAB_STRIPS[1].setBackgroundColor(Color.parseColor("#404040"));
-      Util.setStripColor(Constants.PAGER_TAB_STRIPS[1]);
 
       return pager;
    }
