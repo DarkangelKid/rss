@@ -250,7 +250,8 @@ class RefreshPage extends AsyncTask<Integer, FeedItem, Animation>
 
       if(m_flash)
       {
-         position = Util.gotoLatestUnread(m_adapterCard.m_items, false, m_pageNumber);
+         position = Util.gotoLatestUnread(m_adapterCard.m_items, false, m_pageNumber,
+               m_listFragment);
       }
 
       if(0 != top)

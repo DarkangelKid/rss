@@ -59,7 +59,7 @@ class FragmentFeeds extends Fragment
       FragmentManager fragmentManager = getFragmentManager();
       VIEW_PAGER.setAdapter(new PagerAdapterFeeds(m_navigationAdapter, fragmentManager, m_context));
       VIEW_PAGER.setOffscreenPageLimit(OFF_SCREEN_PAGE_LIMIT);
-      VIEW_PAGER.setOnPageChangeListener(new PageChange());
+      VIEW_PAGER.setOnPageChangeListener(new PageChange(this));
       VIEW_PAGER.setId(0x1000);
 
       return VIEW_PAGER;
@@ -111,7 +111,7 @@ class FragmentFeeds extends Fragment
       }
       if(item.getTitle().equals(Util.getString(R.string.unread)))
       {
-         Util.gotoLatestUnread(null, true, 0);
+         Util.gotoLatestUnread(null, true, 0, this);
          return true;
       }
       if(item.getTitle().equals(Util.getString(R.string.refresh)))
@@ -172,8 +172,11 @@ class FragmentFeeds extends Fragment
    private
    class PageChange implements ViewPager.OnPageChangeListener
    {
-      PageChange()
+      private final Fragment m_fragment;
+
+      PageChange(Fragment fragment)
       {
+         m_fragment = fragment;
       }
 
       @Override
@@ -186,7 +189,7 @@ class FragmentFeeds extends Fragment
       public
       void onPageSelected(int pos)
       {
-         if(0 == Util.getCardAdapter(pos).getCount())
+         if(0 == Util.getCardAdapter(pos, m_fragment).getCount())
          {
             Update.page(m_navigationAdapter, pos);
          }

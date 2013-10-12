@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Environment;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
 import android.support.v4.view.MenuItemCompat;
@@ -66,7 +67,7 @@ class Util
    }
 
    static
-   int gotoLatestUnread(FeedItem[] p_items, boolean update, int page)
+   int gotoLatestUnread(FeedItem[] p_items, boolean update, int page, Fragment fragment)
    {
       FeedItem[] items = p_items;
       int page1 = page;
@@ -83,7 +84,7 @@ class Util
 
       if(null == items)
       {
-         AdapterTag cardAdapter = getCardAdapter(page1);
+         AdapterTag cardAdapter = getCardAdapter(page1, fragment);
          if(null == cardAdapter)
          {
             return -1;
@@ -106,7 +107,7 @@ class Util
        * May not be true anymore.*/
       if(update)
       {
-         ListView lv = getFeedListView(page1);
+         ListView lv = getFeedListView(page1, fragment);
          if(null == lv)
          {
             return -1;
@@ -120,20 +121,16 @@ class Util
    /* For these two functions, check for null. Should only really be
     * null if called from the ServiceUpdate. */
    static
-   AdapterTag getCardAdapter(int page)
+   AdapterTag getCardAdapter(int page, Fragment fragment)
    {
-      return (AdapterTag) getFeedListView(page).getAdapter();
+      return (AdapterTag) getFeedListView(page, fragment).getAdapter();
    }
 
    /* This is the second one. */
    private static
-   ListView getFeedListView(int page)
+   ListView getFeedListView(int page, Fragment fragment)
    {
-      FragmentManager fragmentManager = FeedsActivity.getActivity().getSupportFragmentManager();
-      if(null == fragmentManager)
-      {
-         return null;
-      }
+      FragmentManager fragmentManager = fragment.getFragmentManager();
 
       ViewPager viewpager = FragmentFeeds.VIEW_PAGER;
 
