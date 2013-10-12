@@ -34,7 +34,7 @@ class FragmentTag extends ListFragment
    {
       super.onActivityCreated(savedInstanceState);
       ListView listView = getListView();
-      listView.setOnScrollListener(new onScrollFeedListener(m_navigationAdapter, m_tagAdapter));
+      listView.setOnScrollListener(new OnScrollFeedListener(m_navigationAdapter, m_tagAdapter));
    }
 
    @Override

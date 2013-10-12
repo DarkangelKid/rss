@@ -33,7 +33,7 @@ class AsyncLoadImage extends AsyncTask<Object, Void, Object[]>
 
       String image = Util.getStorage() +
             PATTERN_THUMBNAILS.matcher(imageName).replaceAll(Constants.IMAGES);
-      m_imageView.setOnClickListener(new onClickImage(image));
+      m_imageView.setOnClickListener(new OnClickImage(image));
       return new Object[]{
             BitmapFactory.decodeFile(Util.getStorage() + imageName, o), fadeIn
       };

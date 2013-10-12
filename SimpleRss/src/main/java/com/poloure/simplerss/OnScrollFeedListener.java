@@ -3,12 +3,12 @@ import android.view.View;
 import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 
-class onScrollFeedListener implements AbsListView.OnScrollListener
+class OnScrollFeedListener implements AbsListView.OnScrollListener
 {
    private final BaseAdapter m_navigationAdapter;
    private final BaseAdapter m_feedAdapter;
 
-   onScrollFeedListener(BaseAdapter navigationAdapter, BaseAdapter feedAdapter)
+   OnScrollFeedListener(BaseAdapter navigationAdapter, BaseAdapter feedAdapter)
    {
       m_navigationAdapter = navigationAdapter;
       m_feedAdapter = feedAdapter;

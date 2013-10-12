@@ -5,11 +5,11 @@ import android.view.View;
 
 import java.io.File;
 
-class onClickImage implements View.OnClickListener
+class OnClickImage implements View.OnClickListener
 {
    private final String m_imagePath;
 
-   onClickImage(String im)
+   OnClickImage(String im)
    {
       m_imagePath = im;
    }
