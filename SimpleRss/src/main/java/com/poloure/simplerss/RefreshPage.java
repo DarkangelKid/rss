@@ -2,7 +2,6 @@ package com.poloure.simplerss;
 
 import android.os.AsyncTask;
 import android.support.v4.app.ListFragment;
-import android.text.format.Time;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -33,9 +32,6 @@ class RefreshPage extends AsyncTask<Integer, FeedItem, Animation>
    {
       m_pageNumber = page[0];
       String tag = Read.file(Constants.TAG_LIST)[m_pageNumber];
-
-      Time time = new Time();
-      Map<Long, FeedItem> map = new TreeMap<Long, FeedItem>();
 
       String[][] contents = Read.csv();
       if(0 == contents.length)
@@ -80,11 +76,13 @@ class RefreshPage extends AsyncTask<Integer, FeedItem, Animation>
             }
             catch(IllegalStateException e)
             {
-               e.printStackTrace();
+               /* Do not throw. */
                m_listView = null;
             }
          }
       }
+
+      Map<Long, FeedItem> map = new TreeMap<Long, FeedItem>();
 
       int feedsLength = feeds.length;
       for(int j = 0; j < feedsLength; j++)
@@ -107,15 +105,6 @@ class RefreshPage extends AsyncTask<Integer, FeedItem, Animation>
             int timesLength = times.length;
             for(int i = 0; i < timesLength; i++)
             {
-               try
-               {
-                  time.parse3339(times[i]);
-               }
-               catch(RuntimeException e)
-               {
-                  e.printStackTrace();
-                  return null;
-               }
                /* TODO Do not allow duplicates in the adapter. */
                /*if(-1 == Util.index(Util.getCardAdapter(m_pageNumber).m_links, links[i]))*/
                {
@@ -153,14 +142,10 @@ class RefreshPage extends AsyncTask<Integer, FeedItem, Animation>
                   data.url = links[i];
                   data.description = descriptions[i];
                   data.image = images[i];
-                  data.width = null == widths[i] || 2 > widths[i].length()
-                        ? 0
-                        : Integer.parseInt(widths[i]);
-                  data.height = null == heights[i] || 2 > widths[i].length()
-                        ? 0
-                        : Integer.parseInt(heights[i]);
+                  data.width = Util.stoi(widths[i]);
+                  data.height = Util.stoi(heights[i]);
 
-                  map.put(time.toMillis(false) - i, data);
+                  map.put(Long.parseLong(times[i]) - i, data);
                }
             }
          }

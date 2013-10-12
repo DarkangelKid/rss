@@ -2,7 +2,6 @@ package com.poloure.simplerss;
 
 import android.content.Context;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -10,85 +9,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Arrays;
 
 class Write
 {
    /* All functions in here must check that the media is available before
     * continuing. */
-
-   /* Function should be safe, returns false if fails. */
-   static
-   boolean download(String urler, String path)
-   {
-      /* If s_storage is unmounted OR if we force to use external. */
-      if(Util.isUnmounted())
-      {
-         return false;
-      }
-
-      Context context = Util.getContext();
-      String path1 = Util.getStorage() + path;
-      String name = Util.getInternalPath(path1);
-
-      try
-      {
-         BufferedInputStream in = null;
-         FileOutputStream fout = null;
-         try
-         {
-            in = new BufferedInputStream(new URL(urler).openStream());
-            fout = !Util.isUsingSd() &&
-                  !urler.contains(".jpg") &&
-                  !urler.contains(".png") &&
-                  !urler.contains(".gif") &&
-                  !urler.contains(".JPEG") &&
-                  !urler.contains(".JPG") &&
-                  !urler.contains(".jpeg")
-                  ? context.openFileOutput(name, Context.MODE_PRIVATE)
-                  : new FileOutputStream(path1);
-
-            byte[] data = new byte[1024];
-            int count;
-            while(-1 != (count = in.read(data, 0, 1024)))
-            {
-               fout.write(data, 0, count);
-            }
-         }
-         finally
-         {
-            if(null != in)
-            {
-               in.close();
-            }
-            if(null != fout)
-            {
-               fout.close();
-            }
-         }
-      }
-      catch(FileNotFoundException e)
-      {
-         e.printStackTrace();
-         return false;
-      }
-      catch(MalformedURLException e)
-      {
-         e.printStackTrace();
-         return false;
-      }
-      catch(IOException e)
-      {
-         e.printStackTrace();
-         Util.remove(path1);
-         return false;
-      }
-
-      /* TODO: if file exists. */
-      return true;
-   }
 
    /* This function should be safe, returns false if it failed.
     * NOT SAFE FOR INTERNAL IF FAILS. */
@@ -178,6 +104,22 @@ class Write
       return pos;
    }
 
+   private static
+   BufferedWriter writer(String path, int writeMode)
+         throws FileNotFoundException, UnsupportedEncodingException
+   {
+      Context context = Util.getContext();
+      String path1 = Util.getInternalPath(path);
+      FileOutputStream fileOutputStream = context.openFileOutput(path1, writeMode);
+      return new BufferedWriter(new OutputStreamWriter(fileOutputStream, "UTF8"));
+   }
+
+   private static
+   BufferedWriter writer(String p, boolean ap) throws IOException
+   {
+      return new BufferedWriter(new FileWriter(p, ap));
+   }
+
    static
    void collection(String path, Iterable<?> content)
    {
@@ -227,22 +169,6 @@ class Write
       {
          e.printStackTrace();
       }
-   }
-
-   private static
-   BufferedWriter writer(String p, boolean ap) throws IOException
-   {
-      return new BufferedWriter(new FileWriter(p, ap));
-   }
-
-   private static
-   BufferedWriter writer(String path, int writeMode)
-         throws FileNotFoundException, UnsupportedEncodingException
-   {
-      Context context = Util.getContext();
-      String path1 = Util.getInternalPath(path);
-      FileOutputStream fileOutputStream = context.openFileOutput(path1, writeMode);
-      return new BufferedWriter(new OutputStreamWriter(fileOutputStream, "UTF8"));
    }
 
    static

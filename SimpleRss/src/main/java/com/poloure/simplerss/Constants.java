@@ -35,17 +35,17 @@ class Constants
    static final         String          TAG_TITLE        = "<title";
    static final         String          ENDTAG_TITLE     = "</title>";
    /* Other things. */
-   static final         String          IMAGES           = "images";
-   static final         String          IMAGE_DIR        = IMAGES + SEPAR;
    static final         String          THUMBNAILS       = "thumbnails";
    /* Folders */
    static final         String          THUMBNAIL_DIR    = THUMBNAILS + SEPAR;
    private static final String          SETTINGS         = "settings";
+
    static final         String          SETTINGS_DIR     = SETTINGS + SEPAR;
    static final         String          UNSORTED_TAG     = "Unsorted";
    static final         PagerTabStrip[] PAGER_TAB_STRIPS = new PagerTabStrip[3];
    static final         String          ADD              = "add";
    static final         String          EDIT             = "edit";
+
    private static final int             VER              = Build.VERSION.SDK_INT;
    static final         boolean         JELLYBEAN        = Build.VERSION_CODES.JELLY_BEAN <= VER;
    static final         boolean         HONEYCOMB        = Build.VERSION_CODES.HONEYCOMB <= VER;

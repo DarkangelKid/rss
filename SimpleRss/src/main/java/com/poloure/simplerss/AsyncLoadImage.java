@@ -8,12 +8,9 @@ import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 
-import java.util.regex.Pattern;
-
 class AsyncLoadImage extends AsyncTask<Object, Void, Object[]>
 {
-   private static final long    IMAGE_FADE_IN_DURATION = 240L;
-   private static final Pattern PATTERN_THUMBNAILS     = Pattern.compile(Constants.THUMBNAILS);
+   private static final long IMAGE_FADE_IN_DURATION = 240L;
    private ImageView m_imageView;
    private int       m_imageViewTag;
 
@@ -31,11 +28,10 @@ class AsyncLoadImage extends AsyncTask<Object, Void, Object[]>
       fadeIn.setDuration(IMAGE_FADE_IN_DURATION);
       fadeIn.setInterpolator(new DecelerateInterpolator());
 
-      String image = Util.getStorage() +
-            PATTERN_THUMBNAILS.matcher(imageName).replaceAll(Constants.IMAGES);
+      String image = Util.getStorage() + imageName;
       m_imageView.setOnClickListener(new OnClickImage(image));
       return new Object[]{
-            BitmapFactory.decodeFile(Util.getStorage() + imageName, o), fadeIn
+            BitmapFactory.decodeFile(image, o), fadeIn
       };
    }
 

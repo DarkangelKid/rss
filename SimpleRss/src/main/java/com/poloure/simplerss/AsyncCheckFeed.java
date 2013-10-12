@@ -3,6 +3,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.support.v4.app.ListFragment;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -20,19 +21,23 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
    private final AlertDialog m_dialog;
    private final String      m_mode;
    private final String      m_title;
+   private final BaseAdapter m_navigationAdapter;
    private       String      m_tag;
    private       boolean     m_isFeedNotReal;
    private       String      name;
-   private       boolean     m_existingTag;
+   private       boolean     m_newTag;
 
 
-   AsyncCheckFeed(AlertDialog dialog, String tag, String feedName, String mode, String currentTitle)
+   AsyncCheckFeed(AlertDialog dialog, String tag, String feedName, String mode, String currentTitle,
+         BaseAdapter navigationAdapter)
    {
       m_dialog = dialog;
       m_tag = tag;
       name = feedName;
       m_mode = mode;
       m_title = currentTitle;
+      m_newTag = true;
+      m_navigationAdapter = navigationAdapter;
       Button button = m_dialog.getButton(DialogInterface.BUTTON_POSITIVE);
       if(null != button)
       {
@@ -62,7 +67,7 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
       String[] currentTags = Read.file(Constants.TAG_LIST);
       if(-1 != Util.index(currentTags, m_tag))
       {
-         m_existingTag = false;
+         m_newTag = false;
       }
 
       String[] checkList = url[0].contains("http") ? new String[]{url[0]} : new String[]{
@@ -120,23 +125,6 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
       return new String[]{feedUrl, feedTitle};
    }
 
-   private static
-   byte[] concat(byte[] first, byte... second)
-   {
-      if(null == first)
-      {
-         return second;
-      }
-      if(null == second)
-      {
-         return first;
-      }
-      byte[] result = new byte[first.length + second.length];
-      System.arraycopy(first, 0, result, 0, first.length);
-      System.arraycopy(second, 0, result, first.length, second.length);
-      return result;
-   }
-
    @Override
    protected
    void onPostExecute(String[] result)
@@ -151,10 +139,10 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
          return;
       }
 
-      if(m_existingTag)
+      if(m_newTag)
       {
          Write.single(Constants.TAG_LIST, m_tag + Constants.NL);
-         // TODO Util.updateTags();
+         Util.updateTags(m_navigationAdapter);
       }
       if(0 == name.length())
       {
@@ -224,5 +212,22 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
       /// To ManageFeedsRefresh the counts and the order of the tags.
       // TODO Util.updateTags();
       Update.AsyncCompatManageTagsRefresh(listView, listAdapter);
+   }
+
+   private static
+   byte[] concat(byte[] first, byte... second)
+   {
+      if(null == first)
+      {
+         return second;
+      }
+      if(null == second)
+      {
+         return first;
+      }
+      byte[] result = new byte[first.length + second.length];
+      System.arraycopy(first, 0, result, 0, first.length);
+      System.arraycopy(second, 0, result, first.length, second.length);
+      return result;
    }
 }

@@ -31,20 +31,6 @@ class FragmentManageFeeds extends ListFragment
       m_navigationAdapter = navigationAdapter;
    }
 
-   private static
-   void manageFeeds(ListView listView, ListAdapter listAdapter)
-   {
-      if(Constants.HONEYCOMB)
-      {
-         new AsyncManageFeedsRefresh(listView, listAdapter).executeOnExecutor(
-               AsyncTask.THREAD_POOL_EXECUTOR);
-      }
-      else
-      {
-         new AsyncManageFeedsRefresh(listView, listAdapter).execute();
-      }
-   }
-
    @Override
    public
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -92,7 +78,7 @@ class FragmentManageFeeds extends ListFragment
       AlertDialog editFeedDialog = build.create();
       editFeedDialog.setButton(DialogInterface.BUTTON_POSITIVE,
             con.getString(R.string.accept_dialog),
-            new OnDialogClickEdit(editRssLayout, spinnerTag, title));
+            new OnDialogClickEdit(editRssLayout, spinnerTag, title, m_navigationAdapter));
 
       editFeedDialog.show();
    }
@@ -107,6 +93,20 @@ class FragmentManageFeeds extends ListFragment
       manageFeeds(getListView(), getListAdapter());
    }
 
+   private static
+   void manageFeeds(ListView listView, ListAdapter listAdapter)
+   {
+      if(Constants.HONEYCOMB)
+      {
+         new AsyncManageFeedsRefresh(listView, listAdapter).executeOnExecutor(
+               AsyncTask.THREAD_POOL_EXECUTOR);
+      }
+      else
+      {
+         new AsyncManageFeedsRefresh(listView, listAdapter).execute();
+      }
+   }
+
    /* Add a new feed. */
    @Override
    public
@@ -118,7 +118,7 @@ class FragmentManageFeeds extends ListFragment
       }
       if(Util.getString(R.string.add_feed).equals(item.getTitle()))
       {
-         FeedDialog.showAddDialog();
+         FeedDialog.showAddDialog(m_navigationAdapter);
          return true;
       }
       return super.onOptionsItemSelected(item);

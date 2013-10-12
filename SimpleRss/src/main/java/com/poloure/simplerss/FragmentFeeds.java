@@ -80,22 +80,6 @@ class FragmentFeeds extends Fragment
       Util.setRefreshingIcon(serviceRunning);
    }
 
-   private static
-   boolean isServiceRunning(Activity activity)
-   {
-      ActivityManager manager = (ActivityManager) activity.getSystemService(
-            Context.ACTIVITY_SERVICE);
-      for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(
-            Integer.MAX_VALUE))
-      {
-         if(ServiceUpdate.class.getName().equals(service.service.getClassName()))
-         {
-            return true;
-         }
-      }
-      return false;
-   }
-
    @Override
    public
    boolean onOptionsItemSelected(MenuItem item)
@@ -106,7 +90,7 @@ class FragmentFeeds extends Fragment
       }
       if(item.getTitle().equals(Util.getString(R.string.add_feed)))
       {
-         FeedDialog.showAddDialog();
+         FeedDialog.showAddDialog(m_navigationAdapter);
          return true;
       }
       if(item.getTitle().equals(Util.getString(R.string.unread)))
@@ -134,6 +118,22 @@ class FragmentFeeds extends Fragment
       int currentPage = VIEW_PAGER.getCurrentItem();
       Intent intent = Util.getServiceIntent(currentPage);
       m_context.startService(intent);
+   }
+
+   private static
+   boolean isServiceRunning(Activity activity)
+   {
+      ActivityManager manager = (ActivityManager) activity.getSystemService(
+            Context.ACTIVITY_SERVICE);
+      for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(
+            Integer.MAX_VALUE))
+      {
+         if(ServiceUpdate.class.getName().equals(service.service.getClassName()))
+         {
+            return true;
+         }
+      }
+      return false;
    }
 
    class OnFinishService extends Handler

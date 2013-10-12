@@ -52,15 +52,15 @@ class Update
 
    public static
    void executeFeedCheck(AlertDialog dlg, String ntag, String fname, String mode, String ctitle,
-         String url)
+         String url, BaseAdapter navigationAdapter)
    {
       if(Constants.HONEYCOMB)
       {
-         new AsyncCheckFeed(dlg, ntag, fname, mode, ctitle).execute(url);
+         new AsyncCheckFeed(dlg, ntag, fname, mode, ctitle, navigationAdapter).execute(url);
       }
       else
       {
-         new AsyncCheckFeed(dlg, ntag, fname, mode, ctitle).executeOnExecutor(
+         new AsyncCheckFeed(dlg, ntag, fname, mode, ctitle, navigationAdapter).executeOnExecutor(
                AsyncTask.THREAD_POOL_EXECUTOR, url);
       }
    }

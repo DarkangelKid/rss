@@ -231,10 +231,6 @@ class Util
    {
       String feedFolder = feed + Constants.SEPAR;
 
-      if(Constants.IMAGES.equals(append))
-      {
-         return feedFolder + Constants.IMAGE_DIR;
-      }
       if(Constants.THUMBNAILS.equals(append))
       {
          return feedFolder + Constants.THUMBNAIL_DIR;
@@ -393,15 +389,15 @@ class Util
    static
    int stoi(String str)
    {
-      return Integer.parseInt(str);
+
+      return null == str || 0 == str.length() ? 0 : Integer.parseInt(str);
    }
 
    static
    boolean isNonExisting(String path)
    {
       String path1 = getStorage() + path;
-      if(isUsingSd() || path1.contains(Constants.IMAGE_DIR) ||
-            path1.contains(Constants.THUMBNAIL_DIR))
+      if(isUsingSd() || path1.contains(Constants.THUMBNAIL_DIR))
       {
          return !new File(path1).exists();
       }

@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.SpinnerAdapter;
 
 import java.util.Arrays;
@@ -14,7 +15,7 @@ import java.util.Arrays;
 class FeedDialog
 {
    static
-   void showAddDialog()
+   void showAddDialog(BaseAdapter navigationAdapter)
    {
       Context con = Util.getContext();
       LayoutInflater inf = LayoutInflater.from(con);
@@ -41,7 +42,7 @@ class FeedDialog
             con.getString(R.string.cancel_dialog), new OnDialogClickCancel());
 
       addFeedDialog.setButton(DialogInterface.BUTTON_POSITIVE, con.getString(R.string.add_dialog),
-            new OnDialogClickAdd(addFeedLayout, spinnerTag));
+            new OnDialogClickAdd(addFeedLayout, spinnerTag, navigationAdapter));
 
       addFeedDialog.show();
    }
