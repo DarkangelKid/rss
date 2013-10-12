@@ -1,0 +1,19 @@
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+   <ImageView
+      android:id="@+id/white_left_shadow"
+      android:layout_width="3px"
+      android:layout_height="4px"
+      android:src="@drawable/left_white"
+      android:layout_alignParentLeft="true"
+      android:layout_above="@+id/grey_left_shadow"/>
+
+   <ImageView
+      android:id="@+id/white_right_shadow"
+      android:layout_width="3px"
+      android:layout_height="4px"
+      android:src="@drawable/right_white"
+      android:layout_alignParentRight="true"
+      android:layout_above="@+id/grey_right_shadow"/>
+
+</merge>

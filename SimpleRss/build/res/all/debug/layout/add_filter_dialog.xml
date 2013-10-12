@@ -1,0 +1,13 @@
+<EditText xmlns:android="http://schemas.android.com/apk/res/android"
+          android:id="@+id/URL_edit"
+          android:layout_height="wrap_content"
+          android:layout_width="match_parent"
+          android:padding="8dp"
+          android:scrollHorizontally="true"
+          android:textCursorDrawable="@drawable/white_cursor"
+          android:inputType="textNoSuggestions|textUri"
+          android:hint="@string/filter_hint"
+          android:gravity="fill_horizontal"
+          android:textSize="20sp"
+          android:textColor="#ff000000"/>
+<!-- From: file:/home/paul/code/SimpleRss/SimpleRss/src/main/res/layout/add_filter_dialog.xml -->

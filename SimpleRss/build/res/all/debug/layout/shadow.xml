@@ -1,0 +1,30 @@
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+   <ImageView
+      android:id="@+id/grey_left_shadow"
+      android:layout_width="3px"
+      android:layout_height="4px"
+      android:src="@drawable/left_grey"
+      android:layout_toLeftOf="@+id/grey_centre_shadow"
+      android:layout_alignParentLeft="true"
+      android:layout_alignParentBottom="true"/>
+
+   <ImageView
+      android:id="@+id/grey_right_shadow"
+      android:layout_width="3px"
+      android:layout_height="4px"
+      android:src="@drawable/right_grey"
+      android:layout_alignParentRight="true"
+      android:layout_alignParentBottom="true"/>
+
+   <ImageView
+      android:id="@+id/bottom_centre_shadow"
+      android:layout_width="match_parent"
+      android:layout_height="4px"
+      android:src="@drawable/bottom_grey"
+      android:layout_toLeftOf="@+id/grey_right_shadow"
+      android:layout_alignParentBottom="true"
+      android:scaleType="fitXY"/>
+
+</merge>
+<!-- From: file:/home/paul/code/SimpleRss/SimpleRss/src/main/res/layout/shadow.xml -->
