@@ -18,7 +18,7 @@ class OnScrollFeedListener implements AbsListView.OnScrollListener
    public
    void onScrollStateChanged(AbsListView view, int scrollState)
    {
-      if(view.getChildAt(0).getTop() == /* TODO 8DP */ 16 &&
+      if(16 == view.getChildAt(0).getTop() &&
             View.VISIBLE == view.getVisibility() && ((AdapterTag) m_feedAdapter).isScreenTouched())
       {
          String url = ((FeedItem) m_feedAdapter.getItem(0)).url;

@@ -10,7 +10,7 @@ class OnDialogClickAdd implements DialogInterface.OnClickListener
 {
    private final View                        m_addRssDialog;
    private final AdapterView<SpinnerAdapter> m_tagMenu;
-   BaseAdapter m_navigationAdapter;
+   private final BaseAdapter                 m_navigationAdapter;
 
    OnDialogClickAdd(View addRssDialog, AdapterView<SpinnerAdapter> spinnerTag,
          BaseAdapter navigationAdapter)

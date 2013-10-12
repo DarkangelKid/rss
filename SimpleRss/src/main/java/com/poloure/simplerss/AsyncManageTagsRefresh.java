@@ -30,7 +30,7 @@ class AsyncManageTagsRefresh extends AsyncTask<Void, String[], Void>
    Void doInBackground(Void... nothing)
    {
       String[][] content = getInfoArrays();
-      if(content.length != 0)
+      if(0 != content.length)
       {
          publishProgress(content[1], content[0]);
       }
@@ -68,7 +68,7 @@ class AsyncManageTagsRefresh extends AsyncTask<Void, String[], Void>
    {
       String[] currentTags = Read.file(Constants.TAG_LIST);
       int tagCount = currentTags.length;
-      if(tagCount == 0)
+      if(0 == tagCount)
       {
          return Util.EMPTY_STRING_STRING_ARRAY;
       }

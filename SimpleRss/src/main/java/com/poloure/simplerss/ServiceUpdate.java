@@ -19,13 +19,13 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
@@ -79,7 +79,7 @@ class ServiceUpdate extends IntentService
          if(tags[i].equals(tag) || tag.equals(Constants.ALL_TAG))
          {
             String feedPath = Util.getPath(names[i], "");
-            if(Util.isNonExisting(feedPath))
+            if(isNonExisting(feedPath))
             {
                Util.mkdir(feedPath + Constants.THUMBNAIL_DIR);
             }
@@ -258,7 +258,7 @@ class ServiceUpdate extends IntentService
                {
                   time.parse3339(contentText);
                }
-               catch(RuntimeException ignored)
+               catch(Exception ignored)
                {
                   Write.log("BUG : RFC3339, looks like: " + contentText);
                   time.setToNow();
@@ -266,7 +266,7 @@ class ServiceUpdate extends IntentService
 
                timeLong = time.toMillis(true);
                timeString = Long.toString(timeLong);
-               stringBuilder.append("pubDate|").append(timeString).append('|');
+               stringBuilder.append(Constants.TIME).append(timeString).append('|');
             }
 
             /* "pubDate" - It follows the rss 2.0 specification for rfc882. */
@@ -281,7 +281,7 @@ class ServiceUpdate extends IntentService
                   calendar.setTime(RSS_DATE.parse(contentText));
                   timeLong = calendar.getTimeInMillis();
                }
-               catch(ParseException ignored)
+               catch(Exception ignored)
                {
                   Write.log("BUG : rfc882, looks like: " + contentText);
                   time.setToNow();
@@ -289,13 +289,20 @@ class ServiceUpdate extends IntentService
                }
 
                timeString = Long.toString(timeLong);
-               stringBuilder.append("pubDate|").append(timeString).append('|');
+               stringBuilder.append(Constants.TIME).append(timeString).append('|');
             }
             else if(-1 != index)
             {
                parser.next();
                String content = parser.getText();
-               content = PATTERN_WHITESPACE.matcher(content).replaceAll(" ");
+               if(null != content)
+               {
+                  content = PATTERN_WHITESPACE.matcher(content).replaceAll(" ");
+               }
+               else
+               {
+                  content = "";
+               }
 
                int imgPosition = content.indexOf("img");
                if(-1 != imgPosition)
@@ -305,12 +312,12 @@ class ServiceUpdate extends IntentService
                   int finalPosition = content.indexOf(quote, srcPosition + 1);
 
                   String imgLink = content.substring(srcPosition + 1, finalPosition);
-                  stringBuilder.append("image|").append(imgLink).append('|');
+                  stringBuilder.append(Constants.IMAGE).append(imgLink).append('|');
 
                   int lastSlash = imgLink.lastIndexOf('/') + 1;
                   String imgName = imgLink.substring(lastSlash);
 
-                  if(Util.isNonExisting(thumbnailDir + imgName))
+                  if(isNonExisting(thumbnailDir + imgName))
                   {
                      compressImage(thumbnailDir, imgLink, imgName);
                   }
@@ -396,6 +403,21 @@ class ServiceUpdate extends IntentService
       catch(FileNotFoundException e)
       {
          e.printStackTrace();
+      }
+   }
+
+   static
+   boolean isNonExisting(String path)
+   {
+      String path1 = Util.getStorage() + path;
+      if(Util.isUsingSd() || path1.contains(Constants.THUMBNAIL_DIR))
+      {
+         return !new File(path1).exists();
+      }
+      else
+      {
+         String internalPath = Util.getInternalPath(path1);
+         return !Util.getContext().getFileStreamPath(internalPath).exists();
       }
    }
 }

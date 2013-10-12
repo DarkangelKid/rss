@@ -48,7 +48,7 @@ class FeedsActivity extends ActionBarActivity
    {
       super.onCreate(savedInstanceState);
 
-      if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
+      if(Configuration.ORIENTATION_LANDSCAPE == getResources().getConfiguration().orientation)
       {
          /* If the screen is now in landscape mode, we can show the
           * dialog in-line with the list so we don't need this activity. */
@@ -121,7 +121,19 @@ class FeedsActivity extends ActionBarActivity
 
       /* Save the READ_ITEMS to file. */
       Write.collection(Constants.READ_ITEMS, AdapterTag.s_readLinks);
-      finish();
+   }
+
+   @Override
+   public
+   void onBackPressed()
+   {
+      super.onBackPressed();
+      String feeds = NavDrawer.NAV_TITLES[0];
+
+      getSupportActionBar().setTitle(feeds);
+      int lock = DrawerLayout.LOCK_MODE_UNLOCKED;
+      NavDrawer.s_drawerLayout.setDrawerLockMode(lock);
+      NavDrawer.s_drawerToggle.setDrawerIndicatorEnabled(true);
    }
 
    private static
@@ -164,19 +176,6 @@ class FeedsActivity extends ActionBarActivity
       {
          am.cancel(pintent);
       }
-   }
-
-   @Override
-   public
-   void onBackPressed()
-   {
-      super.onBackPressed();
-      String feeds = NavDrawer.NAV_TITLES[0];
-
-      getSupportActionBar().setTitle(feeds);
-      int lock = DrawerLayout.LOCK_MODE_UNLOCKED;
-      NavDrawer.s_drawerLayout.setDrawerLockMode(lock);
-      NavDrawer.s_drawerToggle.setDrawerIndicatorEnabled(true);
    }
 
    @Override

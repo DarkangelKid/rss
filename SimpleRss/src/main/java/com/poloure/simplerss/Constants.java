@@ -26,10 +26,10 @@ class Constants
    static final         String          STRIP_COLOR      = "pagertabstrip_colour" + TXT;
    /* Files */
    static final         String          INT_STORAGE      = "internal" + TXT;
-   static final         String          STORE            = ".store" + TXT;
    static final         String          TEMP             = ".temp" + TXT;
    /* Parser saves */
    static final         String          IMAGE            = "image|";
+   static final         String          TIME             = "pubDate|";
    static final         String          HEIGHT           = "height|";
    static final         String          WIDTH            = "width|";
    static final         String          TAG_TITLE        = "<title";

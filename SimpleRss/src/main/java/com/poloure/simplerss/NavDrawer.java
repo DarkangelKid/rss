@@ -44,7 +44,6 @@ class NavDrawer
    {
       private final ActionBar m_actionBar = FeedsActivity.getActivity().getSupportActionBar();
 
-      private
       DrawerToggleClick()
       {
          super(FeedsActivity.getActivity(), s_drawerLayout, R.drawable.ic_drawer,

@@ -394,21 +394,6 @@ class Util
    }
 
    static
-   boolean isNonExisting(String path)
-   {
-      String path1 = getStorage() + path;
-      if(isUsingSd() || path1.contains(Constants.THUMBNAIL_DIR))
-      {
-         return !new File(path1).exists();
-      }
-      else
-      {
-         String internalPath = getInternalPath(path1);
-         return !s_context.getFileStreamPath(internalPath).exists();
-      }
-   }
-
-   static
    void setText(CharSequence charSequence, View view, int id)
    {
       ((TextView) view.findViewById(id)).setText(charSequence);

@@ -122,6 +122,7 @@ class AdapterManagerTags extends BaseAdapter
       }
    }
 
+   private
    class MyTouchListener implements OnTouchListener
    {
       @Override
