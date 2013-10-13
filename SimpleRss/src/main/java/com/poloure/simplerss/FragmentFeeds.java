@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.view.Gravity;
@@ -22,14 +23,12 @@ import android.widget.BaseAdapter;
 class FragmentFeeds extends Fragment
 {
    private static final int OFF_SCREEN_PAGE_LIMIT = 128;
-   static        ViewPager   VIEW_PAGER;
+   static        ViewPager   s_viewPager;
    private final BaseAdapter m_navigationAdapter;
-   private final Context     m_context;
 
-   FragmentFeeds(BaseAdapter navigationAdapter, Context context)
+   FragmentFeeds(BaseAdapter navigationAdapter)
    {
       m_navigationAdapter = navigationAdapter;
-      m_context = context;
    }
 
    @Override
@@ -41,43 +40,94 @@ class FragmentFeeds extends Fragment
          return null;
       }
 
-      //
-
       setHasOptionsMenu(true);
+      Context context = getActivity();
 
-      Constants.PAGER_TAB_STRIPS[0] = Util.newPagerTabStrip(m_context);
+      Constants.PAGER_TAB_STRIPS[0] = Util.newPagerTabStrip(context);
 
       ViewPager.LayoutParams layoutParams = new ViewPager.LayoutParams();
       layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
       layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
       layoutParams.gravity = Gravity.TOP;
 
-      VIEW_PAGER = new ViewPager(m_context);
+      s_viewPager = new ViewPager(context);
 
-      VIEW_PAGER.addView(Constants.PAGER_TAB_STRIPS[0], layoutParams);
+      s_viewPager.addView(Constants.PAGER_TAB_STRIPS[0], layoutParams);
 
       FragmentManager fragmentManager = getFragmentManager();
-      VIEW_PAGER.setAdapter(new PagerAdapterFeeds(m_navigationAdapter, fragmentManager, m_context));
-      VIEW_PAGER.setOffscreenPageLimit(OFF_SCREEN_PAGE_LIMIT);
-      VIEW_PAGER.setOnPageChangeListener(new PageChange(this));
-      VIEW_PAGER.setId(0x1000);
+      s_viewPager.setAdapter(new PagerAdapterFeeds(m_navigationAdapter, fragmentManager, context));
+      s_viewPager.setOffscreenPageLimit(OFF_SCREEN_PAGE_LIMIT);
+      s_viewPager.setOnPageChangeListener(new OnPageChangeTags(this, m_navigationAdapter));
+      s_viewPager.setId(0x1000);
 
-      return VIEW_PAGER;
+      return s_viewPager;
    }
 
    @Override
    public
    void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
    {
-      FeedsActivity.s_optionsMenu = menu;
-      FeedsActivity.s_optionsMenu.clear();
+      menu.clear();
 
-      inflater.inflate(R.menu.main_overflow, FeedsActivity.s_optionsMenu);
-      super.onCreateOptionsMenu(FeedsActivity.s_optionsMenu, inflater);
+      inflater.inflate(R.menu.main_overflow, menu);
+      super.onCreateOptionsMenu(menu, inflater);
 
-      Activity activity = getActivity();
+      FragmentActivity activity = getActivity();
+      ((FeedsActivity) activity).setOptionsMenu(menu);
+
       boolean serviceRunning = isServiceRunning(activity);
-      Util.setRefreshingIcon(serviceRunning);
+      Util.setRefreshingIcon(serviceRunning, menu);
+   }
+
+   @Override
+   public
+   boolean onOptionsItemSelected(MenuItem item)
+   {
+      FragmentActivity activity = getActivity();
+      if(activity.onOptionsItemSelected(item))
+      {
+         return true;
+      }
+
+      CharSequence itemTitle = item.getTitle();
+
+      String addFeed = activity.getString(R.string.add_feed);
+      if(itemTitle.equals(addFeed))
+      {
+         FeedDialog.showAddDialog(m_navigationAdapter, activity);
+         return true;
+      }
+
+      String jumpTo = activity.getString(R.string.unread);
+      if(itemTitle.equals(jumpTo))
+      {
+         Util.gotoLatestUnread(null, true, 0, this);
+         return true;
+      }
+
+      String refresh = activity.getString(R.string.refresh);
+      if(itemTitle.equals(refresh))
+      {
+         refreshFeeds();
+         return true;
+      }
+      return super.onOptionsItemSelected(item);
+   }
+
+   /* Updates and refreshes the tags with any new content. */
+   private
+   void refreshFeeds()
+   {
+      FragmentActivity activity = getActivity();
+      Menu menu = ((FeedsActivity) activity).getOptionsMenu();
+      Util.setRefreshingIcon(true, menu);
+
+      /* Set the service handler in FeedsActivity so we can check and call it
+       * from ServiceUpdate. */
+      FeedsActivity.s_serviceHandler = new OnFinishService();
+      int currentPage = s_viewPager.getCurrentItem();
+      Intent intent = Util.getServiceIntent(currentPage, null, activity);
+      activity.startService(intent);
    }
 
    private static
@@ -96,46 +146,6 @@ class FragmentFeeds extends Fragment
       return false;
    }
 
-   @Override
-   public
-   boolean onOptionsItemSelected(MenuItem item)
-   {
-      if(NavDrawer.s_drawerToggle.onOptionsItemSelected(item))
-      {
-         return true;
-      }
-      if(item.getTitle().equals(Util.getString(R.string.add_feed)))
-      {
-         FeedDialog.showAddDialog(m_navigationAdapter);
-         return true;
-      }
-      if(item.getTitle().equals(Util.getString(R.string.unread)))
-      {
-         Util.gotoLatestUnread(null, true, 0, this);
-         return true;
-      }
-      if(item.getTitle().equals(Util.getString(R.string.refresh)))
-      {
-         refreshFeeds();
-         return true;
-      }
-      return super.onOptionsItemSelected(item);
-   }
-
-   /* Updates and refreshes the tags with any new content. */
-   private
-   void refreshFeeds()
-   {
-      Util.setRefreshingIcon(true);
-
-      /* Set the service handler in FeedsActivity so we can check and call it
-       * from ServiceUpdate. */
-      FeedsActivity.s_serviceHandler = new OnFinishService();
-      int currentPage = VIEW_PAGER.getCurrentItem();
-      Intent intent = Util.getServiceIntent(currentPage);
-      m_context.startService(intent);
-   }
-
    class OnFinishService extends Handler
    {
       /* The stuff we would like to run when the service completes. */
@@ -143,7 +153,10 @@ class FragmentFeeds extends Fragment
       public
       void handleMessage(Message msg)
       {
-         Util.setRefreshingIcon(false);
+         FragmentActivity activity = getActivity();
+         Menu menu = ((FeedsActivity) activity).getOptionsMenu();
+         Util.setRefreshingIcon(false, menu);
+
          int page = msg.getData().getInt("page_number");
          refreshPages(page);
       }
@@ -152,53 +165,24 @@ class FragmentFeeds extends Fragment
       private
       void refreshPages(int page)
       {
-         Update.page(m_navigationAdapter, 0);
+         FragmentManager fragmentManager = getFragmentManager();
+         Context context = getActivity();
 
-         int tagsCount = Read.count(Constants.TAG_LIST);
+         Update.page(m_navigationAdapter, 0, fragmentManager, context);
+
+         int tagsCount = Read.count(Constants.TAG_LIST, context);
          if(0 == page)
          {
             for(int i = 1; i < tagsCount; i++)
             {
-               Update.page(m_navigationAdapter, i);
+               Update.page(m_navigationAdapter, i, fragmentManager, context);
             }
          }
          else
          {
-            Update.page(m_navigationAdapter, page);
+            Update.page(m_navigationAdapter, page, fragmentManager, context);
          }
       }
    }
 
-   private
-   class PageChange implements ViewPager.OnPageChangeListener
-   {
-      private final Fragment m_fragment;
-
-      PageChange(Fragment fragment)
-      {
-         m_fragment = fragment;
-      }
-
-      @Override
-      public
-      void onPageScrolled(int pos, float offset, int offsetPx)
-      {
-      }
-
-      @Override
-      public
-      void onPageSelected(int pos)
-      {
-         if(0 == Util.getCardAdapter(pos, m_fragment).getCount())
-         {
-            Update.page(m_navigationAdapter, pos);
-         }
-      }
-
-      @Override
-      public
-      void onPageScrollStateChanged(int state)
-      {
-      }
-   }
 }

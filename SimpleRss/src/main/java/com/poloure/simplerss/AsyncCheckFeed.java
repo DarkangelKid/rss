@@ -1,12 +1,10 @@
 package com.poloure.simplerss;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
-import android.support.v4.app.ListFragment;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.ListAdapter;
-import android.widget.ListView;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -26,10 +24,10 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
    private       boolean     m_isFeedNotReal;
    private       String      name;
    private       boolean     m_newTag;
-
+   private final Context     m_context;
 
    AsyncCheckFeed(AlertDialog dialog, String tag, String feedName, String mode, String currentTitle,
-         BaseAdapter navigationAdapter)
+         BaseAdapter navigationAdapter, Context context)
    {
       m_dialog = dialog;
       m_tag = tag;
@@ -38,6 +36,7 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
       m_title = currentTitle;
       m_newTag = true;
       m_navigationAdapter = navigationAdapter;
+      m_context = context;
       Button button = m_dialog.getButton(DialogInterface.BUTTON_POSITIVE);
       if(null != button)
       {
@@ -64,7 +63,7 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
       m_tag = m_tag.substring(0, m_tag.length() - 1);
 
       /* Check to see if the tag already exists. */
-      String[] currentTags = Read.file(Constants.TAG_LIST);
+      String[] currentTags = Read.file(Constants.TAG_LIST, m_context);
       if(-1 != Util.index(currentTags, m_tag))
       {
          m_newTag = false;
@@ -141,8 +140,8 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
 
       if(m_newTag)
       {
-         Write.single(Constants.TAG_LIST, m_tag + Constants.NL);
-         Util.updateTags(m_navigationAdapter);
+         Write.single(Constants.TAG_LIST, m_tag + Constants.NL, m_context);
+         Util.updateTags(m_navigationAdapter, m_context);
       }
       if(0 == name.length())
       {
@@ -153,7 +152,7 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
 
       if(Constants.EDIT.equals(m_mode))
       {
-         editFeed(m_title, name, result[0], m_tag);
+         editFeed(m_title, name, result[0], m_tag, m_context);
       }
       else if(Constants.ADD.equals(m_mode))
       {
@@ -163,7 +162,7 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
                Constants.NL;
 
    /* Save the feed to the index. */
-         Write.single(Constants.INDEX, feedInfo);
+         Write.single(Constants.INDEX, feedInfo, m_context);
 
    /* TODO Update the manage ListViews with the new information. */
          //if(null != PagerAdapterManage.MANAGE_FRAGMENTS[1].getListAdapter())
@@ -180,7 +179,7 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
    }
 
    private static
-   void editFeed(String oldFeed, String newFeed, String newUrl, String newTag)
+   void editFeed(String oldFeed, String newFeed, String newUrl, String newTag, Context context)
    {
 
       String oldFeedFolder = Util.getPath(oldFeed, "");
@@ -188,17 +187,17 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
 
       if(!oldFeed.equals(newFeed))
       {
-         Util.move(oldFeedFolder, newFeedFolder);
+         Util.move(oldFeedFolder, newFeedFolder, context);
       }
 
       /* Replace the all_tag file with the new image and data. */
       String index = Constants.INDEX;
       String entry = String.format(Constants.INDEX_FORMAT, newFeed, newUrl, newTag);
 
-      int position = Write.removeLine(index, oldFeed, true);
-      Write.single(index, entry + Constants.NL);
+      int position = Write.removeLine(index, oldFeed, true, context);
+      Write.single(index, entry + Constants.NL, context);
 
-      ListFragment fragmentManageFeeds = PagerAdapterManage.MANAGE_FRAGMENTS[1];
+     /*TODO ListFragment fragmentManageFeeds = ?
       ListView listView = fragmentManageFeeds.getListView();
       ListAdapter listAdapter = fragmentManageFeeds.getListAdapter();
 
@@ -211,7 +210,7 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
 
       /// To ManageFeedsRefresh the counts and the order of the tags.
       // TODO Util.updateTags();
-      Update.AsyncCompatManageTagsRefresh(listView, listAdapter);
+      Update.AsyncCompatManageTagsRefresh(listView, listAdapter);*/
    }
 
    private static

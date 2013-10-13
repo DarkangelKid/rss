@@ -10,13 +10,14 @@ class PagerAdapterFeeds extends FragmentPagerAdapter
 {
    private final BaseAdapter m_navigationAdapter;
    private final Context     m_context;
-   private final String[] m_currentTags = Read.file(Constants.TAG_LIST);
+   private final String[]    m_currentTags;
 
    PagerAdapterFeeds(BaseAdapter navigationAdapter, FragmentManager fm, Context context)
    {
       super(fm);
       m_navigationAdapter = navigationAdapter;
       m_context = context;
+      m_currentTags = Read.file(Constants.TAG_LIST, m_context);
    }
 
    @Override
@@ -37,7 +38,6 @@ class PagerAdapterFeeds extends FragmentPagerAdapter
    public
    Fragment getItem(int position)
    {
-      return new FragmentTag(m_navigationAdapter, m_context);
-
+      return new FragmentTag(m_navigationAdapter, m_context, position);
    }
 }

@@ -1,5 +1,6 @@
 package com.poloure.simplerss;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -24,8 +25,10 @@ class FragmentWebView extends Fragment
          m_webView.destroy();
       }
 
-      view = new FrameLayout(Util.getContext());
-      m_webView = new WebView(Util.getContext());
+      Context context = getActivity();
+
+      view = new FrameLayout(context);
+      m_webView = new WebView(context);
 
       return view;
    }

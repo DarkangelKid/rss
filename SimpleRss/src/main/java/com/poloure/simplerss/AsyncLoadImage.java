@@ -1,4 +1,5 @@
 package com.poloure.simplerss;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -21,6 +22,7 @@ class AsyncLoadImage extends AsyncTask<Object, Void, Object[]>
       m_imageView = (ImageView) params[0];
       m_imageViewTag = (Integer) params[1];
       String imageName = (String) params[2];
+      Context context = (Context) params[3];
 
       BitmapFactory.Options o = new BitmapFactory.Options();
       o.inSampleSize = 1;
@@ -28,8 +30,8 @@ class AsyncLoadImage extends AsyncTask<Object, Void, Object[]>
       fadeIn.setDuration(IMAGE_FADE_IN_DURATION);
       fadeIn.setInterpolator(new DecelerateInterpolator());
 
-      String image = Util.getStorage() + imageName;
-      m_imageView.setOnClickListener(new OnClickImage(image));
+      String image = Util.getStorage(context) + imageName;
+      m_imageView.setOnClickListener(new OnClickImage(image, context));
       return new Object[]{
             BitmapFactory.decodeFile(image, o), fadeIn
       };

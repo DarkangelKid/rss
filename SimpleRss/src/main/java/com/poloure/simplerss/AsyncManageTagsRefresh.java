@@ -1,4 +1,5 @@
 package com.poloure.simplerss;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.view.View;
 import android.view.animation.Animation;
@@ -9,20 +10,22 @@ import android.widget.ListView;
 
 class AsyncManageTagsRefresh extends AsyncTask<Void, String[], Void>
 {
-   private final Animation animFadeIn = AnimationUtils.loadAnimation(Util.getContext(),
-         android.R.anim.fade_in);
+   private final Animation   m_fadeIn;
    private final ListView    m_listView;
    private final ListAdapter m_adapter;
+   private final Context     m_context;
 
-   AsyncManageTagsRefresh(ListView listView, ListAdapter adapter)
+   AsyncManageTagsRefresh(ListView listView, ListAdapter adapter, Context context)
    {
       m_listView = listView;
       m_adapter = adapter;
+      m_fadeIn = AnimationUtils.loadAnimation(context, android.R.anim.fade_in);
 
       if(0 == m_adapter.getCount())
       {
          m_listView.setVisibility(View.INVISIBLE);
       }
+      m_context = context;
    }
 
    @Override
@@ -41,7 +44,7 @@ class AsyncManageTagsRefresh extends AsyncTask<Void, String[], Void>
    protected
    void onPostExecute(Void result)
    {
-      m_listView.setAnimation(animFadeIn);
+      m_listView.setAnimation(m_fadeIn);
       m_listView.setVisibility(View.VISIBLE);
    }
 
@@ -63,10 +66,10 @@ class AsyncManageTagsRefresh extends AsyncTask<Void, String[], Void>
       AdapterManagerTags.s_infoArray = infos;
    }
 
-   private static
+   private
    String[][] getInfoArrays()
    {
-      String[] currentTags = Read.file(Constants.TAG_LIST);
+      String[] currentTags = Read.file(Constants.TAG_LIST, m_context);
       int tagCount = currentTags.length;
       if(0 == tagCount)
       {
@@ -77,7 +80,7 @@ class AsyncManageTagsRefresh extends AsyncTask<Void, String[], Void>
       String[] infoArray = new String[tagCount];
       StringBuilder info = new StringBuilder(40);
 
-      String[][] content = Read.csv();
+      String[][] content = Read.csv(m_context);
       String[] feeds = content[0];
       String[] tags = content[2];
 

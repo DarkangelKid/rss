@@ -1,4 +1,5 @@
 package com.poloure.simplerss;
+import android.content.Context;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.BaseAdapter;
@@ -7,11 +8,13 @@ class OnScrollFeedListener implements AbsListView.OnScrollListener
 {
    private final BaseAdapter m_navigationAdapter;
    private final BaseAdapter m_feedAdapter;
+   private final Context     m_context;
 
-   OnScrollFeedListener(BaseAdapter navigationAdapter, BaseAdapter feedAdapter)
+   OnScrollFeedListener(BaseAdapter navigationAdapter, BaseAdapter feedAdapter, Context context)
    {
       m_navigationAdapter = navigationAdapter;
       m_feedAdapter = feedAdapter;
+      m_context = context;
    }
 
    @Override
@@ -27,7 +30,7 @@ class OnScrollFeedListener implements AbsListView.OnScrollListener
 
       if(AbsListView.OnScrollListener.SCROLL_STATE_IDLE == scrollState)
       {
-         Update.navigation(m_navigationAdapter);
+         Update.navigation(m_navigationAdapter, m_context);
       }
    }
 

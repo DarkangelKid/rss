@@ -1,16 +1,22 @@
 package com.poloure.simplerss;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.view.View;
+import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 class OnFilterDialogClickAdd implements DialogInterface.OnClickListener
 {
-   private final View m_addFilterLayout;
+   private final View        m_addFilterLayout;
+   private final BaseAdapter m_adapter;
+   private final Context     m_context;
 
-   OnFilterDialogClickAdd(View addFilterLayout)
+   OnFilterDialogClickAdd(View addFilterLayout, BaseAdapter adapterManageFilters, Context context)
    {
+      m_context = context;
       m_addFilterLayout = addFilterLayout;
+      m_adapter = adapterManageFilters;
    }
 
    private static
@@ -25,12 +31,13 @@ class OnFilterDialogClickAdd implements DialogInterface.OnClickListener
    {
       String filter = getText((TextView) m_addFilterLayout);
       String path = Constants.FILTER_LIST;
-      String[] filters = Read.file(path);
+      String[] filters = Read.file(path, m_context);
       if(-1 == Util.index(filters, filter))
       {
-         Write.single(path, filter + Constants.NL);
+         Write.single(path, filter + Constants.NL, m_context);
       }
-      AdapterManageFilters.setTitles(filters);
+      ((AdapterManageFilters) m_adapter).setTitles(filters);
+      m_adapter.notifyDataSetChanged();
       ((Dialog) dialog).hide();
    }
 }

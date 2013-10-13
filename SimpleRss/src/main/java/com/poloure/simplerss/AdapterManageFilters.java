@@ -9,26 +9,32 @@ import android.widget.TextView;
 
 class AdapterManageFilters extends BaseAdapter
 {
-   private static String[] s_filterTitles = Util.EMPTY_STRING_ARRAY;
+   private String[] m_filterTitles = Util.EMPTY_STRING_ARRAY;
 
-   static
+   private final LayoutInflater m_layoutInflater;
+
+   AdapterManageFilters(Context context)
+   {
+      m_layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+   }
+
    void setTitles(String... titles)
    {
-      s_filterTitles = titles;
+      m_filterTitles = titles;
    }
 
    @Override
    public
    int getCount()
    {
-      return s_filterTitles.length;
+      return m_filterTitles.length;
    }
 
    @Override
    public
    String getItem(int position)
    {
-      return s_filterTitles[position];
+      return m_filterTitles[position];
    }
 
    @Override
@@ -46,10 +52,7 @@ class AdapterManageFilters extends BaseAdapter
       ViewHolder holder;
       if(null == view1)
       {
-
-         String inflate = Context.LAYOUT_INFLATER_SERVICE;
-         view1 = ((LayoutInflater) Util.getContext().getSystemService(inflate)).inflate(
-               R.layout.manage_feed_item, parent, false);
+         view1 = m_layoutInflater.inflate(R.layout.manage_feed_item, parent, false);
          holder = new ViewHolder();
          holder.m_title = (TextView) view1.findViewById(R.id.title_item);
          view1.setTag(holder);
@@ -59,14 +62,14 @@ class AdapterManageFilters extends BaseAdapter
          holder = (ViewHolder) view1.getTag();
       }
 
-      holder.m_title.setText(s_filterTitles[position]);
+      holder.m_title.setText(m_filterTitles[position]);
 
       return view1;
    }
 
    void removePosition(int position)
    {
-      Util.arrayRemove(s_filterTitles, position);
+      Util.arrayRemove(m_filterTitles, position);
       notifyDataSetChanged();
    }
 

@@ -1,5 +1,6 @@
 package com.poloure.simplerss;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.view.View;
 import android.widget.AdapterView;
@@ -12,15 +13,16 @@ class OnDialogClickEdit implements DialogInterface.OnClickListener
    private final AdapterView<SpinnerAdapter> m_tag;
    private final String                      m_title;
    private final BaseAdapter                 m_navigationAdapter;
+   private final Context                     m_context;
 
    OnDialogClickEdit(View editRssDialog, AdapterView<SpinnerAdapter> spinnerTag, String title,
-         BaseAdapter navigationAdapter)
+         BaseAdapter navigationAdapter, Context context)
    {
       m_editRssDialog = editRssDialog;
       m_tag = spinnerTag;
       m_title = title;
       m_navigationAdapter = navigationAdapter;
-
+      m_context = context;
    }
 
    @Override
@@ -41,6 +43,6 @@ class OnDialogClickEdit implements DialogInterface.OnClickListener
       }
 
       Update.executeFeedCheck((AlertDialog) dialog, editTag, newName, Constants.EDIT, m_title,
-            newUrl, m_navigationAdapter);
+            newUrl, m_navigationAdapter, m_context);
    }
 }

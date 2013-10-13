@@ -11,6 +11,12 @@ class AdapterManageFeeds extends BaseAdapter
 {
    private String[] m_titleArray = Util.EMPTY_STRING_ARRAY;
    private String[] m_infoArray  = Util.EMPTY_STRING_ARRAY;
+   private final LayoutInflater m_layoutInflater;
+
+   AdapterManageFeeds(Context context)
+   {
+      m_layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+   }
 
    void setArrays(String[] titles, String... infos)
    {
@@ -53,29 +59,27 @@ class AdapterManageFeeds extends BaseAdapter
 
    @Override
    public
-   View getView(int position, View view, ViewGroup parent)
+   View getView(int position, View convertView, ViewGroup parent)
    {
-      View view1 = view;
+      View view = convertView;
       ViewHolder holder;
-      if(null == view1)
+      if(null == view)
       {
-         String inflate = Context.LAYOUT_INFLATER_SERVICE;
-         view1 = ((LayoutInflater) Util.getContext().getSystemService(inflate)).inflate(
-               R.layout.manage_feed_item, parent, false);
+         view = m_layoutInflater.inflate(R.layout.manage_feed_item, parent, false);
          holder = new ViewHolder();
-         holder.m_title = (TextView) view1.findViewById(R.id.title_item);
-         holder.m_info = (TextView) view1.findViewById(R.id.info_item);
-         view1.setTag(holder);
+         holder.m_title = (TextView) view.findViewById(R.id.title_item);
+         holder.m_info = (TextView) view.findViewById(R.id.info_item);
+         view.setTag(holder);
       }
       else
       {
-         holder = (ViewHolder) view1.getTag();
+         holder = (ViewHolder) view.getTag();
       }
 
       holder.m_title.setText(m_titleArray[position]);
       holder.m_info.setText(m_infoArray[position]);
 
-      return view1;
+      return view;
    }
 
    static

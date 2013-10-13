@@ -35,13 +35,11 @@ import java.util.regex.Pattern;
 public
 class ServiceUpdate extends IntentService
 {
-   private static final SimpleDateFormat RSS_DATE           = new SimpleDateFormat(
+   private static final SimpleDateFormat RSS_DATE = new SimpleDateFormat(
          "EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
-   private static final int              SCREEN_WIDTH       = (int) Math.round(
-         Util.getScreenWidth() * 0.944);
-   private static final Pattern          PATTERN_WHITESPACE = Pattern.compile(
-         "[\\t\\n\\x0B\\f\\r\\|]");
-   private static final String[]         DESIRED_TAGS       = {
+   private static int s_screenWidth;
+   private static final Pattern  PATTERN_WHITESPACE = Pattern.compile("[\\t\\n\\x0B\\f\\r\\|]");
+   private static final String[] DESIRED_TAGS       = {
          "link", "published", "pubDate", "description", "title", "content", "entry", "item"
    };
 
@@ -55,19 +53,19 @@ class ServiceUpdate extends IntentService
    protected
    void onHandleIntent(Intent intent)
    {
-      Util.setContext(this);
-
       PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
       PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SIMPLERSS");
       wakeLock.acquire();
+
+      s_screenWidth = (int) Math.round(Util.getScreenWidth(this) * 0.944);
 
       Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
       int page = intent.getIntExtra("GROUP_NUMBER", 0);
 
-      String tag = Read.file(Constants.TAG_LIST)[page];
+      String tag = Read.file(Constants.TAG_LIST, this)[page];
 
-      String[][] content = Read.csv();
+      String[][] content = Read.csv(this);
       String[] names = content[0];
       String[] urls = content[1];
       String[] tags = content[2];
@@ -76,12 +74,12 @@ class ServiceUpdate extends IntentService
       int namesLength = names.length;
       for(int i = 0; i < namesLength; i++)
       {
-         if(tags[i].equals(tag) || tag.equals(Constants.ALL_TAG))
+         if(tags[i].equals(tag) || tag.equals(getString(R.string.all_tag)))
          {
             String feedPath = Util.getPath(names[i], "");
-            if(isNonExisting(feedPath))
+            if(isNonExisting(feedPath, this))
             {
-               Util.mkdir(feedPath + Constants.THUMBNAIL_DIR);
+               Util.mkdir(feedPath + Constants.THUMBNAIL_DIR, this);
             }
 
             try
@@ -103,7 +101,7 @@ class ServiceUpdate extends IntentService
          }
       }
 
-      int[] unreadCounts = Util.getUnreadCounts();
+      int[] unreadCounts = Util.getUnreadCounts(this);
 
       /* If activity is running. */
       if(null != FeedsActivity.s_serviceHandler)
@@ -129,11 +127,11 @@ class ServiceUpdate extends IntentService
             }
          }
 
-         String titleSingle = Util.getString(R.string.notification_title_singular);
-         String titlePlural = Util.getString(R.string.notification_title_plural);
-         String contentSingleItem = Util.getString(R.string.notification_content_tag_item);
-         String contentSingleTag = Util.getString(R.string.notification_content_tag_items);
-         String contentPluralTag = Util.getString(R.string.notification_content_tags);
+         String titleSingle = getString(R.string.notification_title_singular);
+         String titlePlural = getString(R.string.notification_title_plural);
+         String contentSingleItem = getString(R.string.notification_content_tag_item);
+         String contentSingleTag = getString(R.string.notification_content_tag_items);
+         String contentPluralTag = getString(R.string.notification_content_tags);
 
          String notificationTitle = 1 == unreadCounts[0]
                ? String.format(titleSingle, 1)
@@ -175,7 +173,7 @@ class ServiceUpdate extends IntentService
       stopSelf();
    }
 
-   private static
+   private
    void parseFeed(String urlString, String feed)
          throws XmlPullParserException, MalformedURLException, IOException
    {
@@ -183,7 +181,7 @@ class ServiceUpdate extends IntentService
       String thumbnailDir = Util.getPath(feed, Constants.THUMBNAILS);
       /*String[] filters = Read.file(Constants.FILTER_LIST);*/
 
-      Set<String> set = Read.set(contentFile);
+      Set<String> set = Read.set(contentFile, this);
 
       Time time = new Time();
 
@@ -260,7 +258,7 @@ class ServiceUpdate extends IntentService
                }
                catch(Exception ignored)
                {
-                  Write.log("BUG : RFC3339, looks like: " + contentText);
+                  Write.log("BUG : RFC3339, looks like: " + contentText, this);
                   time.setToNow();
                }
 
@@ -283,7 +281,7 @@ class ServiceUpdate extends IntentService
                }
                catch(Exception ignored)
                {
-                  Write.log("BUG : rfc882, looks like: " + contentText);
+                  Write.log("BUG : rfc882, looks like: " + contentText, this);
                   time.setToNow();
                   timeLong = time.toMillis(true);
                }
@@ -317,13 +315,13 @@ class ServiceUpdate extends IntentService
                   int lastSlash = imgLink.lastIndexOf('/') + 1;
                   String imgName = imgLink.substring(lastSlash);
 
-                  if(isNonExisting(thumbnailDir + imgName))
+                  if(isNonExisting(thumbnailDir + imgName, this))
                   {
-                     compressImage(thumbnailDir, imgLink, imgName);
+                     compressImage(thumbnailDir, imgLink, imgName, this);
                   }
 
                   /* ISSUE #194 */
-                  BitmapFactory.decodeFile(Util.getStorage() + thumbnailDir + imgName, options);
+                  BitmapFactory.decodeFile(Util.getStorage(this) + thumbnailDir + imgName, options);
 
                   stringBuilder.append(Constants.WIDTH)
                         .append(options.outWidth)
@@ -351,7 +349,7 @@ class ServiceUpdate extends IntentService
          }
          else if(XmlPullParser.END_DOCUMENT == eventType)
          {
-            Write.collection(contentFile, set);
+            Write.collection(contentFile, set, this);
             return;
          }
          parser.next();
@@ -359,7 +357,7 @@ class ServiceUpdate extends IntentService
    }
 
    private static
-   void compressImage(String thumbnailDir, String imgLink, String imgName)
+   void compressImage(String thumbnailDir, String imgLink, String imgName, Context context)
    {
       BitmapFactory.Options o = new BitmapFactory.Options();
       o.inJustDecodeBounds = true;
@@ -378,7 +376,7 @@ class ServiceUpdate extends IntentService
 
       float widthTmp = o.outWidth;
 
-      float inSample = widthTmp > SCREEN_WIDTH ? Math.round(widthTmp / SCREEN_WIDTH) : 1;
+      float inSample = widthTmp > s_screenWidth ? Math.round(widthTmp / s_screenWidth) : 1;
 
       try
       {
@@ -397,7 +395,8 @@ class ServiceUpdate extends IntentService
 
       try
       {
-         FileOutputStream out = new FileOutputStream(Util.getStorage() + thumbnailDir + imgName);
+         FileOutputStream out = new FileOutputStream(
+               Util.getStorage(context) + thumbnailDir + imgName);
          bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
       }
       catch(FileNotFoundException e)
@@ -406,18 +405,19 @@ class ServiceUpdate extends IntentService
       }
    }
 
-   static
-   boolean isNonExisting(String path)
+   boolean isNonExisting(String path, Context context)
    {
-      String path1 = Util.getStorage() + path;
+      String path1 = Util.getStorage(context) + path;
       if(Util.isUsingSd() || path1.contains(Constants.THUMBNAIL_DIR))
       {
-         return !new File(path1).exists();
+         File file = new File(path1);
+         return !file.exists();
       }
       else
       {
          String internalPath = Util.getInternalPath(path1);
-         return !Util.getContext().getFileStreamPath(internalPath).exists();
+         File file = getFileStreamPath(internalPath);
+         return !file.exists();
       }
    }
 }

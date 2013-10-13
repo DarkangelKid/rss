@@ -4,17 +4,25 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
+import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
 class FragmentManageFilters extends ListFragment
 {
+   private final BaseAdapter m_navigationAdapter;
+
+   FragmentManageFilters(BaseAdapter navigationAdapter)
+   {
+      m_navigationAdapter = navigationAdapter;
+   }
+
    @Override
    public
    void onCreate(Bundle savedInstanceState)
@@ -29,25 +37,30 @@ class FragmentManageFilters extends ListFragment
    {
       super.onActivityCreated(savedInstanceState);
 
-      ListAdapter listAdapter = new AdapterManageFilters();
+      Context context = getActivity();
+      ListAdapter listAdapter = new AdapterManageFilters(context);
       setListAdapter(listAdapter);
 
+      ((AdapterManageFilters) listAdapter).setTitles(Read.file(Constants.FILTER_LIST, context));
+
       ListView listview = getListView();
-
-      AdapterManageFilters.setTitles(Read.file(Constants.FILTER_LIST));
-
-      listview.setOnItemLongClickListener(new OnFilterLongClick(this, listAdapter));
+      listview.setOnItemLongClickListener(new OnFilterLongClick(this));
    }
 
    @Override
    public
    boolean onOptionsItemSelected(MenuItem item)
    {
-      if(NavDrawer.s_drawerToggle.onOptionsItemSelected(item))
+      FragmentActivity activity = getActivity();
+      if(activity.onOptionsItemSelected(item))
       {
          return true;
       }
-      if(Util.getString(R.string.add_feed).equals(item.getTitle()))
+
+      CharSequence itemTitle = item.getTitle();
+      String addFeed = activity.getString(R.string.add_feed);
+
+      if(addFeed.equals(itemTitle))
       {
          showAddFilterDialog();
          return true;
@@ -55,26 +68,28 @@ class FragmentManageFilters extends ListFragment
       return super.onOptionsItemSelected(item);
    }
 
-   private static
+   private
    void showAddFilterDialog()
    {
-      Context con = Util.getContext();
-      LayoutInflater inf = LayoutInflater.from(con);
-      View addFilterLayout = inf.inflate(R.layout.add_filter_dialog, null);
+      Context context = getActivity();
+      LayoutInflater inflater = LayoutInflater.from(context);
+      View addFilterLayout = inflater.inflate(R.layout.add_filter_dialog, null);
 
-      AlertDialog.Builder build = new AlertDialog.Builder(con);
-      build.setTitle("Add Filter")
-            .setView(addFilterLayout)
-            .setCancelable(true)
-            .setNegativeButton(con.getString(R.string.cancel_dialog), new OnDialogClickCancel());
-      AlertDialog addFilterDialog = build.create();
+      String cancelText = context.getString(R.string.cancel_dialog);
+      String addText = context.getString(R.string.add_dialog);
+      String addFilterText = context.getString(R.string.add_filter);
 
-      addFilterDialog.getWindow()
-            .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+      DialogInterface.OnClickListener onClickCancel = new OnDialogClickCancel();
+      DialogInterface.OnClickListener onClickAdd = new OnFilterDialogClickAdd(addFilterLayout,
+            m_navigationAdapter, context);
 
-      addFilterDialog.setButton(DialogInterface.BUTTON_POSITIVE, con.getString(R.string.add_dialog),
-            new OnFilterDialogClickAdd(addFilterLayout));
-      addFilterDialog.show();
+      AlertDialog.Builder build = new AlertDialog.Builder(context);
+      build.setTitle(addFilterText);
+      build.setView(addFilterLayout);
+      build.setCancelable(true);
+      build.setNegativeButton(cancelText, onClickCancel);
+      build.setPositiveButton(addText, onClickAdd);
+      build.show();
    }
 
    @Override

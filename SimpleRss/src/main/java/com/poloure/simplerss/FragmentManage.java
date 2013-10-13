@@ -1,8 +1,11 @@
 package com.poloure.simplerss;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -32,8 +35,9 @@ class FragmentManage extends Fragment
 
       setHasOptionsMenu(true);
 
-      ViewPager pager = new ViewPager(Util.getContext());
-      Constants.PAGER_TAB_STRIPS[1] = Util.newPagerTabStrip(Util.getContext());
+      Context context = getActivity();
+      ViewPager pager = new ViewPager(context);
+      Constants.PAGER_TAB_STRIPS[1] = Util.newPagerTabStrip(context);
 
       ViewPager.LayoutParams layoutParams = new ViewPager.LayoutParams();
       layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -41,7 +45,10 @@ class FragmentManage extends Fragment
       layoutParams.gravity = Gravity.TOP;
 
       FragmentManager fragmentManager = getFragmentManager();
-      pager.setAdapter(new PagerAdapterManage(m_navigationAdapter, fragmentManager));
+      PagerAdapter pagerAdapter = new PagerAdapterManage(m_navigationAdapter, fragmentManager,
+            context);
+
+      pager.setAdapter(pagerAdapter);
       pager.addView(Constants.PAGER_TAB_STRIPS[1], layoutParams);
       pager.setId(0x2000);
 
@@ -52,9 +59,12 @@ class FragmentManage extends Fragment
    public
    void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
    {
-      FeedsActivity.s_optionsMenu.clear();
+      menu.clear();
 
-      inflater.inflate(R.menu.manage_overflow, FeedsActivity.s_optionsMenu);
-      super.onCreateOptionsMenu(FeedsActivity.s_optionsMenu, inflater);
+      inflater.inflate(R.menu.manage_overflow, menu);
+      super.onCreateOptionsMenu(menu, inflater);
+
+      FragmentActivity activity = getActivity();
+      ((FeedsActivity) activity).setOptionsMenu(menu);
    }
 }

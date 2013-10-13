@@ -1,5 +1,6 @@
 package com.poloure.simplerss;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -20,16 +21,18 @@ class FragmentSettings extends Fragment
          return null;
       }
 
-      ViewPager pager = new ViewPager(Util.getContext());
-      Constants.PAGER_TAB_STRIPS[2] = Util.newPagerTabStrip(Util.getContext());
+      Context context = getActivity();
+
+      ViewPager pager = new ViewPager(context);
+      Constants.PAGER_TAB_STRIPS[2] = Util.newPagerTabStrip(context);
 
       ViewPager.LayoutParams layoutParams = new ViewPager.LayoutParams();
       layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
       layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
       layoutParams.gravity = Gravity.TOP;
 
-      FragmentManager fragmentManager = getChildFragmentManager();
-      pager.setAdapter(new PagerAdapterSettings(fragmentManager));
+      FragmentManager fragmentManager = getFragmentManager();
+      pager.setAdapter(new PagerAdapterSettings(fragmentManager, context));
       pager.addView(Constants.PAGER_TAB_STRIPS[2], layoutParams);
       pager.setId(0x3000);
 

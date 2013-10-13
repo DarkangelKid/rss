@@ -1,6 +1,8 @@
 package com.poloure.simplerss;
 
+import android.content.Context;
 import android.os.AsyncTask;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
 import android.view.View;
 import android.view.animation.Animation;
@@ -8,22 +10,30 @@ import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 
+import java.util.Collection;
 import java.util.Map;
+import java.util.NavigableMap;
 import java.util.TreeMap;
 
-class RefreshPage extends AsyncTask<Integer, FeedItem, Animation>
+class RefreshPage extends AsyncTask<Integer, Object, Animation>
 {
-   private final BaseAdapter  m_navigationAdapter;
-   private       int          m_pageNumber;
-   private       boolean      m_flash;
-   private       ListFragment m_listFragment;
-   private       AdapterTag   m_adapterCard;
-   private       ListView     m_listView;
+   private static final int MAX_DESCRIPTION_LENGTH = 360;
+   private static final int MIN_IMAGE_WIDTH        = 32;
+   private final BaseAdapter     m_navigationAdapter;
+   private       int             m_pageNumber;
+   private       boolean         m_flash;
+   private       ListFragment    m_listFragment;
+   private       AdapterTag      m_adapterCard;
+   private       ListView        m_listView;
+   private       FragmentManager m_fragmentManager;
    private int position = -3;
+   private final Context m_context;
 
-   RefreshPage(BaseAdapter navigationAdapter)
+   RefreshPage(BaseAdapter navigationAdapter, FragmentManager fragmentManager, Context context)
    {
       m_navigationAdapter = navigationAdapter;
+      m_fragmentManager = fragmentManager;
+      m_context = context;
    }
 
    @Override
@@ -31,9 +41,9 @@ class RefreshPage extends AsyncTask<Integer, FeedItem, Animation>
    Animation doInBackground(Integer... page)
    {
       m_pageNumber = page[0];
-      String tag = Read.file(Constants.TAG_LIST)[m_pageNumber];
+      String tag = Read.file(Constants.TAG_LIST, m_context)[m_pageNumber];
 
-      String[][] contents = Read.csv();
+      String[][] contents = Read.csv(m_context);
       if(0 == contents.length)
       {
          return null;
@@ -41,55 +51,24 @@ class RefreshPage extends AsyncTask<Integer, FeedItem, Animation>
       String[] feeds = contents[0];
       String[] tags = contents[2];
 
-      Animation animFadeIn = AnimationUtils.loadAnimation(Util.getContext(),
-            android.R.anim.fade_in);
+      Animation animFadeIn = AnimationUtils.loadAnimation(m_context, android.R.anim.fade_in);
 
-      while(null == m_listView)
-      {
-         /* Anti-pattern. */
-         try
-         {
-            Thread.sleep(5L);
-         }
-         catch(InterruptedException e)
-         {
-            e.printStackTrace();
-         }
+      int viewPagerId = FragmentFeeds.s_viewPager.getId();
+      String fragmentTag = String.format(Constants.FRAGMENT_TAG, viewPagerId, m_pageNumber);
 
-         if(null != FragmentFeeds.VIEW_PAGER && null == m_listFragment)
-         {
-            String fragmentTag = String.format(Constants.FRAGMENT_TAG,
-                  FragmentFeeds.VIEW_PAGER.getId(), m_pageNumber);
-            m_listFragment = (ListFragment) FeedsActivity.getActivity()
-                  .getSupportFragmentManager()
-                  .findFragmentByTag(fragmentTag);
-         }
-         if(null != m_listFragment && null == m_adapterCard)
-         {
-            m_adapterCard = (AdapterTag) m_listFragment.getListAdapter();
-         }
-         if(null != m_listFragment && null == m_listView)
-         {
-            try
-            {
-               m_listView = m_listFragment.getListView();
-            }
-            catch(IllegalStateException e)
-            {
-               /* Do not throw. */
-               m_listView = null;
-            }
-         }
-      }
+      m_listFragment = (ListFragment) m_fragmentManager.findFragmentByTag(fragmentTag);
+      m_adapterCard = (AdapterTag) m_listFragment.getListAdapter();
+      m_listView = m_listFragment.getListView();
 
       Map<Long, FeedItem> map = new TreeMap<Long, FeedItem>();
 
       int feedsLength = feeds.length;
       for(int j = 0; j < feedsLength; j++)
       {
-         if(tags[j].contains(tag) || tag.equals(Constants.ALL_TAG))
+         if(tags[j].contains(tag) || tag.equals(m_context.getString(R.string.all_tag)))
          {
-            String[][] content = csv(feeds[j], 't', 'd', 'l', 'i', 'w', 'h', 'p');
+            String[][] content = Read.csv(Util.getPath(feeds[j], Constants.CONTENT), m_context, 't',
+                  'd', 'l', 'i', 'w', 'h', 'p');
             if(0 == content.length)
             {
                return null;
@@ -105,47 +84,49 @@ class RefreshPage extends AsyncTask<Integer, FeedItem, Animation>
             int timesLength = times.length;
             for(int i = 0; i < timesLength; i++)
             {
-               /* TODO Do not allow duplicates in the adapter. */
-               /*if(-1 == Util.index(Util.getCardAdapter(m_pageNumber).m_links, links[i]))*/
+               /* Edit the data. */
+               if(null != images[i])
                {
-                  /* Edit the data. */
-                  if(null != images[i])
+                  if(MIN_IMAGE_WIDTH < Util.stoi(widths[i]))
                   {
-                     if(32 < Util.stoi(widths[i]))
-                     {
-                        images[i] = Util.getPath(feeds[j], Constants.THUMBNAILS) +
-                              images[i].substring(images[i].lastIndexOf(Constants.SEPAR) + 1);
-                     }
-                     else
-                     {
-                        images[i] = "";
-                        widths[i] = "";
-                        heights[i] = "";
-                     }
+                     int lastSlash = images[i].lastIndexOf(Constants.SEPAR) + 1;
+                     images[i] = Util.getPath(feeds[j], Constants.THUMBNAILS) +
+                           images[i].substring(lastSlash);
                   }
+                  else
+                  {
+                     images[i] = "";
+                     widths[i] = "";
+                     heights[i] = "";
+                  }
+               }
 
-                  if(null == descriptions[i] || 8 > descriptions[i].length())
-                  {
-                     descriptions[i] = "";
-                  }
-                  else if(360 <= descriptions[i].length())
-                  {
-                     descriptions[i] = descriptions[i].substring(0, 360);
-                  }
-                  if(null == titles[i])
-                  {
-                     titles[i] = "";
-                  }
+               if(null == descriptions[i] || 8 > descriptions[i].length())
+               {
+                  descriptions[i] = "";
+               }
+               else if(MAX_DESCRIPTION_LENGTH <= descriptions[i].length())
+               {
+                  descriptions[i] = descriptions[i].substring(0, MAX_DESCRIPTION_LENGTH);
+               }
+               if(null == titles[i])
+               {
+                  titles[i] = "";
+               }
 
-                  FeedItem data = new FeedItem();
-                  data.title = titles[i];
-                  data.url = links[i];
-                  data.description = descriptions[i];
-                  data.image = images[i];
-                  data.width = Util.stoi(widths[i]);
-                  data.height = Util.stoi(heights[i]);
+               FeedItem data = new FeedItem();
+               data.title = titles[i];
+               data.url = links[i];
+               data.description = descriptions[i];
+               data.image = images[i];
+               data.width = Util.stoi(widths[i]);
+               data.height = Util.stoi(heights[i]);
 
-                  map.put(Long.parseLong(times[i]) - i, data);
+               AdapterTag adapterTag = Util.getCardAdapter(m_pageNumber, m_listFragment);
+               if(-1 == Util.index(adapterTag.m_items, data))
+               {
+                  Long l = Long.parseLong(times[i]) - i;
+                  map.put(l, data);
                }
             }
          }
@@ -154,7 +135,11 @@ class RefreshPage extends AsyncTask<Integer, FeedItem, Animation>
       /* Do not count items as Read while we are updating the list. */
       m_adapterCard.m_touchedScreen = false;
 
-      FeedItem[] items = map.values().toArray(new FeedItem[map.size()]);
+      int mapSize = map.size();
+      NavigableMap<Long, FeedItem> navigableMap
+            = ((NavigableMap<Long, FeedItem>) map).descendingMap();
+      Collection<FeedItem> collection = navigableMap.values();
+      Object[] items = collection.toArray(new FeedItem[mapSize]);
 
       if(0 < items.length)
       {
@@ -162,13 +147,6 @@ class RefreshPage extends AsyncTask<Integer, FeedItem, Animation>
       }
 
       return animFadeIn;
-   }
-
-   /* This is for reading an rss file. */
-   private static
-   String[][] csv(String feed, char... type)
-   {
-      return Read.csv(Util.getPath(feed, Constants.CONTENT), type);
    }
 
    @Override
@@ -181,7 +159,7 @@ class RefreshPage extends AsyncTask<Integer, FeedItem, Animation>
       }
 
       /* Update the unread counts in the navigation drawer. */
-      Update.navigation(m_navigationAdapter);
+      Update.navigation(m_navigationAdapter, m_context);
 
       if(null == m_listView)
       {
@@ -201,7 +179,7 @@ class RefreshPage extends AsyncTask<Integer, FeedItem, Animation>
 
    @Override
    protected
-   void onProgressUpdate(FeedItem[] values)
+   void onProgressUpdate(Object[] values)
    {
       /* If these are the first items to be added to the list. */
       if(0 == m_listView.getCount())

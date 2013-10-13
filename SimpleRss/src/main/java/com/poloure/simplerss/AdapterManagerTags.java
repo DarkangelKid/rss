@@ -1,6 +1,7 @@
 package com.poloure.simplerss;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Point;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
@@ -21,14 +22,23 @@ import java.util.Arrays;
 
 class AdapterManagerTags extends BaseAdapter
 {
-   private static final int      SCREEN_HEIGHT = (int) Util.getContext()
-         .getResources()
-         .getDisplayMetrics().heightPixels;
-   static               String[] s_tagArray    = Util.EMPTY_STRING_ARRAY;
-   static               String[] s_infoArray   = Util.EMPTY_STRING_ARRAY;
-   private final        int[]    m_position    = new int[2];
-   private              String   old_title     = "";
-   private int old_view;
+   private final int m_screenHeight;
+   static        String[] s_tagArray  = Util.EMPTY_STRING_ARRAY;
+   static        String[] s_infoArray = Util.EMPTY_STRING_ARRAY;
+   private final int[]    m_position  = new int[2];
+   private       String   old_title   = "";
+   private       int            old_view;
+   private final LayoutInflater m_layoutInflater;
+   private final Context        m_context;
+
+   AdapterManagerTags(Context context)
+   {
+      m_context = context;
+      m_layoutInflater = (LayoutInflater) m_context.getSystemService(
+            Context.LAYOUT_INFLATER_SERVICE);
+      Resources resources = m_context.getResources();
+      m_screenHeight = resources.getDisplayMetrics().heightPixels;
+   }
 
    @Override
    public
@@ -59,9 +69,7 @@ class AdapterManagerTags extends BaseAdapter
       ViewHolder holder;
       if(null == view)
       {
-         String inflate = Context.LAYOUT_INFLATER_SERVICE;
-         view = ((LayoutInflater) Util.getContext().getSystemService(inflate)).inflate(
-               R.layout.manage_group_item, parent, false);
+         view = m_layoutInflater.inflate(R.layout.manage_group_item, parent, false);
          holder = new ViewHolder();
          holder.tag_view = (TextView) view.findViewById(R.id.tag_item);
          holder.info_view = (TextView) view.findViewById(R.id.tag_feeds);
@@ -189,11 +197,11 @@ class AdapterManagerTags extends BaseAdapter
 
             v.getLocationOnScreen(m_position);
 
-            if(m_position[1] > 4.0 / 5.0 * SCREEN_HEIGHT)
+            if(m_position[1] > 4.0 / 5.0 * m_screenHeight)
             {
                listview.smoothScrollBy(v.getHeight(), 400);
             }
-            else if(m_position[1] < 1.0 / 5.0 * SCREEN_HEIGHT)
+            else if(m_position[1] < 1.0 / 5.0 * m_screenHeight)
             {
                listview.smoothScrollBy((int) (-1.0 * v.getHeight()), 400);
             }
@@ -206,7 +214,7 @@ class AdapterManagerTags extends BaseAdapter
             v.setAnimation(fadeIn2);
             v.setVisibility(View.VISIBLE);
 
-            Write.collection(Constants.TAG_LIST, Arrays.asList(s_tagArray));
+            Write.collection(Constants.TAG_LIST, Arrays.asList(s_tagArray), m_context);
             // TODO Util.updateTags();
          }
          return true;

@@ -1,7 +1,9 @@
 package com.poloure.simplerss;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.os.AsyncTask;
+import android.support.v4.app.FragmentManager;
 import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -9,59 +11,62 @@ import android.widget.ListView;
 class Update
 {
    public static
-   void navigation(BaseAdapter navigationAdapter)
+   void navigation(BaseAdapter navigationAdapter, Context context)
    {
+      AsyncRefreshNavigationAdapter task = new AsyncRefreshNavigationAdapter(navigationAdapter,
+            context);
       if(Constants.HONEYCOMB)
       {
-         new AsyncRefreshNavigationAdapter(navigationAdapter).executeOnExecutor(
-               AsyncTask.THREAD_POOL_EXECUTOR, Util.EMPTY_INT_ARRAY);
+         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, Util.EMPTY_INT_ARRAY);
       }
       else
       {
-         new AsyncRefreshNavigationAdapter(navigationAdapter).execute(Util.EMPTY_INT_ARRAY);
+         task.execute(Util.EMPTY_INT_ARRAY);
       }
    }
 
    public static
-   void AsyncCompatManageTagsRefresh(ListView listView, ListAdapter listAdapter)
+   void AsyncCompatManageTagsRefresh(ListView listView, ListAdapter listAdapter, Context context)
    {
+      AsyncManageTagsRefresh task = new AsyncManageTagsRefresh(listView, listAdapter, context);
       if(Constants.HONEYCOMB)
       {
-         new AsyncManageTagsRefresh(listView, listAdapter).executeOnExecutor(
-               AsyncTask.THREAD_POOL_EXECUTOR);
+         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
       }
       else
       {
-         new AsyncManageTagsRefresh(listView, listAdapter).execute();
+         task.execute();
       }
    }
 
    public static
-   void page(BaseAdapter navigationAdapter, int pageNumber)
+   void page(BaseAdapter navigationAdapter, int pageNumber, FragmentManager fragmentManager,
+         Context context)
    {
+      RefreshPage task = new RefreshPage(navigationAdapter, fragmentManager, context);
       if(Constants.HONEYCOMB)
       {
-         new RefreshPage(navigationAdapter).execute(pageNumber);
+         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, pageNumber);
       }
       else
       {
-         new RefreshPage(navigationAdapter).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
-               pageNumber);
+         task.execute(pageNumber);
       }
    }
 
    public static
    void executeFeedCheck(AlertDialog dlg, String ntag, String fname, String mode, String ctitle,
-         String url, BaseAdapter navigationAdapter)
+         String url, BaseAdapter navigationAdapter, Context context)
    {
+      AsyncCheckFeed task = new AsyncCheckFeed(dlg, ntag, fname, mode, ctitle, navigationAdapter,
+            context);
       if(Constants.HONEYCOMB)
       {
-         new AsyncCheckFeed(dlg, ntag, fname, mode, ctitle, navigationAdapter).execute(url);
+         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url);
       }
       else
       {
-         new AsyncCheckFeed(dlg, ntag, fname, mode, ctitle, navigationAdapter).executeOnExecutor(
-               AsyncTask.THREAD_POOL_EXECUTOR, url);
+         task.execute(url);
       }
    }
 }

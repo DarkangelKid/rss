@@ -14,26 +14,31 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.lang.reflect.Array;
+import java.util.HashSet;
 import java.util.Set;
 
 class AdapterTag extends BaseAdapter
 {
-   static final         Set<String> s_readLinks             = Read.set(Constants.READ_ITEMS);
-   private static final int         SCREEN_WIDTH            = Util.getScreenWidth();
-   private static final int         VIEW_TYPE_COUNT         = 4;
-   private static final float       READ_ITEM_IMAGE_OPACITY = 0.5f;
+   static Set<String> s_readLinks = new HashSet<String>();
+   private static int s_screenWidth;
+   private static final int   VIEW_TYPE_COUNT         = 4;
+   private static final float READ_ITEM_IMAGE_OPACITY = 0.5f;
    private final LayoutInflater m_inflater;
    boolean    m_touchedScreen = true;
    FeedItem[] m_items         = new FeedItem[0];
+   private final Context m_context;
 
    AdapterTag(Context context)
    {
-      m_inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+      m_context = context;
+      s_screenWidth = Util.getScreenWidth(m_context);
+      s_readLinks = Read.set(Constants.READ_ITEMS, m_context);
+      m_inflater = (LayoutInflater) m_context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
    }
 
-   void prependArray(FeedItem... items)
+   void prependArray(Object... items)
    {
-      m_items = concat(items, m_items);
+      m_items = concat((FeedItem[]) items, m_items);
    }
 
    private static
@@ -102,7 +107,7 @@ class AdapterTag extends BaseAdapter
             holder.m_url = (TextView) view.findViewById(R.id.url);
             holder.m_des = (TextView) view.findViewById(R.id.description);
             holder.m_imageView = (ImageView) view.findViewById(R.id.image);
-            view.setOnLongClickListener(new OnCardLongClick());
+            view.setOnLongClickListener(new OnCardLongClick(m_context));
             view.setTag(holder);
          }
          else
@@ -128,7 +133,7 @@ class AdapterTag extends BaseAdapter
             holder.title = (TextView) view.findViewById(R.id.title);
             holder.url = (TextView) view.findViewById(R.id.url);
             holder.image = (ImageView) view.findViewById(R.id.image);
-            view.setOnLongClickListener(new OnCardLongClick());
+            view.setOnLongClickListener(new OnCardLongClick(m_context));
             view.setTag(holder);
          }
          else
@@ -153,7 +158,7 @@ class AdapterTag extends BaseAdapter
             holder.title = (TextView) view.findViewById(R.id.title);
             holder.url = (TextView) view.findViewById(R.id.url);
             holder.des = (TextView) view.findViewById(R.id.description);
-            view.setOnLongClickListener(new OnCardLongClick());
+            view.setOnLongClickListener(new OnCardLongClick(m_context));
             view.setTag(holder);
          }
          else
@@ -176,7 +181,7 @@ class AdapterTag extends BaseAdapter
             holder = new BlankHolder();
             holder.title = (TextView) view.findViewById(R.id.title);
             holder.url = (TextView) view.findViewById(R.id.url);
-            view.setOnLongClickListener(new OnCardLongClick());
+            view.setOnLongClickListener(new OnCardLongClick(m_context));
             view.setTag(holder);
          }
          else
@@ -200,41 +205,26 @@ class AdapterTag extends BaseAdapter
       return view;
    }
 
-   private static
-   void setCardAlpha(TextView title, TextView url, ImageView image, TextView des, String link)
+   private
+   void displayImage(ImageView v, int p, String imageName)
    {
-      Resources res = Util.getContext().getResources();
+      v.setImageDrawable(new ColorDrawable(Color.WHITE));
+      LayoutParams lp = v.getLayoutParams();
 
-      if(s_readLinks.contains(link))
+      lp.height = (int) Math.round((double) s_screenWidth / m_items[p].width * m_items[p].height);
+      v.setLayoutParams(lp);
+      v.setTag(p);
+
+      AsyncLoadImage task = new AsyncLoadImage();
+      if(Constants.HONEYCOMB)
       {
-         title.setTextColor(res.getColor(R.color.title_grey));
-         url.setTextColor(res.getColor(R.color.link_grey));
 
-         if(null != des)
-         {
-            des.setTextColor(res.getColor(R.color.des_grey));
-         }
-
-         if(null != image)
-         {
-            image.setAlpha(READ_ITEM_IMAGE_OPACITY);
-         }
+         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, v, v.getTag(), imageName,
+               m_context);
       }
       else
       {
-         Write.log("Not read.");
-         title.setTextColor(res.getColor(R.color.title_black));
-         url.setTextColor(res.getColor(R.color.link_black));
-
-         if(null != des)
-         {
-            des.setTextColor(res.getColor(R.color.des_black));
-         }
-
-         if(null != image)
-         {
-            image.setAlpha(1.0f);
-         }
+         task.execute(v, v.getTag(), imageName, m_context);
       }
    }
 
@@ -270,24 +260,39 @@ class AdapterTag extends BaseAdapter
    }
 
    private
-   void displayImage(ImageView v, int p, String imageName)
+   void setCardAlpha(TextView title, TextView url, ImageView image, TextView des, String link)
    {
-      v.setImageDrawable(new ColorDrawable(Color.WHITE));
-      LayoutParams lp = v.getLayoutParams();
+      Resources res = m_context.getResources();
 
-      lp.height = (int) Math.round((double) SCREEN_WIDTH / m_items[p].width * m_items[p].height);
-      v.setLayoutParams(lp);
-      v.setTag(p);
-
-      if(Constants.HONEYCOMB)
+      if(s_readLinks.contains(link))
       {
+         title.setTextColor(res.getColor(R.color.title_grey));
+         url.setTextColor(res.getColor(R.color.link_grey));
 
-         new AsyncLoadImage().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, v, v.getTag(),
-               imageName);
+         if(null != des)
+         {
+            des.setTextColor(res.getColor(R.color.des_grey));
+         }
+
+         if(null != image)
+         {
+            image.setAlpha(READ_ITEM_IMAGE_OPACITY);
+         }
       }
       else
       {
-         new AsyncLoadImage().execute(v, v.getTag(), imageName);
+         title.setTextColor(res.getColor(R.color.title_black));
+         url.setTextColor(res.getColor(R.color.link_black));
+
+         if(null != des)
+         {
+            des.setTextColor(res.getColor(R.color.des_black));
+         }
+
+         if(null != image)
+         {
+            image.setAlpha(1.0f);
+         }
       }
    }
 

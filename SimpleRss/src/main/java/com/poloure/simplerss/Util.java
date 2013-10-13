@@ -13,6 +13,7 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.PagerTabStrip;
 import android.support.v4.view.ViewPager;
 import android.view.Gravity;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.BaseAdapter;
@@ -29,7 +30,6 @@ class Util
    static final   String[]   EMPTY_STRING_ARRAY        = new String[0];
    static final   String[][] EMPTY_STRING_STRING_ARRAY = new String[0][0];
    private static String     s_storage                 = "";
-   private static Context s_context;
 
    static
    String[] arrayRemove(String[] first, int index)
@@ -49,21 +49,22 @@ class Util
    }
 
    static
-   void updateTags(BaseAdapter navigationAdapter)
+   void updateTags(BaseAdapter navigationAdapter, Context context)
    {
       /* If no tags exists, add the ALL_TAG. */
-      if(0 == Read.count(Constants.TAG_LIST))
+      if(0 == Read.count(Constants.TAG_LIST, context))
       {
-         Write.single(Constants.TAG_LIST, Constants.ALL_TAG + Constants.NL);
+         Write.single(Constants.TAG_LIST, context.getString(R.string.all_tag) + Constants.NL,
+               context);
       }
 
-      if(null != FragmentFeeds.VIEW_PAGER)
+      if(null != FragmentFeeds.s_viewPager)
       {
-         PagerAdapter pagerAdapter = FragmentFeeds.VIEW_PAGER.getAdapter();
+         PagerAdapter pagerAdapter = FragmentFeeds.s_viewPager.getAdapter();
          pagerAdapter.notifyDataSetChanged();
       }
 
-      Update.navigation(navigationAdapter);
+      Update.navigation(navigationAdapter, context);
    }
 
    static
@@ -72,14 +73,14 @@ class Util
       FeedItem[] items = p_items;
       int page1 = page;
 
-      if(null == FragmentFeeds.VIEW_PAGER)
+      if(null == FragmentFeeds.s_viewPager)
       {
          return -1;
       }
 
       if(update)
       {
-         page1 = FragmentFeeds.VIEW_PAGER.getCurrentItem();
+         page1 = FragmentFeeds.s_viewPager.getCurrentItem();
       }
 
       if(null == items)
@@ -118,25 +119,25 @@ class Util
       return i;
    }
 
+   /* This is the second one. */
+   static
+   ListView getFeedListView(int page, Fragment fragment)
+   {
+      FragmentManager fragmentManager = fragment.getFragmentManager();
+
+      ViewPager viewpager = FragmentFeeds.s_viewPager;
+
+      int viewpagerId = viewpager.getId();
+      String tag = String.format(Constants.FRAGMENT_TAG, viewpagerId, page);
+      return ((ListFragment) fragmentManager.findFragmentByTag(tag)).getListView();
+   }
+
    /* For these two functions, check for null. Should only really be
     * null if called from the ServiceUpdate. */
    static
    AdapterTag getCardAdapter(int page, Fragment fragment)
    {
       return (AdapterTag) getFeedListView(page, fragment).getAdapter();
-   }
-
-   /* This is the second one. */
-   private static
-   ListView getFeedListView(int page, Fragment fragment)
-   {
-      FragmentManager fragmentManager = fragment.getFragmentManager();
-
-      ViewPager viewpager = FragmentFeeds.VIEW_PAGER;
-
-      int viewpagerId = viewpager.getId();
-      String tag = String.format(Constants.FRAGMENT_TAG, viewpagerId, page);
-      return ((ListFragment) fragmentManager.findFragmentByTag(tag)).getListView();
    }
 
    static
@@ -159,35 +160,22 @@ class Util
       return true;
    }
 
-   /* This should never return null and so do not check. */
-   static
-   Context getContext()
-   {
-      return s_context;
-   }
-
-   static
-   void setContext(Context context)
-   {
-      s_context = context;
-   }
-
    /* Safe to call at anytime. */
    static
-   int getScreenWidth()
+   int getScreenWidth(Context context)
    {
-      return s_context.getResources().getDisplayMetrics().widthPixels;
+      return context.getResources().getDisplayMetrics().widthPixels;
    }
 
    static
-   int[] getUnreadCounts()
+   int[] getUnreadCounts(Context context)
    {
       Collection<String> readLinks = new HashSet<String>(AdapterTag.s_readLinks.size());
       readLinks.addAll(AdapterTag.s_readLinks);
 
-      String[] currentTags = Read.file(Constants.TAG_LIST);
+      String[] currentTags = Read.file(Constants.TAG_LIST, context);
 
-      String[][] content = Read.csv();
+      String[][] content = Read.csv(context);
       String[] indexNames = content[0];
       String[] indexUrls = content[1];
       String[] indexTags = content[2];
@@ -205,7 +193,7 @@ class Util
          {
             if(indexTags[j].equals(currentTags[i]))
             {
-               totalCounts[i] += Read.count(getPath(indexNames[j], Constants.CONTENT));
+               totalCounts[i] += Read.count(getPath(indexNames[j], Constants.CONTENT), context);
                for(String readUrl : readLinks)
                {
                   int pos = readUrl.indexOf('/') + 1;
@@ -240,15 +228,20 @@ class Util
    }
 
    static
-   Intent getServiceIntent(int page)
+   Intent getServiceIntent(int page, String notificationName, Context context)
    {
+      if(null == notificationName)
+      {
+         Resources resources = context.getResources();
+         notificationName = resources.getStringArray(R.array.settings_names)[3];
+      }
       /* Load notification boolean. */
-      String path = Constants.SETTINGS_DIR + AdapterSettingsFunctions.FILE_NAMES[3] +
+      String path = Constants.SETTINGS_DIR + notificationName +
             Constants.TXT;
-      String[] check = Read.file(path);
+      String[] check = Read.file(path, context);
 
       boolean notificationsEnabled = 0 != check.length && strbol(check[0]);
-      Intent intent = new Intent(s_context, ServiceUpdate.class);
+      Intent intent = new Intent(context, ServiceUpdate.class);
       intent.putExtra("GROUP_NUMBER", page);
       intent.putExtra("NOTIFICATIONS", notificationsEnabled);
       return intent;
@@ -262,15 +255,10 @@ class Util
 
    /* Changes the ManageFeedsRefresh menu item to an animation if m_mode = true. */
    static
-   void setRefreshingIcon(boolean mode)
+   void setRefreshingIcon(boolean mode, Menu menu)
    {
-      if(null == FeedsActivity.s_optionsMenu)
-      {
-         return;
-      }
-
       /* Find the menu item by ID called ManageFeedsRefresh. */
-      MenuItem item = FeedsActivity.s_optionsMenu.findItem(R.id.refresh);
+      MenuItem item = menu.findItem(R.id.refresh);
       if(null == item)
       {
          return;
@@ -288,17 +276,25 @@ class Util
    }
 
    static
-   void remove(String path)
+   void remove(String path, Context context)
    {
-      String path1 = getStorage() + path;
-      s_context.deleteFile(getInternalPath(path1));
+      String path1 = getStorage(context) + path;
+      context.deleteFile(getInternalPath(path1));
       new File(path1).delete();
+   }
+
+   static
+   String getInternalPath(String externalPath)
+   {
+      String substring = externalPath.substring(
+            externalPath.indexOf(Constants.SEPAR + "files" + Constants.SEPAR) + 7);
+      return substring.replaceAll(Constants.SEPAR, "-");
    }
 
    /* This function will return null if it fails. Check for null each time.
     * It should be pretty safe and efficient to call ALL_TAG the time. */
    static
-   String getStorage()
+   String getStorage(Context context)
    {
       if(0 != s_storage.length())
       {
@@ -320,11 +316,11 @@ class Util
 
       if(Constants.FROYO)
       {
-         s_storage = s_context.getExternalFilesDir(null).getAbsolutePath() + sep;
+         s_storage = context.getExternalFilesDir(null).getAbsolutePath() + sep;
       }
       else
       {
-         String name = s_context.getPackageName();
+         String name = context.getPackageName();
          File ext = Environment.getExternalStorageDirectory();
          s_storage = ext.getAbsolutePath() + sep + "Android" + sep + "data" + sep + name + sep +
                "files" + sep;
@@ -339,14 +335,6 @@ class Util
       return s_storage;
    }   /* Replaces ALL_TAG '/'s with '-' to emulate a folder directory layout in
     * data/data. */
-
-   static
-   String getInternalPath(String externalPath)
-   {
-      String substring = externalPath.substring(
-            externalPath.indexOf(Constants.SEPAR + "files" + Constants.SEPAR) + 7);
-      return substring.replaceAll(Constants.SEPAR, "-");
-   }
 
    static
    boolean rmdir(File directory)
@@ -366,9 +354,9 @@ class Util
    }
 
    static
-   void mkdir(String path)
+   void mkdir(String path, Context context)
    {
-      String path1 = getStorage() + path;
+      String path1 = getStorage(context) + path;
       File folder = new File(path1);
       if(!folder.exists())
       {
@@ -377,10 +365,10 @@ class Util
    }
 
    static
-   boolean move(String p_originalFile, String p_resultingFile)
+   boolean move(String p_originalFile, String p_resultingFile, Context context)
    {
-      String originalFile = getStorage() + p_originalFile;
-      String resultingFile = getStorage() + p_resultingFile;
+      String originalFile = getStorage(context) + p_originalFile;
+      String resultingFile = getStorage(context) + p_resultingFile;
       return new File(originalFile).renameTo(new File(resultingFile));
    }
 
@@ -405,40 +393,6 @@ class Util
       return ((TextView) view.findViewById(id)).getText().toString().trim();
    }
 
-   /* Returns a zero-length array if the resource is not found and logs the
-    * event in log. */
-   static
-   String[] getArray(int resource)
-   {
-      String[] array = EMPTY_STRING_ARRAY;
-      try
-      {
-         array = s_context.getResources().getStringArray(resource);
-      }
-      catch(Resources.NotFoundException e)
-      {
-         e.printStackTrace();
-         Write.log(resource + " array does not exist.");
-      }
-      return array;
-   }
-
-   static
-   String getString(int resource)
-   {
-      String str = "";
-      try
-      {
-         str = s_context.getString(resource);
-      }
-      catch(Resources.NotFoundException e)
-      {
-         e.printStackTrace();
-         Write.log(resource + " string does not exist.");
-      }
-      return str;
-   }
-
    static
    PagerTabStrip newPagerTabStrip(Context context)
    {
@@ -450,25 +404,28 @@ class Util
       pagerTabStrip.setPadding(0, fourDp, 0, fourDp);
       pagerTabStrip.setTextColor(Color.WHITE);
       pagerTabStrip.setBackgroundColor(Color.parseColor("#404040"));
-      setStripColor(pagerTabStrip);
+      setStripColor(pagerTabStrip, context);
 
       return pagerTabStrip;
    }
 
    static
-   void setStripColor(PagerTabStrip strip)
+   void setStripColor(PagerTabStrip strip, Context context)
    {
       String colorSettingsPath = Constants.SETTINGS_DIR + Constants.STRIP_COLOR;
 
       /* Read the colour from the settings/colour file, if blank, use blue. */
-      String[] check = Read.file(colorSettingsPath);
+      String[] check = Read.file(colorSettingsPath, context);
       String color = 0 == check.length ? "blue" : check[0];
 
       /* Find the colour stored in adapter_settings_interface that we want. */
-      int pos = index(FeedsActivity.HOLO_COLORS, color);
+      Resources resources = context.getResources();
+      String[] colors = resources.getStringArray(R.array.settings_colours);
+
+      int pos = index(colors, color);
       if(-1 != pos)
       {
-         strip.setTabIndicatorColor(FeedsActivity.COLOR_INTS[pos]);
+         strip.setTabIndicatorColor(Constants.COLOR_INTS[pos]);
       }
    }
 

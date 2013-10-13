@@ -15,35 +15,36 @@ import java.util.Arrays;
 class FeedDialog
 {
    static
-   void showAddDialog(BaseAdapter navigationAdapter)
+   void showAddDialog(BaseAdapter navigationAdapter, Context context)
    {
-      Context con = Util.getContext();
-      LayoutInflater inf = LayoutInflater.from(con);
+      LayoutInflater inf = LayoutInflater.from(context);
       View addFeedLayout = inf.inflate(R.layout.add_rss_dialog, null);
 
       /* Remove all from the spinner. */
-      String[] currentTags = Read.file(Constants.TAG_LIST);
+      String[] currentTags = Read.file(Constants.TAG_LIST, context);
       String[] spinnerTags = Arrays.copyOfRange(currentTags, 1, currentTags.length);
 
       AdapterView<SpinnerAdapter> spinnerTag
             = (AdapterView<SpinnerAdapter>) addFeedLayout.findViewById(R.id.tag_spinner);
 
-      SpinnerAdapter adapter = new ArrayAdapter<String>(con, R.layout.group_spinner_text,
+      String cancelText = context.getString(R.string.cancel_dialog);
+      String addText = context.getString(R.string.add_dialog);
+
+      DialogInterface.OnClickListener onCancel = new OnDialogClickCancel();
+      DialogInterface.OnClickListener onAdd = new OnDialogClickAdd(addFeedLayout, spinnerTag,
+            navigationAdapter, context);
+
+      SpinnerAdapter adapter = new ArrayAdapter<String>(context, R.layout.group_spinner_text,
             spinnerTags);
       //adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
       spinnerTag.setAdapter(adapter);
 
-      AlertDialog.Builder build = new AlertDialog.Builder(con);
-      build.setTitle(R.string.add_dialog_title).setView(addFeedLayout).setCancelable(true);
-
-      AlertDialog addFeedDialog = build.create();
-
-      addFeedDialog.setButton(DialogInterface.BUTTON_NEGATIVE,
-            con.getString(R.string.cancel_dialog), new OnDialogClickCancel());
-
-      addFeedDialog.setButton(DialogInterface.BUTTON_POSITIVE, con.getString(R.string.add_dialog),
-            new OnDialogClickAdd(addFeedLayout, spinnerTag, navigationAdapter));
-
-      addFeedDialog.show();
+      AlertDialog.Builder build = new AlertDialog.Builder(context);
+      build.setTitle(R.string.add_dialog_title);
+      build.setView(addFeedLayout);
+      build.setCancelable(true);
+      build.setNegativeButton(cancelText, onCancel);
+      build.setPositiveButton(addText, onAdd);
+      build.show();
    }
 }

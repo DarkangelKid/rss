@@ -5,21 +5,19 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SpinnerAdapter;
 
-import java.io.File;
 import java.util.Arrays;
 
 class FragmentManageFeeds extends ListFragment
@@ -46,41 +44,47 @@ class FragmentManageFeeds extends ListFragment
    void onListItemClick(ListView l, View v, int position, long id)
    {
       super.onListItemClick(l, v, position, id);
-      Context con = Util.getContext();
-      LayoutInflater inf = LayoutInflater.from(con);
-      View editRssLayout = inf.inflate(R.layout.add_rss_dialog, null);
-      String[][] content = Read.csv();
+      Context context = getActivity();
+
+      String[][] content = Read.csv(context);
       String title = content[0][position];
       String url = content[1][position];
       String tag = content[2][position];
 
+      LayoutInflater inflater = LayoutInflater.from(context);
+      View editRssLayout = inflater.inflate(R.layout.add_rss_dialog, null);
+
       AdapterView<SpinnerAdapter> spinnerTag
             = (AdapterView<SpinnerAdapter>) editRssLayout.findViewById(R.id.tag_spinner);
 
-      String[] currentTags = Read.file(Constants.TAG_LIST);
+      String[] currentTags = Read.file(Constants.TAG_LIST, context);
       String[] spinnerTags = Arrays.copyOfRange(currentTags, 1, currentTags.length);
 
-      SpinnerAdapter adapter = new ArrayAdapter<String>(con, R.layout.group_spinner_text,
+      SpinnerAdapter adapter = new ArrayAdapter<String>(context, R.layout.group_spinner_text,
             spinnerTags);
       //adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
       spinnerTag.setAdapter(adapter);
       Util.setText(url, editRssLayout, R.id.URL_edit);
       Util.setText(title, editRssLayout, R.id.name_edit);
 
-      spinnerTag.setSelection(Util.index(spinnerTags, tag));
+      int tagIndex = Util.index(spinnerTags, tag);
+      spinnerTag.setSelection(tagIndex);
 
-      AlertDialog.Builder build = new AlertDialog.Builder(con);
-      build.setTitle(con.getString(R.string.edit_dialog_title))
-            .setView(editRssLayout)
-            .setCancelable(true)
-            .setNegativeButton(con.getString(R.string.cancel_dialog), new OnDialogClickCancel());
+      String editTitle = context.getString(R.string.edit_dialog_title);
+      String cancelText = context.getString(R.string.cancel_dialog);
+      String acceptText = context.getString(R.string.accept_dialog);
 
-      AlertDialog editFeedDialog = build.create();
-      editFeedDialog.setButton(DialogInterface.BUTTON_POSITIVE,
-            con.getString(R.string.accept_dialog),
-            new OnDialogClickEdit(editRssLayout, spinnerTag, title, m_navigationAdapter));
+      DialogInterface.OnClickListener onDialogClickCancel = new OnDialogClickCancel();
+      DialogInterface.OnClickListener onDialogClickEdit = new OnDialogClickEdit(editRssLayout,
+            spinnerTag, title, m_navigationAdapter, context);
 
-      editFeedDialog.show();
+      AlertDialog.Builder build = new AlertDialog.Builder(context);
+      build.setTitle(editTitle);
+      build.setView(editRssLayout);
+      build.setCancelable(true);
+      build.setNegativeButton(cancelText, onDialogClickCancel);
+      build.setPositiveButton(acceptText, onDialogClickEdit);
+      build.show();
    }
 
    @Override
@@ -88,22 +92,30 @@ class FragmentManageFeeds extends ListFragment
    void onActivityCreated(Bundle savedInstanceState)
    {
       super.onActivityCreated(savedInstanceState);
-      setListAdapter(new AdapterManageFeeds());
-      getListView().setOnItemLongClickListener(new FeedItemLongClick(getListAdapter()));
-      manageFeeds(getListView(), getListAdapter());
+
+      Context context = getActivity();
+      ListView listView = getListView();
+      ListAdapter listAdapter = new AdapterManageFeeds(context);
+      AdapterView.OnItemLongClickListener onItemLongClick = new OnLongClickManageFeedItem(this,
+            (BaseAdapter) listAdapter, m_navigationAdapter);
+
+      setListAdapter(listAdapter);
+      listView.setOnItemLongClickListener(onItemLongClick);
+      manageFeeds(listView, listAdapter);
    }
 
-   private static
+   private
    void manageFeeds(ListView listView, ListAdapter listAdapter)
    {
+      Context context = getActivity();
+      AsyncManageFeedsRefresh task = new AsyncManageFeedsRefresh(listView, (BaseAdapter) listAdapter, context);
       if(Constants.HONEYCOMB)
       {
-         new AsyncManageFeedsRefresh(listView, listAdapter).executeOnExecutor(
-               AsyncTask.THREAD_POOL_EXECUTOR);
+         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
       }
       else
       {
-         new AsyncManageFeedsRefresh(listView, listAdapter).execute();
+         task.execute();
       }
    }
 
@@ -112,97 +124,21 @@ class FragmentManageFeeds extends ListFragment
    public
    boolean onOptionsItemSelected(MenuItem item)
    {
-      if(NavDrawer.s_drawerToggle.onOptionsItemSelected(item))
+      FragmentActivity activity = getActivity();
+      if(activity.onOptionsItemSelected(item))
       {
          return true;
       }
-      if(Util.getString(R.string.add_feed).equals(item.getTitle()))
+
+      String addFeed = activity.getString(R.string.add_feed);
+      CharSequence menuTitle = item.getTitle();
+
+      if(addFeed.equals(menuTitle))
       {
-         FeedDialog.showAddDialog(m_navigationAdapter);
+         FeedDialog.showAddDialog(m_navigationAdapter, activity);
          return true;
       }
       return super.onOptionsItemSelected(item);
    }
 
-   private
-   class FeedItemLongClick implements OnItemLongClickListener
-   {
-      private final AlertDialog.Builder m_build;
-
-      FeedItemLongClick(Adapter p_adapter)
-      {
-         m_build = new AlertDialog.Builder(Util.getContext());
-
-         m_build.setCancelable(true)
-               .setNegativeButton(Util.getString(R.string.delete_dialog),
-                     new FeedDeleteClick(p_adapter))
-               .setPositiveButton(Util.getString(R.string.clear_dialog),
-                     new FeedClearCacheClick(p_adapter));
-      }
-
-      @Override
-      public
-      boolean onItemLongClick(AdapterView<?> parent, View view, int pos, long id)
-      {
-         m_build.show();
-         return true;
-      }
-   }
-
-   private
-   class FeedClearCacheClick implements DialogInterface.OnClickListener
-   {
-      private final Adapter m_adapter;
-
-      FeedClearCacheClick(Adapter p_adapter)
-      {
-         m_adapter = p_adapter;
-      }
-
-      /// Delete the cache.
-      @Override
-      public
-      void onClick(DialogInterface dialog, int position)
-      {
-         String feedName = (String) m_adapter.getItem(position);
-         String path = Util.getPath(feedName, "");
-
-         Util.rmdir(new File(path));
-
-         /* Refresh pages and navigation counts. */
-         Update.navigation(m_navigationAdapter);
-         // TODO Update.manageFeeds();
-         // TODO Update.manageTags();
-      }
-   }
-
-   private
-   class FeedDeleteClick implements DialogInterface.OnClickListener
-   {
-      private final Adapter m_adapter;
-
-      FeedDeleteClick(Adapter p_adapter)
-      {
-         m_adapter = p_adapter;
-      }
-
-      /* Delete the feed. */
-      @Override
-      public
-      void onClick(DialogInterface dialog, int position)
-      {
-         String feed = (String) m_adapter.getItem(position);
-         /* Delete the feed's folder. */
-         Util.rmdir(new File(Util.getStorage() + Util.getPath(feed, "")));
-
-         /* Remove the feed from the index file. */
-         Write.removeLine(Constants.INDEX, feed, true);
-
-         Util.updateTags(m_navigationAdapter);
-         ((AdapterManageFeeds) m_adapter).removeItem(position);
-         ((BaseAdapter) m_adapter).notifyDataSetChanged();
-
-         /*Update.manageTags();*/
-      }
-   }
 }

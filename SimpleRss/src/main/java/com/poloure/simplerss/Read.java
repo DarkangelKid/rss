@@ -21,20 +21,20 @@ class Read
     * continuing. */
 
    static
-   String setting(String path)
+   String setting(String path, Context context)
    {
       if(Util.isUnmounted())
       {
          return null;
       }
 
-      String[] check = file(path);
+      String[] check = file(path, context);
       return 0 == check.length ? "" : check[0];
    }
 
    /* This function is now safe. It will return a zero length array on error. */
    static
-   String[] file(String path)
+   String[] file(String path, Context context)
    {
       String path1 = path;
       if(Util.isUnmounted())
@@ -42,14 +42,14 @@ class Read
          return Util.EMPTY_STRING_ARRAY;
       }
 
-      String storage = Util.getStorage();
+      String storage = Util.getStorage(context);
       if(!path1.contains(storage))
       {
-         path1 = Util.getStorage() + path1;
+         path1 = Util.getStorage(context) + path1;
       }
 
       /* Get the number of lines. */
-      int count = count(path1);
+      int count = count(path1, context);
 
       /* If the file is empty, return a zero length array. */
       if(0 == count)
@@ -66,7 +66,7 @@ class Read
          BufferedReader in = null;
          try
          {
-            in = Util.isUsingSd() ? reader(path1) : reader(path1, UTF8);
+            in = Util.isUsingSd() ? reader(path1) : reader(path1, UTF8, context);
 
             int linesLength = lines.length;
             for(int i = 0; i < linesLength; i++)
@@ -103,10 +103,9 @@ class Read
 
    /* For reading from the internal s_storage. */
    public static
-   BufferedReader reader(String path, String fileEncoding)
+   BufferedReader reader(String path, String fileEncoding, Context context)
          throws FileNotFoundException, UnsupportedEncodingException
    {
-      Context context = Util.getContext();
       String path1 = Util.getInternalPath(path);
       FileInputStream fis = context.openFileInput(path1);
       return new BufferedReader(new InputStreamReader(fis, fileEncoding));
@@ -120,7 +119,7 @@ class Read
    }
 
    static
-   int count(String path)
+   int count(String path, Context context)
    {
       String path1 = path;
       if(Util.isUnmounted())
@@ -128,10 +127,10 @@ class Read
          return 0;
       }
 
-      String storage = Util.getStorage();
+      String storage = Util.getStorage(context);
       if(!path1.contains(storage))
       {
-         path1 = Util.getStorage() + path1;
+         path1 = Util.getStorage(context) + path1;
       }
 
       int i = 0;
@@ -140,7 +139,7 @@ class Read
          BufferedReader in = null;
          try
          {
-            in = Util.isUsingSd() ? reader(path1) : reader(path1, UTF8);
+            in = Util.isUsingSd() ? reader(path1) : reader(path1, UTF8, context);
 
             while(null != in.readLine())
             {
@@ -171,20 +170,20 @@ class Read
    }
 
    static
-   String[][] csv()
+   String[][] csv(Context context)
    {
-      return csv(Constants.INDEX, 'f', 'u', 't');
+      return csv(Constants.INDEX, context, 'f', 'u', 't');
    }
 
    static
-   String[][] csv(String path, char... type)
+   String[][] csv(String path, Context context, char... type)
    {
       if(Util.isUnmounted())
       {
          return new String[type.length][0];
       }
 
-      String[] lines = file(path);
+      String[] lines = file(path, context);
       if(0 == lines.length)
       {
          return new String[type.length][0];
@@ -225,7 +224,7 @@ class Read
    }
 
    static
-   Set set(String filePath)
+   Set set(String filePath, Context context)
    {
       Set set = new HashSet<String>();
 
@@ -234,7 +233,7 @@ class Read
          return set;
       }
 
-      Collections.addAll(set, file(filePath));
+      Collections.addAll(set, file(filePath, context));
       return set;
    }
 }

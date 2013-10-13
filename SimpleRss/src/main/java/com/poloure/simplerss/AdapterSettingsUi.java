@@ -1,6 +1,7 @@
 package com.poloure.simplerss;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,26 +12,36 @@ import android.widget.TextView;
 
 class AdapterSettingsUi extends BaseAdapter
 {
-   static final         float    COLOR_SELECT_OPACITY = 0.3f;
-   private static final String[] INTERFACE_TITLES     = Util.getArray(
-         R.array.settings_interface_titles);
-   private static final String[] INTERFACE_SUMMARIES  = Util.getArray(
-         R.array.settings_interface_summaries);
+   static final float COLOR_SELECT_OPACITY = 0.3f;
+   private static String[] s_interfaceTitles;
+   private static String[] s_interfaceSummaries;
    ImageView[] m_colorViews;
-   private TextView settings_heading;
+   private       TextView       settings_heading;
+   private final LayoutInflater m_layoutInflater;
+   private final Context        m_context;
+
+   AdapterSettingsUi(Context context)
+   {
+      m_context = context;
+      Resources resources = context.getResources();
+      s_interfaceTitles = resources.getStringArray(R.array.settings_interface_titles);
+      s_interfaceSummaries = resources.getStringArray(R.array.settings_interface_summaries);
+      m_layoutInflater = (LayoutInflater) m_context.getSystemService(
+            Context.LAYOUT_INFLATER_SERVICE);
+   }
 
    @Override
    public
    int getCount()
    {
-      return INTERFACE_TITLES.length;
+      return s_interfaceTitles.length;
    }
 
    @Override
    public
    String getItem(int position)
    {
-      return INTERFACE_TITLES[position];
+      return s_interfaceTitles[position];
    }
 
    @Override
@@ -42,24 +53,21 @@ class AdapterSettingsUi extends BaseAdapter
 
    @Override
    public
-   View getView(int position, View cv, ViewGroup parent)
+   View getView(int position, View convertView, ViewGroup parent)
    {
-      View cv1 = cv;
+      View view = convertView;
       int viewType = getItemViewType(position);
-      String title = INTERFACE_TITLES[position];
-      String summary = INTERFACE_SUMMARIES[position];
+      String title = s_interfaceTitles[position];
+      String summary = s_interfaceSummaries[position];
       String settingPath = Constants.SETTINGS_DIR + title + Constants.TXT;
-
-      String inflate = Context.LAYOUT_INFLATER_SERVICE;
-      LayoutInflater inf = (LayoutInflater) Util.getContext().getSystemService(inflate);
 
       /* This type is a heading. */
       if(0 == viewType)
       {
-         if(null == cv1)
+         if(null == view)
          {
-            cv1 = inf.inflate(R.layout.settings_heading, parent, false);
-            settings_heading = (TextView) cv1.findViewById(R.id.settings_heading);
+            view = m_layoutInflater.inflate(R.layout.settings_heading, parent, false);
+            settings_heading = (TextView) view.findViewById(R.id.settings_heading);
          }
 
          settings_heading.setText(title);
@@ -69,29 +77,29 @@ class AdapterSettingsUi extends BaseAdapter
       else if(1 == viewType)
       {
          HolderSettingsColor holder;
-         if(null == cv1)
+         if(null == view)
          {
-            cv1 = inf.inflate(R.layout.settings_holocolour_select, parent, false);
+            view = m_layoutInflater.inflate(R.layout.settings_holocolour_select, parent, false);
             holder = new HolderSettingsColor();
-            holder.title = (TextView) cv1.findViewById(R.id.colour_title);
-            holder.summary = (TextView) cv1.findViewById(R.id.colour_summary);
-            holder.blue = (ImageView) cv1.findViewById(R.id.blue_image);
-            holder.purple = (ImageView) cv1.findViewById(R.id.purple_image);
-            holder.green = (ImageView) cv1.findViewById(R.id.green_image);
-            holder.yellow = (ImageView) cv1.findViewById(R.id.yellow_image);
-            holder.red = (ImageView) cv1.findViewById(R.id.red_image);
-            cv1.setTag(holder);
+            holder.title = (TextView) view.findViewById(R.id.colour_title);
+            holder.summary = (TextView) view.findViewById(R.id.colour_summary);
+            holder.blue = (ImageView) view.findViewById(R.id.blue_image);
+            holder.purple = (ImageView) view.findViewById(R.id.purple_image);
+            holder.green = (ImageView) view.findViewById(R.id.green_image);
+            holder.yellow = (ImageView) view.findViewById(R.id.yellow_image);
+            holder.red = (ImageView) view.findViewById(R.id.red_image);
+            view.setTag(holder);
          }
          else
          {
-            holder = (HolderSettingsColor) cv1.getTag();
+            holder = (HolderSettingsColor) view.getTag();
          }
 
          holder.title.setText(title);
          holder.summary.setText(summary);
 
          /* Read the colour from settings, if null, set as blue. */
-         String[] colorArray = Read.file(Constants.SETTINGS_DIR + Constants.STRIP_COLOR);
+         String[] colorArray = Read.file(Constants.SETTINGS_DIR + Constants.STRIP_COLOR, m_context);
 
          String colour = 0 == colorArray.length ? "blue" : colorArray[0];
 
@@ -101,12 +109,14 @@ class AdapterSettingsUi extends BaseAdapter
          };
 
          /* Set the alpha to 0.5 if not the currently selected colour. */
+         Resources resources = m_context.getResources();
+         String[] colors = resources.getStringArray(R.array.settings_colours);
          int viewsLength = m_colorViews.length;
          for(int i = 0; i < viewsLength; i++)
          {
-            m_colorViews[i].setOnClickListener(new OnClickSettingsColor(this, i));
+            m_colorViews[i].setOnClickListener(new OnClickSettingsColor(this, i, m_context));
 
-            float alpha = colour.equals(FeedsActivity.HOLO_COLORS[i]) ? 1.0f : COLOR_SELECT_OPACITY;
+            float alpha = colour.equals(colors[i]) ? 1.0f : COLOR_SELECT_OPACITY;
             m_colorViews[i].setAlpha(alpha);
          }
       }
@@ -115,28 +125,28 @@ class AdapterSettingsUi extends BaseAdapter
       else if(2 == viewType)
       {
          HolderSettingsCheckBox holder;
-         if(null == cv1)
+         if(null == view)
          {
-            cv1 = inf.inflate(R.layout.settings_checkbox, parent, false);
+            view = m_layoutInflater.inflate(R.layout.settings_checkbox, parent, false);
             holder = new HolderSettingsCheckBox();
-            holder.title = (TextView) cv1.findViewById(R.id.check_title);
-            holder.summary = (TextView) cv1.findViewById(R.id.check_summary);
-            holder.checkbox = (CheckBox) cv1.findViewById(R.id.checkbox);
-            cv1.setTag(holder);
+            holder.title = (TextView) view.findViewById(R.id.check_title);
+            holder.summary = (TextView) view.findViewById(R.id.check_summary);
+            holder.checkbox = (CheckBox) view.findViewById(R.id.checkbox);
+            view.setTag(holder);
          }
          else
          {
-            holder = (HolderSettingsCheckBox) cv1.getTag();
+            holder = (HolderSettingsCheckBox) view.getTag();
          }
 
          holder.title.setText(title);
          holder.summary.setText(summary);
-         holder.checkbox.setOnClickListener(new SettingBooleanChecked(settingPath));
+         holder.checkbox.setOnClickListener(new SettingBooleanChecked(settingPath, m_context));
 
          /* Load the saved boolean value and set the box as checked if true. */
-         holder.checkbox.setChecked(Util.strbol(Read.setting(settingPath)));
+         holder.checkbox.setChecked(Util.strbol(Read.setting(settingPath, m_context)));
       }
-      return cv1;
+      return view;
    }
 
    @Override

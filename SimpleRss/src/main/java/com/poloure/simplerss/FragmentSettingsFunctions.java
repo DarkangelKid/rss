@@ -1,5 +1,6 @@
 package com.poloure.simplerss;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
@@ -22,6 +23,7 @@ class FragmentSettingsFunctions extends ListFragment
    void onActivityCreated(Bundle savedInstanceState)
    {
       super.onActivityCreated(savedInstanceState);
-      setListAdapter(new AdapterSettingsFunctions());
+      Context activity = getActivity();
+      setListAdapter(new AdapterSettingsFunctions(activity));
    }
 }

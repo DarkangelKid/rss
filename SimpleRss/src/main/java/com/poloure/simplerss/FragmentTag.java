@@ -2,6 +2,7 @@ package com.poloure.simplerss;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,11 +14,13 @@ class FragmentTag extends ListFragment
 {
    private final BaseAdapter m_navigationAdapter;
    private final BaseAdapter m_tagAdapter;
+   private final int         m_position;
 
-   FragmentTag(BaseAdapter navigationAdapter, Context context)
+   FragmentTag(BaseAdapter navigationAdapter, Context context, int position)
    {
       m_navigationAdapter = navigationAdapter;
       m_tagAdapter = new AdapterTag(context);
+      m_position = position;
    }
 
    @Override
@@ -34,7 +37,16 @@ class FragmentTag extends ListFragment
    {
       super.onActivityCreated(savedInstanceState);
       ListView listView = getListView();
-      listView.setOnScrollListener(new OnScrollFeedListener(m_navigationAdapter, m_tagAdapter));
+      Context context = getActivity();
+
+      listView.setOnScrollListener(
+            new OnScrollFeedListener(m_navigationAdapter, m_tagAdapter, context));
+
+      if(0 == m_position)
+      {
+         FragmentManager fragmentManager = getFragmentManager();
+         Update.page(m_navigationAdapter, 0, fragmentManager, context);
+      }
    }
 
    @Override
