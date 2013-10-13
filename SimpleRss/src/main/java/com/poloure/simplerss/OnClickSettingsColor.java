@@ -1,11 +1,11 @@
 package com.poloure.simplerss;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.support.v4.view.PagerTabStrip;
 import android.view.View;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
-
 
 class OnClickSettingsColor implements View.OnClickListener
 {

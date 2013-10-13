@@ -130,9 +130,9 @@ class AdapterSettingsFunctions extends BaseAdapter
          /* Load the saved value and set the progress.*/
          String checker = Read.setting(settingPath, m_context);
 
-         int time = 0 == checker.length() ? 3 : null == checker || 0 == checker.length()
-               ? 0
-               : Integer.parseInt(checker);
+         int time = 0 == checker.length()
+               ? 3
+               : null == checker || 0 == checker.length() ? 0 : Integer.parseInt(checker);
          holder.seekbar.setProgress(getIndexOfTime(time));
       }
       return view;

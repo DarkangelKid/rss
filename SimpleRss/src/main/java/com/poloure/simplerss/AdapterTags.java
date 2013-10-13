@@ -18,22 +18,20 @@ import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.HashSet;
 
-class AdapterTag extends BaseAdapter
+class AdapterTags extends BaseAdapter
 {
-   static Collection<String> s_readLinks = new HashSet<String>();
-
-   private static final int   VIEW_TYPE_COUNT         = 4;
-   private static final float READ_ITEM_IMAGE_OPACITY = 0.5f;
-
+   private static final int                VIEW_TYPE_COUNT         = 4;
+   private static final float              READ_ITEM_IMAGE_OPACITY = 0.5f;
+   static               Collection<String> s_readItemTimes         = new HashSet<String>();
    private final LayoutInflater m_inflater;
+   private final Context        m_context;
    boolean    m_touchedScreen = true;
    FeedItem[] m_items         = new FeedItem[0];
-   private final Context m_context;
 
-   AdapterTag(Context context)
+   AdapterTags(Context context)
    {
       m_context = context;
-      s_readLinks = Read.set(Constants.READ_ITEMS, m_context);
+      s_readItemTimes = Read.set(Constants.READ_ITEMS, m_context);
       m_inflater = (LayoutInflater) m_context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
    }
 
@@ -95,6 +93,7 @@ class AdapterTag extends BaseAdapter
 
       String link = m_items[position].url;
       String title = m_items[position].title;
+      String time = m_items[position].time;
 
       /* card_full.xml img && m_des. */
       if(0 == viewType)
@@ -121,7 +120,7 @@ class AdapterTag extends BaseAdapter
          holder.m_title.setText(title);
          holder.m_des.setText(m_items[position].description);
          holder.m_url.setText(link);
-         setCardAlpha(holder.m_title, holder.m_url, holder.m_imageView, holder.m_des, link);
+         setCardAlpha(holder.m_title, holder.m_url, holder.m_imageView, holder.m_des, time);
       }
       /* card_no_des_img.xml no description, image, m_title. */
       else if(1 == viewType)
@@ -146,7 +145,7 @@ class AdapterTag extends BaseAdapter
 
          holder.title.setText(title);
          holder.url.setText(link);
-         setCardAlpha(holder.title, holder.url, holder.image, null, link);
+         setCardAlpha(holder.title, holder.url, holder.image, null, time);
       }
       /* card_des_no_img.xml no image, description, title. */
       else if(2 == viewType)
@@ -170,7 +169,7 @@ class AdapterTag extends BaseAdapter
          holder.title.setText(title);
          holder.des.setText(m_items[position].description);
          holder.url.setText(link);
-         setCardAlpha(holder.title, holder.url, null, holder.des, link);
+         setCardAlpha(holder.title, holder.url, null, holder.des, time);
       }
       /* No description or image. */
       else if(3 == viewType)
@@ -193,14 +192,14 @@ class AdapterTag extends BaseAdapter
          holder.title.setText(title);
          holder.url.setText(link);
 
-         setCardAlpha(holder.title, holder.url, null, null, link);
+         setCardAlpha(holder.title, holder.url, null, null, time);
       }
 
       /* The logic that tells whether the item is Read or not. */
       if(View.VISIBLE == parent.getVisibility() && position + 1 < m_items.length &&
             m_touchedScreen)
       {
-         s_readLinks.add(m_items[position + 1].url);
+         s_readItemTimes.add(m_items[position + 1].time);
       }
 
       return view;
@@ -266,11 +265,11 @@ class AdapterTag extends BaseAdapter
    }
 
    private
-   void setCardAlpha(TextView title, TextView url, ImageView image, TextView des, String link)
+   void setCardAlpha(TextView title, TextView url, ImageView image, TextView des, String time)
    {
       Resources res = m_context.getResources();
 
-      if(s_readLinks.contains(link))
+      if(s_readItemTimes.contains(time))
       {
          title.setTextColor(res.getColor(R.color.title_grey));
          url.setTextColor(res.getColor(R.color.link_grey));

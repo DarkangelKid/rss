@@ -115,7 +115,7 @@ class FeedsActivity extends ActionBarActivity
       setServiceIntent(Constants.ALARM_SERVICE_START);
 
       /* Save the READ_ITEMS to file. */
-      Write.collection(Constants.READ_ITEMS, AdapterTag.s_readLinks, this);
+      Write.collection(Constants.READ_ITEMS, AdapterTags.s_readItemTimes, this);
    }
 
    @Override

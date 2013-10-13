@@ -37,10 +37,11 @@ import java.util.regex.Pattern;
 public
 class ServiceUpdate extends IntentService
 {
-   private static final SimpleDateFormat RSS_DATE = new SimpleDateFormat(
+   private static final SimpleDateFormat RSS_DATE           = new SimpleDateFormat(
          "EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
-   private static final Pattern  PATTERN_WHITESPACE = Pattern.compile("[\\t\\n\\x0B\\f\\r\\|]");
-   private static final String[] DESIRED_TAGS       = {
+   private static final Pattern          PATTERN_WHITESPACE = Pattern.compile(
+         "[\\t\\n\\x0B\\f\\r\\|]");
+   private static final String[]         DESIRED_TAGS       = {
          "link", "published", "pubDate", "description", "title", "content", "entry", "item"
    };
 

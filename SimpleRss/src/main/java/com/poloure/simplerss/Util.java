@@ -83,7 +83,8 @@ class Util
 
       if(null == items)
       {
-         AdapterTag cardAdapter = (AdapterTag) getFeedListView(page1, fragmentManager).getAdapter();
+         AdapterTags cardAdapter = (AdapterTags) getFeedListView(page1,
+               fragmentManager).getAdapter();
          if(null == cardAdapter)
          {
             return -1;
@@ -96,7 +97,7 @@ class Util
       int itemCount = items.length - 1;
       for(i = itemCount; 0 <= i; i--)
       {
-         if(!AdapterTag.s_readLinks.contains(items[i].url))
+         if(!AdapterTags.s_readItemTimes.contains(items[i].time))
          {
             break;
          }
@@ -152,43 +153,48 @@ class Util
    static
    int[] getUnreadCounts(Context context)
    {
-      Collection<String> readLinks = new HashSet<String>(AdapterTag.s_readLinks.size());
-      readLinks.addAll(AdapterTag.s_readLinks);
+      int readCount = AdapterTags.s_readItemTimes.size();
+      Collection<String> readItemTimes = new HashSet<String>(readCount);
+      readItemTimes.addAll(AdapterTags.s_readItemTimes);
 
       String[] currentTags = Read.file(Constants.TAG_LIST, context);
 
-      String[][] content = Read.csv(context);
+      String[][] content = Read.csv(Constants.INDEX, context, 'f', 't');
       String[] indexNames = content[0];
-      String[] indexUrls = content[1];
-      String[] indexTags = content[2];
+      String[] indexTags = content[1];
 
       int total = 0;
-      int currentTagsCount = currentTags.length;
-      int[] unreadCounts = new int[currentTagsCount];
-      int[] totalCounts = new int[currentTagsCount];
+      int tagCount = currentTags.length;
 
-      for(int i = 1; i < currentTagsCount; i++)
+      int[] unreadCounts = new int[tagCount];
+
+      /* For each tag. */
+      for(int i = 1; i < tagCount; i++)
       {
          int read = 0;
          int indexTagsCount = indexTags.length;
+         int totalTagItems = 0;
+
+         /* For each index entry. */
          for(int j = 0; j < indexTagsCount; j++)
          {
             if(indexTags[j].equals(currentTags[i]))
             {
-               totalCounts[i] += Read.count(indexNames[j] + Constants.SEPAR + Constants.CONTENT,
-                     context);
-               for(String readUrl : readLinks)
+               String contentPath = indexNames[j] + Constants.SEPAR + Constants.CONTENT;
+               String[] times = Read.csv(contentPath, context, 'p')[0];
+
+               totalTagItems += times.length;
+
+               for(String time : times)
                {
-                  int pos = readUrl.indexOf('/') + 2;
-                  readUrl = readUrl.substring(pos, readUrl.indexOf('/', pos + 1));
-                  if(indexUrls[j].contains(readUrl))
+                  if(readItemTimes.contains(time))
                   {
                      read++;
                   }
                }
             }
          }
-         unreadCounts[i] = totalCounts[i] - read;
+         unreadCounts[i] = totalTagItems - read;
          total += unreadCounts[i];
       }
 
@@ -246,14 +252,6 @@ class Util
       new File(path1).delete();
    }
 
-   static
-   String getInternalPath(String externalPath)
-   {
-      String substring = externalPath.substring(
-            externalPath.indexOf(Constants.SEPAR + "files" + Constants.SEPAR) + 7);
-      return substring.replaceAll(Constants.SEPAR, "-");
-   }
-
    /* This function will return null if it fails. Check for null each time.
     * It should be pretty safe and efficient to call ALL_TAG the time. */
    static
@@ -296,9 +294,18 @@ class Util
          }
       }
       return s_storage;
-   }   /* Replaces ALL_TAG '/'s with '-' to emulate a folder directory layout in
-    * data/data. */
+   }
 
+   static
+   String getInternalPath(String externalPath)
+   {
+      String substring = externalPath.substring(
+            externalPath.indexOf(Constants.SEPAR + "files" + Constants.SEPAR) + 7);
+      return substring.replaceAll(Constants.SEPAR, "-");
+   }
+
+   /* Replaces ALL_TAG '/'s with '-' to emulate a folder directory layout in
+    * data/data. */
    static
    boolean rmdir(File directory)
    {
@@ -325,7 +332,6 @@ class Util
    }
 
    /* Wrappers for neatness. */
-
    static
    PagerTabStrip newPagerTabStrip(Context context)
    {

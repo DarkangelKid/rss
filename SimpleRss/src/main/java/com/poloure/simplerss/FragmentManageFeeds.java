@@ -33,7 +33,8 @@ class FragmentManageFeeds extends ListFragment
    }
 
    static
-   void showEditDialog(BaseAdapter navigationAdapter, FragmentManager fragmentManager, Context context, int position)
+   void showEditDialog(BaseAdapter navigationAdapter, FragmentManager fragmentManager,
+         Context context, int position)
    {
       LayoutInflater inf = LayoutInflater.from(context);
       View dialogLayout = inf.inflate(R.layout.add_rss_dialog, null);

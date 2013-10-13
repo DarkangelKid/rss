@@ -1,4 +1,5 @@
 package com.poloure.simplerss;
+
 import android.widget.SeekBar;
 import android.widget.TextView;
 

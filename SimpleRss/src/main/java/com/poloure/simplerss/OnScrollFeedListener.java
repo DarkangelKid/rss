@@ -1,4 +1,5 @@
 package com.poloure.simplerss;
+
 import android.content.Context;
 import android.view.View;
 import android.widget.AbsListView;
@@ -22,10 +23,10 @@ class OnScrollFeedListener implements AbsListView.OnScrollListener
    void onScrollStateChanged(AbsListView view, int scrollState)
    {
       if(16 == view.getChildAt(0).getTop() &&
-            View.VISIBLE == view.getVisibility() && ((AdapterTag) m_feedAdapter).isScreenTouched())
+            View.VISIBLE == view.getVisibility() && ((AdapterTags) m_feedAdapter).isScreenTouched())
       {
-         String url = ((FeedItem) m_feedAdapter.getItem(0)).url;
-         AdapterTag.s_readLinks.add(url);
+         String time = ((FeedItem) m_feedAdapter.getItem(0)).time;
+         AdapterTags.s_readItemTimes.add(time);
       }
 
       if(AbsListView.OnScrollListener.SCROLL_STATE_IDLE == scrollState)

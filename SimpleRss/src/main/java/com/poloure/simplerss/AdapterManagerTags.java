@@ -94,7 +94,6 @@ class AdapterManagerTags extends BaseAdapter
          holder.image_view.setVisibility(View.GONE);
       }
 
-
       return view;
    }
 

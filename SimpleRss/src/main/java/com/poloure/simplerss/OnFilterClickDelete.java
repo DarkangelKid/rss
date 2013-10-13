@@ -1,4 +1,5 @@
 package com.poloure.simplerss;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.widget.BaseAdapter;
@@ -6,7 +7,7 @@ import android.widget.BaseAdapter;
 class OnFilterClickDelete implements DialogInterface.OnClickListener
 {
    private final BaseAdapter m_adapter;
-   private final Context m_context;
+   private final Context     m_context;
 
    OnFilterClickDelete(BaseAdapter adapter, Context context)
    {

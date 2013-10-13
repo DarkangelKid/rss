@@ -1,4 +1,5 @@
 package com.poloure.simplerss;
+
 import android.widget.ImageView;
 import android.widget.TextView;
 

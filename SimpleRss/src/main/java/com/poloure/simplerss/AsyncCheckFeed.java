@@ -1,4 +1,5 @@
 package com.poloure.simplerss;
+
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;

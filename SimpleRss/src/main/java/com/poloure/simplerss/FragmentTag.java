@@ -38,7 +38,7 @@ class FragmentTag extends ListFragment
       Context context = getActivity();
       ListView listView = getListView();
 
-      BaseAdapter listAdapter = new AdapterTag(context);
+      BaseAdapter listAdapter = new AdapterTags(context);
       setListAdapter(listAdapter);
 
       AbsListView.OnScrollListener scrollListener = new OnScrollFeedListener(m_navigationAdapter,

@@ -20,14 +20,14 @@ class RefreshPage extends AsyncTask<Integer, Object, Animation>
    private static final int MAX_DESCRIPTION_LENGTH = 360;
    private static final int MIN_IMAGE_WIDTH        = 32;
    private final BaseAdapter     m_navigationAdapter;
+   private final FragmentManager m_fragmentManager;
+   private final Context         m_context;
    private       int             m_pageNumber;
    private       boolean         m_flash;
    private       ListFragment    m_listFragment;
-   private       AdapterTag      m_adapterCard;
+   private       AdapterTags     m_adapterCard;
    private       ListView        m_listView;
-   private final FragmentManager m_fragmentManager;
    private int position = -3;
-   private final Context m_context;
 
    RefreshPage(BaseAdapter navigationAdapter, FragmentManager fragmentManager, Context context)
    {
@@ -57,7 +57,7 @@ class RefreshPage extends AsyncTask<Integer, Object, Animation>
       String fragmentTag = String.format(Constants.FRAGMENT_TAG, viewPagerId, m_pageNumber);
 
       m_listFragment = (ListFragment) m_fragmentManager.findFragmentByTag(fragmentTag);
-      m_adapterCard = (AdapterTag) m_listFragment.getListAdapter();
+      m_adapterCard = (AdapterTags) m_listFragment.getListAdapter();
       m_listView = m_listFragment.getListView();
 
       Map<Long, FeedItem> map = new TreeMap<Long, FeedItem>();
@@ -122,6 +122,7 @@ class RefreshPage extends AsyncTask<Integer, Object, Animation>
                data.url = links[i];
                data.description = descriptions[i];
                data.image = images[i];
+               data.time = times[i];
 
                data.width = null == widths[i] || 0 == widths[i].length()
                      ? 0
@@ -131,9 +132,11 @@ class RefreshPage extends AsyncTask<Integer, Object, Animation>
                      ? 0
                      : Integer.parseInt(heights[i]);
 
-               AdapterTag adapterTag = (AdapterTag) Util.getFeedListView(m_pageNumber,
+               AdapterTags adapterTags = (AdapterTags) Util.getFeedListView(m_pageNumber,
                      m_fragmentManager).getAdapter();
-               if(-1 == Util.index(adapterTag.m_items, data))
+
+               // Do not add duplicates. */
+               if(-1 == Util.index(adapterTags.m_items, data))
                {
                   Long l = Long.parseLong(times[i]) - i;
                   map.put(l, data);

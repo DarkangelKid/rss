@@ -1,4 +1,5 @@
 package com.poloure.simplerss;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.widget.Adapter;
@@ -10,7 +11,7 @@ class OnClickManageFeedClearCache implements DialogInterface.OnClickListener
 {
    private final Adapter     m_adapter;
    private final BaseAdapter m_navigationAdapter;
-   private final Context m_context;
+   private final Context     m_context;
 
    OnClickManageFeedClearCache(Adapter adapter, BaseAdapter navigationAdapter, Context context)
    {
