@@ -130,7 +130,6 @@ class AdapterManagerTags extends BaseAdapter
       }
    }
 
-   private
    class MyTouchListener implements OnTouchListener
    {
       @Override
@@ -140,7 +139,7 @@ class AdapterManagerTags extends BaseAdapter
          if(MotionEvent.ACTION_DOWN == motionEvent.getAction())
          {
             View parent = (View) view.getParent();
-            old_title = Util.getText(parent, R.id.tag_item);
+            old_title = ((TextView) parent.findViewById(R.id.tag_item)).getText().toString().trim();
             CardShadowBuilder shadowBuilder = new CardShadowBuilder(parent);
             parent.startDrag(null, shadowBuilder, parent, 0);
             return true;
@@ -177,12 +176,17 @@ class AdapterManagerTags extends BaseAdapter
             last.setVisibility(View.VISIBLE);
 
             /* Save the position of the view that just faded out. */
-            String newTitle = Util.getText(v, R.id.tag_item);
+            String newTitle = ((TextView) v.findViewById(R.id.tag_item)).getText()
+                  .toString()
+                  .trim();
 
             int childCount = listview.getChildCount();
             for(int i = 0; i < childCount; i++)
             {
-               if(newTitle.equals(Util.getText(listview.getChildAt(i), R.id.tag_item)))
+               if(newTitle.equals(
+                     ((TextView) listview.getChildAt(i).findViewById(R.id.tag_item)).getText()
+                           .toString()
+                           .trim()))
                {
                   old_view = i;
                   break;

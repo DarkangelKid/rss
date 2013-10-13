@@ -110,8 +110,8 @@ class Write
    BufferedWriter writer(String path, int writeMode, Context context)
          throws FileNotFoundException, UnsupportedEncodingException
    {
-      String path1 = Util.getInternalPath(path);
-      FileOutputStream fileOutputStream = context.openFileOutput(path1, writeMode);
+      String internalPath = Util.getInternalPath(path);
+      FileOutputStream fileOutputStream = context.openFileOutput(internalPath, writeMode);
       return new BufferedWriter(new OutputStreamWriter(fileOutputStream, "UTF8"));
    }
 
@@ -177,7 +177,7 @@ class Write
    static
    void log(String text, Context context)
    {
-      single(Constants.DUMP_FILE, text + Constants.NL, context);
+      single(Constants.LOG_FILE, text + Constants.NL, context);
    }
 
    /* Function should be safe, returns false if fails. */
@@ -227,12 +227,12 @@ class Write
    static
    void log(int integer, Context context)
    {
-      single(Constants.DUMP_FILE, integer + Constants.NL, context);
+      single(Constants.LOG_FILE, integer + Constants.NL, context);
    }
 
    static
    void log(Iterable<?> content, Context context)
    {
-      collection(Constants.DUMP_FILE + ".iter.txt", content, context);
+      collection(Constants.LOG_FILE + ".iter.txt", content, context);
    }
 }

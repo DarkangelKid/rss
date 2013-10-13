@@ -1,4 +1,5 @@
 package com.poloure.simplerss;
+
 import android.content.res.Resources;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -49,8 +50,8 @@ class OnClickNavDrawerItem implements AdapterView.OnItemClickListener
       /* Hide the current fragment and display the selected one. */
       showFragment(selectedTitle);
 
-      /* Set the m_title text of the actionbar to the selected item. */
-      ((FeedsActivity) m_activity).setNavigationTitle(selectedTitle);
+      /* Bypass the method here. */
+      ((FeedsActivity) m_activity).setNavigationTitle(selectedTitle, false);
    }
 
    void showFragment(String tag)

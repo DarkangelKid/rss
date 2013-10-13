@@ -1,6 +1,7 @@
 package com.poloure.simplerss;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.ListFragment;
@@ -13,12 +14,25 @@ import android.widget.ListView;
 
 class FragmentManageTags extends ListFragment
 {
+   public static
+   void AsyncCompatManageTagsRefresh(ListView listView, ListAdapter listAdapter, Context context)
+   {
+      AsyncManageTagsRefresh task = new AsyncManageTagsRefresh(listView, listAdapter, context);
+      if(Constants.HONEYCOMB)
+      {
+         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+      }
+      else
+      {
+         task.execute();
+      }
+   }
+
    @Override
    public
    void onCreate(Bundle savedInstanceState)
    {
       super.onCreate(savedInstanceState);
-      setHasOptionsMenu(true);
    }
 
    @Override
@@ -32,20 +46,7 @@ class FragmentManageTags extends ListFragment
       ListAdapter listAdapter = new AdapterManagerTags(context);
       setListAdapter(listAdapter);
 
-      Update.AsyncCompatManageTagsRefresh(listView, listAdapter, context);
-   }
-
-   @Override
-   public
-   boolean onOptionsItemSelected(MenuItem item)
-   {
-      FragmentActivity activity = getActivity();
-      String addFeed = activity.getString(R.string.add_feed);
-      CharSequence menuTitle = item.getTitle();
-
-      return activity.onOptionsItemSelected(item) ||
-            addFeed.equals(menuTitle) ||
-            super.onOptionsItemSelected(item);
+      AsyncCompatManageTagsRefresh(listView, listAdapter, context);
    }
 
    @Override

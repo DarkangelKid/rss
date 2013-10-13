@@ -11,6 +11,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -41,8 +42,8 @@ class FragmentFeeds extends Fragment
       }
 
       setHasOptionsMenu(true);
-      Context context = getActivity();
 
+      Context context = getActivity();
       Constants.PAGER_TAB_STRIPS[0] = Util.newPagerTabStrip(context);
 
       ViewPager.LayoutParams layoutParams = new ViewPager.LayoutParams();
@@ -67,16 +68,9 @@ class FragmentFeeds extends Fragment
    public
    void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
    {
-      menu.clear();
-
-      inflater.inflate(R.menu.main_overflow, menu);
-      super.onCreateOptionsMenu(menu, inflater);
-
-      FragmentActivity activity = getActivity();
-      ((FeedsActivity) activity).setOptionsMenu(menu);
-
-      boolean serviceRunning = isServiceRunning(activity);
-      Util.setRefreshingIcon(serviceRunning, menu);
+      menu.findItem(R.id.refresh).setVisible(true);
+      menu.findItem(R.id.unread).setVisible(true);
+      menu.findItem(R.id.add_feed).setVisible(true);
    }
 
    @Override
@@ -84,53 +78,25 @@ class FragmentFeeds extends Fragment
    boolean onOptionsItemSelected(MenuItem item)
    {
       FragmentActivity activity = getActivity();
-      if(activity.onOptionsItemSelected(item))
-      {
-         return true;
-      }
-
-      CharSequence itemTitle = item.getTitle();
-
-      String addFeed = activity.getString(R.string.add_feed);
-      if(itemTitle.equals(addFeed))
-      {
-         FeedDialog.showAddDialog(m_navigationAdapter, activity);
-         return true;
-      }
-
-      String jumpTo = activity.getString(R.string.unread);
-      if(itemTitle.equals(jumpTo))
-      {
-         Util.gotoLatestUnread(null, true, 0, this);
-         return true;
-      }
-
-      String refresh = activity.getString(R.string.refresh);
-      if(itemTitle.equals(refresh))
-      {
-         refreshFeeds();
-         return true;
-      }
-      return super.onOptionsItemSelected(item);
+      return activity.onOptionsItemSelected(item);
    }
 
    /* Updates and refreshes the tags with any new content. */
-   private
-   void refreshFeeds()
+   static
+   void refreshFeeds(ActionBarActivity activity, BaseAdapter navigationAdapter)
    {
-      FragmentActivity activity = getActivity();
       Menu menu = ((FeedsActivity) activity).getOptionsMenu();
       Util.setRefreshingIcon(true, menu);
 
       /* Set the service handler in FeedsActivity so we can check and call it
        * from ServiceUpdate. */
-      FeedsActivity.s_serviceHandler = new OnFinishService();
+      FeedsActivity.s_serviceHandler = new OnFinishService(activity, navigationAdapter);
       int currentPage = s_viewPager.getCurrentItem();
       Intent intent = Util.getServiceIntent(currentPage, null, activity);
       activity.startService(intent);
    }
 
-   private static
+   static
    boolean isServiceRunning(Activity activity)
    {
       ActivityManager manager = (ActivityManager) activity.getSystemService(
@@ -146,15 +112,24 @@ class FragmentFeeds extends Fragment
       return false;
    }
 
+   static
    class OnFinishService extends Handler
    {
+      private final ActionBarActivity m_activity;
+      private final BaseAdapter       m_navigationAdapter;
+
+      OnFinishService(ActionBarActivity activity, BaseAdapter navigationAdapter)
+      {
+         m_activity = activity;
+         m_navigationAdapter = navigationAdapter;
+      }
+
       /* The stuff we would like to run when the service completes. */
       @Override
       public
       void handleMessage(Message msg)
       {
-         FragmentActivity activity = getActivity();
-         Menu menu = ((FeedsActivity) activity).getOptionsMenu();
+         Menu menu = ((FeedsActivity) m_activity).getOptionsMenu();
          Util.setRefreshingIcon(false, menu);
 
          int page = msg.getData().getInt("page_number");
@@ -165,22 +140,21 @@ class FragmentFeeds extends Fragment
       private
       void refreshPages(int page)
       {
-         FragmentManager fragmentManager = getFragmentManager();
-         Context context = getActivity();
+         FragmentManager fragmentManager = m_activity.getSupportFragmentManager();
 
-         Update.page(m_navigationAdapter, 0, fragmentManager, context);
+         Update.page(m_navigationAdapter, 0, fragmentManager, m_activity);
 
-         int tagsCount = Read.count(Constants.TAG_LIST, context);
+         int tagsCount = Read.count(Constants.TAG_LIST, m_activity);
          if(0 == page)
          {
             for(int i = 1; i < tagsCount; i++)
             {
-               Update.page(m_navigationAdapter, i, fragmentManager, context);
+               Update.page(m_navigationAdapter, i, fragmentManager, m_activity);
             }
          }
          else
          {
-            Update.page(m_navigationAdapter, page, fragmentManager, context);
+            Update.page(m_navigationAdapter, page, fragmentManager, m_activity);
          }
       }
    }

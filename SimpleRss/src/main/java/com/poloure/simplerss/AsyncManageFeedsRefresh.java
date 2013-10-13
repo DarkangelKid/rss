@@ -41,7 +41,7 @@ class AsyncManageFeedsRefresh extends AsyncTask<Void, String[], Void>
          for(int i = 0; i < size; i++)
          {
                /* Form the path to the feed_content file. */
-            String path = Util.getPath(content[0][i], Constants.CONTENT);
+            String path = content[0][i] + Constants.SEPAR + Constants.CONTENT;
 
                /* Build the info string. */
             infoArray[i] = content[1][i] + Constants.NL + content[2][i] + " • " +

@@ -5,6 +5,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -14,6 +15,7 @@ import android.os.Process;
 import android.support.v4.app.NotificationCompat.Builder;
 import android.support.v4.app.TaskStackBuilder;
 import android.text.format.Time;
+import android.util.DisplayMetrics;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -37,7 +39,6 @@ class ServiceUpdate extends IntentService
 {
    private static final SimpleDateFormat RSS_DATE = new SimpleDateFormat(
          "EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
-   private static int s_screenWidth;
    private static final Pattern  PATTERN_WHITESPACE = Pattern.compile("[\\t\\n\\x0B\\f\\r\\|]");
    private static final String[] DESIRED_TAGS       = {
          "link", "published", "pubDate", "description", "title", "content", "entry", "item"
@@ -57,8 +58,6 @@ class ServiceUpdate extends IntentService
       PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SIMPLERSS");
       wakeLock.acquire();
 
-      s_screenWidth = (int) Math.round(Util.getScreenWidth(this) * 0.944);
-
       Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
       int page = intent.getIntExtra("GROUP_NUMBER", 0);
@@ -76,10 +75,15 @@ class ServiceUpdate extends IntentService
       {
          if(tags[i].equals(tag) || tag.equals(getString(R.string.all_tag)))
          {
-            String feedPath = Util.getPath(names[i], "");
+            String feedPath = names[i] + Constants.SEPAR + "";
             if(isNonExisting(feedPath, this))
             {
-               Util.mkdir(feedPath + Constants.THUMBNAIL_DIR, this);
+               String path1 = Util.getStorage(this) + feedPath + Constants.THUMBNAIL_DIR;
+               File folder = new File(path1);
+               if(!folder.exists())
+               {
+                  folder.mkdirs();
+               }
             }
 
             try
@@ -177,8 +181,8 @@ class ServiceUpdate extends IntentService
    void parseFeed(String urlString, String feed)
          throws XmlPullParserException, MalformedURLException, IOException
    {
-      String contentFile = Util.getPath(feed, Constants.CONTENT);
-      String thumbnailDir = Util.getPath(feed, Constants.THUMBNAILS);
+      String contentFile = feed + Constants.SEPAR + Constants.CONTENT;
+      String thumbnailDir = feed + Constants.SEPAR + Constants.THUMBNAIL_DIR;
       /*String[] filters = Read.file(Constants.FILTER_LIST);*/
 
       Set<String> set = Read.set(contentFile, this);
@@ -293,14 +297,7 @@ class ServiceUpdate extends IntentService
             {
                parser.next();
                String content = parser.getText();
-               if(null != content)
-               {
-                  content = PATTERN_WHITESPACE.matcher(content).replaceAll(" ");
-               }
-               else
-               {
-                  content = "";
-               }
+               content = null != content ? PATTERN_WHITESPACE.matcher(content).replaceAll(" ") : "";
 
                int imgPosition = content.indexOf("img");
                if(-1 != imgPosition)
@@ -367,7 +364,7 @@ class ServiceUpdate extends IntentService
          URL imageUrl = new URL(imgLink);
          inputStream = imageUrl.openStream();
       }
-      catch(IOException e)
+      catch(IOException ignored)
       {
          return;
       }
@@ -376,7 +373,10 @@ class ServiceUpdate extends IntentService
 
       float widthTmp = o.outWidth;
 
-      float inSample = widthTmp > s_screenWidth ? Math.round(widthTmp / s_screenWidth) : 1;
+      Resources resources = context.getResources();
+      DisplayMetrics displayMetrics = resources.getDisplayMetrics();
+      int screenWidth = (int) Math.round(displayMetrics.widthPixels * 0.944);
+      float inSample = widthTmp > screenWidth ? Math.round(widthTmp / screenWidth) : 1;
 
       try
       {
@@ -384,7 +384,7 @@ class ServiceUpdate extends IntentService
          URL imageUrl = new URL(imgLink);
          inputStream = imageUrl.openStream();
       }
-      catch(IOException e)
+      catch(IOException ignored)
       {
          return;
       }

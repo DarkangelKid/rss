@@ -182,8 +182,8 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
    void editFeed(String oldFeed, String newFeed, String newUrl, String newTag, Context context)
    {
 
-      String oldFeedFolder = Util.getPath(oldFeed, "");
-      String newFeedFolder = Util.getPath(newFeed, "");
+      String oldFeedFolder = oldFeed + Constants.SEPAR + "";
+      String newFeedFolder = newFeed + Constants.SEPAR + "";
 
       if(!oldFeed.equals(newFeed))
       {

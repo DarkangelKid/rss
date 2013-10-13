@@ -1,4 +1,5 @@
 package com.poloure.simplerss;
+
 import android.app.Activity;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
@@ -6,34 +7,34 @@ import android.view.View;
 
 class OnClickDrawerToggle extends ActionBarDrawerToggle
 {
-   private static String        s_navigation;
-   private final  FeedsActivity m_activity;
+   private final String        m_navigationText;
+   private final FeedsActivity m_activity;
 
    OnClickDrawerToggle(Activity activity, DrawerLayout drawerLayout)
    {
       super(activity, drawerLayout, R.drawable.ic_drawer, R.string.drawer_open,
             R.string.drawer_close);
       m_activity = (FeedsActivity) activity;
-      s_navigation = m_activity.getString(R.string.navigation_title);
+      m_navigationText = activity.getString(R.string.navigation_title);
    }
 
    @Override
    public
    void onDrawerOpened(View drawerView)
    {
-      m_activity.setNavigationTitle(s_navigation);
+      m_activity.setNavigationTitle(m_navigationText, true);
    }
 
    @Override
    public
    void onDrawerClosed(View drawerView)
    {
-      /* Change it back to s_currentTitle. */
+      /* If the title is still R.string.navigation_title, change it to the previous title. */
       String title = m_activity.getNavigationTitle();
-      if(s_navigation.equals(title))
+      if(m_navigationText.equals(title))
       {
          String previousTitle = m_activity.getPreviousNavigationTitle();
-         m_activity.setNavigationTitle(previousTitle);
+         m_activity.setNavigationTitle(previousTitle, false);
       }
    }
 }

@@ -9,15 +9,13 @@ import android.widget.BaseAdapter;
 class PagerAdapterFeeds extends FragmentPagerAdapter
 {
    private final BaseAdapter m_navigationAdapter;
-   private final Context     m_context;
    private final String[]    m_currentTags;
 
    PagerAdapterFeeds(BaseAdapter navigationAdapter, FragmentManager fm, Context context)
    {
       super(fm);
       m_navigationAdapter = navigationAdapter;
-      m_context = context;
-      m_currentTags = Read.file(Constants.TAG_LIST, m_context);
+      m_currentTags = Read.file(Constants.TAG_LIST, context);
    }
 
    @Override
@@ -38,6 +36,6 @@ class PagerAdapterFeeds extends FragmentPagerAdapter
    public
    Fragment getItem(int position)
    {
-      return new FragmentTag(m_navigationAdapter, m_context, position);
+      return new FragmentTag(m_navigationAdapter, position);
    }
 }

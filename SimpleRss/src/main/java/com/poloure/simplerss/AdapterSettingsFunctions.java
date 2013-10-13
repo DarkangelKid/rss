@@ -12,7 +12,7 @@ import android.widget.TextView;
 
 class AdapterSettingsFunctions extends BaseAdapter
 {
-   static         String[]       s_fileNames;
+   private static String[]       s_fileNames;
    static         int[]          s_times;
    private static String[]       s_functionTitles;
    private static String[]       s_functionSummaries;
@@ -98,7 +98,7 @@ class AdapterSettingsFunctions extends BaseAdapter
          holder.checkbox.setOnClickListener(new SettingBooleanChecked(settingPath, m_context));
 
          /* Load the saved boolean value and set the box as checked if true. */
-         holder.checkbox.setChecked(Util.strbol(Read.setting(settingPath, m_context)));
+         holder.checkbox.setChecked(Boolean.parseBoolean(Read.setting(settingPath, m_context)));
       }
 
       /* Otherwise, the type will default to a SeekBar. */
@@ -129,7 +129,10 @@ class AdapterSettingsFunctions extends BaseAdapter
 
          /* Load the saved value and set the progress.*/
          String checker = Read.setting(settingPath, m_context);
-         int time = 0 == checker.length() ? 3 : Util.stoi(checker);
+
+         int time = 0 == checker.length() ? 3 : null == checker || 0 == checker.length()
+               ? 0
+               : Integer.parseInt(checker);
          holder.seekbar.setProgress(getIndexOfTime(time));
       }
       return view;

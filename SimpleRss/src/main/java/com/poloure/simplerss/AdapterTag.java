@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,15 +15,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.lang.reflect.Array;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
 
 class AdapterTag extends BaseAdapter
 {
-   static Set<String> s_readLinks = new HashSet<String>();
-   private static int s_screenWidth;
+   static Collection<String> s_readLinks = new HashSet<String>();
+
    private static final int   VIEW_TYPE_COUNT         = 4;
    private static final float READ_ITEM_IMAGE_OPACITY = 0.5f;
+
    private final LayoutInflater m_inflater;
    boolean    m_touchedScreen = true;
    FeedItem[] m_items         = new FeedItem[0];
@@ -31,7 +33,6 @@ class AdapterTag extends BaseAdapter
    AdapterTag(Context context)
    {
       m_context = context;
-      s_screenWidth = Util.getScreenWidth(m_context);
       s_readLinks = Read.set(Constants.READ_ITEMS, m_context);
       m_inflater = (LayoutInflater) m_context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
    }
@@ -206,25 +207,30 @@ class AdapterTag extends BaseAdapter
    }
 
    private
-   void displayImage(ImageView v, int p, String imageName)
+   void displayImage(ImageView imageView, int position, String imageName)
    {
-      v.setImageDrawable(new ColorDrawable(Color.WHITE));
-      LayoutParams lp = v.getLayoutParams();
+      imageView.setImageDrawable(new ColorDrawable(Color.WHITE));
+      LayoutParams lp = imageView.getLayoutParams();
 
-      lp.height = (int) Math.round((double) s_screenWidth / m_items[p].width * m_items[p].height);
-      v.setLayoutParams(lp);
-      v.setTag(p);
+      Resources resources = m_context.getResources();
+      DisplayMetrics displayMetrics = resources.getDisplayMetrics();
+      int screenWidth = displayMetrics.widthPixels;
+
+      lp.height = (int) Math.round(
+            (double) screenWidth / m_items[position].width * m_items[position].height);
+      imageView.setLayoutParams(lp);
+      imageView.setTag(position);
 
       AsyncLoadImage task = new AsyncLoadImage();
       if(Constants.HONEYCOMB)
       {
 
-         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, v, v.getTag(), imageName,
+         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, imageView, position, imageName,
                m_context);
       }
       else
       {
-         task.execute(v, v.getTag(), imageName, m_context);
+         task.execute(imageView, position, imageName, m_context);
       }
    }
 
@@ -332,5 +338,4 @@ class AdapterTag extends BaseAdapter
       TextView title;
       TextView url;
    }
-
 }

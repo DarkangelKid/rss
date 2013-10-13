@@ -33,6 +33,16 @@ class FragmentWebView extends Fragment
       return view;
    }
 
+   void setData(String url, String html)
+   {
+      m_webView.loadDataWithBaseURL(url, html, null, null, null);
+   }
+
+   void setUrl(String url)
+   {
+      m_webView.loadUrl(url);
+   }
+
    @Override
    public
    void onResume()

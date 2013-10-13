@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -28,7 +27,6 @@ class FragmentManageFilters extends ListFragment
    void onCreate(Bundle savedInstanceState)
    {
       super.onCreate(savedInstanceState);
-      setHasOptionsMenu(true);
    }
 
    @Override
@@ -51,14 +49,8 @@ class FragmentManageFilters extends ListFragment
    public
    boolean onOptionsItemSelected(MenuItem item)
    {
-      FragmentActivity activity = getActivity();
-      if(activity.onOptionsItemSelected(item))
-      {
-         return true;
-      }
-
       CharSequence itemTitle = item.getTitle();
-      String addFeed = activity.getString(R.string.add_feed);
+      String addFeed = getString(R.string.add_feed);
 
       if(addFeed.equals(itemTitle))
       {
@@ -75,9 +67,9 @@ class FragmentManageFilters extends ListFragment
       LayoutInflater inflater = LayoutInflater.from(context);
       View addFilterLayout = inflater.inflate(R.layout.add_filter_dialog, null);
 
-      String cancelText = context.getString(R.string.cancel_dialog);
-      String addText = context.getString(R.string.add_dialog);
-      String addFilterText = context.getString(R.string.add_filter);
+      String cancelText = getString(R.string.cancel_dialog);
+      String addText = getString(R.string.add_dialog);
+      String addFilterText = getString(R.string.add_filter);
 
       DialogInterface.OnClickListener onClickCancel = new OnDialogClickCancel();
       DialogInterface.OnClickListener onClickAdd = new OnFilterDialogClickAdd(addFilterLayout,

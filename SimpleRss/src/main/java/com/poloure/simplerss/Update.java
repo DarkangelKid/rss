@@ -26,20 +26,6 @@ class Update
    }
 
    public static
-   void AsyncCompatManageTagsRefresh(ListView listView, ListAdapter listAdapter, Context context)
-   {
-      AsyncManageTagsRefresh task = new AsyncManageTagsRefresh(listView, listAdapter, context);
-      if(Constants.HONEYCOMB)
-      {
-         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-      }
-      else
-      {
-         task.execute();
-      }
-   }
-
-   public static
    void page(BaseAdapter navigationAdapter, int pageNumber, FragmentManager fragmentManager,
          Context context)
    {

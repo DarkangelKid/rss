@@ -15,7 +15,7 @@ import java.util.Set;
 
 class Read
 {
-   static final String UTF8 = "UTF-8";
+   private static final String UTF8 = "UTF-8";
 
    /* All functions in here must check that the media is available before
     * continuing. */
@@ -82,7 +82,7 @@ class Read
             }
          }
       }
-      catch(FileNotFoundException e)
+      catch(FileNotFoundException ignored)
       {
          //e.printStackTrace();
          return Util.EMPTY_STRING_ARRAY;
@@ -102,7 +102,7 @@ class Read
    }
 
    /* For reading from the internal s_storage. */
-   public static
+   private static
    BufferedReader reader(String path, String fileEncoding, Context context)
          throws FileNotFoundException, UnsupportedEncodingException
    {
@@ -112,7 +112,7 @@ class Read
    }
 
    /* Wrapper for creating external BufferedReader. */
-   public static
+   private static
    BufferedReader reader(String path) throws FileNotFoundException
    {
       return new BufferedReader(new FileReader(path));
@@ -154,7 +154,7 @@ class Read
             }
          }
       }
-      catch(FileNotFoundException e)
+      catch(FileNotFoundException ignored)
       {
          //e.printStackTrace();
       }

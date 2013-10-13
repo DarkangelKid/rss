@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -17,16 +18,77 @@ import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SpinnerAdapter;
-
-import java.util.Arrays;
+import android.widget.TextView;
 
 class FragmentManageFeeds extends ListFragment
 {
    private final BaseAdapter m_navigationAdapter;
+   static final int MODE_ADD = -1;
+   private final FragmentManager m_fragmentManager;
 
-   FragmentManageFeeds(BaseAdapter navigationAdapter)
+   FragmentManageFeeds(BaseAdapter navigationAdapter, FragmentManager fragmentManager)
    {
       m_navigationAdapter = navigationAdapter;
+      m_fragmentManager = fragmentManager;
+   }
+
+   static
+   void showEditDialog(BaseAdapter navigationAdapter, FragmentManager fragmentManager, Context context, int position)
+   {
+      LayoutInflater inf = LayoutInflater.from(context);
+      View dialogLayout = inf.inflate(R.layout.add_rss_dialog, null);
+
+      String[] currentTags = Read.file(Constants.TAG_LIST, context);
+
+      AdapterView<SpinnerAdapter> spinnerTag
+            = (AdapterView<SpinnerAdapter>) dialogLayout.findViewById(R.id.tag_spinner);
+
+      SpinnerAdapter spinnerAdapter = new ArrayAdapter<String>(context, R.layout.group_spinner_text,
+            currentTags);
+      spinnerTag.setAdapter(spinnerAdapter);
+
+      String titleText;
+      String negativeButtonText;
+      String positiveButtonText;
+
+      /* If the mode is edit. */
+      if(MODE_ADD != position)
+      {
+         String[][] content = Read.csv(context);
+         String title = content[0][position];
+         String url = content[1][position];
+         String tag = content[2][position];
+
+         ((TextView) dialogLayout.findViewById(R.id.URL_edit)).setText(url);
+         ((TextView) dialogLayout.findViewById(R.id.name_edit)).setText(title);
+
+         int tagIndex = Util.index(currentTags, tag);
+         spinnerTag.setSelection(tagIndex);
+
+         titleText = context.getString(R.string.edit_dialog_title);
+         negativeButtonText = context.getString(R.string.cancel_dialog);
+         positiveButtonText = context.getString(R.string.accept_dialog);
+      }
+      else
+      {
+         titleText = context.getString(R.string.add_dialog_title);
+         negativeButtonText = context.getString(R.string.cancel_dialog);
+         positiveButtonText = context.getString(R.string.add_dialog);
+      }
+
+      /* Create the button click listeners. */
+      DialogInterface.OnClickListener onCancel = new OnDialogClickCancel();
+      DialogInterface.OnClickListener onAdd = new OnDialogClickAdd(dialogLayout, spinnerTag,
+            navigationAdapter, fragmentManager, context);
+
+      /* Build the AlertDialog. */
+      AlertDialog.Builder build = new AlertDialog.Builder(context);
+      build.setTitle(titleText);
+      build.setView(dialogLayout);
+      build.setCancelable(true);
+      build.setNegativeButton(negativeButtonText, onCancel);
+      build.setPositiveButton(positiveButtonText, onAdd);
+      build.show();
    }
 
    @Override
@@ -46,45 +108,7 @@ class FragmentManageFeeds extends ListFragment
       super.onListItemClick(l, v, position, id);
       Context context = getActivity();
 
-      String[][] content = Read.csv(context);
-      String title = content[0][position];
-      String url = content[1][position];
-      String tag = content[2][position];
-
-      LayoutInflater inflater = LayoutInflater.from(context);
-      View editRssLayout = inflater.inflate(R.layout.add_rss_dialog, null);
-
-      AdapterView<SpinnerAdapter> spinnerTag
-            = (AdapterView<SpinnerAdapter>) editRssLayout.findViewById(R.id.tag_spinner);
-
-      String[] currentTags = Read.file(Constants.TAG_LIST, context);
-      String[] spinnerTags = Arrays.copyOfRange(currentTags, 1, currentTags.length);
-
-      SpinnerAdapter adapter = new ArrayAdapter<String>(context, R.layout.group_spinner_text,
-            spinnerTags);
-      //adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
-      spinnerTag.setAdapter(adapter);
-      Util.setText(url, editRssLayout, R.id.URL_edit);
-      Util.setText(title, editRssLayout, R.id.name_edit);
-
-      int tagIndex = Util.index(spinnerTags, tag);
-      spinnerTag.setSelection(tagIndex);
-
-      String editTitle = context.getString(R.string.edit_dialog_title);
-      String cancelText = context.getString(R.string.cancel_dialog);
-      String acceptText = context.getString(R.string.accept_dialog);
-
-      DialogInterface.OnClickListener onDialogClickCancel = new OnDialogClickCancel();
-      DialogInterface.OnClickListener onDialogClickEdit = new OnDialogClickEdit(editRssLayout,
-            spinnerTag, title, m_navigationAdapter, context);
-
-      AlertDialog.Builder build = new AlertDialog.Builder(context);
-      build.setTitle(editTitle);
-      build.setView(editRssLayout);
-      build.setCancelable(true);
-      build.setNegativeButton(cancelText, onDialogClickCancel);
-      build.setPositiveButton(acceptText, onDialogClickEdit);
-      build.show();
+      showEditDialog(m_navigationAdapter, m_fragmentManager, context, position);
    }
 
    @Override
@@ -108,7 +132,8 @@ class FragmentManageFeeds extends ListFragment
    void manageFeeds(ListView listView, ListAdapter listAdapter)
    {
       Context context = getActivity();
-      AsyncManageFeedsRefresh task = new AsyncManageFeedsRefresh(listView, (BaseAdapter) listAdapter, context);
+      AsyncManageFeedsRefresh task = new AsyncManageFeedsRefresh(listView,
+            (BaseAdapter) listAdapter, context);
       if(Constants.HONEYCOMB)
       {
          task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -127,15 +152,6 @@ class FragmentManageFeeds extends ListFragment
       FragmentActivity activity = getActivity();
       if(activity.onOptionsItemSelected(item))
       {
-         return true;
-      }
-
-      String addFeed = activity.getString(R.string.add_feed);
-      CharSequence menuTitle = item.getTitle();
-
-      if(addFeed.equals(menuTitle))
-      {
-         FeedDialog.showAddDialog(m_navigationAdapter, activity);
          return true;
       }
       return super.onOptionsItemSelected(item);

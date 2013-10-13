@@ -1,10 +1,12 @@
 package com.poloure.simplerss;
+
 import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
+import android.widget.ListView;
 
 class OnPageChangeTags implements ViewPager.OnPageChangeListener
 {
@@ -27,10 +29,12 @@ class OnPageChangeTags implements ViewPager.OnPageChangeListener
    public
    void onPageSelected(int pos)
    {
-      ListAdapter adapter = Util.getCardAdapter(pos, m_fragment);
+      FragmentManager fragmentManager = m_fragment.getFragmentManager();
+      ListView listView = Util.getFeedListView(pos, fragmentManager);
+
+      ListAdapter adapter = listView.getAdapter();
       if(0 == adapter.getCount())
       {
-         FragmentManager fragmentManager = m_fragment.getFragmentManager();
          Context context = m_fragment.getActivity();
          Update.page(m_navigationAdapter, pos, fragmentManager, context);
       }

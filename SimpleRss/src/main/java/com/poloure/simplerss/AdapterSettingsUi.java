@@ -144,7 +144,7 @@ class AdapterSettingsUi extends BaseAdapter
          holder.checkbox.setOnClickListener(new SettingBooleanChecked(settingPath, m_context));
 
          /* Load the saved boolean value and set the box as checked if true. */
-         holder.checkbox.setChecked(Util.strbol(Read.setting(settingPath, m_context)));
+         holder.checkbox.setChecked(Boolean.parseBoolean(Read.setting(settingPath, m_context)));
       }
       return view;
    }

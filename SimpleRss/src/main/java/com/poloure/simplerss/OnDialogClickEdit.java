@@ -1,4 +1,5 @@
 package com.poloure.simplerss;
+
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -6,6 +7,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.SpinnerAdapter;
+import android.widget.TextView;
 
 class OnDialogClickEdit implements DialogInterface.OnClickListener
 {
@@ -29,9 +31,15 @@ class OnDialogClickEdit implements DialogInterface.OnClickListener
    public
    void onClick(DialogInterface dialog, int which)
    {
-      String editTag = Util.getText(m_editRssDialog, R.id.tag_edit);
-      String newUrl = Util.getText(m_editRssDialog, R.id.URL_edit);
-      String newName = Util.getText(m_editRssDialog, R.id.name_edit);
+      String editTag = ((TextView) m_editRssDialog.findViewById(R.id.tag_edit)).getText()
+            .toString()
+            .trim();
+      String newUrl = ((TextView) m_editRssDialog.findViewById(R.id.URL_edit)).getText()
+            .toString()
+            .trim();
+      String newName = ((TextView) m_editRssDialog.findViewById(R.id.name_edit)).getText()
+            .toString()
+            .trim();
       String spinnerTag = m_tag.getSelectedItem().toString();
       if(0 == editTag.length())
       {

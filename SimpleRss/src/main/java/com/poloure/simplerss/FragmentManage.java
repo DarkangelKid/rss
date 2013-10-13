@@ -11,6 +11,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -59,12 +60,16 @@ class FragmentManage extends Fragment
    public
    void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
    {
-      menu.clear();
+      menu.findItem(R.id.refresh).setVisible(false);
+      menu.findItem(R.id.unread).setVisible(false);
+      menu.findItem(R.id.add_feed).setVisible(true);
+   }
 
-      inflater.inflate(R.menu.manage_overflow, menu);
-      super.onCreateOptionsMenu(menu, inflater);
-
+   @Override
+   public
+   boolean onOptionsItemSelected(MenuItem item)
+   {
       FragmentActivity activity = getActivity();
-      ((FeedsActivity) activity).setOptionsMenu(menu);
+      return activity.onOptionsItemSelected(item);
    }
 }

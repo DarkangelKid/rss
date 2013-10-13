@@ -7,6 +7,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -22,6 +24,7 @@ class FragmentSettings extends Fragment
       }
 
       Context context = getActivity();
+      setHasOptionsMenu(true);
 
       ViewPager pager = new ViewPager(context);
       Constants.PAGER_TAB_STRIPS[2] = Util.newPagerTabStrip(context);
@@ -38,4 +41,14 @@ class FragmentSettings extends Fragment
 
       return pager;
    }
+
+   @Override
+   public
+   void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
+   {
+      menu.findItem(R.id.refresh).setVisible(false);
+      menu.findItem(R.id.unread).setVisible(false);
+      menu.findItem(R.id.add_feed).setVisible(false);
+   }
+
 }

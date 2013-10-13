@@ -25,7 +25,7 @@ class RefreshPage extends AsyncTask<Integer, Object, Animation>
    private       ListFragment    m_listFragment;
    private       AdapterTag      m_adapterCard;
    private       ListView        m_listView;
-   private       FragmentManager m_fragmentManager;
+   private final FragmentManager m_fragmentManager;
    private int position = -3;
    private final Context m_context;
 
@@ -67,8 +67,8 @@ class RefreshPage extends AsyncTask<Integer, Object, Animation>
       {
          if(tags[j].contains(tag) || tag.equals(m_context.getString(R.string.all_tag)))
          {
-            String[][] content = Read.csv(Util.getPath(feeds[j], Constants.CONTENT), m_context, 't',
-                  'd', 'l', 'i', 'w', 'h', 'p');
+            String[][] content = Read.csv(feeds[j] + Constants.SEPAR + Constants.CONTENT, m_context,
+                  't', 'd', 'l', 'i', 'w', 'h', 'p');
             if(0 == content.length)
             {
                return null;
@@ -87,10 +87,13 @@ class RefreshPage extends AsyncTask<Integer, Object, Animation>
                /* Edit the data. */
                if(null != images[i])
                {
-                  if(MIN_IMAGE_WIDTH < Util.stoi(widths[i]))
+
+                  if(MIN_IMAGE_WIDTH < (null == widths[i] || 0 == widths[i].length()
+                        ? 0
+                        : Integer.parseInt(widths[i])))
                   {
                      int lastSlash = images[i].lastIndexOf(Constants.SEPAR) + 1;
-                     images[i] = Util.getPath(feeds[j], Constants.THUMBNAILS) +
+                     images[i] = feeds[j] + Constants.SEPAR + Constants.THUMBNAIL_DIR +
                            images[i].substring(lastSlash);
                   }
                   else
@@ -119,10 +122,17 @@ class RefreshPage extends AsyncTask<Integer, Object, Animation>
                data.url = links[i];
                data.description = descriptions[i];
                data.image = images[i];
-               data.width = Util.stoi(widths[i]);
-               data.height = Util.stoi(heights[i]);
 
-               AdapterTag adapterTag = Util.getCardAdapter(m_pageNumber, m_listFragment);
+               data.width = null == widths[i] || 0 == widths[i].length()
+                     ? 0
+                     : Integer.parseInt(widths[i]);
+
+               data.height = null == heights[i] || 0 == heights[i].length()
+                     ? 0
+                     : Integer.parseInt(heights[i]);
+
+               AdapterTag adapterTag = (AdapterTag) Util.getFeedListView(m_pageNumber,
+                     m_fragmentManager).getAdapter();
                if(-1 == Util.index(adapterTag.m_items, data))
                {
                   Long l = Long.parseLong(times[i]) - i;
@@ -214,7 +224,7 @@ class RefreshPage extends AsyncTask<Integer, Object, Animation>
       if(m_flash)
       {
          position = Util.gotoLatestUnread(m_adapterCard.m_items, false, m_pageNumber,
-               m_listFragment);
+               m_fragmentManager);
       }
 
       if(0 != top)

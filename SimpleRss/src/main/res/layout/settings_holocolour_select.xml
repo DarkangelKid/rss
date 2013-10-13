@@ -50,7 +50,7 @@
          android:id="@+id/blue_image"
          android:layout_width="28dp"
          android:layout_height="28dp"
-         android:src="@drawable/colour_blue_light"/>
+         android:src="@color/blue_light"/>
 
       <View
          android:layout_width="0dp"
@@ -61,7 +61,7 @@
          android:id="@+id/purple_image"
          android:layout_width="28dp"
          android:layout_height="28dp"
-         android:src="@drawable/colour_purple_light"/>
+         android:src="@color/purple_light"/>
 
       <View
          android:layout_width="0dp"
@@ -72,7 +72,7 @@
          android:id="@+id/green_image"
          android:layout_width="28dp"
          android:layout_height="28dp"
-         android:src="@drawable/colour_green_light"/>
+         android:src="@color/green_light"/>
 
       <View
          android:layout_width="0dp"
@@ -83,7 +83,7 @@
          android:id="@+id/yellow_image"
          android:layout_width="28dp"
          android:layout_height="28dp"
-         android:src="@drawable/colour_yellow_light"/>
+         android:src="@color/yellow_light"/>
 
       <View
          android:layout_width="0dp"
@@ -94,7 +94,7 @@
          android:id="@+id/red_image"
          android:layout_width="28dp"
          android:layout_height="28dp"
-         android:src="@drawable/colour_red_light"/>
+         android:src="@color/red_light"/>
    </LinearLayout>
 
    <ImageView

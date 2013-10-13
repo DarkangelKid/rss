@@ -15,10 +15,13 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
+
+import java.io.File;
 
 public
 class FeedsActivity extends ActionBarActivity
@@ -39,20 +42,30 @@ class FeedsActivity extends ActionBarActivity
 
       setContentView(R.layout.navigation_drawer_and_content_frame);
 
+      /* Get the navigation drawer titles. */
+      Resources resources = getResources();
+      String[] navTitles = resources.getStringArray(R.array.nav_titles);
+
+      /* Configure the ActionBar. */
       ActionBar actionBar = getSupportActionBar();
       actionBar.setIcon(R.drawable.rss_icon);
       actionBar.setDisplayHomeAsUpEnabled(true);
       actionBar.setHomeButtonEnabled(true);
+      actionBar.setTitle(navTitles[0]);
 
-      Util.remove(Constants.DUMP_FILE, this);
+      /* Delete the log file. */
+      Util.remove(Constants.LOG_FILE, this);
 
-      Util.mkdir(Constants.SETTINGS_DIR, this);
+      /* Make the settings directory. */
+      String storage = Util.getStorage(this);
+      File folder = new File(storage + Constants.SETTINGS_DIR);
+      folder.mkdirs();
 
       /* Create the navigation drawer and set all the listeners for it. */
       m_drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
       ListView navigationList = (ListView) findViewById(R.id.left_drawer);
 
-      /* Set the listeners (and save the navigation list to the public static variable). */
+      /* Set the listeners. */
       AdapterView.OnItemClickListener onClickNavDrawerItem = new OnClickNavDrawerItem(
             m_drawerLayout, this);
       m_drawerToggle = new OnClickDrawerToggle(this, m_drawerLayout);
@@ -73,8 +86,6 @@ class FeedsActivity extends ActionBarActivity
 
          int frame = R.id.content_frame;
 
-         Resources resources = getResources();
-         String[] navTitles = resources.getStringArray(R.array.nav_titles);
          FragmentManager fragmentManager = getSupportFragmentManager();
          FragmentTransaction transaction = fragmentManager.beginTransaction();
          transaction.add(frame, mainFragments[0], navTitles[0]);
@@ -132,7 +143,7 @@ class FeedsActivity extends ActionBarActivity
 
       /* Load the ManageFeedsRefresh boolean value from settings. */
       String[] check = Read.file(Constants.SETTINGS_DIR + fileNames[1] + Constants.TXT, this);
-      boolean refresh = 0 == check.length || !Util.strbol(check[0]);
+      boolean refresh = 0 == check.length || !Boolean.parseBoolean(check[0]);
 
       if(refresh && Constants.ALARM_SERVICE_START.equals(state))
       {
@@ -143,7 +154,10 @@ class FeedsActivity extends ActionBarActivity
       String[] settings = Read.file(Constants.SETTINGS_DIR + fileNames[2] + Constants.TXT, this);
       if(0 != settings.length)
       {
-         time = Util.stoi(settings[0]);
+
+         time = null == settings[0] || 0 == settings[0].length()
+               ? 0
+               : Integer.parseInt(settings[0]);
       }
 
       /* Create intent, turn into pending intent, and get the alarm manager. */
@@ -204,24 +218,65 @@ class FeedsActivity extends ActionBarActivity
    void onPostCreate(Bundle savedInstanceState)
    {
       super.onPostCreate(savedInstanceState);
+
       // Sync the toggle state after onRestoreInstanceState has occurred.
       m_drawerToggle.syncState();
    }
 
    @Override
    public
+   boolean onCreateOptionsMenu(Menu menu)
+   {
+      menu.clear();
+
+      MenuInflater menuInflater = getMenuInflater();
+      menuInflater.inflate(R.menu.activity, menu);
+
+      m_optionsMenu = menu;
+
+      boolean serviceRunning = FragmentFeeds.isServiceRunning(this);
+      Util.setRefreshingIcon(serviceRunning, menu);
+      return true;
+   }
+
+   @Override
+   public
    boolean onOptionsItemSelected(MenuItem item)
    {
-      /* If the user has clicked the title and the title says Constants.OFFLINE. */
-      String barString = getNavigationTitle();
+      /* If the user has clicked the title and the title says R.string.offline. */
+      String navigationTitle = getNavigationTitle();
+      CharSequence menuText = item.getTitle();
 
-      if(getString(R.string.offline).equals(barString))
+      String offline = getString(R.string.offline);
+      String addFeed = getString(R.string.add_feed);
+      String jumpTo = getString(R.string.unread);
+      String refresh = getString(R.string.refresh);
+
+      if(offline.equals(navigationTitle))
       {
          onBackPressed();
-         return true;
+      }
+      else if(menuText.equals(addFeed))
+      {
+         FragmentManager fragmentManager = getSupportFragmentManager();
+         FragmentManageFeeds.showEditDialog(m_navigationDrawer, fragmentManager, this,
+               FragmentManageFeeds.MODE_ADD);
+      }
+      else if(menuText.equals(jumpTo))
+      {
+         FragmentManager fragmentManager = getSupportFragmentManager();
+         Util.gotoLatestUnread(null, true, 0, fragmentManager);
+      }
+      else if(menuText.equals(refresh))
+      {
+         FragmentFeeds.refreshFeeds(this, m_navigationDrawer);
+      }
+      else
+      {
+         return m_drawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
       }
 
-      return m_drawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
+      return true;
    }
 
    String getNavigationTitle()
@@ -231,9 +286,12 @@ class FeedsActivity extends ActionBarActivity
       return title.toString();
    }
 
-   void setNavigationTitle(String title)
+   void setNavigationTitle(String title, boolean saveTitle)
    {
-      m_previousTitle = title;
+      if(saveTitle)
+      {
+         m_previousTitle = getNavigationTitle();
+      }
       ActionBar actionBar = getSupportActionBar();
       actionBar.setTitle(title);
    }

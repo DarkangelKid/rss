@@ -1,11 +1,15 @@
 package com.poloure.simplerss;
+
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.view.PagerAdapter;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.SpinnerAdapter;
+import android.widget.TextView;
 
 class OnDialogClickAdd implements DialogInterface.OnClickListener
 {
@@ -13,23 +17,25 @@ class OnDialogClickAdd implements DialogInterface.OnClickListener
    private final AdapterView<SpinnerAdapter> m_tagMenu;
    private final BaseAdapter                 m_navigationAdapter;
    private final Context                     m_context;
+   private final FragmentManager             m_fragmentManager;
 
    OnDialogClickAdd(View addRssDialog, AdapterView<SpinnerAdapter> spinnerTag,
-         BaseAdapter navigationAdapter, Context context)
+         BaseAdapter navigationAdapter, FragmentManager fragmentManager, Context context)
    {
       m_addRssDialog = addRssDialog;
       m_tagMenu = spinnerTag;
       m_navigationAdapter = navigationAdapter;
       m_context = context;
+      m_fragmentManager = fragmentManager;
    }
 
    @Override
    public
    void onClick(DialogInterface dialog, int which)
    {
-      String tag = Util.getText(m_addRssDialog, R.id.tag_edit);
-      String url = Util.getText(m_addRssDialog, R.id.URL_edit);
-      String name = Util.getText(m_addRssDialog, R.id.name_edit);
+      String tag = ((TextView) m_addRssDialog.findViewById(R.id.tag_edit)).getText().toString();
+      String url = ((TextView) m_addRssDialog.findViewById(R.id.URL_edit)).getText().toString();
+      String name = ((TextView) m_addRssDialog.findViewById(R.id.name_edit)).getText().toString();
 
       if(0 == tag.length())
       {
@@ -50,5 +56,13 @@ class OnDialogClickAdd implements DialogInterface.OnClickListener
 
       Update.executeFeedCheck((AlertDialog) dialog, tag, name, Constants.ADD, "", url,
             m_navigationAdapter, m_context);
+
+      /* Update the navigation drawer. */
+      Update.navigation(m_navigationAdapter, m_context);
+
+      /* Update the feeds PagerAdapter. */
+      PagerAdapter adapter = new PagerAdapterFeeds(m_navigationAdapter, m_fragmentManager,
+            m_context);
+      FragmentFeeds.s_viewPager.setAdapter(adapter);
    }
 }

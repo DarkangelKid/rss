@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Environment;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
 import android.support.v4.view.MenuItemCompat;
@@ -15,10 +14,8 @@ import android.support.v4.view.ViewPager;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import java.io.File;
 import java.util.Collection;
@@ -68,9 +65,10 @@ class Util
    }
 
    static
-   int gotoLatestUnread(FeedItem[] p_items, boolean update, int page, Fragment fragment)
+   int gotoLatestUnread(FeedItem[] feedItems, boolean update, int page,
+         FragmentManager fragmentManager)
    {
-      FeedItem[] items = p_items;
+      FeedItem[] items = feedItems;
       int page1 = page;
 
       if(null == FragmentFeeds.s_viewPager)
@@ -85,7 +83,7 @@ class Util
 
       if(null == items)
       {
-         AdapterTag cardAdapter = getCardAdapter(page1, fragment);
+         AdapterTag cardAdapter = (AdapterTag) getFeedListView(page1, fragmentManager).getAdapter();
          if(null == cardAdapter)
          {
             return -1;
@@ -108,7 +106,7 @@ class Util
        * May not be true anymore.*/
       if(update)
       {
-         ListView lv = getFeedListView(page1, fragment);
+         ListView lv = getFeedListView(page1, fragmentManager);
          if(null == lv)
          {
             return -1;
@@ -121,23 +119,13 @@ class Util
 
    /* This is the second one. */
    static
-   ListView getFeedListView(int page, Fragment fragment)
+   ListView getFeedListView(int page, FragmentManager fragmentManager)
    {
-      FragmentManager fragmentManager = fragment.getFragmentManager();
-
       ViewPager viewpager = FragmentFeeds.s_viewPager;
 
       int viewpagerId = viewpager.getId();
       String tag = String.format(Constants.FRAGMENT_TAG, viewpagerId, page);
       return ((ListFragment) fragmentManager.findFragmentByTag(tag)).getListView();
-   }
-
-   /* For these two functions, check for null. Should only really be
-    * null if called from the ServiceUpdate. */
-   static
-   AdapterTag getCardAdapter(int page, Fragment fragment)
-   {
-      return (AdapterTag) getFeedListView(page, fragment).getAdapter();
    }
 
    static
@@ -150,7 +138,8 @@ class Util
 
       /* Check to see if we can Write to the media. */
       String mounted = Environment.MEDIA_MOUNTED;
-      return !mounted.equals(Environment.getExternalStorageState());
+      String externalStorageState = Environment.getExternalStorageState();
+      return !mounted.equals(externalStorageState);
    }
 
    static
@@ -158,13 +147,6 @@ class Util
    {
       /* Return true if force sd setting is true. */
       return true;
-   }
-
-   /* Safe to call at anytime. */
-   static
-   int getScreenWidth(Context context)
-   {
-      return context.getResources().getDisplayMetrics().widthPixels;
    }
 
    static
@@ -193,10 +175,11 @@ class Util
          {
             if(indexTags[j].equals(currentTags[i]))
             {
-               totalCounts[i] += Read.count(getPath(indexNames[j], Constants.CONTENT), context);
+               totalCounts[i] += Read.count(indexNames[j] + Constants.SEPAR + Constants.CONTENT,
+                     context);
                for(String readUrl : readLinks)
                {
-                  int pos = readUrl.indexOf('/') + 1;
+                  int pos = readUrl.indexOf('/') + 2;
                   readUrl = readUrl.substring(pos, readUrl.indexOf('/', pos + 1));
                   if(indexUrls[j].contains(readUrl))
                   {
@@ -213,20 +196,6 @@ class Util
       return unreadCounts;
    }
 
-   /* For feed files. */
-   static
-   String getPath(String feed, String append)
-   {
-      String feedFolder = feed + Constants.SEPAR;
-
-      if(Constants.THUMBNAILS.equals(append))
-      {
-         return feedFolder + Constants.THUMBNAIL_DIR;
-      }
-
-      return feedFolder + append;
-   }
-
    static
    Intent getServiceIntent(int page, String notificationName, Context context)
    {
@@ -240,17 +209,11 @@ class Util
             Constants.TXT;
       String[] check = Read.file(path, context);
 
-      boolean notificationsEnabled = 0 != check.length && strbol(check[0]);
+      boolean notificationsEnabled = 0 != check.length && Boolean.parseBoolean(check[0]);
       Intent intent = new Intent(context, ServiceUpdate.class);
       intent.putExtra("GROUP_NUMBER", page);
       intent.putExtra("NOTIFICATIONS", notificationsEnabled);
       return intent;
-   }
-
-   static
-   boolean strbol(String str)
-   {
-      return Boolean.parseBoolean(str);
    }
 
    /* Changes the ManageFeedsRefresh menu item to an animation if m_mode = true. */
@@ -354,44 +317,14 @@ class Util
    }
 
    static
-   void mkdir(String path, Context context)
+   boolean move(String original, String resulting, Context context)
    {
-      String path1 = getStorage(context) + path;
-      File folder = new File(path1);
-      if(!folder.exists())
-      {
-         folder.mkdirs();
-      }
-   }
-
-   static
-   boolean move(String p_originalFile, String p_resultingFile, Context context)
-   {
-      String originalFile = getStorage(context) + p_originalFile;
-      String resultingFile = getStorage(context) + p_resultingFile;
+      String originalFile = getStorage(context) + original;
+      String resultingFile = getStorage(context) + resulting;
       return new File(originalFile).renameTo(new File(resultingFile));
    }
 
    /* Wrappers for neatness. */
-
-   static
-   int stoi(String str)
-   {
-
-      return null == str || 0 == str.length() ? 0 : Integer.parseInt(str);
-   }
-
-   static
-   void setText(CharSequence charSequence, View view, int id)
-   {
-      ((TextView) view.findViewById(id)).setText(charSequence);
-   }
-
-   static
-   String getText(View view, int id)
-   {
-      return ((TextView) view.findViewById(id)).getText().toString().trim();
-   }
 
    static
    PagerTabStrip newPagerTabStrip(Context context)
@@ -425,7 +358,14 @@ class Util
       int pos = index(colors, color);
       if(-1 != pos)
       {
-         strip.setTabIndicatorColor(Constants.COLOR_INTS[pos]);
+         int[] colorInts = {
+               resources.getColor(R.color.blue_light),
+               resources.getColor(R.color.purple_light),
+               resources.getColor(R.color.green_light),
+               resources.getColor(R.color.yellow_light),
+               resources.getColor(R.color.red_light),
+         };
+         strip.setTabIndicatorColor(colorInts[pos]);
       }
    }
 
