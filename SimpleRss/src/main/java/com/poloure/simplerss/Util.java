@@ -1,17 +1,12 @@
 package com.poloure.simplerss;
 
 import android.content.Context;
-import android.content.Intent;
-import android.content.res.Resources;
-import android.graphics.Color;
 import android.os.Environment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.PagerTabStrip;
 import android.support.v4.view.ViewPager;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.BaseAdapter;
@@ -202,26 +197,6 @@ class Util
       return unreadCounts;
    }
 
-   static
-   Intent getServiceIntent(int page, String notificationName, Context context)
-   {
-      if(null == notificationName)
-      {
-         Resources resources = context.getResources();
-         notificationName = resources.getStringArray(R.array.settings_names)[3];
-      }
-      /* Load notification boolean. */
-      String path = Constants.SETTINGS_DIR + notificationName +
-            Constants.TXT;
-      String[] check = Read.file(path, context);
-
-      boolean notificationsEnabled = 0 != check.length && Boolean.parseBoolean(check[0]);
-      Intent intent = new Intent(context, ServiceUpdate.class);
-      intent.putExtra("GROUP_NUMBER", page);
-      intent.putExtra("NOTIFICATIONS", notificationsEnabled);
-      return intent;
-   }
-
    /* Changes the ManageFeedsRefresh menu item to an animation if m_mode = true. */
    static
    void setRefreshingIcon(boolean mode, Menu menu)
@@ -250,6 +225,14 @@ class Util
       String path1 = getStorage(context) + path;
       context.deleteFile(getInternalPath(path1));
       new File(path1).delete();
+   }
+
+   static
+   String getInternalPath(String externalPath)
+   {
+      String substring = externalPath.substring(
+            externalPath.indexOf(Constants.SEPAR + "files" + Constants.SEPAR) + 7);
+      return substring.replaceAll(Constants.SEPAR, "-");
    }
 
    /* This function will return null if it fails. Check for null each time.
@@ -296,14 +279,6 @@ class Util
       return s_storage;
    }
 
-   static
-   String getInternalPath(String externalPath)
-   {
-      String substring = externalPath.substring(
-            externalPath.indexOf(Constants.SEPAR + "files" + Constants.SEPAR) + 7);
-      return substring.replaceAll(Constants.SEPAR, "-");
-   }
-
    /* Replaces ALL_TAG '/'s with '-' to emulate a folder directory layout in
     * data/data. */
    static
@@ -329,50 +304,6 @@ class Util
       String originalFile = getStorage(context) + original;
       String resultingFile = getStorage(context) + resulting;
       return new File(originalFile).renameTo(new File(resultingFile));
-   }
-
-   /* Wrappers for neatness. */
-   static
-   PagerTabStrip newPagerTabStrip(Context context)
-   {
-      PagerTabStrip pagerTabStrip = new PagerTabStrip(context);
-      int fourDp = Math.round(4.0F * context.getResources().getDisplayMetrics().density);
-
-      pagerTabStrip.setDrawFullUnderline(true);
-      pagerTabStrip.setGravity(Gravity.START);
-      pagerTabStrip.setPadding(0, fourDp, 0, fourDp);
-      pagerTabStrip.setTextColor(Color.WHITE);
-      pagerTabStrip.setBackgroundColor(Color.parseColor("#404040"));
-      setStripColor(pagerTabStrip, context);
-
-      return pagerTabStrip;
-   }
-
-   static
-   void setStripColor(PagerTabStrip strip, Context context)
-   {
-      String colorSettingsPath = Constants.SETTINGS_DIR + Constants.STRIP_COLOR;
-
-      /* Read the colour from the settings/colour file, if blank, use blue. */
-      String[] check = Read.file(colorSettingsPath, context);
-      String color = 0 == check.length ? "blue" : check[0];
-
-      /* Find the colour stored in adapter_settings_interface that we want. */
-      Resources resources = context.getResources();
-      String[] colors = resources.getStringArray(R.array.settings_colours);
-
-      int pos = index(colors, color);
-      if(-1 != pos)
-      {
-         int[] colorInts = {
-               resources.getColor(R.color.blue_light),
-               resources.getColor(R.color.purple_light),
-               resources.getColor(R.color.green_light),
-               resources.getColor(R.color.yellow_light),
-               resources.getColor(R.color.red_light),
-         };
-         strip.setTabIndicatorColor(colorInts[pos]);
-      }
    }
 
    /* index throws an ArrayOutOfBoundsException if not handled. */

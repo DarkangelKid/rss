@@ -1,7 +1,10 @@
 package com.poloure.simplerss;
 
+import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -33,6 +36,56 @@ class FeedsActivity extends ActionBarActivity
    private ActionBarDrawerToggle m_drawerToggle;
    private String                m_previousTitle;
    private BaseAdapter           m_navigationDrawer;
+
+   /* Updates and refreshes the tags with any new content. */
+   static
+   void refreshFeeds(ActionBarActivity activity, BaseAdapter navigationAdapter)
+   {
+      Menu menu = ((FeedsActivity) activity).m_optionsMenu;
+      Util.setRefreshingIcon(true, menu);
+
+      /* Set the service handler in FeedsActivity so we can check and call it
+       * from ServiceUpdate. */
+      s_serviceHandler = new FragmentFeeds.OnFinishService(activity, navigationAdapter);
+      int currentPage = FragmentFeeds.s_viewPager.getCurrentItem();
+      Intent intent = getServiceIntent(currentPage, null, activity);
+      activity.startService(intent);
+   }
+
+   static
+   boolean isServiceRunning(Activity activity)
+   {
+      ActivityManager manager = (ActivityManager) activity.getSystemService(ACTIVITY_SERVICE);
+      for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(
+            Integer.MAX_VALUE))
+      {
+         if(ServiceUpdate.class.getName().equals(service.service.getClassName()))
+         {
+            return true;
+         }
+      }
+      return false;
+   }
+
+   static
+   Intent getServiceIntent(int page, String notificationName, Context context)
+   {
+      if(null == notificationName)
+      {
+         Resources resources = context.getResources();
+         notificationName = resources.getStringArray(R.array.settings_names)[3];
+      }
+      /* Load notification boolean. */
+      String path = Constants.SETTINGS_DIR + notificationName +
+            Constants.TXT;
+      String[] check = Read.file(path, context);
+
+      boolean notificationsEnabled = 0 != check.length && Boolean.parseBoolean(check[0]);
+      Intent intent = new Intent(context, ServiceUpdate.class);
+      intent.putExtra("GROUP_NUMBER", page);
+      intent.putExtra("NOTIFICATIONS", notificationsEnabled);
+      return intent;
+   }
 
    @Override
    public
@@ -161,7 +214,7 @@ class FeedsActivity extends ActionBarActivity
       }
 
       /* Create intent, turn into pending intent, and get the alarm manager. */
-      Intent intent = Util.getServiceIntent(0, fileNames[3], this);
+      Intent intent = getServiceIntent(0, fileNames[3], this);
       PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, 0);
       AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
 
@@ -234,7 +287,7 @@ class FeedsActivity extends ActionBarActivity
 
       m_optionsMenu = menu;
 
-      boolean serviceRunning = FragmentFeeds.isServiceRunning(this);
+      boolean serviceRunning = isServiceRunning(this);
       Util.setRefreshingIcon(serviceRunning, menu);
       return true;
    }
@@ -269,7 +322,7 @@ class FeedsActivity extends ActionBarActivity
       }
       else if(menuText.equals(refresh))
       {
-         FragmentFeeds.refreshFeeds(this, m_navigationDrawer);
+         refreshFeeds(this, m_navigationDrawer);
       }
       else
       {
@@ -286,7 +339,7 @@ class FeedsActivity extends ActionBarActivity
       return title.toString();
    }
 
-   void setNavigationTitle(String title, boolean saveTitle)
+   void setNavigationTitle(CharSequence title, boolean saveTitle)
    {
       if(saveTitle)
       {

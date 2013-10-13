@@ -12,7 +12,7 @@ import android.widget.ListView;
 
 class FragmentManageTags extends ListFragment
 {
-   public static
+   private static
    void AsyncCompatManageTagsRefresh(ListView listView, ListAdapter listAdapter, Context context)
    {
       AsyncManageTagsRefresh task = new AsyncManageTagsRefresh(listView, listAdapter, context);
@@ -24,13 +24,6 @@ class FragmentManageTags extends ListFragment
       {
          task.execute();
       }
-   }
-
-   @Override
-   public
-   void onCreate(Bundle savedInstanceState)
-   {
-      super.onCreate(savedInstanceState);
    }
 
    @Override

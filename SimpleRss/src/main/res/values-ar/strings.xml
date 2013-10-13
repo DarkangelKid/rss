@@ -23,20 +23,11 @@
    <string name="feed_tag_title">Tags</string>
    <string name="feed_tag_hint">new tag</string>
    <string name="filter_hint">new filter</string>
+   <string name="add_filter">Add Filter</string>
 
    <string name="cancel_dialog">إلغاء‎</string>
    <string name="add_dialog">اضافة</string>
    <string name="accept_dialog">قبول</string>
-   <string name="feed_invalid">Invalid Feed URL</string>
-
-   <string name="refresh_cat_preferences">اعادة التحميل تلقائياً‎</string>
-   <string name="refresh_summary_preferences">Check to enable auto refresh</string>
-   <string name="refresh_time_preferences">Refresh Time</string>
-   <string name="refresh_time_summary_preferences">Adjust auto refresh interval</string>
-   <string name="notifications_preferences">إشعارات‎</string>
-   <string name="notifications_summary_preferences">Check to enable notifications</string>
-   <string name="offline_cat_preferences">Offline Mode</string>
-   <string name="offline_summary_preferences">Check to enable offline mode</string>
 
    <string name="all_tag">All</string>
 

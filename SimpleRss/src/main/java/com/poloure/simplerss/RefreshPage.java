@@ -24,7 +24,6 @@ class RefreshPage extends AsyncTask<Integer, Object, Animation>
    private final Context         m_context;
    private       int             m_pageNumber;
    private       boolean         m_flash;
-   private       ListFragment    m_listFragment;
    private       AdapterTags     m_adapterCard;
    private       ListView        m_listView;
    private int position = -3;
@@ -56,7 +55,7 @@ class RefreshPage extends AsyncTask<Integer, Object, Animation>
       int viewPagerId = FragmentFeeds.s_viewPager.getId();
       String fragmentTag = String.format(Constants.FRAGMENT_TAG, viewPagerId, m_pageNumber);
 
-      m_listFragment = (ListFragment) m_fragmentManager.findFragmentByTag(fragmentTag);
+      ListFragment m_listFragment = (ListFragment) m_fragmentManager.findFragmentByTag(fragmentTag);
       m_adapterCard = (AdapterTags) m_listFragment.getListAdapter();
       m_listView = m_listFragment.getListView();
 

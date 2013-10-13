@@ -21,11 +21,11 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
    private final String      m_mode;
    private final String      m_title;
    private final BaseAdapter m_navigationAdapter;
+   private final Context     m_context;
    private       String      m_tag;
    private       boolean     m_isFeedNotReal;
    private       String      name;
    private       boolean     m_newTag;
-   private final Context     m_context;
 
    AsyncCheckFeed(AlertDialog dialog, String tag, String feedName, String mode, String currentTitle,
          BaseAdapter navigationAdapter, Context context)
@@ -39,6 +39,12 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
       m_navigationAdapter = navigationAdapter;
       m_context = context;
       Button button = m_dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+      if(null != button)
+      {
+         button.setEnabled(false);
+      }
+
+      m_dialog.getButton(DialogInterface.BUTTON_POSITIVE);
       if(null != button)
       {
          button.setEnabled(false);
@@ -180,7 +186,8 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
    }
 
    private static
-   void editFeed(String oldFeed, String newFeed, String newUrl, String newTag, Context context)
+   void editFeed(CharSequence oldFeed, String newFeed, String newUrl, String newTag,
+         Context context)
    {
 
       String oldFeedFolder = oldFeed + Constants.SEPAR + "";

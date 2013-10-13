@@ -53,7 +53,13 @@ class FragmentManageFeeds extends ListFragment
       String positiveButtonText;
 
       /* If the mode is edit. */
-      if(MODE_ADD != position)
+      if(MODE_ADD == position)
+      {
+         titleText = context.getString(R.string.add_dialog_title);
+         negativeButtonText = context.getString(R.string.cancel_dialog);
+         positiveButtonText = context.getString(R.string.add_dialog);
+      }
+      else
       {
          String[][] content = Read.csv(context);
          String title = content[0][position];
@@ -69,12 +75,6 @@ class FragmentManageFeeds extends ListFragment
          titleText = context.getString(R.string.edit_dialog_title);
          negativeButtonText = context.getString(R.string.cancel_dialog);
          positiveButtonText = context.getString(R.string.accept_dialog);
-      }
-      else
-      {
-         titleText = context.getString(R.string.add_dialog_title);
-         negativeButtonText = context.getString(R.string.cancel_dialog);
-         positiveButtonText = context.getString(R.string.add_dialog);
       }
 
       /* Create the button click listeners. */

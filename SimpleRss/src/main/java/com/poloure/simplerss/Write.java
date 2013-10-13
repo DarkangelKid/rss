@@ -106,21 +106,6 @@ class Write
       return pos;
    }
 
-   private static
-   BufferedWriter writer(String path, int writeMode, Context context)
-         throws FileNotFoundException, UnsupportedEncodingException
-   {
-      String internalPath = Util.getInternalPath(path);
-      FileOutputStream fileOutputStream = context.openFileOutput(internalPath, writeMode);
-      return new BufferedWriter(new OutputStreamWriter(fileOutputStream, "UTF8"));
-   }
-
-   private static
-   BufferedWriter writer(String p, boolean ap) throws IOException
-   {
-      return new BufferedWriter(new FileWriter(p, ap));
-   }
-
    static
    void collection(String path, Iterable<?> content, Context context)
    {
@@ -174,6 +159,21 @@ class Write
       }
    }
 
+   private static
+   BufferedWriter writer(String p, boolean ap) throws IOException
+   {
+      return new BufferedWriter(new FileWriter(p, ap));
+   }
+
+   private static
+   BufferedWriter writer(String path, int writeMode, Context context)
+         throws FileNotFoundException, UnsupportedEncodingException
+   {
+      String internalPath = Util.getInternalPath(path);
+      FileOutputStream fileOutputStream = context.openFileOutput(internalPath, writeMode);
+      return new BufferedWriter(new OutputStreamWriter(fileOutputStream, "UTF8"));
+   }
+
    static
    void log(String text, Context context)
    {
@@ -222,17 +222,5 @@ class Write
       {
          e.printStackTrace();
       }
-   }
-
-   static
-   void log(int integer, Context context)
-   {
-      single(Constants.LOG_FILE, integer + Constants.NL, context);
-   }
-
-   static
-   void log(Iterable<?> content, Context context)
-   {
-      collection(Constants.LOG_FILE + ".iter.txt", content, context);
    }
 }

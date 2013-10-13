@@ -11,15 +11,15 @@ import android.widget.TextView;
 
 class AdapterNavDrawer extends BaseAdapter
 {
-   private final int m_twelve;
    private static final int[] NAV_ICONS = {
          R.drawable.feeds, R.drawable.manage, R.drawable.feeds,
    };
-   String[] m_tagArray    = Util.EMPTY_STRING_ARRAY;
-   int[]    m_unreadArray = Util.EMPTY_INT_ARRAY;
-   private       TextView       m_navigationMainItem;
+   private final int            m_twelve;
    private final LayoutInflater m_layoutInflater;
    private final Context        m_context;
+   String[] m_tagArray    = Util.EMPTY_STRING_ARRAY;
+   int[]    m_unreadArray = Util.EMPTY_INT_ARRAY;
+   private TextView m_navigationMainItem;
 
    AdapterNavDrawer(Context context)
    {
@@ -41,7 +41,7 @@ class AdapterNavDrawer extends BaseAdapter
    public
    String getItem(int position)
    {
-      return m_tagArray[position];
+      return 0 == m_unreadArray.length ? "" : Integer.toString(m_unreadArray[position]);
    }
 
    @Override

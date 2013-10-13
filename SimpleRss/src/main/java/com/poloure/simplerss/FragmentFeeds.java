@@ -1,18 +1,15 @@
 package com.poloure.simplerss;
 
-import android.app.Activity;
-import android.app.ActivityManager;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -44,21 +41,15 @@ class FragmentFeeds extends Fragment
       setHasOptionsMenu(true);
 
       Context context = getActivity();
-      Constants.PAGER_TAB_STRIPS[0] = Util.newPagerTabStrip(context);
-
-      ViewPager.LayoutParams layoutParams = new ViewPager.LayoutParams();
-      layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-      layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
-      layoutParams.gravity = Gravity.TOP;
+      FragmentManager fragmentManager = getFragmentManager();
+      PagerAdapter adapter = new PagerAdapterFeeds(m_navigationAdapter, fragmentManager, context);
+      ViewPager.OnPageChangeListener pageChange = new OnPageChangeTags(this, m_navigationAdapter);
 
       s_viewPager = new ViewPager(context);
 
-      s_viewPager.addView(Constants.PAGER_TAB_STRIPS[0], layoutParams);
-
-      FragmentManager fragmentManager = getFragmentManager();
-      s_viewPager.setAdapter(new PagerAdapterFeeds(m_navigationAdapter, fragmentManager, context));
+      s_viewPager.setAdapter(adapter);
       s_viewPager.setOffscreenPageLimit(OFF_SCREEN_PAGE_LIMIT);
-      s_viewPager.setOnPageChangeListener(new OnPageChangeTags(this, m_navigationAdapter));
+      s_viewPager.setOnPageChangeListener(pageChange);
       s_viewPager.setId(0x1000);
 
       return s_viewPager;
@@ -79,37 +70,6 @@ class FragmentFeeds extends Fragment
    {
       FragmentActivity activity = getActivity();
       return activity.onOptionsItemSelected(item);
-   }
-
-   /* Updates and refreshes the tags with any new content. */
-   static
-   void refreshFeeds(ActionBarActivity activity, BaseAdapter navigationAdapter)
-   {
-      Menu menu = ((FeedsActivity) activity).getOptionsMenu();
-      Util.setRefreshingIcon(true, menu);
-
-      /* Set the service handler in FeedsActivity so we can check and call it
-       * from ServiceUpdate. */
-      FeedsActivity.s_serviceHandler = new OnFinishService(activity, navigationAdapter);
-      int currentPage = s_viewPager.getCurrentItem();
-      Intent intent = Util.getServiceIntent(currentPage, null, activity);
-      activity.startService(intent);
-   }
-
-   static
-   boolean isServiceRunning(Activity activity)
-   {
-      ActivityManager manager = (ActivityManager) activity.getSystemService(
-            Context.ACTIVITY_SERVICE);
-      for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(
-            Integer.MAX_VALUE))
-      {
-         if(ServiceUpdate.class.getName().equals(service.service.getClassName()))
-         {
-            return true;
-         }
-      }
-      return false;
    }
 
    static

@@ -12,13 +12,16 @@ import android.widget.TextView;
 
 class AdapterSettingsFunctions extends BaseAdapter
 {
-   private static String[]       s_fileNames;
+   private static final int TYPE_HEADING  = 0;
+   private static final int TYPE_CHECKBOX = 1;
+   private static final int TYPE_SEEKBAR  = 2;
    static         int[]          s_times;
+   private static String[]       s_fileNames;
    private static String[]       s_functionTitles;
    private static String[]       s_functionSummaries;
-   private        TextView       m_titleView;
    private final  LayoutInflater m_layoutInflater;
    private final  Context        m_context;
+   private        TextView       m_titleView;
 
    AdapterSettingsFunctions(Context context)
    {
@@ -61,8 +64,7 @@ class AdapterSettingsFunctions extends BaseAdapter
       int viewType = getItemViewType(position);
       String settingPath = Constants.SETTINGS_DIR + s_fileNames[position] + Constants.TXT;
 
-      /* This type is the a heading. */
-      if(0 == viewType)
+      if(TYPE_HEADING == viewType)
       {
          if(null == view)
          {
@@ -72,9 +74,7 @@ class AdapterSettingsFunctions extends BaseAdapter
 
          m_titleView.setText(s_functionTitles[position]);
       }
-
-      /* This type is a checkbox setting. */
-      else if(1 == viewType)
+      else if(TYPE_CHECKBOX == viewType)
       {
          HolderSettingsCheckBox holder;
          if(null == view)
@@ -100,8 +100,6 @@ class AdapterSettingsFunctions extends BaseAdapter
          /* Load the saved boolean value and set the box as checked if true. */
          holder.checkbox.setChecked(Boolean.parseBoolean(Read.setting(settingPath, m_context)));
       }
-
-      /* Otherwise, the type will default to a SeekBar. */
       else
       {
          HolderSettingsSeekBar holder;
@@ -138,7 +136,7 @@ class AdapterSettingsFunctions extends BaseAdapter
       return view;
    }
 
-   private
+   private static
    int getIndexOfTime(int value)
    {
       if(null == s_times)
@@ -169,11 +167,11 @@ class AdapterSettingsFunctions extends BaseAdapter
    {
       if(0 == position)
       {
-         return 0;
+         return TYPE_HEADING;
       }
       else
       {
-         return 1 == position || 2 < position ? 1 : 2;
+         return 2 == position ? TYPE_SEEKBAR : TYPE_CHECKBOX;
       }
    }
 
