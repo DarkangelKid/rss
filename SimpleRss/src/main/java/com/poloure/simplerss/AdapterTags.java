@@ -15,14 +15,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.lang.reflect.Array;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Set;
 
 class AdapterTags extends BaseAdapter
 {
-   private static final int                VIEW_TYPE_COUNT         = 4;
-   private static final float              READ_ITEM_IMAGE_OPACITY = 0.5f;
-   static               Collection<String> s_readItemTimes         = new HashSet<String>();
+   private static final int       VIEW_TYPE_COUNT         = 4;
+   private static final float     READ_ITEM_IMAGE_OPACITY = 0.5f;
+   static               Set<Long> s_readItemTimes         = new HashSet(0);
    private final LayoutInflater m_inflater;
    private final Context        m_context;
    boolean    m_touchedScreen = true;
@@ -31,7 +32,11 @@ class AdapterTags extends BaseAdapter
    AdapterTags(Context context)
    {
       m_context = context;
-      s_readItemTimes = Read.set(Constants.READ_ITEMS, m_context);
+      if(0 == s_readItemTimes.size())
+      {
+         Set<Long> set = Read.longSet(Constants.READ_ITEMS, m_context);
+         s_readItemTimes = Collections.synchronizedSet(set);
+      }
       m_inflater = (LayoutInflater) m_context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
    }
 
@@ -93,7 +98,7 @@ class AdapterTags extends BaseAdapter
 
       String link = m_items[position].url;
       String title = m_items[position].title;
-      String time = m_items[position].time;
+      Long time = m_items[position].time;
 
       /* card_full.xml img && m_des. */
       if(0 == viewType)
@@ -206,30 +211,39 @@ class AdapterTags extends BaseAdapter
    }
 
    private
-   void displayImage(ImageView imageView, int position, String imageName)
+   void setCardAlpha(TextView title, TextView url, ImageView image, TextView des, Long time)
    {
-      imageView.setImageDrawable(new ColorDrawable(Color.WHITE));
-      LayoutParams lp = imageView.getLayoutParams();
+      Resources res = m_context.getResources();
 
-      Resources resources = m_context.getResources();
-      DisplayMetrics displayMetrics = resources.getDisplayMetrics();
-      int screenWidth = displayMetrics.widthPixels;
-
-      lp.height = (int) Math.round(
-            (double) screenWidth / m_items[position].width * m_items[position].height);
-      imageView.setLayoutParams(lp);
-      imageView.setTag(position);
-
-      AsyncLoadImage task = new AsyncLoadImage();
-      if(Constants.HONEYCOMB)
+      if(s_readItemTimes.contains(time))
       {
+         title.setTextColor(res.getColor(R.color.title_grey));
+         url.setTextColor(res.getColor(R.color.link_grey));
 
-         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, imageView, position, imageName,
-               m_context);
+         if(null != des)
+         {
+            des.setTextColor(res.getColor(R.color.des_grey));
+         }
+
+         if(null != image)
+         {
+            image.setAlpha(READ_ITEM_IMAGE_OPACITY);
+         }
       }
       else
       {
-         task.execute(imageView, position, imageName, m_context);
+         title.setTextColor(res.getColor(R.color.title_black));
+         url.setTextColor(res.getColor(R.color.link_black));
+
+         if(null != des)
+         {
+            des.setTextColor(res.getColor(R.color.des_black));
+         }
+
+         if(null != image)
+         {
+            image.setAlpha(1.0f);
+         }
       }
    }
 
@@ -265,39 +279,30 @@ class AdapterTags extends BaseAdapter
    }
 
    private
-   void setCardAlpha(TextView title, TextView url, ImageView image, TextView des, String time)
+   void displayImage(ImageView imageView, int position, String imageName)
    {
-      Resources res = m_context.getResources();
+      imageView.setImageDrawable(new ColorDrawable(Color.WHITE));
+      LayoutParams lp = imageView.getLayoutParams();
 
-      if(s_readItemTimes.contains(time))
+      Resources resources = m_context.getResources();
+      DisplayMetrics displayMetrics = resources.getDisplayMetrics();
+      int screenWidth = displayMetrics.widthPixels;
+
+      lp.height = (int) Math.round(
+            (double) screenWidth / m_items[position].width * m_items[position].height);
+      imageView.setLayoutParams(lp);
+      imageView.setTag(position);
+
+      AsyncLoadImage task = new AsyncLoadImage();
+      if(Constants.HONEYCOMB)
       {
-         title.setTextColor(res.getColor(R.color.title_grey));
-         url.setTextColor(res.getColor(R.color.link_grey));
 
-         if(null != des)
-         {
-            des.setTextColor(res.getColor(R.color.des_grey));
-         }
-
-         if(null != image)
-         {
-            image.setAlpha(READ_ITEM_IMAGE_OPACITY);
-         }
+         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, imageView, position, imageName,
+               m_context);
       }
       else
       {
-         title.setTextColor(res.getColor(R.color.title_black));
-         url.setTextColor(res.getColor(R.color.link_black));
-
-         if(null != des)
-         {
-            des.setTextColor(res.getColor(R.color.des_black));
-         }
-
-         if(null != image)
-         {
-            image.setAlpha(1.0f);
-         }
+         task.execute(imageView, position, imageName, m_context);
       }
    }
 

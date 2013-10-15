@@ -44,5 +44,4 @@ class FragmentSettings extends Fragment
       menu.findItem(R.id.unread).setVisible(false);
       menu.findItem(R.id.add_feed).setVisible(false);
    }
-
 }

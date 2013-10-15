@@ -4,38 +4,80 @@ import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.widget.BaseAdapter;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 class PagerAdapterFeeds extends FragmentPagerAdapter
 {
+   static Set<String> s_tagSet = new LinkedHashSet<String>(0);
    private final BaseAdapter m_navigationAdapter;
-   private final String[]    m_currentTags;
+   private final ViewPager.OnPageChangeListener m_pageChange;
 
-   PagerAdapterFeeds(BaseAdapter navigationAdapter, FragmentManager fm, Context context)
+   PagerAdapterFeeds(BaseAdapter navigationAdapter, FragmentManager fm,
+         ViewPager.OnPageChangeListener pageChange, Context context)
    {
       super(fm);
       m_navigationAdapter = navigationAdapter;
-      m_currentTags = Read.file(Constants.TAG_LIST, context);
+      m_pageChange = pageChange;
+      updateTags(context);
    }
 
-   @Override
-   public
-   int getCount()
+   static
+   Set<String> updateTags(Context context)
    {
-      return m_currentTags.length;
+      s_tagSet = Collections.synchronizedSet(new LinkedHashSet<String>(0));
+      String[] index = Read.csv(context)[2];
+      List<String> tagList = Arrays.asList(index);
+      s_tagSet.add(context.getString(R.string.all_tag));
+      s_tagSet.addAll(tagList);
+      return s_tagSet;
    }
 
-   @Override
-   public
-   String getPageTitle(int position)
+   static
+   Set<String> getTags()
    {
-      return m_currentTags[position];
+      return s_tagSet;
+   }
+
+   static
+   String[] getTagsArray()
+   {
+      int size = s_tagSet.size();
+      return s_tagSet.toArray(new String[size]);
+   }
+
+   static
+   int getSize()
+   {
+      return s_tagSet.size();
    }
 
    @Override
    public
    Fragment getItem(int position)
    {
-      return new FragmentTag(m_navigationAdapter, position);
+      return new FragmentTag(m_navigationAdapter, m_pageChange, position);
    }
+
+   @Override
+   public
+   int getCount()
+   {
+      return s_tagSet.size();
+   }
+
+   @Override
+   public
+   String getPageTitle(int position)
+   {
+      int size = getCount();
+      return s_tagSet.toArray(new String[size])[position];
+   }
+
 }

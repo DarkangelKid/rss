@@ -1,8 +1,6 @@
 package com.poloure.simplerss;
 
 import android.app.IntentService;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -12,8 +10,6 @@ import android.os.Bundle;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.Process;
-import android.support.v4.app.NotificationCompat.Builder;
-import android.support.v4.app.TaskStackBuilder;
 import android.text.format.Time;
 import android.util.DisplayMetrics;
 
@@ -63,7 +59,9 @@ class ServiceUpdate extends IntentService
 
       int page = intent.getIntExtra("GROUP_NUMBER", 0);
 
-      String tag = Read.file(Constants.TAG_LIST, this)[page];
+      Set<String> tagSet = PagerAdapterFeeds.updateTags(this);
+      int tagSize = tagSet.size();
+      String tag = tagSet.toArray(new String[tagSize])[page];
 
       String[][] content = Read.csv(this);
       String[] names = content[0];
@@ -106,7 +104,7 @@ class ServiceUpdate extends IntentService
          }
       }
 
-      int[] unreadCounts = Util.getUnreadCounts(this);
+      /* TODO GET UNREAD WITHOUT CONTEXT. int[] unreadCounts = Util.getUnreadCounts(this); */
 
       /* If activity is running. */
       if(null != FeedsActivity.s_serviceHandler)
@@ -117,10 +115,10 @@ class ServiceUpdate extends IntentService
          message.setData(bundle);
          FeedsActivity.s_serviceHandler.sendMessage(message);
       }
-      else if(0 != unreadCounts[0] && intent.getBooleanExtra("NOTIFICATIONS", false))
+      /*else if(0 != unreadCounts[0] && intent.getBooleanExtra("NOTIFICATIONS", false))
       {
          /* Calculate the number of tags with new items. */
-         int tagItems = 1;
+         /*int tagItems = 1;
          int sizes = unreadCounts.length;
 
          for(int i = 1; i < sizes; i++)
@@ -154,12 +152,6 @@ class ServiceUpdate extends IntentService
                   : String.format(contentPluralTag, tagItems - 1);
          }
 
-         Builder notificationBuilder = new Builder(this);
-         notificationBuilder.setSmallIcon(R.drawable.rss_icon)
-               .setContentTitle(notificationTitle)
-               .setContentText(notificationContent)
-               .setAutoCancel(true);
-
          Intent notificationIntent = new Intent(this, FeedsActivity.class);
 
          TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
@@ -168,14 +160,37 @@ class ServiceUpdate extends IntentService
          stackBuilder.addNextIntent(notificationIntent);
          PendingIntent pendingIntent = stackBuilder.getPendingIntent(0,
                PendingIntent.FLAG_UPDATE_CURRENT);
-         notificationBuilder.setContentIntent(pendingIntent);
+
+         Builder builder = new Builder(this);
+         builder.setSmallIcon(R.drawable.rss_icon);
+         builder.setContentTitle(notificationTitle);
+         builder.setContentText(notificationContent);
+         builder.setAutoCancel(true);
+         builder.setContentIntent(pendingIntent);
+
          NotificationManager notificationManager = (NotificationManager) getSystemService(
                Context.NOTIFICATION_SERVICE);
-         notificationManager.notify(1, notificationBuilder.build());
-      }
+         notificationManager.notify(1, builder.build());
+      }*/
 
       wakeLock.release();
       stopSelf();
+   }
+
+   boolean isNonExisting(String path, Context context)
+   {
+      String path1 = Util.getStorage(context) + path;
+      if(Util.isUsingSd() || path1.contains(Constants.THUMBNAIL_DIR))
+      {
+         File file = new File(path1);
+         return !file.exists();
+      }
+      else
+      {
+         String internalPath = Util.getInternalPath(path1);
+         File file = getFileStreamPath(internalPath);
+         return !file.exists();
+      }
    }
 
    private
@@ -183,10 +198,12 @@ class ServiceUpdate extends IntentService
          throws XmlPullParserException, MalformedURLException, IOException
    {
       String contentFile = feed + Constants.SEPAR + Constants.CONTENT;
+      String longFile = feed + Constants.SEPAR + Constants.ITEM_LIST;
       String thumbnailDir = feed + Constants.SEPAR + Constants.THUMBNAIL_DIR;
       /*String[] filters = Read.file(Constants.FILTER_LIST);*/
 
       Set<String> set = Read.set(contentFile, this);
+      Set<Long> longSet = Read.longSet(longFile, this);
 
       Time time = new Time();
 
@@ -268,6 +285,8 @@ class ServiceUpdate extends IntentService
                }
 
                timeLong = time.toMillis(true);
+               longSet.add(timeLong);
+
                timeString = Long.toString(timeLong);
                stringBuilder.append(Constants.TIME).append(timeString).append('|');
             }
@@ -291,6 +310,7 @@ class ServiceUpdate extends IntentService
                   timeLong = time.toMillis(true);
                }
 
+               longSet.add(timeLong);
                timeString = Long.toString(timeLong);
                stringBuilder.append(Constants.TIME).append(timeString).append('|');
             }
@@ -321,12 +341,12 @@ class ServiceUpdate extends IntentService
                   /* ISSUE #194 */
                   BitmapFactory.decodeFile(Util.getStorage(this) + thumbnailDir + imgName, options);
 
-                  stringBuilder.append(Constants.WIDTH)
-                        .append(options.outWidth)
-                        .append('|')
-                        .append(Constants.HEIGHT)
-                        .append(options.outHeight)
-                        .append('|');
+                  stringBuilder.append(Constants.WIDTH);
+                  stringBuilder.append(options.outWidth);
+                  stringBuilder.append('|');
+                  stringBuilder.append(Constants.HEIGHT);
+                  stringBuilder.append(options.outHeight);
+                  stringBuilder.append('|');
                }
 
                String tagToAppend = DESIRED_TAGS[5].equals(tag) ? DESIRED_TAGS[3] : tag;
@@ -348,6 +368,8 @@ class ServiceUpdate extends IntentService
          else if(XmlPullParser.END_DOCUMENT == eventType)
          {
             Write.collection(contentFile, set, this);
+            Write.log("size = " + Integer.toString(longSet.size()), this);
+            Write.longSet(longFile, longSet, this);
             return;
          }
          parser.next();
@@ -403,22 +425,6 @@ class ServiceUpdate extends IntentService
       catch(FileNotFoundException e)
       {
          e.printStackTrace();
-      }
-   }
-
-   boolean isNonExisting(String path, Context context)
-   {
-      String path1 = Util.getStorage(context) + path;
-      if(Util.isUsingSd() || path1.contains(Constants.THUMBNAIL_DIR))
-      {
-         File file = new File(path1);
-         return !file.exists();
-      }
-      else
-      {
-         String internalPath = Util.getInternalPath(path1);
-         File file = getFileStreamPath(internalPath);
-         return !file.exists();
       }
    }
 }

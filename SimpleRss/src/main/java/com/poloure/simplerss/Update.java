@@ -4,15 +4,16 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.ViewPager;
 import android.widget.BaseAdapter;
 
 class Update
 {
    public static
-   void navigation(BaseAdapter navigationAdapter, Context context)
+   void navigation(BaseAdapter navigationAdapter, ViewPager.OnPageChangeListener pageChange, int pos, Context context)
    {
       AsyncRefreshNavigationAdapter task = new AsyncRefreshNavigationAdapter(navigationAdapter,
-            context);
+            context, pageChange, pos);
       if(Constants.HONEYCOMB)
       {
          task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, Util.EMPTY_INT_ARRAY);

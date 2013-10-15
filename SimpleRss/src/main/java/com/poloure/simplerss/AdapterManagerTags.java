@@ -18,8 +18,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.util.Arrays;
-
 class AdapterManagerTags extends BaseAdapter
 {
    private final int m_screenHeight;
@@ -217,8 +215,7 @@ class AdapterManagerTags extends BaseAdapter
             v.setAnimation(fadeIn2);
             v.setVisibility(View.VISIBLE);
 
-            Write.collection(Constants.TAG_LIST, Arrays.asList(s_tagArray), m_context);
-            // TODO Util.updateTags();
+            // TODO CHANGE ORDER OF TAGS;
          }
          return true;
       }

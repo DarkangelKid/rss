@@ -2,7 +2,10 @@ package com.poloure.simplerss;
 
 import android.content.Context;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
+import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -10,6 +13,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
+import java.util.Set;
 
 class Write
 {
@@ -215,6 +219,52 @@ class Write
          e.printStackTrace();
       }
       catch(UnsupportedEncodingException e)
+      {
+         e.printStackTrace();
+      }
+      catch(IOException e)
+      {
+         e.printStackTrace();
+      }
+   }
+
+   /* TODO Not for internal yet. */
+   static
+   void longSet(String path, Set<Long> longSet, Context context)
+   {
+      /* If storage is unmounted OR if we force to use external. */
+      if(Util.isUnmounted())
+      {
+         return;
+      }
+
+      String filePath = Util.getStorage(context) + path;
+      File fileOut = new File(filePath);
+
+      try
+      {
+         FileOutputStream fileOutputStream = new FileOutputStream(fileOut);
+         BufferedOutputStream out = new BufferedOutputStream(fileOutputStream);
+         DataOutputStream data = new DataOutputStream(out);
+         try
+         {
+            for(long lon : longSet)
+            {
+               data.writeLong(lon);
+            }
+         }
+         catch(IOException e)
+         {
+            e.printStackTrace();
+         }
+         finally
+         {
+            data.flush();
+            data.close();
+         }
+
+      }
+      catch(FileNotFoundException e)
       {
          e.printStackTrace();
       }

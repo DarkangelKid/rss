@@ -30,7 +30,7 @@ class OnPageChangeTags extends SimpleOnPageChangeListener
 
       ActionBarActivity activity = (ActionBarActivity) m_fragment.getActivity();
 
-      String[] tags = Read.file(Constants.TAG_LIST, activity);
+      String[] tags = PagerAdapterFeeds.getTagsArray();
 
       String unread = (String) m_navigationAdapter.getItem(pos);
 

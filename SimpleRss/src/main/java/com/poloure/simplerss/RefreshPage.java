@@ -24,7 +24,7 @@ class RefreshPage extends AsyncTask<Integer, Object, Animation>
    private final Context         m_context;
    private       int             m_pageNumber;
    private       boolean         m_flash;
-   private       AdapterTags     m_adapterCard;
+   private       AdapterTags     m_adapterTag;
    private       ListView        m_listView;
    private int position = -3;
 
@@ -40,7 +40,7 @@ class RefreshPage extends AsyncTask<Integer, Object, Animation>
    Animation doInBackground(Integer... page)
    {
       m_pageNumber = page[0];
-      String tag = Read.file(Constants.TAG_LIST, m_context)[m_pageNumber];
+      String tag = PagerAdapterFeeds.getTagsArray()[m_pageNumber];
 
       String[][] contents = Read.csv(m_context);
       if(0 == contents.length)
@@ -53,11 +53,11 @@ class RefreshPage extends AsyncTask<Integer, Object, Animation>
       Animation animFadeIn = AnimationUtils.loadAnimation(m_context, android.R.anim.fade_in);
 
       int viewPagerId = FragmentFeeds.s_viewPager.getId();
-      String fragmentTag = String.format(Constants.FRAGMENT_TAG, viewPagerId, m_pageNumber);
+      String fragmentTag = "android:switcher:" + viewPagerId + ':' + m_pageNumber;
 
-      ListFragment m_listFragment = (ListFragment) m_fragmentManager.findFragmentByTag(fragmentTag);
-      m_adapterCard = (AdapterTags) m_listFragment.getListAdapter();
-      m_listView = m_listFragment.getListView();
+      ListFragment listFragment = (ListFragment) m_fragmentManager.findFragmentByTag(fragmentTag);
+      m_adapterTag = (AdapterTags) listFragment.getListAdapter();
+      m_listView = listFragment.getListView();
 
       Map<Long, FeedItem> map = new TreeMap<Long, FeedItem>();
 
@@ -121,7 +121,7 @@ class RefreshPage extends AsyncTask<Integer, Object, Animation>
                data.url = links[i];
                data.description = descriptions[i];
                data.image = images[i];
-               data.time = times[i];
+               data.time = Long.parseLong(times[i]);
 
                data.width = null == widths[i] || 0 == widths[i].length()
                      ? 0
@@ -131,21 +131,17 @@ class RefreshPage extends AsyncTask<Integer, Object, Animation>
                      ? 0
                      : Integer.parseInt(heights[i]);
 
-               AdapterTags adapterTags = (AdapterTags) Util.getFeedListView(m_pageNumber,
-                     m_fragmentManager).getAdapter();
-
                // Do not add duplicates. */
-               if(-1 == Util.index(adapterTags.m_items, data))
+               if(-1 == Util.index(m_adapterTag.m_items, data))
                {
-                  Long l = Long.parseLong(times[i]) - i;
-                  map.put(l, data);
+                  map.put(data.time, data);
                }
             }
          }
       }
 
       /* Do not count items as Read while we are updating the list. */
-      m_adapterCard.m_touchedScreen = false;
+      m_adapterTag.m_touchedScreen = false;
 
       int mapSize = map.size();
       NavigableMap<Long, FeedItem> navigableMap
@@ -171,14 +167,14 @@ class RefreshPage extends AsyncTask<Integer, Object, Animation>
       }
 
       /* Update the unread counts in the navigation drawer. */
-      Update.navigation(m_navigationAdapter, m_context);
+      Update.navigation(m_navigationAdapter, null, 0, m_context);
 
       if(null == m_listView)
       {
          return;
       }
 
-      /* If there were no items to start with (the m_listview is invisible).*/
+      /* If there were no items to start with (the ListView is invisible).*/
       if(m_flash)
       {
          m_listView.setSelection(position);
@@ -186,7 +182,7 @@ class RefreshPage extends AsyncTask<Integer, Object, Animation>
          m_listView.setVisibility(View.VISIBLE);
       }
       /* Resume Read item checking. */
-      m_adapterCard.m_touchedScreen = true;
+      m_adapterTag.m_touchedScreen = true;
    }
 
    @Override
@@ -220,12 +216,12 @@ class RefreshPage extends AsyncTask<Integer, Object, Animation>
          }
       }
 
-      m_adapterCard.prependArray(values);
-      m_adapterCard.notifyDataSetChanged();
+      m_adapterTag.prependArray(values);
+      m_adapterTag.notifyDataSetChanged();
 
       if(m_flash)
       {
-         position = Util.gotoLatestUnread(m_adapterCard.m_items, false, m_pageNumber,
+         position = Util.gotoLatestUnread(m_adapterTag.m_items, false, m_pageNumber,
                m_fragmentManager);
       }
 

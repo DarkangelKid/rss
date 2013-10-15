@@ -3,11 +3,14 @@ package com.poloure.simplerss;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,14 +25,34 @@ import android.widget.TextView;
 
 class FragmentManageFeeds extends ListFragment
 {
-   private final BaseAdapter m_navigationAdapter;
    static final int MODE_ADD = -1;
+   private final BaseAdapter     m_navigationAdapter;
    private final FragmentManager m_fragmentManager;
 
    FragmentManageFeeds(BaseAdapter navigationAdapter, FragmentManager fragmentManager)
    {
       m_navigationAdapter = navigationAdapter;
       m_fragmentManager = fragmentManager;
+   }
+
+   @Override
+   public
+   View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+   {
+      super.onCreateView(inflater, container, savedInstanceState);
+
+      return inflater.inflate(R.layout.listview_cards, container, false);
+   }
+
+   /* Edit the feed. */
+   @Override
+   public
+   void onListItemClick(ListView l, View v, int position, long id)
+   {
+      super.onListItemClick(l, v, position, id);
+      Context context = getActivity();
+
+      showEditDialog(m_navigationAdapter, m_fragmentManager, context, position);
    }
 
    static
@@ -39,7 +62,7 @@ class FragmentManageFeeds extends ListFragment
       LayoutInflater inf = LayoutInflater.from(context);
       View dialogLayout = inf.inflate(R.layout.add_rss_dialog, null);
 
-      String[] currentTags = Read.file(Constants.TAG_LIST, context);
+      String[] currentTags = PagerAdapterFeeds.getTagsArray();
 
       AdapterView<SpinnerAdapter> spinnerTag
             = (AdapterView<SpinnerAdapter>) dialogLayout.findViewById(R.id.tag_spinner);
@@ -94,26 +117,6 @@ class FragmentManageFeeds extends ListFragment
 
    @Override
    public
-   View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
-   {
-      super.onCreateView(inflater, container, savedInstanceState);
-
-      return inflater.inflate(R.layout.listview_cards, container, false);
-   }
-
-   /* Edit the feed. */
-   @Override
-   public
-   void onListItemClick(ListView l, View v, int position, long id)
-   {
-      super.onListItemClick(l, v, position, id);
-      Context context = getActivity();
-
-      showEditDialog(m_navigationAdapter, m_fragmentManager, context, position);
-   }
-
-   @Override
-   public
    void onActivityCreated(Bundle savedInstanceState)
    {
       super.onActivityCreated(savedInstanceState);
@@ -127,6 +130,14 @@ class FragmentManageFeeds extends ListFragment
       setListAdapter(listAdapter);
       listView.setOnItemLongClickListener(onItemLongClick);
       manageFeeds(listView, listAdapter);
+
+      ActionBarActivity activity = (ActionBarActivity) getActivity();
+
+      Resources resources = activity.getResources();
+      String[] manageTitles = resources.getStringArray(R.array.manage_titles);
+
+      ActionBar actionBar = activity.getSupportActionBar();
+      actionBar.setSubtitle(manageTitles[0]);
    }
 
    private
@@ -151,11 +162,7 @@ class FragmentManageFeeds extends ListFragment
    boolean onOptionsItemSelected(MenuItem item)
    {
       FragmentActivity activity = getActivity();
-      if(activity.onOptionsItemSelected(item))
-      {
-         return true;
-      }
-      return super.onOptionsItemSelected(item);
+      return activity.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
    }
 
 }

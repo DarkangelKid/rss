@@ -9,31 +9,37 @@ import android.widget.BaseAdapter;
 
 class OnLongClickManageFeedItem implements AdapterView.OnItemLongClickListener
 {
-   private final AlertDialog.Builder m_build;
+   private final BaseAdapter m_adapter;
+   private final BaseAdapter m_navigationAdapter;
+   private final FragmentManageFeeds m_fragmentManageFeeds;
 
    OnLongClickManageFeedItem(FragmentManageFeeds fragmentManageFeeds, BaseAdapter adapter,
          BaseAdapter navigationAdapter)
    {
-      Context context = fragmentManageFeeds.getActivity();
-
-      String deleteText = context.getString(R.string.delete_dialog);
-      String clearText = context.getString(R.string.clear_dialog);
-
-      DialogInterface.OnClickListener feedDeleteClick = new OnFilterClickDelete(adapter, context);
-      DialogInterface.OnClickListener feedClearCacheClick = new OnClickManageFeedClearCache(adapter,
-            navigationAdapter, context);
-
-      m_build = new AlertDialog.Builder(context);
-      m_build.setCancelable(true);
-      m_build.setNegativeButton(deleteText, feedDeleteClick);
-      m_build.setPositiveButton(clearText, feedClearCacheClick);
+      m_navigationAdapter = navigationAdapter;
+      m_fragmentManageFeeds = fragmentManageFeeds;
+      m_adapter = adapter;
    }
 
    @Override
    public
    boolean onItemLongClick(AdapterView<?> parent, View view, int pos, long id)
    {
-      m_build.show();
+      Context context = m_fragmentManageFeeds.getActivity();
+
+      String deleteText = context.getString(R.string.delete_dialog);
+      String clearText = context.getString(R.string.clear_dialog);
+
+      DialogInterface.OnClickListener feedDeleteClick = new OnClickManageFeedDelete(m_adapter,
+            m_navigationAdapter, pos, context);
+      DialogInterface.OnClickListener feedClearCacheClick = new OnClickManageFeedClearCache(m_adapter,
+            m_navigationAdapter, pos, context);
+
+      AlertDialog.Builder build = new AlertDialog.Builder(context);
+      build.setCancelable(true);
+      build.setNegativeButton(deleteText, feedDeleteClick);
+      build.setPositiveButton(clearText, feedClearCacheClick);
+      build.show();
       return true;
    }
 }

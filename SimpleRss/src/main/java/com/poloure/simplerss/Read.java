@@ -2,7 +2,11 @@ package com.poloure.simplerss;
 
 import android.content.Context;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.EOFException;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -101,23 +105,6 @@ class Read
       return lines;
    }
 
-   /* For reading from the internal s_storage. */
-   private static
-   BufferedReader reader(String path, String fileEncoding, Context context)
-         throws FileNotFoundException, UnsupportedEncodingException
-   {
-      String path1 = Util.getInternalPath(path);
-      FileInputStream fis = context.openFileInput(path1);
-      return new BufferedReader(new InputStreamReader(fis, fileEncoding));
-   }
-
-   /* Wrapper for creating external BufferedReader. */
-   private static
-   BufferedReader reader(String path) throws FileNotFoundException
-   {
-      return new BufferedReader(new FileReader(path));
-   }
-
    static
    int count(String path, Context context)
    {
@@ -167,6 +154,23 @@ class Read
          e.printStackTrace();
       }
       return i;
+   }
+
+   /* Wrapper for creating external BufferedReader. */
+   private static
+   BufferedReader reader(String path) throws FileNotFoundException
+   {
+      return new BufferedReader(new FileReader(path));
+   }
+
+   /* For reading from the internal s_storage. */
+   private static
+   BufferedReader reader(String path, String fileEncoding, Context context)
+         throws FileNotFoundException, UnsupportedEncodingException
+   {
+      String path1 = Util.getInternalPath(path);
+      FileInputStream fis = context.openFileInput(path1);
+      return new BufferedReader(new InputStreamReader(fis, fileEncoding));
    }
 
    static
@@ -221,6 +225,53 @@ class Read
          }
       }
       return types;
+   }
+
+   /* TODO Not for internal yet. */
+   static
+   Set<Long> longSet(String path, Context context)
+   {
+      Set<Long> longSet = new HashSet<Long>(0);
+
+      /* If storage is unmounted OR if we force to use external. */
+      if(Util.isUnmounted())
+      {
+         return longSet;
+      }
+
+      String filePath = Util.getStorage(context) + path;
+      File fileIn = new File(filePath);
+
+      try
+      {
+         FileInputStream fileInputStream = new FileInputStream(fileIn);
+         BufferedInputStream in = new BufferedInputStream(fileInputStream);
+         DataInputStream data = new DataInputStream(in);
+         try
+         {
+            while(true)
+            {
+               long lon = data.readLong();
+               longSet.add(lon);
+            }
+         }
+         catch(EOFException ignored)
+         {
+         }
+         finally
+         {
+            data.close();
+         }
+
+      }
+      catch(FileNotFoundException e)
+      {
+      }
+      catch(IOException e)
+      {
+         e.printStackTrace();
+      }
+      return longSet;
    }
 
    static

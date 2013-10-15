@@ -11,6 +11,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
@@ -43,12 +44,6 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
       {
          button.setEnabled(false);
       }
-
-      m_dialog.getButton(DialogInterface.BUTTON_POSITIVE);
-      if(null != button)
-      {
-         button.setEnabled(false);
-      }
    }
 
    @Override
@@ -70,11 +65,8 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
       m_tag = m_tag.substring(0, m_tag.length() - 1);
 
       /* Check to see if the tag already exists. */
-      String[] currentTags = Read.file(Constants.TAG_LIST, m_context);
-      if(-1 != Util.index(currentTags, m_tag))
-      {
-         m_newTag = false;
-      }
+      Set<String> tagSet = PagerAdapterFeeds.getTags();
+      m_newTag = !tagSet.contains(m_tag);
 
       String[] checkList = url[0].contains("http") ? new String[]{url[0]} : new String[]{
             "http://" + url[0], "https://" + url[0]
@@ -131,6 +123,23 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
       return new String[]{feedUrl, feedTitle};
    }
 
+   private static
+   byte[] concat(byte[] first, byte... second)
+   {
+      if(null == first)
+      {
+         return second;
+      }
+      if(null == second)
+      {
+         return first;
+      }
+      byte[] result = new byte[first.length + second.length];
+      System.arraycopy(first, 0, result, 0, first.length);
+      System.arraycopy(second, 0, result, first.length, second.length);
+      return result;
+   }
+
    @Override
    protected
    void onPostExecute(String[] result)
@@ -145,11 +154,6 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
          return;
       }
 
-      if(m_newTag)
-      {
-         Write.single(Constants.TAG_LIST, m_tag + Constants.NL, m_context);
-         Util.updateTags(m_navigationAdapter, m_context);
-      }
       if(0 == name.length())
       {
          name = result[1];
@@ -164,14 +168,14 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
       else if(Constants.ADD.equals(m_mode))
       {
 
-   /* Create the csv. */
+         /* Create the csv. */
          String feedInfo = String.format(Constants.INDEX_FORMAT, name, result[0], m_tag) +
                Constants.NL;
 
-   /* Save the feed to the index. */
+         /* Save the feed to the index. */
          Write.single(Constants.INDEX, feedInfo, m_context);
 
-   /* TODO Update the manage ListViews with the new information. */
+         /* TODO Update the manage ListViews with the new information. */
          //if(null != PagerAdapterManage.MANAGE_FRAGMENTS[1].getListAdapter())
          {
             //  Update.manageFeeds();
@@ -181,6 +185,8 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
             //    Update.manageTags();
          }
       }
+
+      Util.updateTags(m_navigationAdapter, m_context);
 
       m_dialog.dismiss();
    }
@@ -219,22 +225,5 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
       /// To ManageFeedsRefresh the counts and the order of the tags.
       // TODO Util.updateTags();
       Update.AsyncCompatManageTagsRefresh(listView, listAdapter);*/
-   }
-
-   private static
-   byte[] concat(byte[] first, byte... second)
-   {
-      if(null == first)
-      {
-         return second;
-      }
-      if(null == second)
-      {
-         return first;
-      }
-      byte[] result = new byte[first.length + second.length];
-      System.arraycopy(first, 0, result, 0, first.length);
-      System.arraycopy(second, 0, result, first.length, second.length);
-      return result;
    }
 }

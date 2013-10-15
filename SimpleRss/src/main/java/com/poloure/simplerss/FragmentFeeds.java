@@ -42,8 +42,9 @@ class FragmentFeeds extends Fragment
 
       Context context = getActivity();
       FragmentManager fragmentManager = getFragmentManager();
-      PagerAdapter adapter = new PagerAdapterFeeds(m_navigationAdapter, fragmentManager, context);
       ViewPager.OnPageChangeListener pageChange = new OnPageChangeTags(this, m_navigationAdapter);
+      PagerAdapter adapter = new PagerAdapterFeeds(m_navigationAdapter, fragmentManager, pageChange,
+            context);
 
       s_viewPager = new ViewPager(context);
 
@@ -104,7 +105,7 @@ class FragmentFeeds extends Fragment
 
          Update.page(m_navigationAdapter, 0, fragmentManager, m_activity);
 
-         int tagsCount = Read.count(Constants.TAG_LIST, m_activity);
+         int tagsCount = PagerAdapterFeeds.getSize();
          if(0 == page)
          {
             for(int i = 1; i < tagsCount; i++)

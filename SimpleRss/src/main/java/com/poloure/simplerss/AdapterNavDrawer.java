@@ -11,9 +11,12 @@ import android.widget.TextView;
 
 class AdapterNavDrawer extends BaseAdapter
 {
-   private static final int[] NAV_ICONS = {
+   private static final int[] NAV_ICONS    = {
          R.drawable.feeds, R.drawable.manage, R.drawable.feeds,
    };
+   private static final int   TYPE_TITLE   = 0;
+   private static final int   TYPE_DIVIDER = 1;
+   private static final int   TYPE_TAG     = 2;
    private final int            m_twelve;
    private final LayoutInflater m_layoutInflater;
    private final Context        m_context;
@@ -58,8 +61,7 @@ class AdapterNavDrawer extends BaseAdapter
       View view = convertView;
       int viewType = getItemViewType(position);
 
-         /* This view is for the FeedsActivity items Feeds, Manage, & Settings. */
-      if(0 == viewType)
+      if(TYPE_TITLE == viewType)
       {
          if(null == view)
          {
@@ -77,17 +79,12 @@ class AdapterNavDrawer extends BaseAdapter
                0, 0, 0);
          m_navigationMainItem.setCompoundDrawablePadding(m_twelve);
       }
-
-      /* This view is for the NavDivider and "Groups" subtitle.
-       * The imageView NavDivider is below the subtitle. */
-      if(1 == viewType && null == view)
+      else if(TYPE_DIVIDER == viewType && null == view)
       {
          view = m_layoutInflater.inflate(R.layout.navigation_drawer_subtitle_divider, parent,
                false);
       }
-      /* This view is for the m_imageViewTag items of the navigation drawer.
-       * The one with unread counters. */
-      else if(2 == viewType)
+      else if(TYPE_TAG == viewType)
       {
          NavigationTagItem holder2;
          if(null == view)
@@ -123,12 +120,12 @@ class AdapterNavDrawer extends BaseAdapter
    {
       if(3 > position)
       {
-         return 0;
+         return TYPE_TITLE;
       }
 
       else
       {
-         return 3 == position ? 1 : 2;
+         return 3 == position ? TYPE_DIVIDER : TYPE_TAG;
       }
    }
 

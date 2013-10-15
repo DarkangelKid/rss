@@ -13,8 +13,6 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.HashSet;
 
 class Util
 {
@@ -43,20 +41,14 @@ class Util
    static
    void updateTags(BaseAdapter navigationAdapter, Context context)
    {
-      /* If no tags exists, add the ALL_TAG. */
-      if(0 == Read.count(Constants.TAG_LIST, context))
-      {
-         Write.single(Constants.TAG_LIST, context.getString(R.string.all_tag) + Constants.NL,
-               context);
-      }
-
       if(null != FragmentFeeds.s_viewPager)
       {
          PagerAdapter pagerAdapter = FragmentFeeds.s_viewPager.getAdapter();
+         PagerAdapterFeeds.updateTags(context);
          pagerAdapter.notifyDataSetChanged();
       }
 
-      Update.navigation(navigationAdapter, context);
+      Update.navigation(navigationAdapter, null, 0, context);
    }
 
    static
@@ -120,7 +112,8 @@ class Util
       ViewPager viewpager = FragmentFeeds.s_viewPager;
 
       int viewpagerId = viewpager.getId();
-      String tag = String.format(Constants.FRAGMENT_TAG, viewpagerId, page);
+      String tag = "android:switcher:" + viewpagerId + ':' + page;
+
       return ((ListFragment) fragmentManager.findFragmentByTag(tag)).getListView();
    }
 
@@ -143,58 +136,6 @@ class Util
    {
       /* Return true if force sd setting is true. */
       return true;
-   }
-
-   static
-   int[] getUnreadCounts(Context context)
-   {
-      int readCount = AdapterTags.s_readItemTimes.size();
-      Collection<String> readItemTimes = new HashSet<String>(readCount);
-      readItemTimes.addAll(AdapterTags.s_readItemTimes);
-
-      String[] currentTags = Read.file(Constants.TAG_LIST, context);
-
-      String[][] content = Read.csv(Constants.INDEX, context, 'f', 't');
-      String[] indexNames = content[0];
-      String[] indexTags = content[1];
-
-      int total = 0;
-      int tagCount = currentTags.length;
-
-      int[] unreadCounts = new int[tagCount];
-
-      /* For each tag. */
-      for(int i = 1; i < tagCount; i++)
-      {
-         int read = 0;
-         int indexTagsCount = indexTags.length;
-         int totalTagItems = 0;
-
-         /* For each index entry. */
-         for(int j = 0; j < indexTagsCount; j++)
-         {
-            if(indexTags[j].equals(currentTags[i]))
-            {
-               String contentPath = indexNames[j] + Constants.SEPAR + Constants.CONTENT;
-               String[] times = Read.csv(contentPath, context, 'p')[0];
-
-               totalTagItems += times.length;
-
-               for(String time : times)
-               {
-                  if(readItemTimes.contains(time))
-                  {
-                     read++;
-                  }
-               }
-            }
-         }
-         unreadCounts[i] = totalTagItems - read;
-         total += unreadCounts[i];
-      }
-
-      unreadCounts[0] = total;
-      return unreadCounts;
    }
 
    /* Changes the ManageFeedsRefresh menu item to an animation if m_mode = true. */
@@ -225,14 +166,6 @@ class Util
       String path1 = getStorage(context) + path;
       context.deleteFile(getInternalPath(path1));
       new File(path1).delete();
-   }
-
-   static
-   String getInternalPath(String externalPath)
-   {
-      String substring = externalPath.substring(
-            externalPath.indexOf(Constants.SEPAR + "files" + Constants.SEPAR) + 7);
-      return substring.replaceAll(Constants.SEPAR, "-");
    }
 
    /* This function will return null if it fails. Check for null each time.
@@ -277,6 +210,14 @@ class Util
          }
       }
       return s_storage;
+   }
+
+   static
+   String getInternalPath(String externalPath)
+   {
+      String substring = externalPath.substring(
+            externalPath.indexOf(Constants.SEPAR + "files" + Constants.SEPAR) + 7);
+      return substring.replaceAll(Constants.SEPAR, "-");
    }
 
    /* Replaces ALL_TAG '/'s with '-' to emulate a folder directory layout in

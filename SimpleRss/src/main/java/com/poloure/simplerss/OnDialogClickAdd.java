@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.view.PagerAdapter;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
@@ -58,11 +57,6 @@ class OnDialogClickAdd implements DialogInterface.OnClickListener
             m_navigationAdapter, m_context);
 
       /* Update the navigation drawer. */
-      Update.navigation(m_navigationAdapter, m_context);
-
-      /* Update the feeds PagerAdapter. */
-      PagerAdapter adapter = new PagerAdapterFeeds(m_navigationAdapter, m_fragmentManager,
-            m_context);
-      FragmentFeeds.s_viewPager.setAdapter(adapter);
+      Util.updateTags(m_navigationAdapter, m_context);
    }
 }

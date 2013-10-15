@@ -9,6 +9,8 @@ import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
+import java.util.Set;
+
 class AsyncManageTagsRefresh extends AsyncTask<Void, String[], Void>
 {
    private final Animation   m_fadeIn;
@@ -70,12 +72,14 @@ class AsyncManageTagsRefresh extends AsyncTask<Void, String[], Void>
    private
    String[][] getInfoArrays()
    {
-      String[] currentTags = Read.file(Constants.TAG_LIST, m_context);
-      int tagCount = currentTags.length;
+      Set<String> tagSet = PagerAdapterFeeds.getTags();
+      int tagCount = tagSet.size();
       if(0 == tagCount)
       {
          return Util.EMPTY_STRING_STRING_ARRAY;
       }
+
+      String[] currentTags = tagSet.toArray(new String[tagCount]);
 
       String[] tagArray = new String[tagCount];
       String[] infoArray = new String[tagCount];

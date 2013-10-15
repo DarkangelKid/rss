@@ -29,63 +29,13 @@ import java.io.File;
 public
 class FeedsActivity extends ActionBarActivity
 {
-   static  Handler               s_serviceHandler;
+   static Handler s_serviceHandler;
    /* Only initialized when the activity is running. */
-   private Menu                  m_optionsMenu;
+   Menu m_optionsMenu;
    private DrawerLayout          m_drawerLayout;
    private ActionBarDrawerToggle m_drawerToggle;
    private String                m_previousTitle;
    private BaseAdapter           m_navigationDrawer;
-
-   /* Updates and refreshes the tags with any new content. */
-   static
-   void refreshFeeds(ActionBarActivity activity, BaseAdapter navigationAdapter)
-   {
-      Menu menu = ((FeedsActivity) activity).m_optionsMenu;
-      Util.setRefreshingIcon(true, menu);
-
-      /* Set the service handler in FeedsActivity so we can check and call it
-       * from ServiceUpdate. */
-      s_serviceHandler = new FragmentFeeds.OnFinishService(activity, navigationAdapter);
-      int currentPage = FragmentFeeds.s_viewPager.getCurrentItem();
-      Intent intent = getServiceIntent(currentPage, null, activity);
-      activity.startService(intent);
-   }
-
-   static
-   boolean isServiceRunning(Activity activity)
-   {
-      ActivityManager manager = (ActivityManager) activity.getSystemService(ACTIVITY_SERVICE);
-      for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(
-            Integer.MAX_VALUE))
-      {
-         if(ServiceUpdate.class.getName().equals(service.service.getClassName()))
-         {
-            return true;
-         }
-      }
-      return false;
-   }
-
-   static
-   Intent getServiceIntent(int page, String notificationName, Context context)
-   {
-      if(null == notificationName)
-      {
-         Resources resources = context.getResources();
-         notificationName = resources.getStringArray(R.array.settings_names)[3];
-      }
-      /* Load notification boolean. */
-      String path = Constants.SETTINGS_DIR + notificationName +
-            Constants.TXT;
-      String[] check = Read.file(path, context);
-
-      boolean notificationsEnabled = 0 != check.length && Boolean.parseBoolean(check[0]);
-      Intent intent = new Intent(context, ServiceUpdate.class);
-      intent.putExtra("GROUP_NUMBER", page);
-      intent.putExtra("NOTIFICATIONS", notificationsEnabled);
-      return intent;
-   }
 
    @Override
    public
@@ -168,23 +118,7 @@ class FeedsActivity extends ActionBarActivity
       setServiceIntent(Constants.ALARM_SERVICE_START);
 
       /* Save the READ_ITEMS to file. */
-      Write.collection(Constants.READ_ITEMS, AdapterTags.s_readItemTimes, this);
-   }
-
-   @Override
-   public
-   void onBackPressed()
-   {
-      super.onBackPressed();
-
-      Resources resources = getResources();
-
-      String feeds = resources.getStringArray(R.array.nav_titles)[0];
-      ActionBar actionBar = getSupportActionBar();
-      actionBar.setTitle(feeds);
-
-      m_drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-      m_drawerToggle.setDrawerIndicatorEnabled(true);
+      Write.longSet(Constants.READ_ITEMS, AdapterTags.s_readItemTimes, this);
    }
 
    private
@@ -229,6 +163,42 @@ class FeedsActivity extends ActionBarActivity
       {
          am.cancel(pendingIntent);
       }
+   }
+
+   static
+   Intent getServiceIntent(int page, String notificationName, Context context)
+   {
+      if(null == notificationName)
+      {
+         Resources resources = context.getResources();
+         notificationName = resources.getStringArray(R.array.settings_names)[3];
+      }
+      /* Load notification boolean. */
+      String path = Constants.SETTINGS_DIR + notificationName +
+            Constants.TXT;
+      String[] check = Read.file(path, context);
+
+      boolean notificationsEnabled = 0 != check.length && Boolean.parseBoolean(check[0]);
+      Intent intent = new Intent(context, ServiceUpdate.class);
+      intent.putExtra("GROUP_NUMBER", page);
+      intent.putExtra("NOTIFICATIONS", notificationsEnabled);
+      return intent;
+   }
+
+   @Override
+   public
+   void onBackPressed()
+   {
+      super.onBackPressed();
+
+      Resources resources = getResources();
+
+      String feeds = resources.getStringArray(R.array.nav_titles)[0];
+      ActionBar actionBar = getSupportActionBar();
+      actionBar.setTitle(feeds);
+
+      m_drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+      m_drawerToggle.setDrawerIndicatorEnabled(true);
    }
 
    Menu getOptionsMenu()
@@ -337,6 +307,36 @@ class FeedsActivity extends ActionBarActivity
       ActionBar actionBar = getSupportActionBar();
       CharSequence title = actionBar.getTitle();
       return title.toString();
+   }
+
+   /* Updates and refreshes the tags with any new content. */
+   static
+   void refreshFeeds(ActionBarActivity activity, BaseAdapter navigationAdapter)
+   {
+      Menu menu = ((FeedsActivity) activity).m_optionsMenu;
+      Util.setRefreshingIcon(true, menu);
+
+      /* Set the service handler in FeedsActivity so we can check and call it
+       * from ServiceUpdate. */
+      s_serviceHandler = new FragmentFeeds.OnFinishService(activity, navigationAdapter);
+      int currentPage = FragmentFeeds.s_viewPager.getCurrentItem();
+      Intent intent = getServiceIntent(currentPage, null, activity);
+      activity.startService(intent);
+   }
+
+   static
+   boolean isServiceRunning(Activity activity)
+   {
+      ActivityManager manager = (ActivityManager) activity.getSystemService(ACTIVITY_SERVICE);
+      for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(
+            Integer.MAX_VALUE))
+      {
+         if(ServiceUpdate.class.getName().equals(service.service.getClassName()))
+         {
+            return true;
+         }
+      }
+      return false;
    }
 
    void setNavigationTitle(CharSequence title, boolean saveTitle)

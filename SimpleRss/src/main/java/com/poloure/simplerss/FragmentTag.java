@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.ListFragment;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
@@ -19,13 +20,16 @@ import android.widget.TextView;
 
 class FragmentTag extends ListFragment
 {
-   private final BaseAdapter m_navigationAdapter;
-   private final int         m_position;
    private static final String BACK_STACK_TAG = "BACK";
+   private final BaseAdapter                    m_navigationAdapter;
+   private final int                            m_position;
+   private final ViewPager.OnPageChangeListener m_pageChange;
 
-   FragmentTag(BaseAdapter navigationAdapter, int position)
+   FragmentTag(BaseAdapter navigationAdapter, ViewPager.OnPageChangeListener pageChange,
+         int position)
    {
       m_navigationAdapter = navigationAdapter;
+      m_pageChange = pageChange;
       m_position = position;
    }
 
@@ -42,7 +46,7 @@ class FragmentTag extends ListFragment
       setListAdapter(listAdapter);
 
       AbsListView.OnScrollListener scrollListener = new OnScrollFeedListener(m_navigationAdapter,
-            listAdapter, context);
+            listAdapter, m_pageChange, m_position, context);
 
       listView.setOnScrollListener(scrollListener);
       listView.setOnItemClickListener(new ClickListener(this));
@@ -51,6 +55,15 @@ class FragmentTag extends ListFragment
       {
          FragmentManager fragmentManager = getFragmentManager();
          Update.page(m_navigationAdapter, 0, fragmentManager, context);
+
+         ActionBarActivity activity = (ActionBarActivity) getActivity();
+
+         String allTag = PagerAdapterFeeds.getTagsArray()[0];
+
+         String unread = (String) m_navigationAdapter.getItem(0);
+
+         ActionBar actionBar = activity.getSupportActionBar();
+         actionBar.setSubtitle(allTag + " | " + unread);
       }
    }
 

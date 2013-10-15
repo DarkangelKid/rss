@@ -12,18 +12,17 @@ class Constants
    static final         Locale  LOCALE              = Locale.getDefault();
    /* Formats */
    static final         String  INDEX_FORMAT        = "feed|%s|url|%s|tag|%s|";
-   static final         String  FRAGMENT_TAG        = "android:switcher:%s:%d";
    static final         String  FEED_INFO           = "%s" + NL + "%s • %d items";
    /* Appends */
    static final         String  TXT                 = ".txt";
    static final         String  READ_ITEMS          = "read_items" + TXT;
    static final         String  FILTER_LIST         = "filter_list" + TXT;
-   static final         String  TAG_LIST            = "tag_list" + TXT;
    static final         String  CONTENT             = "content" + TXT;
    static final         String  INDEX               = "index" + TXT;
    static final         String  LOG_FILE            = "dump" + TXT;
    /* Files */
    static final         String  INT_STORAGE         = "internal" + TXT;
+   static final         String  ITEM_LIST           = "item_list" + TXT;
    static final         String  TEMP                = ".temp" + TXT;
    /* Parser saves */
    static final         String  IMAGE               = "image|";
@@ -32,7 +31,6 @@ class Constants
    static final         String  WIDTH               = "width|";
    static final         String  TAG_TITLE           = "<title";
    static final         String  ENDTAG_TITLE        = "</title>";
-   /* Other things. */
    private static final String  THUMBNAILS          = "thumbnails";
    private static final String  SETTINGS            = "settings";
    private static final int     VER                 = Build.VERSION.SDK_INT;
@@ -47,4 +45,5 @@ class Constants
    static final         boolean FROYO               = Build.VERSION_CODES.FROYO <= VER;
    static final         String  ALARM_SERVICE_START = "start";
    static final         String  ALARM_SERVICE_STOP  = "stop";
+   /* Other things. */
 }

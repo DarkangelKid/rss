@@ -8,5 +8,5 @@ class FeedItem
    String image;
    int    width;
    int    height;
-   String time;
+   Long time;
 }
