@@ -60,11 +60,13 @@ class RefreshPage extends AsyncTask<Integer, Object, Animation>
       m_listView = listFragment.getListView();
 
       Map<Long, FeedItem> map = new TreeMap<Long, FeedItem>();
+      String allTag = m_context.getString(R.string.all_tag);
+      boolean isAllTag = tag.equals(allTag);
 
       int feedsLength = feeds.length;
       for(int j = 0; j < feedsLength; j++)
       {
-         if(tags[j].contains(tag) || tag.equals(m_context.getString(R.string.all_tag)))
+         if(isAllTag || tags[j].contains(tag))
          {
             String[][] content = Read.csv(feeds[j] + Constants.SEPAR + Constants.CONTENT, m_context,
                   't', 'd', 'l', 'i', 'w', 'h', 'p');

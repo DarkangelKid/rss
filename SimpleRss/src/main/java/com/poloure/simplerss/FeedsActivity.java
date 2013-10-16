@@ -30,8 +30,7 @@ public
 class FeedsActivity extends ActionBarActivity
 {
    static Handler s_serviceHandler;
-   /* Only initialized when the activity is running. */
-   Menu m_optionsMenu;
+   /* Only initialized when the activity is running. */ Menu m_optionsMenu;
    private DrawerLayout          m_drawerLayout;
    private ActionBarDrawerToggle m_drawerToggle;
    private String                m_previousTitle;
@@ -118,7 +117,7 @@ class FeedsActivity extends ActionBarActivity
       setServiceIntent(Constants.ALARM_SERVICE_START);
 
       /* Save the READ_ITEMS to file. */
-      Write.longSet(Constants.READ_ITEMS, AdapterTags.s_readItemTimes, this);
+      Write.longSet(Constants.READ_ITEMS, AdapterTags.S_READ_ITEM_TIMES, this);
    }
 
    private
@@ -281,9 +280,7 @@ class FeedsActivity extends ActionBarActivity
       }
       else if(menuText.equals(addFeed))
       {
-         FragmentManager fragmentManager = getSupportFragmentManager();
-         FragmentManageFeeds.showEditDialog(m_navigationDrawer, fragmentManager, this,
-               FragmentManageFeeds.MODE_ADD);
+         FragmentManageFeeds.showEditDialog(m_navigationDrawer, this, FragmentManageFeeds.MODE_ADD);
       }
       else if(menuText.equals(jumpTo))
       {

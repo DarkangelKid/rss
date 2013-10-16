@@ -20,21 +20,18 @@ import android.widget.TextView;
 
 class AdapterManagerTags extends BaseAdapter
 {
+   static String[] s_tagArray  = Util.EMPTY_STRING_ARRAY;
+   static String[] s_infoArray = Util.EMPTY_STRING_ARRAY;
    private final int m_screenHeight;
-   static        String[] s_tagArray  = Util.EMPTY_STRING_ARRAY;
-   static        String[] s_infoArray = Util.EMPTY_STRING_ARRAY;
-   private final int[]    m_position  = new int[2];
-   private       String   old_title   = "";
-   private       int            old_view;
+   private final int[] m_position = new int[2];
    private final LayoutInflater m_layoutInflater;
-   private final Context        m_context;
+   private String old_title = "";
+   private int old_view;
 
    AdapterManagerTags(Context context)
    {
-      m_context = context;
-      m_layoutInflater = (LayoutInflater) m_context.getSystemService(
-            Context.LAYOUT_INFLATER_SERVICE);
-      Resources resources = m_context.getResources();
+      m_layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+      Resources resources = context.getResources();
       m_screenHeight = resources.getDisplayMetrics().heightPixels;
    }
 
@@ -81,7 +78,7 @@ class AdapterManagerTags extends BaseAdapter
 
       holder.tag_view.setText(s_tagArray[position]);
       holder.info_view.setText(s_infoArray[position]);
-      if(0 != position && Constants.HONEYCOMB)
+      if(Constants.HONEYCOMB)
       {
          holder.image_view.setVisibility(View.VISIBLE);
          holder.image_view.setOnTouchListener(new MyTouchListener());
@@ -159,7 +156,7 @@ class AdapterManagerTags extends BaseAdapter
             /* Find and fade out the new view. */
             /* V is the thing to fade out. */
             Animation fadeOut = new AlphaAnimation(1.0F, 0.0F);
-            fadeOut.setDuration(120L);
+               fadeOut.setDuration(120L);
             fadeOut.setInterpolator(new DecelerateInterpolator());
             v.setAnimation(fadeOut);
             v.setVisibility(View.INVISIBLE);
@@ -172,18 +169,16 @@ class AdapterManagerTags extends BaseAdapter
             last.setAnimation(fadeIn);
             last.setVisibility(View.VISIBLE);
 
-            /* Save the position of the view that just faded out. */
-            String newTitle = ((TextView) v.findViewById(R.id.tag_item)).getText()
-                  .toString()
-                  .trim();
+            TextView textViewCurrent = (TextView) v.findViewById(R.id.tag_item);
+            CharSequence tagTextCurrent = textViewCurrent.getText();
 
             int childCount = listview.getChildCount();
             for(int i = 0; i < childCount; i++)
             {
-               if(newTitle.equals(
-                     ((TextView) listview.getChildAt(i).findViewById(R.id.tag_item)).getText()
-                           .toString()
-                           .trim()))
+               View view = listview.getChildAt(i);
+               TextView textView = (TextView) view.findViewById(R.id.tag_item);
+               CharSequence tagText = textView.getText();
+               if(tagTextCurrent.equals(tagText))
                {
                   old_view = i;
                   break;
@@ -193,18 +188,19 @@ class AdapterManagerTags extends BaseAdapter
             /* Change the information of the card that just disappeared. */
             /* Old m_title is the currently touched m_title and new_title is the one to be
             replaced */
-            rearrangeTags(old_title, newTitle);
+            rearrangeTags(old_title, (String) tagTextCurrent);
             notifyDataSetChanged();
 
             v.getLocationOnScreen(m_position);
+            int viewHeight = v.getHeight();
 
             if(m_position[1] > 4.0 / 5.0 * m_screenHeight)
             {
-               listview.smoothScrollBy(v.getHeight(), 400);
+               listview.smoothScrollBy(viewHeight, 400);
             }
             else if(m_position[1] < 1.0 / 5.0 * m_screenHeight)
             {
-               listview.smoothScrollBy((int) (-1.0 * v.getHeight()), 400);
+               listview.smoothScrollBy((int) (-1.0 * viewHeight), 400);
             }
          }
          else if(DragEvent.ACTION_DROP == action)

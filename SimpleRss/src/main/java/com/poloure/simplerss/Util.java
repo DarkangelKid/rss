@@ -84,7 +84,7 @@ class Util
       int itemCount = items.length - 1;
       for(i = itemCount; 0 <= i; i--)
       {
-         if(!AdapterTags.s_readItemTimes.contains(items[i].time))
+         if(!AdapterTags.S_READ_ITEM_TIMES.contains(items[i].time))
          {
             break;
          }

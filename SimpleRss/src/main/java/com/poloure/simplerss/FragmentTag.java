@@ -56,14 +56,15 @@ class FragmentTag extends ListFragment
          FragmentManager fragmentManager = getFragmentManager();
          Update.page(m_navigationAdapter, 0, fragmentManager, context);
 
-         ActionBarActivity activity = (ActionBarActivity) getActivity();
+         /*ActionBarActivity activity = (ActionBarActivity) getActivity();
 
          String allTag = PagerAdapterFeeds.getTagsArray()[0];
 
          String unread = (String) m_navigationAdapter.getItem(0);
 
          ActionBar actionBar = activity.getSupportActionBar();
-         actionBar.setSubtitle(allTag + " | " + unread);
+         actionBar.setSubtitle(allTag + " | " + unread);*/
+         Update.navigation(m_navigationAdapter, m_pageChange, 0, context);
       }
    }
 

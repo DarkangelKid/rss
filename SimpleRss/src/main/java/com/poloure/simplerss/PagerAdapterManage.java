@@ -18,7 +18,7 @@ class PagerAdapterManage extends FragmentPagerAdapter
    {
       super(fragmentManager);
       m_manageFragments[0] = new FragmentManageTags();
-      m_manageFragments[1] = new FragmentManageFeeds(navigationAdapter, fragmentManager);
+      m_manageFragments[1] = new FragmentManageFeeds(navigationAdapter);
       m_manageFragments[2] = new FragmentManageFilters(navigationAdapter);
 
       Resources resources = context.getResources();

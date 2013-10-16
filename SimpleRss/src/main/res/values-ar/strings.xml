@@ -19,9 +19,9 @@
    <string name="feed_name_hint">إختياري‎</string>
    <string name="feed_url_dialog">رابط الموجز‎</string>
    <string name="feed_url_hint">http://example.com/rss</string>
-   <string name="feed_tag_dialog">Tag</string>
+   <string name="feed_tag_dialog">Tags</string>
    <string name="feed_tag_title">Tags</string>
-   <string name="feed_tag_hint">new tag</string>
+   <string name="feed_tag_hint">tag one, tag two, …</string>
    <string name="filter_hint">new filter</string>
    <string name="add_filter">Add Filter</string>
 
@@ -29,7 +29,7 @@
    <string name="add_dialog">اضافة</string>
    <string name="accept_dialog">قبول</string>
 
-   <string name="all_tag">All</string>
+   <string name="all_tag">كل</string>
 
    <string name="notification_title_singular">%d Unread Item</string>
    <string name="notification_title_plural">%d Unread Items</string>

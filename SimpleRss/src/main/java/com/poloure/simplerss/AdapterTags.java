@@ -21,9 +21,10 @@ import java.util.Set;
 
 class AdapterTags extends BaseAdapter
 {
+   static final         Set<Long> S_READ_ITEM_TIMES       = Collections.synchronizedSet(
+         new HashSet(0));
    private static final int       VIEW_TYPE_COUNT         = 4;
-   private static final float     READ_ITEM_IMAGE_OPACITY = 0.5f;
-   static               Set<Long> s_readItemTimes         = new HashSet(0);
+   private static final int       READ_ITEM_IMAGE_OPACITY = 120;
    private final LayoutInflater m_inflater;
    private final Context        m_context;
    boolean    m_touchedScreen = true;
@@ -32,10 +33,10 @@ class AdapterTags extends BaseAdapter
    AdapterTags(Context context)
    {
       m_context = context;
-      if(0 == s_readItemTimes.size())
+      if(0 == S_READ_ITEM_TIMES.size())
       {
          Set<Long> set = Read.longSet(Constants.READ_ITEMS, m_context);
-         s_readItemTimes = Collections.synchronizedSet(set);
+         S_READ_ITEM_TIMES.addAll(set);
       }
       m_inflater = (LayoutInflater) m_context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
    }
@@ -204,46 +205,37 @@ class AdapterTags extends BaseAdapter
       if(View.VISIBLE == parent.getVisibility() && position + 1 < m_items.length &&
             m_touchedScreen)
       {
-         s_readItemTimes.add(m_items[position + 1].time);
+         S_READ_ITEM_TIMES.add(m_items[position + 1].time);
       }
 
       return view;
    }
 
    private
-   void setCardAlpha(TextView title, TextView url, ImageView image, TextView des, Long time)
+   void displayImage(ImageView imageView, int position, String imageName)
    {
-      Resources res = m_context.getResources();
+      imageView.setImageDrawable(new ColorDrawable(Color.WHITE));
+      LayoutParams lp = imageView.getLayoutParams();
 
-      if(s_readItemTimes.contains(time))
+      Resources resources = m_context.getResources();
+      DisplayMetrics displayMetrics = resources.getDisplayMetrics();
+      int screenWidth = displayMetrics.widthPixels;
+
+      lp.height = (int) Math.round(
+            (double) screenWidth / m_items[position].width * m_items[position].height);
+      imageView.setLayoutParams(lp);
+      imageView.setTag(position);
+
+      AsyncLoadImage task = new AsyncLoadImage();
+      if(Constants.HONEYCOMB)
       {
-         title.setTextColor(res.getColor(R.color.title_grey));
-         url.setTextColor(res.getColor(R.color.link_grey));
 
-         if(null != des)
-         {
-            des.setTextColor(res.getColor(R.color.des_grey));
-         }
-
-         if(null != image)
-         {
-            image.setAlpha(READ_ITEM_IMAGE_OPACITY);
-         }
+         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, imageView, position, imageName,
+               m_context);
       }
       else
       {
-         title.setTextColor(res.getColor(R.color.title_black));
-         url.setTextColor(res.getColor(R.color.link_black));
-
-         if(null != des)
-         {
-            des.setTextColor(res.getColor(R.color.des_black));
-         }
-
-         if(null != image)
-         {
-            image.setAlpha(1.0f);
-         }
+         task.execute(imageView, position, imageName, m_context);
       }
    }
 
@@ -279,30 +271,39 @@ class AdapterTags extends BaseAdapter
    }
 
    private
-   void displayImage(ImageView imageView, int position, String imageName)
+   void setCardAlpha(TextView title, TextView url, ImageView image, TextView des, Long time)
    {
-      imageView.setImageDrawable(new ColorDrawable(Color.WHITE));
-      LayoutParams lp = imageView.getLayoutParams();
+      Resources res = m_context.getResources();
 
-      Resources resources = m_context.getResources();
-      DisplayMetrics displayMetrics = resources.getDisplayMetrics();
-      int screenWidth = displayMetrics.widthPixels;
-
-      lp.height = (int) Math.round(
-            (double) screenWidth / m_items[position].width * m_items[position].height);
-      imageView.setLayoutParams(lp);
-      imageView.setTag(position);
-
-      AsyncLoadImage task = new AsyncLoadImage();
-      if(Constants.HONEYCOMB)
+      if(S_READ_ITEM_TIMES.contains(time))
       {
+         title.setTextColor(res.getColor(R.color.title_grey));
+         url.setTextColor(res.getColor(R.color.link_grey));
 
-         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, imageView, position, imageName,
-               m_context);
+         if(null != des)
+         {
+            des.setTextColor(res.getColor(R.color.des_grey));
+         }
+
+         if(null != image)
+         {
+            image.setImageAlpha(READ_ITEM_IMAGE_OPACITY);
+         }
       }
       else
       {
-         task.execute(imageView, position, imageName, m_context);
+         title.setTextColor(res.getColor(R.color.title_black));
+         url.setTextColor(res.getColor(R.color.link_black));
+
+         if(null != des)
+         {
+            des.setTextColor(res.getColor(R.color.des_black));
+         }
+
+         if(null != image)
+         {
+            image.setImageAlpha(0);
+         }
       }
    }
 

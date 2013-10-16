@@ -11,13 +11,13 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
 {
-   private static final Pattern ILLEGAL_FILE_CHARS = Pattern.compile("[/\\?%*|<>:]");
-   private static final Pattern SPLIT_SPACE        = Pattern.compile(" ");
+   private static final Pattern ILLEGAL_FILE_CHARS      = Pattern.compile("[/\\?%*|<>:]");
+   private static final Pattern SPLIT_SPACE             = Pattern.compile(" ");
+   private static final int     FEED_STREAM_BYTE_BUFFER = 512;
    private final AlertDialog m_dialog;
    private final String      m_mode;
    private final String      m_title;
@@ -26,7 +26,6 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
    private       String      m_tag;
    private       boolean     m_isFeedNotReal;
    private       String      name;
-   private       boolean     m_newTag;
 
    AsyncCheckFeed(AlertDialog dialog, String tag, String feedName, String mode, String currentTitle,
          BaseAdapter navigationAdapter, Context context)
@@ -36,7 +35,6 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
       name = feedName;
       m_mode = mode;
       m_title = currentTitle;
-      m_newTag = true;
       m_navigationAdapter = navigationAdapter;
       m_context = context;
       Button button = m_dialog.getButton(DialogInterface.BUTTON_POSITIVE);
@@ -64,10 +62,6 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
       }
       m_tag = m_tag.substring(0, m_tag.length() - 1);
 
-      /* Check to see if the tag already exists. */
-      Set<String> tagSet = PagerAdapterFeeds.getTags();
-      m_newTag = !tagSet.contains(m_tag);
-
       String[] checkList = url[0].contains("http") ? new String[]{url[0]} : new String[]{
             "http://" + url[0], "https://" + url[0]
       };
@@ -83,8 +77,8 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
             try
             {
                in = new BufferedInputStream(new URL(check).openStream());
-               byte[] data = new byte[512];
-               in.read(data, 0, 512);
+               byte[] data = new byte[FEED_STREAM_BYTE_BUFFER];
+               in.read(data, 0, FEED_STREAM_BYTE_BUFFER);
 
                String line = new String(data);
                if(line.contains("rss") || line.contains("Atom") || line.contains("atom"))
@@ -92,13 +86,13 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
                   while(!line.contains(Constants.TAG_TITLE) &&
                         !line.contains(Constants.ENDTAG_TITLE))
                   {
-                     byte[] data2 = new byte[512];
-                     in.read(data2, 0, 512);
+                     byte[] data2 = new byte[FEED_STREAM_BYTE_BUFFER];
+                     in.read(data2, 0, FEED_STREAM_BYTE_BUFFER);
                      data = concat(data, data2);
                      line = new String(data);
                   }
-                  int ind = line.indexOf('>', line.indexOf(Constants.TAG_TITLE) + 1);
-                  feedTitle = line.substring(ind, line.indexOf("</", ind));
+                  int index = line.indexOf('>', line.indexOf(Constants.TAG_TITLE) + 1);
+                  feedTitle = line.substring(index, line.indexOf("</", index));
                   m_isFeedNotReal = false;
                   feedUrl = check;
                }
@@ -121,23 +115,6 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
          }
       }
       return new String[]{feedUrl, feedTitle};
-   }
-
-   private static
-   byte[] concat(byte[] first, byte... second)
-   {
-      if(null == first)
-      {
-         return second;
-      }
-      if(null == second)
-      {
-         return first;
-      }
-      byte[] result = new byte[first.length + second.length];
-      System.arraycopy(first, 0, result, 0, first.length);
-      System.arraycopy(second, 0, result, first.length, second.length);
-      return result;
    }
 
    @Override
@@ -225,5 +202,22 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
       /// To ManageFeedsRefresh the counts and the order of the tags.
       // TODO Util.updateTags();
       Update.AsyncCompatManageTagsRefresh(listView, listAdapter);*/
+   }
+
+   private static
+   byte[] concat(byte[] first, byte... second)
+   {
+      if(null == first)
+      {
+         return second;
+      }
+      if(null == second)
+      {
+         return first;
+      }
+      byte[] result = new byte[first.length + second.length];
+      System.arraycopy(first, 0, result, 0, first.length);
+      System.arraycopy(second, 0, result, first.length, second.length);
+      return result;
    }
 }

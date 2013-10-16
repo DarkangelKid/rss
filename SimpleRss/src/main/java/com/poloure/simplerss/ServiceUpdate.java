@@ -68,21 +68,21 @@ class ServiceUpdate extends IntentService
       String[] urls = content[1];
       String[] tags = content[2];
 
+      String allTag = getString(R.string.all_tag);
+      boolean isAllTag = tag.equals(allTag);
+
       /* Download and parse each feed in the index. */
       int namesLength = names.length;
       for(int i = 0; i < namesLength; i++)
       {
-         if(tags[i].equals(tag) || tag.equals(getString(R.string.all_tag)))
+         if(isAllTag || tags[i].contains(tag))
          {
-            String feedPath = names[i] + Constants.SEPAR + "";
+            String feedPath = names[i] + Constants.SEPAR;
             if(isNonExisting(feedPath, this))
             {
                String path1 = Util.getStorage(this) + feedPath + Constants.THUMBNAIL_DIR;
                File folder = new File(path1);
-               if(!folder.exists())
-               {
-                  folder.mkdirs();
-               }
+               folder.mkdirs();
             }
 
             try

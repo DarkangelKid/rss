@@ -105,6 +105,23 @@ class Read
       return lines;
    }
 
+   /* For reading from the internal s_storage. */
+   private static
+   BufferedReader reader(String path, String fileEncoding, Context context)
+         throws FileNotFoundException, UnsupportedEncodingException
+   {
+      String path1 = Util.getInternalPath(path);
+      FileInputStream fis = context.openFileInput(path1);
+      return new BufferedReader(new InputStreamReader(fis, fileEncoding));
+   }
+
+   /* Wrapper for creating external BufferedReader. */
+   private static
+   BufferedReader reader(String path) throws FileNotFoundException
+   {
+      return new BufferedReader(new FileReader(path));
+   }
+
    static
    int count(String path, Context context)
    {
@@ -154,23 +171,6 @@ class Read
          e.printStackTrace();
       }
       return i;
-   }
-
-   /* Wrapper for creating external BufferedReader. */
-   private static
-   BufferedReader reader(String path) throws FileNotFoundException
-   {
-      return new BufferedReader(new FileReader(path));
-   }
-
-   /* For reading from the internal s_storage. */
-   private static
-   BufferedReader reader(String path, String fileEncoding, Context context)
-         throws FileNotFoundException, UnsupportedEncodingException
-   {
-      String path1 = Util.getInternalPath(path);
-      FileInputStream fis = context.openFileInput(path1);
-      return new BufferedReader(new InputStreamReader(fis, fileEncoding));
    }
 
    static

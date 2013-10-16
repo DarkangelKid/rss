@@ -31,7 +31,7 @@ class OnScrollFeedListener implements AbsListView.OnScrollListener
             View.VISIBLE == view.getVisibility() && ((AdapterTags) m_feedAdapter).isScreenTouched())
       {
          Long time = ((FeedItem) m_feedAdapter.getItem(0)).time;
-         AdapterTags.s_readItemTimes.add(time);
+         AdapterTags.S_READ_ITEM_TIMES.add(time);
       }
 
       if(AbsListView.OnScrollListener.SCROLL_STATE_IDLE == scrollState)
