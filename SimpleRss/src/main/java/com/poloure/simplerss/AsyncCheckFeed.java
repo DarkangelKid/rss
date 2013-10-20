@@ -1,5 +1,6 @@
 package com.poloure.simplerss;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -13,6 +14,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
@@ -59,8 +61,9 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
          String firstLetter = word.substring(0, 1);
          String restOfWord = word.substring(1);
 
-         String firstLetterUpper = firstLetter.toUpperCase(Locale.getDefault());
-         String restOfWordLower = restOfWord.toLowerCase(Locale.getDefault());
+         Locale defaultLocale = Locale.getDefault();
+         String firstLetterUpper = firstLetter.toUpperCase(defaultLocale);
+         String restOfWordLower = restOfWord.toLowerCase(defaultLocale);
 
          tagBuilder.append(firstLetterUpper);
          tagBuilder.append(restOfWordLower);
@@ -102,8 +105,12 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
                      data = concat(data, data2);
                      line = new String(data);
                   }
-                  int index = line.indexOf('>', line.indexOf(TAG_TITLE) + 1);
-                  feedTitle = line.substring(index, line.indexOf("</", index));
+
+                  int tagTitleIndex = line.indexOf(TAG_TITLE);
+                  int moreIndex = line.indexOf('>', tagTitleIndex + 1);
+                  int lessIndex = line.indexOf("</", moreIndex);
+
+                  feedTitle = line.substring(moreIndex, lessIndex);
                   m_isFeedNotReal = false;
                   feedUrl = check;
                }
@@ -164,7 +171,8 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
          name = result[1];
       }
 
-      name = ILLEGAL_FILE_CHARS.matcher(name).replaceAll("");
+      Matcher matcher = ILLEGAL_FILE_CHARS.matcher(name);
+      name = matcher.replaceAll("");
 
       if(Constants.EDIT.equals(m_mode))
       {
@@ -191,7 +199,7 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
          }*/
       }
 
-      Util.updateTags(m_navigationAdapter, m_context);
+      Util.updateTags(m_navigationAdapter, (Activity) m_context);
 
       m_dialog.dismiss();
    }
@@ -216,8 +224,7 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
       int position = Write.removeLine(index, oldFeed, true, context);
       Write.single(index, entry + Constants.NL, context);
 
-     /* To ManageFeedsRefresh the counts and the order of the tags.
-      TODO Util.updateTags();
-      Update.AsyncCompatManageTagsRefresh(listView, listAdapter);*/
+      // TODO Util.updateTags();
+      //AsyncManageTagsRefresh(listView, listAdapter);
    }
 }

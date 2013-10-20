@@ -47,8 +47,8 @@ class FragmentWebView extends Fragment
       m_webView.loadDataWithBaseURL(url, html, null, null, null);
    }
 
-   void setUrl(String url)
+   void setUrl(CharSequence url)
    {
-      m_webView.loadUrl(url);
+      m_webView.loadUrl((String) url);
    }
 }

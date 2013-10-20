@@ -1,5 +1,6 @@
 package com.poloure.simplerss;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -14,15 +15,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ListView;
 
 class FragmentManage extends Fragment
 {
-   private static final int VIEW_PAGER_ID = 0x2000;
-   private final BaseAdapter m_navigationAdapter;
+   static final int VIEW_PAGER_ID = 0x2000;
 
-   FragmentManage(BaseAdapter baseAdapter)
+   static
+   FragmentManage newInstance()
    {
-      m_navigationAdapter = baseAdapter;
+      return new FragmentManage();
    }
 
    @Override
@@ -38,8 +40,11 @@ class FragmentManage extends Fragment
 
       setHasOptionsMenu(true);
 
+      ListView navigationList = (ListView) ((Activity) context).findViewById(R.id.left_drawer);
+      BaseAdapter navigationListAdapter = (BaseAdapter) navigationList.getAdapter();
+
       FragmentManager fragmentManager = getFragmentManager();
-      PagerAdapter pagerAdapter = new PagerAdapterManage(m_navigationAdapter, fragmentManager,
+      PagerAdapter pagerAdapter = new PagerAdapterManage(navigationListAdapter, fragmentManager,
             context);
 
       ViewPager.OnPageChangeListener pageChangeManage = new OnPageChangeManage(this);

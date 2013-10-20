@@ -74,7 +74,7 @@ class ServiceUpdate extends IntentService
 
       int page = intent.getIntExtra("GROUP_NUMBER", 0);
 
-      Set<String> tagSet = PagerAdapterFeeds.updateTags(this);
+      Set<String> tagSet = PagerAdapterFeeds.getTagsFromDisk(this);
       int tagSize = tagSet.size();
       String tag = tagSet.toArray(new String[tagSize])[page];
 
@@ -429,7 +429,7 @@ class ServiceUpdate extends IntentService
       }
    }
 
-   static
+   private static
    Set<String> fileToSet(String filePath, Context context)
    {
       Set<String> set = new LinkedHashSet<String>();
@@ -472,6 +472,10 @@ class ServiceUpdate extends IntentService
          URL imageUrl = new URL(imgLink);
          inputStream = imageUrl.openStream();
       }
+      catch(MalformedURLException ignored)
+      {
+         return;
+      }
       catch(IOException ignored)
       {
          return;
@@ -492,6 +496,10 @@ class ServiceUpdate extends IntentService
          URL imageUrl = new URL(imgLink);
          inputStream = imageUrl.openStream();
       }
+      catch(MalformedURLException ignored)
+      {
+         return;
+      }
       catch(IOException ignored)
       {
          return;
@@ -501,10 +509,10 @@ class ServiceUpdate extends IntentService
       o2.inSampleSize = Math.round(inSample);
       Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, o2);
 
+      String storage = Util.getStorage(context);
       try
       {
-         FileOutputStream out = new FileOutputStream(
-               Util.getStorage(context) + thumbnailDir + imgName);
+         FileOutputStream out = new FileOutputStream(storage + thumbnailDir + imgName);
          bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
       }
       catch(FileNotFoundException e)

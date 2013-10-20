@@ -78,7 +78,7 @@ class AdapterNavDrawer extends BaseAdapter
          m_navigationMainItem.setText(navTitles[position]);
 
          /* Set the item's image as a CompoundDrawable of the textView. */
-         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
+         if(Build.VERSION_CODES.JELLY_BEAN_MR1 <= Build.VERSION.SDK_INT)
          {
             m_navigationMainItem.setCompoundDrawablesRelativeWithIntrinsicBounds(
                   NAV_ICONS[position], 0, 0, 0);

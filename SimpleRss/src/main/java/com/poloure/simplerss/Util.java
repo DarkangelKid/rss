@@ -1,5 +1,6 @@
 package com.poloure.simplerss;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
 import android.os.Environment;
@@ -23,82 +24,36 @@ class Util
    private static String     s_storage                 = "";
 
    static
-   void updateTags(BaseAdapter navigationAdapter, Context context)
+   void updateTags(BaseAdapter navigationAdapter, Activity activity)
    {
-      if(null != FragmentFeeds.s_viewPager)
-      {
-         PagerAdapter pagerAdapter = FragmentFeeds.s_viewPager.getAdapter();
-         PagerAdapterFeeds.updateTags(context);
-         pagerAdapter.notifyDataSetChanged();
-      }
+      ViewPager tagPager = (ViewPager) activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
 
-      Update.navigation(navigationAdapter, null, 0, context);
+      PagerAdapter pagerAdapter = tagPager.getAdapter();
+      ((PagerAdapterFeeds) pagerAdapter).getTagsFromDisk(activity);
+      pagerAdapter.notifyDataSetChanged();
+
+      Update.navigation(navigationAdapter, null, 0, activity);
    }
 
    static
-   int gotoLatestUnread(FeedItem[] feedItems, boolean update, int page,
-         FragmentManager fragmentManager)
+   void gotoLatestUnread(FragmentManager fragmentManager, int page)
    {
-      FeedItem[] items = feedItems;
-      int page1 = page;
+      String tag = "android:switcher:" + FragmentFeeds.VIEW_PAGER_ID + ':' + page;
 
-      if(null == FragmentFeeds.s_viewPager)
-      {
-         return -1;
-      }
+      ListFragment tagFragment = (ListFragment) fragmentManager.findFragmentByTag(tag);
+      ListView listView = tagFragment.getListView();
 
-      if(update)
-      {
-         page1 = FragmentFeeds.s_viewPager.getCurrentItem();
-      }
+      AdapterTags cardAdapter = (AdapterTags) listView.getAdapter();
 
-      if(null == items)
+      int itemCount = cardAdapter.getCount() - 1;
+      for(int i = itemCount; 0 <= i; i--)
       {
-         ListView listView = getFeedListView(page1, fragmentManager);
-         AdapterTags cardAdapter = (AdapterTags) listView.getAdapter();
-         if(null == cardAdapter)
+         if(!AdapterTags.S_READ_ITEM_TIMES.contains(cardAdapter.m_items[i].m_itemTime))
          {
-            return -1;
-         }
-
-         items = cardAdapter.m_items;
-      }
-
-      int i;
-      int itemCount = items.length - 1;
-      for(i = itemCount; 0 <= i; i--)
-      {
-         if(!AdapterTags.S_READ_ITEM_TIMES.contains(items[i].m_itemTime))
-         {
+            listView.setSelection(i);
             break;
          }
       }
-
-      /* 0 is the top. links.length - 1 is the bottom.
-       * May not be true anymore.*/
-      if(update)
-      {
-         ListView lv = getFeedListView(page1, fragmentManager);
-         if(null == lv)
-         {
-            return -1;
-         }
-
-         lv.setSelection(i);
-      }
-      return i;
-   }
-
-   /* This is the second one. */
-   static
-   ListView getFeedListView(int page, FragmentManager fragmentManager)
-   {
-      ViewPager viewpager = FragmentFeeds.s_viewPager;
-
-      int viewpagerId = viewpager.getId();
-      String tag = "android:switcher:" + viewpagerId + ':' + page;
-
-      return ((ListFragment) fragmentManager.findFragmentByTag(tag)).getListView();
    }
 
    static
@@ -148,15 +103,16 @@ class Util
    void remove(String path, Context context)
    {
       String path1 = getStorage(context) + path;
-      context.deleteFile(getInternalPath(path1));
+      String internalPath = getInternalPath(path1);
+      context.deleteFile(internalPath);
       new File(path1).delete();
    }
 
    static
    String getInternalPath(String externalPath)
    {
-      String substring = externalPath.substring(
-            externalPath.indexOf(Constants.SEPAR + "files" + Constants.SEPAR) + 7);
+      int index = externalPath.indexOf(Constants.SEPAR + "files" + Constants.SEPAR);
+      String substring = externalPath.substring(index + 7);
       return substring.replaceAll(Constants.SEPAR, "-");
    }
 

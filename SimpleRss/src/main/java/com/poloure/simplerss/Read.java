@@ -70,7 +70,7 @@ class Read
          BufferedReader in = null;
          try
          {
-            in = Util.isUsingSd() ? reader(path1) : reader(path1, UTF8, context);
+            in = Util.isUsingSd() ? reader(path1) : reader(path1, context);
 
             int linesLength = lines.length;
             for(int i = 0; i < linesLength; i++)
@@ -107,12 +107,12 @@ class Read
 
    /* For reading from the internal s_storage. */
    private static
-   BufferedReader reader(String path, String fileEncoding, Context context)
+   BufferedReader reader(String path, Context context)
          throws FileNotFoundException, UnsupportedEncodingException
    {
       String path1 = Util.getInternalPath(path);
       FileInputStream fis = context.openFileInput(path1);
-      return new BufferedReader(new InputStreamReader(fis, fileEncoding));
+      return new BufferedReader(new InputStreamReader(fis, Read.UTF8));
    }
 
    /* Wrapper for creating external BufferedReader. */
@@ -143,7 +143,7 @@ class Read
          BufferedReader in = null;
          try
          {
-            in = Util.isUsingSd() ? reader(path1) : reader(path1, UTF8, context);
+            in = Util.isUsingSd() ? reader(path1) : reader(path1, context);
 
             while(null != in.readLine())
             {

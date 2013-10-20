@@ -1,5 +1,6 @@
 package com.poloure.simplerss;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.widget.Adapter;
@@ -35,7 +36,7 @@ class OnClickManageFeedDelete implements DialogInterface.OnClickListener
       Util.rmdir(new File(path));
 
       /* Refresh pages and navigation counts. */
-      Util.updateTags(m_navigationAdapter, m_context);
+      Util.updateTags(m_navigationAdapter, (Activity) m_context);
       // TODO Update.manageFeeds();
       // TODO Update.manageTags();
    }

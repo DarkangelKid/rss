@@ -20,7 +20,8 @@ class SettingBooleanChecked implements View.OnClickListener
    void onClick(View v)
    {
       Util.remove(m_settingPath, m_context);
-      String value = Boolean.toString(((Checkable) v).isChecked());
+      boolean checked = ((Checkable) v).isChecked();
+      String value = Boolean.toString(checked);
       Write.single(m_settingPath, value, m_context);
    }
 }

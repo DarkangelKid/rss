@@ -12,11 +12,11 @@ import android.widget.TextView;
 
 class AdapterManagerTags extends BaseAdapter
 {
-   private static final long      TAG_SWAP_FADE_DURATION   = 120L;
-   private static final Animation FADE_IN                  = new AlphaAnimation(0.0F, 1.0F);
-   private static final Animation FADE_OUT                 = new AlphaAnimation(1.0F, 0.0F);
-   static               String[]  s_tagArray               = Util.EMPTY_STRING_ARRAY;
-   static               String[]  s_infoArray              = Util.EMPTY_STRING_ARRAY;
+   private static final long      TAG_SWAP_FADE_DURATION = 120L;
+   private static final Animation FADE_IN                = new AlphaAnimation(0.0F, 1.0F);
+   private static final Animation FADE_OUT               = new AlphaAnimation(1.0F, 0.0F);
+   private              String[]  m_tagArray             = Util.EMPTY_STRING_ARRAY;
+   private              String[]  m_infoArray            = Util.EMPTY_STRING_ARRAY;
    private final LayoutInflater m_layoutInflater;
 
    AdapterManagerTags(Context context)
@@ -30,18 +30,24 @@ class AdapterManagerTags extends BaseAdapter
       FADE_IN.setInterpolator(new DecelerateInterpolator());
    }
 
+   void setArrays(String[] tags, String... tagInformation)
+   {
+      m_tagArray = tags;
+      m_infoArray = tagInformation;
+   }
+
    @Override
    public
    int getCount()
    {
-      return s_tagArray.length;
+      return m_tagArray.length;
    }
 
    @Override
    public
    String getItem(int pos)
    {
-      return s_tagArray[pos];
+      return m_tagArray[pos];
    }
 
    @Override
@@ -70,8 +76,8 @@ class AdapterManagerTags extends BaseAdapter
          holder = (ViewHolder) view.getTag();
       }
 
-      holder.m_tagView.setText(s_tagArray[position]);
-      holder.m_infoView.setText(s_infoArray[position]);
+      holder.m_tagView.setText(m_tagArray[position]);
+      holder.m_infoView.setText(m_infoArray[position]);
 
       return view;
    }
@@ -79,7 +85,7 @@ class AdapterManagerTags extends BaseAdapter
    static
    class ViewHolder
    {
-      TextView  m_tagView;
-      TextView  m_infoView;
+      TextView m_tagView;
+      TextView m_infoView;
    }
 }

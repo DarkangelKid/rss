@@ -4,6 +4,7 @@ import android.content.res.Resources;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.view.View;
@@ -36,7 +37,8 @@ class OnClickNavDrawerItem implements AdapterView.OnItemClickListener
       image. */
       if(3 < position)
       {
-         FragmentFeeds.s_viewPager.setCurrentItem(position - 4);
+         ViewPager viewPager = (ViewPager) m_activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
+         viewPager.setCurrentItem(position - 4);
       }
 
       /* If the selected title is the title of the current page, exit.

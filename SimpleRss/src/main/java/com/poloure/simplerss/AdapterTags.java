@@ -142,8 +142,7 @@ class AdapterTags extends BaseAdapter
          holder.m_titleView.setText(title);
          holder.m_descriptionView.setText(m_items[position].m_itemDescription);
          holder.m_urlView.setText(link);
-         setCardAlpha(holder.m_titleView, holder.m_urlView, holder.m_imageView,
-               holder.m_descriptionView, time);
+         setCardAlpha(holder.m_titleView, holder.m_urlView, holder.m_descriptionView, time);
       }
       /* card_no_des_img.xml no description, image, m_title. */
       else if(1 == viewType)
@@ -168,7 +167,7 @@ class AdapterTags extends BaseAdapter
 
          holder.m_titleView.setText(title);
          holder.m_urlView.setText(link);
-         setCardAlpha(holder.m_titleView, holder.m_urlView, holder.m_imageView, null, time);
+         setCardAlpha(holder.m_titleView, holder.m_urlView, null, time);
       }
       /* card_des_no_img.xml no image, description, title. */
       else if(2 == viewType)
@@ -192,7 +191,7 @@ class AdapterTags extends BaseAdapter
          holder.m_titleView.setText(title);
          holder.m_imageView.setText(m_items[position].m_itemDescription);
          holder.m_urlView.setText(link);
-         setCardAlpha(holder.m_titleView, holder.m_urlView, null, holder.m_imageView, time);
+         setCardAlpha(holder.m_titleView, holder.m_urlView, holder.m_imageView, time);
       }
       /* No description or image. */
       else if(3 == viewType)
@@ -215,7 +214,7 @@ class AdapterTags extends BaseAdapter
          holder.m_titleView.setText(title);
          holder.m_urlView.setText(link);
 
-         setCardAlpha(holder.m_titleView, holder.m_urlView, null, null, time);
+         setCardAlpha(holder.m_titleView, holder.m_urlView, null, time);
       }
 
       /* The logic that tells whether the item is Read or not. */
@@ -288,7 +287,7 @@ class AdapterTags extends BaseAdapter
    }
 
    private
-   void setCardAlpha(TextView title, TextView url, ImageView image, TextView des, Long time)
+   void setCardAlpha(TextView title, TextView url, TextView des, Long time)
    {
       if(S_READ_ITEM_TIMES.contains(time))
       {

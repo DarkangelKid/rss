@@ -16,6 +16,12 @@ class FragmentSettings extends Fragment
 {
    private static final int VIEW_PAGER_ID = 0x3000;
 
+   static
+   FragmentSettings newInstance()
+   {
+      return new FragmentSettings();
+   }
+
    @Override
    public
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)

@@ -14,6 +14,7 @@ import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -22,6 +23,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 
 import java.io.File;
@@ -34,10 +36,8 @@ class FeedsActivity extends ActionBarActivity
    private static final long   MINUTE_VALUE        = 60000L;
    static Handler s_serviceHandler;
    /* Only initialized when the activity is running. */ private Menu m_optionsMenu;
-   private DrawerLayout          m_drawerLayout;
    private ActionBarDrawerToggle m_drawerToggle;
    private String                m_previousTitle;
-   private BaseAdapter           m_navigationDrawer;
 
    @Override
    public
@@ -67,37 +67,36 @@ class FeedsActivity extends ActionBarActivity
       folder.mkdirs();
 
       /* Create the navigation drawer and set all the listeners for it. */
-      m_drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+      DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
       ListView navigationList = (ListView) findViewById(R.id.left_drawer);
 
       /* Set the listeners. */
-      AdapterView.OnItemClickListener onClickNavDrawerItem = new OnClickNavDrawerItem(
-            m_drawerLayout, this);
-      m_drawerToggle = new OnClickDrawerToggle(this, m_drawerLayout);
-      m_navigationDrawer = new AdapterNavDrawer(this);
+      m_drawerToggle = new OnClickDrawerToggle(this, drawerLayout);
+      ListAdapter adapterNavDrawer = new AdapterNavDrawer(this);
 
-      m_drawerLayout.setDrawerListener(m_drawerToggle);
-      navigationList.setOnItemClickListener(onClickNavDrawerItem);
-      navigationList.setAdapter(m_navigationDrawer);
+      drawerLayout.setDrawerListener(m_drawerToggle);
+      navigationList.setAdapter(adapterNavDrawer);
 
       /* Create the MANAGE_FRAGMENTS that go inside the content frame. */
       if(null == savedInstanceState)
       {
-         Fragment[] mainFragments = {
-               new FragmentFeeds(m_navigationDrawer),
-               new FragmentManage(m_navigationDrawer),
-               new FragmentSettings(),
-         };
+         Fragment feedFragment = FragmentFeeds.newInstance();
+         Fragment fragmentManage = FragmentManage.newInstance();
+         Fragment fragmentSettings = FragmentSettings.newInstance();
+
+         AdapterView.OnItemClickListener onClickNavDrawerItem = new OnClickNavDrawerItem(
+               drawerLayout, this);
+         navigationList.setOnItemClickListener(onClickNavDrawerItem);
 
          int frame = R.id.content_frame;
 
          FragmentManager fragmentManager = getSupportFragmentManager();
          FragmentTransaction transaction = fragmentManager.beginTransaction();
-         transaction.add(frame, mainFragments[0], navTitles[0]);
-         transaction.add(frame, mainFragments[1], navTitles[1]);
-         transaction.add(frame, mainFragments[2], navTitles[2]);
-         transaction.hide(mainFragments[1]);
-         transaction.hide(mainFragments[2]);
+         transaction.add(frame, feedFragment, navTitles[0]);
+         transaction.add(frame, fragmentManage, navTitles[1]);
+         transaction.add(frame, fragmentSettings, navTitles[2]);
+         transaction.hide(fragmentManage);
+         transaction.hide(fragmentSettings);
          transaction.commit();
       }
    }
@@ -135,7 +134,8 @@ class FeedsActivity extends ActionBarActivity
       ActionBar actionBar = getSupportActionBar();
       actionBar.setTitle(feeds);
 
-      m_drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+      DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+      drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
       m_drawerToggle.setDrawerIndicatorEnabled(true);
    }
 
@@ -166,7 +166,7 @@ class FeedsActivity extends ActionBarActivity
       }
 
       /* Create intent, turn into pending intent, and get the alarm manager. */
-      Intent intent = getServiceIntent(0, fileNames[3], this);
+      Intent intent = getServiceIntent(0, this);
       PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, 0);
       AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
 
@@ -184,16 +184,13 @@ class FeedsActivity extends ActionBarActivity
    }
 
    private static
-   Intent getServiceIntent(int page, String notificationName, Context context)
+   Intent getServiceIntent(int page, Context context)
    {
-      if(null == notificationName)
-      {
-         Resources resources = context.getResources();
-         notificationName = resources.getStringArray(R.array.settings_names)[3];
-      }
+      Resources resources = context.getResources();
+      String notificationName = resources.getStringArray(R.array.settings_names)[3];
+
       /* Load notification boolean. */
-      String path = Constants.SETTINGS_DIR + notificationName +
-            Constants.TXT;
+      String path = Constants.SETTINGS_DIR + notificationName + Constants.TXT;
       String[] check = Read.file(path, context);
 
       boolean notificationsEnabled = 0 != check.length && Boolean.parseBoolean(check[0]);
@@ -213,9 +210,9 @@ class FeedsActivity extends ActionBarActivity
    void onResume()
    {
       super.onResume();
-      Util.updateTags(m_navigationDrawer, this);
-      /*int currentPage = FragmentFeeds.s_viewPager.getCurrentItem();
-      Update.page(m_navigationDrawer, currentPage);*/
+      ListView navigationList = (ListView) findViewById(R.id.left_drawer);
+      BaseAdapter baseAdapter = (BaseAdapter) navigationList.getAdapter();
+      Util.updateTags(baseAdapter, this);
    }
 
    @Override
@@ -273,6 +270,9 @@ class FeedsActivity extends ActionBarActivity
    public
    boolean onOptionsItemSelected(MenuItem item)
    {
+      ListView navigationList = (ListView) findViewById(R.id.left_drawer);
+      BaseAdapter navigationListAdapter = (BaseAdapter) navigationList.getAdapter();
+
       /* If the user has clicked the title and the title says R.string.offline. */
       String navigationTitle = getNavigationTitle();
       CharSequence menuText = item.getTitle();
@@ -288,16 +288,18 @@ class FeedsActivity extends ActionBarActivity
       }
       else if(menuText.equals(addFeed))
       {
-         FragmentManageFeeds.showEditDialog(m_navigationDrawer, this, FragmentManageFeeds.MODE_ADD);
+         FragmentManageFeeds.showEditDialog(navigationListAdapter, this, FragmentManageFeeds.MODE_ADD);
       }
       else if(menuText.equals(jumpTo))
       {
          FragmentManager fragmentManager = getSupportFragmentManager();
-         Util.gotoLatestUnread(null, true, 0, fragmentManager);
+         ViewPager viewPager = (ViewPager) findViewById(FragmentFeeds.VIEW_PAGER_ID);
+         int currentPage = viewPager.getCurrentItem();
+         Util.gotoLatestUnread(fragmentManager, currentPage);
       }
       else if(menuText.equals(refresh))
       {
-         refreshFeeds(this, m_navigationDrawer);
+         refreshFeeds(this, navigationListAdapter);
       }
       else
       {
@@ -308,7 +310,7 @@ class FeedsActivity extends ActionBarActivity
    }
 
    /* Updates and refreshes the tags with any new content. */
-   private static
+   private
    void refreshFeeds(ActionBarActivity activity, BaseAdapter navigationAdapter)
    {
       Menu menu = ((FeedsActivity) activity).m_optionsMenu;
@@ -317,8 +319,11 @@ class FeedsActivity extends ActionBarActivity
       /* Set the service handler in FeedsActivity so we can check and call it
        * from ServiceUpdate. */
       s_serviceHandler = new OnFinishServiceHandler(activity, navigationAdapter, menu);
-      int currentPage = FragmentFeeds.s_viewPager.getCurrentItem();
-      Intent intent = getServiceIntent(currentPage, null, activity);
+
+      ViewPager viewPager = (ViewPager) findViewById(FragmentFeeds.VIEW_PAGER_ID);
+      int currentPage = viewPager.getCurrentItem();
+
+      Intent intent = getServiceIntent(currentPage, activity);
       activity.startService(intent);
    }
 

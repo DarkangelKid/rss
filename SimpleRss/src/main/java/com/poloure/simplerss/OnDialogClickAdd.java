@@ -1,5 +1,6 @@
 package com.poloure.simplerss;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -30,14 +31,16 @@ class OnDialogClickAdd implements DialogInterface.OnClickListener
       String url = ((TextView) m_addRssDialog.findViewById(R.id.URL_edit)).getText().toString();
       String name = ((TextView) m_addRssDialog.findViewById(R.id.name_edit)).getText().toString();
 
+      Locale defaultLocale = Locale.getDefault();
+
       tag = 0 == tag.length()
             ? m_context.getString(R.string.all_tag)
-            : tag.toLowerCase(Locale.getDefault());
+            : tag.toLowerCase(defaultLocale);
 
       Update.executeFeedCheck((AlertDialog) dialog, tag, name, Constants.ADD, "", url,
             m_navigationAdapter, m_context);
 
       /* Update the navigation drawer. */
-      Util.updateTags(m_navigationAdapter, m_context);
+      Util.updateTags(m_navigationAdapter, (Activity) m_context);
    }
 }

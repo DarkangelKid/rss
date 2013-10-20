@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
+import java.util.List;
 
 class Write
 {
@@ -104,7 +105,8 @@ class Write
          if(success)
          {
             Util.remove(path, context);
-            collection(path, Arrays.asList(lines), context);
+            List<String> list = Arrays.asList(lines);
+            collection(path, list, context);
          }
       }
       return pos;

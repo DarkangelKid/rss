@@ -29,14 +29,11 @@ class OnDialogClickEdit implements DialogInterface.OnClickListener
    void onClick(DialogInterface dialog, int which)
    {
       String editTag = ((TextView) m_editRssDialog.findViewById(R.id.tag_edit)).getText()
-            .toString()
-            .trim();
-      String newUrl = ((TextView) m_editRssDialog.findViewById(R.id.URL_edit)).getText()
-            .toString()
-            .trim();
+            .toString();
+      String newUrl = ((TextView) m_editRssDialog.findViewById(R.id.URL_edit)).getText().toString();
       String newName = ((TextView) m_editRssDialog.findViewById(R.id.name_edit)).getText()
-            .toString()
-            .trim();
+            .toString();
+
       if(0 == editTag.length())
       {
          editTag = UNSORTED_TAG;

@@ -16,16 +16,15 @@ class AdapterSettingsFunctions extends BaseAdapter
 {
    private static final int   TYPE_HEADING  = 0;
    private static final int   TYPE_CHECKBOX = 1;
-   private static final int   TYPE_SEEKBAR  = 2;
-   private static final int[] TYPES         = {TYPE_HEADING, TYPE_CHECKBOX, TYPE_SEEKBAR};
+   private static final int   TYPE_SEEK_BAR = 2;
+   private static final int[] TYPES         = {TYPE_HEADING, TYPE_CHECKBOX, TYPE_SEEK_BAR};
 
-   static         int[]          s_times;
-   private static String[]       s_fileNames;
-   private static String[]       s_functionTitles;
-   private static String[]       s_functionSummaries;
-   private final  LayoutInflater m_layoutInflater;
-   private final  Context        m_context;
-   private        TextView       m_titleView;
+   private final String[]       m_fileNames;
+   private final String[]       m_functionTitles;
+   private final String[]       m_functionSummaries;
+   private final LayoutInflater m_layoutInflater;
+   private final Context        m_context;
+   private       TextView       m_titleView;
 
    AdapterSettingsFunctions(Context context)
    {
@@ -33,24 +32,23 @@ class AdapterSettingsFunctions extends BaseAdapter
       m_layoutInflater = (LayoutInflater) m_context.getSystemService(
             Context.LAYOUT_INFLATER_SERVICE);
       Resources resources = m_context.getResources();
-      s_functionTitles = resources.getStringArray(R.array.settings_function_titles);
-      s_functionSummaries = resources.getStringArray(R.array.settings_function_summaries);
-      s_fileNames = resources.getStringArray(R.array.settings_names);
-      s_times = resources.getIntArray(R.array.refresh_integers);
+      m_functionTitles = resources.getStringArray(R.array.settings_function_titles);
+      m_functionSummaries = resources.getStringArray(R.array.settings_function_summaries);
+      m_fileNames = resources.getStringArray(R.array.settings_names);
    }
 
    @Override
    public
    int getCount()
    {
-      return s_functionTitles.length;
+      return m_functionTitles.length;
    }
 
    @Override
    public
    String getItem(int position)
    {
-      return s_functionTitles[position];
+      return m_functionTitles[position];
    }
 
    @Override
@@ -66,7 +64,7 @@ class AdapterSettingsFunctions extends BaseAdapter
    {
       View view = convertView;
       int viewType = getItemViewType(position);
-      String settingPath = Constants.SETTINGS_DIR + s_fileNames[position] + Constants.TXT;
+      String settingPath = Constants.SETTINGS_DIR + m_fileNames[position] + Constants.TXT;
 
       if(TYPE_HEADING == viewType)
       {
@@ -76,7 +74,7 @@ class AdapterSettingsFunctions extends BaseAdapter
             m_titleView = (TextView) view.findViewById(R.id.settings_heading);
          }
 
-         m_titleView.setText(s_functionTitles[position]);
+         m_titleView.setText(m_functionTitles[position]);
       }
       else if(TYPE_CHECKBOX == viewType)
       {
@@ -95,14 +93,16 @@ class AdapterSettingsFunctions extends BaseAdapter
             holder = (HolderSettingsCheckBox) view.getTag();
          }
 
-         holder.m_titleView.setText(s_functionTitles[position]);
-         holder.m_summaryView.setText(s_functionSummaries[position]);
+         holder.m_titleView.setText(m_functionTitles[position]);
+         holder.m_summaryView.setText(m_functionSummaries[position]);
 
          /* On click, save the value of the click to a settings file. */
          holder.m_checkbox.setOnClickListener(new SettingBooleanChecked(settingPath, m_context));
 
          /* Load the saved boolean value and set the box as checked if true. */
-         holder.m_checkbox.setChecked(Boolean.parseBoolean(Read.setting(settingPath, m_context)));
+         String settingString = Read.setting(settingPath, m_context);
+         boolean settingBoolean = Boolean.parseBoolean(settingString);
+         holder.m_checkbox.setChecked(settingBoolean);
       }
       else
       {
@@ -122,8 +122,8 @@ class AdapterSettingsFunctions extends BaseAdapter
             holder = (HolderSettingsSeekBar) view.getTag();
          }
 
-         holder.m_titleView.setText(s_functionTitles[position]);
-         holder.m_summaryView.setText(s_functionSummaries[position]);
+         holder.m_titleView.setText(m_functionTitles[position]);
+         holder.m_summaryView.setText(m_functionSummaries[position]);
          holder.m_seekBar.setMax(9);
 
          /* Load the saved value and set the progress.*/
@@ -175,7 +175,7 @@ class AdapterSettingsFunctions extends BaseAdapter
       }
       else
       {
-         return 2 == position || 5 == position ? TYPE_SEEKBAR : TYPE_CHECKBOX;
+         return 2 == position || 5 == position ? TYPE_SEEK_BAR : TYPE_CHECKBOX;
       }
    }
 
@@ -183,6 +183,6 @@ class AdapterSettingsFunctions extends BaseAdapter
    public
    int getViewTypeCount()
    {
-      return 3;
+      return TYPES.length;
    }
 }

@@ -31,7 +31,6 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Animation>
    private       boolean         m_flash;
    private       AdapterTags     m_adapterTag;
    private       ListView        m_listView;
-   private int m_position = -3;
 
    AsyncRefreshPage(BaseAdapter navigationAdapter, FragmentManager fragmentManager, Context context)
    {
@@ -61,8 +60,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Animation>
 
       Animation animFadeIn = AnimationUtils.loadAnimation(m_context, android.R.anim.fade_in);
 
-      int viewPagerId = FragmentFeeds.s_viewPager.getId();
-      String fragmentTag = "android:switcher:" + viewPagerId + ':' + m_pageNumber;
+      String fragmentTag = "android:switcher:" + FragmentFeeds.VIEW_PAGER_ID + ':' + m_pageNumber;
 
       ListFragment listFragment = (ListFragment) m_fragmentManager.findFragmentByTag(fragmentTag);
       m_adapterTag = (AdapterTags) listFragment.getListAdapter();
@@ -189,7 +187,6 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Animation>
       /* If there were no items to start with (the ListView is invisible).*/
       if(m_flash)
       {
-         m_listView.setSelection(m_position);
          m_listView.setAnimation(result);
          m_listView.setVisibility(View.VISIBLE);
       }
@@ -233,8 +230,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Animation>
 
       if(m_flash)
       {
-         m_position = Util.gotoLatestUnread(m_adapterTag.m_items, false, m_pageNumber,
-               m_fragmentManager);
+         Util.gotoLatestUnread(m_fragmentManager, m_pageNumber);
       }
 
       if(0 != top)

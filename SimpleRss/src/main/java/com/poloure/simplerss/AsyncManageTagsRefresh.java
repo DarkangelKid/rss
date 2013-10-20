@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 
 import java.util.Set;
@@ -16,10 +15,10 @@ class AsyncManageTagsRefresh extends AsyncTask<Void, String[], Void>
    private static final int INFO_INITIAL_CAPACITY = 40;
    private final Animation   m_fadeIn;
    private final ListView    m_listView;
-   private final ListAdapter m_adapter;
+   private final BaseAdapter m_adapter;
    private final Context     m_context;
 
-   AsyncManageTagsRefresh(ListView listView, ListAdapter adapter, Context context)
+   AsyncManageTagsRefresh(ListView listView, BaseAdapter adapter, Context context)
    {
       m_listView = listView;
       m_adapter = adapter;
@@ -58,16 +57,9 @@ class AsyncManageTagsRefresh extends AsyncTask<Void, String[], Void>
    {
       if(null != m_adapter)
       {
-         setArrays(values[0], values[1]);
-         ((BaseAdapter) m_adapter).notifyDataSetChanged();
+         ((AdapterManagerTags) m_adapter).setArrays(values[0], values[1]);
+         m_adapter.notifyDataSetChanged();
       }
-   }
-
-   private static
-   void setArrays(String[] tags, String... infos)
-   {
-      AdapterManagerTags.s_tagArray = tags;
-      AdapterManagerTags.s_infoArray = infos;
    }
 
    private

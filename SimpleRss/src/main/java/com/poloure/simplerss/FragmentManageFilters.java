@@ -48,9 +48,6 @@ class FragmentManageFilters extends ListFragment
       CharSequence itemTitle = item.getTitle();
       String addFeed = getString(R.string.add_feed);
 
-      Write.toLogFile(itemTitle.toString(), getActivity());
-      Write.toLogFile(addFeed, getActivity());
-
       if(addFeed.equals(itemTitle))
       {
          showAddFilterDialog();

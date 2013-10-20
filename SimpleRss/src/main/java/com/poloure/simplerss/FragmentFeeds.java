@@ -1,5 +1,6 @@
 package com.poloure.simplerss;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -14,17 +15,17 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ListView;
 
 class FragmentFeeds extends Fragment
 {
    private static final int OFF_SCREEN_PAGE_LIMIT = 128;
-   private static final int VIEW_PAGER_ID         = 0x1000;
-   static        ViewPager   s_viewPager;
-   private final BaseAdapter m_navigationAdapter;
+   static final         int VIEW_PAGER_ID         = 0x1000;
 
-   FragmentFeeds(BaseAdapter navigationAdapter)
+   static
+   FragmentFeeds newInstance()
    {
-      m_navigationAdapter = navigationAdapter;
+      return new FragmentFeeds();
    }
 
    @Override
@@ -39,20 +40,23 @@ class FragmentFeeds extends Fragment
       }
 
       setHasOptionsMenu(true);
+      FragmentManager fragmentManager = ((FragmentActivity) context).getSupportFragmentManager();
 
-      FragmentManager fragmentManager = getFragmentManager();
-      ViewPager.OnPageChangeListener pageChange = new OnPageChangeTags(this, m_navigationAdapter);
-      PagerAdapter adapter = new PagerAdapterFeeds(m_navigationAdapter, fragmentManager, pageChange,
-            context);
+      ListView navigationList = (ListView) ((Activity) context).findViewById(R.id.left_drawer);
+      BaseAdapter navigationListAdapter = (BaseAdapter) navigationList.getAdapter();
 
-      s_viewPager = new ViewPager(context);
+      ViewPager.OnPageChangeListener pageChange = new OnPageChangeTags(this, navigationListAdapter);
+      PagerAdapter adapter = new PagerAdapterFeeds(navigationListAdapter, fragmentManager,
+            pageChange, context);
 
-      s_viewPager.setAdapter(adapter);
-      s_viewPager.setOffscreenPageLimit(OFF_SCREEN_PAGE_LIMIT);
-      s_viewPager.setOnPageChangeListener(pageChange);
-      s_viewPager.setId(VIEW_PAGER_ID);
+      ViewPager viewPager = new ViewPager(context);
+      viewPager.setAdapter(adapter);
+      viewPager.setOnPageChangeListener(pageChange);
 
-      return s_viewPager;
+      viewPager.setOffscreenPageLimit(OFF_SCREEN_PAGE_LIMIT);
+      viewPager.setId(VIEW_PAGER_ID);
+
+      return viewPager;
    }
 
    @Override
@@ -78,5 +82,4 @@ class FragmentFeeds extends Fragment
       FragmentActivity activity = getActivity();
       return activity.onOptionsItemSelected(item);
    }
-
 }

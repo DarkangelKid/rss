@@ -40,7 +40,9 @@ class OnCardContextMenuClick implements DialogInterface.OnClickListener
       }
       else if(1 == position)
       {
-         m_context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse((String) m_url)));
+         Uri uri = Uri.parse((String) m_url);
+         Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+         m_context.startActivity(intent);
       }
    }
 }

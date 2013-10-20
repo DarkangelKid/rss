@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.ListFragment;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
@@ -98,13 +99,16 @@ class FragmentTag extends ListFragment
          String actionBarTitle = getString(R.string.offline);
          actionBar.setTitle(actionBarTitle);
 
-         /* TODO FeedsActivity.s_drawerLayout.setDrawerLockMode(DrawerLayout
-         .LOCK_MODE_LOCKED_CLOSED);
-         FeedsActivity.m_drawerToggle.setDrawerIndicatorEnabled(false);*/
+         DrawerLayout drawerLayout = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
+
+         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+
+         // TODO FeedsActivity.m_drawerToggle.setDrawerIndicatorEnabled(false);
 
          actionBar.setDisplayHomeAsUpEnabled(true);
 
-         String url = ((TextView) view.findViewById(R.id.url)).getText().toString();
+         TextView textView = (TextView) view.findViewById(R.id.url);
+         CharSequence url = textView.getText();
          Fragment fragmentWebView = new FragmentWebView();
          ((FragmentWebView) fragmentWebView).setUrl(url);
 
