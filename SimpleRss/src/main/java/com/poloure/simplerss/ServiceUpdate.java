@@ -394,7 +394,8 @@ class ServiceUpdate extends IntentService
          {
             Resources resources = getResources();
             String[] settingFiles = resources.getStringArray(R.array.settings_names);
-            String setting = Read.setting(settingFiles[5], this);
+            String settingPath = Constants.SETTINGS_DIR + settingFiles[5] + Constants.TXT;
+            String setting = Read.setting(settingPath, this);
 
             int saveSize = 0 == setting.length() ? 100000 : Integer.parseInt(setting);
             int mapSize = map.size();
