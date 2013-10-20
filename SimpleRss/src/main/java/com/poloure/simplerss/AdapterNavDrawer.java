@@ -2,6 +2,7 @@ package com.poloure.simplerss;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.Build;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +18,8 @@ class AdapterNavDrawer extends BaseAdapter
    private static final int   TYPE_TITLE   = 0;
    private static final int   TYPE_DIVIDER = 1;
    private static final int   TYPE_TAG     = 2;
+   private static final int[] TYPES        = {TYPE_TITLE, TYPE_DIVIDER, TYPE_TAG};
+   private static final float TWELVE_VALUE = 12.0F;
    private final int            m_twelve;
    private final LayoutInflater m_layoutInflater;
    private final Context        m_context;
@@ -30,7 +33,7 @@ class AdapterNavDrawer extends BaseAdapter
       m_layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
       Resources resources = context.getResources();
       DisplayMetrics displayMetrics = resources.getDisplayMetrics();
-      m_twelve = Math.round(12.0F * displayMetrics.density);
+      m_twelve = Math.round(TWELVE_VALUE * displayMetrics.density);
    }
 
    @Override
@@ -74,9 +77,12 @@ class AdapterNavDrawer extends BaseAdapter
 
          m_navigationMainItem.setText(navTitles[position]);
 
-         /* Set the item's image as a CompoundDrawable of the textview. */
-         m_navigationMainItem.setCompoundDrawablesRelativeWithIntrinsicBounds(NAV_ICONS[position],
-               0, 0, 0);
+         /* Set the item's image as a CompoundDrawable of the textView. */
+         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
+         {
+            m_navigationMainItem.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                  NAV_ICONS[position], 0, 0, 0);
+         }
          m_navigationMainItem.setCompoundDrawablePadding(m_twelve);
       }
       else if(TYPE_DIVIDER == viewType && null == view)
@@ -91,7 +97,7 @@ class AdapterNavDrawer extends BaseAdapter
          {
             view = m_layoutInflater.inflate(R.layout.navigation_drawer_group_item, parent, false);
             holder2 = new NavigationTagItem();
-            holder2.title = (TextView) view.findViewById(R.id.tag_title);
+            holder2.m_tagTitle = (TextView) view.findViewById(R.id.tag_title);
             holder2.m_unreadCountView = (TextView) view.findViewById(R.id.unread_item);
             view.setTag(holder2);
          }
@@ -100,9 +106,10 @@ class AdapterNavDrawer extends BaseAdapter
             holder2 = (NavigationTagItem) view.getTag();
          }
 
-         holder2.title.setText(m_tagArray[position - 4]);
+         holder2.m_tagTitle.setText(m_tagArray[position - 4]);
          String number = Integer.toString(m_unreadArray[position - 4]);
-         holder2.m_unreadCountView.setText("0".equals(number) ? "" : number);
+         String unreadText = "0".equals(number) ? "" : number;
+         holder2.m_unreadCountView.setText(unreadText);
       }
       return view;
    }
@@ -133,13 +140,13 @@ class AdapterNavDrawer extends BaseAdapter
    public
    int getViewTypeCount()
    {
-      return 3;
+      return TYPES.length;
    }
 
    static
    class NavigationTagItem
    {
-      TextView title;
+      TextView m_tagTitle;
       TextView m_unreadCountView;
    }
 }

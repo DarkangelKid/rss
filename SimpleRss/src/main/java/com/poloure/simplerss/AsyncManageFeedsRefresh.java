@@ -35,7 +35,7 @@ class AsyncManageFeedsRefresh extends AsyncTask<Void, String[], Void>
       if(null != m_adapter)
       {
             /* Read the ALL_TAG m_imageViewTag file for names, urls, and tags. */
-         String[][] content = Read.csv(m_context);
+         String[][] content = Read.indexFile(m_context);
          int size = content[0].length;
          String[] infoArray = new String[size];
 

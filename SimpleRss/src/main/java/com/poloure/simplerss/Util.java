@@ -1,6 +1,7 @@
 package com.poloure.simplerss;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Environment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
@@ -20,23 +21,6 @@ class Util
    static final   String[]   EMPTY_STRING_ARRAY        = new String[0];
    static final   String[][] EMPTY_STRING_STRING_ARRAY = new String[0][0];
    private static String     s_storage                 = "";
-
-   static
-   String[] arrayRemove(String[] first, int index)
-   {
-      if(null == first || 0 == first.length)
-      {
-         return EMPTY_STRING_ARRAY;
-      }
-
-      String[] resultArray = new String[first.length - 1];
-      System.arraycopy(first, 0, resultArray, 0, index);
-      if(first.length != index)
-      {
-         System.arraycopy(first, index + 1, resultArray, index, first.length - index - 1);
-      }
-      return resultArray;
-   }
 
    static
    void updateTags(BaseAdapter navigationAdapter, Context context)
@@ -70,8 +54,8 @@ class Util
 
       if(null == items)
       {
-         AdapterTags cardAdapter = (AdapterTags) getFeedListView(page1,
-               fragmentManager).getAdapter();
+         ListView listView = getFeedListView(page1, fragmentManager);
+         AdapterTags cardAdapter = (AdapterTags) listView.getAdapter();
          if(null == cardAdapter)
          {
             return -1;
@@ -84,7 +68,7 @@ class Util
       int itemCount = items.length - 1;
       for(i = itemCount; 0 <= i; i--)
       {
-         if(!AdapterTags.S_READ_ITEM_TIMES.contains(items[i].time))
+         if(!AdapterTags.S_READ_ITEM_TIMES.contains(items[i].m_itemTime))
          {
             break;
          }
@@ -168,6 +152,14 @@ class Util
       new File(path1).delete();
    }
 
+   static
+   String getInternalPath(String externalPath)
+   {
+      String substring = externalPath.substring(
+            externalPath.indexOf(Constants.SEPAR + "files" + Constants.SEPAR) + 7);
+      return substring.replaceAll(Constants.SEPAR, "-");
+   }
+
    /* This function will return null if it fails. Check for null each time.
     * It should be pretty safe and efficient to call ALL_TAG the time. */
    static
@@ -191,7 +183,7 @@ class Util
          Build the s_storage string depending on android version. */
       String sep = Constants.SEPAR;
 
-      if(Constants.FROYO)
+      if(Build.VERSION_CODES.FROYO <= Build.VERSION.SDK_INT)
       {
          s_storage = context.getExternalFilesDir(null).getAbsolutePath() + sep;
       }
@@ -204,20 +196,9 @@ class Util
 
          /* If the folder does not exist, create it. */
          File storageFile = new File(s_storage);
-         if(!storageFile.exists())
-         {
-            storageFile.mkdirs();
-         }
+         storageFile.mkdirs();
       }
       return s_storage;
-   }
-
-   static
-   String getInternalPath(String externalPath)
-   {
-      String substring = externalPath.substring(
-            externalPath.indexOf(Constants.SEPAR + "files" + Constants.SEPAR) + 7);
-      return substring.replaceAll(Constants.SEPAR, "-");
    }
 
    /* Replaces ALL_TAG '/'s with '-' to emulate a folder directory layout in

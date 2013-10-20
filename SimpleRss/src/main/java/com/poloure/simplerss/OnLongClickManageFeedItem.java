@@ -3,6 +3,7 @@ package com.poloure.simplerss;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.support.v4.app.Fragment;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
@@ -11,9 +12,9 @@ class OnLongClickManageFeedItem implements AdapterView.OnItemLongClickListener
 {
    private final BaseAdapter m_adapter;
    private final BaseAdapter m_navigationAdapter;
-   private final FragmentManageFeeds m_fragmentManageFeeds;
+   private final Fragment    m_fragmentManageFeeds;
 
-   OnLongClickManageFeedItem(FragmentManageFeeds fragmentManageFeeds, BaseAdapter adapter,
+   OnLongClickManageFeedItem(Fragment fragmentManageFeeds, BaseAdapter adapter,
          BaseAdapter navigationAdapter)
    {
       m_navigationAdapter = navigationAdapter;
@@ -32,8 +33,8 @@ class OnLongClickManageFeedItem implements AdapterView.OnItemLongClickListener
 
       DialogInterface.OnClickListener feedDeleteClick = new OnClickManageFeedDelete(m_adapter,
             m_navigationAdapter, pos, context);
-      DialogInterface.OnClickListener feedClearCacheClick = new OnClickManageFeedClearCache(m_adapter,
-            m_navigationAdapter, pos, context);
+      DialogInterface.OnClickListener feedClearCacheClick = new OnClickManageFeedClearCache(
+            m_adapter, m_navigationAdapter, pos, context);
 
       AlertDialog.Builder build = new AlertDialog.Builder(context);
       build.setCancelable(true);

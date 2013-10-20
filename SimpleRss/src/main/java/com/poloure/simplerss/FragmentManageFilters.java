@@ -9,8 +9,8 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 
 class FragmentManageFilters extends ListFragment
@@ -28,14 +28,17 @@ class FragmentManageFilters extends ListFragment
    {
       super.onActivityCreated(savedInstanceState);
 
-      Context context = getActivity();
-      ListAdapter listAdapter = new AdapterManageFilters(context);
-      setListAdapter(listAdapter);
+      setHasOptionsMenu(true);
 
-      ((AdapterManageFilters) listAdapter).setTitles(Read.file(Constants.FILTER_LIST, context));
+      Context context = getActivity();
+      BaseAdapter baseAdapter = new AdapterManageFilters(context);
+      setListAdapter(baseAdapter);
+      baseAdapter.notifyDataSetChanged();
 
       ListView listview = getListView();
-      listview.setOnItemLongClickListener(new OnFilterLongClick(this));
+
+      AdapterView.OnItemLongClickListener onFilterLongClick = new OnFilterLongClick(this);
+      listview.setOnItemLongClickListener(onFilterLongClick);
    }
 
    @Override
@@ -44,6 +47,9 @@ class FragmentManageFilters extends ListFragment
    {
       CharSequence itemTitle = item.getTitle();
       String addFeed = getString(R.string.add_feed);
+
+      Write.toLogFile(itemTitle.toString(), getActivity());
+      Write.toLogFile(addFeed, getActivity());
 
       if(addFeed.equals(itemTitle))
       {

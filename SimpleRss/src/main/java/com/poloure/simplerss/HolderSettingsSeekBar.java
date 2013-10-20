@@ -5,8 +5,8 @@ import android.widget.TextView;
 
 class HolderSettingsSeekBar
 {
-   TextView title;
-   TextView summary;
-   TextView read;
-   SeekBar  seekbar;
+   TextView m_titleView;
+   TextView m_summaryView;
+   TextView m_readView;
+   SeekBar  m_seekBar;
 }

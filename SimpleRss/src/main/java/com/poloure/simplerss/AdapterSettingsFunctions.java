@@ -10,11 +10,15 @@ import android.widget.CheckBox;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import java.util.Arrays;
+
 class AdapterSettingsFunctions extends BaseAdapter
 {
-   private static final int TYPE_HEADING  = 0;
-   private static final int TYPE_CHECKBOX = 1;
-   private static final int TYPE_SEEKBAR  = 2;
+   private static final int   TYPE_HEADING  = 0;
+   private static final int   TYPE_CHECKBOX = 1;
+   private static final int   TYPE_SEEKBAR  = 2;
+   private static final int[] TYPES         = {TYPE_HEADING, TYPE_CHECKBOX, TYPE_SEEKBAR};
+
    static         int[]          s_times;
    private static String[]       s_fileNames;
    private static String[]       s_functionTitles;
@@ -81,9 +85,9 @@ class AdapterSettingsFunctions extends BaseAdapter
          {
             view = m_layoutInflater.inflate(R.layout.settings_checkbox, parent, false);
             holder = new HolderSettingsCheckBox();
-            holder.title = (TextView) view.findViewById(R.id.check_title);
-            holder.summary = (TextView) view.findViewById(R.id.check_summary);
-            holder.checkbox = (CheckBox) view.findViewById(R.id.checkbox);
+            holder.m_titleView = (TextView) view.findViewById(R.id.check_title);
+            holder.m_summaryView = (TextView) view.findViewById(R.id.check_summary);
+            holder.m_checkbox = (CheckBox) view.findViewById(R.id.checkbox);
             view.setTag(holder);
          }
          else
@@ -91,14 +95,14 @@ class AdapterSettingsFunctions extends BaseAdapter
             holder = (HolderSettingsCheckBox) view.getTag();
          }
 
-         holder.title.setText(s_functionTitles[position]);
-         holder.summary.setText(s_functionSummaries[position]);
+         holder.m_titleView.setText(s_functionTitles[position]);
+         holder.m_summaryView.setText(s_functionSummaries[position]);
 
          /* On click, save the value of the click to a settings file. */
-         holder.checkbox.setOnClickListener(new SettingBooleanChecked(settingPath, m_context));
+         holder.m_checkbox.setOnClickListener(new SettingBooleanChecked(settingPath, m_context));
 
          /* Load the saved boolean value and set the box as checked if true. */
-         holder.checkbox.setChecked(Boolean.parseBoolean(Read.setting(settingPath, m_context)));
+         holder.m_checkbox.setChecked(Boolean.parseBoolean(Read.setting(settingPath, m_context)));
       }
       else
       {
@@ -107,10 +111,10 @@ class AdapterSettingsFunctions extends BaseAdapter
          {
             view = m_layoutInflater.inflate(R.layout.settings_seekbar, parent, false);
             holder = new HolderSettingsSeekBar();
-            holder.title = (TextView) view.findViewById(R.id.seek_title);
-            holder.summary = (TextView) view.findViewById(R.id.seek_summary);
-            holder.seekbar = (SeekBar) view.findViewById(R.id.seekbar);
-            holder.read = (TextView) view.findViewById(R.id.seek_read);
+            holder.m_titleView = (TextView) view.findViewById(R.id.seek_title);
+            holder.m_summaryView = (TextView) view.findViewById(R.id.seek_summary);
+            holder.m_seekBar = (SeekBar) view.findViewById(R.id.seekbar);
+            holder.m_readView = (TextView) view.findViewById(R.id.seek_read);
             view.setTag(holder);
          }
          else
@@ -118,40 +122,40 @@ class AdapterSettingsFunctions extends BaseAdapter
             holder = (HolderSettingsSeekBar) view.getTag();
          }
 
-         holder.title.setText(s_functionTitles[position]);
-         holder.summary.setText(s_functionSummaries[position]);
-         holder.seekbar.setMax(9);
-         holder.seekbar
-               .setOnSeekBarChangeListener(
-                     new SeekBarRefreshTimeChange(holder, settingPath, m_context));
+         holder.m_titleView.setText(s_functionTitles[position]);
+         holder.m_summaryView.setText(s_functionSummaries[position]);
+         holder.m_seekBar.setMax(9);
 
          /* Load the saved value and set the progress.*/
          String checker = Read.setting(settingPath, m_context);
+         Resources resources = m_context.getResources();
+         int resInteger;
 
-         int time = 0 == checker.length()
-               ? 3
-               : null == checker || 0 == checker.length() ? 0 : Integer.parseInt(checker);
-         holder.seekbar.setProgress(getIndexOfTime(time));
+         if(3 == position)
+         {
+            resInteger = R.array.refresh_integers;
+            holder.m_seekBar
+                  .setOnSeekBarChangeListener(
+                        new OnSeekBarChange(holder.m_readView, settingPath, m_context, resInteger,
+                              R.array.refresh_values));
+         }
+         else
+         {
+            resInteger = R.array.history_integers;
+            holder.m_seekBar
+                  .setOnSeekBarChangeListener(
+                        new OnSeekBarChange(holder.m_readView, settingPath, m_context,
+                              R.array.history_integers, R.array.history_values));
+         }
+         int[] settingIntegers = resources.getIntArray(resInteger);
+
+         int settingInteger = null == checker || 0 == checker.length()
+               ? 9
+               : Integer.parseInt(checker);
+         int settingIndex = Arrays.binarySearch(settingIntegers, settingInteger);
+         holder.m_seekBar.setProgress(settingIndex);
       }
       return view;
-   }
-
-   private static
-   int getIndexOfTime(int value)
-   {
-      if(null == s_times)
-      {
-         return -1;
-      }
-      int arrayLength = s_times.length;
-      for(int i = 0; i < arrayLength; i++)
-      {
-         if(s_times[i] == value)
-         {
-            return i;
-         }
-      }
-      return -1;
    }
 
    @Override
@@ -165,13 +169,13 @@ class AdapterSettingsFunctions extends BaseAdapter
    public
    int getItemViewType(int position)
    {
-      if(0 == position)
+      if(0 == position || 4 == position)
       {
          return TYPE_HEADING;
       }
       else
       {
-         return 2 == position ? TYPE_SEEKBAR : TYPE_CHECKBOX;
+         return 2 == position || 5 == position ? TYPE_SEEKBAR : TYPE_CHECKBOX;
       }
    }
 

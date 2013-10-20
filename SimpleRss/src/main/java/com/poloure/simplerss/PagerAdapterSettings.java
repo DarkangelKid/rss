@@ -11,27 +11,27 @@ class PagerAdapterSettings extends FragmentPagerAdapter
    private static final Fragment[] SETTINGS_DIR_FRAGMENTS = {
          new FragmentSettingsFunctions(), new FragmentSettingsUi(),
    };
-   private static String[] s_settingsTitles;
+   private final String[] m_settingsTitles;
 
    PagerAdapterSettings(FragmentManager fm, Context context)
    {
       super(fm);
       Resources resources = context.getResources();
-      s_settingsTitles = resources.getStringArray(R.array.settings_titles);
+      m_settingsTitles = resources.getStringArray(R.array.settings_titles);
    }
 
    @Override
    public
    int getCount()
    {
-      return s_settingsTitles.length;
+      return m_settingsTitles.length;
    }
 
    @Override
    public
    String getPageTitle(int position)
    {
-      return s_settingsTitles[position];
+      return m_settingsTitles[position];
    }
 
    @Override

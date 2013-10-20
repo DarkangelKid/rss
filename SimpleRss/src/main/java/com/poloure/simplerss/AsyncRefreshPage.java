@@ -1,9 +1,11 @@
 package com.poloure.simplerss;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -11,28 +13,35 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Map;
-import java.util.NavigableMap;
 import java.util.TreeMap;
 
-class RefreshPage extends AsyncTask<Integer, Object, Animation>
+class AsyncRefreshPage extends AsyncTask<Integer, Object, Animation>
 {
    private static final int MAX_DESCRIPTION_LENGTH = 360;
    private static final int MIN_IMAGE_WIDTH        = 32;
+   private static final int SIXTEEN_VALUE          = 16;
    private final BaseAdapter     m_navigationAdapter;
    private final FragmentManager m_fragmentManager;
    private final Context         m_context;
+   private final int             m_sixteen;
    private       int             m_pageNumber;
    private       boolean         m_flash;
    private       AdapterTags     m_adapterTag;
    private       ListView        m_listView;
-   private int position = -3;
+   private int m_position = -3;
 
-   RefreshPage(BaseAdapter navigationAdapter, FragmentManager fragmentManager, Context context)
+   AsyncRefreshPage(BaseAdapter navigationAdapter, FragmentManager fragmentManager, Context context)
    {
       m_navigationAdapter = navigationAdapter;
       m_fragmentManager = fragmentManager;
       m_context = context;
+
+      Resources resources = context.getResources();
+      DisplayMetrics displayMetrics = resources.getDisplayMetrics();
+      m_sixteen = Math.round(SIXTEEN_VALUE * displayMetrics.density);
    }
 
    @Override
@@ -42,7 +51,7 @@ class RefreshPage extends AsyncTask<Integer, Object, Animation>
       m_pageNumber = page[0];
       String tag = PagerAdapterFeeds.getTagsArray()[m_pageNumber];
 
-      String[][] contents = Read.csv(m_context);
+      String[][] contents = Read.indexFile(m_context);
       if(0 == contents.length)
       {
          return null;
@@ -59,7 +68,9 @@ class RefreshPage extends AsyncTask<Integer, Object, Animation>
       m_adapterTag = (AdapterTags) listFragment.getListAdapter();
       m_listView = listFragment.getListView();
 
-      Map<Long, FeedItem> map = new TreeMap<Long, FeedItem>();
+      Comparator<Long> reverse = Collections.reverseOrder();
+      Map<Long, FeedItem> map = new TreeMap<Long, FeedItem>(reverse);
+
       String allTag = m_context.getString(R.string.all_tag);
       boolean isAllTag = tag.equals(allTag);
 
@@ -68,8 +79,8 @@ class RefreshPage extends AsyncTask<Integer, Object, Animation>
       {
          if(isAllTag || tags[j].contains(tag))
          {
-            String[][] content = Read.csv(feeds[j] + Constants.SEPAR + Constants.CONTENT, m_context,
-                  't', 'd', 'l', 'i', 'w', 'h', 'p');
+            String[][] content = Read.csvFile(feeds[j] + Constants.SEPAR + Constants.CONTENT,
+                  m_context, 't', 'd', 'l', 'i', 'w', 'h', 'p');
             if(0 == content.length)
             {
                return null;
@@ -119,24 +130,24 @@ class RefreshPage extends AsyncTask<Integer, Object, Animation>
                }
 
                FeedItem data = new FeedItem();
-               data.title = titles[i];
-               data.url = links[i];
-               data.description = descriptions[i];
-               data.image = images[i];
-               data.time = Long.parseLong(times[i]);
+               data.m_itemTitle = titles[i];
+               data.m_itemUrl = links[i];
+               data.m_itemDescription = descriptions[i];
+               data.m_itemImage = images[i];
+               data.m_itemTime = Long.parseLong(times[i]);
 
-               data.width = null == widths[i] || 0 == widths[i].length()
+               data.m_imageWidth = null == widths[i] || 0 == widths[i].length()
                      ? 0
                      : Integer.parseInt(widths[i]);
 
-               data.height = null == heights[i] || 0 == heights[i].length()
+               data.m_imageHeight = null == heights[i] || 0 == heights[i].length()
                      ? 0
                      : Integer.parseInt(heights[i]);
 
                // Do not add duplicates. */
                if(-1 == Util.index(m_adapterTag.m_items, data))
                {
-                  map.put(data.time, data);
+                  map.put(data.m_itemTime, data);
                }
             }
          }
@@ -146,9 +157,8 @@ class RefreshPage extends AsyncTask<Integer, Object, Animation>
       m_adapterTag.m_touchedScreen = false;
 
       int mapSize = map.size();
-      NavigableMap<Long, FeedItem> navigableMap
-            = ((NavigableMap<Long, FeedItem>) map).descendingMap();
-      Collection<FeedItem> collection = navigableMap.values();
+      Collection<FeedItem> collection = map.values();
+
       Object[] items = collection.toArray(new FeedItem[mapSize]);
 
       if(0 < items.length)
@@ -179,7 +189,7 @@ class RefreshPage extends AsyncTask<Integer, Object, Animation>
       /* If there were no items to start with (the ListView is invisible).*/
       if(m_flash)
       {
-         m_listView.setSelection(position);
+         m_listView.setSelection(m_position);
          m_listView.setAnimation(result);
          m_listView.setVisibility(View.VISIBLE);
       }
@@ -200,7 +210,7 @@ class RefreshPage extends AsyncTask<Integer, Object, Animation>
 
       int index = 0;
       int top = 0;
-      /* Find the exact position in the list. */
+      /* Find the exact mPosition in the list. */
       if(!m_flash)
       {
          index = m_listView.getFirstVisiblePosition() + 1;
@@ -223,13 +233,13 @@ class RefreshPage extends AsyncTask<Integer, Object, Animation>
 
       if(m_flash)
       {
-         position = Util.gotoLatestUnread(m_adapterTag.m_items, false, m_pageNumber,
+         m_position = Util.gotoLatestUnread(m_adapterTag.m_items, false, m_pageNumber,
                m_fragmentManager);
       }
 
       if(0 != top)
       {
-         m_listView.setSelectionFromTop(index, top - (/* TODO 8 */ 16 << 1));
+         m_listView.setSelectionFromTop(index, top - m_sixteen);
       }
    }
 }

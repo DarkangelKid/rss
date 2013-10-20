@@ -28,9 +28,11 @@
       <item>auto_refresh_boolean</item>
       <item>refresh_time</item>
       <item>notifications_boolean</item>
+      <item>null</item>
+      <item>max_history</item>
    </string-array>
 
-   <string-array name="refresh_times">
+   <string-array name="refresh_values">
       <item>15m</item>
       <item>30m</item>
       <item>45m</item>
@@ -56,18 +58,48 @@
       <item>1440</item>
    </integer-array>
 
+   <string-array name="history_values">
+      <item>10</item>
+      <item>20</item>
+      <item>30</item>
+      <item>40</item>
+      <item>60</item>
+      <item>80</item>
+      <item>100</item>
+      <item>200</item>
+      <item>400</item>
+      <item>100000</item>
+   </string-array>
+
+   <integer-array name="history_integers">
+      <item>10</item>
+      <item>20</item>
+      <item>30</item>
+      <item>40</item>
+      <item>60</item>
+      <item>80</item>
+      <item>100</item>
+      <item>200</item>
+      <item>400</item>
+      <item>100000</item>
+   </integer-array>
+
    <string-array name="settings_function_titles">
       <item>Auto Refresh</item>
       <item>Auto Refresh</item>
       <item>Refresh Time</item>
       <item>Notifications</item>
+      <item>Global Feed Settings</item>
+      <item>Max History</item>
    </string-array>
 
    <string-array name="settings_function_summaries">
-      <item>EMPTY</item>
+      <item>null</item>
       <item>Check to enable auto refresh</item>
       <item>Adjust auto refresh interval</item>
       <item>Check to enable notifications</item>
+      <item>null</item>
+      <item>Number of items to keep per feed</item>
    </string-array>
 
    <string-array name="settings_interface_titles">

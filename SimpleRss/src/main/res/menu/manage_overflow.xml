@@ -6,5 +6,5 @@
       android:id="@+id/add_feed_manage"
       android:title="@string/add_feed"
       android:icon="@drawable/add"
-      app:showAsAction="ifRoom"/>
+      app:showAsAction="always"/>
 </menu>

@@ -23,12 +23,12 @@ class AsyncRefreshNavigationAdapter extends AsyncTask<int[], Void, int[]>
       m_context = context;
    }
 
-   static
+   private static
    int[] getUnreadCounts(Context context)
    {
       String[] currentTags = PagerAdapterFeeds.getTagsArray();
 
-      String[][] content = Read.csv(Constants.INDEX, context, 'f', 't');
+      String[][] content = Read.csvFile(Constants.INDEX, context, 'f', 't');
       String[] indexNames = content[0];
       String[] indexTags = content[1];
 

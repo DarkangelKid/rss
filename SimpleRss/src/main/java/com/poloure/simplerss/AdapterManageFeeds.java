@@ -24,18 +24,6 @@ class AdapterManageFeeds extends BaseAdapter
       m_infoArray = infos;
    }
 
-   void setPosition(int pos, String title, String info)
-   {
-      m_titleArray[pos] = title;
-      m_infoArray[pos] = info;
-   }
-
-   void removeItem(int position)
-   {
-      m_titleArray = Util.arrayRemove(m_infoArray, position);
-      m_infoArray = Util.arrayRemove(m_infoArray, position);
-   }
-
    @Override
    public
    int getCount()

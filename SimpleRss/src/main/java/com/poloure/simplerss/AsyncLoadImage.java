@@ -12,7 +12,8 @@ import android.widget.ImageView;
 
 class AsyncLoadImage extends AsyncTask<Object, Void, Object[]>
 {
-   private static final long IMAGE_FADE_IN_DURATION = 240L;
+   private static final long  IMAGE_FADE_IN_DURATION  = 240L;
+   private static final float READ_ITEM_IMAGE_OPACITY = 0.66F;
    private ImageView m_imageView;
    private int       m_imageViewTag;
 
@@ -24,11 +25,17 @@ class AsyncLoadImage extends AsyncTask<Object, Void, Object[]>
       m_imageViewTag = (Integer) params[1];
       String imageName = (String) params[2];
       Context context = (Context) params[3];
+      long time = (Long) params[4];
+
+      float imageOpacity = AdapterTags.S_READ_ITEM_TIMES.contains(time)
+            ? READ_ITEM_IMAGE_OPACITY
+            : 1.0F;
 
       BitmapFactory.Options o = new BitmapFactory.Options();
       o.inSampleSize = 1;
-      Animation fadeIn = new AlphaAnimation(0.0F, 1.0F);
+      Animation fadeIn = new AlphaAnimation(0.0F, imageOpacity);
       fadeIn.setDuration(IMAGE_FADE_IN_DURATION);
+      fadeIn.setFillAfter(true);
       fadeIn.setInterpolator(new DecelerateInterpolator());
 
       String image = Util.getStorage(context) + imageName;

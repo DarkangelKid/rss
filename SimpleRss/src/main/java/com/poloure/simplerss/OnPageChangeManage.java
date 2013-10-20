@@ -17,7 +17,7 @@ class OnPageChangeManage extends SimpleOnPageChangeListener
 
    @Override
    public
-   void onPageSelected(int pos)
+   void onPageSelected(int position)
    {
       ActionBarActivity activity = (ActionBarActivity) m_fragment.getActivity();
 
@@ -25,6 +25,6 @@ class OnPageChangeManage extends SimpleOnPageChangeListener
       String[] manageTitles = resources.getStringArray(R.array.manage_titles);
 
       ActionBar actionBar = activity.getSupportActionBar();
-      actionBar.setSubtitle(manageTitles[pos]);
+      actionBar.setSubtitle(manageTitles[position]);
    }
 }

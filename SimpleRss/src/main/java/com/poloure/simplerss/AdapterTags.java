@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,12 +22,17 @@ import java.util.Set;
 
 class AdapterTags extends BaseAdapter
 {
-   static final         Set<Long> S_READ_ITEM_TIMES       = Collections.synchronizedSet(
-         new HashSet(0));
-   private static final int       VIEW_TYPE_COUNT         = 4;
-   private static final int       READ_ITEM_IMAGE_OPACITY = 120;
+   static final         Set<Long> S_READ_ITEM_TIMES = Collections.synchronizedSet(
+         new HashSet<Long>(0));
+   private static final int       VIEW_TYPE_COUNT   = 4;
    private final LayoutInflater m_inflater;
    private final Context        m_context;
+   private final int            m_titleBlack;
+   private final int            m_linkBlack;
+   private final int            m_descriptionBlack;
+   private final int            m_titleGrey;
+   private final int            m_linkGrey;
+   private final int            m_descriptionGrey;
    boolean    m_touchedScreen = true;
    FeedItem[] m_items         = new FeedItem[0];
 
@@ -39,6 +45,15 @@ class AdapterTags extends BaseAdapter
          S_READ_ITEM_TIMES.addAll(set);
       }
       m_inflater = (LayoutInflater) m_context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+      Resources res = context.getResources();
+      m_titleGrey = res.getColor(R.color.title_grey);
+      m_linkGrey = res.getColor(R.color.link_grey);
+      m_descriptionGrey = res.getColor(R.color.des_grey);
+
+      m_titleBlack = res.getColor(R.color.title_black);
+      m_linkBlack = res.getColor(R.color.link_black);
+      m_descriptionBlack = res.getColor(R.color.des_black);
    }
 
    void prependArray(Object... items)
@@ -55,8 +70,9 @@ class AdapterTags extends BaseAdapter
          length += array.length;
       }
 
-      @SuppressWarnings("unchecked") T[] result = (T[]) Array.newInstance(
-            first.getClass().getComponentType(), length);
+      Class firstClass = first.getClass();
+      Class type = firstClass.getComponentType();
+      T[] result = (T[]) Array.newInstance(type, length);
       System.arraycopy(first, 0, result, 0, first.length);
 
       int offset = first.length;
@@ -97,9 +113,9 @@ class AdapterTags extends BaseAdapter
       View view = convertView;
       int viewType = getItemViewType(position);
 
-      String link = m_items[position].url;
-      String title = m_items[position].title;
-      Long time = m_items[position].time;
+      String link = m_items[position].m_itemUrl;
+      String title = m_items[position].m_itemTitle;
+      Long time = m_items[position].m_itemTime;
 
       /* card_full.xml img && m_des. */
       if(0 == viewType)
@@ -109,9 +125,9 @@ class AdapterTags extends BaseAdapter
          {
             view = m_inflater.inflate(R.layout.card_full, parent, false);
             holder = new FullHolder();
-            holder.m_title = (TextView) view.findViewById(R.id.title);
-            holder.m_url = (TextView) view.findViewById(R.id.url);
-            holder.m_des = (TextView) view.findViewById(R.id.description);
+            holder.m_titleView = (TextView) view.findViewById(R.id.title);
+            holder.m_urlView = (TextView) view.findViewById(R.id.url);
+            holder.m_descriptionView = (TextView) view.findViewById(R.id.description);
             holder.m_imageView = (ImageView) view.findViewById(R.id.image);
             view.setOnLongClickListener(new OnCardLongClick(m_context));
             view.setTag(holder);
@@ -121,12 +137,13 @@ class AdapterTags extends BaseAdapter
             holder = (FullHolder) view.getTag();
          }
 
-         displayImage(holder.m_imageView, position, m_items[position].image);
+         displayImage(holder.m_imageView, position, m_items[position].m_itemImage, time);
 
-         holder.m_title.setText(title);
-         holder.m_des.setText(m_items[position].description);
-         holder.m_url.setText(link);
-         setCardAlpha(holder.m_title, holder.m_url, holder.m_imageView, holder.m_des, time);
+         holder.m_titleView.setText(title);
+         holder.m_descriptionView.setText(m_items[position].m_itemDescription);
+         holder.m_urlView.setText(link);
+         setCardAlpha(holder.m_titleView, holder.m_urlView, holder.m_imageView,
+               holder.m_descriptionView, time);
       }
       /* card_no_des_img.xml no description, image, m_title. */
       else if(1 == viewType)
@@ -136,9 +153,9 @@ class AdapterTags extends BaseAdapter
          {
             view = m_inflater.inflate(R.layout.card_no_des_img, parent, false);
             holder = new ImgHolder();
-            holder.title = (TextView) view.findViewById(R.id.title);
-            holder.url = (TextView) view.findViewById(R.id.url);
-            holder.image = (ImageView) view.findViewById(R.id.image);
+            holder.m_titleView = (TextView) view.findViewById(R.id.title);
+            holder.m_urlView = (TextView) view.findViewById(R.id.url);
+            holder.m_imageView = (ImageView) view.findViewById(R.id.image);
             view.setOnLongClickListener(new OnCardLongClick(m_context));
             view.setTag(holder);
          }
@@ -147,11 +164,11 @@ class AdapterTags extends BaseAdapter
             holder = (ImgHolder) view.getTag();
          }
 
-         displayImage(holder.image, position, m_items[position].image);
+         displayImage(holder.m_imageView, position, m_items[position].m_itemImage, time);
 
-         holder.title.setText(title);
-         holder.url.setText(link);
-         setCardAlpha(holder.title, holder.url, holder.image, null, time);
+         holder.m_titleView.setText(title);
+         holder.m_urlView.setText(link);
+         setCardAlpha(holder.m_titleView, holder.m_urlView, holder.m_imageView, null, time);
       }
       /* card_des_no_img.xml no image, description, title. */
       else if(2 == viewType)
@@ -161,9 +178,9 @@ class AdapterTags extends BaseAdapter
          {
             view = m_inflater.inflate(R.layout.card_des_no_img, parent, false);
             holder = new DesHolder();
-            holder.title = (TextView) view.findViewById(R.id.title);
-            holder.url = (TextView) view.findViewById(R.id.url);
-            holder.des = (TextView) view.findViewById(R.id.description);
+            holder.m_titleView = (TextView) view.findViewById(R.id.title);
+            holder.m_urlView = (TextView) view.findViewById(R.id.url);
+            holder.m_imageView = (TextView) view.findViewById(R.id.description);
             view.setOnLongClickListener(new OnCardLongClick(m_context));
             view.setTag(holder);
          }
@@ -172,10 +189,10 @@ class AdapterTags extends BaseAdapter
             holder = (DesHolder) view.getTag();
          }
 
-         holder.title.setText(title);
-         holder.des.setText(m_items[position].description);
-         holder.url.setText(link);
-         setCardAlpha(holder.title, holder.url, null, holder.des, time);
+         holder.m_titleView.setText(title);
+         holder.m_imageView.setText(m_items[position].m_itemDescription);
+         holder.m_urlView.setText(link);
+         setCardAlpha(holder.m_titleView, holder.m_urlView, null, holder.m_imageView, time);
       }
       /* No description or image. */
       else if(3 == viewType)
@@ -185,8 +202,8 @@ class AdapterTags extends BaseAdapter
          {
             view = m_inflater.inflate(R.layout.card_no_des_no_img, parent, false);
             holder = new BlankHolder();
-            holder.title = (TextView) view.findViewById(R.id.title);
-            holder.url = (TextView) view.findViewById(R.id.url);
+            holder.m_titleView = (TextView) view.findViewById(R.id.title);
+            holder.m_urlView = (TextView) view.findViewById(R.id.url);
             view.setOnLongClickListener(new OnCardLongClick(m_context));
             view.setTag(holder);
          }
@@ -195,24 +212,24 @@ class AdapterTags extends BaseAdapter
             holder = (BlankHolder) view.getTag();
          }
 
-         holder.title.setText(title);
-         holder.url.setText(link);
+         holder.m_titleView.setText(title);
+         holder.m_urlView.setText(link);
 
-         setCardAlpha(holder.title, holder.url, null, null, time);
+         setCardAlpha(holder.m_titleView, holder.m_urlView, null, null, time);
       }
 
       /* The logic that tells whether the item is Read or not. */
       if(View.VISIBLE == parent.getVisibility() && position + 1 < m_items.length &&
             m_touchedScreen)
       {
-         S_READ_ITEM_TIMES.add(m_items[position + 1].time);
+         S_READ_ITEM_TIMES.add(m_items[position + 1].m_itemTime);
       }
 
       return view;
    }
 
    private
-   void displayImage(ImageView imageView, int position, String imageName)
+   void displayImage(ImageView imageView, int position, String imageName, long time)
    {
       imageView.setImageDrawable(new ColorDrawable(Color.WHITE));
       LayoutParams lp = imageView.getLayoutParams();
@@ -221,21 +238,21 @@ class AdapterTags extends BaseAdapter
       DisplayMetrics displayMetrics = resources.getDisplayMetrics();
       int screenWidth = displayMetrics.widthPixels;
 
-      lp.height = (int) Math.round(
-            (double) screenWidth / m_items[position].width * m_items[position].height);
+      lp.height = (int) Math.round((double) screenWidth / m_items[position].m_imageWidth *
+            m_items[position].m_imageHeight);
       imageView.setLayoutParams(lp);
       imageView.setTag(position);
 
       AsyncLoadImage task = new AsyncLoadImage();
-      if(Constants.HONEYCOMB)
+      if(Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT)
       {
 
          task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, imageView, position, imageName,
-               m_context);
+               m_context, time);
       }
       else
       {
-         task.execute(imageView, position, imageName, m_context);
+         task.execute(imageView, position, imageName, m_context, time);
       }
    }
 
@@ -243,10 +260,10 @@ class AdapterTags extends BaseAdapter
    public
    int getItemViewType(int position)
    {
-      boolean img = 0 != m_items[position].width;
+      boolean img = 0 != m_items[position].m_imageWidth;
 
-      boolean des = null != m_items[position].description &&
-            0 != m_items[position].description.length();
+      boolean des = null != m_items[position].m_itemDescription &&
+            0 != m_items[position].m_itemDescription.length();
 
       if(img && des)
       {
@@ -273,36 +290,24 @@ class AdapterTags extends BaseAdapter
    private
    void setCardAlpha(TextView title, TextView url, ImageView image, TextView des, Long time)
    {
-      Resources res = m_context.getResources();
-
       if(S_READ_ITEM_TIMES.contains(time))
       {
-         title.setTextColor(res.getColor(R.color.title_grey));
-         url.setTextColor(res.getColor(R.color.link_grey));
+         title.setTextColor(m_titleGrey);
+         url.setTextColor(m_linkGrey);
 
          if(null != des)
          {
-            des.setTextColor(res.getColor(R.color.des_grey));
-         }
-
-         if(null != image)
-         {
-            image.setImageAlpha(READ_ITEM_IMAGE_OPACITY);
+            des.setTextColor(m_descriptionGrey);
          }
       }
       else
       {
-         title.setTextColor(res.getColor(R.color.title_black));
-         url.setTextColor(res.getColor(R.color.link_black));
+         title.setTextColor(m_titleBlack);
+         url.setTextColor(m_linkBlack);
 
          if(null != des)
          {
-            des.setTextColor(res.getColor(R.color.des_black));
-         }
-
-         if(null != image)
-         {
-            image.setImageAlpha(0);
+            des.setTextColor(m_descriptionBlack);
          }
       }
    }
@@ -315,32 +320,32 @@ class AdapterTags extends BaseAdapter
    static
    class FullHolder
    {
-      TextView  m_title;
-      TextView  m_url;
-      TextView  m_des;
+      TextView  m_titleView;
+      TextView  m_urlView;
+      TextView  m_descriptionView;
       ImageView m_imageView;
    }
 
    static
    class DesHolder
    {
-      TextView title;
-      TextView url;
-      TextView des;
+      TextView m_titleView;
+      TextView m_urlView;
+      TextView m_imageView;
    }
 
    static
    class ImgHolder
    {
-      TextView  title;
-      TextView  url;
-      ImageView image;
+      TextView  m_titleView;
+      TextView  m_urlView;
+      ImageView m_imageView;
    }
 
    static
    class BlankHolder
    {
-      TextView title;
-      TextView url;
+      TextView m_titleView;
+      TextView m_urlView;
    }
 }

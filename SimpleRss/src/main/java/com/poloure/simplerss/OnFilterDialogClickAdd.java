@@ -20,12 +20,6 @@ class OnFilterDialogClickAdd implements DialogInterface.OnClickListener
       m_adapter = adapterManageFilters;
    }
 
-   private static
-   String getText(TextView view)
-   {
-      return view.getText().toString().trim();
-   }
-
    @Override
    public
    void onClick(DialogInterface dialog, int which)
@@ -37,8 +31,13 @@ class OnFilterDialogClickAdd implements DialogInterface.OnClickListener
       {
          Write.single(path, filter + Constants.NL, m_context);
       }
-      ((AdapterManageFilters) m_adapter).setTitles(filters);
       m_adapter.notifyDataSetChanged();
       ((Dialog) dialog).hide();
+   }
+
+   private static
+   String getText(TextView view)
+   {
+      return view.getText().toString().trim();
    }
 }

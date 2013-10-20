@@ -9,15 +9,20 @@ import android.widget.Button;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
 {
+   private static final String  TAG_TITLE               = "<title";
+   private static final String  ENDTAG_TITLE            = "</title>";
    private static final Pattern ILLEGAL_FILE_CHARS      = Pattern.compile("[/\\?%*|<>:]");
    private static final Pattern SPLIT_SPACE             = Pattern.compile(" ");
    private static final int     FEED_STREAM_BYTE_BUFFER = 512;
+   private static final int     TAG_INITIAL_CAPACITY    = 32;
    private final AlertDialog m_dialog;
    private final String      m_mode;
    private final String      m_title;
@@ -38,29 +43,34 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
       m_navigationAdapter = navigationAdapter;
       m_context = context;
       Button button = m_dialog.getButton(DialogInterface.BUTTON_POSITIVE);
-      if(null != button)
-      {
-         button.setEnabled(false);
-      }
+      button.setEnabled(false);
    }
 
    @Override
    protected
    String[] doInBackground(String... url)
    {
-      /* If the m_imageViewTag entry has text, check to see if it is an old m_imageViewTag
-       * or if it is new. */
-
       /* Capitalise each word. */
       String[] words = SPLIT_SPACE.split(m_tag);
-      m_tag = "";
+      StringBuilder tagBuilder = new StringBuilder(TAG_INITIAL_CAPACITY);
 
       for(String word : words)
       {
-         m_tag += word.substring(0, 1).toUpperCase(Constants.LOCALE) +
-               word.substring(1).toLowerCase(Constants.LOCALE) + ' ';
+         String firstLetter = word.substring(0, 1);
+         String restOfWord = word.substring(1);
+
+         String firstLetterUpper = firstLetter.toUpperCase(Locale.getDefault());
+         String restOfWordLower = restOfWord.toLowerCase(Locale.getDefault());
+
+         tagBuilder.append(firstLetterUpper);
+         tagBuilder.append(restOfWordLower);
+         tagBuilder.append(' ');
       }
-      m_tag = m_tag.substring(0, m_tag.length() - 1);
+
+      int tagLength = tagBuilder.length();
+      int lastChar = tagLength - 1;
+      tagBuilder.delete(lastChar, tagLength);
+      m_tag = tagBuilder.toString();
 
       String[] checkList = url[0].contains("http") ? new String[]{url[0]} : new String[]{
             "http://" + url[0], "https://" + url[0]
@@ -76,22 +86,23 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
             BufferedInputStream in = null;
             try
             {
-               in = new BufferedInputStream(new URL(check).openStream());
+               URL url1 = new URL(check);
+               InputStream inputStream = url1.openStream();
+               in = new BufferedInputStream(inputStream);
                byte[] data = new byte[FEED_STREAM_BYTE_BUFFER];
                in.read(data, 0, FEED_STREAM_BYTE_BUFFER);
 
                String line = new String(data);
                if(line.contains("rss") || line.contains("Atom") || line.contains("atom"))
                {
-                  while(!line.contains(Constants.TAG_TITLE) &&
-                        !line.contains(Constants.ENDTAG_TITLE))
+                  while(!line.contains(TAG_TITLE) && !line.contains(ENDTAG_TITLE))
                   {
                      byte[] data2 = new byte[FEED_STREAM_BYTE_BUFFER];
                      in.read(data2, 0, FEED_STREAM_BYTE_BUFFER);
                      data = concat(data, data2);
                      line = new String(data);
                   }
-                  int index = line.indexOf('>', line.indexOf(Constants.TAG_TITLE) + 1);
+                  int index = line.indexOf('>', line.indexOf(TAG_TITLE) + 1);
                   feedTitle = line.substring(index, line.indexOf("</", index));
                   m_isFeedNotReal = false;
                   feedUrl = check;
@@ -115,6 +126,23 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
          }
       }
       return new String[]{feedUrl, feedTitle};
+   }
+
+   private static
+   byte[] concat(byte[] first, byte... second)
+   {
+      if(null == first)
+      {
+         return second;
+      }
+      if(null == second)
+      {
+         return first;
+      }
+      byte[] result = new byte[first.length + second.length];
+      System.arraycopy(first, 0, result, 0, first.length);
+      System.arraycopy(second, 0, result, first.length, second.length);
+      return result;
    }
 
    @Override
@@ -153,14 +181,14 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
          Write.single(Constants.INDEX, feedInfo, m_context);
 
          /* TODO Update the manage ListViews with the new information. */
-         //if(null != PagerAdapterManage.MANAGE_FRAGMENTS[1].getListAdapter())
+         /* if(null != PagerAdapterManage.MANAGE_FRAGMENTS[1].getListAdapter())
          {
-            //  Update.manageFeeds();
+            Update.manageFeeds();
          }
-         // if(null != PagerAdapterManage.MANAGE_FRAGMENTS[0].getListAdapter())
+         if(null != PagerAdapterManage.MANAGE_FRAGMENTS[0].getListAdapter())
          {
-            //    Update.manageTags();
-         }
+            Update.manageTags();
+         }*/
       }
 
       Util.updateTags(m_navigationAdapter, m_context);
@@ -173,8 +201,8 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
          Context context)
    {
 
-      String oldFeedFolder = oldFeed + Constants.SEPAR + "";
-      String newFeedFolder = newFeed + Constants.SEPAR + "";
+      String oldFeedFolder = oldFeed + Constants.SEPAR;
+      String newFeedFolder = newFeed + Constants.SEPAR;
 
       if(!oldFeed.equals(newFeed))
       {
@@ -188,36 +216,8 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
       int position = Write.removeLine(index, oldFeed, true, context);
       Write.single(index, entry + Constants.NL, context);
 
-     /*TODO ListFragment fragmentManageFeeds = ?
-      ListView listView = fragmentManageFeeds.getListView();
-      ListAdapter listAdapter = fragmentManageFeeds.getListAdapter();
-
-      String feedContentPath = Util.getPath(newFeed, Constants.CONTENT);
-      int feedContentCount = Read.count(feedContentPath);
-      String feedInfo = String.format(Constants.LOCALE, Constants.FEED_INFO, newUrl, newTag,
-            feedContentCount);
-
-      ((AdapterManageFeeds) listAdapter).setPosition(position, newFeed, feedInfo);
-
-      /// To ManageFeedsRefresh the counts and the order of the tags.
-      // TODO Util.updateTags();
+     /* To ManageFeedsRefresh the counts and the order of the tags.
+      TODO Util.updateTags();
       Update.AsyncCompatManageTagsRefresh(listView, listAdapter);*/
-   }
-
-   private static
-   byte[] concat(byte[] first, byte... second)
-   {
-      if(null == first)
-      {
-         return second;
-      }
-      if(null == second)
-      {
-         return first;
-      }
-      byte[] result = new byte[first.length + second.length];
-      System.arraycopy(first, 0, result, 0, first.length);
-      System.arraycopy(second, 0, result, first.length, second.length);
-      return result;
    }
 }

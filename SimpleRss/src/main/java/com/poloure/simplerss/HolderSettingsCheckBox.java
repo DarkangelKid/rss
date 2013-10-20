@@ -5,7 +5,7 @@ import android.widget.TextView;
 
 class HolderSettingsCheckBox
 {
-   TextView title;
-   TextView summary;
-   CheckBox checkbox;
+   TextView m_titleView;
+   TextView m_summaryView;
+   CheckBox m_checkbox;
 }

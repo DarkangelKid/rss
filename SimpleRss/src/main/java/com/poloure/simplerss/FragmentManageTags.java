@@ -2,6 +2,7 @@ package com.poloure.simplerss;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
@@ -15,8 +16,8 @@ class FragmentManageTags extends ListFragment
    private static
    void asyncCompatManageTagsRefresh(ListView listView, ListAdapter listAdapter, Context context)
    {
-      AsyncManageTagsRefresh task = new AsyncManageTagsRefresh(listView, listAdapter, context);
-      if(Constants.HONEYCOMB)
+      AsyncTask<Void, String[], Void> task = new AsyncManageTagsRefresh(listView, listAdapter, context);
+      if(Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT)
       {
          task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
       }

@@ -29,8 +29,11 @@ import java.io.File;
 public
 class FeedsActivity extends ActionBarActivity
 {
+   private static final String ALARM_SERVICE_START = "start";
+   private static final String ALARM_SERVICE_STOP  = "stop";
+   private static final long   MINUTE_VALUE        = 60000L;
    static Handler s_serviceHandler;
-   /* Only initialized when the activity is running. */ Menu m_optionsMenu;
+   /* Only initialized when the activity is running. */ private Menu m_optionsMenu;
    private DrawerLayout          m_drawerLayout;
    private ActionBarDrawerToggle m_drawerToggle;
    private String                m_previousTitle;
@@ -114,10 +117,26 @@ class FeedsActivity extends ActionBarActivity
    {
       super.onStop();
       /* Set the alarm service to go of starting now. */
-      setServiceIntent(Constants.ALARM_SERVICE_START);
+      setServiceIntent(ALARM_SERVICE_START);
 
       /* Save the READ_ITEMS to file. */
       Write.longSet(Constants.READ_ITEMS, AdapterTags.S_READ_ITEM_TIMES, this);
+   }
+
+   @Override
+   public
+   void onBackPressed()
+   {
+      super.onBackPressed();
+
+      Resources resources = getResources();
+
+      String feeds = resources.getStringArray(R.array.nav_titles)[0];
+      ActionBar actionBar = getSupportActionBar();
+      actionBar.setTitle(feeds);
+
+      m_drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+      m_drawerToggle.setDrawerIndicatorEnabled(true);
    }
 
    private
@@ -131,7 +150,7 @@ class FeedsActivity extends ActionBarActivity
       String[] check = Read.file(Constants.SETTINGS_DIR + fileNames[1] + Constants.TXT, this);
       boolean refresh = 0 == check.length || !Boolean.parseBoolean(check[0]);
 
-      if(refresh && Constants.ALARM_SERVICE_START.equals(state))
+      if(refresh && ALARM_SERVICE_START.equals(state))
       {
          return;
       }
@@ -152,19 +171,19 @@ class FeedsActivity extends ActionBarActivity
       AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
 
       /* Depending on the state string, start or stop the service. */
-      if(Constants.ALARM_SERVICE_START.equals(state))
+      if(ALARM_SERVICE_START.equals(state))
       {
-         long interval = time * 60000L;
+         long interval = time * MINUTE_VALUE;
          long next = System.currentTimeMillis() + interval;
          am.setRepeating(AlarmManager.RTC_WAKEUP, next, interval, pendingIntent);
       }
-      else if(Constants.ALARM_SERVICE_STOP.equals(state))
+      else if(ALARM_SERVICE_STOP.equals(state))
       {
          am.cancel(pendingIntent);
       }
    }
 
-   static
+   private static
    Intent getServiceIntent(int page, String notificationName, Context context)
    {
       if(null == notificationName)
@@ -182,32 +201,6 @@ class FeedsActivity extends ActionBarActivity
       intent.putExtra("GROUP_NUMBER", page);
       intent.putExtra("NOTIFICATIONS", notificationsEnabled);
       return intent;
-   }
-
-   @Override
-   public
-   void onBackPressed()
-   {
-      super.onBackPressed();
-
-      Resources resources = getResources();
-
-      String feeds = resources.getStringArray(R.array.nav_titles)[0];
-      ActionBar actionBar = getSupportActionBar();
-      actionBar.setTitle(feeds);
-
-      m_drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-      m_drawerToggle.setDrawerIndicatorEnabled(true);
-   }
-
-   Menu getOptionsMenu()
-   {
-      return m_optionsMenu;
-   }
-
-   void setOptionsMenu(Menu menu)
-   {
-      m_optionsMenu = menu;
    }
 
    String getPreviousNavigationTitle()
@@ -232,7 +225,7 @@ class FeedsActivity extends ActionBarActivity
       super.onStart();
 
       /* Stop the alarm service and reset the time to 0. */
-      setServiceIntent(Constants.ALARM_SERVICE_STOP);
+      setServiceIntent(ALARM_SERVICE_STOP);
    }
 
    @Override
@@ -259,6 +252,21 @@ class FeedsActivity extends ActionBarActivity
       boolean serviceRunning = isServiceRunning(this);
       Util.setRefreshingIcon(serviceRunning, menu);
       return true;
+   }
+
+   private static
+   boolean isServiceRunning(Activity activity)
+   {
+      ActivityManager manager = (ActivityManager) activity.getSystemService(ACTIVITY_SERVICE);
+      for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(
+            Integer.MAX_VALUE))
+      {
+         if(ServiceUpdate.class.getName().equals(service.service.getClassName()))
+         {
+            return true;
+         }
+      }
+      return false;
    }
 
    @Override
@@ -299,15 +307,8 @@ class FeedsActivity extends ActionBarActivity
       return true;
    }
 
-   String getNavigationTitle()
-   {
-      ActionBar actionBar = getSupportActionBar();
-      CharSequence title = actionBar.getTitle();
-      return title.toString();
-   }
-
    /* Updates and refreshes the tags with any new content. */
-   static
+   private static
    void refreshFeeds(ActionBarActivity activity, BaseAdapter navigationAdapter)
    {
       Menu menu = ((FeedsActivity) activity).m_optionsMenu;
@@ -315,25 +316,17 @@ class FeedsActivity extends ActionBarActivity
 
       /* Set the service handler in FeedsActivity so we can check and call it
        * from ServiceUpdate. */
-      s_serviceHandler = new FragmentFeeds.OnFinishService(activity, navigationAdapter);
+      s_serviceHandler = new OnFinishServiceHandler(activity, navigationAdapter, menu);
       int currentPage = FragmentFeeds.s_viewPager.getCurrentItem();
       Intent intent = getServiceIntent(currentPage, null, activity);
       activity.startService(intent);
    }
 
-   static
-   boolean isServiceRunning(Activity activity)
+   String getNavigationTitle()
    {
-      ActivityManager manager = (ActivityManager) activity.getSystemService(ACTIVITY_SERVICE);
-      for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(
-            Integer.MAX_VALUE))
-      {
-         if(ServiceUpdate.class.getName().equals(service.service.getClassName()))
-         {
-            return true;
-         }
-      }
-      return false;
+      ActionBar actionBar = getSupportActionBar();
+      CharSequence title = actionBar.getTitle();
+      return title.toString();
    }
 
    void setNavigationTitle(CharSequence title, boolean saveTitle)

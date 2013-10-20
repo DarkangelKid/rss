@@ -13,13 +13,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 class Read
 {
-   private static final String UTF8 = "UTF-8";
+   private static final String UTF8           = "UTF-8";
+   private static final char   ITEM_SEPARATER = '|';
 
    /* All functions in here must check that the media is available before
     * continuing. */
@@ -174,13 +174,13 @@ class Read
    }
 
    static
-   String[][] csv(Context context)
+   String[][] indexFile(Context context)
    {
-      return csv(Constants.INDEX, context, 'f', 'u', 't');
+      return csvFile(Constants.INDEX, context, 'f', 'u', 't');
    }
 
    static
-   String[][] csv(String path, Context context, char... type)
+   String[][] csvFile(String path, Context context, char... type)
    {
       if(Util.isUnmounted())
       {
@@ -201,7 +201,8 @@ class Read
          int offset = 0;
          String line = lines[j];
          int next;
-         while(-1 != (next = line.indexOf('|', offset)))
+
+         while(-1 != (next = line.indexOf(ITEM_SEPARATER, offset)))
          {
             if(offset == line.length())
             {
@@ -216,12 +217,12 @@ class Read
             {
                if(ch == type[i])
                {
-                  next = line.indexOf('|', offset);
+                  next = line.indexOf(ITEM_SEPARATER, offset);
                   types[i][j] = line.substring(offset, next);
                   break;
                }
             }
-            offset = line.indexOf('|', offset) + 1;
+            offset = line.indexOf(ITEM_SEPARATER, offset) + 1;
          }
       }
       return types;
@@ -231,7 +232,7 @@ class Read
    static
    Set<Long> longSet(String path, Context context)
    {
-      Set<Long> longSet = new HashSet<Long>(0);
+      Set<Long> longSet = new LinkedHashSet<Long>(0);
 
       /* If storage is unmounted OR if we force to use external. */
       if(Util.isUnmounted())
@@ -264,7 +265,7 @@ class Read
          }
 
       }
-      catch(FileNotFoundException e)
+      catch(FileNotFoundException ignored)
       {
       }
       catch(IOException e)
@@ -272,19 +273,5 @@ class Read
          e.printStackTrace();
       }
       return longSet;
-   }
-
-   static
-   Set set(String filePath, Context context)
-   {
-      Set set = new HashSet<String>();
-
-      if(Util.isUnmounted())
-      {
-         return set;
-      }
-
-      Collections.addAll(set, file(filePath, context));
-      return set;
    }
 }

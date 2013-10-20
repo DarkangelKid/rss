@@ -2,11 +2,11 @@ package com.poloure.simplerss;
 
 class FeedItem
 {
-   String title;
-   String url;
-   String description;
-   String image;
-   int    width;
-   int    height;
-   Long time;
+   String m_itemTitle;
+   String m_itemUrl;
+   String m_itemDescription;
+   String m_itemImage;
+   int    m_imageWidth;
+   int    m_imageHeight;
+   Long   m_itemTime;
 }

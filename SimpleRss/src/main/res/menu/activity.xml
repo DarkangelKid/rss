@@ -4,17 +4,17 @@
    xmlns:app="http://schemas.android.com/apk/res-auto">
    <item
       android:id="@+id/add_feed"
-      android:title="@string/add_feed"
       android:icon="@drawable/add"
-      app:showAsAction="ifRoom"/>
+      android:title="@string/add_feed"
+      app:showAsAction="always"/>
    <item
       android:id="@+id/unread"
-      android:title="@string/unread"
       android:icon="@drawable/unread"
-      app:showAsAction="ifRoom"/>
+      android:title="@string/unread"
+      app:showAsAction="always"/>
    <item
       android:id="@+id/refresh"
-      android:title="@string/refresh"
       android:icon="@drawable/ic_action_refresh"
-      app:showAsAction="ifRoom"/>
+      android:title="@string/refresh"
+      app:showAsAction="always"/>
 </menu>

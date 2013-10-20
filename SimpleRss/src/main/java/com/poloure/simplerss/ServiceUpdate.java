@@ -9,7 +9,6 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.PowerManager;
-import android.os.Process;
 import android.text.format.Time;
 import android.util.DisplayMetrics;
 
@@ -25,21 +24,39 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 public
 class ServiceUpdate extends IntentService
 {
-   private static final SimpleDateFormat RSS_DATE           = new SimpleDateFormat(
+   /* Parser saves */
+   private static final String           IMAGE                       = "image|";
+   private static final String           TIME                        = "pubDate|";
+   private static final String           HEIGHT                      = "height|";
+   private static final String           WIDTH                       = "width|";
+   private static final SimpleDateFormat RSS_DATE                    = new SimpleDateFormat(
          "EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
-   private static final Pattern          PATTERN_WHITESPACE = Pattern.compile(
+   @SuppressWarnings("HardcodedLineSeparator")
+   private static final Pattern          PATTERN_WHITESPACE          = Pattern.compile(
          "[\\t\\n\\x0B\\f\\r\\|]");
-   private static final String[]         DESIRED_TAGS       = {
+   private static final String[]         DESIRED_TAGS                = {
          "link", "published", "pubDate", "description", "title", "content", "entry", "item"
    };
+   private static final int              FEED_ITEM_INITIAL_CAPACITY  = 200;
+   private static final double           AMOUNT_OF_SCREEN_IMAGE_USES = 0.944;
+   private static final char             ITEM_SEPARATOR              = '|';
 
    public
    ServiceUpdate()
@@ -55,15 +72,13 @@ class ServiceUpdate extends IntentService
       PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SIMPLERSS");
       wakeLock.acquire();
 
-      Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-
       int page = intent.getIntExtra("GROUP_NUMBER", 0);
 
       Set<String> tagSet = PagerAdapterFeeds.updateTags(this);
       int tagSize = tagSet.size();
       String tag = tagSet.toArray(new String[tagSize])[page];
 
-      String[][] content = Read.csv(this);
+      String[][] content = Read.indexFile(this);
       String[] names = content[0];
       String[] urls = content[1];
       String[] tags = content[2];
@@ -77,13 +92,10 @@ class ServiceUpdate extends IntentService
       {
          if(isAllTag || tags[i].contains(tag))
          {
-            String feedPath = names[i] + Constants.SEPAR;
-            if(isNonExisting(feedPath, this))
-            {
-               String path1 = Util.getStorage(this) + feedPath + Constants.THUMBNAIL_DIR;
-               File folder = new File(path1);
-               folder.mkdirs();
-            }
+            String path1 = Util.getStorage(this) + names[i] + Constants.SEPAR +
+                  Constants.THUMBNAIL_DIR;
+            File folder = new File(path1);
+            folder.mkdirs();
 
             try
             {
@@ -177,33 +189,33 @@ class ServiceUpdate extends IntentService
       stopSelf();
    }
 
-   boolean isNonExisting(String path, Context context)
-   {
-      String path1 = Util.getStorage(context) + path;
-      if(Util.isUsingSd() || path1.contains(Constants.THUMBNAIL_DIR))
-      {
-         File file = new File(path1);
-         return !file.exists();
-      }
-      else
-      {
-         String internalPath = Util.getInternalPath(path1);
-         File file = getFileStreamPath(internalPath);
-         return !file.exists();
-      }
-   }
-
    private
    void parseFeed(String urlString, String feed)
          throws XmlPullParserException, MalformedURLException, IOException
    {
-      String contentFile = feed + Constants.SEPAR + Constants.CONTENT;
-      String longFile = feed + Constants.SEPAR + Constants.ITEM_LIST;
-      String thumbnailDir = feed + Constants.SEPAR + Constants.THUMBNAIL_DIR;
+      String feedFolder = feed + Constants.SEPAR;
+      String contentFile = feedFolder + Constants.CONTENT;
+      String longFile = feedFolder + Constants.ITEM_LIST;
+      String thumbnailDir = feedFolder + Constants.THUMBNAIL_DIR;
       /*String[] filters = Read.file(Constants.FILTER_LIST);*/
 
-      Set<String> set = Read.set(contentFile, this);
+      /* Load the previously saved items to a map. */
+      Set<String> set = fileToSet(contentFile, this);
       Set<Long> longSet = Read.longSet(longFile, this);
+
+      int setSize = set.size();
+      String[] lines = set.toArray(new String[setSize]);
+
+      int longSize = longSet.size();
+      Long[] longs = longSet.toArray(new Long[longSize]);
+
+      Comparator<Long> longComparator = Collections.reverseOrder();
+      Map<Long, String> map = new TreeMap<Long, String>(longComparator);
+
+      for(int i = 0; i < setSize; i++)
+      {
+         map.put(longs[i], lines[i]);
+      }
 
       Time time = new Time();
 
@@ -218,7 +230,7 @@ class ServiceUpdate extends IntentService
       BitmapFactory.Options options = new BitmapFactory.Options();
       options.inJustDecodeBounds = true;
 
-      StringBuilder stringBuilder = new StringBuilder(200);
+      StringBuilder feedItemBuilder = new StringBuilder(FEED_ITEM_INITIAL_CAPACITY);
 
       boolean preEntry = true;
 
@@ -240,6 +252,8 @@ class ServiceUpdate extends IntentService
          }
       }
 
+      long timeLong = 0L;
+
       while(true)
       {
          int eventType = parser.getEventType();
@@ -249,13 +263,13 @@ class ServiceUpdate extends IntentService
             String tag = parser.getName();
 
             int index = Util.index(DESIRED_TAGS, tag);
-            long timeLong;
             String timeString;
 
             /* "entry", "item" */
             if(5 < index)
             {
-               stringBuilder.setLength(0);
+               feedItemBuilder.setLength(0);
+               timeLong = 0L;
             }
             else if(0 == index)
             {
@@ -265,7 +279,9 @@ class ServiceUpdate extends IntentService
                   parser.next();
                   link = parser.getText();
                }
-               stringBuilder.append("link|").append(link).append('|');
+               feedItemBuilder.append("link|");
+               feedItemBuilder.append(link);
+               feedItemBuilder.append(ITEM_SEPARATOR);
             }
 
             /* "published" - It is an atom feed it will be one of four RFC3339 formats. */
@@ -280,15 +296,16 @@ class ServiceUpdate extends IntentService
                }
                catch(Exception ignored)
                {
-                  Write.log("BUG : RFC3339, looks like: " + contentText, this);
+                  Write.toLogFile("BUG : RFC3339, looks like: " + contentText, this);
                   time.setToNow();
                }
 
                timeLong = time.toMillis(true);
-               longSet.add(timeLong);
 
                timeString = Long.toString(timeLong);
-               stringBuilder.append(Constants.TIME).append(timeString).append('|');
+               feedItemBuilder.append(TIME);
+               feedItemBuilder.append(timeString);
+               feedItemBuilder.append(ITEM_SEPARATOR);
             }
 
             /* "pubDate" - It follows the rss 2.0 specification for rfc882. */
@@ -300,19 +317,21 @@ class ServiceUpdate extends IntentService
                try
                {
                   Calendar calendar = Calendar.getInstance();
-                  calendar.setTime(RSS_DATE.parse(contentText));
+                  Date date = RSS_DATE.parse(contentText);
+                  calendar.setTime(date);
                   timeLong = calendar.getTimeInMillis();
                }
                catch(Exception ignored)
                {
-                  Write.log("BUG : rfc882, looks like: " + contentText, this);
+                  Write.toLogFile("BUG : rfc882, looks like: " + contentText, this);
                   time.setToNow();
                   timeLong = time.toMillis(true);
                }
 
-               longSet.add(timeLong);
                timeString = Long.toString(timeLong);
-               stringBuilder.append(Constants.TIME).append(timeString).append('|');
+               feedItemBuilder.append(TIME);
+               feedItemBuilder.append(timeString);
+               feedItemBuilder.append(ITEM_SEPARATOR);
             }
             else if(-1 != index)
             {
@@ -328,7 +347,9 @@ class ServiceUpdate extends IntentService
                   int finalPosition = content.indexOf(quote, srcPosition + 1);
 
                   String imgLink = content.substring(srcPosition + 1, finalPosition);
-                  stringBuilder.append(Constants.IMAGE).append(imgLink).append('|');
+                  feedItemBuilder.append(IMAGE);
+                  feedItemBuilder.append(imgLink);
+                  feedItemBuilder.append(ITEM_SEPARATOR);
 
                   int lastSlash = imgLink.lastIndexOf('/') + 1;
                   String imgName = imgLink.substring(lastSlash);
@@ -339,19 +360,23 @@ class ServiceUpdate extends IntentService
                   }
 
                   /* ISSUE #194 */
-                  BitmapFactory.decodeFile(Util.getStorage(this) + thumbnailDir + imgName, options);
+                  String storage = Util.getStorage(this);
+                  BitmapFactory.decodeFile(storage + thumbnailDir + imgName, options);
 
-                  stringBuilder.append(Constants.WIDTH);
-                  stringBuilder.append(options.outWidth);
-                  stringBuilder.append('|');
-                  stringBuilder.append(Constants.HEIGHT);
-                  stringBuilder.append(options.outHeight);
-                  stringBuilder.append('|');
+                  feedItemBuilder.append(WIDTH);
+                  feedItemBuilder.append(options.outWidth);
+                  feedItemBuilder.append(ITEM_SEPARATOR);
+                  feedItemBuilder.append(HEIGHT);
+                  feedItemBuilder.append(options.outHeight);
+                  feedItemBuilder.append(ITEM_SEPARATOR);
                }
 
                String tagToAppend = DESIRED_TAGS[5].equals(tag) ? DESIRED_TAGS[3] : tag;
 
-               stringBuilder.append(tagToAppend).append('|').append(content).append('|');
+               feedItemBuilder.append(tagToAppend);
+               feedItemBuilder.append(ITEM_SEPARATOR);
+               feedItemBuilder.append(content);
+               feedItemBuilder.append(ITEM_SEPARATOR);
             }
          }
          else if(XmlPullParser.END_TAG == eventType)
@@ -361,18 +386,77 @@ class ServiceUpdate extends IntentService
             /* "entry", "item" */
             if(DESIRED_TAGS[6].equals(tag) || DESIRED_TAGS[7].equals(tag))
             {
-               String finalLine = stringBuilder.toString();
-               set.add(finalLine);
+               String finalLine = feedItemBuilder.toString();
+               map.put(timeLong, finalLine);
             }
          }
          else if(XmlPullParser.END_DOCUMENT == eventType)
          {
-            Write.collection(contentFile, set, this);
-            Write.log("size = " + Integer.toString(longSet.size()), this);
-            Write.longSet(longFile, longSet, this);
+            Resources resources = getResources();
+            String[] settingFiles = resources.getStringArray(R.array.settings_names);
+            String setting = Read.setting(settingFiles[5], this);
+
+            int saveSize = 0 == setting.length() ? 100000 : Integer.parseInt(setting);
+            int mapSize = map.size();
+
+            saveSize = saveSize >= mapSize ? mapSize : saveSize;
+
+            Long[] mapKeys = new Long[saveSize];
+            String[] mapValues = new String[saveSize];
+
+            Set<Long> finalLongSet = map.keySet();
+            Collection<String> finalSet = map.values();
+
+            Long[] longArray = finalLongSet.toArray(new Long[saveSize]);
+            String[] stringArray = finalSet.toArray(new String[saveSize]);
+
+            for(int i = 0; i < saveSize; i++)
+            {
+               mapKeys[i] = longArray[i];
+               mapValues[i] = stringArray[i];
+            }
+
+            List<String> valueList = Arrays.asList(mapValues);
+            List<Long> keyList = Arrays.asList(mapKeys);
+
+            Write.collection(contentFile, valueList, this);
+            Write.longSet(longFile, keyList, this);
+
             return;
          }
          parser.next();
+      }
+   }
+
+   static
+   Set<String> fileToSet(String filePath, Context context)
+   {
+      Set<String> set = new LinkedHashSet<String>();
+
+      if(Util.isUnmounted())
+      {
+         return set;
+      }
+
+      String[] lines = Read.file(filePath, context);
+      Collections.addAll(set, lines);
+
+      return set;
+   }
+
+   boolean isNonExisting(String path, Context context)
+   {
+      String path1 = Util.getStorage(context) + path;
+      if(Util.isUsingSd() || path1.contains(Constants.THUMBNAIL_DIR))
+      {
+         File file = new File(path1);
+         return !file.exists();
+      }
+      else
+      {
+         String internalPath = Util.getInternalPath(path1);
+         File file = getFileStreamPath(internalPath);
+         return !file.exists();
       }
    }
 
@@ -398,7 +482,7 @@ class ServiceUpdate extends IntentService
 
       Resources resources = context.getResources();
       DisplayMetrics displayMetrics = resources.getDisplayMetrics();
-      int screenWidth = (int) Math.round(displayMetrics.widthPixels * 0.944);
+      int screenWidth = (int) Math.round(displayMetrics.widthPixels * AMOUNT_OF_SCREEN_IMAGE_USES);
       float inSample = widthTmp > screenWidth ? Math.round(widthTmp / screenWidth) : 1;
 
       try

@@ -7,12 +7,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
-import android.widget.FrameLayout;
 
 class FragmentWebView extends Fragment
 {
-   private WebView     m_webView;
-   private FrameLayout view;
+   private WebView m_webView;
 
    @Override
    public
@@ -27,10 +25,21 @@ class FragmentWebView extends Fragment
 
       Context context = getActivity();
 
-      view = new FrameLayout(context);
       m_webView = new WebView(context);
 
-      return view;
+      return m_webView;
+   }
+
+   @Override
+   public
+   void onDestroy()
+   {
+      if(null != m_webView)
+      {
+         m_webView.removeAllViews();
+         m_webView.destroy();
+      }
+      super.onDestroy();
    }
 
    void setData(String url, String html)
@@ -41,36 +50,5 @@ class FragmentWebView extends Fragment
    void setUrl(String url)
    {
       m_webView.loadUrl(url);
-   }
-
-   @Override
-   public
-   void onResume()
-   {
-         /* min api 11. */
-      m_webView.onResume();
-      super.onResume();
-   }
-
-   @Override
-   public
-   void onPause()
-   {
-      /* min api 11. */
-      m_webView.onPause();
-      super.onPause();
-   }
-
-   @Override
-   public
-   void onDestroy()
-   {
-      if(null != m_webView)
-      {
-         view.removeAllViews();
-         m_webView.removeAllViews();
-         m_webView.destroy();
-      }
-      super.onDestroy();
    }
 }

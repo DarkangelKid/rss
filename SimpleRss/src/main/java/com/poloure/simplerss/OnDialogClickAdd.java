@@ -7,6 +7,8 @@ import android.view.View;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import java.util.Locale;
+
 class OnDialogClickAdd implements DialogInterface.OnClickListener
 {
    private final View        m_addRssDialog;
@@ -30,7 +32,7 @@ class OnDialogClickAdd implements DialogInterface.OnClickListener
 
       tag = 0 == tag.length()
             ? m_context.getString(R.string.all_tag)
-            : tag.toLowerCase(Constants.LOCALE);
+            : tag.toLowerCase(Locale.getDefault());
 
       Update.executeFeedCheck((AlertDialog) dialog, tag, name, Constants.ADD, "", url,
             m_navigationAdapter, m_context);

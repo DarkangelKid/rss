@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.ListFragment;
@@ -55,6 +56,7 @@ class FragmentManageFeeds extends ListFragment
    {
       LayoutInflater inf = LayoutInflater.from(context);
       View dialogLayout = inf.inflate(R.layout.add_rss_dialog, null);
+      DialogInterface.OnClickListener onAddEdit;
 
       String titleText;
       String negativeButtonText;
@@ -66,10 +68,12 @@ class FragmentManageFeeds extends ListFragment
          titleText = context.getString(R.string.add_dialog_title);
          negativeButtonText = context.getString(R.string.cancel_dialog);
          positiveButtonText = context.getString(R.string.add_dialog);
+
+         onAddEdit = new OnDialogClickAdd(dialogLayout, navigationAdapter, context);
       }
       else
       {
-         String[][] content = Read.csv(context);
+         String[][] content = Read.indexFile(context);
          String title = content[0][position];
          String url = content[1][position];
          String tag = content[2][position];
@@ -81,12 +85,12 @@ class FragmentManageFeeds extends ListFragment
          titleText = context.getString(R.string.edit_dialog_title);
          negativeButtonText = context.getString(R.string.cancel_dialog);
          positiveButtonText = context.getString(R.string.accept_dialog);
+
+         onAddEdit = new OnDialogClickEdit(dialogLayout, title, navigationAdapter, context);
       }
 
       /* Create the button click listeners. */
       DialogInterface.OnClickListener onCancel = new OnDialogClickCancel();
-      DialogInterface.OnClickListener onAdd = new OnDialogClickAdd(dialogLayout, navigationAdapter,
-            context);
 
       /* Build the AlertDialog. */
       AlertDialog.Builder build = new AlertDialog.Builder(context);
@@ -94,7 +98,7 @@ class FragmentManageFeeds extends ListFragment
       build.setView(dialogLayout);
       build.setCancelable(true);
       build.setNegativeButton(negativeButtonText, onCancel);
-      build.setPositiveButton(positiveButtonText, onAdd);
+      build.setPositiveButton(positiveButtonText, onAddEdit);
       build.show();
    }
 
@@ -136,9 +140,9 @@ class FragmentManageFeeds extends ListFragment
    void manageFeeds(ListView listView, ListAdapter listAdapter)
    {
       Context context = getActivity();
-      AsyncManageFeedsRefresh task = new AsyncManageFeedsRefresh(listView,
+      AsyncTask<Void, String[], Void> task = new AsyncManageFeedsRefresh(listView,
             (BaseAdapter) listAdapter, context);
-      if(Constants.HONEYCOMB)
+      if(Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT)
       {
          task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
       }

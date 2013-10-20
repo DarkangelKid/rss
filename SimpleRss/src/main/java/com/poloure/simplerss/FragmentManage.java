@@ -17,6 +17,7 @@ import android.widget.BaseAdapter;
 
 class FragmentManage extends Fragment
 {
+   private static final int VIEW_PAGER_ID = 0x2000;
    private final BaseAdapter m_navigationAdapter;
 
    FragmentManage(BaseAdapter baseAdapter)
@@ -28,14 +29,15 @@ class FragmentManage extends Fragment
    public
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
+      Context context = getActivity();
+
       if(null == container)
       {
-         return null;
+         return new View(context);
       }
 
       setHasOptionsMenu(true);
 
-      Context context = getActivity();
       FragmentManager fragmentManager = getFragmentManager();
       PagerAdapter pagerAdapter = new PagerAdapterManage(m_navigationAdapter, fragmentManager,
             context);
@@ -45,7 +47,7 @@ class FragmentManage extends Fragment
       ViewPager pager = new ViewPager(context);
       pager.setAdapter(pagerAdapter);
       pager.setOnPageChangeListener(pageChangeManage);
-      pager.setId(0x2000);
+      pager.setId(VIEW_PAGER_ID);
 
       return pager;
    }
@@ -54,9 +56,16 @@ class FragmentManage extends Fragment
    public
    void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
    {
-      menu.findItem(R.id.refresh).setVisible(false);
-      menu.findItem(R.id.unread).setVisible(false);
-      menu.findItem(R.id.add_feed).setVisible(true);
+      MenuItem refreshMenu = menu.findItem(R.id.refresh);
+      MenuItem unreadMenu = menu.findItem(R.id.unread);
+      MenuItem addFeedMenu = menu.findItem(R.id.add_feed);
+
+      if(null != refreshMenu && null != unreadMenu && null != addFeedMenu)
+      {
+         refreshMenu.setVisible(false);
+         unreadMenu.setVisible(false);
+         addFeedMenu.setVisible(true);
+      }
    }
 
    @Override
@@ -64,6 +73,6 @@ class FragmentManage extends Fragment
    boolean onOptionsItemSelected(MenuItem item)
    {
       FragmentActivity activity = getActivity();
-      return activity.onOptionsItemSelected(item);
+      return super.onOptionsItemSelected(item) || activity.onOptionsItemSelected(item);
    }
 }

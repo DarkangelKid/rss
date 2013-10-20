@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 
 class OnCardContextMenuClick implements DialogInterface.OnClickListener
 {
@@ -27,7 +28,7 @@ class OnCardContextMenuClick implements DialogInterface.OnClickListener
          ClipboardManager clipboard = (ClipboardManager) m_context.getSystemService(
                Context.CLIPBOARD_SERVICE);
 
-         if(Constants.HONEYCOMB)
+         if(Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT)
          {
             ClipData clip = ClipData.newPlainText("Url", m_url);
             clipboard.setPrimaryClip(clip);

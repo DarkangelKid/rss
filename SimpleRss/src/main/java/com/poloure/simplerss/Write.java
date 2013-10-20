@@ -13,10 +13,10 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
-import java.util.Set;
 
 class Write
 {
+   private static final String TEMP = ".temp" + Constants.TXT;
    /* All functions in here must check that the media is available before
     * continuing. */
 
@@ -32,7 +32,7 @@ class Write
       }
 
       String path1 = Util.getStorage(context) + path;
-      String tempPath = path1 + Constants.TEMP;
+      String tempPath = path1 + TEMP;
 
       String[] lines = new String[0];
       int pos = -1;
@@ -100,7 +100,7 @@ class Write
       /* If the rename failed, delete the file and Write the original. */
       if(Util.isUsingSd())
       {
-         boolean success = !Util.move(path + Constants.TEMP, path, context);
+         boolean success = !Util.move(path + TEMP, path, context);
          if(success)
          {
             Util.remove(path, context);
@@ -108,6 +108,21 @@ class Write
          }
       }
       return pos;
+   }
+
+   private static
+   BufferedWriter writer(String path, int writeMode, Context context)
+         throws FileNotFoundException, UnsupportedEncodingException
+   {
+      String internalPath = Util.getInternalPath(path);
+      FileOutputStream fileOutputStream = context.openFileOutput(internalPath, writeMode);
+      return new BufferedWriter(new OutputStreamWriter(fileOutputStream, "UTF8"));
+   }
+
+   private static
+   BufferedWriter writer(String p, boolean ap) throws IOException
+   {
+      return new BufferedWriter(new FileWriter(p, ap));
    }
 
    static
@@ -163,23 +178,8 @@ class Write
       }
    }
 
-   private static
-   BufferedWriter writer(String p, boolean ap) throws IOException
-   {
-      return new BufferedWriter(new FileWriter(p, ap));
-   }
-
-   private static
-   BufferedWriter writer(String path, int writeMode, Context context)
-         throws FileNotFoundException, UnsupportedEncodingException
-   {
-      String internalPath = Util.getInternalPath(path);
-      FileOutputStream fileOutputStream = context.openFileOutput(internalPath, writeMode);
-      return new BufferedWriter(new OutputStreamWriter(fileOutputStream, "UTF8"));
-   }
-
    static
-   void log(String text, Context context)
+   void toLogFile(String text, Context context)
    {
       single(Constants.LOG_FILE, text + Constants.NL, context);
    }
@@ -230,7 +230,7 @@ class Write
 
    /* TODO Not for internal yet. */
    static
-   void longSet(String path, Set<Long> longSet, Context context)
+   void longSet(String path, Iterable<Long> longSet, Context context)
    {
       /* If storage is unmounted OR if we force to use external. */
       if(Util.isUnmounted())

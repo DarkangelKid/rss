@@ -13,6 +13,7 @@ import java.util.Set;
 
 class AsyncManageTagsRefresh extends AsyncTask<Void, String[], Void>
 {
+   private static final int INFO_INITIAL_CAPACITY = 40;
    private final Animation   m_fadeIn;
    private final ListView    m_listView;
    private final ListAdapter m_adapter;
@@ -43,6 +44,32 @@ class AsyncManageTagsRefresh extends AsyncTask<Void, String[], Void>
       return null;
    }
 
+   @Override
+   protected
+   void onPostExecute(Void result)
+   {
+      m_listView.setAnimation(m_fadeIn);
+      m_listView.setVisibility(View.VISIBLE);
+   }
+
+   @Override
+   protected
+   void onProgressUpdate(String[][] values)
+   {
+      if(null != m_adapter)
+      {
+         setArrays(values[0], values[1]);
+         ((BaseAdapter) m_adapter).notifyDataSetChanged();
+      }
+   }
+
+   private static
+   void setArrays(String[] tags, String... infos)
+   {
+      AdapterManagerTags.s_tagArray = tags;
+      AdapterManagerTags.s_infoArray = infos;
+   }
+
    private
    String[][] getInfoArrays()
    {
@@ -57,9 +84,9 @@ class AsyncManageTagsRefresh extends AsyncTask<Void, String[], Void>
 
       String[] tagArray = new String[tagCount];
       String[] infoArray = new String[tagCount];
-      StringBuilder info = new StringBuilder(40);
+      StringBuilder info = new StringBuilder(INFO_INITIAL_CAPACITY);
 
-      String[][] content = Read.csv(m_context);
+      String[][] content = Read.indexFile(m_context);
       String[] feeds = content[0];
       String[] tags = content[2];
 
@@ -99,31 +126,5 @@ class AsyncManageTagsRefresh extends AsyncTask<Void, String[], Void>
          /* 0 is meant to be total. */
       infoArray[0] = 0 + " items • " + infoArray[0];
       return new String[][]{infoArray, tagArray};
-   }
-
-   @Override
-   protected
-   void onPostExecute(Void result)
-   {
-      m_listView.setAnimation(m_fadeIn);
-      m_listView.setVisibility(View.VISIBLE);
-   }
-
-   @Override
-   protected
-   void onProgressUpdate(String[][] values)
-   {
-      if(null != m_adapter)
-      {
-         setArrays(values[0], values[1]);
-         ((BaseAdapter) m_adapter).notifyDataSetChanged();
-      }
-   }
-
-   private static
-   void setArrays(String[] tags, String... infos)
-   {
-      AdapterManagerTags.s_tagArray = tags;
-      AdapterManagerTags.s_infoArray = infos;
    }
 }

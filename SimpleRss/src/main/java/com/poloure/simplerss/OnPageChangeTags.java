@@ -23,25 +23,25 @@ class OnPageChangeTags extends SimpleOnPageChangeListener
 
    @Override
    public
-   void onPageSelected(int pos)
+   void onPageSelected(int position)
    {
       FragmentManager fragmentManager = m_fragment.getFragmentManager();
-      ListView listView = Util.getFeedListView(pos, fragmentManager);
+      ListView listView = Util.getFeedListView(position, fragmentManager);
 
       ActionBarActivity activity = (ActionBarActivity) m_fragment.getActivity();
 
       String[] tags = PagerAdapterFeeds.getTagsArray();
 
-      String unread = (String) m_navigationAdapter.getItem(pos);
+      String unread = (String) m_navigationAdapter.getItem(position);
 
       ActionBar actionBar = activity.getSupportActionBar();
-      actionBar.setSubtitle(tags[pos] + " | " + unread);
+      actionBar.setSubtitle(tags[position] + " | " + unread);
 
       ListAdapter adapter = listView.getAdapter();
       if(0 == adapter.getCount())
       {
          Context context = m_fragment.getActivity();
-         Update.page(m_navigationAdapter, pos, fragmentManager, context);
+         Update.page(m_navigationAdapter, position, fragmentManager, context);
       }
    }
 }

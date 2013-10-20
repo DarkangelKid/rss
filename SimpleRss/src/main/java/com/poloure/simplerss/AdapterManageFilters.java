@@ -12,15 +12,21 @@ class AdapterManageFilters extends BaseAdapter
    private String[] m_filterTitles = Util.EMPTY_STRING_ARRAY;
 
    private final LayoutInflater m_layoutInflater;
+   private TextView m_titleView;
+   private final Context m_context;
 
    AdapterManageFilters(Context context)
    {
       m_layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+      m_context = context;
    }
 
-   void setTitles(String... titles)
+   @Override
+   public
+   void notifyDataSetChanged()
    {
-      m_filterTitles = titles;
+      m_filterTitles = Read.file(Constants.FILTER_LIST, m_context);
+      super.notifyDataSetChanged();
    }
 
    @Override
@@ -46,38 +52,17 @@ class AdapterManageFilters extends BaseAdapter
 
    @Override
    public
-   View getView(int position, View view, ViewGroup parent)
+   View getView(int position, View convertView, ViewGroup parent)
    {
-      View view1 = view;
-      ViewHolder holder;
-      if(null == view1)
+      View view = convertView;
+      if(null == view)
       {
-         view1 = m_layoutInflater.inflate(R.layout.manage_feed_item, parent, false);
-         holder = new ViewHolder();
-         holder.m_title = (TextView) view1.findViewById(R.id.title_item);
-         view1.setTag(holder);
-      }
-      else
-      {
-         holder = (ViewHolder) view1.getTag();
+         view = m_layoutInflater.inflate(R.layout.manage_feed_item, parent, false);
+         m_titleView = (TextView) view.findViewById(R.id.title_item);
       }
 
-      holder.m_title.setText(m_filterTitles[position]);
+      m_titleView.setText(m_filterTitles[position]);
 
-      return view1;
+      return view;
    }
-
-   void removePosition(int position)
-   {
-      Util.arrayRemove(m_filterTitles, position);
-      notifyDataSetChanged();
-   }
-
-   static
-   class ViewHolder
-   {
-      // TODO
-      TextView m_title;
-   }
-
 }

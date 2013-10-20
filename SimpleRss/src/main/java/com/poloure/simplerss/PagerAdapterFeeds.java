@@ -10,10 +10,13 @@ import android.widget.BaseAdapter;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 class PagerAdapterFeeds extends FragmentPagerAdapter
 {
-   static Set<String> s_tagSet = new LinkedHashSet<String>(0);
+   private static final Set<String> TAG_SET     = Collections.synchronizedSet(
+         new LinkedHashSet<String>(0));
+   private static final Pattern     SPLIT_COMMA = Pattern.compile(",");
    private final BaseAdapter                    m_navigationAdapter;
    private final ViewPager.OnPageChangeListener m_pageChange;
 
@@ -29,39 +32,41 @@ class PagerAdapterFeeds extends FragmentPagerAdapter
    static
    Set<String> updateTags(Context context)
    {
-      s_tagSet = Collections.synchronizedSet(new LinkedHashSet<String>(0));
-      String[] tagArray = Read.csv(context)[2];
+      TAG_SET.clear();
+      String[] tagArray = Read.indexFile(context)[2];
 
-      s_tagSet.add(context.getString(R.string.all_tag));
+      String allTag = context.getString(R.string.all_tag);
+      TAG_SET.add(allTag);
 
       for(String tag : tagArray)
       {
-         String[] tags = tag.split(",");
+         String[] tags = SPLIT_COMMA.split(tag);
          for(String singleTag : tags)
          {
-            s_tagSet.add(singleTag.trim());
+            String trimmedTag = singleTag.trim();
+            TAG_SET.add(trimmedTag);
          }
       }
-      return s_tagSet;
+      return TAG_SET;
    }
 
    static
    Set<String> getTags()
    {
-      return s_tagSet;
+      return TAG_SET;
    }
 
    static
    String[] getTagsArray()
    {
-      int size = s_tagSet.size();
-      return s_tagSet.toArray(new String[size]);
+      int size = TAG_SET.size();
+      return TAG_SET.toArray(new String[size]);
    }
 
    static
    int getSize()
    {
-      return s_tagSet.size();
+      return TAG_SET.size();
    }
 
    @Override
@@ -75,7 +80,7 @@ class PagerAdapterFeeds extends FragmentPagerAdapter
    public
    int getCount()
    {
-      return s_tagSet.size();
+      return TAG_SET.size();
    }
 
    @Override
@@ -83,7 +88,7 @@ class PagerAdapterFeeds extends FragmentPagerAdapter
    String getPageTitle(int position)
    {
       int size = getCount();
-      return s_tagSet.toArray(new String[size])[position];
+      return TAG_SET.toArray(new String[size])[position];
    }
 
 }
