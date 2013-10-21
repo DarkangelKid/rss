@@ -1,5 +1,6 @@
 package com.poloure.simplerss;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -22,16 +23,23 @@ import android.widget.TextView;
 class FragmentTag extends ListFragment
 {
    private static final String BACK_STACK_TAG = "BACK";
-   private final BaseAdapter                    m_navigationAdapter;
-   private final int                            m_position;
+   private static final String POSITION_KEY   = "POSITION";
    private final ViewPager.OnPageChangeListener m_pageChange;
 
-   FragmentTag(BaseAdapter navigationAdapter, ViewPager.OnPageChangeListener pageChange,
-         int position)
+   private
+   FragmentTag(ViewPager.OnPageChangeListener pageChange)
    {
-      m_navigationAdapter = navigationAdapter;
       m_pageChange = pageChange;
-      m_position = position;
+   }
+
+   static
+   ListFragment newInstance(ViewPager.OnPageChangeListener pageChange, int position)
+   {
+      ListFragment listFragment = new FragmentTag(pageChange);
+      Bundle bundle = new Bundle();
+      bundle.putInt(POSITION_KEY, position);
+      listFragment.setArguments(bundle);
+      return listFragment;
    }
 
    @Override
@@ -46,26 +54,22 @@ class FragmentTag extends ListFragment
       BaseAdapter listAdapter = new AdapterTags(context);
       setListAdapter(listAdapter);
 
-      AbsListView.OnScrollListener scrollListener = new OnScrollFeedListener(m_navigationAdapter,
-            listAdapter, m_pageChange, m_position, context);
+      Bundle bundle = getArguments();
+      int position = bundle.getInt(POSITION_KEY);
+
+      ListView navigationList = (ListView) ((Activity) context).findViewById(R.id.left_drawer);
+      BaseAdapter navigationAdapter = (BaseAdapter) navigationList.getAdapter();
+
+      AbsListView.OnScrollListener scrollListener = new OnScrollFeedListener(navigationAdapter,
+            listAdapter, m_pageChange, position, context);
 
       listView.setOnScrollListener(scrollListener);
       listView.setOnItemClickListener(new ClickListener(this));
 
-      if(0 == m_position)
+      if(0 == position)
       {
          FragmentManager fragmentManager = getFragmentManager();
-         Update.page(m_navigationAdapter, 0, fragmentManager, context);
-
-         /*ActionBarActivity activity = (ActionBarActivity) getActivity();
-
-         String allTag = PagerAdapterFeeds.getTagsArray()[0];
-
-         String unread = (String) m_navigationAdapter.getItem(0);
-
-         ActionBar actionBar = activity.getSupportActionBar();
-         actionBar.setSubtitle(allTag + " | " + unread);*/
-         Update.navigation(m_navigationAdapter, m_pageChange, 0, context);
+         Update.asyncCompatRefreshPage(navigationAdapter, 0, fragmentManager, context);
       }
    }
 
@@ -109,7 +113,7 @@ class FragmentTag extends ListFragment
 
          TextView textView = (TextView) view.findViewById(R.id.url);
          CharSequence url = textView.getText();
-         Fragment fragmentWebView = new FragmentWebView();
+         Fragment fragmentWebView = FragmentWebView.newInstance();
          ((FragmentWebView) fragmentWebView).setUrl(url);
 
          FragmentTransaction transaction = fragmentManager.beginTransaction();

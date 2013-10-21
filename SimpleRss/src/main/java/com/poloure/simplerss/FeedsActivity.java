@@ -258,7 +258,9 @@ class FeedsActivity extends ActionBarActivity
       for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(
             Integer.MAX_VALUE))
       {
-         if(ServiceUpdate.class.getName().equals(service.service.getClassName()))
+         String className = service.service.getClassName();
+         String serviceName = ServiceUpdate.class.getName();
+         if(serviceName.equals(className))
          {
             return true;
          }
@@ -271,7 +273,7 @@ class FeedsActivity extends ActionBarActivity
    boolean onOptionsItemSelected(MenuItem item)
    {
       ListView navigationList = (ListView) findViewById(R.id.left_drawer);
-      BaseAdapter navigationListAdapter = (BaseAdapter) navigationList.getAdapter();
+      BaseAdapter navigationAdapter = (BaseAdapter) navigationList.getAdapter();
 
       /* If the user has clicked the title and the title says R.string.offline. */
       String navigationTitle = getNavigationTitle();
@@ -288,7 +290,8 @@ class FeedsActivity extends ActionBarActivity
       }
       else if(menuText.equals(addFeed))
       {
-         FragmentManageFeeds.showEditDialog(navigationListAdapter, this, FragmentManageFeeds.MODE_ADD);
+         FragmentManageFeeds.showEditDialog(navigationAdapter, this,
+               FragmentManageFeeds.MODE_ADD);
       }
       else if(menuText.equals(jumpTo))
       {
@@ -299,7 +302,7 @@ class FeedsActivity extends ActionBarActivity
       }
       else if(menuText.equals(refresh))
       {
-         refreshFeeds(this, navigationListAdapter);
+         refreshFeeds(this, navigationAdapter);
       }
       else
       {
@@ -313,12 +316,11 @@ class FeedsActivity extends ActionBarActivity
    private
    void refreshFeeds(ActionBarActivity activity, BaseAdapter navigationAdapter)
    {
-      Menu menu = ((FeedsActivity) activity).m_optionsMenu;
-      Util.setRefreshingIcon(true, menu);
+      Util.setRefreshingIcon(true, m_optionsMenu);
 
       /* Set the service handler in FeedsActivity so we can check and call it
        * from ServiceUpdate. */
-      s_serviceHandler = new OnFinishServiceHandler(activity, navigationAdapter, menu);
+      s_serviceHandler = new OnFinishServiceHandler(activity, navigationAdapter, m_optionsMenu);
 
       ViewPager viewPager = (ViewPager) findViewById(FragmentFeeds.VIEW_PAGER_ID);
       int currentPage = viewPager.getCurrentItem();

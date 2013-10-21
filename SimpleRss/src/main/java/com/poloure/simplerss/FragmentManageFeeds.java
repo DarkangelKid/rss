@@ -1,5 +1,6 @@
 package com.poloure.simplerss;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -24,11 +25,11 @@ import android.widget.TextView;
 class FragmentManageFeeds extends ListFragment
 {
    static final int MODE_ADD = -1;
-   private final BaseAdapter m_navigationAdapter;
 
-   FragmentManageFeeds(BaseAdapter navigationAdapter)
+   static
+   ListFragment newInstance()
    {
-      m_navigationAdapter = navigationAdapter;
+      return new FragmentManageFeeds();
    }
 
    @Override
@@ -48,7 +49,10 @@ class FragmentManageFeeds extends ListFragment
       super.onListItemClick(l, v, position, id);
       Context context = getActivity();
 
-      showEditDialog(m_navigationAdapter, context, position);
+      ListView navigationList = (ListView) ((Activity) context).findViewById(R.id.left_drawer);
+      BaseAdapter navigationAdapter = (BaseAdapter) navigationList.getAdapter();
+
+      showEditDialog(navigationAdapter, context, position);
    }
 
    static
@@ -78,7 +82,7 @@ class FragmentManageFeeds extends ListFragment
          String url = content[1][position];
          String tag = content[2][position];
 
-         ((TextView) dialogLayout.findViewById(R.id.URL_edit)).setText(url);
+         ((TextView) dialogLayout.findViewById(R.id.feed_url_edit)).setText(url);
          ((TextView) dialogLayout.findViewById(R.id.name_edit)).setText(title);
          ((TextView) dialogLayout.findViewById(R.id.tag_edit)).setText(tag);
 
@@ -110,9 +114,13 @@ class FragmentManageFeeds extends ListFragment
 
       Context context = getActivity();
       ListView listView = getListView();
+
+      ListView navigationList = (ListView) ((Activity) context).findViewById(R.id.left_drawer);
+      BaseAdapter navigationAdapter = (BaseAdapter) navigationList.getAdapter();
+
       ListAdapter listAdapter = new AdapterManageFeeds(context);
       AdapterView.OnItemLongClickListener onItemLongClick = new OnLongClickManageFeedItem(this,
-            (BaseAdapter) listAdapter, m_navigationAdapter);
+            (BaseAdapter) listAdapter, navigationAdapter);
 
       setListAdapter(listAdapter);
       listView.setOnItemLongClickListener(onItemLongClick);

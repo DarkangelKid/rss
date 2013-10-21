@@ -9,6 +9,7 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -20,7 +21,7 @@ import java.util.regex.Pattern;
 class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
 {
    private static final String  TAG_TITLE               = "<title";
-   private static final String  ENDTAG_TITLE            = "</title>";
+   private static final String  END_TAG_TITLE           = "</title>";
    private static final Pattern ILLEGAL_FILE_CHARS      = Pattern.compile("[/\\?%*|<>:]");
    private static final Pattern SPLIT_SPACE             = Pattern.compile(" ");
    private static final int     FEED_STREAM_BYTE_BUFFER = 512;
@@ -32,14 +33,14 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
    private final Context     m_context;
    private       String      m_tag;
    private       boolean     m_isFeedNotReal;
-   private       String      name;
+   private       String      m_name;
 
    AsyncCheckFeed(AlertDialog dialog, String tag, String feedName, String mode, String currentTitle,
          BaseAdapter navigationAdapter, Context context)
    {
       m_dialog = dialog;
       m_tag = tag;
-      name = feedName;
+      m_name = feedName;
       m_mode = mode;
       m_title = currentTitle;
       m_navigationAdapter = navigationAdapter;
@@ -98,7 +99,7 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
                String line = new String(data);
                if(line.contains("rss") || line.contains("Atom") || line.contains("atom"))
                {
-                  while(!line.contains(TAG_TITLE) && !line.contains(ENDTAG_TITLE))
+                  while(!line.contains(TAG_TITLE) && !line.contains(END_TAG_TITLE))
                   {
                      byte[] data2 = new byte[FEED_STREAM_BYTE_BUFFER];
                      in.read(data2, 0, FEED_STREAM_BYTE_BUFFER);
@@ -166,23 +167,23 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
          return;
       }
 
-      if(0 == name.length())
+      if(0 == m_name.length())
       {
-         name = result[1];
+         m_name = result[1];
       }
 
-      Matcher matcher = ILLEGAL_FILE_CHARS.matcher(name);
-      name = matcher.replaceAll("");
+      Matcher matcher = ILLEGAL_FILE_CHARS.matcher(m_name);
+      m_name = matcher.replaceAll("");
 
       if(Constants.EDIT.equals(m_mode))
       {
-         editFeed(m_title, name, result[0], m_tag, m_context);
+         editFeed(m_title, m_name, result[0], m_tag, m_context);
       }
       else if(Constants.ADD.equals(m_mode))
       {
 
          /* Create the csv. */
-         String feedInfo = String.format(Constants.INDEX_FORMAT, name, result[0], m_tag) +
+         String feedInfo = String.format(Constants.INDEX_FORMAT, m_name, result[0], m_tag) +
                Constants.NL;
 
          /* Save the feed to the index. */
@@ -209,12 +210,12 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
          Context context)
    {
 
-      String oldFeedFolder = oldFeed + Constants.SEPAR;
-      String newFeedFolder = newFeed + Constants.SEPAR;
+      String oldFeedFolder = oldFeed + File.separator;
+      String newFeedFolder = newFeed + File.separator;
 
       if(!oldFeed.equals(newFeed))
       {
-         Util.move(oldFeedFolder, newFeedFolder, context);
+         Util.moveFile(oldFeedFolder, newFeedFolder, context);
       }
 
       /* Replace the all_tag file with the new image and data. */

@@ -105,15 +105,16 @@ class Util
       String path1 = getStorage(context) + path;
       String internalPath = getInternalPath(path1);
       context.deleteFile(internalPath);
-      new File(path1).delete();
+      File file = new File(path1);
+      file.delete();
    }
 
    static
    String getInternalPath(String externalPath)
    {
-      int index = externalPath.indexOf(Constants.SEPAR + "files" + Constants.SEPAR);
+      int index = externalPath.indexOf(File.separator + "files" + File.separator);
       String substring = externalPath.substring(index + 7);
-      return substring.replaceAll(Constants.SEPAR, "-");
+      return substring.replaceAll(File.separator, "-");
    }
 
    /* This function will return null if it fails. Check for null each time.
@@ -137,11 +138,12 @@ class Util
 
       /* If it has reached here the state is MEDIA_MOUNTED and we can continue.
          Build the s_storage string depending on android version. */
-      String sep = Constants.SEPAR;
+      String sep = File.separator;
 
       if(Build.VERSION_CODES.FROYO <= Build.VERSION.SDK_INT)
       {
-         s_storage = context.getExternalFilesDir(null).getAbsolutePath() + sep;
+         File externalFilesDir = context.getExternalFilesDir(null);
+         s_storage = externalFilesDir.getAbsolutePath() + sep;
       }
       else
       {
@@ -160,13 +162,13 @@ class Util
    /* Replaces ALL_TAG '/'s with '-' to emulate a folder directory layout in
     * data/data. */
    static
-   boolean rmdir(File directory)
+   boolean deleteDirectory(File directory)
    {
       if(directory.isDirectory())
       {
          for(String child : directory.list())
          {
-            boolean success = !rmdir(new File(directory, child));
+            boolean success = !deleteDirectory(new File(directory, child));
             if(success)
             {
                return false;
@@ -177,11 +179,14 @@ class Util
    }
 
    static
-   boolean move(String original, String resulting, Context context)
+   boolean moveFile(String original, String resulting, Context context)
    {
-      String originalFile = getStorage(context) + original;
-      String resultingFile = getStorage(context) + resulting;
-      return new File(originalFile).renameTo(new File(resultingFile));
+      String storage = getStorage(context);
+
+      File originalFile = new File(storage + original);
+      File resultingFile = new File(storage + resulting);
+
+      return originalFile.renameTo(resultingFile);
    }
 
    /* index throws an ArrayOutOfBoundsException if not handled. */

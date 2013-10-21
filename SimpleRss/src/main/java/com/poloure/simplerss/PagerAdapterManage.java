@@ -6,20 +6,18 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.ListFragment;
-import android.widget.BaseAdapter;
 
 class PagerAdapterManage extends FragmentPagerAdapter
 {
    private final ListFragment[] m_manageFragments = new ListFragment[3];
    private final String[] m_manageTitles;
 
-   PagerAdapterManage(BaseAdapter navigationAdapter, FragmentManager fragmentManager,
-         Context context)
+   PagerAdapterManage(FragmentManager fragmentManager, Context context)
    {
       super(fragmentManager);
-      m_manageFragments[0] = new FragmentManageTags();
-      m_manageFragments[1] = new FragmentManageFeeds(navigationAdapter);
-      m_manageFragments[2] = new FragmentManageFilters(navigationAdapter);
+      m_manageFragments[0] = FragmentManageTags.newInstance();
+      m_manageFragments[1] = FragmentManageFeeds.newInstance();
+      m_manageFragments[2] = FragmentManageFilters.newInstance();
 
       Resources resources = context.getResources();
       m_manageTitles = resources.getStringArray(R.array.manage_titles);

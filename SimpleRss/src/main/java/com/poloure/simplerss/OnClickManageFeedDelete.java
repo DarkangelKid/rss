@@ -30,10 +30,10 @@ class OnClickManageFeedDelete implements DialogInterface.OnClickListener
    void onClick(DialogInterface dialog, int position)
    {
       String feedName = (String) m_adapter.getItem(m_position);
-      String path = feedName + Constants.SEPAR;
+      String path = feedName + File.separator;
 
       Write.removeLine(Constants.INDEX, feedName, true, m_context);
-      Util.rmdir(new File(path));
+      Util.deleteDirectory(new File(path));
 
       /* Refresh pages and navigation counts. */
       Util.updateTags(m_navigationAdapter, (Activity) m_context);

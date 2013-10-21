@@ -19,7 +19,7 @@ import java.util.Set;
 class Read
 {
    private static final String UTF8           = "UTF-8";
-   private static final char   ITEM_SEPARATER = '|';
+   private static final char   ITEM_SEPARATOR = '|';
 
    /* All functions in here must check that the media is available before
     * continuing. */
@@ -112,7 +112,7 @@ class Read
    {
       String path1 = Util.getInternalPath(path);
       FileInputStream fis = context.openFileInput(path1);
-      return new BufferedReader(new InputStreamReader(fis, Read.UTF8));
+      return new BufferedReader(new InputStreamReader(fis, UTF8));
    }
 
    /* Wrapper for creating external BufferedReader. */
@@ -202,7 +202,7 @@ class Read
          String line = lines[j];
          int next;
 
-         while(-1 != (next = line.indexOf(ITEM_SEPARATER, offset)))
+         while(-1 != (next = line.indexOf(ITEM_SEPARATOR, offset)))
          {
             if(offset == line.length())
             {
@@ -217,12 +217,12 @@ class Read
             {
                if(ch == type[i])
                {
-                  next = line.indexOf(ITEM_SEPARATER, offset);
+                  next = line.indexOf(ITEM_SEPARATOR, offset);
                   types[i][j] = line.substring(offset, next);
                   break;
                }
             }
-            offset = line.indexOf(ITEM_SEPARATER, offset) + 1;
+            offset = line.indexOf(ITEM_SEPARATOR, offset) + 1;
          }
       }
       return types;

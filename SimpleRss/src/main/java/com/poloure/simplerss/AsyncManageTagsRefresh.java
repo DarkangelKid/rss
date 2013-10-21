@@ -92,7 +92,8 @@ class AsyncManageTagsRefresh extends AsyncTask<Void, String[], Void>
 
          if(currentTags[i].equals(allTag))
          {
-            info.append(tagCount).append(" tags");
+            info.append(tagCount);
+            info.append(" tags");
          }
          else
          {

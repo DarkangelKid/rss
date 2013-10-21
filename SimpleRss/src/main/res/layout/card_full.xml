@@ -1,19 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="#ffffff">
+<com.poloure.simplerss.ItemView xmlns:android="http://schemas.android.com/apk/res/android"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:background="#ffffff">
 
-   <include layout="@layout/card_title_url"/>
+   <TextView
+      android:id="@+id/title"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="@+id/title"
+      android:textAppearance="@android:style/TextAppearance.Medium"
+      android:paddingStart="8dp"
+      android:paddingLeft="8dp"
+      android:paddingEnd="8dp"
+      android:paddingRight="8dp"
+      android:paddingTop="6dp"
+      android:fontFamily="sans-serif-light"
+      android:maxLines="2"
+      android:ellipsize="end"/>
 
-   <include
-      layout="@layout/card_img"
-      android:paddingTop="0dp"/>
+   <TextView
+      android:id="@+id/url"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="@+id/url"
+      android:textAppearance="@android:style/TextAppearance.Small"
+      android:paddingStart="8dp"
+      android:paddingLeft="8dp"
+      android:paddingEnd="8dp"
+      android:fontFamily="sans-serif-light"
+      android:paddingRight="8dp"
+      android:paddingBottom="4dp"
+      android:layout_below="@+id/title"
+      android:maxLines="1"
+      android:ellipsize="end"/>
 
-   <include layout="@layout/card_des"/>
+   <ImageView
+      android:id="@+id/image"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:adjustViewBounds="true"
+      android:paddingTop="4dp"
+      android:layout_below="@+id/url"
+      android:scaleType="centerCrop"/>
 
-   <include layout="@layout/top_shadow"/>
 
-   <include layout="@layout/shadow"/>
+   <TextView
+      android:id="@+id/description"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_below="@+id/image"
+      android:fontFamily="sans-serif-light"
+      android:paddingBottom="8dp"
+      android:paddingEnd="8dp"
+      android:paddingLeft="8dp"
+      android:paddingRight="8dp"
+      android:paddingStart="8dp"
+      android:paddingTop="2dp"
+      android:text="@+id/description"
+      android:textAppearance="@android:style/TextAppearance.Small"/>
 
-</RelativeLayout>
+   <ImageView
+      android:id="@+id/white_left_shadow"
+      android:layout_width="3px"
+      android:layout_height="4px"
+      android:layout_below="@+id/description"
+      android:layout_alignParentLeft="true"
+      android:src="@drawable/left_white"/>
+
+   <ImageView
+      android:id="@+id/white_right_shadow"
+      android:layout_width="3px"
+      android:layout_height="4px"
+      android:layout_below="@+id/description"
+      android:layout_alignParentRight="true"
+      android:src="@drawable/right_white"/>
+
+   <ImageView
+      android:id="@+id/grey_left_shadow"
+      android:layout_width="3px"
+      android:layout_height="4px"
+      android:layout_alignParentLeft="true"
+      android:layout_below="@+id/white_left_shadow"
+      android:src="@drawable/left_grey"/>
+
+   <ImageView
+      android:id="@+id/grey_centre_shadow"
+      android:layout_width="match_parent"
+      android:layout_height="4px"
+      android:layout_below="@+id/white_left_shadow"
+      android:layout_toRightOf="@+id/grey_left_shadow"
+      android:layout_toLeftOf="@+id/grey_right_shadow"
+      android:src="@drawable/bottom_grey"
+      android:scaleType="fitXY"/>
+
+
+   <ImageView
+      android:id="@+id/grey_right_shadow"
+      android:layout_width="3px"
+      android:layout_height="4px"
+      android:layout_below="@+id/white_right_shadow"
+      android:layout_alignParentRight="true"
+      android:src="@drawable/right_grey"/>
+
+</com.poloure.simplerss.ItemView>

@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.support.v4.view.ViewPager;
 import android.widget.BaseAdapter;
 
+import java.io.File;
 import java.util.Set;
 
 class AsyncRefreshNavigationAdapter extends AsyncTask<int[], Void, int[]>
@@ -32,7 +33,7 @@ class AsyncRefreshNavigationAdapter extends AsyncTask<int[], Void, int[]>
       String[] indexNames = content[0];
       String[] indexTags = content[1];
 
-      String append = Constants.SEPAR + Constants.ITEM_LIST;
+      String append = File.separator + Constants.ITEM_LIST;
       int total = 0;
       int tagCount = currentTags.length;
       int indexTagsCount = indexTags.length;

@@ -23,7 +23,7 @@ class FragmentFeeds extends Fragment
    static final         int VIEW_PAGER_ID         = 0x1000;
 
    static
-   FragmentFeeds newInstance()
+   Fragment newInstance()
    {
       return new FragmentFeeds();
    }
@@ -43,11 +43,10 @@ class FragmentFeeds extends Fragment
       FragmentManager fragmentManager = ((FragmentActivity) context).getSupportFragmentManager();
 
       ListView navigationList = (ListView) ((Activity) context).findViewById(R.id.left_drawer);
-      BaseAdapter navigationListAdapter = (BaseAdapter) navigationList.getAdapter();
+      BaseAdapter navigationAdapter = (BaseAdapter) navigationList.getAdapter();
 
-      ViewPager.OnPageChangeListener pageChange = new OnPageChangeTags(this, navigationListAdapter);
-      PagerAdapter adapter = new PagerAdapterFeeds(navigationListAdapter, fragmentManager,
-            pageChange, context);
+      ViewPager.OnPageChangeListener pageChange = new OnPageChangeTags(this, navigationAdapter);
+      PagerAdapter adapter = new PagerAdapterFeeds(fragmentManager, pageChange, context);
 
       ViewPager viewPager = new ViewPager(context);
       viewPager.setAdapter(adapter);

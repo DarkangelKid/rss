@@ -28,6 +28,12 @@ class FragmentManageTags extends ListFragment
       }
    }
 
+   static
+   ListFragment newInstance()
+   {
+      return new FragmentManageTags();
+   }
+
    @Override
    public
    void onActivityCreated(Bundle savedInstanceState)

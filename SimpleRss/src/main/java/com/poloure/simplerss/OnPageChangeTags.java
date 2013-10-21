@@ -1,7 +1,6 @@
 package com.poloure.simplerss;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
@@ -30,7 +29,6 @@ class OnPageChangeTags extends SimpleOnPageChangeListener
    {
       ActionBarActivity activity = (ActionBarActivity) m_fragment.getActivity();
       FragmentManager fragmentManager = m_fragment.getFragmentManager();
-      Resources resources = activity.getResources();
 
       ViewPager viewPager = (ViewPager) activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
       PagerAdapter pagerAdapter = viewPager.getAdapter();
@@ -48,7 +46,7 @@ class OnPageChangeTags extends SimpleOnPageChangeListener
       if(0 == adapter.getCount())
       {
          Context context = m_fragment.getActivity();
-         Update.page(m_navigationAdapter, position, fragmentManager, context);
+         Update.asyncCompatRefreshPage(m_navigationAdapter, position, fragmentManager, context);
       }
    }
 }

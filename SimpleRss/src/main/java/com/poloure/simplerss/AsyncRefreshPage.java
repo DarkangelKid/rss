@@ -12,6 +12,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -77,7 +78,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Animation>
       {
          if(isAllTag || tags[j].contains(tag))
          {
-            String[][] content = Read.csvFile(feeds[j] + Constants.SEPAR + Constants.CONTENT,
+            String[][] content = Read.csvFile(feeds[j] + File.separator + Constants.CONTENT,
                   m_context, 't', 'd', 'l', 'i', 'w', 'h', 'p');
             if(0 == content.length)
             {
@@ -102,8 +103,8 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Animation>
                         ? 0
                         : Integer.parseInt(widths[i])))
                   {
-                     int lastSlash = images[i].lastIndexOf(Constants.SEPAR) + 1;
-                     images[i] = feeds[j] + Constants.SEPAR + Constants.THUMBNAIL_DIR +
+                     int lastSlash = images[i].lastIndexOf(File.separator) + 1;
+                     images[i] = feeds[j] + File.separator + Constants.THUMBNAIL_DIR +
                            images[i].substring(lastSlash);
                   }
                   else

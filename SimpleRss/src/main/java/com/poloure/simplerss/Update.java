@@ -28,8 +28,8 @@ class Update
    }
 
    public static
-   void page(BaseAdapter navigationAdapter, int pageNumber, FragmentManager fragmentManager,
-         Context context)
+   void asyncCompatRefreshPage(BaseAdapter navigationAdapter, int pageNumber,
+         FragmentManager fragmentManager, Context context)
    {
       AsyncTask<Integer, Object, Animation> task = new AsyncRefreshPage(navigationAdapter,
             fragmentManager, context);

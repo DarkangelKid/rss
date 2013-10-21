@@ -9,7 +9,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 class PagerAdapterSettings extends FragmentPagerAdapter
 {
    private static final Fragment[] SETTINGS_DIR_FRAGMENTS = {
-         new FragmentSettingsFunctions(), new FragmentSettingsUi(),
+         FragmentSettingsFunctions.newInstance(), FragmentSettingsUi.newInstance(),
    };
    private final String[] m_settingsTitles;
 

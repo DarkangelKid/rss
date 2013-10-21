@@ -15,6 +15,8 @@
    <string name="refresh">إعادة التحميل‎</string>
    <string name="offline">Offline</string>
 
+   <string name="refresh_time_preferences">Refresh Time</string>
+
    <string name="feed_name_dialog">إسم الموجز‎</string>
    <string name="feed_name_hint">إختياري‎</string>
    <string name="feed_url_dialog">رابط الموجز‎</string>

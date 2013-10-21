@@ -8,6 +8,8 @@ import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 
+import java.io.File;
+
 class AsyncManageFeedsRefresh extends AsyncTask<Void, String[], Void>
 {
    private final Animation   m_fadeIn;
@@ -42,7 +44,7 @@ class AsyncManageFeedsRefresh extends AsyncTask<Void, String[], Void>
          for(int i = 0; i < size; i++)
          {
                /* Form the path to the feed_content file. */
-            String path = content[0][i] + Constants.SEPAR + Constants.CONTENT;
+            String path = content[0][i] + File.separator + Constants.CONTENT;
 
                /* Build the info string. */
             infoArray[i] = content[1][i] + Constants.NL + content[2][i] + " • " +

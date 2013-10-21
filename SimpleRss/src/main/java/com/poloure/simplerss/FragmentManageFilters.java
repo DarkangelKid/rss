@@ -1,5 +1,6 @@
 package com.poloure.simplerss;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -15,11 +16,10 @@ import android.widget.ListView;
 
 class FragmentManageFilters extends ListFragment
 {
-   private final BaseAdapter m_navigationAdapter;
-
-   FragmentManageFilters(BaseAdapter navigationAdapter)
+   static
+   ListFragment newInstance()
    {
-      m_navigationAdapter = navigationAdapter;
+      return new FragmentManageFilters();
    }
 
    @Override
@@ -67,9 +67,12 @@ class FragmentManageFilters extends ListFragment
       String addText = getString(R.string.add_dialog);
       String addFilterText = getString(R.string.add_filter);
 
+      ListView navigationList = (ListView) ((Activity) context).findViewById(R.id.left_drawer);
+      BaseAdapter navigationAdapter = (BaseAdapter) navigationList.getAdapter();
+
       DialogInterface.OnClickListener onClickCancel = new OnDialogClickCancel();
       DialogInterface.OnClickListener onClickAdd = new OnFilterDialogClickAdd(addFilterLayout,
-            m_navigationAdapter, context);
+            navigationAdapter, context);
 
       AlertDialog.Builder build = new AlertDialog.Builder(context);
       build.setTitle(addFilterText);

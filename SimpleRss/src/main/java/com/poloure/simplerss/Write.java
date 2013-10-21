@@ -101,7 +101,7 @@ class Write
       /* If the rename failed, delete the file and Write the original. */
       if(Util.isUsingSd())
       {
-         boolean success = !Util.move(path + TEMP, path, context);
+         boolean success = !Util.moveFile(path + TEMP, path, context);
          if(success)
          {
             Util.remove(path, context);

@@ -28,7 +28,7 @@ class OnDialogClickAdd implements DialogInterface.OnClickListener
    void onClick(DialogInterface dialog, int which)
    {
       String tag = ((TextView) m_addRssDialog.findViewById(R.id.tag_edit)).getText().toString();
-      String url = ((TextView) m_addRssDialog.findViewById(R.id.URL_edit)).getText().toString();
+      String url = ((TextView) m_addRssDialog.findViewById(R.id.feed_url_edit)).getText().toString();
       String name = ((TextView) m_addRssDialog.findViewById(R.id.name_edit)).getText().toString();
 
       Locale defaultLocale = Locale.getDefault();

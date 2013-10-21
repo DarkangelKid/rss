@@ -5,15 +5,24 @@
       android:layout_width="3px"
       android:layout_height="4px"
       android:src="@drawable/left_white"
-      android:layout_alignParentLeft="true"
+      android:layout_below="@+id/description"
       android:layout_above="@+id/grey_left_shadow"/>
+
+   <ImageView
+      android:id="@+id/white_centre_shadow"
+      android:layout_width="match_parent"
+      android:layout_height="4px"
+      android:layout_below="@+id/description"
+      android:layout_above="@+id/grey_centre_shadow"
+      android:src="@android:color/white"
+      android:scaleType="fitXY"/>
 
    <ImageView
       android:id="@+id/white_right_shadow"
       android:layout_width="3px"
       android:layout_height="4px"
       android:src="@drawable/right_white"
-      android:layout_alignParentRight="true"
+      android:layout_below="@+id/description"
       android:layout_above="@+id/grey_right_shadow"/>
 
 </merge>

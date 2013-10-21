@@ -12,6 +12,12 @@ class FragmentWebView extends Fragment
 {
    private WebView m_webView;
 
+   static
+   Fragment newInstance()
+   {
+      return new FragmentWebView();
+   }
+
    @Override
    public
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -42,10 +48,10 @@ class FragmentWebView extends Fragment
       super.onDestroy();
    }
 
-   void setData(String url, String html)
+   /* TODO void setData(String url, String html)
    {
       m_webView.loadDataWithBaseURL(url, html, null, null, null);
-   }
+   }*/
 
    void setUrl(CharSequence url)
    {

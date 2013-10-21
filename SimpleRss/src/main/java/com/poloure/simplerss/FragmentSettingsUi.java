@@ -9,6 +9,12 @@ import android.view.ViewGroup;
 
 class FragmentSettingsUi extends ListFragment
 {
+   static
+   ListFragment newInstance()
+   {
+      return new FragmentSettingsUi();
+   }
+
    @Override
    public
    void onActivityCreated(Bundle savedInstanceState)

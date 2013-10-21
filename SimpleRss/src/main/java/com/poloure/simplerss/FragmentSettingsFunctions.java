@@ -11,6 +11,12 @@ import android.view.ViewGroup;
 
 class FragmentSettingsFunctions extends ListFragment
 {
+   static
+   ListFragment newInstance()
+   {
+      return new FragmentSettingsFunctions();
+   }
+
    @Override
    public
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)

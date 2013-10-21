@@ -92,7 +92,7 @@ class ServiceUpdate extends IntentService
       {
          if(isAllTag || tags[i].contains(tag))
          {
-            String path1 = Util.getStorage(this) + names[i] + Constants.SEPAR +
+            String path1 = Util.getStorage(this) + names[i] + File.separator +
                   Constants.THUMBNAIL_DIR;
             File folder = new File(path1);
             folder.mkdirs();
@@ -193,7 +193,7 @@ class ServiceUpdate extends IntentService
    void parseFeed(String urlString, String feed)
          throws XmlPullParserException, MalformedURLException, IOException
    {
-      String feedFolder = feed + Constants.SEPAR;
+      String feedFolder = feed + File.separator;
       String contentFile = feedFolder + Constants.CONTENT;
       String longFile = feedFolder + Constants.ITEM_LIST;
       String thumbnailDir = feedFolder + Constants.THUMBNAIL_DIR;
