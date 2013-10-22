@@ -18,8 +18,9 @@ import java.util.Set;
 
 class Read
 {
-   private static final String UTF8           = "UTF-8";
-   private static final char   ITEM_SEPARATOR = '|';
+   static final String INDEX = "index.txt";
+   private static final String UTF8 = "UTF-8";
+   private static final char ITEM_SEPARATOR = '|';
 
    /* All functions in here must check that the media is available before
     * continuing. */
@@ -46,10 +47,10 @@ class Read
          return Util.EMPTY_STRING_ARRAY;
       }
 
-      String storage = Util.getStorage(context);
+      String storage = FeedsActivity.getStorage(context);
       if(!path1.contains(storage))
       {
-         path1 = Util.getStorage(context) + path1;
+         path1 = FeedsActivity.getStorage(context) + path1;
       }
 
       /* Get the number of lines. */
@@ -131,10 +132,10 @@ class Read
          return 0;
       }
 
-      String storage = Util.getStorage(context);
+      String storage = FeedsActivity.getStorage(context);
       if(!path1.contains(storage))
       {
-         path1 = Util.getStorage(context) + path1;
+         path1 = FeedsActivity.getStorage(context) + path1;
       }
 
       int i = 0;
@@ -176,7 +177,7 @@ class Read
    static
    String[][] indexFile(Context context)
    {
-      return csvFile(Constants.INDEX, context, 'f', 'u', 't');
+      return csvFile(INDEX, context, 'f', 'u', 't');
    }
 
    static
@@ -240,7 +241,7 @@ class Read
          return longSet;
       }
 
-      String filePath = Util.getStorage(context) + path;
+      String filePath = FeedsActivity.getStorage(context) + path;
       File fileIn = new File(filePath);
 
       try

@@ -6,19 +6,15 @@ import android.os.Message;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
-import android.widget.BaseAdapter;
 
 class OnFinishServiceHandler extends Handler
 {
    private final ActionBarActivity m_activity;
-   private final BaseAdapter       m_navigationAdapter;
    private final Menu              m_optionsMenu;
 
-   OnFinishServiceHandler(ActionBarActivity activity, BaseAdapter navigationAdapter,
-         Menu optionsMenu)
+   OnFinishServiceHandler(ActionBarActivity activity, Menu optionsMenu)
    {
       m_activity = activity;
-      m_navigationAdapter = navigationAdapter;
       m_optionsMenu = optionsMenu;
 
    }
@@ -28,7 +24,7 @@ class OnFinishServiceHandler extends Handler
    public
    void handleMessage(Message msg)
    {
-      Util.setRefreshingIcon(false, m_optionsMenu);
+      FeedsActivity.setRefreshingIcon(false, m_optionsMenu);
 
       Bundle bundle = msg.getData();
       if(null != bundle)

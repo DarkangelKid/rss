@@ -73,7 +73,7 @@ class FragmentManageFeeds extends ListFragment
          negativeButtonText = context.getString(R.string.cancel_dialog);
          positiveButtonText = context.getString(R.string.add_dialog);
 
-         onAddEdit = new OnDialogClickAdd(dialogLayout, navigationAdapter, context);
+         onAddEdit = new OnDialogClickAdd(dialogLayout, context);
       }
       else
       {
@@ -90,7 +90,7 @@ class FragmentManageFeeds extends ListFragment
          negativeButtonText = context.getString(R.string.cancel_dialog);
          positiveButtonText = context.getString(R.string.accept_dialog);
 
-         onAddEdit = new OnDialogClickEdit(dialogLayout, title, navigationAdapter, context);
+         onAddEdit = new OnDialogClickEdit(dialogLayout, title, context);
       }
 
       /* Create the button click listeners. */
@@ -120,7 +120,7 @@ class FragmentManageFeeds extends ListFragment
 
       ListAdapter listAdapter = new AdapterManageFeeds(context);
       AdapterView.OnItemLongClickListener onItemLongClick = new OnLongClickManageFeedItem(this,
-            (BaseAdapter) listAdapter, navigationAdapter);
+            (BaseAdapter) listAdapter);
 
       setListAdapter(listAdapter);
       listView.setOnItemLongClickListener(onItemLongClick);

@@ -1,25 +1,21 @@
 package com.poloure.simplerss;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.view.View;
-import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import java.util.Locale;
 
 class OnDialogClickAdd implements DialogInterface.OnClickListener
 {
-   private final View        m_addRssDialog;
-   private final BaseAdapter m_navigationAdapter;
-   private final Context     m_context;
+   private final View    m_addRssDialog;
+   private final Context m_context;
 
-   OnDialogClickAdd(View addRssDialog, BaseAdapter navigationAdapter, Context context)
+   OnDialogClickAdd(View addRssDialog, Context context)
    {
       m_addRssDialog = addRssDialog;
-      m_navigationAdapter = navigationAdapter;
       m_context = context;
    }
 
@@ -38,9 +34,7 @@ class OnDialogClickAdd implements DialogInterface.OnClickListener
             ? m_context.getString(R.string.all_tag)
             : tag.toLowerCase(defaultLocale);
 
-      Update.executeFeedCheck((AlertDialog) dialog, tag, name, Constants.ADD, "", url, m_context);
-
-      /* Update the navigation drawer. */
-      Util.updateTags((Activity) m_context);
+      Update.executeFeedCheck((AlertDialog) dialog, tag, name, AsyncCheckFeed.MODE_ADD_FEED, "",
+            url, m_context);
    }
 }

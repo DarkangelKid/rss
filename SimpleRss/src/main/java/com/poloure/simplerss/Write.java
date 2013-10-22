@@ -17,7 +17,8 @@ import java.util.List;
 
 class Write
 {
-   private static final String TEMP = ".temp" + Constants.TXT;
+   static final         String LOG_FILE = "dump" + ".txt";
+   private static final String TEMP     = ".temp" + ".txt";
    /* All functions in here must check that the media is available before
     * continuing. */
 
@@ -32,7 +33,7 @@ class Write
          return -1;
       }
 
-      String path1 = Util.getStorage(context) + path;
+      String path1 = FeedsActivity.getStorage(context) + path;
       String tempPath = path1 + TEMP;
 
       String[] lines = new String[0];
@@ -60,7 +61,7 @@ class Write
                if(contains && !item.contains(stringSearch) ||
                      !contains && !item.equals(stringSearch))
                {
-                  out.write(item + Constants.NL);
+                  out.write(item + System.getProperty("line.separator"));
                   line++;
                }
                else
@@ -93,7 +94,7 @@ class Write
          e.printStackTrace();
          if(Util.isUsingSd())
          {
-            Util.remove(tempPath, context);
+            remove(tempPath, context);
          }
          return -1;
       }
@@ -104,7 +105,7 @@ class Write
          boolean success = !Util.moveFile(path + TEMP, path, context);
          if(success)
          {
-            Util.remove(path, context);
+            remove(path, context);
             List<String> list = Arrays.asList(lines);
             collection(path, list, context);
          }
@@ -136,11 +137,11 @@ class Write
          return;
       }
 
-      String path1 = Util.getStorage(context) + path;
+      String path1 = FeedsActivity.getStorage(context) + path;
 
       if(Util.isUsingSd())
       {
-         Util.remove(path1, context);
+         remove(path1, context);
       }
 
       try
@@ -155,7 +156,7 @@ class Write
 
             for(Object item : content)
             {
-               out.write(item + Constants.NL);
+               out.write(item + System.getProperty("line.separator"));
             }
          }
          finally
@@ -183,7 +184,7 @@ class Write
    static
    void toLogFile(String text, Context context)
    {
-      single(Constants.LOG_FILE, text + Constants.NL, context);
+      single(LOG_FILE, text + System.getProperty("line.separator"), context);
    }
 
    /* Function should be safe, returns false if fails. */
@@ -196,7 +197,7 @@ class Write
          return;
       }
 
-      String path1 = Util.getStorage(context) + path;
+      String path1 = FeedsActivity.getStorage(context) + path;
 
       try
       {
@@ -240,7 +241,7 @@ class Write
          return;
       }
 
-      String filePath = Util.getStorage(context) + path;
+      String filePath = FeedsActivity.getStorage(context) + path;
       File fileOut = new File(filePath);
 
       try
@@ -274,5 +275,15 @@ class Write
       {
          e.printStackTrace();
       }
+   }
+
+   static
+   void remove(String path, Context context)
+   {
+      String path1 = FeedsActivity.getStorage(context) + path;
+      String internalPath = Util.getInternalPath(path1);
+      context.deleteFile(internalPath);
+      File file = new File(path1);
+      file.delete();
    }
 }

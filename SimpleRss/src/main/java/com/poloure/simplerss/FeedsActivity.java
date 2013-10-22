@@ -8,12 +8,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.ListFragment;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -31,11 +35,14 @@ import java.io.File;
 public
 class FeedsActivity extends ActionBarActivity
 {
-   private static final String ALARM_SERVICE_START = "start";
-   private static final String ALARM_SERVICE_STOP  = "stop";
+   static final         String READ_ITEMS          = "read_items" + ".txt";
+   static final         String SETTINGS_DIR        = "settings" + File.separatorChar;
+   private static final int    ALARM_SERVICE_START = 1;
+   private static final int    ALARM_SERVICE_STOP  = 0;
    private static final long   MINUTE_VALUE        = 60000L;
    static Handler s_serviceHandler;
-   /* Only initialized when the activity is running. */ private Menu m_optionsMenu;
+   private static String s_storage = "";
+   private Menu                  m_optionsMenu;
    private ActionBarDrawerToggle m_drawerToggle;
    private String                m_previousTitle;
 
@@ -59,11 +66,11 @@ class FeedsActivity extends ActionBarActivity
       actionBar.setTitle(navTitles[0]);
 
       /* Delete the log file. */
-      Util.remove(Constants.LOG_FILE, this);
+      Write.remove(Write.LOG_FILE, this);
 
       /* Make the settings directory. */
-      String storage = Util.getStorage(this);
-      File folder = new File(storage + Constants.SETTINGS_DIR);
+      String storage = getStorage(this);
+      File folder = new File(storage + SETTINGS_DIR);
       folder.mkdirs();
 
       /* Create the navigation drawer and set all the listeners for it. */
@@ -84,8 +91,7 @@ class FeedsActivity extends ActionBarActivity
          Fragment fragmentManage = FragmentManage.newInstance();
          Fragment fragmentSettings = FragmentSettings.newInstance();
 
-         AdapterView.OnItemClickListener onClickNavDrawerItem = new OnClickNavDrawerItem(
-               drawerLayout, this);
+         AdapterView.OnItemClickListener onClickNavDrawerItem = new OnClickNavDrawerItem(this);
          navigationList.setOnItemClickListener(onClickNavDrawerItem);
 
          int frame = R.id.content_frame;
@@ -119,7 +125,7 @@ class FeedsActivity extends ActionBarActivity
       setServiceIntent(ALARM_SERVICE_START);
 
       /* Save the READ_ITEMS to file. */
-      Write.longSet(Constants.READ_ITEMS, AdapterTags.S_READ_ITEM_TIMES, this);
+      Write.longSet(READ_ITEMS, AdapterTags.S_READ_ITEM_TIMES, this);
    }
 
    @Override
@@ -140,23 +146,23 @@ class FeedsActivity extends ActionBarActivity
    }
 
    private
-   void setServiceIntent(String state)
+   void setServiceIntent(int state)
    {
       Resources resources = getResources();
       int time = resources.getIntArray(R.array.refresh_integers)[3];
       String[] fileNames = resources.getStringArray(R.array.settings_names);
 
       /* Load the ManageFeedsRefresh boolean value from settings. */
-      String[] check = Read.file(Constants.SETTINGS_DIR + fileNames[1] + Constants.TXT, this);
+      String[] check = Read.file(SETTINGS_DIR + fileNames[1] + ".txt", this);
       boolean refresh = 0 == check.length || !Boolean.parseBoolean(check[0]);
 
-      if(refresh && ALARM_SERVICE_START.equals(state))
+      if(refresh && ALARM_SERVICE_START == state)
       {
          return;
       }
 
       /* Load the ManageFeedsRefresh time from settings. */
-      String[] settings = Read.file(Constants.SETTINGS_DIR + fileNames[2] + Constants.TXT, this);
+      String[] settings = Read.file(SETTINGS_DIR + fileNames[2] + ".txt", this);
       if(0 != settings.length)
       {
 
@@ -171,13 +177,13 @@ class FeedsActivity extends ActionBarActivity
       AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
 
       /* Depending on the state string, start or stop the service. */
-      if(ALARM_SERVICE_START.equals(state))
+      if(ALARM_SERVICE_START == state)
       {
          long interval = time * MINUTE_VALUE;
          long next = System.currentTimeMillis() + interval;
          am.setRepeating(AlarmManager.RTC_WAKEUP, next, interval, pendingIntent);
       }
-      else if(ALARM_SERVICE_STOP.equals(state))
+      else if(ALARM_SERVICE_STOP == state)
       {
          am.cancel(pendingIntent);
       }
@@ -190,7 +196,7 @@ class FeedsActivity extends ActionBarActivity
       String notificationName = resources.getStringArray(R.array.settings_names)[3];
 
       /* Load notification boolean. */
-      String path = Constants.SETTINGS_DIR + notificationName + Constants.TXT;
+      String path = SETTINGS_DIR + notificationName + ".txt";
       String[] check = Read.file(path, context);
 
       boolean notificationsEnabled = 0 != check.length && Boolean.parseBoolean(check[0]);
@@ -200,6 +206,48 @@ class FeedsActivity extends ActionBarActivity
       return intent;
    }
 
+   /* This function will return null if it fails. Check for null each time.
+       * It should be pretty safe and efficient to call ALL_TAG the time. */
+   static
+   String getStorage(Context context)
+   {
+      if(0 != s_storage.length())
+      {
+         return s_storage;
+      }
+      /* Check the media state for any undesirable states. */
+      /* TODO Check to see if it is the desired first then skip these. */
+      String state = Environment.getExternalStorageState();
+
+      String mounted = Environment.MEDIA_MOUNTED;
+      if(!mounted.equals(state))
+      {
+         return null;
+      }
+
+      /* If it has reached here the state is MEDIA_MOUNTED and we can continue.
+         Build the s_storage string depending on android version. */
+      char sep = File.separatorChar;
+
+      if(Build.VERSION_CODES.FROYO <= Build.VERSION.SDK_INT)
+      {
+         File externalFilesDir = context.getExternalFilesDir(null);
+         s_storage = externalFilesDir.getAbsolutePath() + sep;
+      }
+      else
+      {
+         String name = context.getPackageName();
+         File ext = Environment.getExternalStorageDirectory();
+         s_storage = ext.getAbsolutePath() + sep + "Android" + sep + "data" + sep + name + sep +
+               "files" + sep;
+
+         /* If the folder does not exist, create it. */
+         File storageFile = new File(s_storage);
+         storageFile.mkdirs();
+      }
+      return s_storage;
+   }
+
    String getPreviousNavigationTitle()
    {
       return m_previousTitle;
@@ -207,18 +255,9 @@ class FeedsActivity extends ActionBarActivity
 
    @Override
    protected
-   void onResume()
-   {
-      super.onResume();
-      Util.updateTags(this);
-   }
-
-   @Override
-   protected
    void onStart()
    {
       super.onStart();
-
       /* Stop the alarm service and reset the time to 0. */
       setServiceIntent(ALARM_SERVICE_STOP);
    }
@@ -228,7 +267,6 @@ class FeedsActivity extends ActionBarActivity
    void onPostCreate(Bundle savedInstanceState)
    {
       super.onPostCreate(savedInstanceState);
-
       // Sync the toggle state after onRestoreInstanceState has occurred.
       m_drawerToggle.syncState();
    }
@@ -245,7 +283,7 @@ class FeedsActivity extends ActionBarActivity
       m_optionsMenu = menu;
 
       boolean serviceRunning = isServiceRunning(this);
-      Util.setRefreshingIcon(serviceRunning, menu);
+      setRefreshingIcon(serviceRunning, menu);
       return true;
    }
 
@@ -295,7 +333,7 @@ class FeedsActivity extends ActionBarActivity
          FragmentManager fragmentManager = getSupportFragmentManager();
          ViewPager viewPager = (ViewPager) findViewById(FragmentFeeds.VIEW_PAGER_ID);
          int currentPage = viewPager.getCurrentItem();
-         Util.gotoLatestUnread(fragmentManager, currentPage);
+         gotoLatestUnread(fragmentManager, currentPage);
       }
       else if(menuText.equals(refresh))
       {
@@ -313,11 +351,11 @@ class FeedsActivity extends ActionBarActivity
    private
    void refreshFeeds(ActionBarActivity activity, BaseAdapter navigationAdapter)
    {
-      Util.setRefreshingIcon(true, m_optionsMenu);
+      setRefreshingIcon(true, m_optionsMenu);
 
       /* Set the service handler in FeedsActivity so we can check and call it
        * from ServiceUpdate. */
-      s_serviceHandler = new OnFinishServiceHandler(activity, navigationAdapter, m_optionsMenu);
+      s_serviceHandler = new OnFinishServiceHandler(activity, m_optionsMenu);
 
       ViewPager viewPager = (ViewPager) findViewById(FragmentFeeds.VIEW_PAGER_ID);
       int currentPage = viewPager.getCurrentItem();
@@ -331,6 +369,50 @@ class FeedsActivity extends ActionBarActivity
       ActionBar actionBar = getSupportActionBar();
       CharSequence title = actionBar.getTitle();
       return title.toString();
+   }
+
+   static
+   void gotoLatestUnread(FragmentManager fragmentManager, int page)
+   {
+      String tag = "android:switcher:" + FragmentFeeds.VIEW_PAGER_ID + ':' + page;
+
+      ListFragment tagFragment = (ListFragment) fragmentManager.findFragmentByTag(tag);
+      ListView listView = tagFragment.getListView();
+
+      ListAdapter cardAdapter = listView.getAdapter();
+
+      int itemCount = cardAdapter.getCount() - 1;
+      for(int i = itemCount; 0 <= i; i--)
+      {
+         FeedItem feedItem = (FeedItem) cardAdapter.getItem(i);
+         if(!AdapterTags.S_READ_ITEM_TIMES.contains(feedItem.m_itemTime))
+         {
+            listView.setSelection(i);
+            break;
+         }
+      }
+   }
+
+   /* Changes the ManageFeedsRefresh menu item to an animation if m_mode = true. */
+   static
+   void setRefreshingIcon(boolean mode, Menu menu)
+   {
+      /* Find the menu item by ID called ManageFeedsRefresh. */
+      MenuItem item = menu.findItem(R.id.refresh);
+      if(null == item)
+      {
+         return;
+      }
+
+      /* Change it depending on the m_mode. */
+      if(mode)
+      {
+         MenuItemCompat.setActionView(item, R.layout.progress_circle);
+      }
+      else
+      {
+         MenuItemCompat.setActionView(item, null);
+      }
    }
 
    void setNavigationTitle(CharSequence title, boolean saveTitle)

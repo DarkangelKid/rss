@@ -59,7 +59,7 @@ class AdapterSettingsUi extends BaseAdapter
       int viewType = getItemViewType(position);
       String title = m_interfaceTitles[position];
       String summary = m_interfaceSummaries[position];
-      String settingPath = Constants.SETTINGS_DIR + title + Constants.TXT;
+      String settingPath = FeedsActivity.SETTINGS_DIR + title + ".txt";
 
       if(TYPE_HEADING == viewType)
       {

@@ -76,7 +76,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Animation>
       {
          if(isAllTag || tags[j].contains(tag))
          {
-            String[][] content = Read.csvFile(feeds[j] + File.separator + Constants.CONTENT,
+            String[][] content = Read.csvFile(feeds[j] + File.separatorChar + ServiceUpdate.CONTENT,
                   m_context, 't', 'd', 'l', 'i', 'w', 'h', 'p');
             if(0 == content.length)
             {
@@ -101,8 +101,8 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Animation>
                         ? 0
                         : Integer.parseInt(widths[i])))
                   {
-                     int lastSlash = images[i].lastIndexOf(File.separator) + 1;
-                     images[i] = feeds[j] + File.separator + Constants.THUMBNAIL_DIR +
+                     int lastSlash = images[i].lastIndexOf(File.separatorChar) + 1;
+                     images[i] = feeds[j] + File.separatorChar + ServiceUpdate.THUMBNAIL_DIR +
                            images[i].substring(lastSlash);
                   }
                   else
@@ -229,7 +229,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Animation>
 
       if(m_flash)
       {
-         Util.gotoLatestUnread(m_fragmentManager, m_pageNumber);
+         FeedsActivity.gotoLatestUnread(m_fragmentManager, m_pageNumber);
       }
 
       if(0 != top)

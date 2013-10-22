@@ -12,12 +12,10 @@ import android.widget.AdapterView;
 
 class OnClickNavDrawerItem implements AdapterView.OnItemClickListener
 {
-   private final DrawerLayout      m_drawerLayout;
    private final ActionBarActivity m_activity;
 
-   OnClickNavDrawerItem(DrawerLayout drawerLayout, ActionBarActivity activity)
+   OnClickNavDrawerItem(ActionBarActivity activity)
    {
-      m_drawerLayout = drawerLayout;
       m_activity = activity;
    }
 
@@ -26,7 +24,8 @@ class OnClickNavDrawerItem implements AdapterView.OnItemClickListener
    void onItemClick(AdapterView parent, View view, int position, long id)
    {
       /* Close the drawer on any click of a navigation item. */
-      m_drawerLayout.closeDrawers();
+      DrawerLayout drawerLayout = (DrawerLayout) m_activity.findViewById(R.id.drawer_layout);
+      drawerLayout.closeDrawers();
 
       /* Determine the new m_title based on the position of the item clicked. */
       Resources resources = m_activity.getResources();

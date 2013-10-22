@@ -58,11 +58,11 @@ class AsyncRefreshNavigationAdapter extends AsyncTask<int[], Void, int[]>
    {
       String[] currentTags = PagerAdapterFeeds.getTagsArray();
 
-      String[][] content = Read.csvFile(Constants.INDEX, context, 'f', 't');
+      String[][] content = Read.csvFile(Read.INDEX, context, 'f', 't');
       String[] indexNames = content[0];
       String[] indexTags = content[1];
 
-      String append = File.separator + Constants.ITEM_LIST;
+      String append = File.separatorChar + ServiceUpdate.ITEM_LIST;
       int total = 0;
       int tagCount = currentTags.length;
       int indexTagsCount = indexTags.length;

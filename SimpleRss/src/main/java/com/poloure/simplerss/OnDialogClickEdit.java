@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.view.View;
-import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 class OnDialogClickEdit implements DialogInterface.OnClickListener
@@ -12,15 +11,12 @@ class OnDialogClickEdit implements DialogInterface.OnClickListener
    private static final String UNSORTED_TAG = "Unsorted";
    private final View        m_editRssDialog;
    private final String      m_title;
-   private final BaseAdapter m_navigationAdapter;
    private final Context     m_context;
 
-   OnDialogClickEdit(View editRssDialog, String title, BaseAdapter navigationAdapter,
-         Context context)
+   OnDialogClickEdit(View editRssDialog, String title, Context context)
    {
       m_editRssDialog = editRssDialog;
       m_title = title;
-      m_navigationAdapter = navigationAdapter;
       m_context = context;
    }
 
@@ -40,7 +36,7 @@ class OnDialogClickEdit implements DialogInterface.OnClickListener
          editTag = UNSORTED_TAG;
       }
 
-      Update.executeFeedCheck((AlertDialog) dialog, editTag, newName, Constants.EDIT, m_title,
+      Update.executeFeedCheck((AlertDialog) dialog, editTag, newName, AsyncCheckFeed.MODE_EDIT_FEED, m_title,
             newUrl, m_context);
    }
 }

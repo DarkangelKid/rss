@@ -26,7 +26,7 @@ class OnClickManageFeedClearCache implements DialogInterface.OnClickListener
    void onClick(DialogInterface dialog, int position)
    {
       String feedName = (String) m_adapter.getItem(m_position);
-      String path = feedName + File.separator;
+      String path = feedName + File.separatorChar;
 
       Util.deleteDirectory(new File(path));
 

@@ -23,7 +23,7 @@ class AdapterTags extends BaseAdapter
    {
       if(0 == S_READ_ITEM_TIMES.size())
       {
-         Set<Long> set = Read.longSet(Constants.READ_ITEMS, context);
+         Set<Long> set = Read.longSet(FeedsActivity.READ_ITEMS, context);
          S_READ_ITEM_TIMES.addAll(set);
       }
       m_context = context;

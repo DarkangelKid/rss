@@ -10,7 +10,7 @@ import java.io.File;
 
 class OnClickImage implements View.OnClickListener
 {
-   private static final String IMAGE_TYPE = "image" + File.separator;
+   private static final String IMAGE_TYPE = "image" + File.separatorChar;
    private final String  m_imagePath;
    private final Context m_context;
    private static final char WEB_FILE_SUFFIX_SEPARATOR = '.';

@@ -20,7 +20,7 @@ class OnFilterClickDelete implements DialogInterface.OnClickListener
    void onClick(DialogInterface dialog, int position)
    {
       CharSequence item = (CharSequence) m_adapter.getItem(position);
-      Write.removeLine(Constants.FILTER_LIST, item, false, m_context);
+      Write.removeLine(AdapterManageFilters.FILTER_LIST, item, false, m_context);
       m_adapter.notifyDataSetChanged();
    }
 }

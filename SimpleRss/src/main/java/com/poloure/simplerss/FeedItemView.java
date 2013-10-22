@@ -106,7 +106,7 @@ class FeedItemView extends RelativeLayout
       Resources resources = getResources();
       DisplayMetrics displayMetrics = resources.getDisplayMetrics();
 
-      String imagePath = Util.getStorage(context) + feedItem.m_itemImage;
+      String imagePath = FeedsActivity.getStorage(context) + feedItem.m_itemImage;
       int imageWidth = feedItem.m_imageWidth;
       int imageHeight = feedItem.m_imageHeight;
       int screenWidth = displayMetrics.widthPixels;

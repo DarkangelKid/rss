@@ -11,13 +11,10 @@ import android.widget.BaseAdapter;
 class OnLongClickManageFeedItem implements AdapterView.OnItemLongClickListener
 {
    private final BaseAdapter m_adapter;
-   private final BaseAdapter m_navigationAdapter;
    private final Fragment    m_fragmentManageFeeds;
 
-   OnLongClickManageFeedItem(Fragment fragmentManageFeeds, BaseAdapter adapter,
-         BaseAdapter navigationAdapter)
+   OnLongClickManageFeedItem(Fragment fragmentManageFeeds, BaseAdapter adapter)
    {
-      m_navigationAdapter = navigationAdapter;
       m_fragmentManageFeeds = fragmentManageFeeds;
       m_adapter = adapter;
    }

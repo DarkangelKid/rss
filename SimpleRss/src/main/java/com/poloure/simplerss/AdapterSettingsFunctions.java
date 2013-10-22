@@ -64,7 +64,7 @@ class AdapterSettingsFunctions extends BaseAdapter
    {
       View view = convertView;
       int viewType = getItemViewType(position);
-      String settingPath = Constants.SETTINGS_DIR + m_fileNames[position] + Constants.TXT;
+      String settingPath = FeedsActivity.SETTINGS_DIR + m_fileNames[position] + ".txt";
 
       if(TYPE_HEADING == viewType)
       {

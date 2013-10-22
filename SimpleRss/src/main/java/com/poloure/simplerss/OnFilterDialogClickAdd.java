@@ -25,11 +25,11 @@ class OnFilterDialogClickAdd implements DialogInterface.OnClickListener
    void onClick(DialogInterface dialog, int which)
    {
       String filter = getText((TextView) m_addFilterLayout);
-      String path = Constants.FILTER_LIST;
+      String path = AdapterManageFilters.FILTER_LIST;
       String[] filters = Read.file(path, m_context);
-      if(-1 == Util.index(filters, filter))
+      if(-1 == ServiceUpdate.index(filters, filter))
       {
-         Write.single(path, filter + Constants.NL, m_context);
+         Write.single(path, filter + System.getProperty("line.separator"), m_context);
       }
       m_adapter.notifyDataSetChanged();
       ((Dialog) dialog).hide();

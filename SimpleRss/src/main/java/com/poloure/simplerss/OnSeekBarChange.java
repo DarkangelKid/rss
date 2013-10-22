@@ -30,7 +30,7 @@ class OnSeekBarChange implements SeekBar.OnSeekBarChangeListener
    void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
    {
       m_seekText.setText(m_valuesString[progress]);
-      Util.remove(m_settingsPath, m_context);
+      Write.remove(m_settingsPath, m_context);
 
       String valueString = Integer.toString(m_values[progress]);
       Write.single(m_settingsPath, valueString, m_context);

@@ -9,7 +9,8 @@ import android.widget.TextView;
 
 class AdapterManageFilters extends BaseAdapter
 {
-   private String[] m_filterTitles = Util.EMPTY_STRING_ARRAY;
+   static final String   FILTER_LIST    = "filter_list.txt";
+   private      String[] m_filterTitles = Util.EMPTY_STRING_ARRAY;
 
    private final LayoutInflater m_layoutInflater;
    private       TextView       m_titleView;
@@ -25,7 +26,7 @@ class AdapterManageFilters extends BaseAdapter
    public
    void notifyDataSetChanged()
    {
-      m_filterTitles = Read.file(Constants.FILTER_LIST, m_context);
+      m_filterTitles = Read.file(FILTER_LIST, m_context);
       super.notifyDataSetChanged();
    }
 

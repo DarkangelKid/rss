@@ -41,6 +41,11 @@ import java.util.regex.Pattern;
 public
 class ServiceUpdate extends IntentService
 {
+   static final         String           ITEM_LIST                   = "item_list.txt";
+   static final         String           CONTENT                     = "content.txt";
+   /* Folders */
+   static final         String           THUMBNAIL_DIR               = "thumbnails" +
+         File.separatorChar;
    /* Parser saves */
    private static final String           IMAGE                       = "image|";
    private static final String           TIME                        = "pubDate|";
@@ -62,6 +67,26 @@ class ServiceUpdate extends IntentService
    ServiceUpdate()
    {
       super("Service");
+   }
+
+   /* index throws an ArrayOutOfBoundsException if not handled. */
+   static
+   <T> int index(T[] array, T value)
+   {
+      if(null == array)
+      {
+         return -1;
+      }
+
+      int arrayLength = array.length;
+      for(int i = 0; i < arrayLength; i++)
+      {
+         if(array[i].equals(value))
+         {
+            return i;
+         }
+      }
+      return -1;
    }
 
    @Override
@@ -92,8 +117,8 @@ class ServiceUpdate extends IntentService
       {
          if(isAllTag || tags[i].contains(tag))
          {
-            String path1 = Util.getStorage(this) + names[i] + File.separator +
-                  Constants.THUMBNAIL_DIR;
+            String path1 = FeedsActivity.getStorage(this) + names[i] + File.separatorChar +
+                  THUMBNAIL_DIR;
             File folder = new File(path1);
             folder.mkdirs();
 
@@ -193,10 +218,10 @@ class ServiceUpdate extends IntentService
    void parseFeed(String urlString, String feed)
          throws XmlPullParserException, MalformedURLException, IOException
    {
-      String feedFolder = feed + File.separator;
-      String contentFile = feedFolder + Constants.CONTENT;
-      String longFile = feedFolder + Constants.ITEM_LIST;
-      String thumbnailDir = feedFolder + Constants.THUMBNAIL_DIR;
+      String feedFolder = feed + File.separatorChar;
+      String contentFile = feedFolder + CONTENT;
+      String longFile = feedFolder + ITEM_LIST;
+      String thumbnailDir = feedFolder + THUMBNAIL_DIR;
       /*String[] filters = Read.file(Constants.FILTER_LIST);*/
 
       /* Load the previously saved items to a map. */
@@ -262,7 +287,7 @@ class ServiceUpdate extends IntentService
          {
             String tag = parser.getName();
 
-            int index = Util.index(DESIRED_TAGS, tag);
+            int index = index(DESIRED_TAGS, tag);
             String timeString;
 
             /* "entry", "item" */
@@ -360,7 +385,7 @@ class ServiceUpdate extends IntentService
                   }
 
                   /* ISSUE #194 */
-                  String storage = Util.getStorage(this);
+                  String storage = FeedsActivity.getStorage(this);
                   BitmapFactory.decodeFile(storage + thumbnailDir + imgName, options);
 
                   feedItemBuilder.append(WIDTH);
@@ -394,7 +419,7 @@ class ServiceUpdate extends IntentService
          {
             Resources resources = getResources();
             String[] settingFiles = resources.getStringArray(R.array.settings_names);
-            String settingPath = Constants.SETTINGS_DIR + settingFiles[5] + Constants.TXT;
+            String settingPath = FeedsActivity.SETTINGS_DIR + settingFiles[5] + ".txt";
             String setting = Read.setting(settingPath, this);
 
             int saveSize = 0 == setting.length() ? 100000 : Integer.parseInt(setting);
@@ -447,8 +472,8 @@ class ServiceUpdate extends IntentService
 
    boolean isNonExisting(String path, Context context)
    {
-      String path1 = Util.getStorage(context) + path;
-      if(Util.isUsingSd() || path1.contains(Constants.THUMBNAIL_DIR))
+      String path1 = FeedsActivity.getStorage(context) + path;
+      if(Util.isUsingSd() || path1.contains(THUMBNAIL_DIR))
       {
          File file = new File(path1);
          return !file.exists();
@@ -509,7 +534,7 @@ class ServiceUpdate extends IntentService
       o2.inSampleSize = Math.round(inSample);
       Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, o2);
 
-      String storage = Util.getStorage(context);
+      String storage = FeedsActivity.getStorage(context);
       try
       {
          FileOutputStream out = new FileOutputStream(storage + thumbnailDir + imgName);

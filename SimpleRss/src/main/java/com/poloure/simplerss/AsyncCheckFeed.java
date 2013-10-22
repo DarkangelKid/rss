@@ -5,6 +5,8 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.widget.Button;
 
 import java.io.BufferedInputStream;
@@ -19,6 +21,10 @@ import java.util.regex.Pattern;
 
 class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
 {
+   /* Formats */
+   static final         String  INDEX_FORMAT            = "feed|%s|url|%s|tag|%s|";
+   static final         String  MODE_ADD_FEED           = "add";
+   static final         String  MODE_EDIT_FEED          = "edit";
    private static final String  TAG_TITLE               = "<title";
    private static final String  END_TAG_TITLE           = "</title>";
    private static final Pattern ILLEGAL_FILE_CHARS      = Pattern.compile("[/\\?%*|<>:]");
@@ -44,6 +50,18 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
       m_context = context;
       Button button = m_dialog.getButton(DialogInterface.BUTTON_POSITIVE);
       button.setEnabled(false);
+   }
+
+   static
+   void updateTags(Activity activity)
+   {
+      ViewPager tagPager = (ViewPager) activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
+
+      PagerAdapter pagerAdapter = tagPager.getAdapter();
+      ((PagerAdapterFeeds) pagerAdapter).getTagsFromDisk(activity);
+      pagerAdapter.notifyDataSetChanged();
+
+      Update.navigation(activity);
    }
 
    @Override
@@ -100,7 +118,7 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
                   {
                      byte[] data2 = new byte[FEED_STREAM_BYTE_BUFFER];
                      in.read(data2, 0, FEED_STREAM_BYTE_BUFFER);
-                     data = concat(data, data2);
+                     data = joinByteArrays(data, data2);
                      line = new String(data);
                   }
 
@@ -133,23 +151,6 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
       return new String[]{feedUrl, feedTitle};
    }
 
-   private static
-   byte[] concat(byte[] first, byte... second)
-   {
-      if(null == first)
-      {
-         return second;
-      }
-      if(null == second)
-      {
-         return first;
-      }
-      byte[] result = new byte[first.length + second.length];
-      System.arraycopy(first, 0, result, 0, first.length);
-      System.arraycopy(second, 0, result, first.length, second.length);
-      return result;
-   }
-
    @Override
    protected
    void onPostExecute(String[] result)
@@ -172,32 +173,24 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
       Matcher matcher = ILLEGAL_FILE_CHARS.matcher(m_name);
       m_name = matcher.replaceAll("");
 
-      if(Constants.EDIT.equals(m_mode))
+      if(MODE_EDIT_FEED.equals(m_mode))
       {
          editFeed(m_title, m_name, result[0], m_tag, m_context);
       }
-      else if(Constants.ADD.equals(m_mode))
+      else if(MODE_ADD_FEED.equals(m_mode))
       {
 
          /* Create the csv. */
-         String feedInfo = String.format(Constants.INDEX_FORMAT, m_name, result[0], m_tag) +
-               Constants.NL;
+         String feedInfo = String.format(INDEX_FORMAT, m_name, result[0], m_tag) +
+               System.getProperty("line.separator");
 
          /* Save the feed to the index. */
-         Write.single(Constants.INDEX, feedInfo, m_context);
+         Write.single(Read.INDEX, feedInfo, m_context);
 
          /* TODO Update the manage ListViews with the new information. */
-         /* if(null != PagerAdapterManage.MANAGE_FRAGMENTS[1].getListAdapter())
-         {
-            Update.manageFeeds();
-         }
-         if(null != PagerAdapterManage.MANAGE_FRAGMENTS[0].getListAdapter())
-         {
-            Update.manageTags();
-         }*/
       }
 
-      Util.updateTags((Activity) m_context);
+      updateTags((Activity) m_context);
 
       m_dialog.dismiss();
    }
@@ -208,7 +201,7 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
    {
 
       String oldFeedFolder = oldFeed + File.separator;
-      String newFeedFolder = newFeed + File.separator;
+      String newFeedFolder = newFeed + File.separatorChar;
 
       if(!oldFeed.equals(newFeed))
       {
@@ -216,13 +209,29 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
       }
 
       /* Replace the all_tag file with the new image and data. */
-      String index = Constants.INDEX;
-      String entry = String.format(Constants.INDEX_FORMAT, newFeed, newUrl, newTag);
+      String index = Read.INDEX;
+      String entry = String.format(INDEX_FORMAT, newFeed, newUrl, newTag);
 
       Write.removeLine(index, oldFeed, true, context);
-      Write.single(index, entry + Constants.NL, context);
+      Write.single(index, entry + System.getProperty("line.separator"), context);
 
-      Util.updateTags((Activity) context);
       // TODO AsyncManageTagsRefresh(listView, listAdapter);
+   }
+
+   private static
+   byte[] joinByteArrays(byte[] first, byte... second)
+   {
+      if(null == first)
+      {
+         return second;
+      }
+      if(null == second)
+      {
+         return first;
+      }
+      byte[] result = new byte[first.length + second.length];
+      System.arraycopy(first, 0, result, 0, first.length);
+      System.arraycopy(second, 0, result, first.length, second.length);
+      return result;
    }
 }
