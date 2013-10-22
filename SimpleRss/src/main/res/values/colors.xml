@@ -1,21 +1,6 @@
 <resources>
    <color name="custom_theme_color">#ffe5e5e5</color>
 
-   <color name="title_grey">#ff808080</color>
-   <color name="title_black">#ff000000</color>
-
-   <color name="des_grey">#ffa7a7a7</color>
-   <color name="des_black">#ff4e4e4e</color>
-
-   <color name="link_grey">#ffc2c2c2</color>
-   <color name="link_black">#ff808080</color>
-
    <drawable name="divider_settings_dark">#cccccc</drawable>
    <drawable name="divider_settings_light">#e5e5e5</drawable>
-
-   <color name="blue_light">#33b5e5</color>
-   <color name="purple_light">#aa66cc</color>
-   <color name="green_light">#99cc00</color>
-   <color name="yellow_light">#ffbb33</color>
-   <color name="red_light">#ff4444</color>
 </resources>

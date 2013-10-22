@@ -1,5 +1,6 @@
 package com.poloure.simplerss;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.AsyncTask;
@@ -9,7 +10,6 @@ import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.BaseAdapter;
 import android.widget.ListView;
 
 import java.io.File;
@@ -24,7 +24,6 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Animation>
    private static final int MAX_DESCRIPTION_LENGTH = 360;
    private static final int MIN_IMAGE_WIDTH        = 32;
    private static final int SIXTEEN_VALUE          = 16;
-   private final BaseAdapter     m_navigationAdapter;
    private final FragmentManager m_fragmentManager;
    private final Context         m_context;
    private final int             m_sixteen;
@@ -33,9 +32,8 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Animation>
    private       AdapterTags     m_adapterTag;
    private       ListView        m_listView;
 
-   AsyncRefreshPage(BaseAdapter navigationAdapter, FragmentManager fragmentManager, Context context)
+   AsyncRefreshPage(FragmentManager fragmentManager, Context context)
    {
-      m_navigationAdapter = navigationAdapter;
       m_fragmentManager = fragmentManager;
       m_context = context;
 
@@ -144,7 +142,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Animation>
                      : Integer.parseInt(heights[i]);
 
                // Do not add duplicates. */
-               if(-1 == Util.index(m_adapterTag.m_items, data))
+               if(!m_adapterTag.m_items.contains(data))
                {
                   map.put(data.m_itemTime, data);
                }
@@ -153,7 +151,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Animation>
       }
 
       /* Do not count items as Read while we are updating the list. */
-      m_adapterTag.m_touchedScreen = false;
+      m_adapterTag.m_readingItems = false;
 
       int mapSize = map.size();
       Collection<FeedItem> collection = map.values();
@@ -178,7 +176,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Animation>
       }
 
       /* Update the unread counts in the navigation drawer. */
-      Update.navigation(m_navigationAdapter, null, 0, m_context);
+      Update.navigation((Activity) m_context);
 
       if(null == m_listView)
       {
@@ -192,7 +190,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Animation>
          m_listView.setVisibility(View.VISIBLE);
       }
       /* Resume Read item checking. */
-      m_adapterTag.m_touchedScreen = true;
+      m_adapterTag.m_readingItems = true;
    }
 
    @Override

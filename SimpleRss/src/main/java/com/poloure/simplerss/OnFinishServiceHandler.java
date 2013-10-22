@@ -36,19 +36,19 @@ class OnFinishServiceHandler extends Handler
          int page = bundle.getInt("page_number");
          FragmentManager fragmentManager = m_activity.getSupportFragmentManager();
 
-         Update.asyncCompatRefreshPage(m_navigationAdapter, 0, fragmentManager, m_activity);
+         Update.asyncCompatRefreshPage(0, fragmentManager, m_activity);
 
          int tagsCount = PagerAdapterFeeds.getSize();
          if(0 == page)
          {
             for(int i = 1; i < tagsCount; i++)
             {
-               Update.asyncCompatRefreshPage(m_navigationAdapter, i, fragmentManager, m_activity);
+               Update.asyncCompatRefreshPage(i, fragmentManager, m_activity);
             }
          }
          else
          {
-            Update.asyncCompatRefreshPage(m_navigationAdapter, page, fragmentManager, m_activity);
+            Update.asyncCompatRefreshPage(page, fragmentManager, m_activity);
          }
       }
    }

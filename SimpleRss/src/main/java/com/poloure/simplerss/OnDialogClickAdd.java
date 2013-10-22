@@ -28,7 +28,8 @@ class OnDialogClickAdd implements DialogInterface.OnClickListener
    void onClick(DialogInterface dialog, int which)
    {
       String tag = ((TextView) m_addRssDialog.findViewById(R.id.tag_edit)).getText().toString();
-      String url = ((TextView) m_addRssDialog.findViewById(R.id.feed_url_edit)).getText().toString();
+      String url = ((TextView) m_addRssDialog.findViewById(R.id.feed_url_edit)).getText()
+            .toString();
       String name = ((TextView) m_addRssDialog.findViewById(R.id.name_edit)).getText().toString();
 
       Locale defaultLocale = Locale.getDefault();
@@ -37,10 +38,9 @@ class OnDialogClickAdd implements DialogInterface.OnClickListener
             ? m_context.getString(R.string.all_tag)
             : tag.toLowerCase(defaultLocale);
 
-      Update.executeFeedCheck((AlertDialog) dialog, tag, name, Constants.ADD, "", url,
-            m_navigationAdapter, m_context);
+      Update.executeFeedCheck((AlertDialog) dialog, tag, name, Constants.ADD, "", url, m_context);
 
       /* Update the navigation drawer. */
-      Util.updateTags(m_navigationAdapter, (Activity) m_context);
+      Util.updateTags((Activity) m_context);
    }
 }

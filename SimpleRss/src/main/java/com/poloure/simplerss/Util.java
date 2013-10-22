@@ -11,7 +11,7 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.BaseAdapter;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 
 import java.io.File;
@@ -24,7 +24,7 @@ class Util
    private static String     s_storage                 = "";
 
    static
-   void updateTags(BaseAdapter navigationAdapter, Activity activity)
+   void updateTags(Activity activity)
    {
       ViewPager tagPager = (ViewPager) activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
 
@@ -32,7 +32,7 @@ class Util
       ((PagerAdapterFeeds) pagerAdapter).getTagsFromDisk(activity);
       pagerAdapter.notifyDataSetChanged();
 
-      Update.navigation(navigationAdapter, null, 0, activity);
+      Update.navigation(activity);
    }
 
    static
@@ -43,12 +43,13 @@ class Util
       ListFragment tagFragment = (ListFragment) fragmentManager.findFragmentByTag(tag);
       ListView listView = tagFragment.getListView();
 
-      AdapterTags cardAdapter = (AdapterTags) listView.getAdapter();
+      ListAdapter cardAdapter = listView.getAdapter();
 
       int itemCount = cardAdapter.getCount() - 1;
       for(int i = itemCount; 0 <= i; i--)
       {
-         if(!AdapterTags.S_READ_ITEM_TIMES.contains(cardAdapter.m_items[i].m_itemTime))
+         FeedItem feedItem = (FeedItem) cardAdapter.getItem(i);
+         if(!AdapterTags.S_READ_ITEM_TIMES.contains(feedItem.m_itemTime))
          {
             listView.setSelection(i);
             break;
@@ -109,14 +110,6 @@ class Util
       file.delete();
    }
 
-   static
-   String getInternalPath(String externalPath)
-   {
-      int index = externalPath.indexOf(File.separator + "files" + File.separator);
-      String substring = externalPath.substring(index + 7);
-      return substring.replaceAll(File.separator, "-");
-   }
-
    /* This function will return null if it fails. Check for null each time.
     * It should be pretty safe and efficient to call ALL_TAG the time. */
    static
@@ -157,6 +150,14 @@ class Util
          storageFile.mkdirs();
       }
       return s_storage;
+   }
+
+   static
+   String getInternalPath(String externalPath)
+   {
+      int index = externalPath.indexOf(File.separator + "files" + File.separator);
+      String substring = externalPath.substring(index + 7);
+      return substring.replaceAll(File.separator, "-");
    }
 
    /* Replaces ALL_TAG '/'s with '-' to emulate a folder directory layout in

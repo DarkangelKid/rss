@@ -12,8 +12,8 @@ class AdapterManageFilters extends BaseAdapter
    private String[] m_filterTitles = Util.EMPTY_STRING_ARRAY;
 
    private final LayoutInflater m_layoutInflater;
-   private TextView m_titleView;
-   private final Context m_context;
+   private       TextView       m_titleView;
+   private final Context        m_context;
 
    AdapterManageFilters(Context context)
    {

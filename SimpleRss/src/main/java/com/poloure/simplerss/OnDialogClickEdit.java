@@ -30,7 +30,8 @@ class OnDialogClickEdit implements DialogInterface.OnClickListener
    {
       String editTag = ((TextView) m_editRssDialog.findViewById(R.id.tag_edit)).getText()
             .toString();
-      String newUrl = ((TextView) m_editRssDialog.findViewById(R.id.feed_url_edit)).getText().toString();
+      String newUrl = ((TextView) m_editRssDialog.findViewById(R.id.feed_url_edit)).getText()
+            .toString();
       String newName = ((TextView) m_editRssDialog.findViewById(R.id.name_edit)).getText()
             .toString();
 
@@ -40,6 +41,6 @@ class OnDialogClickEdit implements DialogInterface.OnClickListener
       }
 
       Update.executeFeedCheck((AlertDialog) dialog, editTag, newName, Constants.EDIT, m_title,
-            newUrl, m_navigationAdapter, m_context);
+            newUrl, m_context);
    }
 }

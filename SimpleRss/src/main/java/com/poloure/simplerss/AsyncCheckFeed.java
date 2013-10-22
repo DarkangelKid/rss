@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 
 import java.io.BufferedInputStream;
@@ -29,21 +28,19 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
    private final AlertDialog m_dialog;
    private final String      m_mode;
    private final String      m_title;
-   private final BaseAdapter m_navigationAdapter;
    private final Context     m_context;
    private       String      m_tag;
    private       boolean     m_isFeedNotReal;
    private       String      m_name;
 
    AsyncCheckFeed(AlertDialog dialog, String tag, String feedName, String mode, String currentTitle,
-         BaseAdapter navigationAdapter, Context context)
+         Context context)
    {
       m_dialog = dialog;
       m_tag = tag;
       m_name = feedName;
       m_mode = mode;
       m_title = currentTitle;
-      m_navigationAdapter = navigationAdapter;
       m_context = context;
       Button button = m_dialog.getButton(DialogInterface.BUTTON_POSITIVE);
       button.setEnabled(false);
@@ -200,7 +197,7 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
          }*/
       }
 
-      Util.updateTags(m_navigationAdapter, (Activity) m_context);
+      Util.updateTags((Activity) m_context);
 
       m_dialog.dismiss();
    }
@@ -222,10 +219,10 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
       String index = Constants.INDEX;
       String entry = String.format(Constants.INDEX_FORMAT, newFeed, newUrl, newTag);
 
-      int position = Write.removeLine(index, oldFeed, true, context);
+      Write.removeLine(index, oldFeed, true, context);
       Write.single(index, entry + Constants.NL, context);
 
-      // TODO Util.updateTags();
-      //AsyncManageTagsRefresh(listView, listAdapter);
+      Util.updateTags((Activity) context);
+      // TODO AsyncManageTagsRefresh(listView, listAdapter);
    }
 }

@@ -13,7 +13,6 @@ class OnSeekBarChange implements SeekBar.OnSeekBarChangeListener
    private final int[]    m_values;
    private final String[] m_valuesString;
 
-
    OnSeekBarChange(TextView seekText, String settingPath, Context context, int arrayInt,
          int arrayString)
    {

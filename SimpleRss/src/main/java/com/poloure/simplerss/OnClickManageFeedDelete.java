@@ -4,22 +4,18 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.widget.Adapter;
-import android.widget.BaseAdapter;
 
 import java.io.File;
 
 class OnClickManageFeedDelete implements DialogInterface.OnClickListener
 {
-   private final Adapter     m_adapter;
-   private final BaseAdapter m_navigationAdapter;
-   private final Context     m_context;
-   private final int         m_position;
+   private final Adapter m_adapter;
+   private final Context m_context;
+   private final int     m_position;
 
-   OnClickManageFeedDelete(Adapter adapter, BaseAdapter navigationAdapter, int position,
-         Context context)
+   OnClickManageFeedDelete(Adapter adapter, int position, Context context)
    {
       m_adapter = adapter;
-      m_navigationAdapter = navigationAdapter;
       m_context = context;
       m_position = position;
    }
@@ -36,7 +32,7 @@ class OnClickManageFeedDelete implements DialogInterface.OnClickListener
       Util.deleteDirectory(new File(path));
 
       /* Refresh pages and navigation counts. */
-      Util.updateTags(m_navigationAdapter, (Activity) m_context);
+      Util.updateTags((Activity) m_context);
       // TODO Update.manageFeeds();
       // TODO Update.manageTags();
    }

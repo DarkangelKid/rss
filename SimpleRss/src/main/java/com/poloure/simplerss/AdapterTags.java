@@ -1,22 +1,23 @@
 package com.poloure.simplerss;
 
 import android.content.Context;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
-import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 class AdapterTags extends BaseAdapter
 {
    static final Set<Long> S_READ_ITEM_TIMES = Collections.synchronizedSet(new HashSet<Long>(0));
-   private final LayoutInflater m_inflater;
-   boolean    m_touchedScreen = true;
-   FeedItem[] m_items         = new FeedItem[0];
+   private final Context m_context;
+   boolean m_readingItems = true;
+   final List<FeedItem> m_items = new ArrayList<FeedItem>(0);
 
    AdapterTags(Context context)
    {
@@ -25,40 +26,27 @@ class AdapterTags extends BaseAdapter
          Set<Long> set = Read.longSet(Constants.READ_ITEMS, context);
          S_READ_ITEM_TIMES.addAll(set);
       }
-      m_inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+      m_context = context;
    }
 
    void prependArray(Object... items)
    {
-      m_items = concat((FeedItem[]) items, m_items);
-   }
-
-   private static
-   <T> T[] concat(T[] first, T[] second)
-   {
-      int length = first.length + second.length;
-
-      Class firstClass = first.getClass();
-      Class type = firstClass.getComponentType();
-      T[] result = (T[]) Array.newInstance(type, length);
-      System.arraycopy(first, 0, result, 0, first.length);
-      System.arraycopy(second, 0, result, first.length, second.length);
-
-      return result;
+      List<FeedItem> feedItems = Arrays.asList((FeedItem[]) items);
+      m_items.addAll(0, feedItems);
    }
 
    @Override
    public
    int getCount()
    {
-      return null == m_items ? 0 : m_items.length;
+      return m_items.size();
    }
 
    @Override
    public
    Object getItem(int position)
    {
-      return m_items[position];
+      return m_items.get(position);
    }
 
    @Override
@@ -72,28 +60,24 @@ class AdapterTags extends BaseAdapter
    public
    View getView(int position, View convertView, ViewGroup parent)
    {
-      ItemView view = null == convertView
-            ? (ItemView) m_inflater.inflate(R.layout.card_full, null)
-            : (ItemView) convertView;
+      View view = null == convertView ? new FeedItemView(m_context) : convertView;
 
-      if(null != view)
-      {
-         Object item = getItem(position);
-         view.showItem((FeedItem) item, position);
-      }
+      FeedItem item = m_items.get(position);
+      Long time = item.m_itemTime;
+      boolean isRead = S_READ_ITEM_TIMES.contains(time);
+
+      ((FeedItemView) view).showItem(item, position, isRead);
 
       /* The logic that tells whether the item is Read or not. */
-      if(View.VISIBLE == parent.getVisibility() && position + 1 < m_items.length &&
-            m_touchedScreen)
+      boolean isListViewShown = parent.isShown();
+      boolean isNotLastItem = position + 1 < getCount();
+
+      if(isListViewShown && isNotLastItem && m_readingItems)
       {
-         S_READ_ITEM_TIMES.add(m_items[position + 1].m_itemTime);
+         FeedItem nextItem = m_items.get(position + 1);
+         S_READ_ITEM_TIMES.add(nextItem.m_itemTime);
       }
 
       return view;
-   }
-
-   boolean isScreenTouched()
-   {
-      return m_touchedScreen;
    }
 }

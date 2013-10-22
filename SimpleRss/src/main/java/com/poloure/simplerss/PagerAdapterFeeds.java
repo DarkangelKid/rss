@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -16,12 +15,10 @@ class PagerAdapterFeeds extends FragmentPagerAdapter
    private static       Set<String> s_tagSet    = Collections.synchronizedSet(
          new LinkedHashSet<String>(0));
    private static final Pattern     SPLIT_COMMA = Pattern.compile(",");
-   private final ViewPager.OnPageChangeListener m_pageChange;
 
-   PagerAdapterFeeds(FragmentManager fm, ViewPager.OnPageChangeListener pageChange, Context context)
+   PagerAdapterFeeds(FragmentManager fm, Context context)
    {
       super(fm);
-      m_pageChange = pageChange;
       getTagsFromDisk(context);
    }
 
@@ -72,7 +69,7 @@ class PagerAdapterFeeds extends FragmentPagerAdapter
    public
    Fragment getItem(int position)
    {
-      return FragmentTag.newInstance(m_pageChange, position);
+      return FragmentTag.newInstance(position);
    }
 
    @Override

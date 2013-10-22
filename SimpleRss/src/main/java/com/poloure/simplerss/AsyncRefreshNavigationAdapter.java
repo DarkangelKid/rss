@@ -1,27 +1,56 @@
 package com.poloure.simplerss;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.widget.BaseAdapter;
+import android.widget.ListView;
 
 import java.io.File;
 import java.util.Set;
 
 class AsyncRefreshNavigationAdapter extends AsyncTask<int[], Void, int[]>
 {
-   private final BaseAdapter                    m_navigationAdapter;
-   private final Context                        m_context;
-   private final ViewPager.OnPageChangeListener m_pageChange;
-   private final int                            m_page;
+   private final ActionBarActivity m_activity;
 
-   AsyncRefreshNavigationAdapter(BaseAdapter navigationAdapter, Context context,
-         ViewPager.OnPageChangeListener pageChange, int pos)
+   AsyncRefreshNavigationAdapter(Activity activity)
    {
-      m_navigationAdapter = navigationAdapter;
-      m_pageChange = pageChange;
-      m_page = pos;
-      m_context = context;
+      m_activity = (ActionBarActivity) activity;
+   }
+
+   @Override
+   protected
+   int[] doInBackground(int[]... counts)
+   {
+      /* If null was passed into the task, count the unread items. */
+      return 0 == counts[0].length ? getUnreadCounts(m_activity) : counts[0];
+   }
+
+   @Override
+   protected
+   void onPostExecute(int[] result)
+   {
+      ListView navigationList = (ListView) m_activity.findViewById(R.id.left_drawer);
+      BaseAdapter navigationAdapter = (BaseAdapter) navigationList.getAdapter();
+
+      /* Set the titles & counts arrays in this file and notify the adapter. */
+      ((AdapterNavDrawer) navigationAdapter).m_tagArray = PagerAdapterFeeds.getTagsArray();
+      ((AdapterNavDrawer) navigationAdapter).m_unreadArray = result;
+      navigationAdapter.notifyDataSetChanged();
+
+      /* Update the subtitle. */
+      ViewPager viewPager = (ViewPager) m_activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
+      int currentPage = viewPager.getCurrentItem();
+
+      String[] item = (String[]) navigationAdapter.getItem(currentPage);
+      String unread = item[0];
+      String tag = item[1];
+
+      ActionBar actionBar = m_activity.getSupportActionBar();
+      actionBar.setSubtitle(tag + " | " + unread);
    }
 
    private static
@@ -60,27 +89,5 @@ class AsyncRefreshNavigationAdapter extends AsyncTask<int[], Void, int[]>
 
       unreadCounts[0] = total;
       return unreadCounts;
-   }
-
-   @Override
-   protected
-   int[] doInBackground(int[]... counts)
-   {
-      /* If null was passed into the task, count the unread items. */
-      return 0 == counts[0].length ? getUnreadCounts(m_context) : counts[0];
-   }
-
-   @Override
-   protected
-   void onPostExecute(int[] result)
-   {
-      /* Set the titles & counts arrays in this file and notify the adapter. */
-      ((AdapterNavDrawer) m_navigationAdapter).m_tagArray = PagerAdapterFeeds.getTagsArray();
-      ((AdapterNavDrawer) m_navigationAdapter).m_unreadArray = result;
-      m_navigationAdapter.notifyDataSetChanged();
-      if(null != m_pageChange)
-      {
-         m_pageChange.onPageSelected(m_page);
-      }
    }
 }

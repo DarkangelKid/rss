@@ -45,9 +45,11 @@ class AdapterNavDrawer extends BaseAdapter
 
    @Override
    public
-   String getItem(int position)
+   String[] getItem(int position)
    {
-      return 0 == m_unreadArray.length ? "" : Integer.toString(m_unreadArray[position]);
+      String unread = 0 == m_unreadArray.length ? "" : Integer.toString(m_unreadArray[position]);
+      String tag = m_tagArray[position];
+      return new String[]{unread, tag};
    }
 
    @Override

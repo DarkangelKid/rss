@@ -210,9 +210,7 @@ class FeedsActivity extends ActionBarActivity
    void onResume()
    {
       super.onResume();
-      ListView navigationList = (ListView) findViewById(R.id.left_drawer);
-      BaseAdapter baseAdapter = (BaseAdapter) navigationList.getAdapter();
-      Util.updateTags(baseAdapter, this);
+      Util.updateTags(this);
    }
 
    @Override
@@ -290,8 +288,7 @@ class FeedsActivity extends ActionBarActivity
       }
       else if(menuText.equals(addFeed))
       {
-         FragmentManageFeeds.showEditDialog(navigationAdapter, this,
-               FragmentManageFeeds.MODE_ADD);
+         FragmentManageFeeds.showEditDialog(navigationAdapter, this, FragmentManageFeeds.MODE_ADD);
       }
       else if(menuText.equals(jumpTo))
       {

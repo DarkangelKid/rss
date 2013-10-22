@@ -1,22 +1,19 @@
 package com.poloure.simplerss;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.view.ViewPager;
 import android.view.animation.Animation;
-import android.widget.BaseAdapter;
 
 class Update
 {
    public static
-   void navigation(BaseAdapter navigationAdapter, ViewPager.OnPageChangeListener pageChange,
-         int pos, Context context)
+   void navigation(Activity activity)
    {
-      AsyncTask<int[], Void, int[]> task = new AsyncRefreshNavigationAdapter(navigationAdapter,
-            context, pageChange, pos);
+      AsyncTask<int[], Void, int[]> task = new AsyncRefreshNavigationAdapter(activity);
       if(Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT)
       {
          task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, Util.EMPTY_INT_ARRAY);
@@ -28,11 +25,9 @@ class Update
    }
 
    public static
-   void asyncCompatRefreshPage(BaseAdapter navigationAdapter, int pageNumber,
-         FragmentManager fragmentManager, Context context)
+   void asyncCompatRefreshPage(int pageNumber, FragmentManager fragmentManager, Context context)
    {
-      AsyncTask<Integer, Object, Animation> task = new AsyncRefreshPage(navigationAdapter,
-            fragmentManager, context);
+      AsyncTask<Integer, Object, Animation> task = new AsyncRefreshPage(fragmentManager, context);
       if(Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT)
       {
          task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, pageNumber);
@@ -45,10 +40,10 @@ class Update
 
    public static
    void executeFeedCheck(AlertDialog dlg, String ntag, String fname, String mode, String ctitle,
-         String url, BaseAdapter navigationAdapter, Context context)
+         String url, Context context)
    {
       AsyncTask<String, Void, String[]> task = new AsyncCheckFeed(dlg, ntag, fname, mode, ctitle,
-            navigationAdapter, context);
+            context);
       if(Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT)
       {
          task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url);

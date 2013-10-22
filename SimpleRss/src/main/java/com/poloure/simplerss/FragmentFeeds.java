@@ -46,7 +46,7 @@ class FragmentFeeds extends Fragment
       BaseAdapter navigationAdapter = (BaseAdapter) navigationList.getAdapter();
 
       ViewPager.OnPageChangeListener pageChange = new OnPageChangeTags(this, navigationAdapter);
-      PagerAdapter adapter = new PagerAdapterFeeds(fragmentManager, pageChange, context);
+      PagerAdapter adapter = new PagerAdapterFeeds(fragmentManager, context);
 
       ViewPager viewPager = new ViewPager(context);
       viewPager.setAdapter(adapter);

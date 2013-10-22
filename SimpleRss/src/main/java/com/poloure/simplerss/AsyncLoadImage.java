@@ -23,13 +23,11 @@ class AsyncLoadImage extends AsyncTask<Object, Void, Object[]>
    {
       m_imageView = (ImageView) params[0];
       m_imageViewTag = (Integer) params[1];
-      String imageName = (String) params[2];
+      String imagePath = (String) params[2];
       Context context = (Context) params[3];
-      long time = (Long) params[4];
+      boolean isRead = (Boolean) params[4];
 
-      float imageOpacity = AdapterTags.S_READ_ITEM_TIMES.contains(time)
-            ? READ_ITEM_IMAGE_OPACITY
-            : 1.0F;
+      float imageOpacity = isRead ? READ_ITEM_IMAGE_OPACITY : 1.0F;
 
       BitmapFactory.Options o = new BitmapFactory.Options();
       o.inSampleSize = 1;
@@ -38,10 +36,9 @@ class AsyncLoadImage extends AsyncTask<Object, Void, Object[]>
       fadeIn.setFillAfter(true);
       fadeIn.setInterpolator(new DecelerateInterpolator());
 
-      String image = Util.getStorage(context) + imageName;
-      m_imageView.setOnClickListener(new OnClickImage(image, context));
+      m_imageView.setOnClickListener(new OnClickImage(imagePath, context));
       return new Object[]{
-            BitmapFactory.decodeFile(image, o), fadeIn
+            BitmapFactory.decodeFile(imagePath, o), fadeIn
       };
    }
 

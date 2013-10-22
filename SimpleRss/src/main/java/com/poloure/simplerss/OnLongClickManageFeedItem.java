@@ -31,10 +31,10 @@ class OnLongClickManageFeedItem implements AdapterView.OnItemLongClickListener
       String deleteText = context.getString(R.string.delete_dialog);
       String clearText = context.getString(R.string.clear_dialog);
 
-      DialogInterface.OnClickListener feedDeleteClick = new OnClickManageFeedDelete(m_adapter,
-            m_navigationAdapter, pos, context);
+      DialogInterface.OnClickListener feedDeleteClick = new OnClickManageFeedDelete(m_adapter, pos,
+            context);
       DialogInterface.OnClickListener feedClearCacheClick = new OnClickManageFeedClearCache(
-            m_adapter, m_navigationAdapter, pos, context);
+            m_adapter, pos, context);
 
       AlertDialog.Builder build = new AlertDialog.Builder(context);
       build.setCancelable(true);

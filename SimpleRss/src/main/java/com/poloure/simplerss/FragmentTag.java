@@ -7,7 +7,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.ListFragment;
-import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -24,18 +23,11 @@ class FragmentTag extends ListFragment
 {
    private static final String BACK_STACK_TAG = "BACK";
    private static final String POSITION_KEY   = "POSITION";
-   private final ViewPager.OnPageChangeListener m_pageChange;
-
-   private
-   FragmentTag(ViewPager.OnPageChangeListener pageChange)
-   {
-      m_pageChange = pageChange;
-   }
 
    static
-   ListFragment newInstance(ViewPager.OnPageChangeListener pageChange, int position)
+   ListFragment newInstance(int position)
    {
-      ListFragment listFragment = new FragmentTag(pageChange);
+      ListFragment listFragment = new FragmentTag();
       Bundle bundle = new Bundle();
       bundle.putInt(POSITION_KEY, position);
       listFragment.setArguments(bundle);
@@ -60,8 +52,7 @@ class FragmentTag extends ListFragment
       ListView navigationList = (ListView) ((Activity) context).findViewById(R.id.left_drawer);
       BaseAdapter navigationAdapter = (BaseAdapter) navigationList.getAdapter();
 
-      AbsListView.OnScrollListener scrollListener = new OnScrollFeedListener(navigationAdapter,
-            listAdapter, m_pageChange, position, context);
+      AbsListView.OnScrollListener scrollListener = new OnScrollFeedListener(listAdapter, context);
 
       listView.setOnScrollListener(scrollListener);
       listView.setOnItemClickListener(new ClickListener(this));
@@ -69,7 +60,7 @@ class FragmentTag extends ListFragment
       if(0 == position)
       {
          FragmentManager fragmentManager = getFragmentManager();
-         Update.asyncCompatRefreshPage(navigationAdapter, 0, fragmentManager, context);
+         Update.asyncCompatRefreshPage(0, fragmentManager, context);
       }
    }
 
