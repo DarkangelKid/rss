@@ -70,14 +70,13 @@ class FragmentManageFilters extends ListFragment
       ListView navigationList = (ListView) ((Activity) context).findViewById(R.id.left_drawer);
       BaseAdapter navigationAdapter = (BaseAdapter) navigationList.getAdapter();
 
-      DialogInterface.OnClickListener onClickCancel = new OnDialogClickNegative();
       DialogInterface.OnClickListener onClickAdd = new OnFilterDialogClickAdd(addFilterLayout,
             navigationAdapter, context);
 
       AlertDialog.Builder build = new AlertDialog.Builder(context);
       build.setTitle(addFilterText);
       build.setView(addFilterLayout);
-      build.setNegativeButton(cancelText, onClickCancel);
+      build.setNegativeButton(cancelText, null);
       build.setPositiveButton(addText, onClickAdd);
       build.show();
    }
@@ -90,5 +89,4 @@ class FragmentManageFilters extends ListFragment
 
       return inflater.inflate(R.layout.listview_cards, container, false);
    }
-
 }

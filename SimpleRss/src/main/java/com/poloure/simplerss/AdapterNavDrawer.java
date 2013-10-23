@@ -23,8 +23,9 @@ class AdapterNavDrawer extends BaseAdapter
    private final int            m_twelve;
    private final LayoutInflater m_layoutInflater;
    private final Context        m_context;
-   String[] m_tagArray    = Util.EMPTY_STRING_ARRAY;
-   int[]    m_unreadArray = Util.EMPTY_INT_ARRAY;
+   String[] m_tagArray = new String[0];
+   static final int[] EMPTY_INT_ARRAY = new int[0];
+   int[] m_unreadArray = EMPTY_INT_ARRAY;
    private TextView m_navigationMainItem;
 
    AdapterNavDrawer(Context context)

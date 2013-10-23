@@ -1,6 +1,7 @@
 package com.poloure.simplerss;
 
 import android.content.Context;
+import android.os.Environment;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -28,7 +29,7 @@ class Read
    static
    String setting(String path, Context context)
    {
-      if(Util.isUnmounted())
+      if(isUnmounted())
       {
          return null;
       }
@@ -42,9 +43,9 @@ class Read
    String[] file(String path, Context context)
    {
       String path1 = path;
-      if(Util.isUnmounted())
+      if(isUnmounted())
       {
-         return Util.EMPTY_STRING_ARRAY;
+         return new String[0];
       }
 
       String storage = FeedsActivity.getStorage(context);
@@ -59,7 +60,7 @@ class Read
       /* If the file is empty, return a zero length array. */
       if(0 == count)
       {
-         return Util.EMPTY_STRING_ARRAY;
+         return new String[0];
       }
 
       /* Use the count to allocate memory for the array. */
@@ -71,7 +72,7 @@ class Read
          BufferedReader in = null;
          try
          {
-            in = Util.isUsingSd() ? reader(path1) : reader(path1, context);
+            in = Write.isUsingSd() ? reader(path1) : reader(path1, context);
 
             int linesLength = lines.length;
             for(int i = 0; i < linesLength; i++)
@@ -90,17 +91,17 @@ class Read
       catch(FileNotFoundException ignored)
       {
          //e.printStackTrace();
-         return Util.EMPTY_STRING_ARRAY;
+         return new String[0];
       }
       catch(UnsupportedEncodingException e)
       {
          e.printStackTrace();
-         return Util.EMPTY_STRING_ARRAY;
+         return new String[0];
       }
       catch(IOException e)
       {
          e.printStackTrace();
-         return Util.EMPTY_STRING_ARRAY;
+         return new String[0];
       }
 
       return lines;
@@ -111,7 +112,7 @@ class Read
    BufferedReader reader(String path, Context context)
          throws FileNotFoundException, UnsupportedEncodingException
    {
-      String path1 = Util.getInternalPath(path);
+      String path1 = Write.getInternalPath(path);
       FileInputStream fis = context.openFileInput(path1);
       return new BufferedReader(new InputStreamReader(fis, UTF8));
    }
@@ -127,7 +128,7 @@ class Read
    int count(String path, Context context)
    {
       String path1 = path;
-      if(Util.isUnmounted())
+      if(isUnmounted())
       {
          return 0;
       }
@@ -144,7 +145,7 @@ class Read
          BufferedReader in = null;
          try
          {
-            in = Util.isUsingSd() ? reader(path1) : reader(path1, context);
+            in = Write.isUsingSd() ? reader(path1) : reader(path1, context);
 
             while(null != in.readLine())
             {
@@ -183,7 +184,7 @@ class Read
    static
    String[][] csvFile(String path, Context context, char... type)
    {
-      if(Util.isUnmounted())
+      if(isUnmounted())
       {
          return new String[type.length][0];
       }
@@ -236,7 +237,7 @@ class Read
       Set<Long> longSet = new LinkedHashSet<Long>(0);
 
       /* If storage is unmounted OR if we force to use external. */
-      if(Util.isUnmounted())
+      if(isUnmounted())
       {
          return longSet;
       }
@@ -274,5 +275,19 @@ class Read
          e.printStackTrace();
       }
       return longSet;
+   }
+
+   static
+   boolean isUnmounted()
+   {
+      if(!Write.isUsingSd())
+      {
+         return false;
+      }
+
+      /* Check to see if we can Write to the media. */
+      String mounted = Environment.MEDIA_MOUNTED;
+      String externalStorageState = Environment.getExternalStorageState();
+      return !mounted.equals(externalStorageState);
    }
 }

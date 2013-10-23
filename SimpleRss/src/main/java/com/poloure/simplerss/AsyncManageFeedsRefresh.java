@@ -47,7 +47,8 @@ class AsyncManageFeedsRefresh extends AsyncTask<Void, String[], Void>
             String path = content[0][i] + File.separatorChar + ServiceUpdate.CONTENT;
 
                /* Build the info string. */
-            infoArray[i] = content[1][i] + System.getProperty("line.separator") + content[2][i] + " • " +
+            infoArray[i] = content[1][i] + System.getProperty("line.separator") + content[2][i] +
+                  " • " +
                   Read.count(path, m_context) +
                   " items";
          }
@@ -60,8 +61,11 @@ class AsyncManageFeedsRefresh extends AsyncTask<Void, String[], Void>
    protected
    void onPostExecute(Void result)
    {
-      m_listView.setAnimation(m_fadeIn);
-      m_listView.setVisibility(View.VISIBLE);
+      if(!m_listView.isShown())
+      {
+         m_listView.setAnimation(m_fadeIn);
+         m_listView.setVisibility(View.VISIBLE);
+      }
    }
 
    @Override

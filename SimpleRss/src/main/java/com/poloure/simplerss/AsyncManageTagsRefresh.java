@@ -12,6 +12,7 @@ import java.util.Set;
 
 class AsyncManageTagsRefresh extends AsyncTask<Void, String[], Void>
 {
+   static final String[][] EMPTY_STRING_STRING_ARRAY = new String[0][0];
    private static final int INFO_INITIAL_CAPACITY = 40;
    private final Animation   m_fadeIn;
    private final ListView    m_listView;
@@ -43,25 +44,6 @@ class AsyncManageTagsRefresh extends AsyncTask<Void, String[], Void>
       return null;
    }
 
-   @Override
-   protected
-   void onPostExecute(Void result)
-   {
-      m_listView.setAnimation(m_fadeIn);
-      m_listView.setVisibility(View.VISIBLE);
-   }
-
-   @Override
-   protected
-   void onProgressUpdate(String[][] values)
-   {
-      if(null != m_adapter)
-      {
-         ((AdapterManagerTags) m_adapter).setArrays(values[0], values[1]);
-         m_adapter.notifyDataSetChanged();
-      }
-   }
-
    private
    String[][] getInfoArrays()
    {
@@ -69,7 +51,7 @@ class AsyncManageTagsRefresh extends AsyncTask<Void, String[], Void>
       int tagCount = tagSet.size();
       if(0 == tagCount)
       {
-         return Util.EMPTY_STRING_STRING_ARRAY;
+         return EMPTY_STRING_STRING_ARRAY;
       }
 
       String[] currentTags = tagSet.toArray(new String[tagCount]);
@@ -119,5 +101,27 @@ class AsyncManageTagsRefresh extends AsyncTask<Void, String[], Void>
          /* 0 is meant to be total. */
       infoArray[0] = 0 + " items • " + infoArray[0];
       return new String[][]{infoArray, tagArray};
+   }
+
+   @Override
+   protected
+   void onPostExecute(Void result)
+   {
+      if(!m_listView.isShown())
+      {
+         m_listView.setAnimation(m_fadeIn);
+         m_listView.setVisibility(View.VISIBLE);
+      }
+   }
+
+   @Override
+   protected
+   void onProgressUpdate(String[][] values)
+   {
+      if(null != m_adapter)
+      {
+         ((AdapterManagerTags) m_adapter).setArrays(values[0], values[1]);
+         m_adapter.notifyDataSetChanged();
+      }
    }
 }

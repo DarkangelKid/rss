@@ -84,13 +84,12 @@ class FragmentManageFeeds extends ListFragment
       /* Create the button click listeners. */
       DialogInterface.OnClickListener onClickPositive = new OnDialogClickPositive(context,
             oldFeedTitle);
-      DialogInterface.OnClickListener onClickNegative = new OnDialogClickNegative();
 
       /* Build the AlertDialog. */
       AlertDialog.Builder build = new AlertDialog.Builder(context);
       build.setTitle(titleText);
       build.setView(dialogLayout);
-      build.setNegativeButton(negativeButtonText, onClickNegative);
+      build.setNegativeButton(negativeButtonText, null);
       build.setPositiveButton(positiveButtonText, onClickPositive);
       build.show();
    }

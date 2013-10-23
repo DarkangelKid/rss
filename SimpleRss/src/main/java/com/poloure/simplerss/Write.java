@@ -28,7 +28,7 @@ class Write
    int removeLine(String path, CharSequence stringSearch, boolean contains, Context context)
    {
       /* If s_storage is unmounted OR if we force to use external. */
-      if(Util.isUnmounted())
+      if(Read.isUnmounted())
       {
          return -1;
       }
@@ -51,7 +51,7 @@ class Write
             }
 
             /* No backup for internal s_storage. */
-            out = Util.isUsingSd()
+            out = isUsingSd()
                   ? writer(tempPath, false)
                   : writer(path1, Context.MODE_PRIVATE, context);
 
@@ -92,7 +92,7 @@ class Write
       catch(IOException e)
       {
          e.printStackTrace();
-         if(Util.isUsingSd())
+         if(isUsingSd())
          {
             remove(tempPath, context);
          }
@@ -100,9 +100,9 @@ class Write
       }
 
       /* If the rename failed, delete the file and Write the original. */
-      if(Util.isUsingSd())
+      if(isUsingSd())
       {
-         boolean success = !Util.moveFile(path + TEMP, path, context);
+         boolean success = !moveFile(path + TEMP, path, context);
          if(success)
          {
             remove(path, context);
@@ -117,7 +117,7 @@ class Write
    BufferedWriter writer(String path, int writeMode, Context context)
          throws FileNotFoundException, UnsupportedEncodingException
    {
-      String internalPath = Util.getInternalPath(path);
+      String internalPath = getInternalPath(path);
       FileOutputStream fileOutputStream = context.openFileOutput(internalPath, writeMode);
       return new BufferedWriter(new OutputStreamWriter(fileOutputStream, "UTF8"));
    }
@@ -132,14 +132,14 @@ class Write
    void collection(String path, Iterable<?> content, Context context)
    {
       /* If s_storage is unmounted OR if we force to use external. */
-      if(Util.isUnmounted())
+      if(Read.isUnmounted())
       {
          return;
       }
 
       String path1 = FeedsActivity.getStorage(context) + path;
 
-      if(Util.isUsingSd())
+      if(isUsingSd())
       {
          remove(path1, context);
       }
@@ -150,7 +150,7 @@ class Write
          try
          {
             /* Create the buffered writer. */
-            out = Util.isUsingSd()
+            out = isUsingSd()
                   ? writer(path1, false)
                   : writer(path1, Context.MODE_PRIVATE, context);
 
@@ -192,7 +192,7 @@ class Write
    void single(String path, String stringToWrite, Context context)
    {
       /* If s_storage is unmounted OR if we force to use external. */
-      if(Util.isUnmounted())
+      if(Read.isUnmounted())
       {
          return;
       }
@@ -204,7 +204,7 @@ class Write
          BufferedWriter out = null;
          try
          {
-            out = Util.isUsingSd()
+            out = isUsingSd()
                   ? writer(path1, true)
                   : writer(path1, Context.MODE_APPEND, context);
             out.write(stringToWrite);
@@ -236,7 +236,7 @@ class Write
    void longSet(String path, Iterable<Long> longSet, Context context)
    {
       /* If storage is unmounted OR if we force to use external. */
-      if(Util.isUnmounted())
+      if(Read.isUnmounted())
       {
          return;
       }
@@ -281,9 +281,35 @@ class Write
    void remove(String path, Context context)
    {
       String path1 = FeedsActivity.getStorage(context) + path;
-      String internalPath = Util.getInternalPath(path1);
+      String internalPath = getInternalPath(path1);
       context.deleteFile(internalPath);
       File file = new File(path1);
       file.delete();
+   }
+
+   static
+   boolean moveFile(String original, String resulting, Context context)
+   {
+      String storage = FeedsActivity.getStorage(context);
+
+      File originalFile = new File(storage + original);
+      File resultingFile = new File(storage + resulting);
+
+      return originalFile.renameTo(resultingFile);
+   }
+
+   static
+   String getInternalPath(String externalPath)
+   {
+      int index = externalPath.indexOf(File.separatorChar + "files" + File.separatorChar);
+      String substring = externalPath.substring(index + 7);
+      return substring.replaceAll(File.separator, "-");
+   }
+
+   static
+   boolean isUsingSd()
+   {
+      /* Return true if force sd setting is true. */
+      return true;
    }
 }

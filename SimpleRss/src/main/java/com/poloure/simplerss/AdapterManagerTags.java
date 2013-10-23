@@ -15,8 +15,8 @@ class AdapterManagerTags extends BaseAdapter
    private static final long      TAG_SWAP_FADE_DURATION = 120L;
    private static final Animation FADE_IN                = new AlphaAnimation(0.0F, 1.0F);
    private static final Animation FADE_OUT               = new AlphaAnimation(1.0F, 0.0F);
-   private              String[]  m_tagArray             = Util.EMPTY_STRING_ARRAY;
-   private              String[]  m_infoArray            = Util.EMPTY_STRING_ARRAY;
+   private              String[]  m_tagArray             = new String[0];
+   private              String[]  m_infoArray            = new String[0];
    private final LayoutInflater m_layoutInflater;
 
    AdapterManagerTags(Context context)

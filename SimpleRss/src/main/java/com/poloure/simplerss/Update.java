@@ -15,11 +15,11 @@ class Update
       AsyncTask<int[], Void, int[]> task = new AsyncRefreshNavigationAdapter(activity);
       if(Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT)
       {
-         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, Util.EMPTY_INT_ARRAY);
+         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, AdapterNavDrawer.EMPTY_INT_ARRAY);
       }
       else
       {
-         task.execute(Util.EMPTY_INT_ARRAY);
+         task.execute(AdapterNavDrawer.EMPTY_INT_ARRAY);
       }
    }
 

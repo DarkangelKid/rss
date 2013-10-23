@@ -218,7 +218,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
 
       if(!oldFeed.equals(newFeed))
       {
-         Util.moveFile(oldFeedFolder, newFeedFolder, m_context);
+         Write.moveFile(oldFeedFolder, newFeedFolder, m_context);
       }
 
       /* Replace the all_tag file with the new image and data. */

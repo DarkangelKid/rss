@@ -10,7 +10,7 @@ import android.widget.TextView;
 class AdapterManageFilters extends BaseAdapter
 {
    static final String   FILTER_LIST    = "filter_list.txt";
-   private      String[] m_filterTitles = Util.EMPTY_STRING_ARRAY;
+   private      String[] m_filterTitles = new String[0];
 
    private final LayoutInflater m_layoutInflater;
    private       TextView       m_titleView;

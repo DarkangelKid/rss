@@ -20,6 +20,25 @@ class OnClickManageFeedDelete implements DialogInterface.OnClickListener
       m_position = position;
    }
 
+   /* Replaces ALL_TAG '/'s with '-' to emulate a folder directory layout in
+       * data/data. */
+   static
+   boolean deleteDirectory(File directory)
+   {
+      if(directory.isDirectory())
+      {
+         for(String child : directory.list())
+         {
+            boolean success = !deleteDirectory(new File(directory, child));
+            if(success)
+            {
+               return false;
+            }
+         }
+      }
+      return directory.delete();
+   }
+
    /* Delete the cache.*/
    @Override
    public
@@ -29,7 +48,7 @@ class OnClickManageFeedDelete implements DialogInterface.OnClickListener
       String path = feedName + File.separatorChar;
 
       Write.removeLine(Read.INDEX, feedName, true, m_context);
-      Util.deleteDirectory(new File(path));
+      deleteDirectory(new File(path));
 
       /* Refresh pages and navigation counts. */
       AsyncCheckFeed.updateTags((Activity) m_context);

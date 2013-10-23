@@ -10,8 +10,8 @@ import android.widget.TextView;
 class AdapterManageFeeds extends BaseAdapter
 {
    private final LayoutInflater m_layoutInflater;
-   private String[] m_titleArray = Util.EMPTY_STRING_ARRAY;
-   private String[] m_infoArray  = Util.EMPTY_STRING_ARRAY;
+   private String[] m_titleArray = new String[0];
+   private String[] m_infoArray  = new String[0];
 
    AdapterManageFeeds(Context context)
    {

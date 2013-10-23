@@ -459,7 +459,7 @@ class ServiceUpdate extends IntentService
    {
       Set<String> set = new LinkedHashSet<String>();
 
-      if(Util.isUnmounted())
+      if(Read.isUnmounted())
       {
          return set;
       }
@@ -473,14 +473,14 @@ class ServiceUpdate extends IntentService
    boolean isNonExisting(String path, Context context)
    {
       String path1 = FeedsActivity.getStorage(context) + path;
-      if(Util.isUsingSd() || path1.contains(THUMBNAIL_DIR))
+      if(Write.isUsingSd() || path1.contains(THUMBNAIL_DIR))
       {
          File file = new File(path1);
          return !file.exists();
       }
       else
       {
-         String internalPath = Util.getInternalPath(path1);
+         String internalPath = Write.getInternalPath(path1);
          File file = getFileStreamPath(internalPath);
          return !file.exists();
       }
