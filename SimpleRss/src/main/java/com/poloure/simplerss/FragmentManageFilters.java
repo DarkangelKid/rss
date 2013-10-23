@@ -77,7 +77,6 @@ class FragmentManageFilters extends ListFragment
       AlertDialog.Builder build = new AlertDialog.Builder(context);
       build.setTitle(addFilterText);
       build.setView(addFilterLayout);
-      build.setCancelable(true);
       build.setNegativeButton(cancelText, onClickCancel);
       build.setPositiveButton(addText, onClickAdd);
       build.show();

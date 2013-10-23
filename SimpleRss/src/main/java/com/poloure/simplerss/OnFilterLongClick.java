@@ -30,7 +30,6 @@ class OnFilterLongClick implements AdapterView.OnItemLongClickListener
             (BaseAdapter) listAdapter, activity);
 
       AlertDialog.Builder build = new AlertDialog.Builder(activity);
-      build.setCancelable(true);
       build.setPositiveButton(deleteString, onFilterClickDelete);
       build.show();
       return true;

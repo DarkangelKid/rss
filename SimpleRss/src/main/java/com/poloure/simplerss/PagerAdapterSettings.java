@@ -1,23 +1,17 @@
 package com.poloure.simplerss;
 
-import android.content.Context;
-import android.content.res.Resources;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
 class PagerAdapterSettings extends FragmentPagerAdapter
 {
-   private static final Fragment[] SETTINGS_DIR_FRAGMENTS = {
-         FragmentSettingsFunctions.newInstance(), FragmentSettingsUi.newInstance(),
-   };
    private final String[] m_settingsTitles;
 
-   PagerAdapterSettings(FragmentManager fm, Context context)
+   PagerAdapterSettings(FragmentManager fm, String[] settingsTitles)
    {
       super(fm);
-      Resources resources = context.getResources();
-      m_settingsTitles = resources.getStringArray(R.array.settings_titles);
+      m_settingsTitles = settingsTitles;
    }
 
    @Override
@@ -38,6 +32,8 @@ class PagerAdapterSettings extends FragmentPagerAdapter
    public
    Fragment getItem(int position)
    {
-      return SETTINGS_DIR_FRAGMENTS[position];
+      return 0 == position
+            ? FragmentSettingsFunctions.newInstance()
+            : FragmentSettingsUi.newInstance();
    }
 }

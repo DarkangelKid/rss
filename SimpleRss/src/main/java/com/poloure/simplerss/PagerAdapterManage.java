@@ -1,33 +1,25 @@
 package com.poloure.simplerss;
 
-import android.content.Context;
-import android.content.res.Resources;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.ListFragment;
 
 class PagerAdapterManage extends FragmentPagerAdapter
 {
-   private final ListFragment[] m_manageFragments = new ListFragment[3];
    private final String[] m_manageTitles;
 
-   PagerAdapterManage(FragmentManager fragmentManager, Context context)
+   PagerAdapterManage(FragmentManager fragmentManager, String[] manageTitles)
    {
       super(fragmentManager);
-      m_manageFragments[0] = FragmentManageTags.newInstance();
-      m_manageFragments[1] = FragmentManageFeeds.newInstance();
-      m_manageFragments[2] = FragmentManageFilters.newInstance();
 
-      Resources resources = context.getResources();
-      m_manageTitles = resources.getStringArray(R.array.manage_titles);
+      m_manageTitles = manageTitles;
    }
 
    @Override
    public
    int getCount()
    {
-      return m_manageFragments.length;
+      return m_manageTitles.length;
    }
 
    @Override
@@ -41,6 +33,15 @@ class PagerAdapterManage extends FragmentPagerAdapter
    public
    Fragment getItem(int position)
    {
-      return m_manageFragments[position];
+      if(0 == position)
+      {
+         return FragmentManageTags.newInstance();
+      }
+      if(1 == position)
+      {
+         return FragmentManageFeeds.newInstance();
+      }
+
+      return FragmentManageFilters.newInstance();
    }
 }

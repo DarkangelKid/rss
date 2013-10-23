@@ -58,17 +58,17 @@ class FragmentManageFeeds extends ListFragment
       View dialogLayout = inf.inflate(R.layout.add_rss_dialog, null);
       DialogInterface.OnClickListener onAddEdit;
 
-      String titleText;
-      String negativeButtonText;
-      String positiveButtonText;
+      int titleResource = MODE_ADD == position
+            ? R.string.add_dialog_title
+            : R.string.edit_dialog_title;
+      String titleText = context.getString(titleResource);
+
+      String negativeButtonText = context.getString(R.string.cancel_dialog);
+      String positiveButtonText = context.getString(R.string.add_dialog);
 
       /* If the mode is edit. */
       if(MODE_ADD == position)
       {
-         titleText = context.getString(R.string.add_dialog_title);
-         negativeButtonText = context.getString(R.string.cancel_dialog);
-         positiveButtonText = context.getString(R.string.add_dialog);
-
          onAddEdit = new OnDialogClickAdd(context);
       }
       else
@@ -81,10 +81,6 @@ class FragmentManageFeeds extends ListFragment
          ((TextView) dialogLayout.findViewById(R.id.feed_url_edit)).setText(url);
          ((TextView) dialogLayout.findViewById(R.id.name_edit)).setText(title);
          ((TextView) dialogLayout.findViewById(R.id.tag_edit)).setText(tag);
-
-         titleText = context.getString(R.string.edit_dialog_title);
-         negativeButtonText = context.getString(R.string.cancel_dialog);
-         positiveButtonText = context.getString(R.string.accept_dialog);
 
          onAddEdit = new OnDialogClickEdit(title, context);
       }
@@ -107,18 +103,16 @@ class FragmentManageFeeds extends ListFragment
    {
       super.onActivityCreated(savedInstanceState);
 
-      Context context = getActivity();
+      ActionBarActivity activity = (ActionBarActivity) getActivity();
       ListView listView = getListView();
 
-      ListAdapter listAdapter = new AdapterManageFeeds(context);
-      AdapterView.OnItemLongClickListener onItemLongClick = new OnLongClickManageFeedItem(this,
+      ListAdapter listAdapter = new AdapterManageFeeds(activity);
+      AdapterView.OnItemLongClickListener onItemLongClick = new OnLongClickManageFeedItem(activity,
             (BaseAdapter) listAdapter);
 
       setListAdapter(listAdapter);
       listView.setOnItemLongClickListener(onItemLongClick);
-      asyncCompatManageFeedsRefresh(listView, context);
-
-      ActionBarActivity activity = (ActionBarActivity) getActivity();
+      asyncCompatManageFeedsRefresh(listView, activity);
 
       Resources resources = activity.getResources();
       String[] manageTitles = resources.getStringArray(R.array.manage_titles);
@@ -149,5 +143,4 @@ class FragmentManageFeeds extends ListFragment
       FragmentActivity activity = getActivity();
       return activity.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
    }
-
 }

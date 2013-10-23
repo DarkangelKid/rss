@@ -1,12 +1,14 @@
 package com.poloure.simplerss;
 
-import android.content.Context;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -28,21 +30,26 @@ class FragmentManage extends Fragment
    public
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
-      Context context = getActivity();
+      ActionBarActivity activity = (ActionBarActivity) getActivity();
 
       if(null == container)
       {
-         return new View(context);
+         return new View(activity);
       }
 
       setHasOptionsMenu(true);
 
+      Resources resources = getResources();
+      String[] manageTitles = resources.getStringArray(R.array.manage_titles);
+
       FragmentManager fragmentManager = getFragmentManager();
-      PagerAdapter pagerAdapter = new PagerAdapterManage(fragmentManager, context);
+      ActionBar actionBar = activity.getSupportActionBar();
 
-      ViewPager.OnPageChangeListener pageChangeManage = new OnPageChangeManage(this);
+      PagerAdapter pagerAdapter = new PagerAdapterManage(fragmentManager, manageTitles);
+      ViewPager.OnPageChangeListener pageChangeManage = new OnPageChangeSubtitle(actionBar,
+            manageTitles);
 
-      ViewPager pager = new ViewPager(context);
+      ViewPager pager = new ViewPager(activity);
       pager.setAdapter(pagerAdapter);
       pager.setOnPageChangeListener(pageChangeManage);
       pager.setId(VIEW_PAGER_ID);

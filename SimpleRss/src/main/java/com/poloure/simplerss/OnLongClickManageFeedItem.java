@@ -3,7 +3,6 @@ package com.poloure.simplerss;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.support.v4.app.Fragment;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
@@ -11,11 +10,11 @@ import android.widget.BaseAdapter;
 class OnLongClickManageFeedItem implements AdapterView.OnItemLongClickListener
 {
    private final BaseAdapter m_adapter;
-   private final Fragment    m_fragmentManageFeeds;
+   private final Context    m_context;
 
-   OnLongClickManageFeedItem(Fragment fragmentManageFeeds, BaseAdapter adapter)
+   OnLongClickManageFeedItem(Context context, BaseAdapter adapter)
    {
-      m_fragmentManageFeeds = fragmentManageFeeds;
+      m_context = context;
       m_adapter = adapter;
    }
 
@@ -23,18 +22,15 @@ class OnLongClickManageFeedItem implements AdapterView.OnItemLongClickListener
    public
    boolean onItemLongClick(AdapterView<?> parent, View view, int pos, long id)
    {
-      Context context = m_fragmentManageFeeds.getActivity();
-
-      String deleteText = context.getString(R.string.delete_dialog);
-      String clearText = context.getString(R.string.clear_dialog);
+      String deleteText = m_context.getString(R.string.delete_dialog);
+      String clearText = m_context.getString(R.string.clear_dialog);
 
       DialogInterface.OnClickListener feedDeleteClick = new OnClickManageFeedDelete(m_adapter, pos,
-            context);
+            m_context);
       DialogInterface.OnClickListener feedClearCacheClick = new OnClickManageFeedClearCache(
-            m_adapter, pos, context);
+            m_adapter, pos, m_context);
 
-      AlertDialog.Builder build = new AlertDialog.Builder(context);
-      build.setCancelable(true);
+      AlertDialog.Builder build = new AlertDialog.Builder(m_context);
       build.setNegativeButton(deleteText, feedDeleteClick);
       build.setPositiveButton(clearText, feedClearCacheClick);
       build.show();
