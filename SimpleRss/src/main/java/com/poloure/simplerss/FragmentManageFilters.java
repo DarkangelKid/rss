@@ -70,7 +70,7 @@ class FragmentManageFilters extends ListFragment
       ListView navigationList = (ListView) ((Activity) context).findViewById(R.id.left_drawer);
       BaseAdapter navigationAdapter = (BaseAdapter) navigationList.getAdapter();
 
-      DialogInterface.OnClickListener onClickCancel = new OnDialogClickCancel();
+      DialogInterface.OnClickListener onClickCancel = new OnDialogClickNegative();
       DialogInterface.OnClickListener onClickAdd = new OnFilterDialogClickAdd(addFilterLayout,
             navigationAdapter, context);
 

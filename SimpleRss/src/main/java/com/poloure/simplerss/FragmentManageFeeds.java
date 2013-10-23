@@ -54,46 +54,44 @@ class FragmentManageFeeds extends ListFragment
    static
    void showEditDialog(Context context, int position)
    {
-      LayoutInflater inf = LayoutInflater.from(context);
-      View dialogLayout = inf.inflate(R.layout.add_rss_dialog, null);
-      DialogInterface.OnClickListener onAddEdit;
+      LayoutInflater inflater = LayoutInflater.from(context);
+      View dialogLayout = inflater.inflate(R.layout.add_rss_dialog, null);
 
-      int titleResource = MODE_ADD == position
-            ? R.string.add_dialog_title
-            : R.string.edit_dialog_title;
-      String titleText = context.getString(titleResource);
-
-      String negativeButtonText = context.getString(R.string.cancel_dialog);
-      String positiveButtonText = context.getString(R.string.add_dialog);
+      String oldFeedTitle = "";
 
       /* If the mode is edit. */
-      if(MODE_ADD == position)
-      {
-         onAddEdit = new OnDialogClickAdd(context);
-      }
-      else
+      if(MODE_ADD != position)
       {
          String[][] content = Read.indexFile(context);
-         String title = content[0][position];
+         oldFeedTitle = content[0][position];
          String url = content[1][position];
          String tag = content[2][position];
 
          ((TextView) dialogLayout.findViewById(R.id.feed_url_edit)).setText(url);
-         ((TextView) dialogLayout.findViewById(R.id.name_edit)).setText(title);
+         ((TextView) dialogLayout.findViewById(R.id.name_edit)).setText(oldFeedTitle);
          ((TextView) dialogLayout.findViewById(R.id.tag_edit)).setText(tag);
-
-         onAddEdit = new OnDialogClickEdit(title, context);
       }
 
+      /* Get the text resources. */
+      int titleResource = MODE_ADD == position
+            ? R.string.add_dialog_title
+            : R.string.edit_dialog_title;
+
+      String titleText = context.getString(titleResource);
+      String negativeButtonText = context.getString(R.string.cancel_dialog);
+      String positiveButtonText = context.getString(R.string.add_dialog);
+
       /* Create the button click listeners. */
-      DialogInterface.OnClickListener onCancel = new OnDialogClickCancel();
+      DialogInterface.OnClickListener onClickPositive = new OnDialogClickPositive(context,
+            oldFeedTitle);
+      DialogInterface.OnClickListener onClickNegative = new OnDialogClickNegative();
 
       /* Build the AlertDialog. */
       AlertDialog.Builder build = new AlertDialog.Builder(context);
       build.setTitle(titleText);
       build.setView(dialogLayout);
-      build.setNegativeButton(negativeButtonText, onCancel);
-      build.setPositiveButton(positiveButtonText, onAddEdit);
+      build.setNegativeButton(negativeButtonText, onClickNegative);
+      build.setPositiveButton(positiveButtonText, onClickPositive);
       build.show();
    }
 

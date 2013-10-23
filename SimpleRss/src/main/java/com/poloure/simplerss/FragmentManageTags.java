@@ -8,25 +8,11 @@ import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 
 class FragmentManageTags extends ListFragment
 {
-   static
-   void asyncCompatManageTagsRefresh(ListView listView, Context context)
-   {
-      AsyncTask<Void, String[], Void> task = new AsyncManageTagsRefresh(listView, context);
-      if(Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT)
-      {
-         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-      }
-      else
-      {
-         task.execute();
-      }
-   }
-
    static
    ListFragment newInstance()
    {
@@ -41,10 +27,24 @@ class FragmentManageTags extends ListFragment
 
       ListView listView = getListView();
       Context context = getActivity();
-      BaseAdapter baseAdapter = new AdapterManagerTags(context);
-      setListAdapter(baseAdapter);
+      ListAdapter listAdapter = new AdapterManagerTags(context);
+      setListAdapter(listAdapter);
 
       asyncCompatManageTagsRefresh(listView, context);
+   }
+
+   static
+   void asyncCompatManageTagsRefresh(ListView listView, Context context)
+   {
+      AsyncTask<Void, String[], Void> task = new AsyncManageTagsRefresh(listView, context);
+      if(Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT)
+      {
+         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+      }
+      else
+      {
+         task.execute();
+      }
    }
 
    @Override

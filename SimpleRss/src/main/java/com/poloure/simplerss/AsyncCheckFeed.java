@@ -27,24 +27,20 @@ import java.util.regex.Pattern;
 class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
 {
    /* Formats */
-   static final         String  INDEX_FORMAT            = "feed|%s|url|%s|tag|%s|";
-   static final         int     MODE_ADD_FEED           = 1;
-   static final         int     MODE_EDIT_FEED          = 2;
+   private static final String  INDEX_FORMAT            = "feed|%s|url|%s|tag|%s|";
    private static final String  TAG_TITLE               = "<title";
    private static final String  END_TAG_TITLE           = "</title>";
    private static final Pattern ILLEGAL_FILE_CHARS      = Pattern.compile("[/\\?%*|<>:]");
    private static final Pattern SPLIT_SPACE             = Pattern.compile(" ");
    private static final int     FEED_STREAM_BYTE_BUFFER = 512;
    private final AlertDialog m_dialog;
-   private final int         m_mode;
    private final String      m_oldFeedName;
    private final Context     m_context;
    private       boolean     m_isFeedReal;
 
-   AsyncCheckFeed(AlertDialog dialog, int mode, String currentTitle, Context context)
+   AsyncCheckFeed(AlertDialog dialog, String currentTitle, Context context)
    {
       m_dialog = dialog;
-      m_mode = mode;
       m_oldFeedName = currentTitle;
       m_context = context;
       Button button = m_dialog.getButton(DialogInterface.BUTTON_POSITIVE);
@@ -183,7 +179,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       String feedInfo = String.format(INDEX_FORMAT, finalName, feedUrlFromCheck, feedTag) +
             System.getProperty("line.separator");
 
-      if(MODE_EDIT_FEED == m_mode)
+      if(0 != m_oldFeedName.length())
       {
          editFeed(m_oldFeedName, finalName);
       }
@@ -213,18 +209,6 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       m_dialog.dismiss();
    }
 
-   static
-   void updateTags(Activity activity)
-   {
-      ViewPager tagPager = (ViewPager) activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
-
-      PagerAdapter pagerAdapter = tagPager.getAdapter();
-      ((PagerAdapterFeeds) pagerAdapter).getTagsFromDisk(activity);
-      pagerAdapter.notifyDataSetChanged();
-
-      Update.navigation(activity);
-   }
-
    private
    void editFeed(CharSequence oldFeed, String newFeed)
    {
@@ -240,6 +224,18 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       /* Replace the all_tag file with the new image and data. */
       Write.removeLine(Read.INDEX, oldFeed, true, m_context);
 
+   }
+
+   static
+   void updateTags(Activity activity)
+   {
+      ViewPager tagPager = (ViewPager) activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
+
+      PagerAdapter pagerAdapter = tagPager.getAdapter();
+      ((PagerAdapterFeeds) pagerAdapter).getTagsFromDisk(activity);
+      pagerAdapter.notifyDataSetChanged();
+
+      Update.navigation(activity);
    }
 
    private static

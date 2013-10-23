@@ -1,6 +1,5 @@
 package com.poloure.simplerss;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -48,9 +47,6 @@ class FragmentTag extends ListFragment
 
       Bundle bundle = getArguments();
       int position = bundle.getInt(POSITION_KEY);
-
-      ListView navigationList = (ListView) ((Activity) context).findViewById(R.id.left_drawer);
-      BaseAdapter navigationAdapter = (BaseAdapter) navigationList.getAdapter();
 
       AbsListView.OnScrollListener scrollListener = new OnScrollFeedListener(listAdapter, context);
 

@@ -107,6 +107,48 @@ class FeedsActivity extends ActionBarActivity
       }
    }
 
+   /* This function will return null if it fails. Check for null each time.
+       * It should be pretty safe and efficient to call ALL_TAG the time. */
+   static
+   String getStorage(Context context)
+   {
+      if(0 != s_storage.length())
+      {
+         return s_storage;
+      }
+      /* Check the media state for any undesirable states. */
+      /* TODO Check to see if it is the desired first then skip these. */
+      String state = Environment.getExternalStorageState();
+
+      String mounted = Environment.MEDIA_MOUNTED;
+      if(!mounted.equals(state))
+      {
+         return null;
+      }
+
+      /* If it has reached here the state is MEDIA_MOUNTED and we can continue.
+         Build the s_storage string depending on android version. */
+      char sep = File.separatorChar;
+
+      if(Build.VERSION_CODES.FROYO <= Build.VERSION.SDK_INT)
+      {
+         File externalFilesDir = context.getExternalFilesDir(null);
+         s_storage = externalFilesDir.getAbsolutePath() + sep;
+      }
+      else
+      {
+         String name = context.getPackageName();
+         File ext = Environment.getExternalStorageDirectory();
+         s_storage = ext.getAbsolutePath() + sep + "Android" + sep + "data" + sep + name + sep +
+               "files" + sep;
+
+         /* If the folder does not exist, create it. */
+         File storageFile = new File(s_storage);
+         storageFile.mkdirs();
+      }
+      return s_storage;
+   }
+
    /* This is so the icon and text in the actionbar are selected. */
    @Override
    public
@@ -126,23 +168,6 @@ class FeedsActivity extends ActionBarActivity
 
       /* Save the READ_ITEMS to file. */
       Write.longSet(READ_ITEMS, AdapterTags.S_READ_ITEM_TIMES, this);
-   }
-
-   @Override
-   public
-   void onBackPressed()
-   {
-      super.onBackPressed();
-
-      Resources resources = getResources();
-
-      String feeds = resources.getStringArray(R.array.nav_titles)[0];
-      ActionBar actionBar = getSupportActionBar();
-      actionBar.setTitle(feeds);
-
-      DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-      drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-      m_drawerToggle.setDrawerIndicatorEnabled(true);
    }
 
    private
@@ -206,46 +231,21 @@ class FeedsActivity extends ActionBarActivity
       return intent;
    }
 
-   /* This function will return null if it fails. Check for null each time.
-       * It should be pretty safe and efficient to call ALL_TAG the time. */
-   static
-   String getStorage(Context context)
+   @Override
+   public
+   void onBackPressed()
    {
-      if(0 != s_storage.length())
-      {
-         return s_storage;
-      }
-      /* Check the media state for any undesirable states. */
-      /* TODO Check to see if it is the desired first then skip these. */
-      String state = Environment.getExternalStorageState();
+      super.onBackPressed();
 
-      String mounted = Environment.MEDIA_MOUNTED;
-      if(!mounted.equals(state))
-      {
-         return null;
-      }
+      Resources resources = getResources();
 
-      /* If it has reached here the state is MEDIA_MOUNTED and we can continue.
-         Build the s_storage string depending on android version. */
-      char sep = File.separatorChar;
+      String feeds = resources.getStringArray(R.array.nav_titles)[0];
+      ActionBar actionBar = getSupportActionBar();
+      actionBar.setTitle(feeds);
 
-      if(Build.VERSION_CODES.FROYO <= Build.VERSION.SDK_INT)
-      {
-         File externalFilesDir = context.getExternalFilesDir(null);
-         s_storage = externalFilesDir.getAbsolutePath() + sep;
-      }
-      else
-      {
-         String name = context.getPackageName();
-         File ext = Environment.getExternalStorageDirectory();
-         s_storage = ext.getAbsolutePath() + sep + "Android" + sep + "data" + sep + name + sep +
-               "files" + sep;
-
-         /* If the folder does not exist, create it. */
-         File storageFile = new File(s_storage);
-         storageFile.mkdirs();
-      }
-      return s_storage;
+      DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+      drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+      m_drawerToggle.setDrawerIndicatorEnabled(true);
    }
 
    String getPreviousNavigationTitle()
@@ -287,21 +287,26 @@ class FeedsActivity extends ActionBarActivity
       return true;
    }
 
-   private static
-   boolean isServiceRunning(Activity activity)
+   /* Changes the ManageFeedsRefresh menu item to an animation if m_mode = true. */
+   static
+   void setRefreshingIcon(boolean mode, Menu menu)
    {
-      ActivityManager manager = (ActivityManager) activity.getSystemService(ACTIVITY_SERVICE);
-      for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(
-            Integer.MAX_VALUE))
+      /* Find the menu item by ID called ManageFeedsRefresh. */
+      MenuItem item = menu.findItem(R.id.refresh);
+      if(null == item)
       {
-         String className = service.service.getClassName();
-         String serviceName = ServiceUpdate.class.getName();
-         if(serviceName.equals(className))
-         {
-            return true;
-         }
+         return;
       }
-      return false;
+
+      /* Change it depending on the m_mode. */
+      if(mode)
+      {
+         MenuItemCompat.setActionView(item, R.layout.progress_circle);
+      }
+      else
+      {
+         MenuItemCompat.setActionView(item, null);
+      }
    }
 
    @Override
@@ -337,7 +342,7 @@ class FeedsActivity extends ActionBarActivity
       }
       else if(menuText.equals(refresh))
       {
-         refreshFeeds(this, navigationAdapter);
+         refreshFeeds(this);
       }
       else
       {
@@ -345,30 +350,6 @@ class FeedsActivity extends ActionBarActivity
       }
 
       return true;
-   }
-
-   /* Updates and refreshes the tags with any new content. */
-   private
-   void refreshFeeds(ActionBarActivity activity, BaseAdapter navigationAdapter)
-   {
-      setRefreshingIcon(true, m_optionsMenu);
-
-      /* Set the service handler in FeedsActivity so we can check and call it
-       * from ServiceUpdate. */
-      s_serviceHandler = new OnFinishServiceHandler(activity, m_optionsMenu);
-
-      ViewPager viewPager = (ViewPager) findViewById(FragmentFeeds.VIEW_PAGER_ID);
-      int currentPage = viewPager.getCurrentItem();
-
-      Intent intent = getServiceIntent(currentPage, activity);
-      activity.startService(intent);
-   }
-
-   String getNavigationTitle()
-   {
-      ActionBar actionBar = getSupportActionBar();
-      CharSequence title = actionBar.getTitle();
-      return title.toString();
    }
 
    static
@@ -393,26 +374,45 @@ class FeedsActivity extends ActionBarActivity
       }
    }
 
-   /* Changes the ManageFeedsRefresh menu item to an animation if m_mode = true. */
-   static
-   void setRefreshingIcon(boolean mode, Menu menu)
+   String getNavigationTitle()
    {
-      /* Find the menu item by ID called ManageFeedsRefresh. */
-      MenuItem item = menu.findItem(R.id.refresh);
-      if(null == item)
-      {
-         return;
-      }
+      ActionBar actionBar = getSupportActionBar();
+      CharSequence title = actionBar.getTitle();
+      return title.toString();
+   }
 
-      /* Change it depending on the m_mode. */
-      if(mode)
+   /* Updates and refreshes the tags with any new content. */
+   private
+   void refreshFeeds(ActionBarActivity activity)
+   {
+      setRefreshingIcon(true, m_optionsMenu);
+
+      /* Set the service handler in FeedsActivity so we can check and call it
+       * from ServiceUpdate. */
+      s_serviceHandler = new OnFinishServiceHandler(activity, m_optionsMenu);
+
+      ViewPager viewPager = (ViewPager) findViewById(FragmentFeeds.VIEW_PAGER_ID);
+      int currentPage = viewPager.getCurrentItem();
+
+      Intent intent = getServiceIntent(currentPage, activity);
+      activity.startService(intent);
+   }
+
+   private static
+   boolean isServiceRunning(Activity activity)
+   {
+      ActivityManager manager = (ActivityManager) activity.getSystemService(ACTIVITY_SERVICE);
+      for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(
+            Integer.MAX_VALUE))
       {
-         MenuItemCompat.setActionView(item, R.layout.progress_circle);
+         String className = service.service.getClassName();
+         String serviceName = ServiceUpdate.class.getName();
+         if(serviceName.equals(className))
+         {
+            return true;
+         }
       }
-      else
-      {
-         MenuItemCompat.setActionView(item, null);
-      }
+      return false;
    }
 
    void setNavigationTitle(CharSequence title, boolean saveTitle)

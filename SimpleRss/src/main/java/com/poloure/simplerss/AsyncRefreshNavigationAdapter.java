@@ -75,7 +75,7 @@ class AsyncRefreshNavigationAdapter extends AsyncTask<int[], Void, int[]>
          /* For each index entry. */
          for(int j = 0; j < indexTagsCount; j++)
          {
-            if(indexTags[j].equals(currentTags[i]))
+            if(indexTags[j].contains(currentTags[i]))
             {
                String longFile = indexNames[j] + append;
                Set<Long> longSet = Read.longSet(longFile, context);

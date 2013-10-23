@@ -2,7 +2,7 @@ package com.poloure.simplerss;
 
 import android.content.DialogInterface;
 
-class OnDialogClickCancel implements DialogInterface.OnClickListener
+class OnDialogClickNegative implements DialogInterface.OnClickListener
 {
    @Override
    public
