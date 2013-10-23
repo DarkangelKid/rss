@@ -1,6 +1,5 @@
 package com.poloure.simplerss;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -49,14 +48,11 @@ class FragmentManageFeeds extends ListFragment
       super.onListItemClick(l, v, position, id);
       Context context = getActivity();
 
-      ListView navigationList = (ListView) ((Activity) context).findViewById(R.id.left_drawer);
-      BaseAdapter navigationAdapter = (BaseAdapter) navigationList.getAdapter();
-
-      showEditDialog(navigationAdapter, context, position);
+      showEditDialog(context, position);
    }
 
    static
-   void showEditDialog(BaseAdapter navigationAdapter, Context context, int position)
+   void showEditDialog(Context context, int position)
    {
       LayoutInflater inf = LayoutInflater.from(context);
       View dialogLayout = inf.inflate(R.layout.add_rss_dialog, null);
@@ -73,7 +69,7 @@ class FragmentManageFeeds extends ListFragment
          negativeButtonText = context.getString(R.string.cancel_dialog);
          positiveButtonText = context.getString(R.string.add_dialog);
 
-         onAddEdit = new OnDialogClickAdd(dialogLayout, context);
+         onAddEdit = new OnDialogClickAdd(context);
       }
       else
       {
@@ -90,7 +86,7 @@ class FragmentManageFeeds extends ListFragment
          negativeButtonText = context.getString(R.string.cancel_dialog);
          positiveButtonText = context.getString(R.string.accept_dialog);
 
-         onAddEdit = new OnDialogClickEdit(dialogLayout, title, context);
+         onAddEdit = new OnDialogClickEdit(title, context);
       }
 
       /* Create the button click listeners. */
@@ -100,7 +96,6 @@ class FragmentManageFeeds extends ListFragment
       AlertDialog.Builder build = new AlertDialog.Builder(context);
       build.setTitle(titleText);
       build.setView(dialogLayout);
-      build.setCancelable(true);
       build.setNegativeButton(negativeButtonText, onCancel);
       build.setPositiveButton(positiveButtonText, onAddEdit);
       build.show();
@@ -115,16 +110,13 @@ class FragmentManageFeeds extends ListFragment
       Context context = getActivity();
       ListView listView = getListView();
 
-      ListView navigationList = (ListView) ((Activity) context).findViewById(R.id.left_drawer);
-      BaseAdapter navigationAdapter = (BaseAdapter) navigationList.getAdapter();
-
       ListAdapter listAdapter = new AdapterManageFeeds(context);
       AdapterView.OnItemLongClickListener onItemLongClick = new OnLongClickManageFeedItem(this,
             (BaseAdapter) listAdapter);
 
       setListAdapter(listAdapter);
       listView.setOnItemLongClickListener(onItemLongClick);
-      manageFeeds(listView, listAdapter);
+      asyncCompatManageFeedsRefresh(listView, context);
 
       ActionBarActivity activity = (ActionBarActivity) getActivity();
 
@@ -135,21 +127,10 @@ class FragmentManageFeeds extends ListFragment
       actionBar.setSubtitle(manageTitles[0]);
    }
 
-   /* Add a new feed. */
-   @Override
-   public
-   boolean onOptionsItemSelected(MenuItem item)
+   static
+   void asyncCompatManageFeedsRefresh(ListView listView, Context context)
    {
-      FragmentActivity activity = getActivity();
-      return activity.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
-   }
-
-   private
-   void manageFeeds(ListView listView, ListAdapter listAdapter)
-   {
-      Context context = getActivity();
-      AsyncTask<Void, String[], Void> task = new AsyncManageFeedsRefresh(listView,
-            (BaseAdapter) listAdapter, context);
+      AsyncTask<Void, String[], Void> task = new AsyncManageFeedsRefresh(listView, context);
       if(Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT)
       {
          task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -158,6 +139,15 @@ class FragmentManageFeeds extends ListFragment
       {
          task.execute();
       }
+   }
+
+   /* Add a new feed. */
+   @Override
+   public
+   boolean onOptionsItemSelected(MenuItem item)
+   {
+      FragmentActivity activity = getActivity();
+      return activity.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
    }
 
 }

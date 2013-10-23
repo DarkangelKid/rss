@@ -3,19 +3,14 @@ package com.poloure.simplerss;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.view.View;
-import android.widget.TextView;
 
 class OnDialogClickEdit implements DialogInterface.OnClickListener
 {
-   private static final String UNSORTED_TAG = "Unsorted";
-   private final View        m_editRssDialog;
    private final String      m_title;
    private final Context     m_context;
 
-   OnDialogClickEdit(View editRssDialog, String title, Context context)
+   OnDialogClickEdit(String title, Context context)
    {
-      m_editRssDialog = editRssDialog;
       m_title = title;
       m_context = context;
    }
@@ -24,19 +19,7 @@ class OnDialogClickEdit implements DialogInterface.OnClickListener
    public
    void onClick(DialogInterface dialog, int which)
    {
-      String editTag = ((TextView) m_editRssDialog.findViewById(R.id.tag_edit)).getText()
-            .toString();
-      String newUrl = ((TextView) m_editRssDialog.findViewById(R.id.feed_url_edit)).getText()
-            .toString();
-      String newName = ((TextView) m_editRssDialog.findViewById(R.id.name_edit)).getText()
-            .toString();
-
-      if(0 == editTag.length())
-      {
-         editTag = UNSORTED_TAG;
-      }
-
-      Update.executeFeedCheck((AlertDialog) dialog, editTag, newName, AsyncCheckFeed.MODE_EDIT_FEED, m_title,
-            newUrl, m_context);
+      Update.executeFeedCheck((AlertDialog) dialog, AsyncCheckFeed.MODE_EDIT_FEED, m_title,
+            m_context);
    }
 }

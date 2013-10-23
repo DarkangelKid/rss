@@ -326,7 +326,7 @@ class FeedsActivity extends ActionBarActivity
       }
       else if(menuText.equals(addFeed))
       {
-         FragmentManageFeeds.showEditDialog(navigationAdapter, this, FragmentManageFeeds.MODE_ADD);
+         FragmentManageFeeds.showEditDialog(this, FragmentManageFeeds.MODE_ADD);
       }
       else if(menuText.equals(jumpTo))
       {

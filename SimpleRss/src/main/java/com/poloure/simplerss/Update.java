@@ -10,7 +10,7 @@ import android.view.animation.Animation;
 
 class Update
 {
-   public static
+   static
    void navigation(Activity activity)
    {
       AsyncTask<int[], Void, int[]> task = new AsyncRefreshNavigationAdapter(activity);
@@ -24,7 +24,7 @@ class Update
       }
    }
 
-   public static
+   static
    void asyncCompatRefreshPage(int pageNumber, FragmentManager fragmentManager, Context context)
    {
       AsyncTask<Integer, Object, Animation> task = new AsyncRefreshPage(fragmentManager, context);
@@ -38,19 +38,18 @@ class Update
       }
    }
 
-   public static
-   void executeFeedCheck(AlertDialog dlg, String ntag, String fname, String mode, String ctitle,
-         String url, Context context)
+   static
+   void executeFeedCheck(AlertDialog dialog, int mode, String oldFeedTitle, Context context)
    {
-      AsyncTask<String, Void, String[]> task = new AsyncCheckFeed(dlg, ntag, fname, mode, ctitle,
+      AsyncTask<Void, Void, String[]> task = new AsyncCheckFeed(dialog, mode, oldFeedTitle,
             context);
       if(Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT)
       {
-         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url);
+         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
       }
       else
       {
-         task.execute(url);
+         task.execute();
       }
    }
 }

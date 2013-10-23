@@ -18,10 +18,10 @@ class AsyncManageTagsRefresh extends AsyncTask<Void, String[], Void>
    private final BaseAdapter m_adapter;
    private final Context     m_context;
 
-   AsyncManageTagsRefresh(ListView listView, BaseAdapter adapter, Context context)
+   AsyncManageTagsRefresh(ListView listView, Context context)
    {
       m_listView = listView;
-      m_adapter = adapter;
+      m_adapter = (BaseAdapter) listView.getAdapter();
       m_fadeIn = AnimationUtils.loadAnimation(context, android.R.anim.fade_in);
 
       if(0 == m_adapter.getCount())

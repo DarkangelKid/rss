@@ -13,11 +13,10 @@ import android.widget.ListView;
 
 class FragmentManageTags extends ListFragment
 {
-   private static
-   void asyncCompatManageTagsRefresh(ListView listView, BaseAdapter listAdapter, Context context)
+   static
+   void asyncCompatManageTagsRefresh(ListView listView, Context context)
    {
-      AsyncTask<Void, String[], Void> task = new AsyncManageTagsRefresh(listView, listAdapter,
-            context);
+      AsyncTask<Void, String[], Void> task = new AsyncManageTagsRefresh(listView, context);
       if(Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT)
       {
          task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -45,7 +44,7 @@ class FragmentManageTags extends ListFragment
       BaseAdapter baseAdapter = new AdapterManagerTags(context);
       setListAdapter(baseAdapter);
 
-      asyncCompatManageTagsRefresh(listView, baseAdapter, context);
+      asyncCompatManageTagsRefresh(listView, context);
    }
 
    @Override

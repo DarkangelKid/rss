@@ -3,7 +3,6 @@ package com.poloure.simplerss;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.res.Resources;
 import android.view.View;
 import android.widget.TextView;
 
@@ -24,13 +23,10 @@ class OnCardLongClick implements View.OnLongClickListener
       TextView textView = (TextView) v.findViewById(R.id.url);
       CharSequence url = textView.getText();
 
-      Resources resources = m_context.getResources();
-      String[] menuItems = resources.getStringArray(R.array.card_menu_image);
       DialogInterface.OnClickListener onClick = new OnCardContextMenuClick(url, m_context);
 
       AlertDialog.Builder build = new AlertDialog.Builder(m_context);
-      build.setCancelable(true);
-      build.setItems(menuItems, onClick);
+      build.setItems(R.array.card_click_menu, onClick);
       build.show();
 
       return true;

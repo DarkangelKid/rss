@@ -5,9 +5,14 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.ListFragment;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.widget.Button;
+import android.widget.ListView;
+import android.widget.TextView;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -19,65 +24,55 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
+class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
 {
    /* Formats */
    static final         String  INDEX_FORMAT            = "feed|%s|url|%s|tag|%s|";
-   static final         String  MODE_ADD_FEED           = "add";
-   static final         String  MODE_EDIT_FEED          = "edit";
+   static final         int     MODE_ADD_FEED           = 1;
+   static final         int     MODE_EDIT_FEED          = 2;
    private static final String  TAG_TITLE               = "<title";
    private static final String  END_TAG_TITLE           = "</title>";
    private static final Pattern ILLEGAL_FILE_CHARS      = Pattern.compile("[/\\?%*|<>:]");
    private static final Pattern SPLIT_SPACE             = Pattern.compile(" ");
    private static final int     FEED_STREAM_BYTE_BUFFER = 512;
-   private static final int     TAG_INITIAL_CAPACITY    = 32;
    private final AlertDialog m_dialog;
-   private final String      m_mode;
-   private final String      m_title;
+   private final int         m_mode;
+   private final String      m_oldFeedName;
    private final Context     m_context;
-   private       String      m_tag;
-   private       boolean     m_isFeedNotReal;
-   private       String      m_name;
+   private       boolean     m_isFeedReal;
 
-   AsyncCheckFeed(AlertDialog dialog, String tag, String feedName, String mode, String currentTitle,
-         Context context)
+   AsyncCheckFeed(AlertDialog dialog, int mode, String currentTitle, Context context)
    {
       m_dialog = dialog;
-      m_tag = tag;
-      m_name = feedName;
       m_mode = mode;
-      m_title = currentTitle;
+      m_oldFeedName = currentTitle;
       m_context = context;
       Button button = m_dialog.getButton(DialogInterface.BUTTON_POSITIVE);
       button.setEnabled(false);
    }
 
-   static
-   void updateTags(Activity activity)
-   {
-      ViewPager tagPager = (ViewPager) activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
-
-      PagerAdapter pagerAdapter = tagPager.getAdapter();
-      ((PagerAdapterFeeds) pagerAdapter).getTagsFromDisk(activity);
-      pagerAdapter.notifyDataSetChanged();
-
-      Update.navigation(activity);
-   }
-
    @Override
    protected
-   String[] doInBackground(String... url)
+   String[] doInBackground(Void... nothing)
    {
+      String userInputTags = ((TextView) m_dialog.findViewById(R.id.tag_edit)).getText().toString();
+      Locale defaultLocale = Locale.getDefault();
+
+      String initialTags = 0 == userInputTags.length()
+            ? m_context.getString(R.string.all_tag)
+            : userInputTags.toLowerCase(defaultLocale);
+
+      int tagInitialCapacity = initialTags.length();
+
       /* Capitalise each word. */
-      String[] words = SPLIT_SPACE.split(m_tag);
-      StringBuilder tagBuilder = new StringBuilder(TAG_INITIAL_CAPACITY);
+      String[] words = SPLIT_SPACE.split(initialTags);
+      StringBuilder tagBuilder = new StringBuilder(tagInitialCapacity);
 
       for(String word : words)
       {
          String firstLetter = word.substring(0, 1);
          String restOfWord = word.substring(1);
 
-         Locale defaultLocale = Locale.getDefault();
          String firstLetterUpper = firstLetter.toUpperCase(defaultLocale);
          String restOfWordLower = restOfWord.toLowerCase(defaultLocale);
 
@@ -89,11 +84,16 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
       int tagLength = tagBuilder.length();
       int lastChar = tagLength - 1;
       tagBuilder.delete(lastChar, tagLength);
-      m_tag = tagBuilder.toString();
+      String finalTag = tagBuilder.toString();
 
-      String[] checkList = url[0].contains("http") ? new String[]{url[0]} : new String[]{
-            "http://" + url[0], "https://" + url[0]
-      };
+      String userInputUrl = ((TextView) m_dialog.findViewById(R.id.feed_url_edit)).getText()
+            .toString();
+
+      String[] checkList = userInputUrl.contains("http")
+            ? new String[]{userInputUrl}
+            : new String[]{
+                  "http://" + userInputUrl, "https://" + userInputUrl
+            };
 
       String feedUrl = "";
       String feedTitle = "";
@@ -127,7 +127,7 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
                   int lessIndex = line.indexOf("</", moreIndex);
 
                   feedTitle = line.substring(moreIndex, lessIndex);
-                  m_isFeedNotReal = false;
+                  m_isFeedReal = true;
                   feedUrl = check;
                }
             }
@@ -148,14 +148,14 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
             e.printStackTrace();
          }
       }
-      return new String[]{feedUrl, feedTitle};
+      return new String[]{feedUrl, feedTitle, finalTag};
    }
 
    @Override
    protected
    void onPostExecute(String[] result)
    {
-      if(m_isFeedNotReal)
+      if(!m_isFeedReal)
       {
          Button button = m_dialog.getButton(DialogInterface.BUTTON_POSITIVE);
          if(null != button)
@@ -165,57 +165,81 @@ class AsyncCheckFeed extends AsyncTask<String, Void, String[]>
          return;
       }
 
-      if(0 == m_name.length())
+      String feedUrlFromCheck = result[0];
+      String feedTitleFromXml = result[1];
+      String feedTag = result[2];
+
+      String userInputName = ((TextView) m_dialog.findViewById(R.id.name_edit)).getText()
+            .toString();
+
+      /* Did the user enter a feed name? If not, use the feed title found from the check. */
+      String finalName = 0 == userInputName.length() ? feedTitleFromXml : userInputName;
+
+      /* Replace any characters that are not allowed in file names. */
+      Matcher matcher = ILLEGAL_FILE_CHARS.matcher(finalName);
+      finalName = matcher.replaceAll("");
+
+      /* Create the csv. */
+      String feedInfo = String.format(INDEX_FORMAT, finalName, feedUrlFromCheck, feedTag) +
+            System.getProperty("line.separator");
+
+      if(MODE_EDIT_FEED == m_mode)
       {
-         m_name = result[1];
+         editFeed(m_oldFeedName, finalName);
       }
 
-      Matcher matcher = ILLEGAL_FILE_CHARS.matcher(m_name);
-      m_name = matcher.replaceAll("");
+      /* Save the feed to the index. */
+      Write.single(Read.INDEX, feedInfo, m_context);
 
-      if(MODE_EDIT_FEED.equals(m_mode))
-      {
-         editFeed(m_title, m_name, result[0], m_tag, m_context);
-      }
-      else if(MODE_ADD_FEED.equals(m_mode))
-      {
-
-         /* Create the csv. */
-         String feedInfo = String.format(INDEX_FORMAT, m_name, result[0], m_tag) +
-               System.getProperty("line.separator");
-
-         /* Save the feed to the index. */
-         Write.single(Read.INDEX, feedInfo, m_context);
-
-         /* TODO Update the manage ListViews with the new information. */
-      }
-
+      /* Update the tags. */
       updateTags((Activity) m_context);
+
+      /* Update the manage ListView adapters. */
+      FragmentManager fragmentManager = ((FragmentActivity) m_context).getSupportFragmentManager();
+
+      String tagPrefix = "android:switcher:" + FragmentManage.VIEW_PAGER_ID + ':';
+      String tagTag = tagPrefix + 0;
+      String feedsTag = tagPrefix + 1;
+
+      ListFragment tagFragment = (ListFragment) fragmentManager.findFragmentByTag(tagTag);
+      ListFragment feedsFragment = (ListFragment) fragmentManager.findFragmentByTag(feedsTag);
+
+      ListView tagListView = tagFragment.getListView();
+      ListView feedsListView = feedsFragment.getListView();
+
+      FragmentManageTags.asyncCompatManageTagsRefresh(tagListView, m_context);
+      FragmentManageFeeds.asyncCompatManageFeedsRefresh(feedsListView, m_context);
 
       m_dialog.dismiss();
    }
 
-   private static
-   void editFeed(CharSequence oldFeed, String newFeed, String newUrl, String newTag,
-         Context context)
+   static
+   void updateTags(Activity activity)
    {
+      ViewPager tagPager = (ViewPager) activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
 
+      PagerAdapter pagerAdapter = tagPager.getAdapter();
+      ((PagerAdapterFeeds) pagerAdapter).getTagsFromDisk(activity);
+      pagerAdapter.notifyDataSetChanged();
+
+      Update.navigation(activity);
+   }
+
+   private
+   void editFeed(CharSequence oldFeed, String newFeed)
+   {
+      /* Rename the folder if it is different. */
       String oldFeedFolder = oldFeed + File.separator;
       String newFeedFolder = newFeed + File.separatorChar;
 
       if(!oldFeed.equals(newFeed))
       {
-         Util.moveFile(oldFeedFolder, newFeedFolder, context);
+         Util.moveFile(oldFeedFolder, newFeedFolder, m_context);
       }
 
       /* Replace the all_tag file with the new image and data. */
-      String index = Read.INDEX;
-      String entry = String.format(INDEX_FORMAT, newFeed, newUrl, newTag);
+      Write.removeLine(Read.INDEX, oldFeed, true, m_context);
 
-      Write.removeLine(index, oldFeed, true, context);
-      Write.single(index, entry + System.getProperty("line.separator"), context);
-
-      // TODO AsyncManageTagsRefresh(listView, listAdapter);
    }
 
    private static
