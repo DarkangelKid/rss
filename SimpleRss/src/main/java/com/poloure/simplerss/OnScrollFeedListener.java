@@ -1,49 +1,48 @@
 package com.poloure.simplerss;
 
-import android.app.Activity;
-import android.content.Context;
-import android.content.res.Resources;
-import android.util.DisplayMetrics;
+import android.support.v7.app.ActionBar;
 import android.view.View;
 import android.widget.AbsListView;
-import android.widget.BaseAdapter;
 
 class OnScrollFeedListener implements AbsListView.OnScrollListener
 {
-   private static final int SIXTEEN_VALUE = 16;
-   private final BaseAdapter m_feedAdapter;
-   private final Context     m_context;
-   private final int         m_sixteen;
+   private final int              m_sixteenDp;
+   private final String           m_applicationFolder;
+   private final int              m_page;
+   private final AdapterNavDrawer m_adapterNavDrawer;
+   private final ActionBar        m_actionBar;
 
-   OnScrollFeedListener(BaseAdapter feedAdapter, Context context)
+   OnScrollFeedListener(AdapterNavDrawer adapterNavDrawer, ActionBar actionBar,
+         String applicationFolder, int page, int sixteenDp)
    {
-      m_feedAdapter = feedAdapter;
-      m_context = context;
-
-      Resources resources = context.getResources();
-      DisplayMetrics displayMetrics = resources.getDisplayMetrics();
-      m_sixteen = Math.round(SIXTEEN_VALUE * displayMetrics.density);
+      m_adapterNavDrawer = adapterNavDrawer;
+      m_actionBar = actionBar;
+      m_applicationFolder = applicationFolder;
+      m_page = page;
+      m_sixteenDp = sixteenDp;
    }
 
    @Override
    public
    void onScrollStateChanged(AbsListView view, int scrollState)
    {
+      AdapterTags adapterTags = (AdapterTags) view.getAdapter();
       View topView = view.getChildAt(0);
       boolean isTopView = null != topView;
-      boolean isSixteenGap = isTopView && m_sixteen == topView.getTop();
+      boolean isSixteenGap = isTopView && m_sixteenDp == topView.getTop();
       boolean isListViewShown = view.isShown();
-      boolean readingItems = ((AdapterTags) m_feedAdapter).m_readingItems;
+      boolean readingItems = adapterTags.m_readingItems;
 
       if(isTopView && isSixteenGap && isListViewShown && readingItems)
       {
-         Long time = ((FeedItem) m_feedAdapter.getItem(0)).m_itemTime;
+         Long time = ((FeedItem) adapterTags.getItem(0)).m_itemTime;
          AdapterTags.S_READ_ITEM_TIMES.add(time);
       }
 
       if(AbsListView.OnScrollListener.SCROLL_STATE_IDLE == scrollState)
       {
-         Update.navigation((Activity) m_context);
+         AsyncRefreshNavigationAdapter.newInstance(m_adapterNavDrawer, m_actionBar,
+               m_applicationFolder, m_page);
       }
    }
 

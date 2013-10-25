@@ -1,9 +1,6 @@
 package com.poloure.simplerss;
 
-import android.content.Context;
-import android.content.res.Resources;
 import android.os.Build;
-import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,22 +16,19 @@ class AdapterNavDrawer extends BaseAdapter
    private static final int   TYPE_DIVIDER = 1;
    private static final int   TYPE_TAG     = 2;
    private static final int[] TYPES        = {TYPE_TITLE, TYPE_DIVIDER, TYPE_TAG};
-   private static final float TWELVE_VALUE = 12.0F;
-   private final int            m_twelve;
+   private final int            m_twelveDp;
+   private final String[]       m_navigationTitles;
    private final LayoutInflater m_layoutInflater;
-   private final Context        m_context;
    String[] m_tagArray = new String[0];
    static final int[] EMPTY_INT_ARRAY = new int[0];
    int[] m_unreadArray = EMPTY_INT_ARRAY;
    private TextView m_navigationMainItem;
 
-   AdapterNavDrawer(Context context)
+   AdapterNavDrawer(String[] navigationTitles, int twelveDp, LayoutInflater layoutInflater)
    {
-      m_context = context;
-      m_layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-      Resources resources = context.getResources();
-      DisplayMetrics displayMetrics = resources.getDisplayMetrics();
-      m_twelve = Math.round(TWELVE_VALUE * displayMetrics.density);
+      m_navigationTitles = navigationTitles;
+      m_layoutInflater = layoutInflater;
+      m_twelveDp = twelveDp;
    }
 
    @Override
@@ -75,10 +69,7 @@ class AdapterNavDrawer extends BaseAdapter
             m_navigationMainItem = (TextView) view.findViewById(R.id.menu_item);
          }
 
-         Resources resources = m_context.getResources();
-         String[] navTitles = resources.getStringArray(R.array.nav_titles);
-
-         m_navigationMainItem.setText(navTitles[position]);
+         m_navigationMainItem.setText(m_navigationTitles[position]);
 
          /* Set the item's image as a CompoundDrawable of the textView. */
          if(Build.VERSION_CODES.JELLY_BEAN_MR1 <= Build.VERSION.SDK_INT)
@@ -86,7 +77,7 @@ class AdapterNavDrawer extends BaseAdapter
             m_navigationMainItem.setCompoundDrawablesRelativeWithIntrinsicBounds(
                   NAV_ICONS[position], 0, 0, 0);
          }
-         m_navigationMainItem.setCompoundDrawablePadding(m_twelve);
+         m_navigationMainItem.setCompoundDrawablePadding(m_twelveDp);
       }
       else if(TYPE_DIVIDER == viewType && null == view)
       {

@@ -42,13 +42,23 @@ class FragmentTag extends ListFragment
       Context context = getActivity();
       ListView listView = getListView();
 
-      BaseAdapter listAdapter = new AdapterTags(context);
+      String applicationFolder = FeedsActivity.getApplicationFolder(context);
+
+      BaseAdapter listAdapter = new AdapterTags(context, FeedsActivity.READ_ITEMS,
+            applicationFolder);
+
       setListAdapter(listAdapter);
 
       Bundle bundle = getArguments();
       int position = bundle.getInt(POSITION_KEY);
 
-      AbsListView.OnScrollListener scrollListener = new OnScrollFeedListener(listAdapter, context);
+      ActionBarActivity activity = (ActionBarActivity) getActivity();
+      ListView navigationList = (ListView) activity.findViewById(R.id.left_drawer);
+      AdapterNavDrawer adapterNavDrawer = (AdapterNavDrawer) navigationList.getAdapter();
+      ActionBar actionBar = activity.getSupportActionBar();
+
+      AbsListView.OnScrollListener scrollListener = new OnScrollFeedListener(adapterNavDrawer,
+            actionBar, applicationFolder, position, /* TODO */ 24);
 
       listView.setOnScrollListener(scrollListener);
       listView.setOnItemClickListener(new ClickListener(this));
@@ -56,7 +66,13 @@ class FragmentTag extends ListFragment
       if(0 == position)
       {
          FragmentManager fragmentManager = getFragmentManager();
-         Update.asyncCompatRefreshPage(0, fragmentManager, context);
+
+         String fragmentTag = "android:switcher:" + FragmentFeeds.VIEW_PAGER_ID + ':' + 0;
+         String storage = FeedsActivity.getApplicationFolder(context);
+
+         ListFragment listFragment = (ListFragment) fragmentManager.findFragmentByTag(fragmentTag);
+         ListView listViewTags = listFragment.getListView();
+         AsyncRefreshPage.newInstance(0, listViewTags, storage, /* TODO 16 DP. */ 24, true);
       }
    }
 

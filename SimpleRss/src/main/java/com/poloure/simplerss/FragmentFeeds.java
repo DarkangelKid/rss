@@ -2,6 +2,7 @@ package com.poloure.simplerss;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -41,12 +42,17 @@ class FragmentFeeds extends Fragment
 
       setHasOptionsMenu(true);
       FragmentManager fragmentManager = ((FragmentActivity) context).getSupportFragmentManager();
+      Resources resources = getResources();
+      String applicationFolder = FeedsActivity.getApplicationFolder(context);
+      String allTag = resources.getString(R.string.all_tag);
 
       ListView navigationList = (ListView) ((Activity) context).findViewById(R.id.left_drawer);
       BaseAdapter navigationAdapter = (BaseAdapter) navigationList.getAdapter();
 
       ViewPager.OnPageChangeListener pageChange = new OnPageChangeTags(this, navigationAdapter);
-      PagerAdapter adapter = new PagerAdapterFeeds(fragmentManager, context);
+      PagerAdapter adapter = new PagerAdapterFeeds(fragmentManager);
+      PagerAdapterFeeds.getTagsFromDisk(applicationFolder, allTag);
+      adapter.notifyDataSetChanged();
 
       ViewPager viewPager = new ViewPager(context);
       viewPager.setAdapter(adapter);

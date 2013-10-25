@@ -31,13 +31,23 @@ class FragmentManageFilters extends ListFragment
       setHasOptionsMenu(true);
 
       Context context = getActivity();
-      BaseAdapter baseAdapter = new AdapterManageFilters(context);
+      LayoutInflater layoutInflater = getLayoutInflater(savedInstanceState);
+      String applicationFolder = FeedsActivity.getApplicationFolder(context);
+
+      BaseAdapter baseAdapter = new AdapterManageFilters(applicationFolder,
+            FeedsActivity.FILTER_LIST, layoutInflater);
+
       setListAdapter(baseAdapter);
       baseAdapter.notifyDataSetChanged();
 
       ListView listview = getListView();
 
-      AdapterView.OnItemLongClickListener onFilterLongClick = new OnFilterLongClick(this);
+      AlertDialog.Builder builder = new AlertDialog.Builder(context);
+      String deleteString = getString(R.string.delete_filter);
+
+      AdapterView.OnItemLongClickListener onFilterLongClick = new OnFilterLongClick(builder,
+            deleteString, applicationFolder);
+
       listview.setOnItemLongClickListener(onFilterLongClick);
    }
 
@@ -70,8 +80,10 @@ class FragmentManageFilters extends ListFragment
       ListView navigationList = (ListView) ((Activity) context).findViewById(R.id.left_drawer);
       BaseAdapter navigationAdapter = (BaseAdapter) navigationList.getAdapter();
 
+      String applicationFolder = FeedsActivity.getApplicationFolder(context);
+
       DialogInterface.OnClickListener onClickAdd = new OnFilterDialogClickAdd(addFilterLayout,
-            navigationAdapter, context);
+            navigationAdapter, applicationFolder);
 
       AlertDialog.Builder build = new AlertDialog.Builder(context);
       build.setTitle(addFilterText);

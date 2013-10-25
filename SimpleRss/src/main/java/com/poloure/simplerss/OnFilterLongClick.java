@@ -2,36 +2,36 @@ package com.poloure.simplerss;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.ListFragment;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.ListAdapter;
 
 class OnFilterLongClick implements AdapterView.OnItemLongClickListener
 {
-   private final ListFragment m_filters;
+   private final AlertDialog.Builder m_builder;
+   private final String              m_deleteString;
+   private final String              m_applicationFolder;
 
-   OnFilterLongClick(ListFragment filters)
+   OnFilterLongClick(AlertDialog.Builder builder, String deleteString, String applicationFolder)
    {
-      m_filters = filters;
+      m_builder = builder;
+      m_deleteString = deleteString;
+      m_applicationFolder = applicationFolder;
    }
 
    @Override
    public
    boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id)
    {
-      FragmentActivity activity = m_filters.getActivity();
-      ListAdapter listAdapter = m_filters.getListAdapter();
+      BaseAdapter adapter = (BaseAdapter) parent.getAdapter();
+      String filterName = (String) adapter.getItem(position);
 
-      String deleteString = activity.getString(R.string.delete_dialog);
-      DialogInterface.OnClickListener onFilterClickDelete = new OnFilterClickDelete(
-            (BaseAdapter) listAdapter, activity);
+      DialogInterface.OnClickListener onFilterClickDelete = new OnFilterClickDelete(adapter,
+            m_applicationFolder, FeedsActivity.FILTER_LIST, filterName);
 
-      AlertDialog.Builder build = new AlertDialog.Builder(activity);
-      build.setPositiveButton(deleteString, onFilterClickDelete);
-      build.show();
+      m_builder.setPositiveButton(m_deleteString, onFilterClickDelete);
+
+      m_builder.show();
       return true;
    }
 }

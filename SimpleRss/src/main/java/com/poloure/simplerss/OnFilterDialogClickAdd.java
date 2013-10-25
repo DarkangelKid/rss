@@ -1,7 +1,6 @@
 package com.poloure.simplerss;
 
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.view.View;
 import android.widget.BaseAdapter;
@@ -11,13 +10,13 @@ class OnFilterDialogClickAdd implements DialogInterface.OnClickListener
 {
    private final View        m_addFilterLayout;
    private final BaseAdapter m_adapter;
-   private final Context     m_context;
+   private final String      m_applicationFolder;
 
-   OnFilterDialogClickAdd(View addFilterLayout, BaseAdapter adapterManageFilters, Context context)
+   OnFilterDialogClickAdd(View addFilterLayout, BaseAdapter adapterManageFilters, String applicationFolder)
    {
-      m_context = context;
       m_addFilterLayout = addFilterLayout;
       m_adapter = adapterManageFilters;
+      m_applicationFolder = applicationFolder;
    }
 
    @Override
@@ -25,11 +24,11 @@ class OnFilterDialogClickAdd implements DialogInterface.OnClickListener
    void onClick(DialogInterface dialog, int which)
    {
       String filter = getText((TextView) m_addFilterLayout);
-      String path = AdapterManageFilters.FILTER_LIST;
-      String[] filters = Read.file(path, m_context);
+      String fileName = FeedsActivity.FILTER_LIST;
+      String[] filters = Read.file(fileName, m_applicationFolder);
       if(-1 == ServiceUpdate.index(filters, filter))
       {
-         Write.single(path, filter + System.getProperty("line.separator"), m_context);
+         Write.single(fileName, filter + System.getProperty("line.separator"), m_applicationFolder);
       }
       m_adapter.notifyDataSetChanged();
       ((Dialog) dialog).hide();

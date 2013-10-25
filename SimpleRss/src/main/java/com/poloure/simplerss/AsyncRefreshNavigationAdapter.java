@@ -1,64 +1,63 @@
 package com.poloure.simplerss;
 
-import android.app.Activity;
-import android.content.Context;
 import android.os.AsyncTask;
-import android.support.v4.view.ViewPager;
+import android.os.Build;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
-import android.widget.BaseAdapter;
-import android.widget.ListView;
 
 import java.io.File;
 import java.util.Set;
 
-class AsyncRefreshNavigationAdapter extends AsyncTask<int[], Void, int[]>
+class AsyncRefreshNavigationAdapter extends AsyncTask<String, Void, int[]>
 {
-   private final ActionBarActivity m_activity;
+   private final AdapterNavDrawer m_adapterNavDrawer;
+   private final ActionBar        m_actionBar;
+   private final int              m_currentPage;
 
-   AsyncRefreshNavigationAdapter(Activity activity)
+   AsyncRefreshNavigationAdapter(AdapterNavDrawer adapterNavDrawer, ActionBar actionBar,
+         int currentPage)
    {
-      m_activity = (ActionBarActivity) activity;
+      m_adapterNavDrawer = adapterNavDrawer;
+      m_actionBar = actionBar;
+      m_currentPage = currentPage;
    }
 
+   /* For when the user is updating the navigation drawer not from the Feeds page. */
+   static
+   AsyncTask<String, Void, int[]> newInstance(AdapterNavDrawer adapterNavDrawer,
+         String applicationFolder)
+   {
+      return newInstance(adapterNavDrawer, null, applicationFolder, -1);
+   }
+
+   static
+   AsyncTask<String, Void, int[]> newInstance(AdapterNavDrawer adapterNavDrawer,
+         ActionBar actionBar, String applicationFolder, int currentPage)
+   {
+      AsyncTask<String, Void, int[]> task = new AsyncRefreshNavigationAdapter(adapterNavDrawer,
+            actionBar, currentPage);
+
+      if(Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT)
+      {
+         task.executeOnExecutor(THREAD_POOL_EXECUTOR, applicationFolder);
+      }
+      else
+      {
+         task.execute(applicationFolder);
+      }
+      return task;
+   }
+
+   /* Get the unread counts for the tags. */
    @Override
    protected
-   int[] doInBackground(int[]... counts)
+   int[] doInBackground(String... applicationFolder)
    {
+      String appFolder = applicationFolder[0];
+
       /* If null was passed into the task, count the unread items. */
-      return 0 == counts[0].length ? getUnreadCounts(m_activity) : counts[0];
-   }
-
-   @Override
-   protected
-   void onPostExecute(int[] result)
-   {
-      ListView navigationList = (ListView) m_activity.findViewById(R.id.left_drawer);
-      BaseAdapter navigationAdapter = (BaseAdapter) navigationList.getAdapter();
-
-      /* Set the titles & counts arrays in this file and notify the adapter. */
-      ((AdapterNavDrawer) navigationAdapter).m_tagArray = PagerAdapterFeeds.getTagsArray();
-      ((AdapterNavDrawer) navigationAdapter).m_unreadArray = result;
-      navigationAdapter.notifyDataSetChanged();
-
-      /* Update the subtitle. */
-      ViewPager viewPager = (ViewPager) m_activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
-      int currentPage = viewPager.getCurrentItem();
-
-      String[] item = (String[]) navigationAdapter.getItem(currentPage);
-      String unread = item[0];
-      String tag = item[1];
-
-      ActionBar actionBar = m_activity.getSupportActionBar();
-      actionBar.setSubtitle(tag + " | " + unread);
-   }
-
-   private static
-   int[] getUnreadCounts(Context context)
-   {
       String[] currentTags = PagerAdapterFeeds.getTagsArray();
 
-      String[][] content = Read.csvFile(Read.INDEX, context, 'f', 't');
+      String[][] content = Read.csvFile(Read.INDEX, appFolder, 'f', 't');
       String[] indexNames = content[0];
       String[] indexTags = content[1];
 
@@ -78,7 +77,7 @@ class AsyncRefreshNavigationAdapter extends AsyncTask<int[], Void, int[]>
             if(indexTags[j].contains(currentTags[i]))
             {
                String longFile = indexNames[j] + append;
-               Set<Long> longSet = Read.longSet(longFile, context);
+               Set<Long> longSet = Read.longSet(longFile, appFolder);
 
                longSet.removeAll(AdapterTags.S_READ_ITEM_TIMES);
                unreadCounts[i] += longSet.size();
@@ -89,5 +88,26 @@ class AsyncRefreshNavigationAdapter extends AsyncTask<int[], Void, int[]>
 
       unreadCounts[0] = total;
       return unreadCounts;
+   }
+
+   @Override
+   protected
+   void onPostExecute(int[] result)
+   {
+      /* Set the titles & counts arrays in this file and notify the adapter. */
+      /* TODO We get the tag array twice in this class. */
+      m_adapterNavDrawer.m_tagArray = PagerAdapterFeeds.getTagsArray();
+      m_adapterNavDrawer.m_unreadArray = result;
+      m_adapterNavDrawer.notifyDataSetChanged();
+
+      /* Update the subtitle if actionBar != null. */
+      if(null != m_actionBar)
+      {
+         String[] item = m_adapterNavDrawer.getItem(m_currentPage);
+         String unread = item[0];
+         String tag = item[1];
+
+         m_actionBar.setSubtitle(tag + " | " + unread);
+      }
    }
 }

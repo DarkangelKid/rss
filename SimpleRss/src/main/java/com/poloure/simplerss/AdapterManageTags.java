@@ -10,7 +10,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-class AdapterManagerTags extends BaseAdapter
+class AdapterManageTags extends BaseAdapter
 {
    private static final long      TAG_SWAP_FADE_DURATION = 120L;
    private static final Animation FADE_IN                = new AlphaAnimation(0.0F, 1.0F);
@@ -19,7 +19,7 @@ class AdapterManagerTags extends BaseAdapter
    private              String[]  m_infoArray            = new String[0];
    private final LayoutInflater m_layoutInflater;
 
-   AdapterManagerTags(Context context)
+   AdapterManageTags(Context context)
    {
       m_layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 

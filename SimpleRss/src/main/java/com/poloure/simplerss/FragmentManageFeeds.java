@@ -4,8 +4,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.ListFragment;
@@ -15,8 +13,6 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -47,14 +43,16 @@ class FragmentManageFeeds extends ListFragment
    {
       super.onListItemClick(l, v, position, id);
       Context context = getActivity();
+      LayoutInflater inflater = LayoutInflater.from(context);
+      String applicationFolder = FeedsActivity.getApplicationFolder(context);
 
-      showEditDialog(context, position);
+      showEditDialog(position, applicationFolder, inflater, context);
    }
 
    static
-   void showEditDialog(Context context, int position)
+   void showEditDialog(int position, String applicationFolder, LayoutInflater inflater,
+         Context context)
    {
-      LayoutInflater inflater = LayoutInflater.from(context);
       View dialogLayout = inflater.inflate(R.layout.add_rss_dialog, null);
 
       String oldFeedTitle = "";
@@ -62,7 +60,7 @@ class FragmentManageFeeds extends ListFragment
       /* If the mode is edit. */
       if(MODE_ADD != position)
       {
-         String[][] content = Read.indexFile(context);
+         String[][] content = Read.indexFile(applicationFolder);
          oldFeedTitle = content[0][position];
          String url = content[1][position];
          String tag = content[2][position];
@@ -82,8 +80,9 @@ class FragmentManageFeeds extends ListFragment
       String positiveButtonText = context.getString(R.string.add_dialog);
 
       /* Create the button click listeners. */
-      DialogInterface.OnClickListener onClickPositive = new OnDialogClickPositive(context,
-            oldFeedTitle);
+      String allTag = context.getString(R.string.all_tag);
+      DialogInterface.OnClickListener onClickPositive = new OnDialogClickPositive(oldFeedTitle,
+            applicationFolder, allTag);
 
       /* Build the AlertDialog. */
       AlertDialog.Builder build = new AlertDialog.Builder(context);
@@ -102,34 +101,22 @@ class FragmentManageFeeds extends ListFragment
 
       ActionBarActivity activity = (ActionBarActivity) getActivity();
       ListView listView = getListView();
+      String applicationFolder = FeedsActivity.getApplicationFolder(activity);
 
       ListAdapter listAdapter = new AdapterManageFeeds(activity);
-      AdapterView.OnItemLongClickListener onItemLongClick = new OnLongClickManageFeedItem(activity,
-            (BaseAdapter) listAdapter);
+
+      /* Make an alertDialog for the long click of a list item. */
+      AlertDialog.Builder build = new AlertDialog.Builder(activity);
 
       setListAdapter(listAdapter);
-      listView.setOnItemLongClickListener(onItemLongClick);
-      asyncCompatManageFeedsRefresh(listView, activity);
+      listView.setOnItemLongClickListener(new OnLongClickManageFeedItem(build, applicationFolder));
+      AsyncManageFeedsRefresh.newInstance(listView, applicationFolder);
 
       Resources resources = activity.getResources();
       String[] manageTitles = resources.getStringArray(R.array.manage_titles);
 
       ActionBar actionBar = activity.getSupportActionBar();
       actionBar.setSubtitle(manageTitles[0]);
-   }
-
-   static
-   void asyncCompatManageFeedsRefresh(ListView listView, Context context)
-   {
-      AsyncTask<Void, String[], Void> task = new AsyncManageFeedsRefresh(listView, context);
-      if(Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT)
-      {
-         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-      }
-      else
-      {
-         task.execute();
-      }
    }
 
    /* Add a new feed. */

@@ -1,6 +1,5 @@
 package com.poloure.simplerss;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,24 +8,26 @@ import android.widget.TextView;
 
 class AdapterManageFilters extends BaseAdapter
 {
-   static final String   FILTER_LIST    = "filter_list.txt";
-   private      String[] m_filterTitles = new String[0];
+   private String[] m_filterTitles = new String[0];
 
    private final LayoutInflater m_layoutInflater;
    private       TextView       m_titleView;
-   private final Context        m_context;
+   private final String         m_filterFileName;
+   private final String         m_applicationFolder;
 
-   AdapterManageFilters(Context context)
+   AdapterManageFilters(String applicationFolder, String filterFileName,
+         LayoutInflater layoutInflater)
    {
-      m_layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-      m_context = context;
+      m_applicationFolder = applicationFolder;
+      m_filterFileName = filterFileName;
+      m_layoutInflater = layoutInflater;
    }
 
    @Override
    public
    void notifyDataSetChanged()
    {
-      m_filterTitles = Read.file(FILTER_LIST, m_context);
+      m_filterTitles = Read.file(m_filterFileName, m_applicationFolder);
       super.notifyDataSetChanged();
    }
 

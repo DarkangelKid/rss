@@ -98,17 +98,18 @@ class ServiceUpdate extends IntentService
       wakeLock.acquire();
 
       int page = intent.getIntExtra("GROUP_NUMBER", 0);
+      String applicationFolder = FeedsActivity.getApplicationFolder(this);
+      String allTag = getString(R.string.all_tag);
 
-      Set<String> tagSet = PagerAdapterFeeds.getTagsFromDisk(this);
+      Set<String> tagSet = PagerAdapterFeeds.getTagsFromDisk(applicationFolder, allTag);
       int tagSize = tagSet.size();
       String tag = tagSet.toArray(new String[tagSize])[page];
 
-      String[][] content = Read.indexFile(this);
+      String[][] content = Read.indexFile(applicationFolder);
       String[] names = content[0];
       String[] urls = content[1];
       String[] tags = content[2];
 
-      String allTag = getString(R.string.all_tag);
       boolean isAllTag = tag.equals(allTag);
 
       /* Download and parse each feed in the index. */
@@ -117,14 +118,15 @@ class ServiceUpdate extends IntentService
       {
          if(isAllTag || tags[i].contains(tag))
          {
-            String path1 = FeedsActivity.getStorage(this) + names[i] + File.separatorChar +
+            String path1 = applicationFolder + names[i] +
+                  File.separatorChar +
                   THUMBNAIL_DIR;
             File folder = new File(path1);
             folder.mkdirs();
 
             try
             {
-               parseFeed(urls[i], names[i]);
+               parseFeed(urls[i], names[i], applicationFolder);
             }
             catch(XmlPullParserException e)
             {
@@ -215,18 +217,18 @@ class ServiceUpdate extends IntentService
    }
 
    private
-   void parseFeed(String urlString, String feed)
+   void parseFeed(String urlString, String feed, String applicationFolder)
          throws XmlPullParserException, MalformedURLException, IOException
    {
       String feedFolder = feed + File.separatorChar;
-      String contentFile = feedFolder + CONTENT;
-      String longFile = feedFolder + ITEM_LIST;
+      String contentFileName = feedFolder + CONTENT;
+      String longFileName = feedFolder + ITEM_LIST;
       String thumbnailDir = feedFolder + THUMBNAIL_DIR;
       /*String[] filters = Read.file(Constants.FILTER_LIST);*/
 
       /* Load the previously saved items to a map. */
-      Set<String> set = fileToSet(contentFile, this);
-      Set<Long> longSet = Read.longSet(longFile, this);
+      Set<String> set = fileToSet(contentFileName, applicationFolder);
+      Set<Long> longSet = Read.longSet(longFileName, applicationFolder);
 
       int setSize = set.size();
       String[] lines = set.toArray(new String[setSize]);
@@ -321,7 +323,7 @@ class ServiceUpdate extends IntentService
                }
                catch(Exception ignored)
                {
-                  Write.toLogFile("BUG : RFC3339, looks like: " + contentText, this);
+                  Write.toLogFile("BUG : RFC3339, looks like: " + contentText, applicationFolder);
                   time.setToNow();
                }
 
@@ -348,7 +350,7 @@ class ServiceUpdate extends IntentService
                }
                catch(Exception ignored)
                {
-                  Write.toLogFile("BUG : rfc882, looks like: " + contentText, this);
+                  Write.toLogFile("BUG : rfc882, looks like: " + contentText, applicationFolder);
                   time.setToNow();
                   timeLong = time.toMillis(true);
                }
@@ -379,14 +381,16 @@ class ServiceUpdate extends IntentService
                   int lastSlash = imgLink.lastIndexOf('/') + 1;
                   String imgName = imgLink.substring(lastSlash);
 
-                  if(isNonExisting(thumbnailDir + imgName, this))
+                  String thumbnailPath = applicationFolder + thumbnailDir + imgName;
+
+                  File file = new File(thumbnailPath);
+                  if(!file.exists())
                   {
                      compressImage(thumbnailDir, imgLink, imgName, this);
                   }
 
                   /* ISSUE #194 */
-                  String storage = FeedsActivity.getStorage(this);
-                  BitmapFactory.decodeFile(storage + thumbnailDir + imgName, options);
+                  BitmapFactory.decodeFile(thumbnailPath, options);
 
                   feedItemBuilder.append(WIDTH);
                   feedItemBuilder.append(options.outWidth);
@@ -418,9 +422,10 @@ class ServiceUpdate extends IntentService
          else if(XmlPullParser.END_DOCUMENT == eventType)
          {
             Resources resources = getResources();
-            String[] settingFiles = resources.getStringArray(R.array.settings_names);
-            String settingPath = FeedsActivity.SETTINGS_DIR + settingFiles[5] + ".txt";
-            String setting = Read.setting(settingPath, this);
+            String[] settingFiles = resources.getStringArray(R.array.settings_function_names);
+            String settingName = FeedsActivity.SETTINGS_DIR + settingFiles[5] + ".txt";
+            String[] check = Read.file(settingName, applicationFolder);
+            String setting = 0 == check.length ? "" : check[0];
 
             int saveSize = 0 == setting.length() ? 100000 : Integer.parseInt(setting);
             int mapSize = map.size();
@@ -445,8 +450,8 @@ class ServiceUpdate extends IntentService
             List<String> valueList = Arrays.asList(mapValues);
             List<Long> keyList = Arrays.asList(mapKeys);
 
-            Write.collection(contentFile, valueList, this);
-            Write.longSet(longFile, keyList, this);
+            Write.collection(contentFileName, valueList, applicationFolder);
+            Write.longSet(longFileName, keyList, applicationFolder);
 
             return;
          }
@@ -455,7 +460,7 @@ class ServiceUpdate extends IntentService
    }
 
    private static
-   Set<String> fileToSet(String filePath, Context context)
+   Set<String> fileToSet(String fileName, String fileFolder)
    {
       Set<String> set = new LinkedHashSet<String>();
 
@@ -464,26 +469,10 @@ class ServiceUpdate extends IntentService
          return set;
       }
 
-      String[] lines = Read.file(filePath, context);
+      String[] lines = Read.file(fileName, fileFolder);
       Collections.addAll(set, lines);
 
       return set;
-   }
-
-   boolean isNonExisting(String path, Context context)
-   {
-      String path1 = FeedsActivity.getStorage(context) + path;
-      if(Write.isUsingSd() || path1.contains(THUMBNAIL_DIR))
-      {
-         File file = new File(path1);
-         return !file.exists();
-      }
-      else
-      {
-         String internalPath = Write.getInternalPath(path1);
-         File file = getFileStreamPath(internalPath);
-         return !file.exists();
-      }
    }
 
    private static
@@ -534,7 +523,7 @@ class ServiceUpdate extends IntentService
       o2.inSampleSize = Math.round(inSample);
       Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, o2);
 
-      String storage = FeedsActivity.getStorage(context);
+      String storage = FeedsActivity.getApplicationFolder(context);
       try
       {
          FileOutputStream out = new FileOutputStream(storage + thumbnailDir + imgName);

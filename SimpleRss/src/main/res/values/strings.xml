@@ -5,8 +5,6 @@
 
    <string name="navigation_title">Navigation</string>
 
-   <string name="delete_dialog">Delete</string>
-   <string name="clear_dialog">Clear Content</string>
    <string name="add_dialog_title">Add Feed</string>
    <string name="edit_dialog_title">Edit Feed</string>
 
@@ -26,6 +24,7 @@
    <string name="feed_tag_hint">tag one, tag two, …</string>
    <string name="filter_hint">new filter</string>
    <string name="add_filter">Add Filter</string>
+   <string name="delete_filter">Delete Filter</string>
 
    <string name="cancel_dialog">Cancel</string>
    <string name="add_dialog">Add</string>

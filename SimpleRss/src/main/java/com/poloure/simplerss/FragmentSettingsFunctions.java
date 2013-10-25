@@ -33,12 +33,20 @@ class FragmentSettingsFunctions extends ListFragment
       super.onActivityCreated(savedInstanceState);
       ActionBarActivity activity = (ActionBarActivity) getActivity();
 
-      setListAdapter(new AdapterSettingsFunctions(activity));
-
       Resources resources = activity.getResources();
-      String[] manageTitles = resources.getStringArray(R.array.settings_titles);
+      LayoutInflater layoutInflater = getLayoutInflater(savedInstanceState);
+
+      String applicationFolder = FeedsActivity.getApplicationFolder(activity);
+
+      String[] functionTitles = resources.getStringArray(R.array.settings_function_titles);
+      String[] functionSummaries = resources.getStringArray(R.array.settings_function_summaries);
+      String[] functionFileNames = resources.getStringArray(R.array.settings_function_names);
+
+      setListAdapter(new AdapterSettingsFunctions(applicationFolder, functionTitles, functionSummaries, functionFileNames, layoutInflater));
 
       ActionBar actionBar = activity.getSupportActionBar();
+
+      String[] manageTitles = resources.getStringArray(R.array.settings_titles);
       actionBar.setSubtitle(manageTitles[0]);
    }
 }

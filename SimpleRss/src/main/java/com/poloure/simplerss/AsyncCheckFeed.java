@@ -1,17 +1,11 @@
 package com.poloure.simplerss;
 
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.ListFragment;
+import android.os.Build;
 import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import java.io.BufferedInputStream;
@@ -35,16 +29,37 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
    private static final int     FEED_STREAM_BYTE_BUFFER = 512;
    private final AlertDialog m_dialog;
    private final String      m_oldFeedName;
-   private final Context     m_context;
+   private final String      m_applicationFolder;
+   private final String      m_allTag;
    private       boolean     m_isFeedReal;
 
-   AsyncCheckFeed(AlertDialog dialog, String currentTitle, Context context)
+   AsyncCheckFeed(AlertDialog dialog, String currentTitle, String applicationFolder, String allTag)
    {
       m_dialog = dialog;
       m_oldFeedName = currentTitle;
-      m_context = context;
+      m_applicationFolder = applicationFolder;
+      m_allTag = allTag;
+
       Button button = m_dialog.getButton(DialogInterface.BUTTON_POSITIVE);
       button.setEnabled(false);
+   }
+
+   static
+   AsyncTask<Void, Void, String[]> newInstance(AlertDialog dialog, String oldFeedTitle,
+         String applicationFolder, String allTag)
+   {
+      AsyncTask<Void, Void, String[]> task = new AsyncCheckFeed(dialog, oldFeedTitle,
+            applicationFolder, allTag);
+
+      if(Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT)
+      {
+         task.executeOnExecutor(THREAD_POOL_EXECUTOR);
+      }
+      else
+      {
+         task.execute();
+      }
+      return task;
    }
 
    @Override
@@ -55,7 +70,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       Locale defaultLocale = Locale.getDefault();
 
       String initialTags = 0 == userInputTags.length()
-            ? m_context.getString(R.string.all_tag)
+            ? m_allTag
             : userInputTags.toLowerCase(defaultLocale);
 
       int tagInitialCapacity = initialTags.length();
@@ -181,17 +196,18 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
 
       if(0 != m_oldFeedName.length())
       {
-         editFeed(m_oldFeedName, finalName);
+         editFeed(m_oldFeedName, finalName, m_applicationFolder);
       }
 
       /* Save the feed to the index. */
-      Write.single(Read.INDEX, feedInfo, m_context);
+      Write.single(Read.INDEX, feedInfo, m_applicationFolder);
 
       /* Update the tags. */
-      updateTags((Activity) m_context);
+      /* TODO updateTags((Activity) m_context); */
 
       /* Update the manage ListView adapters. */
-      FragmentManager fragmentManager = ((FragmentActivity) m_context).getSupportFragmentManager();
+      /*FragmentManager fragmentManager = ((FragmentActivity) m_context)
+      .getSupportFragmentManager();
 
       String tagPrefix = "android:switcher:" + FragmentManage.VIEW_PAGER_ID + ':';
       String tagTag = tagPrefix + 0;
@@ -201,16 +217,16 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       ListFragment feedsFragment = (ListFragment) fragmentManager.findFragmentByTag(feedsTag);
 
       ListView tagListView = tagFragment.getListView();
-      ListView feedsListView = feedsFragment.getListView();
+      ListView feedsListView = feedsFragment.getListView();*/
 
-      FragmentManageTags.asyncCompatManageTagsRefresh(tagListView, m_context);
-      FragmentManageFeeds.asyncCompatManageFeedsRefresh(feedsListView, m_context);
+      /* TODO AsyncManageTagsRefresh.newInstance(tagListView); */
+      /* TODO AsyncManageFeedsRefresh.newInstance(feedsListView, m_context); */
 
       m_dialog.dismiss();
    }
 
    private
-   void editFeed(CharSequence oldFeed, String newFeed)
+   void editFeed(CharSequence oldFeed, String newFeed, String applicationFolder)
    {
       /* Rename the folder if it is different. */
       String oldFeedFolder = oldFeed + File.separator;
@@ -218,24 +234,22 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
 
       if(!oldFeed.equals(newFeed))
       {
-         Write.moveFile(oldFeedFolder, newFeedFolder, m_context);
+         Write.moveFile(oldFeedFolder, newFeedFolder, applicationFolder);
       }
 
       /* Replace the all_tag file with the new image and data. */
-      Write.removeLine(Read.INDEX, oldFeed, true, m_context);
+      Write.removeLine(Read.INDEX, oldFeed, true, applicationFolder);
 
    }
 
    static
-   void updateTags(Activity activity)
+   void updateTags(PagerAdapter tagPagerAdapter, AdapterNavDrawer adapterNavDrawer,
+         String applicationFolder, String allTag)
    {
-      ViewPager tagPager = (ViewPager) activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
+      ((PagerAdapterFeeds) tagPagerAdapter).getTagsFromDisk(applicationFolder, allTag);
+      tagPagerAdapter.notifyDataSetChanged();
 
-      PagerAdapter pagerAdapter = tagPager.getAdapter();
-      ((PagerAdapterFeeds) pagerAdapter).getTagsFromDisk(activity);
-      pagerAdapter.notifyDataSetChanged();
-
-      Update.navigation(activity);
+      AsyncRefreshNavigationAdapter.newInstance(adapterNavDrawer, applicationFolder);
    }
 
    private static

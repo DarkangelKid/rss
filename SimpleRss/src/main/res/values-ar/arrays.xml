@@ -23,7 +23,7 @@
       <item>إعدادات</item>
    </string-array>
 
-   <string-array name="settings_names">
+   <string-array name="settings_function_names">
       <item>null</item>
       <item>auto_refresh_boolean</item>
       <item>refresh_time</item>
@@ -87,4 +87,10 @@
       <item>Check to enable dark theme</item>
       <item>Adjust text size</item>
    </string-array>
+
+   <string-array name="long_click_manage_feeds">
+      <item>حذف</item>
+      <item>مسح المحتوى‎</item>
+   </string-array>
+
 </resources>

@@ -1,90 +1,90 @@
 package com.poloure.simplerss;
 
-import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
+import android.widget.Adapter;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 
-import java.util.Set;
-
-class AsyncManageTagsRefresh extends AsyncTask<Void, String[], Void>
+class AsyncManageTagsRefresh extends AsyncTask<String, String[], Animation>
 {
-   static final String[][] EMPTY_STRING_STRING_ARRAY = new String[0][0];
    private static final int INFO_INITIAL_CAPACITY = 40;
-   private final Animation   m_fadeIn;
-   private final ListView    m_listView;
-   private final BaseAdapter m_adapter;
-   private final Context     m_context;
+   private final ListView m_listView;
 
-   AsyncManageTagsRefresh(ListView listView, Context context)
+   AsyncManageTagsRefresh(ListView listView)
    {
       m_listView = listView;
-      m_adapter = (BaseAdapter) listView.getAdapter();
-      m_fadeIn = AnimationUtils.loadAnimation(context, android.R.anim.fade_in);
 
-      if(0 == m_adapter.getCount())
+      /* If the adapter has no items, make the listView not shown. */
+      Adapter adapter = listView.getAdapter();
+      if(0 == adapter.getCount())
       {
          m_listView.setVisibility(View.INVISIBLE);
       }
-      m_context = context;
+   }
+
+   static
+   AsyncTask<String, String[], Animation> newInstance(ListView listView, String applicationFolder,
+         String allTag)
+   {
+      AsyncTask<String, String[], Animation> task = new AsyncManageTagsRefresh(listView);
+
+      if(Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT)
+      {
+         task.executeOnExecutor(THREAD_POOL_EXECUTOR, allTag, applicationFolder);
+      }
+      else
+      {
+         task.execute(allTag, applicationFolder);
+      }
+      return task;
    }
 
    @Override
    protected
-   Void doInBackground(Void... nothing)
+   Animation doInBackground(String... allTagAndFolder)
    {
-      String[][] content = getInfoArrays();
-      if(0 != content.length)
-      {
-         publishProgress(content[1], content[0]);
-      }
-      return null;
-   }
+      /* Create the info strings for each tag. */
+      String[] feedTags = PagerAdapterFeeds.getTagsArray();
+      int tagCount = feedTags.length;
 
-   private
-   String[][] getInfoArrays()
-   {
-      Set<String> tagSet = PagerAdapterFeeds.getTags();
-      int tagCount = tagSet.size();
       if(0 == tagCount)
       {
-         return EMPTY_STRING_STRING_ARRAY;
+         return null;
       }
 
-      String[] currentTags = tagSet.toArray(new String[tagCount]);
+      String allTag = allTagAndFolder[0];
+      String applicationFolder = allTagAndFolder[1];
 
-      String[] tagArray = new String[tagCount];
-      String[] infoArray = new String[tagCount];
+      /* Get the feed names from the index File. */
+      String[][] feedsIndex = Read.csvFile(Read.INDEX, applicationFolder, 'f', 't');
+      String[] indexNames = feedsIndex[0];
+      String[] indexTags = feedsIndex[1];
+
+      String[] feedInfoArray = new String[tagCount];
       StringBuilder info = new StringBuilder(INFO_INITIAL_CAPACITY);
-
-      String[][] content = Read.indexFile(m_context);
-      String[] feeds = content[0];
-      String[] tags = content[2];
-
-      String allTag = m_context.getString(R.string.all_tag);
 
       for(int i = 0; i < tagCount; i++)
       {
          info.setLength(0);
-         tagArray[i] = currentTags[i];
          int feedCount = 0;
 
-         if(currentTags[i].equals(allTag))
+         if(feedTags[i].equals(allTag))
          {
             info.append(tagCount);
             info.append(" tags");
          }
          else
          {
-            int feedsCount = feeds.length;
+            int feedsCount = indexNames.length;
             for(int j = 0; j < feedsCount; j++)
             {
-               if(tags[j].contains(currentTags[i]))
+               if(indexTags[j].contains(feedTags[i]))
                {
-                  info.append(feeds[j]);
+                  info.append(indexNames[j]);
                   info.append(", ");
                   feedCount++;
                }
@@ -96,20 +96,25 @@ class AsyncManageTagsRefresh extends AsyncTask<Void, String[], Void>
             info.delete(infoSize - 2, infoSize);
          }
          String feedString = 1 == feedCount ? " feed • " : " feeds • ";
-         infoArray[i] = feedCount + feedString + info;
+         feedInfoArray[i] = feedCount + feedString + info;
       }
          /* 0 is meant to be total. */
-      infoArray[0] = 0 + " items • " + infoArray[0];
-      return new String[][]{infoArray, tagArray};
+      feedInfoArray[0] = 0 + " items • " + feedInfoArray[0];
+
+      publishProgress(feedTags, feedInfoArray);
+
+      Animation fadeIn = new AlphaAnimation(0.0F, 1.0F);
+      fadeIn.setDuration(330);
+      return fadeIn;
    }
 
    @Override
    protected
-   void onPostExecute(Void result)
+   void onPostExecute(Animation fadeIn)
    {
-      if(!m_listView.isShown())
+      if(null != fadeIn && !m_listView.isShown())
       {
-         m_listView.setAnimation(m_fadeIn);
+         m_listView.setAnimation(fadeIn);
          m_listView.setVisibility(View.VISIBLE);
       }
    }
@@ -118,10 +123,11 @@ class AsyncManageTagsRefresh extends AsyncTask<Void, String[], Void>
    protected
    void onProgressUpdate(String[][] values)
    {
-      if(null != m_adapter)
+      BaseAdapter adapter = (BaseAdapter) m_listView.getAdapter();
+      if(null != adapter)
       {
-         ((AdapterManagerTags) m_adapter).setArrays(values[0], values[1]);
-         m_adapter.notifyDataSetChanged();
+         ((AdapterManageTags) adapter).setArrays(values[0], values[1]);
+         adapter.notifyDataSetChanged();
       }
    }
 }

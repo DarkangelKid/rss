@@ -1,39 +1,33 @@
 package com.poloure.simplerss;
 
-import android.content.Context;
-import android.content.res.Resources;
 import android.widget.SeekBar;
 import android.widget.TextView;
+
+import java.io.File;
 
 class OnSeekBarChange implements SeekBar.OnSeekBarChangeListener
 {
    private final TextView m_seekText;
-   private final String   m_settingsPath;
-   private final Context  m_context;
-   private final int[]    m_values;
-   private final String[] m_valuesString;
+   private final String   m_settingsFileName;
+   private final String   m_applicationFolder;
 
-   OnSeekBarChange(TextView seekText, String settingPath, Context context, int arrayInt,
-         int arrayString)
+   OnSeekBarChange(TextView seekText, String settingFileName, String applicationFolder)
    {
-      m_context = context;
       m_seekText = seekText;
-      m_settingsPath = settingPath;
-
-      Resources resources = context.getResources();
-      m_values = resources.getIntArray(arrayInt);
-      m_valuesString = resources.getStringArray(arrayString);
+      m_settingsFileName = settingFileName;
+      m_applicationFolder = applicationFolder;
    }
 
    @Override
    public
    void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
    {
-      m_seekText.setText(m_valuesString[progress]);
-      Write.remove(m_settingsPath, m_context);
+      m_seekText.setText(Integer.toString(progress));
+      File file = new File(m_applicationFolder + m_settingsFileName);
+      file.delete();
 
-      String valueString = Integer.toString(m_values[progress]);
-      Write.single(m_settingsPath, valueString, m_context);
+      String valueString = Integer.toString(progress);
+      Write.single(m_settingsFileName, valueString, m_applicationFolder);
    }
 
    @Override

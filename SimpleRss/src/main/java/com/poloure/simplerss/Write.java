@@ -1,7 +1,5 @@
 package com.poloure.simplerss;
 
-import android.content.Context;
-
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.DataOutputStream;
@@ -10,7 +8,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.List;
@@ -25,7 +22,7 @@ class Write
    /* This function should be safe, returns false if it failed.
     * NOT SAFE FOR INTERNAL IF FAILS. */
    static
-   int removeLine(String path, CharSequence stringSearch, boolean contains, Context context)
+   int removeLine(String fileName, CharSequence stringSearch, boolean contains, String fileFolder)
    {
       /* If s_storage is unmounted OR if we force to use external. */
       if(Read.isUnmounted())
@@ -33,8 +30,8 @@ class Write
          return -1;
       }
 
-      String path1 = FeedsActivity.getStorage(context) + path;
-      String tempPath = path1 + TEMP;
+      String filePath = fileFolder + fileName;
+      String tempPath = filePath + TEMP;
 
       String[] lines = new String[0];
       int pos = -1;
@@ -44,16 +41,14 @@ class Write
          try
          {
             /* Read the file to an array, if the file does not exist, return. */
-            lines = Read.file(path1, context);
+            lines = Read.file(fileName, fileFolder);
             if(0 == lines.length)
             {
                return -1;
             }
 
             /* No backup for internal s_storage. */
-            out = isUsingSd()
-                  ? writer(tempPath, false)
-                  : writer(path1, Context.MODE_PRIVATE, context);
+            out = writer(tempPath, false);
 
             int line = 0;
             for(String item : lines)
@@ -92,44 +87,34 @@ class Write
       catch(IOException e)
       {
          e.printStackTrace();
-         if(isUsingSd())
-         {
-            remove(tempPath, context);
-         }
+
+         File file = new File(tempPath);
+         file.delete();
+
          return -1;
       }
 
       /* If the rename failed, delete the file and Write the original. */
-      if(isUsingSd())
+      boolean success = !moveFile(fileName + TEMP, fileName, fileFolder);
+      if(success)
       {
-         boolean success = !moveFile(path + TEMP, path, context);
-         if(success)
-         {
-            remove(path, context);
-            List<String> list = Arrays.asList(lines);
-            collection(path, list, context);
-         }
+         File file = new File(fileName);
+         file.delete();
+         List<String> list = Arrays.asList(lines);
+         collection(fileName, list, fileFolder);
+
       }
       return pos;
    }
 
    private static
-   BufferedWriter writer(String path, int writeMode, Context context)
-         throws FileNotFoundException, UnsupportedEncodingException
+   BufferedWriter writer(String filePath, boolean appendToEnd) throws IOException
    {
-      String internalPath = getInternalPath(path);
-      FileOutputStream fileOutputStream = context.openFileOutput(internalPath, writeMode);
-      return new BufferedWriter(new OutputStreamWriter(fileOutputStream, "UTF8"));
-   }
-
-   private static
-   BufferedWriter writer(String p, boolean ap) throws IOException
-   {
-      return new BufferedWriter(new FileWriter(p, ap));
+      return new BufferedWriter(new FileWriter(filePath, appendToEnd));
    }
 
    static
-   void collection(String path, Iterable<?> content, Context context)
+   void collection(String fileName, Iterable<?> content, String fileFolder)
    {
       /* If s_storage is unmounted OR if we force to use external. */
       if(Read.isUnmounted())
@@ -137,12 +122,11 @@ class Write
          return;
       }
 
-      String path1 = FeedsActivity.getStorage(context) + path;
+      String filePath = fileFolder + fileName;
 
-      if(isUsingSd())
-      {
-         remove(path1, context);
-      }
+      /* Delete file before writing new one. */
+      File file = new File(filePath);
+      file.delete();
 
       try
       {
@@ -150,9 +134,7 @@ class Write
          try
          {
             /* Create the buffered writer. */
-            out = isUsingSd()
-                  ? writer(path1, false)
-                  : writer(path1, Context.MODE_PRIVATE, context);
+            out = writer(filePath, false);
 
             for(Object item : content)
             {
@@ -182,14 +164,14 @@ class Write
    }
 
    static
-   void toLogFile(String text, Context context)
+   void toLogFile(String text, String fileFolder)
    {
-      single(LOG_FILE, text + System.getProperty("line.separator"), context);
+      single(LOG_FILE, text + System.getProperty("line.separator"), fileFolder);
    }
 
    /* Function should be safe, returns false if fails. */
    static
-   void single(String path, String stringToWrite, Context context)
+   void single(String fileName, String stringToWrite, String fileFolder)
    {
       /* If s_storage is unmounted OR if we force to use external. */
       if(Read.isUnmounted())
@@ -197,16 +179,14 @@ class Write
          return;
       }
 
-      String path1 = FeedsActivity.getStorage(context) + path;
+      String filePath = fileFolder + fileName;
 
       try
       {
          BufferedWriter out = null;
          try
          {
-            out = isUsingSd()
-                  ? writer(path1, true)
-                  : writer(path1, Context.MODE_APPEND, context);
+            out = writer(filePath, true);
             out.write(stringToWrite);
          }
          finally
@@ -231,9 +211,8 @@ class Write
       }
    }
 
-   /* TODO Not for internal yet. */
    static
-   void longSet(String path, Iterable<Long> longSet, Context context)
+   void longSet(String fileName, Iterable<Long> longSet, String fileFolder)
    {
       /* If storage is unmounted OR if we force to use external. */
       if(Read.isUnmounted())
@@ -241,7 +220,7 @@ class Write
          return;
       }
 
-      String filePath = FeedsActivity.getStorage(context) + path;
+      String filePath = fileFolder + fileName;
       File fileOut = new File(filePath);
 
       try
@@ -278,38 +257,11 @@ class Write
    }
 
    static
-   void remove(String path, Context context)
+   boolean moveFile(String originalName, String resultingName, String storage)
    {
-      String path1 = FeedsActivity.getStorage(context) + path;
-      String internalPath = getInternalPath(path1);
-      context.deleteFile(internalPath);
-      File file = new File(path1);
-      file.delete();
-   }
-
-   static
-   boolean moveFile(String original, String resulting, Context context)
-   {
-      String storage = FeedsActivity.getStorage(context);
-
-      File originalFile = new File(storage + original);
-      File resultingFile = new File(storage + resulting);
+      File originalFile = new File(storage + originalName);
+      File resultingFile = new File(storage + resultingName);
 
       return originalFile.renameTo(resultingFile);
-   }
-
-   static
-   String getInternalPath(String externalPath)
-   {
-      int index = externalPath.indexOf(File.separatorChar + "files" + File.separatorChar);
-      String substring = externalPath.substring(index + 7);
-      return substring.replaceAll(File.separator, "-");
-   }
-
-   static
-   boolean isUsingSd()
-   {
-      /* Return true if force sd setting is true. */
-      return true;
    }
 }

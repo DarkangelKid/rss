@@ -1,7 +1,5 @@
 package com.poloure.simplerss;
 
-import android.content.Context;
-import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,8 +7,6 @@ import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.SeekBar;
 import android.widget.TextView;
-
-import java.util.Arrays;
 
 class AdapterSettingsFunctions extends BaseAdapter
 {
@@ -23,18 +19,17 @@ class AdapterSettingsFunctions extends BaseAdapter
    private final String[]       m_functionTitles;
    private final String[]       m_functionSummaries;
    private final LayoutInflater m_layoutInflater;
-   private final Context        m_context;
    private       TextView       m_titleView;
+   private final String         m_applicationFolder;
 
-   AdapterSettingsFunctions(Context context)
+   AdapterSettingsFunctions(String applicationFolder, String[] adapterTitles,
+         String[] adapterSummaries, String[] adapterFileNames, LayoutInflater layoutInflater)
    {
-      m_context = context;
-      m_layoutInflater = (LayoutInflater) m_context.getSystemService(
-            Context.LAYOUT_INFLATER_SERVICE);
-      Resources resources = m_context.getResources();
-      m_functionTitles = resources.getStringArray(R.array.settings_function_titles);
-      m_functionSummaries = resources.getStringArray(R.array.settings_function_summaries);
-      m_fileNames = resources.getStringArray(R.array.settings_names);
+      m_applicationFolder = applicationFolder;
+      m_functionTitles = adapterTitles;
+      m_functionSummaries = adapterSummaries;
+      m_layoutInflater = layoutInflater;
+      m_fileNames = adapterFileNames;
    }
 
    @Override
@@ -64,7 +59,7 @@ class AdapterSettingsFunctions extends BaseAdapter
    {
       View view = convertView;
       int viewType = getItemViewType(position);
-      String settingPath = FeedsActivity.SETTINGS_DIR + m_fileNames[position] + ".txt";
+      String settingFileName = FeedsActivity.SETTINGS_DIR + m_fileNames[position] + ".txt";
 
       if(TYPE_HEADING == viewType)
       {
@@ -97,10 +92,12 @@ class AdapterSettingsFunctions extends BaseAdapter
          holder.m_summaryView.setText(m_functionSummaries[position]);
 
          /* On click, save the value of the click to a settings file. */
-         holder.m_checkbox.setOnClickListener(new SettingBooleanChecked(settingPath, m_context));
+         holder.m_checkbox
+               .setOnClickListener(new SettingBooleanChecked(settingFileName, m_applicationFolder));
 
          /* Load the saved boolean value and set the box as checked if true. */
-         String settingString = Read.setting(settingPath, m_context);
+         String[] check = Read.file(settingFileName, m_applicationFolder);
+         String settingString = 0 == check.length ? "" : check[0];
          boolean settingBoolean = Boolean.parseBoolean(settingString);
          holder.m_checkbox.setChecked(settingBoolean);
       }
@@ -124,36 +121,28 @@ class AdapterSettingsFunctions extends BaseAdapter
 
          holder.m_titleView.setText(m_functionTitles[position]);
          holder.m_summaryView.setText(m_functionSummaries[position]);
-         holder.m_seekBar.setMax(9);
-
-         /* Load the saved value and set the progress.*/
-         String checker = Read.setting(settingPath, m_context);
-         Resources resources = m_context.getResources();
-         int resInteger;
 
          if(3 == position)
          {
-            resInteger = R.array.refresh_integers;
-            holder.m_seekBar
-                  .setOnSeekBarChangeListener(
-                        new OnSeekBarChange(holder.m_readView, settingPath, m_context, resInteger,
-                              R.array.refresh_values));
+            holder.m_seekBar.setKeyProgressIncrement(5);
+            holder.m_seekBar.setMax(1440);
          }
          else
          {
-            resInteger = R.array.history_integers;
-            holder.m_seekBar
-                  .setOnSeekBarChangeListener(
-                        new OnSeekBarChange(holder.m_readView, settingPath, m_context,
-                              R.array.history_integers, R.array.history_values));
+            holder.m_seekBar.setKeyProgressIncrement(10);
+            holder.m_seekBar.setMax(1000);
          }
-         int[] settingIntegers = resources.getIntArray(resInteger);
 
-         int settingInteger = null == checker || 0 == checker.length()
-               ? 9
-               : Integer.parseInt(checker);
-         int settingIndex = Arrays.binarySearch(settingIntegers, settingInteger);
-         holder.m_seekBar.setProgress(settingIndex);
+         holder.m_seekBar
+               .setOnSeekBarChangeListener(
+                     new OnSeekBarChange(holder.m_readView, settingFileName, m_applicationFolder));
+
+         /* Load the saved value and set the progress.*/
+         String[] check = Read.file(settingFileName, m_applicationFolder);
+         int settingInteger = null == check || 0 == check[0].length()
+               ? 100
+               : Integer.parseInt(check[0]);
+         holder.m_seekBar.setProgress(settingInteger);
       }
       return view;
    }

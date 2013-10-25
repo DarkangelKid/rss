@@ -1,6 +1,7 @@
 package com.poloure.simplerss;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
@@ -21,7 +22,17 @@ class FragmentSettingsUi extends ListFragment
    {
       super.onActivityCreated(savedInstanceState);
       Context context = getActivity();
-      setListAdapter(new AdapterSettingsUi(context));
+
+      Resources resources = context.getResources();
+      LayoutInflater layoutInflater = getLayoutInflater(savedInstanceState);
+
+      String applicationFolder = FeedsActivity.getApplicationFolder(context);
+
+      String[] interfaceTitles = resources.getStringArray(R.array.settings_interface_titles);
+      String[] interfaceSummaries = resources.getStringArray(R.array.settings_interface_summaries);
+
+      setListAdapter(new AdapterSettingsUi(applicationFolder, interfaceTitles, interfaceSummaries,
+            layoutInflater));
    }
 
    @Override

@@ -1,15 +1,13 @@
 package com.poloure.simplerss;
 
-import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
-import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.SimpleOnPageChangeListener;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.widget.BaseAdapter;
-import android.widget.ListAdapter;
+import android.widget.ListView;
 
 class OnPageChangeTags extends SimpleOnPageChangeListener
 {
@@ -29,11 +27,8 @@ class OnPageChangeTags extends SimpleOnPageChangeListener
       ActionBarActivity activity = (ActionBarActivity) m_fragment.getActivity();
       FragmentManager fragmentManager = m_fragment.getFragmentManager();
 
-      /* Update the subtitle. */
-      ViewPager viewPager = (ViewPager) activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
-      int currentPage = viewPager.getCurrentItem();
-
-      String[] item = (String[]) m_navigationAdapter.getItem(currentPage);
+      /* Update the ActionBar subtitle. */
+      String[] item = (String[]) m_navigationAdapter.getItem(position);
       String unread = item[0];
       String tag = item[1];
 
@@ -43,12 +38,15 @@ class OnPageChangeTags extends SimpleOnPageChangeListener
       /* Refresh the page if it has no items on display. */
       String fragmentTag = "android:switcher:" + FragmentFeeds.VIEW_PAGER_ID + ':' + position;
       ListFragment tagFragment = (ListFragment) fragmentManager.findFragmentByTag(fragmentTag);
-      ListAdapter adapter = tagFragment.getListAdapter();
+      AdapterTags listAdapter = (AdapterTags) tagFragment.getListAdapter();
 
-      if(0 == adapter.getCount())
+      /* If the page has no items in the ListView yet, refresh the page. */
+      if(0 == listAdapter.getCount())
       {
-         Context context = m_fragment.getActivity();
-         Update.asyncCompatRefreshPage(position, fragmentManager, context);
+         ListView listView = tagFragment.getListView();
+         String applicationFolder = FeedsActivity.getApplicationFolder(activity);
+         AsyncRefreshPage.newInstance(position, listView, applicationFolder, /* TODO */ 24,
+               0 == position);
       }
    }
 }

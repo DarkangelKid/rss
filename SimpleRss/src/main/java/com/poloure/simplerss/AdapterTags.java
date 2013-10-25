@@ -19,11 +19,11 @@ class AdapterTags extends BaseAdapter
    boolean m_readingItems = true;
    final List<FeedItem> m_items = new ArrayList<FeedItem>(0);
 
-   AdapterTags(Context context)
+   AdapterTags(Context context, String readItemFileName, String applicationFolder)
    {
       if(0 == S_READ_ITEM_TIMES.size())
       {
-         Set<Long> set = Read.longSet(FeedsActivity.READ_ITEMS, context);
+         Set<Long> set = Read.longSet(readItemFileName, applicationFolder);
          S_READ_ITEM_TIMES.addAll(set);
       }
       m_context = context;

@@ -1,7 +1,5 @@
 package com.poloure.simplerss;
 
-import android.content.Context;
-import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,17 +15,16 @@ class AdapterSettingsUi extends BaseAdapter
    private final String[]       m_interfaceTitles;
    private final String[]       m_interfaceSummaries;
    private final LayoutInflater m_layoutInflater;
-   private final Context        m_context;
    private       TextView       m_settingsHeading;
+   private final String         m_applicationFolder;
 
-   AdapterSettingsUi(Context context)
+   AdapterSettingsUi(String applicationFolder, String[] adapterTitles, String[] adapterSummaries,
+         LayoutInflater layoutInflater)
    {
-      m_context = context;
-      Resources resources = context.getResources();
-      m_interfaceTitles = resources.getStringArray(R.array.settings_interface_titles);
-      m_interfaceSummaries = resources.getStringArray(R.array.settings_interface_summaries);
-      m_layoutInflater = (LayoutInflater) m_context.getSystemService(
-            Context.LAYOUT_INFLATER_SERVICE);
+      m_applicationFolder = applicationFolder;
+      m_interfaceTitles = adapterTitles;
+      m_interfaceSummaries = adapterSummaries;
+      m_layoutInflater = layoutInflater;
    }
 
    @Override
@@ -59,7 +56,7 @@ class AdapterSettingsUi extends BaseAdapter
       int viewType = getItemViewType(position);
       String title = m_interfaceTitles[position];
       String summary = m_interfaceSummaries[position];
-      String settingPath = FeedsActivity.SETTINGS_DIR + title + ".txt";
+      String settingFileName = FeedsActivity.SETTINGS_DIR + title + ".txt";
 
       if(TYPE_HEADING == viewType)
       {
@@ -90,10 +87,12 @@ class AdapterSettingsUi extends BaseAdapter
 
          holder.m_titleView.setText(title);
          holder.m_summaryView.setText(summary);
-         holder.m_checkbox.setOnClickListener(new SettingBooleanChecked(settingPath, m_context));
+         holder.m_checkbox
+               .setOnClickListener(new SettingBooleanChecked(settingFileName, m_applicationFolder));
 
          /* Load the saved boolean value and set the box as checked if true. */
-         String settingString = Read.setting(settingPath, m_context);
+         String[] check = Read.file(settingFileName, m_applicationFolder);
+         String settingString = 0 == check.length ? "" : check[0];
          boolean settingBoolean = Boolean.parseBoolean(settingString);
          holder.m_checkbox.setChecked(settingBoolean);
       }

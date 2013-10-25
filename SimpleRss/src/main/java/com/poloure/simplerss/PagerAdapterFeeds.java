@@ -1,6 +1,5 @@
 package com.poloure.simplerss;
 
-import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -16,19 +15,17 @@ class PagerAdapterFeeds extends FragmentPagerAdapter
          new LinkedHashSet<String>(0));
    private static final Pattern     SPLIT_COMMA = Pattern.compile(",");
 
-   PagerAdapterFeeds(FragmentManager fm, Context context)
+   PagerAdapterFeeds(FragmentManager fm)
    {
       super(fm);
-      getTagsFromDisk(context);
    }
 
    static
-   Set<String> getTagsFromDisk(Context context)
+   Set<String> getTagsFromDisk(String applicationFolder, String allTag)
    {
       Set<String> tagSet = Collections.synchronizedSet(new LinkedHashSet<String>(0));
-      String[] tagArray = Read.indexFile(context)[2];
+      String[] tagArray = Read.indexFile(applicationFolder)[2];
 
-      String allTag = context.getString(R.string.all_tag);
       tagSet.add(allTag);
 
       for(String tag : tagArray)
