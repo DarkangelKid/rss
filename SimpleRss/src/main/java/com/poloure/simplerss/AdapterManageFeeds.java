@@ -20,8 +20,8 @@ class AdapterManageFeeds extends BaseAdapter
 
    void setArrays(String[] titles, String... infos)
    {
-      m_titleArray = titles;
-      m_infoArray = infos;
+      m_titleArray = titles.clone();
+      m_infoArray = infos.clone();
    }
 
    @Override

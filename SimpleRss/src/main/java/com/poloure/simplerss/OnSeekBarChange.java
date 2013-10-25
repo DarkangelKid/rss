@@ -22,7 +22,9 @@ class OnSeekBarChange implements SeekBar.OnSeekBarChangeListener
    public
    void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
    {
-      m_seekText.setText(Integer.toString(progress));
+      String progressString = Integer.toString(progress);
+      m_seekText.setText(progressString);
+
       File file = new File(m_applicationFolder + m_settingsFileName);
       file.delete();
 

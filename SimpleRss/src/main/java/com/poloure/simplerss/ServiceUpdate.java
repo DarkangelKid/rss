@@ -47,10 +47,10 @@ class ServiceUpdate extends IntentService
    static final         String           THUMBNAIL_DIR               = "thumbnails" +
          File.separatorChar;
    /* Parser saves */
-   private static final String           IMAGE                       = "image|";
-   private static final String           TIME                        = "pubDate|";
-   private static final String           HEIGHT                      = "height|";
-   private static final String           WIDTH                       = "width|";
+   private static final String           INDEX_IMAGE                 = "image|";
+   private static final String           INDEX_TIME                  = "pubDate|";
+   private static final String           INDEX_HEIGHT                = "height|";
+   private static final String           INDEX_WIDTH                 = "width|";
    private static final SimpleDateFormat RSS_DATE                    = new SimpleDateFormat(
          "EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
    @SuppressWarnings("HardcodedLineSeparator")
@@ -330,7 +330,7 @@ class ServiceUpdate extends IntentService
                timeLong = time.toMillis(true);
 
                timeString = Long.toString(timeLong);
-               feedItemBuilder.append(TIME);
+               feedItemBuilder.append(INDEX_TIME);
                feedItemBuilder.append(timeString);
                feedItemBuilder.append(ITEM_SEPARATOR);
             }
@@ -356,7 +356,7 @@ class ServiceUpdate extends IntentService
                }
 
                timeString = Long.toString(timeLong);
-               feedItemBuilder.append(TIME);
+               feedItemBuilder.append(INDEX_TIME);
                feedItemBuilder.append(timeString);
                feedItemBuilder.append(ITEM_SEPARATOR);
             }
@@ -374,7 +374,7 @@ class ServiceUpdate extends IntentService
                   int finalPosition = content.indexOf(quote, srcPosition + 1);
 
                   String imgLink = content.substring(srcPosition + 1, finalPosition);
-                  feedItemBuilder.append(IMAGE);
+                  feedItemBuilder.append(INDEX_IMAGE);
                   feedItemBuilder.append(imgLink);
                   feedItemBuilder.append(ITEM_SEPARATOR);
 
@@ -392,10 +392,10 @@ class ServiceUpdate extends IntentService
                   /* ISSUE #194 */
                   BitmapFactory.decodeFile(thumbnailPath, options);
 
-                  feedItemBuilder.append(WIDTH);
+                  feedItemBuilder.append(INDEX_WIDTH);
                   feedItemBuilder.append(options.outWidth);
                   feedItemBuilder.append(ITEM_SEPARATOR);
-                  feedItemBuilder.append(HEIGHT);
+                  feedItemBuilder.append(INDEX_HEIGHT);
                   feedItemBuilder.append(options.outHeight);
                   feedItemBuilder.append(ITEM_SEPARATOR);
                }

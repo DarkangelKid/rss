@@ -11,7 +11,7 @@ class OnPageChangeSubtitle extends SimpleOnPageChangeListener
    OnPageChangeSubtitle(ActionBar actionBar, String[] pageTitles)
    {
       m_actionBar = actionBar;
-      m_pageTitles = pageTitles;
+      m_pageTitles = pageTitles.clone();
    }
 
    @Override

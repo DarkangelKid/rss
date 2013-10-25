@@ -19,7 +19,7 @@ import android.widget.TextView;
 
 class FragmentManageFeeds extends ListFragment
 {
-   static final int MODE_ADD = -1;
+   private static final int MODE_ADD = -1;
 
    static
    ListFragment newInstance()

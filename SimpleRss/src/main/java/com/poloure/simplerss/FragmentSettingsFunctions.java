@@ -42,7 +42,9 @@ class FragmentSettingsFunctions extends ListFragment
       String[] functionSummaries = resources.getStringArray(R.array.settings_function_summaries);
       String[] functionFileNames = resources.getStringArray(R.array.settings_function_names);
 
-      setListAdapter(new AdapterSettingsFunctions(applicationFolder, functionTitles, functionSummaries, functionFileNames, layoutInflater));
+      setListAdapter(
+            new AdapterSettingsFunctions(applicationFolder, functionTitles, functionSummaries,
+                  functionFileNames, layoutInflater));
 
       ActionBar actionBar = activity.getSupportActionBar();
 

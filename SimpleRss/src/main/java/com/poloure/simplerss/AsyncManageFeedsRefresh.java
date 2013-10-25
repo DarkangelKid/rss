@@ -15,6 +15,7 @@ class AsyncManageFeedsRefresh extends AsyncTask<String, String[], Animation>
 {
    private final ListView m_listView;
 
+   private
    AsyncManageFeedsRefresh(ListView listView)
    {
       m_listView = listView;
@@ -27,7 +28,7 @@ class AsyncManageFeedsRefresh extends AsyncTask<String, String[], Animation>
    }
 
    static
-   AsyncTask<String, String[], Animation> newInstance(ListView listView, String applicationFolder)
+   void newInstance(ListView listView, String applicationFolder)
    {
       AsyncTask<String, String[], Animation> task = new AsyncManageFeedsRefresh(listView);
 
@@ -39,7 +40,6 @@ class AsyncManageFeedsRefresh extends AsyncTask<String, String[], Animation>
       {
          task.execute(applicationFolder);
       }
-      return task;
    }
 
    @Override
@@ -77,11 +77,11 @@ class AsyncManageFeedsRefresh extends AsyncTask<String, String[], Animation>
 
    @Override
    protected
-   void onPostExecute(Animation fadeIn)
+   void onPostExecute(Animation result)
    {
       if(!m_listView.isShown())
       {
-         m_listView.setAnimation(fadeIn);
+         m_listView.setAnimation(result);
          m_listView.setVisibility(View.VISIBLE);
       }
    }

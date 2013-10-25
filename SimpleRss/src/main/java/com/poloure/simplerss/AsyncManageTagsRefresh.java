@@ -14,6 +14,7 @@ class AsyncManageTagsRefresh extends AsyncTask<String, String[], Animation>
    private static final int INFO_INITIAL_CAPACITY = 40;
    private final ListView m_listView;
 
+   private
    AsyncManageTagsRefresh(ListView listView)
    {
       m_listView = listView;
@@ -27,8 +28,7 @@ class AsyncManageTagsRefresh extends AsyncTask<String, String[], Animation>
    }
 
    static
-   AsyncTask<String, String[], Animation> newInstance(ListView listView, String applicationFolder,
-         String allTag)
+   void newInstance(ListView listView, String applicationFolder, String allTag)
    {
       AsyncTask<String, String[], Animation> task = new AsyncManageTagsRefresh(listView);
 
@@ -40,7 +40,6 @@ class AsyncManageTagsRefresh extends AsyncTask<String, String[], Animation>
       {
          task.execute(allTag, applicationFolder);
       }
-      return task;
    }
 
    @Override
@@ -110,11 +109,11 @@ class AsyncManageTagsRefresh extends AsyncTask<String, String[], Animation>
 
    @Override
    protected
-   void onPostExecute(Animation fadeIn)
+   void onPostExecute(Animation result)
    {
-      if(null != fadeIn && !m_listView.isShown())
+      if(null != result && !m_listView.isShown())
       {
-         m_listView.setAnimation(fadeIn);
+         m_listView.setAnimation(result);
          m_listView.setVisibility(View.VISIBLE);
       }
    }

@@ -26,10 +26,10 @@ class AdapterSettingsFunctions extends BaseAdapter
          String[] adapterSummaries, String[] adapterFileNames, LayoutInflater layoutInflater)
    {
       m_applicationFolder = applicationFolder;
-      m_functionTitles = adapterTitles;
-      m_functionSummaries = adapterSummaries;
+      m_functionTitles = adapterTitles.clone();
+      m_functionSummaries = adapterSummaries.clone();
+      m_fileNames = adapterFileNames.clone();
       m_layoutInflater = layoutInflater;
-      m_fileNames = adapterFileNames;
    }
 
    @Override

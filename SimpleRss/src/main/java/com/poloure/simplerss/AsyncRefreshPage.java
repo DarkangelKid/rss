@@ -3,8 +3,7 @@ package com.poloure.simplerss;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.view.View;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
+import android.widget.Adapter;
 import android.widget.ListView;
 
 import java.io.File;
@@ -14,30 +13,31 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
 
-class AsyncRefreshPage extends AsyncTask<Integer, Object, Animation>
+class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
 {
    private static final int MAX_DESCRIPTION_LENGTH = 360;
+   private static final int MIN_DESCRIPTION_LENGTH = 8;
    private static final int MIN_IMAGE_WIDTH        = 32;
    private final int      m_sixteenDp;
-   private final String   m_storage;
-   private       boolean  m_flash;
-   private       ListView m_listView;
+   private final String   m_applicationFolder;
+   private final ListView m_listView;
    private final boolean  m_isAllTag;
 
-   AsyncRefreshPage(ListView listView, String storage, int sixteenDp, boolean isAllTag)
+   private
+   AsyncRefreshPage(ListView listView, String applicationFolder, int sixteenDp, boolean isAllTag)
    {
       m_listView = listView;
-      m_storage = storage;
+      m_applicationFolder = applicationFolder;
       m_isAllTag = isAllTag;
       m_sixteenDp = sixteenDp;
    }
 
    static
-   AsyncTask<Integer, Object, Animation> newInstance(int pageNumber, ListView listView,
-         String storage, int sixteenDp, boolean isAllTag)
+   void newInstance(int pageNumber, ListView listView, String storage, int sixteenDp,
+         boolean isAllTag)
    {
-      AsyncTask<Integer, Object, Animation> task = new AsyncRefreshPage(listView, storage,
-            sixteenDp, isAllTag);
+      AsyncTask<Integer, Object, Void> task = new AsyncRefreshPage(listView, storage, sixteenDp,
+            isAllTag);
 
       if(Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT)
       {
@@ -47,39 +47,36 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Animation>
       {
          task.execute(pageNumber);
       }
-      return task;
    }
 
    @Override
    protected
-   Animation doInBackground(Integer... page)
+   Void doInBackground(Integer... page)
    {
       int pageNumber = page[0];
       String tag = PagerAdapterFeeds.getTagsArray()[pageNumber];
 
-      String[][] contents = Read.indexFile(m_storage);
-      if(0 == contents.length)
+      String[][] feedsIndex = Read.csvFile(Read.INDEX, m_applicationFolder, 'f', 't');
+      if(0 == feedsIndex.length)
       {
          return null;
       }
-      String[] feeds = contents[0];
-      String[] tags = contents[2];
-
-      Animation animFadeIn = new AlphaAnimation(0.0F, 1.0F);
-      animFadeIn.setDuration(330);
+      String[] feedNames = feedsIndex[0];
+      String[] feedTags = feedsIndex[1];
 
       Comparator<Long> reverse = Collections.reverseOrder();
       Map<Long, FeedItem> map = new TreeMap<Long, FeedItem>(reverse);
 
       AdapterTags adapterTag = (AdapterTags) m_listView.getAdapter();
 
-      int feedsLength = feeds.length;
+      int feedsLength = feedNames.length;
       for(int j = 0; j < feedsLength; j++)
       {
-         if(m_isAllTag || tags[j].contains(tag))
+         if(m_isAllTag || feedTags[j].contains(tag))
          {
-            String[][] content = Read.csvFile(feeds[j] + File.separatorChar + ServiceUpdate.CONTENT,
-                  m_storage, 't', 'd', 'l', 'i', 'w', 'h', 'p');
+            String[][] content = Read.csvFile(
+                  feedNames[j] + File.separatorChar + ServiceUpdate.CONTENT, m_applicationFolder,
+                  't', 'd', 'l', 'i', 'w', 'h', 'p');
             if(0 == content.length)
             {
                return null;
@@ -104,7 +101,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Animation>
                         : Integer.parseInt(widths[i])))
                   {
                      int lastSlash = images[i].lastIndexOf(File.separatorChar) + 1;
-                     images[i] = feeds[j] + File.separatorChar + ServiceUpdate.THUMBNAIL_DIR +
+                     images[i] = feedNames[j] + File.separatorChar + ServiceUpdate.THUMBNAIL_DIR +
                            images[i].substring(lastSlash);
                   }
                   else
@@ -115,7 +112,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Animation>
                   }
                }
 
-               if(null == descriptions[i] || 8 > descriptions[i].length())
+               if(null == descriptions[i] || MIN_DESCRIPTION_LENGTH > descriptions[i].length())
                {
                   descriptions[i] = "";
                }
@@ -164,53 +161,32 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Animation>
       {
          publishProgress(items);
       }
-
-      return animFadeIn;
+      return null;
    }
 
    @Override
    protected
-   void onPostExecute(Animation result)
+   void onPostExecute(Void result)
    {
-      if(null == result)
-      {
-         return;
-      }
-
-      /* Update the unread counts in the navigation drawer. */
-      // TODO Update.navigation((Activity) m_context);
-
-      if(null == m_listView)
-      {
-         return;
-      }
-
-      /* If there were no items to start with (the ListView is invisible).*/
-      if(m_flash)
-      {
-         m_listView.setAnimation(result);
-         m_listView.setVisibility(View.VISIBLE);
-      }
       /* Resume Read item checking. */
-      AdapterTags adapterTag = (AdapterTags) m_listView.getAdapter();
-      adapterTag.m_readingItems = true;
+      Adapter adapterTag = m_listView.getAdapter();
+      ((AdapterTags) adapterTag).m_readingItems = true;
    }
 
    @Override
    protected
    void onProgressUpdate(Object[] values)
    {
+      int index = 0;
+      int top = 0;
+
       /* If these are the first items to be added to the list. */
       if(0 == m_listView.getCount())
       {
          m_listView.setVisibility(View.INVISIBLE);
-         m_flash = true;
       }
-
-      int index = 0;
-      int top = 0;
       /* Find the exact mPosition in the list. */
-      if(!m_flash)
+      /*else
       {
          index = m_listView.getFirstVisiblePosition() + 1;
          View v = m_listView.getChildAt(0);
@@ -225,13 +201,14 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Animation>
             View childAt = m_listView.getChildAt(1);
             top = childAt.getTop();
          }
-      }
+      }*/
 
       AdapterTags adapterTag = (AdapterTags) m_listView.getAdapter();
       adapterTag.prependArray(values);
       adapterTag.notifyDataSetChanged();
 
-      if(m_flash)
+      /* If this was the first time loading the tag data, jump to the latest unread item. */
+      if(!m_listView.isShown())
       {
          FeedsActivity.gotoLatestUnread(adapterTag, m_listView);
       }

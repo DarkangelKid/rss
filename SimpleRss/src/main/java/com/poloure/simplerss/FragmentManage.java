@@ -18,7 +18,7 @@ import android.view.ViewGroup;
 
 class FragmentManage extends Fragment
 {
-   static final int VIEW_PAGER_ID = 0x2000;
+   private static final int VIEW_PAGER_ID = 0x2000;
 
    static
    Fragment newInstance()

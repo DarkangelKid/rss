@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -26,9 +25,11 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.Adapter;
 import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
@@ -115,17 +116,10 @@ class FeedsActivity extends ActionBarActivity
       }
    }
 
-   /* This function will return null if it fails. Check for null each time.
-       * It should be pretty safe and efficient to call ALL_TAG the time. */
    static
    String getApplicationFolder(Context context)
    {
-      if(0 != s_applicationFolder.length())
-      {
-         return s_applicationFolder;
-      }
-      /* Check the media state for any undesirable states. */
-      /* TODO Check to see if it is the desired first then skip these. */
+      /* Check the media state for the desirable state. */
       String state = Environment.getExternalStorageState();
 
       String mounted = Environment.MEDIA_MOUNTED;
@@ -134,28 +128,8 @@ class FeedsActivity extends ActionBarActivity
          return null;
       }
 
-      /* If it has reached here the state is MEDIA_MOUNTED and we can continue.
-         Build the s_storage string depending on android version. */
-      char sep = File.separatorChar;
-
-      if(Build.VERSION_CODES.FROYO <= Build.VERSION.SDK_INT)
-      {
-         File externalFilesDir = context.getExternalFilesDir(null);
-         s_applicationFolder = externalFilesDir.getAbsolutePath() + sep;
-      }
-      else
-      {
-         String name = context.getPackageName();
-         File ext = Environment.getExternalStorageDirectory();
-         s_applicationFolder = ext.getAbsolutePath() + sep + "Android" + sep + "data" + sep + name +
-               sep +
-               "files" + sep;
-
-         /* If the folder does not exist, create it. */
-         File storageFile = new File(s_applicationFolder);
-         storageFile.mkdirs();
-      }
-      return s_applicationFolder;
+      File externalFilesDir = context.getExternalFilesDir(null);
+      return externalFilesDir.getAbsolutePath() + File.separatorChar;
    }
 
    /* This is so the icon and text in the actionbar are selected. */
@@ -331,9 +305,6 @@ class FeedsActivity extends ActionBarActivity
    public
    boolean onOptionsItemSelected(MenuItem item)
    {
-      ListView navigationList = (ListView) findViewById(R.id.left_drawer);
-      BaseAdapter navigationAdapter = (BaseAdapter) navigationList.getAdapter();
-
       /* If the user has clicked the title and the title says R.string.offline. */
       String navigationTitle = getNavigationTitle();
       CharSequence menuText = item.getTitle();
@@ -362,7 +333,7 @@ class FeedsActivity extends ActionBarActivity
          String fragmentTag = "android:switcher:" + FragmentFeeds.VIEW_PAGER_ID + ':' + currentPage;
 
          ListFragment listFragment = (ListFragment) fragmentManager.findFragmentByTag(fragmentTag);
-         AdapterTags adapterTags = (AdapterTags) listFragment.getListAdapter();
+         Adapter adapterTags = listFragment.getListAdapter();
          ListView listViewTags = listFragment.getListView();
 
          gotoLatestUnread(adapterTags, listViewTags);
@@ -392,6 +363,14 @@ class FeedsActivity extends ActionBarActivity
             break;
          }
       }
+
+      if(!listView.isShown() || 0 == itemCount)
+      {
+         Animation animation = new AlphaAnimation(0.0F, 1.0F);
+         animation.setDuration(240);
+         listView.setAnimation(animation);
+         listView.setVisibility(View.VISIBLE);
+      }
    }
 
    String getNavigationTitle()
@@ -407,14 +386,13 @@ class FeedsActivity extends ActionBarActivity
    {
       setRefreshingIcon(true, m_optionsMenu);
 
-      /* Set the service handler in FeedsActivity so we can check and call it
-       * from ServiceUpdate. */
+      /* Set the service handler in FeedsActivity so we can check and call it from ServiceUpdate. */
 
       String applicationFolder = getApplicationFolder(this);
-
       FragmentManager fragmentManager = getSupportFragmentManager();
-      s_serviceHandler = new OnFinishServiceHandler(fragmentManager, m_optionsMenu,
-            applicationFolder, /* TODO */24);
+
+      s_serviceHandler = new ServiceHandler(fragmentManager, m_optionsMenu, applicationFolder,
+      /* TODO */ 24);
 
       ViewPager viewPager = (ViewPager) findViewById(FragmentFeeds.VIEW_PAGER_ID);
       int currentPage = viewPager.getCurrentItem();

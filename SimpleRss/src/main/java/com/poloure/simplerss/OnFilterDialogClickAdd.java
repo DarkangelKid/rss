@@ -12,7 +12,8 @@ class OnFilterDialogClickAdd implements DialogInterface.OnClickListener
    private final BaseAdapter m_adapter;
    private final String      m_applicationFolder;
 
-   OnFilterDialogClickAdd(View addFilterLayout, BaseAdapter adapterManageFilters, String applicationFolder)
+   OnFilterDialogClickAdd(View addFilterLayout, BaseAdapter adapterManageFilters,
+         String applicationFolder)
    {
       m_addFilterLayout = addFilterLayout;
       m_adapter = adapterManageFilters;
@@ -28,7 +29,8 @@ class OnFilterDialogClickAdd implements DialogInterface.OnClickListener
       String[] filters = Read.file(fileName, m_applicationFolder);
       if(-1 == ServiceUpdate.index(filters, filter))
       {
-         Write.single(fileName, filter + System.getProperty("line.separator"), m_applicationFolder);
+         String newLine = System.getProperty("line.separator");
+         Write.single(fileName, filter + newLine, m_applicationFolder);
       }
       m_adapter.notifyDataSetChanged();
       ((Dialog) dialog).hide();

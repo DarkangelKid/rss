@@ -49,6 +49,7 @@ class Write
 
             /* No backup for internal s_storage. */
             out = writer(tempPath, false);
+            String newLine = System.getProperty("line.separator");
 
             int line = 0;
             for(String item : lines)
@@ -56,7 +57,7 @@ class Write
                if(contains && !item.contains(stringSearch) ||
                      !contains && !item.equals(stringSearch))
                {
-                  out.write(item + System.getProperty("line.separator"));
+                  out.write(item + newLine);
                   line++;
                }
                else

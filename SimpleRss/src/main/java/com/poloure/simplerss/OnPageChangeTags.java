@@ -6,6 +6,7 @@ import android.support.v4.app.ListFragment;
 import android.support.v4.view.ViewPager.SimpleOnPageChangeListener;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.widget.Adapter;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 
@@ -38,7 +39,7 @@ class OnPageChangeTags extends SimpleOnPageChangeListener
       /* Refresh the page if it has no items on display. */
       String fragmentTag = "android:switcher:" + FragmentFeeds.VIEW_PAGER_ID + ':' + position;
       ListFragment tagFragment = (ListFragment) fragmentManager.findFragmentByTag(fragmentTag);
-      AdapterTags listAdapter = (AdapterTags) tagFragment.getListAdapter();
+      Adapter listAdapter = tagFragment.getListAdapter();
 
       /* If the page has no items in the ListView yet, refresh the page. */
       if(0 == listAdapter.getCount())

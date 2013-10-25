@@ -32,8 +32,8 @@ class AdapterManageTags extends BaseAdapter
 
    void setArrays(String[] tags, String... tagInformation)
    {
-      m_tagArray = tags;
-      m_infoArray = tagInformation;
+      m_tagArray = tags.clone();
+      m_infoArray = tagInformation.clone();
    }
 
    @Override

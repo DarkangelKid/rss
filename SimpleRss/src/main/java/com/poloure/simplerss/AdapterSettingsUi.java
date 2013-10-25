@@ -22,8 +22,8 @@ class AdapterSettingsUi extends BaseAdapter
          LayoutInflater layoutInflater)
    {
       m_applicationFolder = applicationFolder;
-      m_interfaceTitles = adapterTitles;
-      m_interfaceSummaries = adapterSummaries;
+      m_interfaceTitles = adapterTitles.clone();
+      m_interfaceSummaries = adapterSummaries.clone();
       m_layoutInflater = layoutInflater;
    }
 

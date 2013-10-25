@@ -20,13 +20,13 @@ class AdapterNavDrawer extends BaseAdapter
    private final String[]       m_navigationTitles;
    private final LayoutInflater m_layoutInflater;
    String[] m_tagArray = new String[0];
-   static final int[] EMPTY_INT_ARRAY = new int[0];
+   private static final int[] EMPTY_INT_ARRAY = new int[0];
    int[] m_unreadArray = EMPTY_INT_ARRAY;
    private TextView m_navigationMainItem;
 
    AdapterNavDrawer(String[] navigationTitles, int twelveDp, LayoutInflater layoutInflater)
    {
-      m_navigationTitles = navigationTitles;
+      m_navigationTitles = navigationTitles.clone();
       m_layoutInflater = layoutInflater;
       m_twelveDp = twelveDp;
    }

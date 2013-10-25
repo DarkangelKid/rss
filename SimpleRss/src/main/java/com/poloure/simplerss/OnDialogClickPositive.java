@@ -5,7 +5,7 @@ import android.content.DialogInterface;
 
 class OnDialogClickPositive implements DialogInterface.OnClickListener
 {
-   private final String  m_oldFeedTitle;
+   private final String m_oldFeedTitle;
    private final String m_applicationFolder;
    private final String m_allTag;
 

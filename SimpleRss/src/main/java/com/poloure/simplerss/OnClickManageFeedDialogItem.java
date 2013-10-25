@@ -15,7 +15,7 @@ class OnClickManageFeedDialogItem implements DialogInterface.OnClickListener
       m_applicationFolder = applicationFolder;
    }
 
-   static
+   private static
    boolean deleteDirectory(File directory)
    {
       if(directory.isDirectory())

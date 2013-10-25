@@ -33,6 +33,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
    private final String      m_allTag;
    private       boolean     m_isFeedReal;
 
+   private
    AsyncCheckFeed(AlertDialog dialog, String currentTitle, String applicationFolder, String allTag)
    {
       m_dialog = dialog;
@@ -45,8 +46,8 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
    }
 
    static
-   AsyncTask<Void, Void, String[]> newInstance(AlertDialog dialog, String oldFeedTitle,
-         String applicationFolder, String allTag)
+   void newInstance(AlertDialog dialog, String oldFeedTitle, String applicationFolder,
+         String allTag)
    {
       AsyncTask<Void, Void, String[]> task = new AsyncCheckFeed(dialog, oldFeedTitle,
             applicationFolder, allTag);
@@ -59,7 +60,6 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       {
          task.execute();
       }
-      return task;
    }
 
    @Override
@@ -184,11 +184,11 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
             .toString();
 
       /* Did the user enter a feed name? If not, use the feed title found from the check. */
-      String finalName = 0 == userInputName.length() ? feedTitleFromXml : userInputName;
+      String nameBefore = 0 == userInputName.length() ? feedTitleFromXml : userInputName;
 
       /* Replace any characters that are not allowed in file names. */
-      Matcher matcher = ILLEGAL_FILE_CHARS.matcher(finalName);
-      finalName = matcher.replaceAll("");
+      Matcher matcher = ILLEGAL_FILE_CHARS.matcher(nameBefore);
+      String finalName = matcher.replaceAll("");
 
       /* Create the csv. */
       String feedInfo = String.format(INDEX_FORMAT, finalName, feedUrlFromCheck, feedTag) +
@@ -225,7 +225,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       m_dialog.dismiss();
    }
 
-   private
+   private static
    void editFeed(CharSequence oldFeed, String newFeed, String applicationFolder)
    {
       /* Rename the folder if it is different. */

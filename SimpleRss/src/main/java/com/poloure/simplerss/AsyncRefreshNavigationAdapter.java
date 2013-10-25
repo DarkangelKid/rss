@@ -13,6 +13,7 @@ class AsyncRefreshNavigationAdapter extends AsyncTask<String, Void, int[]>
    private final ActionBar        m_actionBar;
    private final int              m_currentPage;
 
+   private
    AsyncRefreshNavigationAdapter(AdapterNavDrawer adapterNavDrawer, ActionBar actionBar,
          int currentPage)
    {
@@ -23,15 +24,14 @@ class AsyncRefreshNavigationAdapter extends AsyncTask<String, Void, int[]>
 
    /* For when the user is updating the navigation drawer not from the Feeds page. */
    static
-   AsyncTask<String, Void, int[]> newInstance(AdapterNavDrawer adapterNavDrawer,
-         String applicationFolder)
+   void newInstance(AdapterNavDrawer adapterNavDrawer, String applicationFolder)
    {
-      return newInstance(adapterNavDrawer, null, applicationFolder, -1);
+      newInstance(adapterNavDrawer, null, applicationFolder, -1);
    }
 
    static
-   AsyncTask<String, Void, int[]> newInstance(AdapterNavDrawer adapterNavDrawer,
-         ActionBar actionBar, String applicationFolder, int currentPage)
+   void newInstance(AdapterNavDrawer adapterNavDrawer, ActionBar actionBar,
+         String applicationFolder, int currentPage)
    {
       AsyncTask<String, Void, int[]> task = new AsyncRefreshNavigationAdapter(adapterNavDrawer,
             actionBar, currentPage);
@@ -44,7 +44,6 @@ class AsyncRefreshNavigationAdapter extends AsyncTask<String, Void, int[]>
       {
          task.execute(applicationFolder);
       }
-      return task;
    }
 
    /* Get the unread counts for the tags. */
@@ -97,7 +96,7 @@ class AsyncRefreshNavigationAdapter extends AsyncTask<String, Void, int[]>
       /* Set the titles & counts arrays in this file and notify the adapter. */
       /* TODO We get the tag array twice in this class. */
       m_adapterNavDrawer.m_tagArray = PagerAdapterFeeds.getTagsArray();
-      m_adapterNavDrawer.m_unreadArray = result;
+      m_adapterNavDrawer.m_unreadArray = result.clone();
       m_adapterNavDrawer.notifyDataSetChanged();
 
       /* Update the subtitle if actionBar != null. */

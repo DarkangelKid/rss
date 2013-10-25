@@ -41,13 +41,6 @@ class PagerAdapterFeeds extends FragmentPagerAdapter
       return tagSet;
    }
 
-   /* TODO */
-   static
-   Set<String> getTags()
-   {
-      return s_tagSet;
-   }
-
    static
    String[] getTagsArray()
    {

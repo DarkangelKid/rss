@@ -12,7 +12,7 @@ class PagerAdapterManage extends FragmentPagerAdapter
    {
       super(fragmentManager);
 
-      m_manageTitles = manageTitles;
+      m_manageTitles = manageTitles.clone();
    }
 
    @Override

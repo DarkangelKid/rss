@@ -11,7 +11,7 @@ class PagerAdapterSettings extends FragmentPagerAdapter
    PagerAdapterSettings(FragmentManager fm, String[] settingsTitles)
    {
       super(fm);
-      m_settingsTitles = settingsTitles;
+      m_settingsTitles = settingsTitles.clone();
    }
 
    @Override
