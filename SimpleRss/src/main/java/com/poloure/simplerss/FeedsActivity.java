@@ -45,7 +45,6 @@ class FeedsActivity extends ActionBarActivity
    private static final int    ALARM_SERVICE_STOP  = 0;
    private static final long   MINUTE_VALUE        = 60000L;
    static Handler s_serviceHandler;
-   private static String s_applicationFolder = "";
    private Menu                  m_optionsMenu;
    private ActionBarDrawerToggle m_drawerToggle;
    private String                m_previousTitle;

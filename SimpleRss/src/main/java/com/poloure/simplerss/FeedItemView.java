@@ -2,8 +2,6 @@ package com.poloure.simplerss;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
@@ -117,17 +115,6 @@ class FeedItemView extends RelativeLayout
       imageView.setLayoutParams(lp);
       imageView.setTag(position);
 
-      AsyncTask<Object, Void, Object[]> task = new AsyncLoadImage();
-      if(Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT)
-      {
-
-         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, imageView, position, imagePath,
-               context, isRead);
-      }
-      else
-      {
-         task.execute(imageView, position, imagePath, context, isRead);
-      }
+      AsyncLoadImage.newInstance(imageView, imagePath, position, context, isRead);
    }
-
 }

@@ -15,10 +15,10 @@ class OnClickImage implements View.OnClickListener
    private final Context m_context;
    private static final char WEB_FILE_SUFFIX_SEPARATOR = '.';
 
-   OnClickImage(String im, Context context)
+   OnClickImage(String imagePath, Context context)
    {
       m_context = context;
-      m_imagePath = im;
+      m_imagePath = imagePath;
    }
 
    @Override
