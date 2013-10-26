@@ -21,11 +21,13 @@ class AdapterSettingsFunctions extends BaseAdapter
    private final LayoutInflater m_layoutInflater;
    private       TextView       m_titleView;
    private final String         m_applicationFolder;
+   private final String         m_settingsDir;
 
-   AdapterSettingsFunctions(String applicationFolder, String[] adapterTitles,
+   AdapterSettingsFunctions(String applicationFolder, String settingsDir, String[] adapterTitles,
          String[] adapterSummaries, String[] adapterFileNames, LayoutInflater layoutInflater)
    {
       m_applicationFolder = applicationFolder;
+      m_settingsDir = settingsDir;
       m_functionTitles = adapterTitles.clone();
       m_functionSummaries = adapterSummaries.clone();
       m_fileNames = adapterFileNames.clone();
@@ -59,7 +61,7 @@ class AdapterSettingsFunctions extends BaseAdapter
    {
       View view = convertView;
       int viewType = getItemViewType(position);
-      String settingFileName = FeedsActivity.SETTINGS_DIR + m_fileNames[position] + ".txt";
+      String settingFileName = m_settingsDir + m_fileNames[position] + ".txt";
 
       if(TYPE_HEADING == viewType)
       {

@@ -24,7 +24,7 @@ class PagerAdapterFeeds extends FragmentPagerAdapter
    Set<String> getTagsFromDisk(String applicationFolder, String allTag)
    {
       Set<String> tagSet = Collections.synchronizedSet(new LinkedHashSet<String>(0));
-      String[] tagArray = Read.indexFile(applicationFolder)[2];
+      String[] tagArray = Read.csvFile(Read.INDEX, applicationFolder, 't')[0];
 
       tagSet.add(allTag);
 

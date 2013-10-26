@@ -177,8 +177,6 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
    protected
    void onProgressUpdate(Object[] values)
    {
-      int index = 0;
-      int top = 0;
 
       /* If these are the first items to be added to the list. */
       if(0 == m_listView.getCount())
@@ -210,11 +208,13 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       /* If this was the first time loading the tag data, jump to the latest unread item. */
       if(!m_listView.isShown())
       {
-         FeedsActivity.gotoLatestUnread(adapterTag, m_listView);
+         FeedsActivity.gotoLatestUnread(m_listView);
       }
 
+      int top = 0;
       if(0 != top)
       {
+         int index = 0;
          m_listView.setSelectionFromTop(index, top - m_sixteenDp);
       }
    }

@@ -19,9 +19,9 @@ class AdapterNavDrawer extends BaseAdapter
    private final int            m_twelveDp;
    private final String[]       m_navigationTitles;
    private final LayoutInflater m_layoutInflater;
-   String[] m_tagArray = new String[0];
-   private static final int[] EMPTY_INT_ARRAY = new int[0];
-   int[] m_unreadArray = EMPTY_INT_ARRAY;
+   private              String[] m_tagArray      = new String[0];
+   private static final int[]    EMPTY_INT_ARRAY = new int[0];
+   private              int[]    m_unreadArray   = EMPTY_INT_ARRAY;
    private TextView m_navigationMainItem;
 
    AdapterNavDrawer(String[] navigationTitles, int twelveDp, LayoutInflater layoutInflater)
@@ -29,6 +29,12 @@ class AdapterNavDrawer extends BaseAdapter
       m_navigationTitles = navigationTitles.clone();
       m_layoutInflater = layoutInflater;
       m_twelveDp = twelveDp;
+   }
+
+   void setArrays(String[] tags, int[] unreadCounts)
+   {
+      m_tagArray = tags.clone();
+      m_unreadArray = unreadCounts.clone();
    }
 
    @Override

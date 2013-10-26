@@ -88,4 +88,28 @@
       android:hint="@string/feed_tag_hint"
       android:inputType="textNoSuggestions"
       android:scrollHorizontally="true"/>
+
+   <LinearLayout
+      android:layout_height="wrap_content"
+      android:layout_width="match_parent"
+      android:layout_below="@+id/tag_edit">
+
+      <Button
+         android:id="@+id/negative_button"
+         android:layout_height="wrap_content"
+         android:layout_width="0px"
+         android:layout_weight="0.5"
+         android:text="@string/cancel_dialog"
+         android:background="@drawable/dialog_select"/>
+
+      <Button
+         android:id="@+id/positive_button"
+         android:layout_height="wrap_content"
+         android:layout_width="0px"
+         android:layout_weight="0.5"
+         android:text="@string/add_dialog"
+         android:background="@drawable/dialog_select"/>
+   </LinearLayout>
+
+
 </RelativeLayout>

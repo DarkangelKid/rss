@@ -30,11 +30,13 @@ class Write
          return -1;
       }
 
+      String newLine = System.getProperty("line.separator");
       String filePath = fileFolder + fileName;
       String tempPath = filePath + TEMP;
 
       String[] lines = new String[0];
       int pos = -1;
+
       try
       {
          BufferedWriter out = null;
@@ -49,7 +51,6 @@ class Write
 
             /* No backup for internal s_storage. */
             out = writer(tempPath, false);
-            String newLine = System.getProperty("line.separator");
 
             int line = 0;
             for(String item : lines)
@@ -75,17 +76,7 @@ class Write
          }
       }
       /* If writing to the temp file fails, delete the temp file and return. */
-      catch(FileNotFoundException e)
-      {
-         e.printStackTrace();
-         return -1;
-      }
-      catch(UnsupportedEncodingException e)
-      {
-         e.printStackTrace();
-         return -1;
-      }
-      catch(IOException e)
+      catch(Exception e)
       {
          e.printStackTrace();
 
@@ -108,10 +99,13 @@ class Write
       return pos;
    }
 
-   private static
-   BufferedWriter writer(String filePath, boolean appendToEnd) throws IOException
+   static
+   boolean moveFile(String originalName, String resultingName, String storage)
    {
-      return new BufferedWriter(new FileWriter(filePath, appendToEnd));
+      File originalFile = new File(storage + originalName);
+      File resultingFile = new File(storage + resultingName);
+
+      return originalFile.renameTo(resultingFile);
    }
 
    static
@@ -123,6 +117,7 @@ class Write
          return;
       }
 
+      String newLine = System.getProperty("line.separator");
       String filePath = fileFolder + fileName;
 
       /* Delete file before writing new one. */
@@ -139,7 +134,7 @@ class Write
 
             for(Object item : content)
             {
-               out.write(item + System.getProperty("line.separator"));
+               out.write(item + newLine);
             }
          }
          finally
@@ -164,10 +159,17 @@ class Write
       }
    }
 
+   private static
+   BufferedWriter writer(String filePath, boolean appendToEnd) throws IOException
+   {
+      return new BufferedWriter(new FileWriter(filePath, appendToEnd));
+   }
+
    static
    void toLogFile(String text, String fileFolder)
    {
-      single(LOG_FILE, text + System.getProperty("line.separator"), fileFolder);
+      String newLine = System.getProperty("line.separator");
+      single(LOG_FILE, text + newLine, fileFolder);
    }
 
    /* Function should be safe, returns false if fails. */
@@ -255,14 +257,5 @@ class Write
       {
          e.printStackTrace();
       }
-   }
-
-   static
-   boolean moveFile(String originalName, String resultingName, String storage)
-   {
-      File originalFile = new File(storage + originalName);
-      File resultingFile = new File(storage + resultingName);
-
-      return originalFile.renameTo(resultingFile);
    }
 }

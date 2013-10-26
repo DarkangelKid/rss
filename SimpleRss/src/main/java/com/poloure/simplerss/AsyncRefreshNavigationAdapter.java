@@ -95,8 +95,8 @@ class AsyncRefreshNavigationAdapter extends AsyncTask<String, Void, int[]>
    {
       /* Set the titles & counts arrays in this file and notify the adapter. */
       /* TODO We get the tag array twice in this class. */
-      m_adapterNavDrawer.m_tagArray = PagerAdapterFeeds.getTagsArray();
-      m_adapterNavDrawer.m_unreadArray = result.clone();
+      String[] tags = PagerAdapterFeeds.getTagsArray();
+      m_adapterNavDrawer.setArrays(tags, result);
       m_adapterNavDrawer.notifyDataSetChanged();
 
       /* Update the subtitle if actionBar != null. */

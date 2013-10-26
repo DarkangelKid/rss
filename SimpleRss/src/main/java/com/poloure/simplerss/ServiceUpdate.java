@@ -69,26 +69,6 @@ class ServiceUpdate extends IntentService
       super("Service");
    }
 
-   /* index throws an ArrayOutOfBoundsException if not handled. */
-   static
-   <T> int index(T[] array, T value)
-   {
-      if(null == array)
-      {
-         return -1;
-      }
-
-      int arrayLength = array.length;
-      for(int i = 0; i < arrayLength; i++)
-      {
-         if(array[i].equals(value))
-         {
-            return i;
-         }
-      }
-      return -1;
-   }
-
    @Override
    protected
    void onHandleIntent(Intent intent)
@@ -460,22 +440,6 @@ class ServiceUpdate extends IntentService
    }
 
    private static
-   Set<String> fileToSet(String fileName, String fileFolder)
-   {
-      Set<String> set = new LinkedHashSet<String>();
-
-      if(Read.isUnmounted())
-      {
-         return set;
-      }
-
-      String[] lines = Read.file(fileName, fileFolder);
-      Collections.addAll(set, lines);
-
-      return set;
-   }
-
-   private static
    void compressImage(String thumbnailDir, String imgLink, String imgName, Context context)
    {
       BitmapFactory.Options o = new BitmapFactory.Options();
@@ -533,5 +497,41 @@ class ServiceUpdate extends IntentService
       {
          e.printStackTrace();
       }
+   }
+
+   private static
+   Set<String> fileToSet(String fileName, String fileFolder)
+   {
+      Set<String> set = new LinkedHashSet<String>();
+
+      if(Read.isUnmounted())
+      {
+         return set;
+      }
+
+      String[] lines = Read.file(fileName, fileFolder);
+      Collections.addAll(set, lines);
+
+      return set;
+   }
+
+   /* index throws an ArrayOutOfBoundsException if not handled. */
+   static
+   <T> int index(T[] array, T value)
+   {
+      if(null == array)
+      {
+         return -1;
+      }
+
+      int arrayLength = array.length;
+      for(int i = 0; i < arrayLength; i++)
+      {
+         if(array[i].equals(value))
+         {
+            return i;
+         }
+      }
+      return -1;
    }
 }

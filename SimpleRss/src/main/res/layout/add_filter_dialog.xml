@@ -4,7 +4,6 @@
           android:layout_width="match_parent"
           android:padding="8dp"
           android:scrollHorizontally="true"
-          android:textCursorDrawable="@drawable/white_cursor"
           android:inputType="textNoSuggestions|textUri"
           android:hint="@string/filter_hint"
           android:gravity="fill_horizontal"

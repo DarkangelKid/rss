@@ -1,6 +1,9 @@
 package com.poloure.simplerss;
 
+import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.widget.Toast;
 
 import java.io.File;
 
@@ -50,7 +53,13 @@ class OnClickManageFeedDialogItem implements DialogInterface.OnClickListener
       {
          /* Delete the feed. */
          Write.removeLine(Read.INDEX, m_feedName, true, m_applicationFolder);
-         /* TODO AsyncCheckFeed.updateTags((Activity) m_context);*/
+
+         /* Show deleted feed toast notification. */
+         Context context = ((Dialog) dialog).getContext();
+         String deletedText = context.getString(R.string.deleted_feed) + ' ' + m_feedName;
+         Toast.makeText(context, deletedText, Toast.LENGTH_SHORT).show();
+
+         /* TODO AsyncCheckFeed.updateTags((Activity) context); */
       }
 
       /* Refresh pages and navigation counts. */

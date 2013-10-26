@@ -5,21 +5,22 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
-import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ListView;
 
 class ServiceHandler extends Handler
 {
    private final FragmentManager m_fragmentManager;
-   private final Menu            m_optionsMenu;
-   private final String          m_storage;
+   private final MenuItem        m_refreshItem;
+   private final String          m_applicationFolder;
    private final int             m_sixteenDp;
 
-   ServiceHandler(FragmentManager fragmentManager, Menu optionsMenu, String storage, int sixteenDp)
+   ServiceHandler(FragmentManager fragmentManager, MenuItem refreshItem, String applicationFolder,
+         int sixteenDp)
    {
       m_fragmentManager = fragmentManager;
-      m_optionsMenu = optionsMenu;
-      m_storage = storage;
+      m_refreshItem = refreshItem;
+      m_applicationFolder = applicationFolder;
       m_sixteenDp = sixteenDp;
    }
 
@@ -28,7 +29,7 @@ class ServiceHandler extends Handler
    public
    void handleMessage(Message msg)
    {
-      FeedsActivity.setRefreshingIcon(false, m_optionsMenu);
+      FeedsActivity.setRefreshingIcon(false, m_refreshItem);
 
       Bundle bundle = msg.getData();
       if(null == bundle)
@@ -40,22 +41,31 @@ class ServiceHandler extends Handler
 
          /* Find which pages we want to refresh. */
       int tagsCount = PagerAdapterFeeds.getSize();
-      int[] pagesToRefresh = 0 == updatedPage ? new int[tagsCount] : new int[]{0, updatedPage};
+      int[] pagesToRefresh;
 
+      if(0 == updatedPage)
+      {
+         pagesToRefresh = new int[tagsCount];
+         for(int i = 0; i < tagsCount; i++)
+         {
+            pagesToRefresh[i] = i;
+         }
+      }
+      else
+      {
+         pagesToRefresh = new int[]{0, updatedPage};
+      }
       String tagPrefix = "android:switcher:" + FragmentFeeds.VIEW_PAGER_ID + ':';
 
       /* Refresh those Pages. */
-      for(int i = 0; i < tagsCount; i++)
+      for(int page : pagesToRefresh)
       {
-         if(tagsCount > 2 || i == pagesToRefresh[i])
-         {
-            ListFragment listFragment = (ListFragment) m_fragmentManager.findFragmentByTag(
-                  tagPrefix + i);
-            ListView listView = listFragment.getListView();
+         ListFragment listFragment = (ListFragment) m_fragmentManager.findFragmentByTag(
+               tagPrefix + page);
+         ListView listView = listFragment.getListView();
 
-             /* TODO isAllTag not 0. */
-            AsyncRefreshPage.newInstance(i, listView, m_storage, m_sixteenDp, 0 == i);
-         }
+         /* TODO isAllTag not 0. */
+         AsyncRefreshPage.newInstance(page, listView, m_applicationFolder, m_sixteenDp, 0 == page);
       }
    }
 }

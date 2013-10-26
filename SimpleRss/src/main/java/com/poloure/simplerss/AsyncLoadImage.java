@@ -15,8 +15,8 @@ class AsyncLoadImage extends AsyncTask<Object, Void, Object[]>
 {
    private static final long  IMAGE_FADE_IN_DURATION  = 240L;
    private static final float READ_ITEM_IMAGE_OPACITY = 0.66F;
-   private ImageView m_imageView;
-   private int       m_imageViewTag;
+   private final ImageView m_imageView;
+   private       int       m_imageViewTag;
 
    static
    void newInstance(ImageView imageView, String imagePath, int imageViewTag, Context context,

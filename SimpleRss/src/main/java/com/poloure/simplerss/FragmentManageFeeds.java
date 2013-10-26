@@ -1,8 +1,8 @@
 package com.poloure.simplerss;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -43,31 +43,35 @@ class FragmentManageFeeds extends ListFragment
    {
       super.onListItemClick(l, v, position, id);
       Context context = getActivity();
-      LayoutInflater inflater = LayoutInflater.from(context);
       String applicationFolder = FeedsActivity.getApplicationFolder(context);
 
-      showEditDialog(position, applicationFolder, inflater, context);
+      showEditDialog(position, applicationFolder, context);
    }
 
    static
-   void showEditDialog(int position, String applicationFolder, LayoutInflater inflater,
-         Context context)
+   void showEditDialog(int position, String applicationFolder, Context context)
    {
-      View dialogLayout = inflater.inflate(R.layout.add_rss_dialog, null);
-
+      String allTag = context.getString(R.string.all_tag);
       String oldFeedTitle = "";
+      String url = "";
+      String tag = "";
 
-      /* If the mode is edit. */
       if(MODE_ADD != position)
       {
          String[][] content = Read.indexFile(applicationFolder);
          oldFeedTitle = content[0][position];
-         String url = content[1][position];
-         String tag = content[2][position];
+         url = content[1][position];
+         tag = content[2][position];
+      }
 
-         ((TextView) dialogLayout.findViewById(R.id.feed_url_edit)).setText(url);
-         ((TextView) dialogLayout.findViewById(R.id.name_edit)).setText(oldFeedTitle);
-         ((TextView) dialogLayout.findViewById(R.id.tag_edit)).setText(tag);
+      Dialog editDialog = EditDialog.newInstance(context, oldFeedTitle, applicationFolder, allTag);
+
+      /* If the mode is edit. */
+      if(MODE_ADD != position)
+      {
+         ((TextView) editDialog.findViewById(R.id.feed_url_edit)).setText(url);
+         ((TextView) editDialog.findViewById(R.id.name_edit)).setText(oldFeedTitle);
+         ((TextView) editDialog.findViewById(R.id.tag_edit)).setText(tag);
       }
 
       /* Get the text resources. */
@@ -76,21 +80,9 @@ class FragmentManageFeeds extends ListFragment
             : R.string.edit_dialog_title;
 
       String titleText = context.getString(titleResource);
-      String negativeButtonText = context.getString(R.string.cancel_dialog);
-      String positiveButtonText = context.getString(R.string.add_dialog);
+      //TODO ((TextView) editDialog.findViewById(R.id.title_text)).setText(titleText);
 
-      /* Create the button click listeners. */
-      String allTag = context.getString(R.string.all_tag);
-      DialogInterface.OnClickListener onClickPositive = new OnDialogClickPositive(oldFeedTitle,
-            applicationFolder, allTag);
-
-      /* Build the AlertDialog. */
-      AlertDialog.Builder build = new AlertDialog.Builder(context);
-      build.setTitle(titleText);
-      build.setView(dialogLayout);
-      build.setNegativeButton(negativeButtonText, null);
-      build.setPositiveButton(positiveButtonText, onClickPositive);
-      build.show();
+      editDialog.show();
    }
 
    @Override
