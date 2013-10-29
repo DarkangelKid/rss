@@ -15,7 +15,7 @@
       android:layout_marginTop="4dp"
       android:fontFamily="sans-serif-light"
       android:text="@+id/settings_heading"
-      android:textAppearance="@android:style/TextAppearance.Medium"
+      android:textAppearance="@android:style/TextAppearance.Large"
       android:textColor="#323232"/>
 
    <ImageView

@@ -9,19 +9,19 @@ import android.widget.TextView;
 
 class AdapterNavDrawer extends BaseAdapter
 {
-   private static final int[] NAV_ICONS    = {
-         R.drawable.feeds, R.drawable.manage, R.drawable.feeds,
+   private static final int[] NAV_ICONS       = {
+         R.drawable.action_feeds, R.drawable.action_manage, R.drawable.action_settings,
    };
-   private static final int   TYPE_TITLE   = 0;
-   private static final int   TYPE_DIVIDER = 1;
-   private static final int   TYPE_TAG     = 2;
-   private static final int[] TYPES        = {TYPE_TITLE, TYPE_DIVIDER, TYPE_TAG};
+   private static final int   TYPE_TITLE      = 0;
+   private static final int   TYPE_DIVIDER    = 1;
+   private static final int   TYPE_TAG        = 2;
+   private static final int[] TYPES           = {TYPE_TITLE, TYPE_DIVIDER, TYPE_TAG};
+   private static final int[] EMPTY_INT_ARRAY = new int[0];
    private final int            m_twelveDp;
    private final String[]       m_navigationTitles;
    private final LayoutInflater m_layoutInflater;
-   private              String[] m_tagArray      = new String[0];
-   private static final int[]    EMPTY_INT_ARRAY = new int[0];
-   private              int[]    m_unreadArray   = EMPTY_INT_ARRAY;
+   private String[] m_tagArray    = new String[0];
+   private int[]    m_unreadArray = EMPTY_INT_ARRAY;
 
    AdapterNavDrawer(String[] navigationTitles, int twelveDp, LayoutInflater layoutInflater)
    {
@@ -68,22 +68,20 @@ class AdapterNavDrawer extends BaseAdapter
 
       if(TYPE_TITLE == viewType)
       {
-         TextView navigationMainItem = (TextView) view;
          if(null == view)
          {
             view = m_layoutInflater.inflate(R.layout.navigation_drawer_main_item, parent, false);
-            navigationMainItem = (TextView) view.findViewById(R.id.menu_item);
          }
 
-         navigationMainItem.setText(m_navigationTitles[position]);
+         ((TextView) view).setText(m_navigationTitles[position]);
 
          /* Set the item's image as a CompoundDrawable of the textView. */
          if(Build.VERSION_CODES.JELLY_BEAN_MR1 <= Build.VERSION.SDK_INT)
          {
-            navigationMainItem.setCompoundDrawablesRelativeWithIntrinsicBounds(NAV_ICONS[position],
+            ((TextView) view).setCompoundDrawablesRelativeWithIntrinsicBounds(NAV_ICONS[position],
                   0, 0, 0);
          }
-         navigationMainItem.setCompoundDrawablePadding(m_twelveDp);
+         ((TextView) view).setCompoundDrawablePadding(m_twelveDp);
       }
       else if(TYPE_DIVIDER == viewType && null == view)
       {

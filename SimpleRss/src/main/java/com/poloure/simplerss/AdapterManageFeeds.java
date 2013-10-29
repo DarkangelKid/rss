@@ -18,10 +18,10 @@ class AdapterManageFeeds extends BaseAdapter
       m_layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
    }
 
-   void setArrays(String[] titles, String... infos)
+   void setArrays(String[] titleArray, String... infoArray)
    {
-      m_titleArray = titles.clone();
-      m_infoArray = infos.clone();
+      m_titleArray = titleArray.clone();
+      m_infoArray = infoArray.clone();
    }
 
    @Override
