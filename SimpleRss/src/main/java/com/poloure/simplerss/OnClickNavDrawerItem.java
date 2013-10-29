@@ -48,11 +48,12 @@ class OnClickNavDrawerItem implements AdapterView.OnItemClickListener
          return;
       }
 
+      /* Show the title first to stop truncated subtitles.
+       * Bypass the method here. */
+      ((FeedsActivity) m_activity).setNavigationTitle(selectedTitle, false);
+
       /* Hide the current fragment and display the selected one. */
       showFragment(selectedTitle);
-
-      /* Bypass the method here. */
-      ((FeedsActivity) m_activity).setNavigationTitle(selectedTitle, false);
    }
 
    void showFragment(String tag)

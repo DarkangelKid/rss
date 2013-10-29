@@ -16,7 +16,7 @@
    <application
       android:allowBackup="true"
       android:hardwareAccelerated="true"
-      android:icon="@drawable/abc_ic_cab_done_holo_light"
+      android:icon="@drawable/rss_icon"
       android:label="Simple RSS"
       android:supportsRtl="true">
       <activity

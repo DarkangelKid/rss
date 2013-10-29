@@ -112,7 +112,7 @@ class AdapterSettingsFunctions extends BaseAdapter
             holder = new HolderSettingsSeekBar();
             holder.m_titleView = (TextView) view.findViewById(R.id.seek_title);
             holder.m_summaryView = (TextView) view.findViewById(R.id.seek_summary);
-            holder.m_seekBar = (SeekBar) view.findViewById(R.id.seekbar);
+            holder.m_seekBar = (SeekBar) view.findViewById(R.id.seek_bar);
             holder.m_readView = (TextView) view.findViewById(R.id.seek_read);
             view.setTag(holder);
          }

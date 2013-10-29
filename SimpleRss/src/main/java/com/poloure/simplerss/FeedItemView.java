@@ -53,7 +53,6 @@ class FeedItemView extends RelativeLayout
       setBackgroundColor(backgroundColor);
    }
 
-   public
    void showItem(FeedItem feedItem, int position, boolean isRead)
    {
       String link = feedItem.m_itemUrl;
@@ -70,6 +69,7 @@ class FeedItemView extends RelativeLayout
 
       if(isImage)
       {
+         m_imageView.setVisibility(View.VISIBLE);
          displayImage(m_imageView, position, feedItem, isRead);
       }
       else

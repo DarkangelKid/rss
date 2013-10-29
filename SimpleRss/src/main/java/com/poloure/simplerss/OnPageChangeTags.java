@@ -35,8 +35,10 @@ class OnPageChangeTags extends SimpleOnPageChangeListener
       String unread = item[0];
       String tag = item[1];
 
+      String subtitle = String.format(AsyncRefreshNavigationAdapter.TAG_SUBTITLE_FORMAT, unread, tag);
+
       ActionBar actionBar = activity.getSupportActionBar();
-      actionBar.setSubtitle(tag + " | " + unread);
+      actionBar.setSubtitle(subtitle);
 
       /* Refresh the page if it has no items on display. */
       String fragmentTag = "android:switcher:" + FragmentFeeds.VIEW_PAGER_ID + ':' + position;
