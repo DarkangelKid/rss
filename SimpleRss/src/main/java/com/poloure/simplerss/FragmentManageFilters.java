@@ -77,7 +77,8 @@ class FragmentManageFilters extends ListFragment
       String addText = getString(R.string.add_dialog);
       String addFilterText = getString(R.string.add_filter);
 
-      ListView navigationList = (ListView) ((Activity) context).findViewById(R.id.left_drawer);
+      ListView navigationList = (ListView) ((Activity) context).findViewById(
+            R.id.navigation_drawer);
       BaseAdapter navigationAdapter = (BaseAdapter) navigationList.getAdapter();
 
       String applicationFolder = FeedsActivity.getApplicationFolder(context);

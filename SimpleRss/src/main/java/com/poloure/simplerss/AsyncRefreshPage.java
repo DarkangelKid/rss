@@ -150,7 +150,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       }
 
       /* Do not count items as Read while we are updating the list. */
-      adapterTag.m_readingItems = false;
+      adapterTag.m_isReadingItems = false;
 
       int mapSize = map.size();
       Collection<FeedItem> collection = map.values();
@@ -170,7 +170,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
    {
       /* Resume Read item checking. */
       Adapter adapterTag = m_listView.getAdapter();
-      ((AdapterTags) adapterTag).m_readingItems = true;
+      ((AdapterTags) adapterTag).m_isReadingItems = true;
    }
 
    @Override
@@ -178,13 +178,16 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
    void onProgressUpdate(Object[] values)
    {
 
+      int top = 0;
+      int index = 0;
+
       /* If these are the first items to be added to the list. */
       if(0 == m_listView.getCount())
       {
          m_listView.setVisibility(View.INVISIBLE);
       }
       /* Find the exact mPosition in the list. */
-      /*else
+      else
       {
          index = m_listView.getFirstVisiblePosition() + 1;
          View v = m_listView.getChildAt(0);
@@ -199,7 +202,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
             View childAt = m_listView.getChildAt(1);
             top = childAt.getTop();
          }
-      }*/
+      }
 
       AdapterTags adapterTag = (AdapterTags) m_listView.getAdapter();
       adapterTag.prependArray(values);
@@ -211,10 +214,8 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
          FeedsActivity.gotoLatestUnread(m_listView);
       }
 
-      int top = 0;
       if(0 != top)
       {
-         int index = 0;
          m_listView.setSelectionFromTop(index, top - m_sixteenDp);
       }
    }

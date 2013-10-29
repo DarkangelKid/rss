@@ -3,17 +3,26 @@ package com.poloure.simplerss;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Toast;
 
 import java.io.File;
 
 class OnClickManageFeedDialogItem implements DialogInterface.OnClickListener
 {
-   private final String m_feedName;
-   private final String m_applicationFolder;
+   private final String               m_feedName;
+   private final String               m_applicationFolder;
+   private final String               m_allTag;
+   private final FragmentPagerAdapter m_pagerAdapterFeeds;
+   private final BaseAdapter          m_navigationAdapter;
 
-   OnClickManageFeedDialogItem(String feedName, String applicationFolder)
+   OnClickManageFeedDialogItem(FragmentPagerAdapter pagerAdapterFeeds,
+         BaseAdapter navigationAdapter, String feedName, String applicationFolder, String allTag)
    {
+      m_pagerAdapterFeeds = pagerAdapterFeeds;
+      m_navigationAdapter = navigationAdapter;
+      m_allTag = allTag;
       m_feedName = feedName;
       m_applicationFolder = applicationFolder;
    }
@@ -45,10 +54,8 @@ class OnClickManageFeedDialogItem implements DialogInterface.OnClickListener
       boolean isDelete = 0 == which;
       boolean isClearContent = 1 == which;
 
-      if(isDelete || isClearContent)
-      {
-         deleteDirectory(new File(feedFolderPath));
-      }
+      /* This if statement must come first since the AsyncRefreshNavigationAdapter relies on the
+      tagList in the PagerAdapterFeeds. */
       if(isDelete)
       {
          /* Delete the feed. */
@@ -59,7 +66,16 @@ class OnClickManageFeedDialogItem implements DialogInterface.OnClickListener
          String deletedText = context.getString(R.string.deleted_feed) + ' ' + m_feedName;
          Toast.makeText(context, deletedText, Toast.LENGTH_SHORT).show();
 
-         /* TODO AsyncCheckFeed.updateTags((Activity) context); */
+         /* Update the PagerAdapter for the tag fragments. */
+         ((PagerAdapterFeeds) m_pagerAdapterFeeds).getTagsFromDisk(m_applicationFolder, m_allTag);
+         m_pagerAdapterFeeds.notifyDataSetChanged();
+      }
+      if(isDelete || isClearContent)
+      {
+         deleteDirectory(new File(feedFolderPath));
+
+         /* Update the navigationDrawer without the ActionBar. */
+         AsyncRefreshNavigationAdapter.newInstance(m_navigationAdapter, m_applicationFolder);
       }
 
       /* Refresh pages and navigation counts. */

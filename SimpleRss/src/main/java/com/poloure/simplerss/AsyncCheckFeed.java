@@ -4,6 +4,8 @@ import android.app.Dialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,15 +26,22 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
    private static final String  INDEX_FORMAT       = "feed|%s|url|%s|tag|%s|";
    private static final Pattern ILLEGAL_FILE_CHARS = Pattern.compile("[/\\?%*|<>:]");
    private static final Pattern SPLIT_SPACE        = Pattern.compile(" ");
-   private final Dialog m_dialog;
-   private final String m_oldFeedName;
-   private final String m_applicationFolder;
-   private final String m_allTag;
+   private static final Pattern SPLIT_COMMA        = Pattern.compile(",");
+   private final Dialog               m_dialog;
+   private final String               m_oldFeedName;
+   private final String               m_applicationFolder;
+   private final String               m_allTag;
+   private final FragmentPagerAdapter m_pagerAdapterFeeds;
+   private final BaseAdapter          m_navigationAdapter;
 
    private
-   AsyncCheckFeed(Dialog dialog, String currentTitle, String applicationFolder, String allTag)
+   AsyncCheckFeed(Dialog dialog, FragmentPagerAdapter pagerAdapterFeeds,
+         BaseAdapter navigationAdapter, String currentTitle, String applicationFolder,
+         String allTag)
    {
       m_dialog = dialog;
+      m_pagerAdapterFeeds = pagerAdapterFeeds;
+      m_navigationAdapter = navigationAdapter;
       m_oldFeedName = currentTitle;
       m_applicationFolder = applicationFolder;
       m_allTag = allTag;
@@ -43,10 +52,12 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
    }
 
    static
-   void newInstance(Dialog dialog, String oldFeedTitle, String applicationFolder, String allTag)
+   void newInstance(Dialog dialog, FragmentPagerAdapter pagerAdapterFeeds,
+         BaseAdapter navigationAdapter, String oldFeedTitle, String applicationFolder,
+         String allTag)
    {
-      AsyncTask<Void, Void, String[]> task = new AsyncCheckFeed(dialog, oldFeedTitle,
-            applicationFolder, allTag);
+      AsyncTask<Void, Void, String[]> task = new AsyncCheckFeed(dialog, pagerAdapterFeeds,
+            navigationAdapter, oldFeedTitle, applicationFolder, allTag);
 
       if(Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT)
       {
@@ -123,8 +134,13 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
          /* Save the feed to the index. */
          Write.single(Read.INDEX, feedInfo, m_applicationFolder);
 
-         /* Update the tags. */
-         /* TODO updateTags((Activity) m_context); */
+         /* Update the PagerAdapter for the tag fragments. */
+         ((PagerAdapterFeeds) m_pagerAdapterFeeds).getTagsFromDisk(m_applicationFolder, m_allTag);
+         m_pagerAdapterFeeds.notifyDataSetChanged();
+
+         /* Update the NavigationDrawer adapter.
+         *  The subtitle of the actionbar should never change on an add of a feed.*/
+         AsyncRefreshNavigationAdapter.newInstance(m_navigationAdapter, m_applicationFolder);
 
          /* TODO AsyncManageTagsRefresh.newInstance(tagListView); */
          /* TODO AsyncManageFeedsRefresh.newInstance(feedsListView, m_context); */
@@ -166,32 +182,48 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
    {
       Locale defaultLocale = Locale.getDefault();
 
-      String initialTags = 0 == userInputTags.length()
+      String lowerTags = 0 == userInputTags.length()
             ? allTag
             : userInputTags.toLowerCase(defaultLocale);
 
-      int tagInitialCapacity = initialTags.length();
+      /* + 10 in case the user did not put spaces after the commas. */
+      int tagInitialCapacity = lowerTags.length();
+      StringBuilder tagBuilder = new StringBuilder(tagInitialCapacity + 10);
 
-      /* Capitalise each word. */
-      String[] words = SPLIT_SPACE.split(initialTags);
-      StringBuilder tagBuilder = new StringBuilder(tagInitialCapacity);
+      String[] tags = SPLIT_COMMA.split(lowerTags);
 
-      for(String word : words)
+      /* For each tag. */
+      for(String tag : tags)
       {
-         String firstLetter = word.substring(0, 1);
-         String restOfWord = word.substring(1);
+         /* In case the tag is multiple words. */
+         String[] words = SPLIT_SPACE.split(tag);
 
-         String firstLetterUpper = firstLetter.toUpperCase(defaultLocale);
-         String restOfWordLower = restOfWord.toLowerCase(defaultLocale);
+         /* The input tag is all lowercase. */
+         for(String word : words)
+         {
+            if(0 < word.length())
+            {
+               char firstLetter = word.charAt(0);
+               char firstLetterUpper = Character.toUpperCase(firstLetter);
 
-         tagBuilder.append(firstLetterUpper);
-         tagBuilder.append(restOfWordLower);
-         tagBuilder.append(' ');
+               String restOfWord = word.substring(1);
+
+               tagBuilder.append(firstLetterUpper);
+               tagBuilder.append(restOfWord);
+               tagBuilder.append(' ');
+            }
+         }
+         /* Delete the last space. */
+         int builderLength = tagBuilder.length();
+         tagBuilder.deleteCharAt(builderLength - 1);
+
+         tagBuilder.append(", ");
       }
 
-      int tagLength = tagBuilder.length();
-      int lastChar = tagLength - 1;
-      tagBuilder.delete(lastChar, tagLength);
+      /* Delete the last comma and space. */
+      int builderLength = tagBuilder.length();
+      tagBuilder.setLength(builderLength - 2);
+
       return tagBuilder.toString();
    }
 
@@ -218,6 +250,19 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       {
       }
       return isValid;
+   }
+
+   private static
+   XmlPullParser createXmlParser(String urlString) throws Exception
+   {
+      XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+      factory.setNamespaceAware(true);
+      XmlPullParser parser = factory.newPullParser();
+
+      URL url = new URL(urlString);
+      InputStream inputStream = url.openStream();
+      parser.setInput(inputStream, null);
+      return parser;
    }
 
    private static
@@ -249,18 +294,5 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       {
       }
       return feedTitle;
-   }
-
-   private static
-   XmlPullParser createXmlParser(String urlString) throws Exception
-   {
-      XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
-      factory.setNamespaceAware(true);
-      XmlPullParser parser = factory.newPullParser();
-
-      URL url = new URL(urlString);
-      InputStream inputStream = url.openStream();
-      parser.setInput(inputStream, null);
-      return parser;
    }
 }

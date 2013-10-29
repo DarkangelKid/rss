@@ -3,6 +3,7 @@ package com.poloure.simplerss;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.v7.app.ActionBar;
+import android.widget.BaseAdapter;
 
 import java.io.File;
 import java.util.Set;
@@ -14,24 +15,23 @@ class AsyncRefreshNavigationAdapter extends AsyncTask<String, Void, int[]>
    private final int              m_currentPage;
 
    private
-   AsyncRefreshNavigationAdapter(AdapterNavDrawer adapterNavDrawer, ActionBar actionBar,
-         int currentPage)
+   AsyncRefreshNavigationAdapter(BaseAdapter adapterNavDrawer, ActionBar actionBar, int currentPage)
    {
-      m_adapterNavDrawer = adapterNavDrawer;
+      m_adapterNavDrawer = (AdapterNavDrawer) adapterNavDrawer;
       m_actionBar = actionBar;
       m_currentPage = currentPage;
    }
 
    /* For when the user is updating the navigation drawer not from the Feeds page. */
    static
-   void newInstance(AdapterNavDrawer adapterNavDrawer, String applicationFolder)
+   void newInstance(BaseAdapter adapterNavDrawer, String applicationFolder)
    {
       newInstance(adapterNavDrawer, null, applicationFolder, -1);
    }
 
    static
-   void newInstance(AdapterNavDrawer adapterNavDrawer, ActionBar actionBar,
-         String applicationFolder, int currentPage)
+   void newInstance(BaseAdapter adapterNavDrawer, ActionBar actionBar, String applicationFolder,
+         int currentPage)
    {
       AsyncTask<String, Void, int[]> task = new AsyncRefreshNavigationAdapter(adapterNavDrawer,
             actionBar, currentPage);

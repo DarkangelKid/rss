@@ -3,29 +3,35 @@ package com.poloure.simplerss;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.view.View;
+import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 
-public
 class EditDialog extends Dialog
 {
-   private final String m_oldFeedTitle;
-   private final String m_applicationFolder;
-   private final String m_allTag;
-
-   static
-   Dialog newInstance(Context context, String oldFeedTitle, String applicationFolder, String allTag)
-   {
-      return new EditDialog(context, oldFeedTitle, applicationFolder, allTag);
-   }
+   private final String           m_oldFeedTitle;
+   private final String           m_applicationFolder;
+   private final String           m_allTag;
+   private final FragmentActivity m_activity;
 
    private
    EditDialog(Context context, String oldFeedTitle, String applicationFolder, String allTag)
    {
       super(context);
+      m_activity = (FragmentActivity) context;
       m_oldFeedTitle = oldFeedTitle;
       m_applicationFolder = applicationFolder;
       m_allTag = allTag;
+   }
+
+   static
+   Dialog newInstance(Context context, String oldFeedTitle, String applicationFolder, String allTag)
+   {
+      return new EditDialog(context, oldFeedTitle, applicationFolder, allTag);
    }
 
    @Override
@@ -64,7 +70,14 @@ class EditDialog extends Dialog
       public
       void onClick(View v)
       {
-         AsyncCheckFeed.newInstance(m_dialog, m_oldFeedTitle, m_applicationFolder, m_allTag);
+         ViewPager feedPager = (ViewPager) m_activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
+         FragmentPagerAdapter pagerAdapterFeeds = (FragmentPagerAdapter) feedPager.getAdapter();
+
+         ListView navigationDrawer = (ListView) m_activity.findViewById(R.id.navigation_drawer);
+         BaseAdapter navigationAdapter = (BaseAdapter) navigationDrawer.getAdapter();
+
+         AsyncCheckFeed.newInstance(m_dialog, pagerAdapterFeeds, navigationAdapter, m_oldFeedTitle,
+               m_applicationFolder, m_allTag);
       }
    }
 }

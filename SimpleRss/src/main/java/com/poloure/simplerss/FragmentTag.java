@@ -1,11 +1,12 @@
 package com.poloure.simplerss;
 
-import android.content.Context;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,26 +34,27 @@ class FragmentTag extends ListFragment
    {
       super.onActivityCreated(savedInstanceState);
 
-      Context context = getActivity();
       ListView listView = getListView();
+      Resources resources = getResources();
+      ActionBarActivity activity = (ActionBarActivity) getActivity();
+      ActionBar actionBar = activity.getSupportActionBar();
+      String applicationFolder = FeedsActivity.getApplicationFolder(activity);
 
-      String applicationFolder = FeedsActivity.getApplicationFolder(context);
+      ListView navigationList = (ListView) activity.findViewById(R.id.navigation_drawer);
+      AdapterNavDrawer adapterNavDrawer = (AdapterNavDrawer) navigationList.getAdapter();
 
-      ListAdapter listAdapter = new AdapterTags(context, FeedsActivity.READ_ITEMS,
-            applicationFolder);
-
+      ListAdapter listAdapter = new AdapterTags(activity);
       setListAdapter(listAdapter);
 
       Bundle bundle = getArguments();
       int position = bundle.getInt(POSITION_KEY);
 
-      ActionBarActivity activity = (ActionBarActivity) getActivity();
-      ListView navigationList = (ListView) activity.findViewById(R.id.left_drawer);
-      AdapterNavDrawer adapterNavDrawer = (AdapterNavDrawer) navigationList.getAdapter();
-      ActionBar actionBar = activity.getSupportActionBar();
+      /* Get what 16DP is. */
+      DisplayMetrics displayMetrics = resources.getDisplayMetrics();
+      int sixteenDp = Math.round(displayMetrics.density * 16);
 
       AbsListView.OnScrollListener scrollListener = new OnScrollFeedListener(adapterNavDrawer,
-            actionBar, applicationFolder, position, /* TODO */ 24);
+            actionBar, applicationFolder, position, sixteenDp);
 
       listView.setOnScrollListener(scrollListener);
 
@@ -64,8 +66,7 @@ class FragmentTag extends ListFragment
 
          ListFragment listFragment = (ListFragment) fragmentManager.findFragmentByTag(fragmentTag);
          ListView listViewTags = listFragment.getListView();
-         AsyncRefreshPage.newInstance(0, listViewTags, applicationFolder, /* TODO 16 DP. */ 24,
-               true);
+         AsyncRefreshPage.newInstance(0, listViewTags, applicationFolder, sixteenDp, true);
       }
    }
 

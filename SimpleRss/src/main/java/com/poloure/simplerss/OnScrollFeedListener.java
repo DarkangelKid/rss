@@ -26,21 +26,21 @@ class OnScrollFeedListener implements AbsListView.OnScrollListener
    public
    void onScrollStateChanged(AbsListView view, int scrollState)
    {
-      AdapterTags adapterTags = (AdapterTags) view.getAdapter();
-      View topView = view.getChildAt(0);
-      boolean isTopView = null != topView;
-      boolean isSixteenGap = isTopView && m_sixteenDp == topView.getTop();
-      boolean isListViewShown = view.isShown();
-      boolean readingItems = adapterTags.m_readingItems;
-
-      if(isTopView && isSixteenGap && isListViewShown && readingItems)
-      {
-         Long time = ((FeedItem) adapterTags.getItem(0)).m_itemTime;
-         AdapterTags.S_READ_ITEM_TIMES.add(time);
-      }
-
       if(AbsListView.OnScrollListener.SCROLL_STATE_IDLE == scrollState)
       {
+         AdapterTags adapterTags = (AdapterTags) view.getAdapter();
+         View topView = view.getChildAt(0);
+         boolean isTopView = null != topView;
+         boolean isSixteenGap = isTopView && m_sixteenDp == topView.getTop();
+         boolean isListViewShown = view.isShown();
+         boolean readingItems = adapterTags.m_isReadingItems;
+
+         if(isTopView && isSixteenGap && isListViewShown && readingItems)
+         {
+            Long time = ((FeedItem) adapterTags.getItem(0)).m_itemTime;
+            AdapterTags.S_READ_ITEM_TIMES.add(time);
+         }
+
          AsyncRefreshNavigationAdapter.newInstance(m_adapterNavDrawer, m_actionBar,
                m_applicationFolder, m_page);
       }

@@ -9,6 +9,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,8 +21,8 @@ import android.widget.ListView;
 
 class FragmentFeeds extends Fragment
 {
-   private static final int OFF_SCREEN_PAGE_LIMIT = 128;
    static final         int VIEW_PAGER_ID         = 0x1000;
+   private static final int OFF_SCREEN_PAGE_LIMIT = 128;
 
    static
    Fragment newInstance()
@@ -46,10 +47,16 @@ class FragmentFeeds extends Fragment
       String applicationFolder = FeedsActivity.getApplicationFolder(context);
       String allTag = resources.getString(R.string.all_tag);
 
-      ListView navigationList = (ListView) ((Activity) context).findViewById(R.id.left_drawer);
+      ListView navigationList = (ListView) ((Activity) context).findViewById(
+            R.id.navigation_drawer);
       BaseAdapter navigationAdapter = (BaseAdapter) navigationList.getAdapter();
 
-      ViewPager.OnPageChangeListener pageChange = new OnPageChangeTags(this, navigationAdapter);
+      DisplayMetrics displayMetrics = resources.getDisplayMetrics();
+      int sixteenDp = Math.round(displayMetrics.density * 16);
+
+      ViewPager.OnPageChangeListener pageChange = new OnPageChangeTags(this, navigationAdapter,
+            sixteenDp);
+
       PagerAdapter adapter = new PagerAdapterFeeds(fragmentManager);
       PagerAdapterFeeds.getTagsFromDisk(applicationFolder, allTag);
       adapter.notifyDataSetChanged();

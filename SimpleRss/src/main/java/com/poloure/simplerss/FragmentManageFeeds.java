@@ -5,14 +5,15 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.ListFragment;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -65,6 +66,7 @@ class FragmentManageFeeds extends ListFragment
       }
 
       Dialog editDialog = EditDialog.newInstance(context, oldFeedTitle, applicationFolder, allTag);
+      editDialog.show();
 
       /* If the mode is edit. */
       if(MODE_ADD != position)
@@ -80,9 +82,7 @@ class FragmentManageFeeds extends ListFragment
             : R.string.edit_dialog_title;
 
       String titleText = context.getString(titleResource);
-      //TODO ((TextView) editDialog.findViewById(R.id.title_text)).setText(titleText);
-
-      editDialog.show();
+      editDialog.setTitle(titleText);
    }
 
    @Override
@@ -100,8 +100,19 @@ class FragmentManageFeeds extends ListFragment
       /* Make an alertDialog for the long click of a list item. */
       AlertDialog.Builder build = new AlertDialog.Builder(activity);
 
+      /* Get the items that the onClick listener needs to refresh when deleting/clearing a feed. */
+      ViewPager feedPager = (ViewPager) activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
+      FragmentPagerAdapter pagerAdapterFeeds = (FragmentPagerAdapter) feedPager.getAdapter();
+
+      ListView navigationDrawer = (ListView) activity.findViewById(R.id.navigation_drawer);
+      BaseAdapter navigationAdapter = (BaseAdapter) navigationDrawer.getAdapter();
+
+      String allTag = activity.getString(R.string.all_tag);
+
       setListAdapter(listAdapter);
-      listView.setOnItemLongClickListener(new OnLongClickManageFeedItem(build, applicationFolder));
+      listView.setOnItemLongClickListener(
+            new OnLongClickManageFeedItem(pagerAdapterFeeds, navigationAdapter, build,
+                  applicationFolder, allTag));
       AsyncManageFeedsRefresh.newInstance(listView, applicationFolder);
 
       Resources resources = activity.getResources();
@@ -109,14 +120,5 @@ class FragmentManageFeeds extends ListFragment
 
       ActionBar actionBar = activity.getSupportActionBar();
       actionBar.setSubtitle(manageTitles[0]);
-   }
-
-   /* Add a new feed. */
-   @Override
-   public
-   boolean onOptionsItemSelected(MenuItem item)
-   {
-      FragmentActivity activity = getActivity();
-      return activity.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
    }
 }

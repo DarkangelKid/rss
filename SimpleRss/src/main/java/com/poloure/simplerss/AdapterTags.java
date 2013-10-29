@@ -16,16 +16,11 @@ class AdapterTags extends BaseAdapter
 {
    static final Set<Long> S_READ_ITEM_TIMES = Collections.synchronizedSet(new HashSet<Long>(0));
    private final Context m_context;
-   boolean m_readingItems = true;
+   boolean m_isReadingItems = true;
    final List<FeedItem> m_items = new ArrayList<FeedItem>(0);
 
-   AdapterTags(Context context, String readItemFileName, String applicationFolder)
+   AdapterTags(Context context)
    {
-      if(0 == S_READ_ITEM_TIMES.size())
-      {
-         Set<Long> set = Read.longSet(readItemFileName, applicationFolder);
-         S_READ_ITEM_TIMES.addAll(set);
-      }
       m_context = context;
    }
 
@@ -72,7 +67,7 @@ class AdapterTags extends BaseAdapter
       boolean isListViewShown = parent.isShown();
       boolean isNotLastItem = position + 1 < getCount();
 
-      if(isListViewShown && isNotLastItem && m_readingItems)
+      if(isListViewShown && isNotLastItem && m_isReadingItems)
       {
          FeedItem nextItem = m_items.get(position + 1);
          S_READ_ITEM_TIMES.add(nextItem.m_itemTime);

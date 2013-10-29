@@ -22,7 +22,6 @@ class AdapterNavDrawer extends BaseAdapter
    private              String[] m_tagArray      = new String[0];
    private static final int[]    EMPTY_INT_ARRAY = new int[0];
    private              int[]    m_unreadArray   = EMPTY_INT_ARRAY;
-   private TextView m_navigationMainItem;
 
    AdapterNavDrawer(String[] navigationTitles, int twelveDp, LayoutInflater layoutInflater)
    {
@@ -69,21 +68,22 @@ class AdapterNavDrawer extends BaseAdapter
 
       if(TYPE_TITLE == viewType)
       {
+         TextView navigationMainItem = (TextView) view;
          if(null == view)
          {
             view = m_layoutInflater.inflate(R.layout.navigation_drawer_main_item, parent, false);
-            m_navigationMainItem = (TextView) view.findViewById(R.id.menu_item);
+            navigationMainItem = (TextView) view.findViewById(R.id.menu_item);
          }
 
-         m_navigationMainItem.setText(m_navigationTitles[position]);
+         navigationMainItem.setText(m_navigationTitles[position]);
 
          /* Set the item's image as a CompoundDrawable of the textView. */
          if(Build.VERSION_CODES.JELLY_BEAN_MR1 <= Build.VERSION.SDK_INT)
          {
-            m_navigationMainItem.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                  NAV_ICONS[position], 0, 0, 0);
+            navigationMainItem.setCompoundDrawablesRelativeWithIntrinsicBounds(NAV_ICONS[position],
+                  0, 0, 0);
          }
-         m_navigationMainItem.setCompoundDrawablePadding(m_twelveDp);
+         navigationMainItem.setCompoundDrawablePadding(m_twelveDp);
       }
       else if(TYPE_DIVIDER == viewType && null == view)
       {

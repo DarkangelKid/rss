@@ -23,6 +23,70 @@ class Read
    /* All functions in here must check that the media is available before
     * continuing. */
 
+   static
+   String[][] indexFile(String applicationFolder)
+   {
+      return csvFile(INDEX, applicationFolder, 'f', 'u', 't');
+   }
+
+   static
+   String[][] csvFile(String fileName, String applicationFolder, char... type)
+   {
+      if(isUnmounted())
+      {
+         return new String[type.length][0];
+      }
+
+      String[] lines = file(fileName, applicationFolder);
+      if(0 == lines.length)
+      {
+         return new String[type.length][0];
+      }
+
+      String[][] types = new String[type.length][lines.length];
+
+      int linesLength = lines.length;
+      for(int j = 0; j < linesLength; j++)
+      {
+         int offset = 0;
+         String line = lines[j];
+         int next;
+
+         while(-1 != (next = line.indexOf(ITEM_SEPARATOR, offset)))
+         {
+            if(offset == line.length())
+            {
+               break;
+            }
+
+            char ch = line.charAt(offset);
+            offset = next + 1;
+
+            int typeLength = type.length;
+            for(int i = 0; i < typeLength; i++)
+            {
+               if(ch == type[i])
+               {
+                  next = line.indexOf(ITEM_SEPARATOR, offset);
+                  types[i][j] = line.substring(offset, next);
+                  break;
+               }
+            }
+            offset = line.indexOf(ITEM_SEPARATOR, offset) + 1;
+         }
+      }
+      return types;
+   }
+
+   static
+   boolean isUnmounted()
+   {
+      /* Check to see if we can Write to the media. */
+      String mounted = Environment.MEDIA_MOUNTED;
+      String externalStorageState = Environment.getExternalStorageState();
+      return !mounted.equals(externalStorageState);
+   }
+
    /* This function is now safe. It will return a zero length array on error. */
    static
    String[] file(String fileName, String applicationFolder)
@@ -87,13 +151,6 @@ class Read
       return lines;
    }
 
-   /* Wrapper for creating external BufferedReader. */
-   private static
-   BufferedReader reader(String path) throws FileNotFoundException
-   {
-      return new BufferedReader(new FileReader(path));
-   }
-
    static
    int count(String fileName, String applicationFolder)
    {
@@ -140,62 +197,13 @@ class Read
       return i;
    }
 
-   static
-   String[][] indexFile(String applicationFolder)
+   /* Wrapper for creating external BufferedReader. */
+   private static
+   BufferedReader reader(String path) throws FileNotFoundException
    {
-      return csvFile(INDEX, applicationFolder, 'f', 'u', 't');
+      return new BufferedReader(new FileReader(path));
    }
 
-   static
-   String[][] csvFile(String fileName, String applicationFolder, char... type)
-   {
-      if(isUnmounted())
-      {
-         return new String[type.length][0];
-      }
-
-      String[] lines = file(fileName, applicationFolder);
-      if(0 == lines.length)
-      {
-         return new String[type.length][0];
-      }
-
-      String[][] types = new String[type.length][lines.length];
-
-      int linesLength = lines.length;
-      for(int j = 0; j < linesLength; j++)
-      {
-         int offset = 0;
-         String line = lines[j];
-         int next;
-
-         while(-1 != (next = line.indexOf(ITEM_SEPARATOR, offset)))
-         {
-            if(offset == line.length())
-            {
-               break;
-            }
-
-            char ch = line.charAt(offset);
-            offset = next + 1;
-
-            int typeLength = type.length;
-            for(int i = 0; i < typeLength; i++)
-            {
-               if(ch == type[i])
-               {
-                  next = line.indexOf(ITEM_SEPARATOR, offset);
-                  types[i][j] = line.substring(offset, next);
-                  break;
-               }
-            }
-            offset = line.indexOf(ITEM_SEPARATOR, offset) + 1;
-         }
-      }
-      return types;
-   }
-
-   /* TODO Not for internal yet. */
    static
    Set<Long> longSet(String fileName, String fileFolder)
    {
@@ -207,7 +215,6 @@ class Read
          return longSet;
       }
 
-      /* TODO, if name does not contain fileFolder. */
       String filePath = fileFolder + fileName;
       File fileIn = new File(filePath);
 
@@ -241,14 +248,5 @@ class Read
          e.printStackTrace();
       }
       return longSet;
-   }
-
-   static
-   boolean isUnmounted()
-   {
-      /* Check to see if we can Write to the media. */
-      String mounted = Environment.MEDIA_MOUNTED;
-      String externalStorageState = Environment.getExternalStorageState();
-      return !mounted.equals(externalStorageState);
    }
 }

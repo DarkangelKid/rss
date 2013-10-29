@@ -20,6 +20,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -28,24 +29,24 @@ import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.Adapter;
+import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
 import java.io.File;
+import java.util.Set;
 
 public
 class FeedsActivity extends ActionBarActivity
 {
-   static final         String READ_ITEMS          = "read_items" + ".txt";
+   static final         String READ_ITEMS          = "read_items.txt";
    static final         String SETTINGS_DIR        = "settings" + File.separatorChar;
    static final         String FILTER_LIST         = "filter_list.txt";
    private static final int    ALARM_SERVICE_START = 1;
    private static final int    ALARM_SERVICE_STOP  = 0;
    private static final long   MINUTE_VALUE        = 60000L;
-   static Handler s_serviceHandler;
-
+   static  Handler               s_serviceHandler;
    private ViewPager             m_feedsViewPager;
-   private MenuItem              m_refreshItem;
    private ListAdapter           m_adapterNavDrawer;
    private DrawerLayout          m_drawerLayout;
    private ActionBarDrawerToggle m_drawerToggle;
@@ -53,8 +54,8 @@ class FeedsActivity extends ActionBarActivity
    private FragmentManager       m_fragmentManager;
    private String                m_applicationFolder;
    private Resources             m_resources;
-   private LayoutInflater        m_layoutInflater;
    private String                m_previousActionBarTitle;
+   private int                   m_sixteenDp;
 
    @Override
    public
@@ -68,14 +69,24 @@ class FeedsActivity extends ActionBarActivity
       m_actionBar = getSupportActionBar();
       m_applicationFolder = getApplicationFolder(this);
       m_fragmentManager = getSupportFragmentManager();
-      m_layoutInflater = getLayoutInflater();
+      LayoutInflater layoutInflater = getLayoutInflater();
+
+      /* Get what 16DP is. */
+      DisplayMetrics displayMetrics = m_resources.getDisplayMetrics();
+      m_sixteenDp = Math.round(displayMetrics.density * 16);
+
+      /* Load the read items to the AdapterTag class. */
+      if(0 == AdapterTags.S_READ_ITEM_TIMES.size())
+      {
+         Set<Long> set = Read.longSet(READ_ITEMS, m_applicationFolder);
+         AdapterTags.S_READ_ITEM_TIMES.addAll(set);
+      }
 
       /* Get the navigation drawer titles. */
       String[] navigationTitles = m_resources.getStringArray(R.array.nav_titles);
 
       m_drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-      m_adapterNavDrawer = new AdapterNavDrawer(navigationTitles, /* TODO DP */ 24,
-            m_layoutInflater);
+      m_adapterNavDrawer = new AdapterNavDrawer(navigationTitles, m_sixteenDp, layoutInflater);
 
       /* Configure the ActionBar. */
       m_actionBar.setIcon(R.drawable.rss_icon);
@@ -95,7 +106,7 @@ class FeedsActivity extends ActionBarActivity
       m_drawerToggle = new OnClickDrawerToggle(this, m_drawerLayout);
       m_drawerLayout.setDrawerListener(m_drawerToggle);
 
-      ListView navigationList = (ListView) findViewById(R.id.left_drawer);
+      ListView navigationList = (ListView) findViewById(R.id.navigation_drawer);
       navigationList.setOnItemClickListener(new OnClickNavDrawerItem(this));
       navigationList.setAdapter(m_adapterNavDrawer);
 
@@ -250,7 +261,7 @@ class FeedsActivity extends ActionBarActivity
       // Sync the toggle state after onRestoreInstanceState has occurred.
       m_drawerToggle.syncState();
 
-      AsyncRefreshNavigationAdapter.newInstance((AdapterNavDrawer) m_adapterNavDrawer, m_actionBar,
+      AsyncRefreshNavigationAdapter.newInstance((BaseAdapter) m_adapterNavDrawer, m_actionBar,
             m_applicationFolder, 0);
 
       m_feedsViewPager = (ViewPager) findViewById(FragmentFeeds.VIEW_PAGER_ID);
@@ -265,19 +276,20 @@ class FeedsActivity extends ActionBarActivity
       MenuInflater menuInflater = getMenuInflater();
       menuInflater.inflate(R.menu.activity, menu);
 
-      m_refreshItem = menu.findItem(R.id.refresh);
-
+      /* Set the refreshItem to spin if the service is running. The handler will stop it in due
+      time. */
+      MenuItem refreshItem = menu.findItem(R.id.refresh);
       boolean serviceRunning = isServiceRunning();
-      setRefreshingIcon(serviceRunning, m_refreshItem);
+      setRefreshingIcon(serviceRunning, refreshItem);
       return true;
    }
 
    /* Changes the ManageFeedsRefresh menu item to an animation if m_mode = true. */
    static
-   void setRefreshingIcon(boolean mode, MenuItem item)
+   void setRefreshingIcon(boolean isSpinning, MenuItem item)
    {
       /* Change it depending on the m_mode. */
-      if(mode)
+      if(isSpinning)
       {
          MenuItemCompat.setActionView(item, R.layout.progress_circle);
       }
@@ -322,7 +334,7 @@ class FeedsActivity extends ActionBarActivity
       }
       else if(menuText.equals(refresh))
       {
-         refreshFeeds();
+         refreshFeeds(item);
       }
       else
       {
@@ -365,11 +377,13 @@ class FeedsActivity extends ActionBarActivity
 
    /* Updates and refreshes the tags with any new content. */
    private
-   void refreshFeeds()
+   void refreshFeeds(MenuItem menuItem)
    {
+      MenuItemCompat.setActionView(menuItem, R.layout.progress_circle);
+
       /* Set the service handler in FeedsActivity so we can check and call it from ServiceUpdate. */
-      s_serviceHandler = new ServiceHandler(m_fragmentManager, m_refreshItem, m_applicationFolder,
-      /* TODO */ 24);
+      s_serviceHandler = new ServiceHandler(m_fragmentManager, menuItem, m_applicationFolder,
+            m_sixteenDp);
 
       int currentPage = m_feedsViewPager.getCurrentItem();
 
