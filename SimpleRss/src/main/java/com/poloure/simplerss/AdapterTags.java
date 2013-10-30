@@ -14,10 +14,11 @@ import java.util.Set;
 
 class AdapterTags extends BaseAdapter
 {
-   static final Set<Long> S_READ_ITEM_TIMES = Collections.synchronizedSet(new HashSet<Long>(0));
+   static final Set<Long>      S_READ_ITEM_TIMES = Collections.synchronizedSet(
+         new HashSet<Long>(0));
+   final        List<FeedItem> m_items           = new ArrayList<FeedItem>(0);
    private final Context m_context;
    boolean m_isReadingItems = true;
-   final List<FeedItem> m_items = new ArrayList<FeedItem>(0);
 
    AdapterTags(Context context)
    {
@@ -60,6 +61,13 @@ class AdapterTags extends BaseAdapter
       FeedItem item = m_items.get(position);
       Long time = item.m_itemTime;
       boolean isRead = S_READ_ITEM_TIMES.contains(time);
+
+      if(0.0F == FeedItemView.s_card_opacity && isRead)
+      {
+         /* TODO Separators persist. */
+         view.setVisibility(View.GONE);
+         return view;
+      }
 
       ((FeedItemView) view).showItem(item, position, isRead);
 

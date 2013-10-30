@@ -129,22 +129,6 @@ class FeedsActivity extends ActionBarActivity
       }
    }
 
-   static
-   String getApplicationFolder(Context context)
-   {
-      /* Check the media state for the desirable state. */
-      String state = Environment.getExternalStorageState();
-
-      String mounted = Environment.MEDIA_MOUNTED;
-      if(!mounted.equals(state))
-      {
-         return null;
-      }
-
-      File externalFilesDir = context.getExternalFilesDir(null);
-      return externalFilesDir.getAbsolutePath() + File.separatorChar;
-   }
-
    /* This is so the icon and text in the actionbar are selected. */
    @Override
    public
@@ -166,14 +150,26 @@ class FeedsActivity extends ActionBarActivity
       Write.longSet(READ_ITEMS, AdapterTags.S_READ_ITEM_TIMES, m_applicationFolder);
    }
 
+   @Override
+   public
+   void onBackPressed()
+   {
+      super.onBackPressed();
+
+      String feeds = m_resources.getStringArray(R.array.nav_titles)[0];
+      m_actionBar.setTitle(feeds);
+
+      m_drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+      m_drawerToggle.setDrawerIndicatorEnabled(true);
+   }
+
    private
    void setServiceIntent(int state)
    {
-      int time = m_resources.getIntArray(R.array.refresh_integers)[3];
-      String[] fileNames = m_resources.getStringArray(R.array.settings_function_names);
+      String[] settingTitles = m_resources.getStringArray(R.array.settings_function_titles);
 
       /* Load the ManageFeedsRefresh boolean value from settings. */
-      String[] check = Read.file(SETTINGS_DIR + fileNames[1] + ".txt", m_applicationFolder);
+      String[] check = Read.file(SETTINGS_DIR + settingTitles[1] + ".txt", m_applicationFolder);
       boolean refresh = 0 == check.length || !Boolean.parseBoolean(check[0]);
 
       if(refresh && ALARM_SERVICE_START == state)
@@ -182,19 +178,15 @@ class FeedsActivity extends ActionBarActivity
       }
 
       /* Load the ManageFeedsRefresh time from settings. */
-      String[] settings = Read.file(SETTINGS_DIR + fileNames[2] + ".txt", m_applicationFolder);
-      if(0 != settings.length)
-      {
+      String[] settings = Read.file(SETTINGS_DIR + settingTitles[2] + ".txt", m_applicationFolder);
 
-         time = null == settings[0] || 0 == settings[0].length()
-               ? 0
-               : Integer.parseInt(settings[0]);
-      }
+      int time = 0 == settings.length || 0 == settings[0].length()
+            ? 120 /* TODO DEFAULT REFRESH TIME. */
+            : Integer.parseInt(settings[0]);
 
-      String[] settingNames = m_resources.getStringArray(R.array.settings_function_names);
       /* Create intent, turn into pending intent, and get the alarm manager. */
       Intent intent = new Intent(this, ServiceUpdate.class);
-      intent = configureServiceIntent(intent, 0, settingNames, m_applicationFolder);
+      intent = configureServiceIntent(intent, 0, settingTitles, m_applicationFolder);
 
       PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, 0);
       AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
@@ -213,11 +205,11 @@ class FeedsActivity extends ActionBarActivity
    }
 
    private static
-   Intent configureServiceIntent(Intent intent, int page, String[] settingNames,
+   Intent configureServiceIntent(Intent intent, int page, String[] settingTitles,
          String applicationFolder)
    {
       /* Load notification boolean. */
-      String settingFileName = SETTINGS_DIR + settingNames[3] + ".txt";
+      String settingFileName = SETTINGS_DIR + settingTitles[3] + ".txt";
       String[] check = Read.file(settingFileName, applicationFolder);
 
       boolean notificationsEnabled = 0 != check.length && Boolean.parseBoolean(check[0]);
@@ -226,17 +218,20 @@ class FeedsActivity extends ActionBarActivity
       return intent;
    }
 
-   @Override
-   public
-   void onBackPressed()
+   static
+   String getApplicationFolder(Context context)
    {
-      super.onBackPressed();
+      /* Check the media state for the desirable state. */
+      String state = Environment.getExternalStorageState();
 
-      String feeds = m_resources.getStringArray(R.array.nav_titles)[0];
-      m_actionBar.setTitle(feeds);
+      String mounted = Environment.MEDIA_MOUNTED;
+      if(!mounted.equals(state))
+      {
+         return null;
+      }
 
-      m_drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-      m_drawerToggle.setDrawerIndicatorEnabled(true);
+      File externalFilesDir = context.getExternalFilesDir(null);
+      return externalFilesDir.getAbsolutePath() + File.separatorChar;
    }
 
    String getPreviousNavigationTitle()
@@ -284,19 +279,21 @@ class FeedsActivity extends ActionBarActivity
       return true;
    }
 
-   /* Changes the ManageFeedsRefresh menu item to an animation if m_mode = true. */
-   static
-   void setRefreshingIcon(boolean isSpinning, MenuItem item)
+   private
+   boolean isServiceRunning()
    {
-      /* Change it depending on the m_mode. */
-      if(isSpinning)
+      ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+      for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(
+            Integer.MAX_VALUE))
       {
-         MenuItemCompat.setActionView(item, R.layout.progress_circle);
+         String className = service.service.getClassName();
+         String serviceName = ServiceUpdate.class.getName();
+         if(serviceName.equals(className))
+         {
+            return true;
+         }
       }
-      else
-      {
-         MenuItemCompat.setActionView(item, null);
-      }
+      return false;
    }
 
    @Override
@@ -344,6 +341,31 @@ class FeedsActivity extends ActionBarActivity
       return true;
    }
 
+   /* Updates and refreshes the tags with any new content. */
+   private
+   void refreshFeeds(MenuItem menuItem)
+   {
+      MenuItemCompat.setActionView(menuItem, R.layout.progress_circle);
+
+      /* Set the service handler in FeedsActivity so we can check and call it from ServiceUpdate. */
+      s_serviceHandler = new ServiceHandler(m_fragmentManager, menuItem, m_applicationFolder,
+            m_sixteenDp);
+
+      int currentPage = m_feedsViewPager.getCurrentItem();
+
+      String[] settingTitles = m_resources.getStringArray(R.array.settings_function_titles);
+
+      Intent intent = new Intent(this, ServiceUpdate.class);
+      intent = configureServiceIntent(intent, currentPage, settingTitles, m_applicationFolder);
+      startService(intent);
+   }
+
+   String getNavigationTitle()
+   {
+      CharSequence title = m_actionBar.getTitle();
+      return title.toString();
+   }
+
    static
    void gotoLatestUnread(ListView listView)
    {
@@ -369,46 +391,19 @@ class FeedsActivity extends ActionBarActivity
       }
    }
 
-   String getNavigationTitle()
+   /* Changes the ManageFeedsRefresh menu item to an animation if m_mode = true. */
+   static
+   void setRefreshingIcon(boolean isSpinning, MenuItem item)
    {
-      CharSequence title = m_actionBar.getTitle();
-      return title.toString();
-   }
-
-   /* Updates and refreshes the tags with any new content. */
-   private
-   void refreshFeeds(MenuItem menuItem)
-   {
-      MenuItemCompat.setActionView(menuItem, R.layout.progress_circle);
-
-      /* Set the service handler in FeedsActivity so we can check and call it from ServiceUpdate. */
-      s_serviceHandler = new ServiceHandler(m_fragmentManager, menuItem, m_applicationFolder,
-            m_sixteenDp);
-
-      int currentPage = m_feedsViewPager.getCurrentItem();
-
-      String[] settingNames = m_resources.getStringArray(R.array.settings_function_names);
-
-      Intent intent = new Intent(this, ServiceUpdate.class);
-      intent = configureServiceIntent(intent, currentPage, settingNames, m_applicationFolder);
-      startService(intent);
-   }
-
-   private
-   boolean isServiceRunning()
-   {
-      ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-      for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(
-            Integer.MAX_VALUE))
+      /* Change it depending on the m_mode. */
+      if(isSpinning)
       {
-         String className = service.service.getClassName();
-         String serviceName = ServiceUpdate.class.getName();
-         if(serviceName.equals(className))
-         {
-            return true;
-         }
+         MenuItemCompat.setActionView(item, R.layout.progress_circle);
       }
-      return false;
+      else
+      {
+         MenuItemCompat.setActionView(item, null);
+      }
    }
 
    void setNavigationTitle(CharSequence title, boolean saveTitle)

@@ -14,23 +14,20 @@ class AdapterSettingsFunctions extends BaseAdapter
    private static final int   TYPE_CHECKBOX = 1;
    private static final int   TYPE_SEEK_BAR = 2;
    private static final int[] TYPES         = {TYPE_HEADING, TYPE_CHECKBOX, TYPE_SEEK_BAR};
-
-   private final String[]       m_fileNames;
    private final String[]       m_functionTitles;
    private final String[]       m_functionSummaries;
    private final LayoutInflater m_layoutInflater;
-   private       TextView       m_titleView;
    private final String         m_applicationFolder;
    private final String         m_settingsDir;
+   private       TextView       m_titleView;
 
    AdapterSettingsFunctions(String applicationFolder, String settingsDir, String[] adapterTitles,
-         String[] adapterSummaries, String[] adapterFileNames, LayoutInflater layoutInflater)
+         String[] adapterSummaries, LayoutInflater layoutInflater)
    {
       m_applicationFolder = applicationFolder;
       m_settingsDir = settingsDir;
       m_functionTitles = adapterTitles.clone();
       m_functionSummaries = adapterSummaries.clone();
-      m_fileNames = adapterFileNames.clone();
       m_layoutInflater = layoutInflater;
    }
 
@@ -61,7 +58,7 @@ class AdapterSettingsFunctions extends BaseAdapter
    {
       View view = convertView;
       int viewType = getItemViewType(position);
-      String settingFileName = m_settingsDir + m_fileNames[position] + ".txt";
+      String settingFileName = m_settingsDir + m_functionTitles[position] + ".txt";
 
       if(TYPE_HEADING == viewType)
       {
@@ -126,12 +123,10 @@ class AdapterSettingsFunctions extends BaseAdapter
 
          if(3 == position)
          {
-            holder.m_seekBar.setKeyProgressIncrement(5);
             holder.m_seekBar.setMax(1440);
          }
          else
          {
-            holder.m_seekBar.setKeyProgressIncrement(10);
             holder.m_seekBar.setMax(1000);
          }
 
@@ -141,7 +136,7 @@ class AdapterSettingsFunctions extends BaseAdapter
 
          /* Load the saved value and set the progress.*/
          String[] check = Read.file(settingFileName, m_applicationFolder);
-         int settingInteger = null == check || 0 == check[0].length()
+         int settingInteger = 0 == check.length || 0 == check[0].length()
                ? 100
                : Integer.parseInt(check[0]);
          holder.m_seekBar.setProgress(settingInteger);

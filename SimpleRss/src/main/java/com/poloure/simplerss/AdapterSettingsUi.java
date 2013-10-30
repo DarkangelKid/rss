@@ -5,18 +5,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 class AdapterSettingsUi extends BaseAdapter
 {
    private static final int   TYPE_HEADING  = 0;
    private static final int   TYPE_CHECKBOX = 1;
-   private static final int[] TYPES         = {TYPE_HEADING, TYPE_CHECKBOX};
+   private static final int   TYPE_SEEK_BAR = 2;
+   private static final int[] TYPES         = {TYPE_HEADING, TYPE_CHECKBOX, TYPE_SEEK_BAR};
    private final String[]       m_interfaceTitles;
    private final String[]       m_interfaceSummaries;
    private final LayoutInflater m_layoutInflater;
-   private       TextView       m_settingsHeading;
    private final String         m_applicationFolder;
+   private       TextView       m_settingsHeading;
 
    AdapterSettingsUi(String applicationFolder, String[] adapterTitles, String[] adapterSummaries,
          LayoutInflater layoutInflater)
@@ -96,6 +98,43 @@ class AdapterSettingsUi extends BaseAdapter
          boolean settingBoolean = Boolean.parseBoolean(settingString);
          holder.m_checkbox.setChecked(settingBoolean);
       }
+      else if(TYPE_SEEK_BAR == viewType)
+      {
+         HolderSettingsSeekBar holder;
+         if(null == view)
+         {
+            view = m_layoutInflater.inflate(R.layout.settings_seekbar, parent, false);
+            holder = new HolderSettingsSeekBar();
+            holder.m_titleView = (TextView) view.findViewById(R.id.seek_title);
+            holder.m_summaryView = (TextView) view.findViewById(R.id.seek_summary);
+            holder.m_seekBar = (SeekBar) view.findViewById(R.id.seek_bar);
+            holder.m_readView = (TextView) view.findViewById(R.id.seek_read);
+            view.setTag(holder);
+         }
+         else
+         {
+            holder = (HolderSettingsSeekBar) view.getTag();
+         }
+
+         holder.m_titleView.setText(m_interfaceTitles[position]);
+         holder.m_summaryView.setText(m_interfaceSummaries[position]);
+
+         if(0 == position)
+         {
+            holder.m_seekBar.setMax(100);
+         }
+
+         holder.m_seekBar
+               .setOnSeekBarChangeListener(
+                     new OnSeekBarChange(holder.m_readView, settingFileName, m_applicationFolder));
+
+         /* Load the saved value and set the progress.*/
+         String[] check = Read.file(settingFileName, m_applicationFolder);
+         int settingInteger = 0 == check.length || 0 == check[0].length()
+               ? 100
+               : Integer.parseInt(check[0]);
+         holder.m_seekBar.setProgress(settingInteger);
+      }
       return view;
    }
 
@@ -110,7 +149,7 @@ class AdapterSettingsUi extends BaseAdapter
    public
    int getItemViewType(int position)
    {
-      return 0 == position ? TYPE_HEADING : TYPE_CHECKBOX;
+      return 0 == position ? TYPE_HEADING : TYPE_SEEK_BAR;
    }
 
    @Override

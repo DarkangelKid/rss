@@ -1,5 +1,6 @@
 package com.poloure.simplerss;
 
+import android.graphics.Color;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -30,6 +31,19 @@ class OnSeekBarChange implements SeekBar.OnSeekBarChangeListener
 
       String valueString = Integer.toString(progress);
       Write.single(m_settingsFileName, valueString, m_applicationFolder);
+
+      if(m_settingsFileName.contains("Read Item Opacity"))
+      {
+         /* TODO Change of static variables. */
+
+         /* Set the Opacity values. */
+         Float opacity = progress / 100.0F;
+         FeedItemView.s_card_opacity = opacity;
+
+         FeedItemView.s_titleRead = Color.argb(Math.round(255 * opacity), 0, 0, 0);
+         FeedItemView.s_notTitleRead = Color.argb(Math.round(190 * opacity) /* Maybe 66 */, 0, 0,
+               0);
+      }
    }
 
    @Override

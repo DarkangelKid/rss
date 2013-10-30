@@ -2,6 +2,7 @@ package com.poloure.simplerss;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,10 +13,13 @@ import android.widget.TextView;
 
 class FeedItemView extends RelativeLayout
 {
-   private final int       m_primaryTextLight;
-   private final int       m_secondaryTextLight;
-   private final int       m_tertiaryTextLight;
-   private final int       m_secondaryTextDark;
+   private static final float DEFAULT_CARD_OPACITY = 0.66F;
+   static        float     s_card_opacity;
+   static        int       s_titleUnread;
+   static        int       s_descriptionUnread;
+   static        int       s_linkUnread;
+   static        int       s_titleRead;
+   static        int       s_notTitleRead;
    private final TextView  m_titleView;
    private final TextView  m_urlView;
    private final TextView  m_descriptionView;
@@ -41,12 +45,25 @@ class FeedItemView extends RelativeLayout
             matchParent);
       setLayoutParams(layoutParams);
 
-      /* Get the colors for the ListView item texts. */
+      /* Get the opacity value from file. */
       Resources resources = getResources();
-      m_tertiaryTextLight = resources.getColor(android.R.color.tertiary_text_light);
-      m_secondaryTextDark = resources.getColor(android.R.color.secondary_text_dark);
-      m_primaryTextLight = resources.getColor(android.R.color.primary_text_light);
-      m_secondaryTextLight = resources.getColor(android.R.color.secondary_text_light);
+      String applicationFolder = FeedsActivity.getApplicationFolder(context);
+      String[] SettingTitles = resources.getStringArray(R.array.settings_interface_titles);
+      String opacityPath = FeedsActivity.SETTINGS_DIR + SettingTitles[1] + ".txt";
+      String[] opacityFile = Read.file(opacityPath, applicationFolder);
+
+      boolean valueEmpty = 0 == opacityFile.length || 0 == opacityFile[0].length();
+      s_card_opacity = valueEmpty
+            ? DEFAULT_CARD_OPACITY
+            : Float.parseFloat(opacityFile[0]) / 100.0F;
+
+      /* Get the colors for the ListView item texts. */
+      s_titleRead = Color.argb(Math.round(255 * s_card_opacity), 0, 0, 0);
+      s_notTitleRead = Color.argb(Math.round(190 * s_card_opacity), 0, 0, 0);
+
+      s_titleUnread = Color.argb(Math.round(255), 0, 0, 0);
+      s_linkUnread = Color.argb(Math.round(128), 0, 0, 0);
+      s_descriptionUnread = Color.argb(Math.round(205), 0, 0, 0);
 
       /* Set the background color of the ListView items. */
       int backgroundColor = resources.getColor(android.R.color.background_light);
@@ -88,12 +105,12 @@ class FeedItemView extends RelativeLayout
       }
 
       /* Set the text colors based on whether the item has been read or not. */
-      m_titleView.setTextColor(isRead ? m_tertiaryTextLight : m_primaryTextLight);
-      m_urlView.setTextColor(isRead ? m_secondaryTextDark : m_tertiaryTextLight);
+      m_titleView.setTextColor(isRead ? s_titleRead : s_titleUnread);
+      m_urlView.setTextColor(isRead ? s_notTitleRead : s_linkUnread);
 
       if(null != m_descriptionView)
       {
-         m_descriptionView.setTextColor(isRead ? m_secondaryTextDark : m_secondaryTextLight);
+         m_descriptionView.setTextColor(isRead ? s_notTitleRead : s_descriptionUnread);
       }
    }
 

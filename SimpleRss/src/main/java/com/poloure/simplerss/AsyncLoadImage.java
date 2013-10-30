@@ -14,7 +14,6 @@ import android.widget.ImageView;
 class AsyncLoadImage extends AsyncTask<Object, Void, Object[]>
 {
    private static final long  IMAGE_FADE_IN_DURATION  = 240L;
-   private static final float READ_ITEM_IMAGE_OPACITY = 0.66F;
    private final ImageView m_imageView;
    private       int       m_imageViewTag;
 
@@ -50,7 +49,7 @@ class AsyncLoadImage extends AsyncTask<Object, Void, Object[]>
       Context context = (Context) params[2];
       boolean isRead = (Boolean) params[3];
 
-      float imageOpacity = isRead ? READ_ITEM_IMAGE_OPACITY : 1.0F;
+      float imageOpacity = isRead ? FeedItemView.s_card_opacity : 1.0F;
 
       BitmapFactory.Options o = new BitmapFactory.Options();
       o.inSampleSize = 1;

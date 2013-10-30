@@ -402,8 +402,8 @@ class ServiceUpdate extends IntentService
          else if(XmlPullParser.END_DOCUMENT == eventType)
          {
             Resources resources = getResources();
-            String[] settingFiles = resources.getStringArray(R.array.settings_function_names);
-            String settingName = FeedsActivity.SETTINGS_DIR + settingFiles[5] + ".txt";
+            String[] settingTitles = resources.getStringArray(R.array.settings_function_titles);
+            String settingName = FeedsActivity.SETTINGS_DIR + settingTitles[5] + ".txt";
             String[] check = Read.file(settingName, applicationFolder);
             String setting = 0 == check.length ? "" : check[0];
 
