@@ -7,6 +7,7 @@ import android.os.Build;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,13 +34,15 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
    private final String               m_allTag;
    private final FragmentPagerAdapter m_pagerAdapterFeeds;
    private final BaseAdapter          m_navigationAdapter;
+   private final ListView             m_listView;
 
    private
-   AsyncCheckFeed(Dialog dialog, FragmentPagerAdapter pagerAdapterFeeds,
+   AsyncCheckFeed(Dialog dialog, ListView listView, FragmentPagerAdapter pagerAdapterFeeds,
          BaseAdapter navigationAdapter, String currentTitle, String applicationFolder,
          String allTag)
    {
       m_dialog = dialog;
+      m_listView = listView;
       m_pagerAdapterFeeds = pagerAdapterFeeds;
       m_navigationAdapter = navigationAdapter;
       m_oldFeedName = currentTitle;
@@ -52,11 +55,11 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
    }
 
    static
-   void newInstance(Dialog dialog, FragmentPagerAdapter pagerAdapterFeeds,
+   void newInstance(Dialog dialog, ListView listView, FragmentPagerAdapter pagerAdapterFeeds,
          BaseAdapter navigationAdapter, String oldFeedTitle, String applicationFolder,
          String allTag)
    {
-      AsyncTask<Void, Void, String[]> task = new AsyncCheckFeed(dialog, pagerAdapterFeeds,
+      AsyncTask<Void, Void, String[]> task = new AsyncCheckFeed(dialog, listView, pagerAdapterFeeds,
             navigationAdapter, oldFeedTitle, applicationFolder, allTag);
 
       if(Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT)
@@ -143,7 +146,10 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
          AsyncRefreshNavigationAdapter.newInstance(m_navigationAdapter, m_applicationFolder);
 
          /* TODO AsyncManageTagsRefresh.newInstance(tagListView); */
-         /* TODO AsyncManageFeedsRefresh.newInstance(feedsListView, m_context); */
+         if(null != m_listView)
+         {
+            AsyncManageFeedsRefresh.newInstance(m_listView, m_applicationFolder);
+         }
 
          /* Show added feed toast notification. */
          String addedText = context.getString(R.string.added_feed) + ' ' + finalTitle;

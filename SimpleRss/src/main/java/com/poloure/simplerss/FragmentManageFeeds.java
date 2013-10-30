@@ -46,11 +46,11 @@ class FragmentManageFeeds extends ListFragment
       Context context = getActivity();
       String applicationFolder = FeedsActivity.getApplicationFolder(context);
 
-      showEditDialog(position, applicationFolder, context);
+      showEditDialog(l, position, applicationFolder, context);
    }
 
    static
-   void showEditDialog(int position, String applicationFolder, Context context)
+   void showEditDialog(ListView listView, int position, String applicationFolder, Context context)
    {
       String allTag = context.getString(R.string.all_tag);
       String oldFeedTitle = "";
@@ -65,7 +65,7 @@ class FragmentManageFeeds extends ListFragment
          tag = content[2][position];
       }
 
-      Dialog editDialog = EditDialog.newInstance(context, oldFeedTitle, applicationFolder, allTag);
+      Dialog editDialog = EditDialog.newInstance(context, listView, oldFeedTitle, applicationFolder, allTag);
       editDialog.show();
 
       /* If the mode is edit. */
@@ -111,7 +111,7 @@ class FragmentManageFeeds extends ListFragment
 
       setListAdapter(listAdapter);
       listView.setOnItemLongClickListener(
-            new OnLongClickManageFeedItem(pagerAdapterFeeds, navigationAdapter, build,
+            new OnLongClickManageFeedItem(listView, pagerAdapterFeeds, navigationAdapter, build,
                   applicationFolder, allTag));
       AsyncManageFeedsRefresh.newInstance(listView, applicationFolder);
 

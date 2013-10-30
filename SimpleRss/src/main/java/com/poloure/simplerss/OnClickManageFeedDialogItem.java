@@ -5,21 +5,24 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.widget.BaseAdapter;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import java.io.File;
 
 class OnClickManageFeedDialogItem implements DialogInterface.OnClickListener
 {
+   private final ListView m_listView;
    private final String               m_feedName;
    private final String               m_applicationFolder;
    private final String               m_allTag;
    private final FragmentPagerAdapter m_pagerAdapterFeeds;
    private final BaseAdapter          m_navigationAdapter;
 
-   OnClickManageFeedDialogItem(FragmentPagerAdapter pagerAdapterFeeds,
+   OnClickManageFeedDialogItem(ListView listView, FragmentPagerAdapter pagerAdapterFeeds,
          BaseAdapter navigationAdapter, String feedName, String applicationFolder, String allTag)
    {
+      m_listView = listView;
       m_pagerAdapterFeeds = pagerAdapterFeeds;
       m_navigationAdapter = navigationAdapter;
       m_allTag = allTag;
@@ -76,10 +79,10 @@ class OnClickManageFeedDialogItem implements DialogInterface.OnClickListener
 
          /* Update the navigationDrawer without the ActionBar. */
          AsyncRefreshNavigationAdapter.newInstance(m_navigationAdapter, m_applicationFolder);
-      }
 
-      /* Refresh pages and navigation counts. */
-      // TODO Update.manageFeeds();
-      // TODO Update.manageTags();
+         /* Refresh pages and navigation counts. */
+         AsyncManageFeedsRefresh.newInstance(m_listView, m_applicationFolder);
+         // TODO Update.manageTags();
+      }
    }
 }

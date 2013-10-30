@@ -315,7 +315,14 @@ class FeedsActivity extends ActionBarActivity
       }
       else if(menuText.equals(addFeed))
       {
-         FragmentManageFeeds.showEditDialog(-1, m_applicationFolder, this);
+         String fragmentTag = "android:switcher:" + FragmentManage.VIEW_PAGER_ID + ':' + 1;
+
+         ListFragment listFragment = (ListFragment) m_fragmentManager.findFragmentByTag(
+               fragmentTag);
+
+         ListView listView = null == listFragment ? null : listFragment.getListView();
+
+         FragmentManageFeeds.showEditDialog(listView, -1, m_applicationFolder, this);
       }
       else if(menuText.equals(jumpTo))
       {

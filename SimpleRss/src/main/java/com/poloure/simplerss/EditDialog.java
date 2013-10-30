@@ -17,21 +17,25 @@ class EditDialog extends Dialog
    private final String           m_applicationFolder;
    private final String           m_allTag;
    private final FragmentActivity m_activity;
+   private final ListView         m_listView;
 
    private
-   EditDialog(Context context, String oldFeedTitle, String applicationFolder, String allTag)
+   EditDialog(Context context, ListView listView, String oldFeedTitle, String applicationFolder,
+         String allTag)
    {
       super(context);
       m_activity = (FragmentActivity) context;
+      m_listView = listView;
       m_oldFeedTitle = oldFeedTitle;
       m_applicationFolder = applicationFolder;
       m_allTag = allTag;
    }
 
    static
-   Dialog newInstance(Context context, String oldFeedTitle, String applicationFolder, String allTag)
+   Dialog newInstance(Context context, ListView listView, String oldFeedTitle,
+         String applicationFolder, String allTag)
    {
-      return new EditDialog(context, oldFeedTitle, applicationFolder, allTag);
+      return new EditDialog(context, listView, oldFeedTitle, applicationFolder, allTag);
    }
 
    @Override
@@ -53,17 +57,19 @@ class EditDialog extends Dialog
       });
 
       Button buttonPositive = (Button) findViewById(R.id.positive_button);
-      buttonPositive.setOnClickListener(new OnClickPositive(this));
+      buttonPositive.setOnClickListener(new OnClickPositive(this, m_listView));
    }
 
    private
    class OnClickPositive implements View.OnClickListener
    {
       private final Dialog m_dialog;
+      private final ListView m_listView;
 
-      OnClickPositive(Dialog dialog)
+      OnClickPositive(Dialog dialog, ListView listView)
       {
          m_dialog = dialog;
+         m_listView = listView;
       }
 
       @Override
@@ -76,7 +82,7 @@ class EditDialog extends Dialog
          ListView navigationDrawer = (ListView) m_activity.findViewById(R.id.navigation_drawer);
          BaseAdapter navigationAdapter = (BaseAdapter) navigationDrawer.getAdapter();
 
-         AsyncCheckFeed.newInstance(m_dialog, pagerAdapterFeeds, navigationAdapter, m_oldFeedTitle,
+         AsyncCheckFeed.newInstance(m_dialog, m_listView, pagerAdapterFeeds, navigationAdapter, m_oldFeedTitle,
                m_applicationFolder, m_allTag);
       }
    }
