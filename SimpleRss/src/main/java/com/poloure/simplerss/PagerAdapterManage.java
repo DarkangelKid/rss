@@ -11,7 +11,6 @@ class PagerAdapterManage extends FragmentPagerAdapter
    PagerAdapterManage(FragmentManager fragmentManager, String[] manageTitles)
    {
       super(fragmentManager);
-
       m_manageTitles = manageTitles.clone();
    }
 

@@ -6,7 +6,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -17,7 +16,8 @@ import android.view.ViewGroup;
 
 class FragmentManage extends Fragment
 {
-   static final int VIEW_PAGER_ID = 0x2000;
+   static final         int VIEW_PAGER_ID        = 0x2000;
+   private static final int PAGER_TITLE_STRIP_ID = 54218;
 
    static
    Fragment newInstance()
@@ -42,15 +42,11 @@ class FragmentManage extends Fragment
       String[] manageTitles = resources.getStringArray(R.array.manage_titles);
 
       FragmentManager fragmentManager = getFragmentManager();
-      ActionBar actionBar = activity.getSupportActionBar();
 
       PagerAdapter pagerAdapter = new PagerAdapterManage(fragmentManager, manageTitles);
-      ViewPager.OnPageChangeListener pageChangeManage = new OnPageChangeSubtitle(actionBar,
-            manageTitles);
 
-      ViewPager pager = new ViewPager(activity);
+      ViewPager pager = ViewPagerStrip.newInstance(activity, PAGER_TITLE_STRIP_ID);
       pager.setAdapter(pagerAdapter);
-      pager.setOnPageChangeListener(pageChangeManage);
       pager.setId(VIEW_PAGER_ID);
 
       return pager;

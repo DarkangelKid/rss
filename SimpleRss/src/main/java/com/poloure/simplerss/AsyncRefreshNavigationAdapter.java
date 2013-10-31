@@ -103,13 +103,8 @@ class AsyncRefreshNavigationAdapter extends AsyncTask<String, Void, int[]>
       /* Update the subtitle if actionBar != null. */
       if(null != m_actionBar)
       {
-         String[] item = m_adapterNavDrawer.getItem(m_currentPage);
-         String unread = item[0];
-         String tag = item[1];
-
-         String subtitle = String.format(TAG_SUBTITLE_FORMAT, unread, tag);
-
-         m_actionBar.setSubtitle(subtitle);
+         String unread = m_adapterNavDrawer.getItem(m_currentPage);
+         m_actionBar.setSubtitle("Unread: " + unread);
       }
    }
 }

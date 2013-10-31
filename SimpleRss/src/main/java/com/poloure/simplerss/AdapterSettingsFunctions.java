@@ -121,7 +121,7 @@ class AdapterSettingsFunctions extends BaseAdapter
          holder.m_titleView.setText(m_functionTitles[position]);
          holder.m_summaryView.setText(m_functionSummaries[position]);
 
-         if(3 == position)
+         if(2 == position)
          {
             holder.m_seekBar.setMax(1440);
          }

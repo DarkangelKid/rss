@@ -6,9 +6,12 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 
 class OnClickNavDrawerItem implements AdapterView.OnItemClickListener
 {
@@ -56,17 +59,17 @@ class OnClickNavDrawerItem implements AdapterView.OnItemClickListener
       showFragment(selectedTitle);
    }
 
-   void showFragment(String tag)
+   void showFragment(String title)
    {
       FragmentManager fragmentManager = m_activity.getSupportFragmentManager();
-      Fragment fragment = fragmentManager.findFragmentByTag(tag);
+      Fragment fragment = fragmentManager.findFragmentByTag(title);
       FragmentTransaction transaction = fragmentManager.beginTransaction();
 
       Resources resources = m_activity.getResources();
       String[] navTitles = resources.getStringArray(R.array.nav_titles);
-      for(String title : navTitles)
+      for(String navTitle : navTitles)
       {
-         Fragment frag = fragmentManager.findFragmentByTag(title);
+         Fragment frag = fragmentManager.findFragmentByTag(navTitle);
          if(null != frag && !frag.equals(fragment) && !frag.isHidden())
          {
             transaction.hide(frag);
@@ -74,5 +77,24 @@ class OnClickNavDrawerItem implements AdapterView.OnItemClickListener
       }
       transaction.show(fragment);
       transaction.commit();
+
+      ActionBar actionBar = m_activity.getSupportActionBar();
+
+      if(!navTitles[0].equals(title))
+      {
+         actionBar.setSubtitle(null);
+      }
+      else
+      {
+         /* Update the ActionBar subtitle. */
+         ListView navigationList = (ListView) m_activity.findViewById(R.id.navigation_drawer);
+         ListAdapter navigationAdapter = navigationList.getAdapter();
+
+         ViewPager viewPager = (ViewPager) m_activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
+         int currentPage = viewPager.getCurrentItem();
+
+         String unread = (String) navigationAdapter.getItem(currentPage);
+         actionBar.setSubtitle("Unread: " + unread);
+      }
    }
 }
