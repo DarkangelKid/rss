@@ -49,12 +49,12 @@ class FragmentTag extends ListFragment
       Bundle bundle = getArguments();
       int position = bundle.getInt(POSITION_KEY);
 
-      /* Get what 16DP is. */
+      /* Get what 8DP is. */
       DisplayMetrics displayMetrics = resources.getDisplayMetrics();
-      int sixteenDp = Math.round(displayMetrics.density * 16);
+      int eightDp = Math.round(displayMetrics.density * 8);
 
       AbsListView.OnScrollListener scrollListener = new OnScrollFeedListener(adapterNavDrawer,
-            actionBar, applicationFolder, position, sixteenDp);
+            actionBar, applicationFolder, position, eightDp);
 
       listView.setOnScrollListener(scrollListener);
 
@@ -66,7 +66,7 @@ class FragmentTag extends ListFragment
 
          ListFragment listFragment = (ListFragment) fragmentManager.findFragmentByTag(fragmentTag);
          ListView listViewTags = listFragment.getListView();
-         AsyncRefreshPage.newInstance(0, listViewTags, applicationFolder, sixteenDp, true);
+         AsyncRefreshPage.newInstance(0, listViewTags, applicationFolder, eightDp, true);
       }
    }
 

@@ -6,20 +6,20 @@ import android.widget.AbsListView;
 
 class OnScrollFeedListener implements AbsListView.OnScrollListener
 {
-   private final int              m_sixteenDp;
+   private final int              m_eightDp;
    private final String           m_applicationFolder;
    private final int              m_page;
    private final AdapterNavDrawer m_adapterNavDrawer;
    private final ActionBar        m_actionBar;
 
    OnScrollFeedListener(AdapterNavDrawer adapterNavDrawer, ActionBar actionBar,
-         String applicationFolder, int page, int sixteenDp)
+         String applicationFolder, int page, int eightDp)
    {
       m_adapterNavDrawer = adapterNavDrawer;
       m_actionBar = actionBar;
       m_applicationFolder = applicationFolder;
       m_page = page;
-      m_sixteenDp = sixteenDp;
+      m_eightDp = eightDp;
    }
 
    @Override
@@ -31,9 +31,13 @@ class OnScrollFeedListener implements AbsListView.OnScrollListener
          AdapterTags adapterTags = (AdapterTags) view.getAdapter();
          View topView = view.getChildAt(0);
          boolean isTopView = null != topView;
-         boolean isSixteenGap = isTopView && m_sixteenDp == topView.getTop();
+         boolean isSixteenGap = isTopView && m_eightDp == topView.getTop();
          boolean isListViewShown = view.isShown();
          boolean readingItems = adapterTags.m_isReadingItems;
+
+         Write.toLogFile(Boolean.toString(isTopView) + "|" + Boolean.toString(isSixteenGap) + "|" +
+               Boolean.toString(isListViewShown) + "|" + Boolean.toString(readingItems),
+               m_applicationFolder);
 
          if(isTopView && isSixteenGap && isListViewShown && readingItems)
          {

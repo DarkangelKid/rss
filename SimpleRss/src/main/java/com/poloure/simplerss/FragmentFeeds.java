@@ -52,10 +52,10 @@ class FragmentFeeds extends Fragment
       BaseAdapter navigationAdapter = (BaseAdapter) navigationList.getAdapter();
 
       DisplayMetrics displayMetrics = resources.getDisplayMetrics();
-      int sixteenDp = Math.round(displayMetrics.density * 16);
+      int eightDp = Math.round(displayMetrics.density * 8);
 
       ViewPager.OnPageChangeListener onTagPageChange = new OnPageChangeTags(fragmentManager,
-            actionBar, navigationAdapter, applicationFolder, sixteenDp);
+            actionBar, navigationAdapter, applicationFolder, eightDp);
 
       PagerAdapter adapter = new PagerAdapterFeeds(fragmentManager);
       PagerAdapterFeeds.getTagsFromDisk(applicationFolder, allTag);
