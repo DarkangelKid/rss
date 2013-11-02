@@ -14,16 +14,16 @@ import android.widget.TextView;
 class FeedItemView extends RelativeLayout
 {
    private static final float DEFAULT_CARD_OPACITY = 0.66F;
-   static        float     s_card_opacity;
-   static        int       s_titleUnread;
-   static        int       s_descriptionUnread;
-   static        int       s_linkUnread;
-   static        int       s_titleRead;
-   static        int       s_notTitleRead;
-   private final TextView  m_titleView;
-   private final TextView  m_urlView;
-   private final TextView  m_descriptionView;
-   private final ImageView m_imageView;
+   static         float     s_cardOpacity;
+   private static int       s_titleUnread;
+   private static int       s_descriptionUnread;
+   private static int       s_linkUnread;
+   static         int       s_titleRead;
+   static         int       s_notTitleRead;
+   private final  TextView  m_titleView;
+   private final  TextView  m_urlView;
+   private final  TextView  m_descriptionView;
+   private final  ImageView m_imageView;
 
    FeedItemView(Context context)
    {
@@ -48,18 +48,16 @@ class FeedItemView extends RelativeLayout
       /* Get the opacity value from file. */
       Resources resources = getResources();
       String applicationFolder = FeedsActivity.getApplicationFolder(context);
-      String[] SettingTitles = resources.getStringArray(R.array.settings_interface_titles);
-      String opacityPath = FeedsActivity.SETTINGS_DIR + SettingTitles[1] + ".txt";
+      String[] settingTitles = resources.getStringArray(R.array.settings_interface_titles);
+      String opacityPath = FeedsActivity.SETTINGS_DIR + settingTitles[1] + ".txt";
       String[] opacityFile = Read.file(opacityPath, applicationFolder);
 
       boolean valueEmpty = 0 == opacityFile.length || 0 == opacityFile[0].length();
-      s_card_opacity = valueEmpty
-            ? DEFAULT_CARD_OPACITY
-            : Float.parseFloat(opacityFile[0]) / 100.0F;
+      s_cardOpacity = valueEmpty ? DEFAULT_CARD_OPACITY : Float.parseFloat(opacityFile[0]) / 100.0F;
 
       /* Get the colors for the ListView item texts. */
-      s_titleRead = Color.argb(Math.round(255 * s_card_opacity), 0, 0, 0);
-      s_notTitleRead = Color.argb(Math.round(190 * s_card_opacity), 0, 0, 0);
+      s_titleRead = Color.argb(Math.round(255 * s_cardOpacity), 0, 0, 0);
+      s_notTitleRead = Color.argb(Math.round(190 * s_cardOpacity), 0, 0, 0);
 
       s_titleUnread = Color.argb(Math.round(255), 0, 0, 0);
       s_linkUnread = Color.argb(Math.round(128), 0, 0, 0);

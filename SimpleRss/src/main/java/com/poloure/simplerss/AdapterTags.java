@@ -62,7 +62,7 @@ class AdapterTags extends BaseAdapter
       Long time = item.m_itemTime;
       boolean isRead = S_READ_ITEM_TIMES.contains(time);
 
-      if(0.0F == FeedItemView.s_card_opacity && isRead)
+      if(0.0F == FeedItemView.s_cardOpacity && isRead)
       {
          /* TODO Separators persist. */
          view.setVisibility(View.GONE);

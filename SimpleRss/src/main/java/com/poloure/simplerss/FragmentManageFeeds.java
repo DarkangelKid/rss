@@ -63,7 +63,8 @@ class FragmentManageFeeds extends ListFragment
          tag = content[2][position];
       }
 
-      Dialog editDialog = EditDialog.newInstance(context, listView, oldFeedTitle, applicationFolder, allTag);
+      Dialog editDialog = EditDialog.newInstance(context, listView, oldFeedTitle, applicationFolder,
+            allTag);
       editDialog.show();
 
       /* If the mode is edit. */

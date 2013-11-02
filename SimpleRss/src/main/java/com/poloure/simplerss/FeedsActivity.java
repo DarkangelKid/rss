@@ -29,6 +29,7 @@ import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.Adapter;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -45,7 +46,8 @@ class FeedsActivity extends ActionBarActivity
    private static final int    ALARM_SERVICE_START = 1;
    private static final int    ALARM_SERVICE_STOP  = 0;
    private static final long   MINUTE_VALUE        = 60000L;
-   static  Handler               s_serviceHandler;
+   static Handler s_serviceHandler;
+   String m_previousActionBarTitle;
    private ViewPager             m_feedsViewPager;
    private ListAdapter           m_adapterNavDrawer;
    private DrawerLayout          m_drawerLayout;
@@ -54,7 +56,6 @@ class FeedsActivity extends ActionBarActivity
    private FragmentManager       m_fragmentManager;
    private String                m_applicationFolder;
    private Resources             m_resources;
-   private String                m_previousActionBarTitle;
    private int                   m_sixteenDp;
 
    @Override
@@ -83,7 +84,7 @@ class FeedsActivity extends ActionBarActivity
       }
 
       /* Get the navigation drawer titles. */
-      String[] navigationTitles = m_resources.getStringArray(R.array.nav_titles);
+      String[] navigationTitles = m_resources.getStringArray(R.array.navigation_titles);
 
       m_drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
       m_adapterNavDrawer = new AdapterNavDrawer(navigationTitles, m_sixteenDp, layoutInflater);
@@ -107,7 +108,6 @@ class FeedsActivity extends ActionBarActivity
       m_drawerLayout.setDrawerListener(m_drawerToggle);
 
       ListView navigationList = (ListView) findViewById(R.id.navigation_drawer);
-      navigationList.setOnItemClickListener(new OnClickNavDrawerItem(this));
       navigationList.setAdapter(m_adapterNavDrawer);
 
       /* Create the MANAGE_FRAGMENTS that go inside the content frame. */
@@ -146,7 +146,6 @@ class FeedsActivity extends ActionBarActivity
       /* Set the alarm service to go of starting now. */
       setServiceIntent(ALARM_SERVICE_START);
 
-      /* Save the READ_ITEMS to file. */
       Write.longSet(READ_ITEMS, AdapterTags.S_READ_ITEM_TIMES, m_applicationFolder);
    }
 
@@ -156,7 +155,7 @@ class FeedsActivity extends ActionBarActivity
    {
       super.onBackPressed();
 
-      String feeds = m_resources.getStringArray(R.array.nav_titles)[0];
+      String feeds = m_resources.getStringArray(R.array.navigation_titles)[0];
       m_actionBar.setTitle(feeds);
 
       m_drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
@@ -234,11 +233,6 @@ class FeedsActivity extends ActionBarActivity
       return externalFilesDir.getAbsolutePath() + File.separatorChar;
    }
 
-   String getPreviousNavigationTitle()
-   {
-      return m_previousActionBarTitle;
-   }
-
    @Override
    protected
    void onStart()
@@ -260,6 +254,14 @@ class FeedsActivity extends ActionBarActivity
             m_applicationFolder, 0);
 
       m_feedsViewPager = (ViewPager) findViewById(FragmentFeeds.VIEW_PAGER_ID);
+      String[] navigationTitles = m_resources.getStringArray(R.array.navigation_titles);
+
+      /* Create the OnItemClickLister for the navigation list. */
+      AdapterView.OnItemClickListener onClick = new OnClickNavDrawerItem(m_fragmentManager,
+            m_actionBar, m_drawerLayout, m_adapterNavDrawer, m_feedsViewPager, navigationTitles);
+
+      ListView navigationList = (ListView) findViewById(R.id.navigation_drawer);
+      navigationList.setOnItemClickListener(onClick);
    }
 
    @Override

@@ -10,7 +10,6 @@ import java.util.Set;
 
 class AsyncRefreshNavigationAdapter extends AsyncTask<String, Void, int[]>
 {
-   static final String TAG_SUBTITLE_FORMAT = "%-3s  %s";
    private final AdapterNavDrawer m_adapterNavDrawer;
    private final ActionBar        m_actionBar;
    private final int              m_currentPage;

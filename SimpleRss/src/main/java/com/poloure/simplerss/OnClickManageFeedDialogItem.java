@@ -12,7 +12,7 @@ import java.io.File;
 
 class OnClickManageFeedDialogItem implements DialogInterface.OnClickListener
 {
-   private final ListView m_listView;
+   private final ListView             m_listView;
    private final String               m_feedName;
    private final String               m_applicationFolder;
    private final String               m_allTag;

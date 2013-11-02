@@ -10,15 +10,16 @@ import android.widget.ListView;
 
 class OnLongClickManageFeedItem implements AdapterView.OnItemLongClickListener
 {
-   private final ListView m_listView;
+   private final ListView             m_listView;
    private final AlertDialog.Builder  m_builder;
    private final String               m_applicationFolder;
    private final String               m_allTag;
    private final FragmentPagerAdapter m_pagerAdapterFeeds;
    private final BaseAdapter          m_navigationAdapter;
 
-   OnLongClickManageFeedItem(ListView listView, FragmentPagerAdapter pagerAdapterFeeds, BaseAdapter navigationAdapter,
-         AlertDialog.Builder builder, String applicationFolder, String allTag)
+   OnLongClickManageFeedItem(ListView listView, FragmentPagerAdapter pagerAdapterFeeds,
+         BaseAdapter navigationAdapter, AlertDialog.Builder builder, String applicationFolder,
+         String allTag)
    {
       m_listView = listView;
       m_pagerAdapterFeeds = pagerAdapterFeeds;
@@ -35,8 +36,8 @@ class OnLongClickManageFeedItem implements AdapterView.OnItemLongClickListener
       Adapter adapter = parent.getAdapter();
       String feedName = (String) adapter.getItem(pos);
       m_builder.setItems(R.array.long_click_manage_feeds,
-            new OnClickManageFeedDialogItem(m_listView, m_pagerAdapterFeeds, m_navigationAdapter, feedName,
-                  m_applicationFolder, m_allTag));
+            new OnClickManageFeedDialogItem(m_listView, m_pagerAdapterFeeds, m_navigationAdapter,
+                  feedName, m_applicationFolder, m_allTag));
       m_builder.show();
       return true;
    }

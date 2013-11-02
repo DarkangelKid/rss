@@ -46,15 +46,7 @@ class EditDialog extends Dialog
       setContentView(R.layout.add_rss_dialog);
 
       Button buttonNegative = (Button) findViewById(R.id.negative_button);
-      buttonNegative.setOnClickListener(new View.OnClickListener()
-      {
-         @Override
-         public
-         void onClick(View v)
-         {
-            dismiss();
-         }
-      });
+      buttonNegative.setOnClickListener(new OnClickNegativeButton(this));
 
       Button buttonPositive = (Button) findViewById(R.id.positive_button);
       buttonPositive.setOnClickListener(new OnClickPositive(this, m_listView));
@@ -63,7 +55,7 @@ class EditDialog extends Dialog
    private
    class OnClickPositive implements View.OnClickListener
    {
-      private final Dialog m_dialog;
+      private final Dialog   m_dialog;
       private final ListView m_listView;
 
       OnClickPositive(Dialog dialog, ListView listView)
@@ -82,8 +74,9 @@ class EditDialog extends Dialog
          ListView navigationDrawer = (ListView) m_activity.findViewById(R.id.navigation_drawer);
          BaseAdapter navigationAdapter = (BaseAdapter) navigationDrawer.getAdapter();
 
-         AsyncCheckFeed.newInstance(m_dialog, m_listView, pagerAdapterFeeds, navigationAdapter, m_oldFeedTitle,
-               m_applicationFolder, m_allTag);
+         AsyncCheckFeed.newInstance(m_dialog, m_listView, pagerAdapterFeeds, navigationAdapter,
+               m_oldFeedTitle, m_applicationFolder, m_allTag);
       }
    }
+
 }

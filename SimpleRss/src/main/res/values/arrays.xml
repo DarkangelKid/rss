@@ -17,7 +17,7 @@
       <item>Interface</item>
    </string-array>
 
-   <string-array name="nav_titles">
+   <string-array name="navigation_titles">
       <item>Feeds</item>
       <item>Manage</item>
       <item>Settings</item>

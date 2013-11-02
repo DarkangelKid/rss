@@ -33,7 +33,7 @@ class OnClickDrawerToggle extends ActionBarDrawerToggle
       String title = m_activity.getNavigationTitle();
       if(m_navigationText.equals(title))
       {
-         String previousTitle = m_activity.getPreviousNavigationTitle();
+         String previousTitle = m_activity.m_previousActionBarTitle;
          m_activity.setNavigationTitle(previousTitle, false);
       }
    }

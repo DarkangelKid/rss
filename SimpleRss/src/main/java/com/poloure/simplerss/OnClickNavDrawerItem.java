@@ -1,100 +1,89 @@
 package com.poloure.simplerss;
 
-import android.content.res.Resources;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
-import android.widget.ListView;
 
 class OnClickNavDrawerItem implements AdapterView.OnItemClickListener
 {
-   private final ActionBarActivity m_activity;
+   private final FragmentManager m_fragmentManager;
+   private final ActionBar       m_actionBar;
+   private final DrawerLayout    m_drawerLayout;
+   private final ListAdapter     m_navigationAdapter;
+   private final ViewPager       m_tagsViewPager;
+   private final String[]        m_navigationTitles;
 
-   OnClickNavDrawerItem(ActionBarActivity activity)
+   OnClickNavDrawerItem(FragmentManager fragmentManager, ActionBar actionBar,
+         DrawerLayout drawerLayout, ListAdapter navigationAdapter, ViewPager tagsViewPager,
+         String[] navigationTitles)
    {
-      m_activity = activity;
+      m_fragmentManager = fragmentManager;
+      m_actionBar = actionBar;
+      m_drawerLayout = drawerLayout;
+      m_navigationAdapter = navigationAdapter;
+      m_tagsViewPager = tagsViewPager;
+
+      /* This is finished with at the end of the Activity's onCreate so it is safe to share. */
+      //noinspection AssignmentToCollectionOrArrayFieldFromParameter
+      m_navigationTitles = navigationTitles;
    }
 
    @Override
    public
    void onItemClick(AdapterView parent, View view, int position, long id)
    {
-      /* Close the drawer on any click of a navigation item. */
-      DrawerLayout drawerLayout = (DrawerLayout) m_activity.findViewById(R.id.drawer_layout);
-      drawerLayout.closeDrawers();
+      /* Close the drawer on any click. This will call the OnDrawerClose of the DrawerToggle. */
+      m_drawerLayout.closeDrawers();
 
-      /* Determine the new m_title based on the position of the item clicked. */
-      Resources resources = m_activity.getResources();
-      String[] navTitles = resources.getStringArray(R.array.nav_titles);
-      String selectedTitle = 3 < position ? navTitles[0] : navTitles[position];
+      boolean tagWasClicked = 3 < position;
+      boolean feedsWasClicked = 0 == position;
+      String feedTitle = m_navigationTitles[0];
 
-      /* If the item selected was a m_imageViewTag, change the s_viewPager to that
-      image. */
-      if(3 < position)
+      /* Determine the new title based on the position of the item clicked. */
+      String selectedTitle = tagWasClicked ? feedTitle : m_navigationTitles[position];
+
+      /* If the item selected was a tag, change the FragmentFeeds ViewPager to that page. */
+      if(tagWasClicked)
       {
-         ViewPager viewPager = (ViewPager) m_activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
-         viewPager.setCurrentItem(position - 4);
+         m_tagsViewPager.setCurrentItem(position - 4);
       }
 
-      /* If the selected title is the title of the current page, exit.
-       * This stops the animation from showing on page change.*/
-      String previousTitle = ((FeedsActivity) m_activity).getPreviousNavigationTitle();
-      if(previousTitle.equals(selectedTitle))
+      /* Set the ActionBar title without saving the previous title (not changing to navTitle). */
+      m_actionBar.setTitle(selectedTitle);
+
+      /* Set the ActionBar subtitle accordingly. */
+      if(feedsWasClicked)
       {
-         return;
+         int currentPage = m_tagsViewPager.getCurrentItem();
+
+         String unread = (String) m_navigationAdapter.getItem(currentPage);
+         m_actionBar.setSubtitle("Unread: " + unread);
+      }
+      else
+      {
+         m_actionBar.setSubtitle(null);
       }
 
-      /* Show the title first to stop truncated subtitles.
-       * Bypass the method here. */
-      ((FeedsActivity) m_activity).setNavigationTitle(selectedTitle, false);
+      /* Get the selected fragment. */
+      Fragment selectedFragment = m_fragmentManager.findFragmentByTag(selectedTitle);
 
       /* Hide the current fragment and display the selected one. */
-      showFragment(selectedTitle);
-   }
-
-   void showFragment(String title)
-   {
-      FragmentManager fragmentManager = m_activity.getSupportFragmentManager();
-      Fragment fragment = fragmentManager.findFragmentByTag(title);
-      FragmentTransaction transaction = fragmentManager.beginTransaction();
-
-      Resources resources = m_activity.getResources();
-      String[] navTitles = resources.getStringArray(R.array.nav_titles);
-      for(String navTitle : navTitles)
+      FragmentTransaction transaction = m_fragmentManager.beginTransaction();
+      for(String navigationTitle : m_navigationTitles)
       {
-         Fragment frag = fragmentManager.findFragmentByTag(navTitle);
-         if(null != frag && !frag.equals(fragment) && !frag.isHidden())
+         Fragment frag = m_fragmentManager.findFragmentByTag(navigationTitle);
+         if(null != frag && !frag.equals(selectedFragment))
          {
             transaction.hide(frag);
          }
       }
-      transaction.show(fragment);
+      transaction.show(selectedFragment);
       transaction.commit();
-
-      ActionBar actionBar = m_activity.getSupportActionBar();
-
-      if(!navTitles[0].equals(title))
-      {
-         actionBar.setSubtitle(null);
-      }
-      else
-      {
-         /* Update the ActionBar subtitle. */
-         ListView navigationList = (ListView) m_activity.findViewById(R.id.navigation_drawer);
-         ListAdapter navigationAdapter = navigationList.getAdapter();
-
-         ViewPager viewPager = (ViewPager) m_activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
-         int currentPage = viewPager.getCurrentItem();
-
-         String unread = (String) navigationAdapter.getItem(currentPage);
-         actionBar.setSubtitle("Unread: " + unread);
-      }
    }
 }
