@@ -15,16 +15,14 @@ class OnPageChangeTags extends SimpleOnPageChangeListener
    private final FragmentManager m_fragmentManager;
    private final ActionBar       m_actionBar;
    private final String          m_applicationFolder;
-   private final int             m_eightDp;
 
    OnPageChangeTags(FragmentManager fragmentManager, ActionBar actionBar,
-         BaseAdapter navigationAdapter, String applicationFolder, int eightDp)
+         BaseAdapter navigationAdapter, String applicationFolder)
    {
       m_fragmentManager = fragmentManager;
       m_actionBar = actionBar;
       m_navigationAdapter = navigationAdapter;
       m_applicationFolder = applicationFolder;
-      m_eightDp = eightDp;
    }
 
    @Override
@@ -44,8 +42,7 @@ class OnPageChangeTags extends SimpleOnPageChangeListener
       if(0 == listAdapter.getCount())
       {
          ListView listView = tagFragment.getListView();
-         AsyncRefreshPage.newInstance(position, listView, m_applicationFolder, m_eightDp,
-               0 == position);
+         AsyncRefreshPage.newInstance(position, listView, m_applicationFolder, 0 == position);
       }
    }
 }

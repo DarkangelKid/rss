@@ -58,7 +58,7 @@ class OnClickNavDrawerItem implements AdapterView.OnItemClickListener
       m_actionBar.setTitle(selectedTitle);
 
       /* Set the ActionBar subtitle accordingly. */
-      if(feedsWasClicked)
+      if(feedsWasClicked || tagWasClicked)
       {
          int currentPage = m_tagsViewPager.getCurrentItem();
 

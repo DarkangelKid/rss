@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
+/* Must be public for rotation. */
+public
 class FragmentManageTags extends ListFragment
 {
    static

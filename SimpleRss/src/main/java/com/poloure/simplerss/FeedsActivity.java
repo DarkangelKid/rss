@@ -56,7 +56,6 @@ class FeedsActivity extends ActionBarActivity
    private FragmentManager       m_fragmentManager;
    private String                m_applicationFolder;
    private Resources             m_resources;
-   private int                   m_eightDp;
 
    @Override
    public
@@ -71,10 +70,10 @@ class FeedsActivity extends ActionBarActivity
       m_applicationFolder = getApplicationFolder(this);
       m_fragmentManager = getSupportFragmentManager();
       LayoutInflater layoutInflater = getLayoutInflater();
-
-      /* Get what 8DP is. */
       DisplayMetrics displayMetrics = m_resources.getDisplayMetrics();
-      m_eightDp = Math.round(displayMetrics.density * 8);
+
+      /* Get what 12DP is for the AdapterNavDrawer compound drawable. */
+      int twelveDp = Math.round(displayMetrics.density * 12);
 
       /* Load the read items to the AdapterTag class. */
       if(0 == AdapterTags.S_READ_ITEM_TIMES.size())
@@ -87,7 +86,7 @@ class FeedsActivity extends ActionBarActivity
       String[] navigationTitles = m_resources.getStringArray(R.array.navigation_titles);
 
       m_drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-      m_adapterNavDrawer = new AdapterNavDrawer(navigationTitles, m_eightDp, layoutInflater);
+      m_adapterNavDrawer = new AdapterNavDrawer(navigationTitles, twelveDp, layoutInflater);
 
       /* Configure the ActionBar. */
       m_actionBar.setIcon(R.drawable.rss_icon);
@@ -357,8 +356,7 @@ class FeedsActivity extends ActionBarActivity
       MenuItemCompat.setActionView(menuItem, R.layout.progress_circle);
 
       /* Set the service handler in FeedsActivity so we can check and call it from ServiceUpdate. */
-      s_serviceHandler = new ServiceHandler(m_fragmentManager, menuItem, m_applicationFolder,
-            m_eightDp);
+      s_serviceHandler = new ServiceHandler(m_fragmentManager, menuItem, m_applicationFolder);
 
       int currentPage = m_feedsViewPager.getCurrentItem();
 

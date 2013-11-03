@@ -1,12 +1,9 @@
 package com.poloure.simplerss;
 
-import android.content.res.Resources;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +11,8 @@ import android.widget.AbsListView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
+/* Must be public for rotation. */
+public
 class FragmentTag extends ListFragment
 {
    private static final String POSITION_KEY = "POSITION";
@@ -35,7 +34,6 @@ class FragmentTag extends ListFragment
       super.onActivityCreated(savedInstanceState);
 
       ListView listView = getListView();
-      Resources resources = getResources();
       ActionBarActivity activity = (ActionBarActivity) getActivity();
       ActionBar actionBar = activity.getSupportActionBar();
       String applicationFolder = FeedsActivity.getApplicationFolder(activity);
@@ -49,24 +47,17 @@ class FragmentTag extends ListFragment
       Bundle bundle = getArguments();
       int position = bundle.getInt(POSITION_KEY);
 
-      /* Get what 8DP is. */
-      DisplayMetrics displayMetrics = resources.getDisplayMetrics();
-      int eightDp = Math.round(displayMetrics.density * 8);
+      /* Get what the listViewTopPadding is. */
+      int listViewTopPadding = listView.getPaddingTop();
 
       AbsListView.OnScrollListener scrollListener = new OnScrollFeedListener(adapterNavDrawer,
-            actionBar, applicationFolder, position, eightDp);
+            actionBar, applicationFolder, position, listViewTopPadding);
 
       listView.setOnScrollListener(scrollListener);
 
       if(0 == position)
       {
-         FragmentManager fragmentManager = getFragmentManager();
-
-         String fragmentTag = "android:switcher:" + FragmentFeeds.VIEW_PAGER_ID + ':' + 0;
-
-         ListFragment listFragment = (ListFragment) fragmentManager.findFragmentByTag(fragmentTag);
-         ListView listViewTags = listFragment.getListView();
-         AsyncRefreshPage.newInstance(0, listViewTags, applicationFolder, eightDp, true);
+         AsyncRefreshPage.newInstance(0, listView, applicationFolder, true);
       }
    }
 

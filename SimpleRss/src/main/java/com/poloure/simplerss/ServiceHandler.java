@@ -13,15 +13,12 @@ class ServiceHandler extends Handler
    private final FragmentManager m_fragmentManager;
    private final MenuItem        m_refreshItem;
    private final String          m_applicationFolder;
-   private final int             m_eightDp;
 
-   ServiceHandler(FragmentManager fragmentManager, MenuItem refreshItem, String applicationFolder,
-         int eightDp)
+   ServiceHandler(FragmentManager fragmentManager, MenuItem refreshItem, String applicationFolder)
    {
       m_fragmentManager = fragmentManager;
       m_refreshItem = refreshItem;
       m_applicationFolder = applicationFolder;
-      m_eightDp = eightDp;
    }
 
    /* The stuff we would like to run when the service completes. */
@@ -65,7 +62,7 @@ class ServiceHandler extends Handler
          ListView listView = listFragment.getListView();
 
          /* TODO isAllTag not 0. */
-         AsyncRefreshPage.newInstance(page, listView, m_applicationFolder, m_eightDp, 0 == page);
+         AsyncRefreshPage.newInstance(page, listView, m_applicationFolder, 0 == page);
       }
    }
 }

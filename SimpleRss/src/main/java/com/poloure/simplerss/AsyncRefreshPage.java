@@ -18,26 +18,22 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
    private static final int MAX_DESCRIPTION_LENGTH = 360;
    private static final int MIN_DESCRIPTION_LENGTH = 8;
    private static final int MIN_IMAGE_WIDTH        = 32;
-   private final int      m_eightDp;
    private final String   m_applicationFolder;
    private final ListView m_listView;
    private final boolean  m_isAllTag;
 
    private
-   AsyncRefreshPage(ListView listView, String applicationFolder, int eightDp, boolean isAllTag)
+   AsyncRefreshPage(ListView listView, String applicationFolder, boolean isAllTag)
    {
       m_listView = listView;
       m_applicationFolder = applicationFolder;
       m_isAllTag = isAllTag;
-      m_eightDp = eightDp;
    }
 
    static
-   void newInstance(int pageNumber, ListView listView, String storage, int eightDp,
-         boolean isAllTag)
+   void newInstance(int pageNumber, ListView listView, String storage, boolean isAllTag)
    {
-      AsyncTask<Integer, Object, Void> task = new AsyncRefreshPage(listView, storage, eightDp,
-            isAllTag);
+      AsyncTask<Integer, Object, Void> task = new AsyncRefreshPage(listView, storage, isAllTag);
 
       if(Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT)
       {
@@ -216,7 +212,8 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
 
       if(0 != top)
       {
-         m_listView.setSelectionFromTop(index, top - m_eightDp);
+         int listViewPaddingTop = m_listView.getPaddingTop();
+         m_listView.setSelectionFromTop(index, top - listViewPaddingTop);
       }
    }
 }

@@ -16,6 +16,8 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+/* Must be public for rotation. */
+public
 class FragmentManageFeeds extends ListFragment
 {
    private static final int MODE_ADD = -1;

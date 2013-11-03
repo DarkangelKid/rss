@@ -9,7 +9,6 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -19,6 +18,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 
+/* Must be public for rotation. */
+public
 class FragmentFeeds extends Fragment
 {
    static final         int VIEW_PAGER_ID        = 0x1000;
@@ -51,11 +52,8 @@ class FragmentFeeds extends Fragment
       ListView navigationList = (ListView) context.findViewById(R.id.navigation_drawer);
       BaseAdapter navigationAdapter = (BaseAdapter) navigationList.getAdapter();
 
-      DisplayMetrics displayMetrics = resources.getDisplayMetrics();
-      int eightDp = Math.round(displayMetrics.density * 8);
-
       ViewPager.OnPageChangeListener onTagPageChange = new OnPageChangeTags(fragmentManager,
-            actionBar, navigationAdapter, applicationFolder, eightDp);
+            actionBar, navigationAdapter, applicationFolder);
 
       PagerAdapter adapter = new PagerAdapterFeeds(fragmentManager);
       PagerAdapterFeeds.getTagsFromDisk(applicationFolder, allTag);

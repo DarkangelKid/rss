@@ -14,6 +14,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+/* Must be public for rotation. */
+public
 class FragmentManage extends Fragment
 {
    static final         int VIEW_PAGER_ID        = 0x2000;

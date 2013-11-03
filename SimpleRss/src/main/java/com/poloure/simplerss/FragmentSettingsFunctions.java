@@ -8,6 +8,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+/* Must be public for rotation. */
+public
 class FragmentSettingsFunctions extends ListFragment
 {
    static
