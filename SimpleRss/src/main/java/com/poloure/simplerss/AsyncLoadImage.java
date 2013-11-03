@@ -49,7 +49,7 @@ class AsyncLoadImage extends AsyncTask<Object, Void, Object[]>
       Context context = (Context) params[2];
       boolean isRead = (Boolean) params[3];
 
-      float imageOpacity = isRead ? FeedItemView.s_cardOpacity : 1.0F;
+      float imageOpacity = isRead ? LayoutFeedItem.s_cardOpacity : 1.0F;
 
       BitmapFactory.Options o = new BitmapFactory.Options();
       o.inSampleSize = 1;

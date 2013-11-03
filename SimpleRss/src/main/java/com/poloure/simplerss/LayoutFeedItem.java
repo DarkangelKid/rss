@@ -11,21 +11,21 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-class FeedItemView extends RelativeLayout
+class LayoutFeedItem extends RelativeLayout
 {
    private static final float DEFAULT_CARD_OPACITY = 0.66F;
    static         float     s_cardOpacity;
+   static         int       s_titleRead;
+   static         int       s_notTitleRead;
    private static int       s_titleUnread;
    private static int       s_descriptionUnread;
    private static int       s_linkUnread;
-   static         int       s_titleRead;
-   static         int       s_notTitleRead;
    private final  TextView  m_titleView;
    private final  TextView  m_urlView;
    private final  TextView  m_descriptionView;
    private final  ImageView m_imageView;
 
-   FeedItemView(Context context)
+   LayoutFeedItem(Context context)
    {
       super(context);
       inflate(context, R.layout.card_full, this);
@@ -64,8 +64,7 @@ class FeedItemView extends RelativeLayout
       s_descriptionUnread = Color.argb(Math.round(205), 0, 0, 0);
 
       /* Set the background color of the ListView items. */
-      int backgroundColor = resources.getColor(android.R.color.background_light);
-      setBackgroundColor(backgroundColor);
+      setBackgroundColor(Color.WHITE);
    }
 
    void showItem(FeedItem feedItem, int position, boolean isRead)

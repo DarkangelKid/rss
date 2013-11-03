@@ -56,20 +56,20 @@ class AdapterTags extends BaseAdapter
    public
    View getView(int position, View convertView, ViewGroup parent)
    {
-      View view = null == convertView ? new FeedItemView(m_context) : convertView;
+      View view = null == convertView ? new LayoutFeedItem(m_context) : convertView;
 
       FeedItem item = m_items.get(position);
       Long time = item.m_itemTime;
       boolean isRead = S_READ_ITEM_TIMES.contains(time);
 
-      if(0.0F == FeedItemView.s_cardOpacity && isRead)
+      if(0.0F == LayoutFeedItem.s_cardOpacity && isRead)
       {
          /* TODO Separators persist. */
          view.setVisibility(View.GONE);
          return view;
       }
 
-      ((FeedItemView) view).showItem(item, position, isRead);
+      ((LayoutFeedItem) view).showItem(item, position, isRead);
 
       /* The logic that tells whether the item is Read or not. */
       boolean isListViewShown = parent.isShown();

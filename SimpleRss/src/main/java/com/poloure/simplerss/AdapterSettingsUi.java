@@ -1,11 +1,10 @@
 package com.poloure.simplerss;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.CheckBox;
-import android.widget.SeekBar;
 import android.widget.TextView;
 
 class AdapterSettingsUi extends BaseAdapter
@@ -18,11 +17,13 @@ class AdapterSettingsUi extends BaseAdapter
    private final String[]       m_interfaceSummaries;
    private final LayoutInflater m_layoutInflater;
    private final String         m_applicationFolder;
+   private final Context        m_context;
    private       TextView       m_settingsHeading;
 
-   AdapterSettingsUi(String applicationFolder, String[] adapterTitles, String[] adapterSummaries,
-         LayoutInflater layoutInflater)
+   AdapterSettingsUi(Context context, String applicationFolder, String[] adapterTitles,
+         String[] adapterSummaries, LayoutInflater layoutInflater)
    {
+      m_context = context;
       m_applicationFolder = applicationFolder;
       m_interfaceTitles = adapterTitles.clone();
       m_interfaceSummaries = adapterSummaries.clone();
@@ -58,7 +59,6 @@ class AdapterSettingsUi extends BaseAdapter
       int viewType = getItemViewType(position);
       String title = m_interfaceTitles[position];
       String summary = m_interfaceSummaries[position];
-      String settingFileName = FeedsActivity.SETTINGS_DIR + title + ".txt";
 
       if(TYPE_HEADING == viewType)
       {
@@ -72,68 +72,13 @@ class AdapterSettingsUi extends BaseAdapter
       }
       else if(TYPE_CHECKBOX == viewType)
       {
-         HolderSettingsCheckBox holder;
-         if(null == view)
-         {
-            view = m_layoutInflater.inflate(R.layout.settings_checkbox, parent, false);
-            holder = new HolderSettingsCheckBox();
-            holder.m_titleView = (TextView) view.findViewById(R.id.check_title);
-            holder.m_summaryView = (TextView) view.findViewById(R.id.check_summary);
-            holder.m_checkbox = (CheckBox) view.findViewById(R.id.checkbox);
-            view.setTag(holder);
-         }
-         else
-         {
-            holder = (HolderSettingsCheckBox) view.getTag();
-         }
-
-         holder.m_titleView.setText(title);
-         holder.m_summaryView.setText(summary);
-         holder.m_checkbox
-               .setOnClickListener(new SettingBooleanChecked(settingFileName, m_applicationFolder));
-
-         /* Load the saved boolean value and set the box as checked if true. */
-         String[] check = Read.file(settingFileName, m_applicationFolder);
-         String settingString = 0 == check.length ? "" : check[0];
-         boolean settingBoolean = Boolean.parseBoolean(settingString);
-         holder.m_checkbox.setChecked(settingBoolean);
+         view = null == convertView ? new LayoutCheckBox(m_context) : convertView;
+         ((LayoutCheckBox) view).showItem(title, summary, m_applicationFolder);
       }
       else if(TYPE_SEEK_BAR == viewType)
       {
-         HolderSettingsSeekBar holder;
-         if(null == view)
-         {
-            view = m_layoutInflater.inflate(R.layout.settings_seekbar, parent, false);
-            holder = new HolderSettingsSeekBar();
-            holder.m_titleView = (TextView) view.findViewById(R.id.seek_title);
-            holder.m_summaryView = (TextView) view.findViewById(R.id.seek_summary);
-            holder.m_seekBar = (SeekBar) view.findViewById(R.id.seek_bar);
-            holder.m_readView = (TextView) view.findViewById(R.id.seek_read);
-            view.setTag(holder);
-         }
-         else
-         {
-            holder = (HolderSettingsSeekBar) view.getTag();
-         }
-
-         holder.m_titleView.setText(m_interfaceTitles[position]);
-         holder.m_summaryView.setText(m_interfaceSummaries[position]);
-
-         if(0 == position)
-         {
-            holder.m_seekBar.setMax(100);
-         }
-
-         holder.m_seekBar
-               .setOnSeekBarChangeListener(
-                     new OnSeekBarChange(holder.m_readView, settingFileName, m_applicationFolder));
-
-         /* Load the saved value and set the progress.*/
-         String[] check = Read.file(settingFileName, m_applicationFolder);
-         int settingInteger = 0 == check.length || 0 == check[0].length()
-               ? 100
-               : Integer.parseInt(check[0]);
-         holder.m_seekBar.setProgress(settingInteger);
+         view = null == convertView ? new LayoutSeekBar(m_context) : convertView;
+         ((LayoutSeekBar) view).showItem(title, summary, 100, m_applicationFolder);
       }
       return view;
    }

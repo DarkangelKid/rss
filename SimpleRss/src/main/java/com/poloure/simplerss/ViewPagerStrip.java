@@ -22,8 +22,6 @@ class ViewPagerStrip extends ViewPager
    static
    ViewPager newInstance(Context context, int pagerTitleStripId)
    {
-      ViewPager viewPager = new ViewPagerStrip(context);
-
       /* Create the LayoutParams to put the PagerTitleStrip in the ViewPager correctly. */
       LayoutParams layoutParams = new LayoutParams();
       layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -45,6 +43,7 @@ class ViewPagerStrip extends ViewPager
       pagerTitleStrip.setBackgroundColor(Color.parseColor("#404040"));
 
       /* Create the ViewPager. */
+      ViewPager viewPager = new ViewPagerStrip(context);
       viewPager.setOffscreenPageLimit(OFF_SCREEN_PAGE_LIMIT);
       viewPager.addView(pagerTitleStrip, layoutParams);
 

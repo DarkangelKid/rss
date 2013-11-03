@@ -33,8 +33,9 @@ class FragmentSettingsUi extends ListFragment
       String[] interfaceTitles = resources.getStringArray(R.array.settings_interface_titles);
       String[] interfaceSummaries = resources.getStringArray(R.array.settings_interface_summaries);
 
-      setListAdapter(new AdapterSettingsUi(applicationFolder, interfaceTitles, interfaceSummaries,
-            layoutInflater));
+      setListAdapter(
+            new AdapterSettingsUi(context, applicationFolder, interfaceTitles, interfaceSummaries,
+                  layoutInflater));
    }
 
    @Override

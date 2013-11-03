@@ -209,8 +209,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       {
          FeedsActivity.gotoLatestUnread(m_listView);
       }
-
-      if(0 != top)
+      else
       {
          int listViewPaddingTop = m_listView.getPaddingTop();
          m_listView.setSelectionFromTop(index, top - listViewPaddingTop);

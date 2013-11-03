@@ -1,8 +1,6 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
 
-   <TextView
+<TextView
       android:id="@+id/seek_title"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
@@ -72,4 +70,4 @@
       android:layout_below="@+id/seek_bar"
       android:scaleType="fitXY"
       android:src="@drawable/divider_settings_light"/>
-</RelativeLayout>
+</merge>

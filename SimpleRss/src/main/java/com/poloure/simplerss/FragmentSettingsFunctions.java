@@ -1,5 +1,6 @@
 package com.poloure.simplerss;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
@@ -35,14 +36,15 @@ class FragmentSettingsFunctions extends ListFragment
       ActionBarActivity activity = (ActionBarActivity) getActivity();
 
       Resources resources = activity.getResources();
-      LayoutInflater layoutInflater = getLayoutInflater(savedInstanceState);
+      Context context = getActivity();
 
       String applicationFolder = FeedsActivity.getApplicationFolder(activity);
 
       String[] functionTitles = resources.getStringArray(R.array.settings_function_titles);
       String[] functionSummaries = resources.getStringArray(R.array.settings_function_summaries);
 
-      setListAdapter(new AdapterSettingsFunctions(applicationFolder, FeedsActivity.SETTINGS_DIR,
-            functionTitles, functionSummaries, layoutInflater));
+      setListAdapter(
+            new AdapterSettingsFunctions(context, applicationFolder, FeedsActivity.SETTINGS_DIR,
+                  functionTitles, functionSummaries));
    }
 }
