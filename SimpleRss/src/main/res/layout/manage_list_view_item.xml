@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="#ffffff">
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
 
    <TextView
-      android:id="@+id/title_item"
-      android:text="@+id/title_item"
+      android:id="@+id/first_text"
+      android:text="@+id/first_text"
       android:textColor="#4d4d4d"
       android:textSize="16sp"
       android:background="#00000000"
@@ -21,8 +18,8 @@
       android:maxLines="1"/>
 
    <TextView
-      android:id="@+id/info_item"
-      android:text="@+id/info_item"
+      android:id="@+id/second_text"
+      android:text="@+id/second_text"
       android:textColor="#808080"
       android:textSize="12sp"
       android:background="#00000000"
@@ -31,14 +28,14 @@
       android:paddingStart="8dp"
       android:paddingEnd="8dp"
       android:paddingRight="8dp"
-      android:layout_below="@+id/title_item"
+      android:layout_below="@+id/first_text"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"/>
 
    <include
       layout="@layout/top_shadow"
-      android:layout_below="@+id/info_item"/>
+      android:layout_below="@+id/second_text"/>
 
    <include layout="@layout/shadow"/>
 
-</RelativeLayout>
+</merge>

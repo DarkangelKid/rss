@@ -96,7 +96,7 @@ class ListFragmentManageFeeds extends ListFragment
       ListView listView = getListView();
       String applicationFolder = FeedsActivity.getApplicationFolder(activity);
 
-      ListAdapter listAdapter = new AdapterManageFeeds(activity);
+      ListAdapter listAdapter = new AdapterManageFragments(activity);
 
       /* Make an alertDialog for the long click of a list item. */
       AlertDialog.Builder build = new AlertDialog.Builder(activity);

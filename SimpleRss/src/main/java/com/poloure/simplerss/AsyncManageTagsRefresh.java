@@ -126,7 +126,7 @@ class AsyncManageTagsRefresh extends AsyncTask<String, String[], Animation>
       BaseAdapter adapter = (BaseAdapter) m_listView.getAdapter();
       if(null != adapter)
       {
-         ((AdapterManageTags) adapter).setArrays(values[0], values[1]);
+         ((AdapterManageFragments) adapter).setArrays(values[0], values[1]);
          adapter.notifyDataSetChanged();
       }
    }

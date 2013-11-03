@@ -92,7 +92,7 @@ class AsyncManageFeedsRefresh extends AsyncTask<String, String[], Animation>
    void onProgressUpdate(String[]... values)
    {
       BaseAdapter adapter = (BaseAdapter) m_listView.getAdapter();
-      ((AdapterManageFeeds) adapter).setArrays(values[0], values[1]);
+      ((AdapterManageFragments) adapter).setArrays(values[0], values[1]);
       adapter.notifyDataSetChanged();
    }
 }

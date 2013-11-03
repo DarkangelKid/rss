@@ -11,6 +11,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -78,15 +79,6 @@ class Read
       return types;
    }
 
-   static
-   boolean isUnmounted()
-   {
-      /* Check to see if we can Write to the media. */
-      String mounted = Environment.MEDIA_MOUNTED;
-      String externalStorageState = Environment.getExternalStorageState();
-      return !mounted.equals(externalStorageState);
-   }
-
    /* This function is now safe. It will return a zero length array on error. */
    static
    String[] file(String fileName, String applicationFolder)
@@ -151,6 +143,13 @@ class Read
       return lines;
    }
 
+   /* Wrapper for creating external BufferedReader. */
+   private static
+   BufferedReader reader(String path) throws FileNotFoundException
+   {
+      return new BufferedReader(new FileReader(path));
+   }
+
    static
    int count(String fileName, String applicationFolder)
    {
@@ -160,48 +159,54 @@ class Read
       }
 
       String filePath = applicationFolder + fileName;
+      int count = 0;
 
-      int i = 0;
       try
       {
-         BufferedReader in = null;
+         InputStream is = new BufferedInputStream(new FileInputStream(filePath));
          try
          {
-            in = reader(filePath);
-
-            while(null != in.readLine())
+            byte[] c = new byte[1024];
+            int readChars = 0;
+            boolean endsWithoutNewLine = false;
+            while(-1 != (readChars = is.read(c)))
             {
-               i++;
+               for(int i = 0; i < readChars; ++i)
+               {
+                  if('\n' == c[i])
+                  {
+                     ++count;
+                  }
+               }
+               endsWithoutNewLine = '\n' != c[readChars - 1];
+            }
+            if(endsWithoutNewLine)
+            {
+               ++count;
             }
          }
          finally
          {
-            if(null != in)
-            {
-               in.close();
-            }
+            is.close();
          }
       }
       catch(FileNotFoundException ignored)
       {
-         //e.printStackTrace();
       }
-      catch(UnsupportedEncodingException e)
+      catch(IOException ignored)
       {
-         e.printStackTrace();
       }
-      catch(IOException e)
-      {
-         e.printStackTrace();
-      }
-      return i;
+
+      return count;
    }
 
-   /* Wrapper for creating external BufferedReader. */
-   private static
-   BufferedReader reader(String path) throws FileNotFoundException
+   static
+   boolean isUnmounted()
    {
-      return new BufferedReader(new FileReader(path));
+      /* Check to see if we can Write to the media. */
+      String mounted = Environment.MEDIA_MOUNTED;
+      String externalStorageState = Environment.getExternalStorageState();
+      return !mounted.equals(externalStorageState);
    }
 
    static

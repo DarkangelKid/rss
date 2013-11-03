@@ -4,7 +4,7 @@
               android:orientation="vertical">
 
    <TextView
-      android:id="@+id/title_item"
+      android:id="@+id/first_text"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:background="#00000000"

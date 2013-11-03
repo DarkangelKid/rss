@@ -27,7 +27,8 @@ class ListFragmentManageTags extends ListFragment
 
       ListView listView = getListView();
       Context context = getActivity();
-      ListAdapter listAdapter = new AdapterManageTags(context);
+      ListAdapter listAdapter = new AdapterManageFragments(context);
+
       setListAdapter(listAdapter);
 
       String allTag = context.getString(R.string.all_tag);
