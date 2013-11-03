@@ -2,21 +2,23 @@ package com.poloure.simplerss;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 
 /* Must be public for rotation. */
 public
-class FragmentSettingsFunctions extends ListFragment
+class ListFragmentSettingsFunctions extends ListFragment
 {
    static
    ListFragment newInstance()
    {
-      return new FragmentSettingsFunctions();
+      return new ListFragmentSettingsFunctions();
    }
 
    @Override
@@ -25,7 +27,11 @@ class FragmentSettingsFunctions extends ListFragment
    {
       super.onCreateView(inflater, container, savedInstanceState);
 
-      return inflater.inflate(R.layout.listview_settings_function, container, false);
+      ListView listView = (ListView) inflater.inflate(R.layout.listview, container, false);
+      listView.setDividerHeight(0);
+      listView.setBackgroundColor(Color.WHITE);
+
+      return listView;
    }
 
    @Override
@@ -43,8 +49,7 @@ class FragmentSettingsFunctions extends ListFragment
       String[] functionTitles = resources.getStringArray(R.array.settings_function_titles);
       String[] functionSummaries = resources.getStringArray(R.array.settings_function_summaries);
 
-      setListAdapter(
-            new AdapterSettingsFunctions(context, applicationFolder, FeedsActivity.SETTINGS_DIR,
-                  functionTitles, functionSummaries));
+      setListAdapter(new AdapterSettingsFunctions(context, applicationFolder, functionTitles,
+            functionSummaries));
    }
 }

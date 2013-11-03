@@ -33,7 +33,7 @@ class PagerAdapterSettings extends FragmentPagerAdapter
    Fragment getItem(int position)
    {
       return 0 == position
-            ? FragmentSettingsFunctions.newInstance()
-            : FragmentSettingsUi.newInstance();
+            ? ListFragmentSettingsFunctions.newInstance()
+            : ListFragmentSettingsUi.newInstance();
    }
 }

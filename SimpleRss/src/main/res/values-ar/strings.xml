@@ -22,11 +22,17 @@
    <string name="feed_tag_dialog">Tags</string>
    <string name="feed_tag_title">Tags</string>
    <string name="feed_tag_hint">tag one, tag two, …</string>
+
    <string name="filter_hint">new filter</string>
    <string name="add_filter">Add Filter</string>
+   <string name="delete_filter">Delete Filter</string>
 
    <string name="cancel_dialog">إلغاء‎</string>
    <string name="add_dialog">اضافة</string>
+   <string name="dialog_checking_feed">Checking…</string>
+   <string name="invalid_feed">Invalid feed URL</string>
+   <string name="added_feed">Added </string>
+   <string name="deleted_feed">Deleted </string>
    <string name="accept_dialog">قبول</string>
 
    <string name="all_tag">كل</string>

@@ -11,7 +11,8 @@ import android.view.ViewGroup;
 
 class ViewPagerStrip extends ViewPager
 {
-   private static final int OFF_SCREEN_PAGE_LIMIT = 128;
+   private static final int   OFF_SCREEN_PAGE_LIMIT = 128;
+   private static final float TEXT_VERTICAL_PADDING = 4.0F;
 
    private
    ViewPagerStrip(Context context)
@@ -36,9 +37,9 @@ class ViewPagerStrip extends ViewPager
       /* Configure the PagerTitleStrip. */
       Resources resources = context.getResources();
       DisplayMetrics displayMetrics = resources.getDisplayMetrics();
-      int fourDp = Math.round(4.0F * displayMetrics.density);
+      int textVerticalPadding = Math.round(TEXT_VERTICAL_PADDING * displayMetrics.density);
       pagerTitleStrip.setGravity(Gravity.START);
-      pagerTitleStrip.setPadding(0, fourDp, 0, fourDp);
+      pagerTitleStrip.setPadding(0, textVerticalPadding, 0, textVerticalPadding);
       pagerTitleStrip.setTextColor(Color.WHITE);
       pagerTitleStrip.setBackgroundColor(Color.parseColor("#404040"));
 

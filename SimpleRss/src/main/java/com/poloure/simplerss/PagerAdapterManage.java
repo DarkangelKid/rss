@@ -34,13 +34,13 @@ class PagerAdapterManage extends FragmentPagerAdapter
    {
       if(0 == position)
       {
-         return FragmentManageTags.newInstance();
+         return ListFragmentManageTags.newInstance();
       }
       if(1 == position)
       {
-         return FragmentManageFeeds.newInstance();
+         return ListFragmentManageFeeds.newInstance();
       }
 
-      return FragmentManageFilters.newInstance();
+      return ListFragmentManageFilters.newInstance();
    }
 }

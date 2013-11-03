@@ -2,8 +2,10 @@ package com.poloure.simplerss;
 
 import android.app.ActivityManager;
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -40,12 +42,14 @@ import java.util.Set;
 public
 class FeedsActivity extends ActionBarActivity
 {
-   static final         String READ_ITEMS          = "read_items.txt";
-   static final         String SETTINGS_DIR        = "settings" + File.separatorChar;
-   static final         String FILTER_LIST         = "filter_list.txt";
-   private static final int    ALARM_SERVICE_START = 1;
-   private static final int    ALARM_SERVICE_STOP  = 0;
-   private static final long   MINUTE_VALUE        = 60000L;
+   static final         String READ_ITEMS                  = "read_items.txt";
+   static final         String SETTINGS_DIR                = "settings" + File.separatorChar;
+   static final         String FILTER_LIST                 = "filter_list.txt";
+   private static final int    ALARM_SERVICE_START         = 1;
+   private static final int    ALARM_SERVICE_STOP          = 0;
+   private static final long   MINUTE_VALUE                = 60000L;
+   private static final int    DEFAULT_REFRESH_TIME        = 120;
+   private static final int    TAGS_LIST_VIEW_FADE_IN_TIME = 240;
    static Handler s_serviceHandler;
    String m_previousActionBarTitle;
    private ViewPager             m_feedsViewPager;
@@ -56,6 +60,33 @@ class FeedsActivity extends ActionBarActivity
    private FragmentManager       m_fragmentManager;
    private String                m_applicationFolder;
    private Resources             m_resources;
+
+   static
+   void showAddFilterDialog(Context context, FragmentManager fragmentManager)
+   {
+      LayoutInflater inflater = LayoutInflater.from(context);
+      View addFilterLayout = inflater.inflate(R.layout.add_filter_dialog, null);
+
+      String cancelText = context.getString(R.string.cancel_dialog);
+      String addText = context.getString(R.string.add_dialog);
+      String addFilterText = context.getString(R.string.add_filter);
+
+      String applicationFolder = getApplicationFolder(context);
+
+      String fragmentTag = "android:switcher:" + FragmentManage.VIEW_PAGER_ID + ':' + 2;
+      ListFragment listFragment = (ListFragment) fragmentManager.findFragmentByTag(fragmentTag);
+      BaseAdapter adapter = (BaseAdapter) listFragment.getListAdapter();
+
+      DialogInterface.OnClickListener onClickAdd = new OnClickFilterDialogAdd(addFilterLayout,
+            adapter, applicationFolder);
+
+      AlertDialog.Builder build = new AlertDialog.Builder(context);
+      build.setTitle(addFilterText);
+      build.setView(addFilterLayout);
+      build.setNegativeButton(cancelText, null);
+      build.setPositiveButton(addText, onClickAdd);
+      build.show();
+   }
 
    @Override
    public
@@ -128,6 +159,22 @@ class FeedsActivity extends ActionBarActivity
       }
    }
 
+   static
+   String getApplicationFolder(Context context)
+   {
+      /* Check the media state for the desirable state. */
+      String state = Environment.getExternalStorageState();
+
+      String mounted = Environment.MEDIA_MOUNTED;
+      if(!mounted.equals(state))
+      {
+         return null;
+      }
+
+      File externalFilesDir = context.getExternalFilesDir(null);
+      return externalFilesDir.getAbsolutePath() + File.separatorChar;
+   }
+
    /* This is so the icon and text in the actionbar are selected. */
    @Override
    public
@@ -148,19 +195,6 @@ class FeedsActivity extends ActionBarActivity
       Write.longSet(READ_ITEMS, AdapterTags.S_READ_ITEM_TIMES, m_applicationFolder);
    }
 
-   @Override
-   public
-   void onBackPressed()
-   {
-      super.onBackPressed();
-
-      String feeds = m_resources.getStringArray(R.array.navigation_titles)[0];
-      m_actionBar.setTitle(feeds);
-
-      m_drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-      m_drawerToggle.setDrawerIndicatorEnabled(true);
-   }
-
    private
    void setServiceIntent(int state)
    {
@@ -179,7 +213,7 @@ class FeedsActivity extends ActionBarActivity
       String[] settings = Read.file(SETTINGS_DIR + settingTitles[2] + ".txt", m_applicationFolder);
 
       int time = 0 == settings.length || 0 == settings[0].length()
-            ? 120 /* TODO DEFAULT REFRESH TIME. */
+            ? DEFAULT_REFRESH_TIME
             : Integer.parseInt(settings[0]);
 
       /* Create intent, turn into pending intent, and get the alarm manager. */
@@ -216,20 +250,17 @@ class FeedsActivity extends ActionBarActivity
       return intent;
    }
 
-   static
-   String getApplicationFolder(Context context)
+   @Override
+   public
+   void onBackPressed()
    {
-      /* Check the media state for the desirable state. */
-      String state = Environment.getExternalStorageState();
+      super.onBackPressed();
 
-      String mounted = Environment.MEDIA_MOUNTED;
-      if(!mounted.equals(state))
-      {
-         return null;
-      }
+      String feeds = m_resources.getStringArray(R.array.navigation_titles)[0];
+      m_actionBar.setTitle(feeds);
 
-      File externalFilesDir = context.getExternalFilesDir(null);
-      return externalFilesDir.getAbsolutePath() + File.separatorChar;
+      m_drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+      m_drawerToggle.setDrawerIndicatorEnabled(true);
    }
 
    @Override
@@ -280,21 +311,19 @@ class FeedsActivity extends ActionBarActivity
       return true;
    }
 
-   private
-   boolean isServiceRunning()
+   /* Changes the ManageFeedsRefresh menu item to an animation if m_mode = true. */
+   static
+   void setRefreshingIcon(boolean isSpinning, MenuItem item)
    {
-      ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-      for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(
-            Integer.MAX_VALUE))
+      /* Change it depending on the m_mode. */
+      if(isSpinning)
       {
-         String className = service.service.getClassName();
-         String serviceName = ServiceUpdate.class.getName();
-         if(serviceName.equals(className))
-         {
-            return true;
-         }
+         MenuItemCompat.setActionView(item, R.layout.progress_circle);
       }
-      return false;
+      else
+      {
+         MenuItemCompat.setActionView(item, null);
+      }
    }
 
    @Override
@@ -316,6 +345,15 @@ class FeedsActivity extends ActionBarActivity
       }
       else if(menuText.equals(addFeed))
       {
+         /* Deal with the case of add filter. */
+         ViewPager viewPager = (ViewPager) findViewById(FragmentManage.VIEW_PAGER_ID);
+         if(null != viewPager && 2 == viewPager.getCurrentItem() && viewPager.isShown())
+         {
+            showAddFilterDialog(this, m_fragmentManager);
+            return true;
+         }
+
+         /* The rest is the case of add/edit feed. */
          String fragmentTag = "android:switcher:" + FragmentManage.VIEW_PAGER_ID + ':' + 1;
 
          ListFragment listFragment = (ListFragment) m_fragmentManager.findFragmentByTag(
@@ -323,7 +361,7 @@ class FeedsActivity extends ActionBarActivity
 
          ListView listView = null == listFragment ? null : listFragment.getListView();
 
-         FragmentManageFeeds.showEditDialog(listView, -1, m_applicationFolder, this);
+         ListFragmentManageFeeds.showEditDialog(listView, -1, m_applicationFolder, this);
       }
       else if(menuText.equals(jumpTo))
       {
@@ -349,30 +387,6 @@ class FeedsActivity extends ActionBarActivity
       return true;
    }
 
-   /* Updates and refreshes the tags with any new content. */
-   private
-   void refreshFeeds(MenuItem menuItem)
-   {
-      MenuItemCompat.setActionView(menuItem, R.layout.progress_circle);
-
-      /* Set the service handler in FeedsActivity so we can check and call it from ServiceUpdate. */
-      s_serviceHandler = new ServiceHandler(m_fragmentManager, menuItem, m_applicationFolder);
-
-      int currentPage = m_feedsViewPager.getCurrentItem();
-
-      String[] settingTitles = m_resources.getStringArray(R.array.settings_function_titles);
-
-      Intent intent = new Intent(this, ServiceUpdate.class);
-      intent = configureServiceIntent(intent, currentPage, settingTitles, m_applicationFolder);
-      startService(intent);
-   }
-
-   String getNavigationTitle()
-   {
-      CharSequence title = m_actionBar.getTitle();
-      return title.toString();
-   }
-
    static
    void gotoLatestUnread(ListView listView)
    {
@@ -392,25 +406,51 @@ class FeedsActivity extends ActionBarActivity
       if(!listView.isShown() || 0 == itemCount)
       {
          Animation animation = new AlphaAnimation(0.0F, 1.0F);
-         animation.setDuration(240);
+         animation.setDuration(TAGS_LIST_VIEW_FADE_IN_TIME);
          listView.setAnimation(animation);
          listView.setVisibility(View.VISIBLE);
       }
    }
 
-   /* Changes the ManageFeedsRefresh menu item to an animation if m_mode = true. */
-   static
-   void setRefreshingIcon(boolean isSpinning, MenuItem item)
+   String getNavigationTitle()
    {
-      /* Change it depending on the m_mode. */
-      if(isSpinning)
+      CharSequence title = m_actionBar.getTitle();
+      return title.toString();
+   }
+
+   /* Updates and refreshes the tags with any new content. */
+   private
+   void refreshFeeds(MenuItem menuItem)
+   {
+      MenuItemCompat.setActionView(menuItem, R.layout.progress_circle);
+
+      /* Set the service handler in FeedsActivity so we can check and call it from ServiceUpdate. */
+      s_serviceHandler = new ServiceHandler(m_fragmentManager, menuItem, m_applicationFolder);
+
+      int currentPage = m_feedsViewPager.getCurrentItem();
+
+      String[] settingTitles = m_resources.getStringArray(R.array.settings_function_titles);
+
+      Intent intent = new Intent(this, ServiceUpdate.class);
+      intent = configureServiceIntent(intent, currentPage, settingTitles, m_applicationFolder);
+      startService(intent);
+   }
+
+   private
+   boolean isServiceRunning()
+   {
+      ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+      for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(
+            Integer.MAX_VALUE))
       {
-         MenuItemCompat.setActionView(item, R.layout.progress_circle);
+         String className = service.service.getClassName();
+         String serviceName = ServiceUpdate.class.getName();
+         if(serviceName.equals(className))
+         {
+            return true;
+         }
       }
-      else
-      {
-         MenuItemCompat.setActionView(item, null);
-      }
+      return false;
    }
 
    void setNavigationTitle(CharSequence title, boolean saveTitle)

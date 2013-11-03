@@ -18,14 +18,14 @@ import android.widget.TextView;
 
 /* Must be public for rotation. */
 public
-class FragmentManageFeeds extends ListFragment
+class ListFragmentManageFeeds extends ListFragment
 {
    private static final int MODE_ADD = -1;
 
    static
    ListFragment newInstance()
    {
-      return new FragmentManageFeeds();
+      return new ListFragmentManageFeeds();
    }
 
    @Override
@@ -34,7 +34,7 @@ class FragmentManageFeeds extends ListFragment
    {
       super.onCreateView(inflater, container, savedInstanceState);
 
-      return inflater.inflate(R.layout.listview_cards, container, false);
+      return inflater.inflate(R.layout.listview, container, false);
    }
 
    /* Edit the feed. */
@@ -65,8 +65,8 @@ class FragmentManageFeeds extends ListFragment
          tag = content[2][position];
       }
 
-      Dialog editDialog = EditDialog.newInstance(context, listView, oldFeedTitle, applicationFolder,
-            allTag);
+      Dialog editDialog = DialogEditFeed.newInstance(context, listView, oldFeedTitle,
+            applicationFolder, allTag);
       editDialog.show();
 
       /* If the mode is edit. */

@@ -5,12 +5,12 @@ import android.widget.Checkable;
 
 import java.io.File;
 
-class SettingBooleanChecked implements View.OnClickListener
+class OnClickSettingsCheckBox implements View.OnClickListener
 {
    private final String m_settingFileName;
    private final String m_applicationFolder;
 
-   SettingBooleanChecked(String settingPath, String applicationFolder)
+   OnClickSettingsCheckBox(String settingPath, String applicationFolder)
    {
       m_applicationFolder = applicationFolder;
       m_settingFileName = settingPath;

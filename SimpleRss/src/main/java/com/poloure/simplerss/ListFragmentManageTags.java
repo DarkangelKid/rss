@@ -11,12 +11,12 @@ import android.widget.ListView;
 
 /* Must be public for rotation. */
 public
-class FragmentManageTags extends ListFragment
+class ListFragmentManageTags extends ListFragment
 {
    static
    ListFragment newInstance()
    {
-      return new FragmentManageTags();
+      return new ListFragmentManageTags();
    }
 
    @Override
@@ -42,7 +42,7 @@ class FragmentManageTags extends ListFragment
    {
       super.onCreateView(inflater, container, savedInstanceState);
 
-      return inflater.inflate(R.layout.listview_cards, container, false);
+      return inflater.inflate(R.layout.listview, container, false);
    }
 
 }

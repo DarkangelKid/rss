@@ -13,14 +13,14 @@ import android.widget.ListView;
 
 /* Must be public for rotation. */
 public
-class FragmentTag extends ListFragment
+class ListFragmentTag extends ListFragment
 {
    private static final String POSITION_KEY = "POSITION";
 
    static
    ListFragment newInstance(int position)
    {
-      ListFragment listFragment = new FragmentTag();
+      ListFragment listFragment = new ListFragmentTag();
       Bundle bundle = new Bundle();
       bundle.putInt(POSITION_KEY, position);
       listFragment.setArguments(bundle);
@@ -67,6 +67,6 @@ class FragmentTag extends ListFragment
    {
       super.onCreateView(inflater, container, savedInstanceState);
 
-      return inflater.inflate(R.layout.listview_cards, container, false);
+      return inflater.inflate(R.layout.listview, container, false);
    }
 }

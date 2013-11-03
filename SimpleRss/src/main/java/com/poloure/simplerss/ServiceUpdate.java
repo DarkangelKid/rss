@@ -60,6 +60,7 @@ class ServiceUpdate extends IntentService
          "link", "published", "pubDate", "description", "title", "content", "entry", "item"
    };
    private static final int              FEED_ITEM_INITIAL_CAPACITY  = 200;
+   private static final int              DEFAULT_MAX_HISTORY         = 10000;
    private static final double           AMOUNT_OF_SCREEN_IMAGE_USES = 0.944;
    private static final char             ITEM_SEPARATOR              = '|';
 
@@ -348,13 +349,27 @@ class ServiceUpdate extends IntentService
                content = null != content ? PATTERN_WHITESPACE.matcher(content).replaceAll(" ") : "";
 
                int imgPosition = content.indexOf("img");
-               if(-1 != imgPosition)
+               int srcPosition = content.indexOf("src", imgPosition);
+               if(-1 != imgPosition && -1 != srcPosition)
                {
-                  int srcPosition = content.indexOf("src", imgPosition) + 4;
-                  char quote = content.charAt(srcPosition);
-                  int finalPosition = content.indexOf(quote, srcPosition + 1);
+                  /* Find which mark is being used. */
+                  int apostrophePosition = content.indexOf('\'', srcPosition);
+                  int quotePosition = content.indexOf('\"', srcPosition);
+                  int usedMarkPosition;
 
-                  String imgLink = content.substring(srcPosition + 1, finalPosition);
+                  if(-1 != apostrophePosition && -1 != quotePosition)
+                  {
+                     usedMarkPosition = Math.min(apostrophePosition, quotePosition);
+                  }
+                  else
+                  {
+                     usedMarkPosition = -1 == quotePosition ? apostrophePosition : quotePosition;
+                  }
+
+                  char quote = content.charAt(usedMarkPosition);
+                  int finalPosition = content.indexOf(quote, usedMarkPosition + 1);
+
+                  String imgLink = content.substring(usedMarkPosition + 1, finalPosition);
                   feedItemBuilder.append(INDEX_IMAGE);
                   feedItemBuilder.append(imgLink);
                   feedItemBuilder.append(ITEM_SEPARATOR);
@@ -408,7 +423,7 @@ class ServiceUpdate extends IntentService
             String[] check = Read.file(settingName, applicationFolder);
             String setting = 0 == check.length ? "" : check[0];
 
-            int saveSize = 0 == setting.length() ? 100000 : Integer.parseInt(setting);
+            int saveSize = 0 == setting.length() ? DEFAULT_MAX_HISTORY : Integer.parseInt(setting);
             int mapSize = map.size();
 
             saveSize = saveSize >= mapSize ? mapSize : saveSize;
@@ -438,42 +453,6 @@ class ServiceUpdate extends IntentService
          }
          parser.next();
       }
-   }
-
-   /* index throws an ArrayOutOfBoundsException if not handled. */
-   static
-   <T> int index(T[] array, T value)
-   {
-      if(null == array)
-      {
-         return -1;
-      }
-
-      int arrayLength = array.length;
-      for(int i = 0; i < arrayLength; i++)
-      {
-         if(array[i].equals(value))
-         {
-            return i;
-         }
-      }
-      return -1;
-   }
-
-   private static
-   Set<String> fileToSet(String fileName, String fileFolder)
-   {
-      Set<String> set = new LinkedHashSet<String>();
-
-      if(Read.isUnmounted())
-      {
-         return set;
-      }
-
-      String[] lines = Read.file(fileName, fileFolder);
-      Collections.addAll(set, lines);
-
-      return set;
    }
 
    private static
@@ -534,5 +513,41 @@ class ServiceUpdate extends IntentService
       {
          e.printStackTrace();
       }
+   }
+
+   private static
+   Set<String> fileToSet(String fileName, String fileFolder)
+   {
+      Set<String> set = new LinkedHashSet<String>();
+
+      if(Read.isUnmounted())
+      {
+         return set;
+      }
+
+      String[] lines = Read.file(fileName, fileFolder);
+      Collections.addAll(set, lines);
+
+      return set;
+   }
+
+   /* index throws an ArrayOutOfBoundsException if not handled. */
+   static
+   <T> int index(T[] array, T value)
+   {
+      if(null == array)
+      {
+         return -1;
+      }
+
+      int arrayLength = array.length;
+      for(int i = 0; i < arrayLength; i++)
+      {
+         if(array[i].equals(value))
+         {
+            return i;
+         }
+      }
+      return -1;
    }
 }

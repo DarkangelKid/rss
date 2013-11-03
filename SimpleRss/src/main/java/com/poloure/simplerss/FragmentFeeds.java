@@ -3,7 +3,6 @@ package com.poloure.simplerss;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -82,13 +81,5 @@ class FragmentFeeds extends Fragment
          unreadMenu.setVisible(true);
          addFeedMenu.setVisible(true);
       }
-   }
-
-   @Override
-   public
-   boolean onOptionsItemSelected(MenuItem item)
-   {
-      FragmentActivity activity = getActivity();
-      return activity.onOptionsItemSelected(item);
    }
 }

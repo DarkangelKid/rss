@@ -3,14 +3,14 @@ package com.poloure.simplerss;
 import android.content.DialogInterface;
 import android.widget.BaseAdapter;
 
-class OnFilterClickDelete implements DialogInterface.OnClickListener
+class OnClickFilterDialogDelete implements DialogInterface.OnClickListener
 {
    private final BaseAdapter m_adapter;
    private final String      m_filterFileName;
    private final String      m_applicationFolder;
    private final String      m_filterName;
 
-   OnFilterClickDelete(BaseAdapter adapter, String applicationFolder, String filterFileName,
+   OnClickFilterDialogDelete(BaseAdapter adapter, String applicationFolder, String filterFileName,
          String filterName)
    {
       m_adapter = adapter;

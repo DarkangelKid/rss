@@ -9,24 +9,24 @@ import android.widget.TextView;
 
 class AdapterSettingsFunctions extends BaseAdapter
 {
-   private static final int   TYPE_HEADING  = 0;
-   private static final int   TYPE_CHECKBOX = 1;
-   private static final int   TYPE_SEEK_BAR = 2;
-   private static final int[] TYPES         = {TYPE_HEADING, TYPE_CHECKBOX, TYPE_SEEK_BAR};
+   private static final int   TYPE_HEADING        = 0;
+   private static final int   TYPE_CHECKBOX       = 1;
+   private static final int   TYPE_SEEK_BAR       = 2;
+   private static final int[] TYPES               = {TYPE_HEADING, TYPE_CHECKBOX, TYPE_SEEK_BAR};
+   private static final int   MAX_REFRESH_MINUTES = 1440;
+   private static final int   MAX_HISTORY_ITEMS   = 1000;
    private final String[]       m_functionTitles;
    private final String[]       m_functionSummaries;
    private final Context        m_context;
    private final String         m_applicationFolder;
-   private final String         m_settingsDir;
    private final LayoutInflater m_layoutInflater;
    private       TextView       m_titleView;
 
-   AdapterSettingsFunctions(Context context, String applicationFolder, String settingsDir,
-         String[] adapterTitles, String[] adapterSummaries)
+   AdapterSettingsFunctions(Context context, String applicationFolder, String[] adapterTitles,
+         String[] adapterSummaries)
    {
       m_context = context;
       m_applicationFolder = applicationFolder;
-      m_settingsDir = settingsDir;
       m_functionTitles = adapterTitles.clone();
       m_functionSummaries = adapterSummaries.clone();
       m_layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -81,7 +81,7 @@ class AdapterSettingsFunctions extends BaseAdapter
       {
          view = null == convertView ? new LayoutSeekBar(m_context) : convertView;
 
-         int max = 2 == position ? 1440 : 1000;
+         int max = 2 == position ? MAX_REFRESH_MINUTES : MAX_HISTORY_ITEMS;
 
          ((LayoutSeekBar) view).showItem(title, summary, max, m_applicationFolder);
       }

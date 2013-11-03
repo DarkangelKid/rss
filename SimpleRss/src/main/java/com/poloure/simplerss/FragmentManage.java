@@ -20,6 +20,7 @@ class FragmentManage extends Fragment
 {
    static final         int VIEW_PAGER_ID        = 0x2000;
    private static final int PAGER_TITLE_STRIP_ID = 54218;
+   private ViewPager m_pager;
 
    static
    Fragment newInstance()
@@ -47,11 +48,11 @@ class FragmentManage extends Fragment
 
       PagerAdapter pagerAdapter = new PagerAdapterManage(fragmentManager, manageTitles);
 
-      ViewPager pager = ViewPagerStrip.newInstance(activity, PAGER_TITLE_STRIP_ID);
-      pager.setAdapter(pagerAdapter);
-      pager.setId(VIEW_PAGER_ID);
+      m_pager = ViewPagerStrip.newInstance(activity, PAGER_TITLE_STRIP_ID);
+      m_pager.setAdapter(pagerAdapter);
+      m_pager.setId(VIEW_PAGER_ID);
 
-      return pager;
+      return m_pager;
    }
 
    @Override

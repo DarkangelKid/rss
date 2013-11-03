@@ -21,7 +21,6 @@
       android:textSize="16sp"/>
 
    <ImageView
-      android:id="@+id/divider_item"
       android:layout_width="fill_parent"
       android:layout_height="2dp"
       android:layout_marginEnd="8dp"

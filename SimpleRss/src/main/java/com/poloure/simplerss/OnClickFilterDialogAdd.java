@@ -6,13 +6,13 @@ import android.view.View;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-class OnFilterDialogClickAdd implements DialogInterface.OnClickListener
+class OnClickFilterDialogAdd implements DialogInterface.OnClickListener
 {
    private final View        m_addFilterLayout;
    private final BaseAdapter m_adapter;
    private final String      m_applicationFolder;
 
-   OnFilterDialogClickAdd(View addFilterLayout, BaseAdapter adapterManageFilters,
+   OnClickFilterDialogAdd(View addFilterLayout, BaseAdapter adapterManageFilters,
          String applicationFolder)
    {
       m_addFilterLayout = addFilterLayout;

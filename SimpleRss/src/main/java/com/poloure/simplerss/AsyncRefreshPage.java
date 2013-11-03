@@ -185,7 +185,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       /* Find the exact mPosition in the list. */
       else
       {
-         index = m_listView.getFirstVisiblePosition() + 1;
+         index = m_listView.getFirstVisiblePosition();
          View v = m_listView.getChildAt(0);
          top = null == v ? 0 : v.getTop();
          if(0 == top)
@@ -205,14 +205,14 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       adapterTag.notifyDataSetChanged();
 
       /* If this was the first time loading the tag data, jump to the latest unread item. */
-      if(!m_listView.isShown())
-      {
-         FeedsActivity.gotoLatestUnread(m_listView);
-      }
-      else
+      if(m_listView.isShown())
       {
          int listViewPaddingTop = m_listView.getPaddingTop();
          m_listView.setSelectionFromTop(index, top - listViewPaddingTop);
+      }
+      else
+      {
+         FeedsActivity.gotoLatestUnread(m_listView);
       }
    }
 }

@@ -40,7 +40,6 @@
       android:paddingTop="4dp"
       android:scaleType="centerCrop"/>
 
-
    <TextView
       android:id="@+id/description"
       android:layout_width="match_parent"

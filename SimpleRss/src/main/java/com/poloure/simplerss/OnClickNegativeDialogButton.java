@@ -3,11 +3,11 @@ package com.poloure.simplerss;
 import android.app.Dialog;
 import android.view.View;
 
-class OnClickNegativeButton implements View.OnClickListener
+class OnClickNegativeDialogButton implements View.OnClickListener
 {
    private final Dialog m_dialog;
 
-   OnClickNegativeButton(Dialog editDialog)
+   OnClickNegativeDialogButton(Dialog editDialog)
    {
       m_dialog = editDialog;
    }

@@ -2,20 +2,22 @@ package com.poloure.simplerss;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 
 /* Must be public for rotation. */
 public
-class FragmentSettingsUi extends ListFragment
+class ListFragmentSettingsUi extends ListFragment
 {
    static
    ListFragment newInstance()
    {
-      return new FragmentSettingsUi();
+      return new ListFragmentSettingsUi();
    }
 
    @Override
@@ -44,6 +46,10 @@ class FragmentSettingsUi extends ListFragment
    {
       super.onCreateView(inflater, container, savedInstanceState);
 
-      return inflater.inflate(R.layout.listview_settings_function, container, false);
+      ListView listView = (ListView) inflater.inflate(R.layout.listview, container, false);
+      listView.setDividerHeight(0);
+      listView.setBackgroundColor(Color.WHITE);
+
+      return listView;
    }
 }

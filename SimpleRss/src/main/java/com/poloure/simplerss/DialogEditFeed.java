@@ -11,7 +11,7 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 
-class EditDialog extends Dialog
+class DialogEditFeed extends Dialog
 {
    private final String           m_oldFeedTitle;
    private final String           m_applicationFolder;
@@ -20,7 +20,7 @@ class EditDialog extends Dialog
    private final ListView         m_listView;
 
    private
-   EditDialog(Context context, ListView listView, String oldFeedTitle, String applicationFolder,
+   DialogEditFeed(Context context, ListView listView, String oldFeedTitle, String applicationFolder,
          String allTag)
    {
       super(context);
@@ -35,7 +35,7 @@ class EditDialog extends Dialog
    Dialog newInstance(Context context, ListView listView, String oldFeedTitle,
          String applicationFolder, String allTag)
    {
-      return new EditDialog(context, listView, oldFeedTitle, applicationFolder, allTag);
+      return new DialogEditFeed(context, listView, oldFeedTitle, applicationFolder, allTag);
    }
 
    @Override
@@ -46,7 +46,7 @@ class EditDialog extends Dialog
       setContentView(R.layout.add_rss_dialog);
 
       Button buttonNegative = (Button) findViewById(R.id.negative_button);
-      buttonNegative.setOnClickListener(new OnClickNegativeButton(this));
+      buttonNegative.setOnClickListener(new OnClickNegativeDialogButton(this));
 
       Button buttonPositive = (Button) findViewById(R.id.positive_button);
       buttonPositive.setOnClickListener(new OnClickPositive(this, m_listView));

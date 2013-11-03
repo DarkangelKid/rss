@@ -43,13 +43,14 @@ class OnClickNavDrawerItem implements AdapterView.OnItemClickListener
 
       boolean tagWasClicked = 3 < position;
       boolean feedsWasClicked = 0 == position;
+      boolean clickedDifferentPage = m_tagsViewPager.getCurrentItem() != position;
       String feedTitle = m_navigationTitles[0];
 
       /* Determine the new title based on the position of the item clicked. */
       String selectedTitle = tagWasClicked ? feedTitle : m_navigationTitles[position];
 
       /* If the item selected was a tag, change the FragmentFeeds ViewPager to that page. */
-      if(tagWasClicked)
+      if(tagWasClicked && clickedDifferentPage)
       {
          m_tagsViewPager.setCurrentItem(position - 4);
       }

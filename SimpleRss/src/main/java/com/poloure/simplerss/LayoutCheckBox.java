@@ -40,7 +40,8 @@ class LayoutCheckBox extends RelativeLayout
 
       m_titleView.setText(title);
       m_summaryView.setText(summary);
-      m_checkbox.setOnClickListener(new SettingBooleanChecked(settingFileName, applicationFolder));
+      m_checkbox.setOnClickListener(
+            new OnClickSettingsCheckBox(settingFileName, applicationFolder));
 
       /* Load the saved boolean value and set the box as checked if true. */
       String[] check = Read.file(settingFileName, applicationFolder);

@@ -6,13 +6,13 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 
-class OnFilterLongClick implements AdapterView.OnItemLongClickListener
+class OnLongClickFilterItem implements AdapterView.OnItemLongClickListener
 {
    private final AlertDialog.Builder m_builder;
    private final String              m_deleteString;
    private final String              m_applicationFolder;
 
-   OnFilterLongClick(AlertDialog.Builder builder, String deleteString, String applicationFolder)
+   OnLongClickFilterItem(AlertDialog.Builder builder, String deleteString, String applicationFolder)
    {
       m_builder = builder;
       m_deleteString = deleteString;
@@ -26,7 +26,7 @@ class OnFilterLongClick implements AdapterView.OnItemLongClickListener
       BaseAdapter adapter = (BaseAdapter) parent.getAdapter();
       String filterName = (String) adapter.getItem(position);
 
-      DialogInterface.OnClickListener onFilterClickDelete = new OnFilterClickDelete(adapter,
+      DialogInterface.OnClickListener onFilterClickDelete = new OnClickFilterDialogDelete(adapter,
             m_applicationFolder, FeedsActivity.FILTER_LIST, filterName);
 
       m_builder.setPositiveButton(m_deleteString, onFilterClickDelete);

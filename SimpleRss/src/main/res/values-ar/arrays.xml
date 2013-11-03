@@ -23,41 +23,6 @@
       <item>إعدادات</item>
    </string-array>
 
-   <string-array name="settings_function_names">
-      <item>null</item>
-      <item>auto_refresh_boolean</item>
-      <item>refresh_time</item>
-      <item>notifications_boolean</item>
-      <item>null</item>
-      <item>max_history</item>
-   </string-array>
-
-   <string-array name="refresh_values">
-      <item>١٥ دقائق</item>
-      <item>٣٠ دقائق</item>
-      <item>٤٥ دقائق</item>
-      <item>١ ساعة</item>
-      <item>٢ ساعات</item>
-      <item>٣ ساعات</item>
-      <item>٤ ساعات</item>
-      <item>٨ ساعات</item>
-      <item>١٢ ساعات</item>
-      <item>٢٤ ساعات</item>
-   </string-array>
-
-   <string-array name="history_values">
-      <item>10</item>
-      <item>20</item>
-      <item>30</item>
-      <item>40</item>
-      <item>60</item>
-      <item>80</item>
-      <item>100</item>
-      <item>200</item>
-      <item>400</item>
-      <item>100000</item>
-   </string-array>
-
    <string-array name="settings_function_titles">
       <item>Auto Refresh</item>
       <item>Auto Refresh</item>
@@ -77,15 +42,13 @@
    </string-array>
 
    <string-array name="settings_interface_titles">
-      <item>UI Colours</item>
-      <item>Dark Theme</item>
-      <item>Text Size</item>
+      <item>Feed Display</item>
+      <item>Read Item Opacity</item>
    </string-array>
 
    <string-array name="settings_interface_summaries">
       <item>EMPTY</item>
-      <item>Check to enable dark theme</item>
-      <item>Adjust text size</item>
+      <item>0\%% is hidden, 100\%% disables effect</item>
    </string-array>
 
    <string-array name="long_click_manage_feeds">
