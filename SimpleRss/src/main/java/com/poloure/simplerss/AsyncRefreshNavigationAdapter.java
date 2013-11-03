@@ -10,14 +10,14 @@ import java.util.Set;
 
 class AsyncRefreshNavigationAdapter extends AsyncTask<String, Void, int[]>
 {
-   private final AdapterNavDrawer m_adapterNavDrawer;
-   private final ActionBar        m_actionBar;
-   private final int              m_currentPage;
+   private final AdapterNavigationDrawer m_adapterNavDrawer;
+   private final ActionBar               m_actionBar;
+   private final int                     m_currentPage;
 
    private
    AsyncRefreshNavigationAdapter(BaseAdapter adapterNavDrawer, ActionBar actionBar, int currentPage)
    {
-      m_adapterNavDrawer = (AdapterNavDrawer) adapterNavDrawer;
+      m_adapterNavDrawer = (AdapterNavigationDrawer) adapterNavDrawer;
       m_actionBar = actionBar;
       m_currentPage = currentPage;
    }

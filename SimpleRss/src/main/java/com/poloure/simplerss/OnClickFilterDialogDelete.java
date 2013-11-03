@@ -23,7 +23,7 @@ class OnClickFilterDialogDelete implements DialogInterface.OnClickListener
    public
    void onClick(DialogInterface dialog, int position)
    {
-      Write.removeLine(m_filterFileName, m_filterName, false, m_applicationFolder);
+      Write.editLine(m_filterFileName, m_filterName, false, m_applicationFolder, Write.MODE_REMOVE, "");
       m_adapter.notifyDataSetChanged();
    }
 }

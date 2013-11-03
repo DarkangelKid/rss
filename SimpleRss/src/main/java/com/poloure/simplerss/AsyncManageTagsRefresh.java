@@ -95,10 +95,9 @@ class AsyncManageTagsRefresh extends AsyncTask<String, String[], Animation>
             int infoSize = info.length();
             info.delete(infoSize - 2, infoSize);
          }
-         String feedString = 1 == feedCount ? " feed • " : " feeds • ";
-         feedInfoArray[i] = feedCount + feedString + info;
+         feedInfoArray[i] = "<b>Feeds: </b>" + feedCount + " · " + info;
       }
-         /* 0 is meant to be total. */
+      /* 0 is meant to be total. */
       feedInfoArray[0] = 0 + " items • " + feedInfoArray[0];
 
       publishProgress(feedTags, feedInfoArray);

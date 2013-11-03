@@ -11,7 +11,7 @@ import android.widget.ListView;
 
 import java.io.File;
 
-class AsyncManageFeedsRefresh extends AsyncTask<String, String[], Animation>
+class AsyncManageFeedsRefresh extends AsyncTask<String, CharSequence[], Animation>
 {
    private static final int FADE_IN_DURATION = 330;
    private final ListView m_listView;
@@ -31,7 +31,7 @@ class AsyncManageFeedsRefresh extends AsyncTask<String, String[], Animation>
    static
    void newInstance(ListView listView, String applicationFolder)
    {
-      AsyncTask<String, String[], Animation> task = new AsyncManageFeedsRefresh(listView);
+      AsyncTask<String, CharSequence[], Animation> task = new AsyncManageFeedsRefresh(listView);
 
       if(Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT)
       {
@@ -57,7 +57,7 @@ class AsyncManageFeedsRefresh extends AsyncTask<String, String[], Animation>
       String[] feedTags = feedsIndex[2];
 
       int size = feedNames.length;
-      String[] feedInfoArray = new String[size];
+      CharSequence[] feedInfoArray = new CharSequence[size];
 
       for(int i = 0; i < size; i++)
       {
@@ -66,8 +66,15 @@ class AsyncManageFeedsRefresh extends AsyncTask<String, String[], Animation>
          int feedContentSize = Read.count(feedContentFileName, appFolder);
 
          /* Build the info string. */
-         feedInfoArray[i] = feedUrls[i] + newLine + feedTags[i] + " • " + feedContentSize +
-               " items";
+         StringBuilder builder = new StringBuilder(80);
+         builder.append(feedUrls[i]);
+         builder.append("<br><b>Items: </b>");
+         builder.append(Integer.toString(feedContentSize));
+         builder.append(" · <b>");
+         builder.append(feedTags[i]);
+         builder.append("</b>");
+
+         feedInfoArray[i] = builder.toString();
       }
       publishProgress(feedNames, feedInfoArray);
 
@@ -89,7 +96,7 @@ class AsyncManageFeedsRefresh extends AsyncTask<String, String[], Animation>
 
    @Override
    protected
-   void onProgressUpdate(String[]... values)
+   void onProgressUpdate(CharSequence[]... values)
    {
       BaseAdapter adapter = (BaseAdapter) m_listView.getAdapter();
       ((AdapterManageFragments) adapter).setArrays(values[0], values[1]);

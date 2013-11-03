@@ -14,28 +14,30 @@ import java.util.List;
 
 class Write
 {
-   static final         String LOG_FILE = "dump" + ".txt";
-   private static final String TEMP     = ".temp" + ".txt";
+   static final         String LOG_FILE     = "dump" + ".txt";
+   static final         int    MODE_REMOVE  = 1;
+   static final         int    MODE_REPLACE = 2;
+   private static final String TEMP         = ".temp" + ".txt";
    /* All functions in here must check that the media is available before
     * continuing. */
 
    /* This function should be safe, returns false if it failed.
     * NOT SAFE FOR INTERNAL IF FAILS. */
    static
-   int removeLine(String fileName, CharSequence stringSearch, boolean contains, String fileFolder)
+   void editLine(String fileName, CharSequence stringSearch, boolean containing,
+         String applicationFolder, int mode, String replacementLine)
    {
       /* If s_storage is unmounted OR if we force to use external. */
       if(Read.isUnmounted())
       {
-         return -1;
+         return;
       }
 
       String newLine = System.getProperty("line.separator");
-      String filePath = fileFolder + fileName;
+      String filePath = applicationFolder + fileName;
       String tempPath = filePath + TEMP;
 
       String[] lines = new String[0];
-      int pos = -1;
 
       try
       {
@@ -43,27 +45,25 @@ class Write
          try
          {
             /* Read the file to an array, if the file does not exist, return. */
-            lines = Read.file(fileName, fileFolder);
+            lines = Read.file(fileName, applicationFolder);
             if(0 == lines.length)
             {
-               return -1;
+               return;
             }
 
             /* No backup for internal s_storage. */
             out = writer(tempPath, false);
 
-            int line = 0;
-            for(String item : lines)
+            for(String line : lines)
             {
-               if(contains && !item.contains(stringSearch) ||
-                     !contains && !item.equals(stringSearch))
+               if(containing && !line.contains(stringSearch) ||
+                     !containing && !line.equals(stringSearch))
                {
-                  out.write(item + newLine);
-                  line++;
+                  out.write(line + newLine);
                }
-               else
+               else if(MODE_REPLACE == mode)
                {
-                  pos = line;
+                  out.write(replacementLine);
                }
             }
          }
@@ -83,20 +83,19 @@ class Write
          File file = new File(tempPath);
          file.delete();
 
-         return -1;
+         return;
       }
 
       /* If the rename failed, delete the file and Write the original. */
-      boolean success = !moveFile(fileName + TEMP, fileName, fileFolder);
+      boolean success = !moveFile(fileName + TEMP, fileName, applicationFolder);
       if(success)
       {
          File file = new File(fileName);
          file.delete();
          List<String> list = Arrays.asList(lines);
-         collection(fileName, list, fileFolder);
+         collection(fileName, list, applicationFolder);
 
       }
-      return pos;
    }
 
    static

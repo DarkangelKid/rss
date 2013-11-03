@@ -103,7 +103,7 @@ class FeedsActivity extends ActionBarActivity
       LayoutInflater layoutInflater = getLayoutInflater();
       DisplayMetrics displayMetrics = m_resources.getDisplayMetrics();
 
-      /* Get what 12DP is for the AdapterNavDrawer compound drawable. */
+      /* Get what 12DP is for the AdapterNavigationDrawer compound drawable. */
       int twelveDp = Math.round(displayMetrics.density * 12);
 
       /* Load the read items to the AdapterTag class. */
@@ -117,7 +117,7 @@ class FeedsActivity extends ActionBarActivity
       String[] navigationTitles = m_resources.getStringArray(R.array.navigation_titles);
 
       m_drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-      m_adapterNavDrawer = new AdapterNavDrawer(navigationTitles, twelveDp, layoutInflater);
+      m_adapterNavDrawer = new AdapterNavigationDrawer(navigationTitles, twelveDp, layoutInflater);
 
       /* Configure the ActionBar. */
       m_actionBar.setIcon(R.drawable.rss_icon);

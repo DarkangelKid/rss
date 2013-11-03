@@ -6,16 +6,16 @@ import android.widget.AbsListView;
 
 class OnScrollFeedListener implements AbsListView.OnScrollListener
 {
-   private final int              m_listViewTopPadding;
-   private final String           m_applicationFolder;
-   private final int              m_page;
-   private final AdapterNavDrawer m_adapterNavDrawer;
-   private final ActionBar        m_actionBar;
+   private final int                     m_listViewTopPadding;
+   private final String                  m_applicationFolder;
+   private final int                     m_page;
+   private final AdapterNavigationDrawer m_adapterNavigationDrawer;
+   private final ActionBar               m_actionBar;
 
-   OnScrollFeedListener(AdapterNavDrawer adapterNavDrawer, ActionBar actionBar,
+   OnScrollFeedListener(AdapterNavigationDrawer adapterNavigationDrawer, ActionBar actionBar,
          String applicationFolder, int page, int listViewTopPadding)
    {
-      m_adapterNavDrawer = adapterNavDrawer;
+      m_adapterNavigationDrawer = adapterNavigationDrawer;
       m_actionBar = actionBar;
       m_applicationFolder = applicationFolder;
       m_page = page;
@@ -41,7 +41,7 @@ class OnScrollFeedListener implements AbsListView.OnScrollListener
             AdapterTags.S_READ_ITEM_TIMES.add(time);
          }
 
-         AsyncRefreshNavigationAdapter.newInstance(m_adapterNavDrawer, m_actionBar,
+         AsyncRefreshNavigationAdapter.newInstance(m_adapterNavigationDrawer, m_actionBar,
                m_applicationFolder, m_page);
       }
    }

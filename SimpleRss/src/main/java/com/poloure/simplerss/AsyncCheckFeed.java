@@ -121,6 +121,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       String finalTag = result[2];
 
       boolean isFeedValid = 0 != feedUrlFromCheck.length();
+      boolean isExistingFeed = 0 != m_oldFeedName.length();
       Context context = m_dialog.getContext();
 
       if(isFeedValid)
@@ -129,13 +130,26 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
          String feedInfo = String.format(INDEX_FORMAT, finalTitle, feedUrlFromCheck, finalTag) +
                System.getProperty("line.separator");
 
-         if(0 != m_oldFeedName.length())
+         if(isExistingFeed)
          {
-            editFeed(m_oldFeedName, finalTitle, m_applicationFolder);
-         }
+            /* Rename the folder if it is different. */
+            String oldFeedFolder = m_oldFeedName + File.separator;
+            String newFeedFolder = finalTitle + File.separatorChar;
 
-         /* Save the feed to the index. */
-         Write.single(Read.INDEX, feedInfo, m_applicationFolder);
+            if(!m_oldFeedName.equals(finalTitle))
+            {
+               Write.moveFile(oldFeedFolder, newFeedFolder, m_applicationFolder);
+            }
+
+            Write.editLine(Read.INDEX, m_oldFeedName, true, m_applicationFolder, Write.MODE_REPLACE,
+                  feedInfo);
+
+         }
+         else
+         {
+            /* Save the feed to the index. */
+            Write.single(Read.INDEX, feedInfo, m_applicationFolder);
+         }
 
          /* Update the PagerAdapter for the tag fragments. */
          ((PagerAdapterFeeds) m_pagerAdapterFeeds).getTagsFromDisk(m_applicationFolder, m_allTag);
@@ -164,23 +178,6 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
          button.setEnabled(true);
          Toast.makeText(context, R.string.invalid_feed, Toast.LENGTH_SHORT).show();
       }
-   }
-
-   private static
-   void editFeed(CharSequence oldFeed, String newFeed, String applicationFolder)
-   {
-      /* Rename the folder if it is different. */
-      String oldFeedFolder = oldFeed + File.separator;
-      String newFeedFolder = newFeed + File.separatorChar;
-
-      if(!oldFeed.equals(newFeed))
-      {
-         Write.moveFile(oldFeedFolder, newFeedFolder, applicationFolder);
-      }
-
-      /* Replace the all_tag file with the new image and data. */
-      Write.removeLine(Read.INDEX, oldFeed, true, applicationFolder);
-
    }
 
    private static

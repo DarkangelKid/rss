@@ -8,15 +8,15 @@ import android.widget.BaseAdapter;
 class AdapterManageFragments extends BaseAdapter
 {
    private final Context m_context;
-   private String[] m_firstArray  = new String[0];
-   private String[] m_secondArray = new String[0];
+   private CharSequence[] m_firstArray  = new String[0];
+   private CharSequence[] m_secondArray = new String[0];
 
    AdapterManageFragments(Context context)
    {
       m_context = context;
    }
 
-   void setArrays(String[] titleArray, String... infoArray)
+   void setArrays(CharSequence[] titleArray, CharSequence... infoArray)
    {
       m_firstArray = titleArray.clone();
       m_secondArray = infoArray.clone();
@@ -31,7 +31,7 @@ class AdapterManageFragments extends BaseAdapter
 
    @Override
    public
-   String getItem(int position)
+   CharSequence getItem(int position)
    {
       return m_firstArray[position];
    }

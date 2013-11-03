@@ -2,6 +2,8 @@ package com.poloure.simplerss;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.text.Html;
+import android.text.Spanned;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.RelativeLayout;
@@ -34,6 +36,7 @@ class LayoutManageListViewItem extends RelativeLayout
    void showItem(CharSequence title, CharSequence subtitle)
    {
       m_titleView.setText(title);
-      m_subTitleView.setText(subtitle);
+      Spanned spanned = Html.fromHtml((String) subtitle);
+      m_subTitleView.setText(spanned);
    }
 }

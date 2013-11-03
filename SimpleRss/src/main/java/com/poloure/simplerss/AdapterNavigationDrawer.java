@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-class AdapterNavDrawer extends BaseAdapter
+class AdapterNavigationDrawer extends BaseAdapter
 {
    private static final int[] NAV_ICONS       = {
          R.drawable.action_feeds, R.drawable.action_manage, R.drawable.action_settings,
@@ -23,7 +23,7 @@ class AdapterNavDrawer extends BaseAdapter
    private String[] m_tagArray    = new String[0];
    private int[]    m_unreadArray = EMPTY_INT_ARRAY;
 
-   AdapterNavDrawer(String[] navigationTitles, int twelveDp, LayoutInflater layoutInflater)
+   AdapterNavigationDrawer(String[] navigationTitles, int twelveDp, LayoutInflater layoutInflater)
    {
       m_navigationTitles = navigationTitles.clone();
       m_layoutInflater = layoutInflater;
