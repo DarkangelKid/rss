@@ -53,6 +53,8 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
    {
       int pageNumber = page[0];
       String tag = PagerAdapterFeeds.getTagsArray()[pageNumber];
+      String thumbnailDir = File.separatorChar + ServiceUpdate.THUMBNAIL_DIR;
+      String contentFile = File.separatorChar + ServiceUpdate.CONTENT;
 
       String[][] feedsIndex = Read.csvFile(Read.INDEX, m_applicationFolder, 'f', 't');
       if(0 == feedsIndex.length)
@@ -72,13 +74,14 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       {
          if(m_isAllTag || feedTags[j].contains(tag))
          {
-            String[][] content = Read.csvFile(
-                  feedNames[j] + File.separatorChar + ServiceUpdate.CONTENT, m_applicationFolder,
-                  't', 'd', 'l', 'i', 'w', 'h', 'p');
+            String[][] content = Read.csvFile(feedNames[j] + contentFile, m_applicationFolder, 't',
+                  'd', 'l', 'i', 'w', 'h', 'p');
+
             if(0 == content.length)
             {
                return null;
             }
+
             String[] titles = content[0];
             String[] descriptions = content[1];
             String[] links = content[2];
@@ -87,20 +90,22 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
             String[] heights = content[5];
             String[] times = content[6];
 
+            String feedThumbnailDir = feedNames[j] + thumbnailDir;
+
             int timesLength = times.length;
             for(int i = 0; i < timesLength; i++)
             {
                /* Edit the data. */
                if(null != images[i])
                {
-
-                  if(MIN_IMAGE_WIDTH < (null == widths[i] || 0 == widths[i].length()
+                  int imageWidth = null == widths[i] || 0 == widths[i].length()
                         ? 0
-                        : Integer.parseInt(widths[i])))
+                        : Integer.parseInt(widths[i]);
+
+                  if(MIN_IMAGE_WIDTH < imageWidth)
                   {
                      int lastSlash = images[i].lastIndexOf(File.separatorChar) + 1;
-                     images[i] = feedNames[j] + File.separatorChar + ServiceUpdate.THUMBNAIL_DIR +
-                           images[i].substring(lastSlash);
+                     images[i] = feedThumbnailDir + images[i].substring(lastSlash);
                   }
                   else
                   {
@@ -190,8 +195,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       {
          /* Get the time of the top item. */
          index = m_listView.getFirstVisiblePosition();
-         FeedItem topItem = (FeedItem) adapterTag.getItem(index);
-         timeBefore = topItem.m_itemTime;
+         timeBefore = adapterTag.m_times.get(index);
 
          View v = m_listView.getChildAt(0);
          top = null == v ? 0 : v.getTop();
@@ -218,8 +222,8 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
          int i = 0;
          while(i < timeListSize && 0 == index)
          {
-            Long time = timeList.get(i);
-            if(time == timeBefore)
+            boolean sameItem = timeBefore == timeList.get(i);
+            if(sameItem)
             {
                index = i + 1;
             }
