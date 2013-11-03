@@ -7,9 +7,11 @@ import android.widget.Adapter;
 import android.widget.ListView;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -136,8 +138,8 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
                      ? 0
                      : Integer.parseInt(heights[i]);
 
-               // Do not add duplicates. */
-               if(!adapterTag.m_items.contains(data))
+               /* Do not add duplicates. */
+               if(!adapterTag.m_times.contains(data.m_itemTime))
                {
                   map.put(data.m_itemTime, data);
                }
@@ -149,13 +151,12 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       adapterTag.m_isReadingItems = false;
 
       int mapSize = map.size();
-      Collection<FeedItem> collection = map.values();
+      Collection<FeedItem> itemCollection = map.values();
+      List<Long> longList = Arrays.asList(map.keySet().toArray(new Long[mapSize]));
 
-      Object[] items = collection.toArray(new FeedItem[mapSize]);
-
-      if(0 < items.length)
+      if(0 < itemCollection.size())
       {
-         publishProgress(items);
+         publishProgress(itemCollection, longList);
       }
       return null;
    }
@@ -171,11 +172,13 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
 
    @Override
    protected
-   void onProgressUpdate(Object[] values)
+   void onProgressUpdate(Object... values)
    {
 
       int top = 0;
       int index = 0;
+      long timeBefore = 0L;
+      AdapterTags adapterTag = (AdapterTags) m_listView.getAdapter();
 
       /* If these are the first items to be added to the list. */
       if(0 == m_listView.getCount())
@@ -185,28 +188,44 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       /* Find the exact mPosition in the list. */
       else
       {
+         /* Get the time of the top item. */
          index = m_listView.getFirstVisiblePosition();
+         FeedItem topItem = (FeedItem) adapterTag.getItem(index);
+         timeBefore = topItem.m_itemTime;
+
          View v = m_listView.getChildAt(0);
          top = null == v ? 0 : v.getTop();
-         if(0 == top)
+         if(0 != top)
          {
-            index++;
-         }
-         else if(0 > top && null != m_listView.getChildAt(1))
-         {
-            index++;
             View childAt = m_listView.getChildAt(1);
-            top = childAt.getTop();
+            if(null != childAt)
+            {
+               top = childAt.getTop();
+            }
          }
       }
 
-      AdapterTags adapterTag = (AdapterTags) m_listView.getAdapter();
-      adapterTag.prependArray(values);
+      adapterTag.prependArray(values[0], values[1]);
       adapterTag.notifyDataSetChanged();
 
       /* If this was the first time loading the tag data, jump to the latest unread item. */
       if(m_listView.isShown())
       {
+         /* We now need to find the position of the item with the time timeBefore. */
+         /* NOTE Do not change anything in itemList. */
+         List<Long> timeList = adapterTag.m_times;
+         int timeListSize = timeList.size();
+         int i = 0;
+         while(i < timeListSize && 0 == index)
+         {
+            Long time = timeList.get(i);
+            if(time == timeBefore)
+            {
+               index = i + 1;
+            }
+            i++;
+         }
+
          int listViewPaddingTop = m_listView.getPaddingTop();
          m_listView.setSelectionFromTop(index, top - listViewPaddingTop);
       }

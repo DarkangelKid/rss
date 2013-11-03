@@ -6,7 +6,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -17,6 +17,7 @@ class AdapterTags extends BaseAdapter
    static final Set<Long>      S_READ_ITEM_TIMES = Collections.synchronizedSet(
          new HashSet<Long>(0));
    final        List<FeedItem> m_items           = new ArrayList<FeedItem>(0);
+   final        List<Long>     m_times           = new ArrayList<Long>(0);
    private final Context m_context;
    boolean m_isReadingItems = true;
 
@@ -27,8 +28,10 @@ class AdapterTags extends BaseAdapter
 
    void prependArray(Object... items)
    {
-      List<FeedItem> feedItems = Arrays.asList((FeedItem[]) items);
-      m_items.addAll(0, feedItems);
+      Collection<FeedItem> longCollection = (Collection<FeedItem>) items[0];
+      List<Long> longList = (List<Long>) items[1];
+      m_items.addAll(0, longCollection);
+      m_times.addAll(0, longList);
    }
 
    @Override
