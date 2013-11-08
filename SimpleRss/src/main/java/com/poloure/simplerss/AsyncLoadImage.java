@@ -17,27 +17,27 @@ class AsyncLoadImage extends AsyncTask<Object, Void, Object[]>
    private final ImageView m_imageView;
    private       int       m_imageViewTag;
 
+   private
+   AsyncLoadImage(ImageView imageView)
+   {
+      m_imageView = imageView;
+   }
+
    static
    void newInstance(ImageView imageView, String imagePath, int imageViewTag, Context context,
-         boolean isRead)
+         boolean isRead, float opacity)
    {
       AsyncTask<Object, Void, Object[]> task = new AsyncLoadImage(imageView);
       if(Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT)
       {
 
          task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, imageViewTag, imagePath, context,
-               isRead);
+               isRead, opacity);
       }
       else
       {
-         task.execute(imageViewTag, imagePath, context, isRead);
+         task.execute(imageViewTag, imagePath, context, isRead, opacity);
       }
-   }
-
-   private
-   AsyncLoadImage(ImageView imageView)
-   {
-      m_imageView = imageView;
    }
 
    @Override
@@ -48,8 +48,7 @@ class AsyncLoadImage extends AsyncTask<Object, Void, Object[]>
       String imagePath = (String) params[1];
       Context context = (Context) params[2];
       boolean isRead = (Boolean) params[3];
-
-      float imageOpacity = isRead ? LayoutFeedItem.s_cardOpacity : 1.0F;
+      float imageOpacity = isRead ? (Float) params[4] : 1.0F;
 
       BitmapFactory.Options o = new BitmapFactory.Options();
       o.inSampleSize = 1;
@@ -74,10 +73,10 @@ class AsyncLoadImage extends AsyncTask<Object, Void, Object[]>
       }
       if(null != m_imageView && null != result[0])
       {
-         m_imageView.setImageBitmap((Bitmap) result[0]);
-         m_imageView.startAnimation((Animation) result[1]);
          if((Integer) m_imageView.getTag() == m_imageViewTag)
          {
+            m_imageView.setImageBitmap((Bitmap) result[0]);
+            m_imageView.startAnimation((Animation) result[1]);
             m_imageView.setVisibility(View.VISIBLE);
          }
       }

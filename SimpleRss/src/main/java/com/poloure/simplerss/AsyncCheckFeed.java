@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
 {
    /* Formats */
-   private static final String  INDEX_FORMAT       = "feed|%s|url|%s|tag|%s|";
+   private static final String  INDEX_FORMAT       = "|f|%s|u|%s|t|%s|";
    private static final Pattern ILLEGAL_FILE_CHARS = Pattern.compile("[/\\?%*|<>:]");
    private static final Pattern SPLIT_SPACE        = Pattern.compile(" ");
    private static final Pattern SPLIT_COMMA        = Pattern.compile(",");
@@ -112,6 +112,125 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       return new String[]{url, title, tags};
    }
 
+   private static
+   String getFeedTitle(String urlString)
+   {
+      String feedTitle = "";
+      try
+      {
+         XmlPullParser parser = createXmlParser(urlString);
+         int eventType;
+
+         do
+         {
+            parser.next();
+            eventType = parser.getEventType();
+            if(XmlPullParser.START_TAG == eventType)
+            {
+               String tag = parser.getName();
+               if("title".equals(tag))
+               {
+                  parser.next();
+                  feedTitle = parser.getText();
+               }
+            }
+         }
+         while(0 == feedTitle.length() && XmlPullParser.END_DOCUMENT != eventType);
+      }
+      catch(Exception ignored)
+      {
+      }
+      return feedTitle;
+   }
+
+   private static
+   boolean isValidFeed(String urlString)
+   {
+      boolean isValid = false;
+      try
+      {
+         XmlPullParser parser = createXmlParser(urlString);
+
+         parser.next();
+         int eventType = parser.getEventType();
+         if(XmlPullParser.START_TAG == eventType)
+         {
+            String tag = parser.getName();
+            if("rss".equals(tag) || "feed".equals(tag))
+            {
+               isValid = true;
+            }
+         }
+      }
+      catch(Exception ignored)
+      {
+      }
+      return isValid;
+   }
+
+   private static
+   XmlPullParser createXmlParser(String urlString) throws Exception
+   {
+      XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+      factory.setNamespaceAware(true);
+      XmlPullParser parser = factory.newPullParser();
+
+      URL url = new URL(urlString);
+      InputStream inputStream = url.openStream();
+      parser.setInput(inputStream, null);
+      return parser;
+   }
+
+   private static
+   String formatUserTagsInput(String userInputTags, String allTag)
+   {
+      Locale defaultLocale = Locale.getDefault();
+
+      String lowerTags = 0 == userInputTags.length()
+            ? allTag
+            : userInputTags.toLowerCase(defaultLocale);
+
+      /* + 10 in case the user did not put spaces after the commas. */
+      int tagInitialCapacity = lowerTags.length();
+      StringBuilder tagBuilder = new StringBuilder(tagInitialCapacity + 10);
+
+      String[] tags = SPLIT_COMMA.split(lowerTags);
+
+      /* For each tag. */
+      for(String tag : tags)
+      {
+         /* In case the tag is multiple words. */
+         String[] words = SPLIT_SPACE.split(tag);
+
+         /* The input tag is all lowercase. */
+         for(String word : words)
+         {
+            if(0 < word.length())
+            {
+               char firstLetter = word.charAt(0);
+               char firstLetterUpper = Character.toUpperCase(firstLetter);
+
+               String restOfWord = word.substring(1);
+
+               tagBuilder.append(firstLetterUpper);
+               tagBuilder.append(restOfWord);
+               tagBuilder.append(' ');
+            }
+         }
+         /* Delete the last space. */
+         int builderLength = tagBuilder.length();
+         tagBuilder.deleteCharAt(builderLength - 1);
+
+         tagBuilder.append(", ");
+      }
+
+      /* Delete the last comma and space. */
+      int builderLength = tagBuilder.length();
+      tagBuilder.setLength(builderLength - 2);
+
+      return tagBuilder.toString();
+   }
+
    @Override
    protected
    void onPostExecute(String[] result)
@@ -178,124 +297,5 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
          button.setEnabled(true);
          Toast.makeText(context, R.string.invalid_feed, Toast.LENGTH_SHORT).show();
       }
-   }
-
-   private static
-   String formatUserTagsInput(String userInputTags, String allTag)
-   {
-      Locale defaultLocale = Locale.getDefault();
-
-      String lowerTags = 0 == userInputTags.length()
-            ? allTag
-            : userInputTags.toLowerCase(defaultLocale);
-
-      /* + 10 in case the user did not put spaces after the commas. */
-      int tagInitialCapacity = lowerTags.length();
-      StringBuilder tagBuilder = new StringBuilder(tagInitialCapacity + 10);
-
-      String[] tags = SPLIT_COMMA.split(lowerTags);
-
-      /* For each tag. */
-      for(String tag : tags)
-      {
-         /* In case the tag is multiple words. */
-         String[] words = SPLIT_SPACE.split(tag);
-
-         /* The input tag is all lowercase. */
-         for(String word : words)
-         {
-            if(0 < word.length())
-            {
-               char firstLetter = word.charAt(0);
-               char firstLetterUpper = Character.toUpperCase(firstLetter);
-
-               String restOfWord = word.substring(1);
-
-               tagBuilder.append(firstLetterUpper);
-               tagBuilder.append(restOfWord);
-               tagBuilder.append(' ');
-            }
-         }
-         /* Delete the last space. */
-         int builderLength = tagBuilder.length();
-         tagBuilder.deleteCharAt(builderLength - 1);
-
-         tagBuilder.append(", ");
-      }
-
-      /* Delete the last comma and space. */
-      int builderLength = tagBuilder.length();
-      tagBuilder.setLength(builderLength - 2);
-
-      return tagBuilder.toString();
-   }
-
-   private static
-   boolean isValidFeed(String urlString)
-   {
-      boolean isValid = false;
-      try
-      {
-         XmlPullParser parser = createXmlParser(urlString);
-
-         parser.next();
-         int eventType = parser.getEventType();
-         if(XmlPullParser.START_TAG == eventType)
-         {
-            String tag = parser.getName();
-            if("rss".equals(tag) || "feed".equals(tag))
-            {
-               isValid = true;
-            }
-         }
-      }
-      catch(Exception ignored)
-      {
-      }
-      return isValid;
-   }
-
-   private static
-   XmlPullParser createXmlParser(String urlString) throws Exception
-   {
-      XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
-      factory.setNamespaceAware(true);
-      XmlPullParser parser = factory.newPullParser();
-
-      URL url = new URL(urlString);
-      InputStream inputStream = url.openStream();
-      parser.setInput(inputStream, null);
-      return parser;
-   }
-
-   private static
-   String getFeedTitle(String urlString)
-   {
-      String feedTitle = "";
-      try
-      {
-         XmlPullParser parser = createXmlParser(urlString);
-         int eventType;
-
-         do
-         {
-            parser.next();
-            eventType = parser.getEventType();
-            if(XmlPullParser.START_TAG == eventType)
-            {
-               String tag = parser.getName();
-               if("title".equals(tag))
-               {
-                  parser.next();
-                  feedTitle = parser.getText();
-               }
-            }
-         }
-         while(0 == feedTitle.length() && XmlPullParser.END_DOCUMENT != eventType);
-      }
-      catch(Exception ignored)
-      {
-      }
-      return feedTitle;
    }
 }

@@ -39,7 +39,8 @@ class ListFragmentTag extends ListFragment
       String applicationFolder = FeedsActivity.getApplicationFolder(activity);
 
       ListView navigationList = (ListView) activity.findViewById(R.id.navigation_drawer);
-      AdapterNavigationDrawer adapterNavigationDrawer = (AdapterNavigationDrawer) navigationList.getAdapter();
+      AdapterNavigationDrawer adapterNavigationDrawer
+            = (AdapterNavigationDrawer) navigationList.getAdapter();
 
       ListAdapter listAdapter = new AdapterTags(activity);
       setListAdapter(listAdapter);
@@ -51,8 +52,7 @@ class ListFragmentTag extends ListFragment
       int listViewTopPadding = listView.getPaddingTop();
 
       AbsListView.OnScrollListener scrollListener = new OnScrollFeedListener(
-            adapterNavigationDrawer,
-            actionBar, applicationFolder, position, listViewTopPadding);
+            adapterNavigationDrawer, actionBar, applicationFolder, position, listViewTopPadding);
 
       listView.setOnScrollListener(scrollListener);
 

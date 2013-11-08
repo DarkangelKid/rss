@@ -59,7 +59,7 @@ class ListFragmentManageFeeds extends ListFragment
 
       if(MODE_ADD != position)
       {
-         String[][] content = Read.indexFile(applicationFolder);
+         String[][] content = Read.csvFile(Read.INDEX, applicationFolder, 'f', 'u', 't');
          oldFeedTitle = content[0][position];
          url = content[1][position];
          tag = content[2][position];

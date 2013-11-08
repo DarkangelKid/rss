@@ -13,17 +13,17 @@ import android.widget.TextView;
 
 class LayoutFeedItem extends RelativeLayout
 {
-   private static final float DEFAULT_CARD_OPACITY = 0.66F;
-   static         float     s_cardOpacity;
-   static         int       s_titleRead;
-   static         int       s_notTitleRead;
-   private static int       s_titleUnread;
-   private static int       s_descriptionUnread;
-   private static int       s_linkUnread;
-   private final  TextView  m_titleView;
-   private final  TextView  m_urlView;
-   private final  TextView  m_descriptionView;
-   private final  ImageView m_imageView;
+   private static final float DEFAULT_CARD_OPACITY     = 0.66F;
+   private static final int   COLOR_TITLE_UNREAD       = Color.argb(255, 0, 0, 0);
+   private static final int   COLOR_DESCRIPTION_UNREAD = Color.argb(205, 0, 0, 0);
+   private static final int   COLOR_LINK_UNREAD        = Color.argb(128, 0, 0, 0);
+   static float s_opacity = DEFAULT_CARD_OPACITY;
+   static        int       s_titleRead;
+   static        int       s_notTitleRead;
+   private final TextView  m_titleView;
+   private final TextView  m_urlView;
+   private final TextView  m_descriptionView;
+   private final ImageView m_imageView;
 
    LayoutFeedItem(Context context)
    {
@@ -45,26 +45,25 @@ class LayoutFeedItem extends RelativeLayout
             matchParent);
       setLayoutParams(layoutParams);
 
-      /* Get the opacity value from file. */
-      Resources resources = getResources();
-      String applicationFolder = FeedsActivity.getApplicationFolder(context);
-      String[] settingTitles = resources.getStringArray(R.array.settings_interface_titles);
-      String opacityPath = FeedsActivity.SETTINGS_DIR + settingTitles[1] + ".txt";
-      String[] opacityFile = Read.file(opacityPath, applicationFolder);
-
-      boolean valueEmpty = 0 == opacityFile.length || 0 == opacityFile[0].length();
-      s_cardOpacity = valueEmpty ? DEFAULT_CARD_OPACITY : Float.parseFloat(opacityFile[0]) / 100.0F;
-
-      /* Get the colors for the ListView item texts. */
-      s_titleRead = Color.argb(Math.round(255 * s_cardOpacity), 0, 0, 0);
-      s_notTitleRead = Color.argb(Math.round(190 * s_cardOpacity), 0, 0, 0);
-
-      s_titleUnread = Color.argb(Math.round(255), 0, 0, 0);
-      s_linkUnread = Color.argb(Math.round(128), 0, 0, 0);
-      s_descriptionUnread = Color.argb(Math.round(205), 0, 0, 0);
+      s_titleRead = Color.argb(Math.round(255.0F * DEFAULT_CARD_OPACITY), 0, 0, 0);
+      s_notTitleRead = Color.argb(Math.round(190.0F * DEFAULT_CARD_OPACITY), 0, 0, 0);
 
       /* Set the background color of the ListView items. */
       setBackgroundColor(Color.WHITE);
+   }
+
+   static
+   void setReadItemOpacity(float opacity)
+   {
+      s_opacity = opacity;
+      s_titleRead = Color.argb(Math.round(255.0F * opacity), 0, 0, 0);
+      s_notTitleRead = Color.argb(Math.round(190.0F * opacity), 0, 0, 0);
+   }
+
+   static
+   float getReadItemOpacity()
+   {
+      return s_opacity;
    }
 
    void showItem(FeedItem feedItem, int position, boolean isRead)
@@ -102,12 +101,12 @@ class LayoutFeedItem extends RelativeLayout
       }
 
       /* Set the text colors based on whether the item has been read or not. */
-      m_titleView.setTextColor(isRead ? s_titleRead : s_titleUnread);
-      m_urlView.setTextColor(isRead ? s_notTitleRead : s_linkUnread);
+      m_titleView.setTextColor(isRead ? s_titleRead : COLOR_TITLE_UNREAD);
+      m_urlView.setTextColor(isRead ? s_notTitleRead : COLOR_LINK_UNREAD);
 
       if(null != m_descriptionView)
       {
-         m_descriptionView.setTextColor(isRead ? s_notTitleRead : s_descriptionUnread);
+         m_descriptionView.setTextColor(isRead ? s_notTitleRead : COLOR_DESCRIPTION_UNREAD);
       }
    }
 
@@ -118,7 +117,7 @@ class LayoutFeedItem extends RelativeLayout
       Resources resources = getResources();
       DisplayMetrics displayMetrics = resources.getDisplayMetrics();
 
-      String imagePath = FeedsActivity.getApplicationFolder(context) + feedItem.m_itemImage;
+      String imagePath = FeedsActivity.getApplicationFolder(context) + feedItem.m_imagePath;
       int imageWidth = feedItem.m_imageWidth;
       int imageHeight = feedItem.m_imageHeight;
       int screenWidth = displayMetrics.widthPixels;
@@ -129,6 +128,6 @@ class LayoutFeedItem extends RelativeLayout
       imageView.setLayoutParams(lp);
       imageView.setTag(position);
 
-      AsyncLoadImage.newInstance(imageView, imagePath, position, context, isRead);
+      AsyncLoadImage.newInstance(imageView, imagePath, position, context, isRead, s_opacity);
    }
 }

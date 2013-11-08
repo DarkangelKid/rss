@@ -51,7 +51,7 @@ class AsyncManageFeedsRefresh extends AsyncTask<String, CharSequence[], Animatio
       String appFolder = applicationFolder[0];
 
       /* Read the ALL_TAG m_imageViewTag file for names, urls, and tags. */
-      String[][] feedsIndex = Read.indexFile(appFolder);
+      String[][] feedsIndex = Read.csvFile(Read.INDEX, appFolder, 'f', 'u', 't');
       String[] feedNames = feedsIndex[0];
       String[] feedUrls = feedsIndex[1];
       String[] feedTags = feedsIndex[2];

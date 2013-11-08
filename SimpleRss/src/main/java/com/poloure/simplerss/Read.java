@@ -2,6 +2,8 @@ package com.poloure.simplerss;
 
 import android.os.Environment;
 
+import org.apache.http.util.ByteArrayBuffer;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -13,22 +15,22 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 class Read
 {
-   static final         String INDEX          = "index.txt";
-   private static final char   ITEM_SEPARATOR = '|';
+   static final         String  INDEX             = "index.txt";
+   private static final Pattern SPLIT_NEWLINE     = Pattern.compile("\n");
+   private static final char    ITEM_SEPARATOR    = '|';
+   private static final int     COUNT_BUFFER_SIZE = 8096;
+   private static final int     FILE_BUFFER_SIZE  = 8096;
 
    /* All functions in here must check that the media is available before
     * continuing. */
-
-   static
-   String[][] indexFile(String applicationFolder)
-   {
-      return csvFile(INDEX, applicationFolder, 'f', 'u', 't');
-   }
 
    static
    String[][] csvFile(String fileName, String applicationFolder, char... type)
@@ -39,44 +41,55 @@ class Read
       }
 
       String[] lines = file(fileName, applicationFolder);
-      if(0 == lines.length)
+      int numberOfLines = lines.length;
+
+      if(0 == numberOfLines)
       {
          return new String[type.length][0];
       }
 
-      String[][] types = new String[type.length][lines.length];
+      String[][] types = new String[type.length][numberOfLines];
+      String typeString = new String(type);
 
-      int linesLength = lines.length;
-      for(int j = 0; j < linesLength; j++)
+      for(int j = 0; j < numberOfLines; j++)
       {
-         int offset = 0;
          String line = lines[j];
-         int next;
 
-         while(-1 != (next = line.indexOf(ITEM_SEPARATOR, offset)))
+         int offset = 0;
+         int nextSeparator;
+
+         do
          {
-            if(offset == line.length())
+            offset = line.indexOf(ITEM_SEPARATOR, offset) + 1;
+            nextSeparator = line.indexOf(ITEM_SEPARATOR, offset);
+            if(-1 == nextSeparator)
             {
                break;
             }
 
-            char ch = line.charAt(offset);
-            offset = next + 1;
+            char firstChar = line.charAt(offset);
+            int indexOfCh = typeString.indexOf(firstChar);
 
-            int typeLength = type.length;
-            for(int i = 0; i < typeLength; i++)
+            if(-1 != indexOfCh)
             {
-               if(ch == type[i])
-               {
-                  next = line.indexOf(ITEM_SEPARATOR, offset);
-                  types[i][j] = line.substring(offset, next);
-                  break;
-               }
+               offset = nextSeparator + 1;
+               nextSeparator = line.indexOf(ITEM_SEPARATOR, offset);
+               types[indexOfCh][j] = line.substring(offset, nextSeparator);
             }
-            offset = line.indexOf(ITEM_SEPARATOR, offset) + 1;
          }
+         while(-1 != nextSeparator);
+
       }
       return types;
+   }
+
+   static
+   boolean isUnmounted()
+   {
+      /* Check to see if we can Write to the media. */
+      String mounted = Environment.MEDIA_MOUNTED;
+      String externalStorageState = Environment.getExternalStorageState();
+      return !mounted.equals(externalStorageState);
    }
 
    /* This function is now safe. It will return a zero length array on error. */
@@ -90,37 +103,37 @@ class Read
 
       String filePath = applicationFolder + fileName;
 
-      /* Get the number of lines. */
-      int count = count(fileName, applicationFolder);
-
-      /* If the file is empty, return a zero length array. */
-      if(0 == count)
-      {
-         return new String[0];
-      }
-
-      /* Use the count to allocate memory for the array. */
-      String[] lines = new String[count];
+      String[] lines;
 
       /* Begin reading the file to the String array. */
       try
       {
-         BufferedReader in = null;
+         FileInputStream f = null;
          try
          {
-            in = reader(filePath);
+            ByteArrayBuffer builder = new ByteArrayBuffer(FILE_BUFFER_SIZE);
+            f = new FileInputStream(filePath);
+            FileChannel channel = f.getChannel();
+            MappedByteBuffer mb = channel.map(FileChannel.MapMode.READ_ONLY, 0L, channel.size());
+            byte[] bufferArray = new byte[FILE_BUFFER_SIZE];
 
-            int linesLength = lines.length;
-            for(int i = 0; i < linesLength; i++)
+            while(mb.hasRemaining())
             {
-               lines[i] = in.readLine();
+               int nGet = Math.min(mb.remaining(), FILE_BUFFER_SIZE);
+               mb.get(bufferArray, 0, nGet);
+               builder.append(bufferArray, 0, nGet);
             }
+
+            byte[] bytes = builder.toByteArray();
+            CharSequence fullFile = new String(bytes);
+
+            lines = SPLIT_NEWLINE.split(fullFile);
          }
          finally
          {
-            if(null != in)
+            if(null != f)
             {
-               in.close();
+               f.close();
             }
          }
       }
@@ -166,7 +179,7 @@ class Read
          InputStream is = new BufferedInputStream(new FileInputStream(filePath));
          try
          {
-            byte[] c = new byte[1024];
+            byte[] c = new byte[COUNT_BUFFER_SIZE];
             int readChars = 0;
             boolean endsWithoutNewLine = false;
             while(-1 != (readChars = is.read(c)))
@@ -198,15 +211,6 @@ class Read
       }
 
       return count;
-   }
-
-   static
-   boolean isUnmounted()
-   {
-      /* Check to see if we can Write to the media. */
-      String mounted = Environment.MEDIA_MOUNTED;
-      String externalStorageState = Environment.getExternalStorageState();
-      return !mounted.equals(externalStorageState);
    }
 
    static

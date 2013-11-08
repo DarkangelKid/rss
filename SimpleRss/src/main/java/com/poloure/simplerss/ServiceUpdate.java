@@ -46,9 +46,11 @@ class ServiceUpdate extends IntentService
    /* Folders */
    static final         String           THUMBNAIL_DIR               = "thumbnails" +
          File.separatorChar;
+   private static final char             ITEM_SEPARATOR              = '|';
    /* Parser saves */
    private static final String           INDEX_IMAGE                 = "image|";
    private static final String           INDEX_TIME                  = "pubDate|";
+   private static final String           INDEX_LINK                  = "link|";
    private static final String           INDEX_HEIGHT                = "height|";
    private static final String           INDEX_WIDTH                 = "width|";
    private static final SimpleDateFormat RSS_DATE                    = new SimpleDateFormat(
@@ -62,7 +64,6 @@ class ServiceUpdate extends IntentService
    private static final int              FEED_ITEM_INITIAL_CAPACITY  = 200;
    private static final int              DEFAULT_MAX_HISTORY         = 10000;
    private static final double           AMOUNT_OF_SCREEN_IMAGE_USES = 0.944;
-   private static final char             ITEM_SEPARATOR              = '|';
 
    public
    ServiceUpdate()
@@ -86,7 +87,7 @@ class ServiceUpdate extends IntentService
       int tagSize = tagSet.size();
       String tag = tagSet.toArray(new String[tagSize])[page];
 
-      String[][] content = Read.indexFile(applicationFolder);
+      String[][] content = Read.csvFile(Read.INDEX, applicationFolder, 'f', 'u', 't');
       String[] names = content[0];
       String[] urls = content[1];
       String[] tags = content[2];
@@ -278,6 +279,7 @@ class ServiceUpdate extends IntentService
             if(5 < index)
             {
                feedItemBuilder.setLength(0);
+               feedItemBuilder.append(ITEM_SEPARATOR);
                timeLong = 0L;
             }
             else if(0 == index)
@@ -288,7 +290,7 @@ class ServiceUpdate extends IntentService
                   parser.next();
                   link = parser.getText();
                }
-               feedItemBuilder.append("link|");
+               feedItemBuilder.append(INDEX_LINK);
                feedItemBuilder.append(link);
                feedItemBuilder.append(ITEM_SEPARATOR);
             }

@@ -85,7 +85,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
             String[] titles = content[0];
             String[] descriptions = content[1];
             String[] links = content[2];
-            String[] images = content[3];
+            String[] imageUrls = content[3];
             String[] widths = content[4];
             String[] heights = content[5];
             String[] times = content[6];
@@ -95,23 +95,29 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
             int timesLength = times.length;
             for(int i = 0; i < timesLength; i++)
             {
-               /* Edit the data. */
-               if(null != images[i])
-               {
-                  int imageWidth = null == widths[i] || 0 == widths[i].length()
-                        ? 0
-                        : Integer.parseInt(widths[i]);
+               FeedItem data = new FeedItem();
 
-                  if(MIN_IMAGE_WIDTH < imageWidth)
+               /* Edit the data. */
+               if(null != imageUrls[i])
+               {
+                  data.m_imageWidth = null == widths[i] || 0 == widths[i].length()
+                        ? 0
+                        : fastParseInt(widths[i]);
+
+                  /* If the image is large enough so that we should care about it. */
+                  if(MIN_IMAGE_WIDTH < data.m_imageWidth)
                   {
-                     int lastSlash = images[i].lastIndexOf(File.separatorChar) + 1;
-                     images[i] = feedThumbnailDir + images[i].substring(lastSlash);
+                     int lastSlash = imageUrls[i].lastIndexOf(File.separatorChar) + 1;
+                     data.m_imagePath = feedThumbnailDir + imageUrls[i].substring(lastSlash);
+                     data.m_imageHeight = null == heights[i] || 0 == heights[i].length()
+                           ? 0
+                           : fastParseInt(heights[i]);
                   }
                   else
                   {
-                     images[i] = "";
-                     widths[i] = "";
-                     heights[i] = "";
+                     data.m_imagePath = "";
+                     data.m_imageWidth = 0;
+                     data.m_imageHeight = 0;
                   }
                }
 
@@ -123,30 +129,25 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
                {
                   descriptions[i] = descriptions[i].substring(0, MAX_DESCRIPTION_LENGTH);
                }
-               if(null == titles[i])
-               {
-                  titles[i] = "";
-               }
 
-               FeedItem data = new FeedItem();
-               data.m_itemTitle = titles[i];
+               data.m_itemTitle = null == titles[i] ? "" : titles[i];
                data.m_itemUrl = links[i];
                data.m_itemDescription = descriptions[i];
-               data.m_itemImage = images[i];
-               data.m_itemTime = Long.parseLong(times[i]);
 
-               data.m_imageWidth = null == widths[i] || 0 == widths[i].length()
-                     ? 0
-                     : Integer.parseInt(widths[i]);
+               /* This is the time and it is never larger than MAX_INT. */
+               data.m_itemTime = fastParseLong(times[i]);
 
-               data.m_imageHeight = null == heights[i] || 0 == heights[i].length()
-                     ? 0
-                     : Integer.parseInt(heights[i]);
+               /* Do not add duplicates, do not add read items if opacity == 0 */
+               boolean notInAdapter = !adapterTag.m_times.contains(data.m_itemTime);
+               boolean isUnread = !AdapterTags.READ_ITEM_TIMES.contains(data.m_itemTime);
+               boolean isOpaque = 0.0F != LayoutFeedItem.getReadItemOpacity();
 
-               /* Do not add duplicates. */
-               if(!adapterTag.m_times.contains(data.m_itemTime))
+               if(notInAdapter)
                {
-                  map.put(data.m_itemTime, data);
+                  if(isUnread || isOpaque)
+                  {
+                     map.put(data.m_itemTime, data);
+                  }
                }
             }
          }
@@ -164,6 +165,32 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
          publishProgress(itemCollection, longList);
       }
       return null;
+   }
+
+   public static
+   long fastParseLong(String s)
+   {
+      char[] chars = s.toCharArray();
+      long num = 0;
+
+      for(int i : chars)
+      {
+         num = num * 10 + i - 48;
+      }
+      return num;
+   }
+
+   public static
+   int fastParseInt(String s)
+   {
+      char[] chars = s.toCharArray();
+      int num = 0;
+
+      for(int i : chars)
+      {
+         num = num * 10 + i - 48;
+      }
+      return num;
    }
 
    @Override

@@ -78,7 +78,7 @@ class AsyncRefreshNavigationAdapter extends AsyncTask<String, Void, int[]>
                String longFile = indexNames[j] + append;
                Set<Long> longSet = Read.longSet(longFile, appFolder);
 
-               longSet.removeAll(AdapterTags.S_READ_ITEM_TIMES);
+               longSet.removeAll(AdapterTags.READ_ITEM_TIMES);
                unreadCounts[i] += longSet.size();
             }
          }

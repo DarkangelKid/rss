@@ -61,33 +61,6 @@ class FeedsActivity extends ActionBarActivity
    private String                m_applicationFolder;
    private Resources             m_resources;
 
-   static
-   void showAddFilterDialog(Context context, FragmentManager fragmentManager)
-   {
-      LayoutInflater inflater = LayoutInflater.from(context);
-      View addFilterLayout = inflater.inflate(R.layout.add_filter_dialog, null);
-
-      String cancelText = context.getString(R.string.cancel_dialog);
-      String addText = context.getString(R.string.add_dialog);
-      String addFilterText = context.getString(R.string.add_filter);
-
-      String applicationFolder = getApplicationFolder(context);
-
-      String fragmentTag = "android:switcher:" + FragmentManage.VIEW_PAGER_ID + ':' + 2;
-      ListFragment listFragment = (ListFragment) fragmentManager.findFragmentByTag(fragmentTag);
-      BaseAdapter adapter = (BaseAdapter) listFragment.getListAdapter();
-
-      DialogInterface.OnClickListener onClickAdd = new OnClickFilterDialogAdd(addFilterLayout,
-            adapter, applicationFolder);
-
-      AlertDialog.Builder build = new AlertDialog.Builder(context);
-      build.setTitle(addFilterText);
-      build.setView(addFilterLayout);
-      build.setNegativeButton(cancelText, null);
-      build.setPositiveButton(addText, onClickAdd);
-      build.show();
-   }
-
    @Override
    public
    void onCreate(Bundle savedInstanceState)
@@ -107,10 +80,10 @@ class FeedsActivity extends ActionBarActivity
       int twelveDp = Math.round(displayMetrics.density * 12);
 
       /* Load the read items to the AdapterTag class. */
-      if(0 == AdapterTags.S_READ_ITEM_TIMES.size())
+      if(0 == AdapterTags.READ_ITEM_TIMES.size())
       {
          Set<Long> set = Read.longSet(READ_ITEMS, m_applicationFolder);
-         AdapterTags.S_READ_ITEM_TIMES.addAll(set);
+         AdapterTags.READ_ITEM_TIMES.addAll(set);
       }
 
       /* Get the navigation drawer titles. */
@@ -159,22 +132,6 @@ class FeedsActivity extends ActionBarActivity
       }
    }
 
-   static
-   String getApplicationFolder(Context context)
-   {
-      /* Check the media state for the desirable state. */
-      String state = Environment.getExternalStorageState();
-
-      String mounted = Environment.MEDIA_MOUNTED;
-      if(!mounted.equals(state))
-      {
-         return null;
-      }
-
-      File externalFilesDir = context.getExternalFilesDir(null);
-      return externalFilesDir.getAbsolutePath() + File.separatorChar;
-   }
-
    /* This is so the icon and text in the actionbar are selected. */
    @Override
    public
@@ -192,7 +149,20 @@ class FeedsActivity extends ActionBarActivity
       /* Set the alarm service to go of starting now. */
       setServiceIntent(ALARM_SERVICE_START);
 
-      Write.longSet(READ_ITEMS, AdapterTags.S_READ_ITEM_TIMES, m_applicationFolder);
+      Write.longSet(READ_ITEMS, AdapterTags.READ_ITEM_TIMES, m_applicationFolder);
+   }
+
+   @Override
+   public
+   void onBackPressed()
+   {
+      super.onBackPressed();
+
+      String feeds = m_resources.getStringArray(R.array.navigation_titles)[0];
+      m_actionBar.setTitle(feeds);
+
+      m_drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+      m_drawerToggle.setDrawerIndicatorEnabled(true);
    }
 
    private
@@ -250,17 +220,20 @@ class FeedsActivity extends ActionBarActivity
       return intent;
    }
 
-   @Override
-   public
-   void onBackPressed()
+   static
+   String getApplicationFolder(Context context)
    {
-      super.onBackPressed();
+      /* Check the media state for the desirable state. */
+      String state = Environment.getExternalStorageState();
 
-      String feeds = m_resources.getStringArray(R.array.navigation_titles)[0];
-      m_actionBar.setTitle(feeds);
+      String mounted = Environment.MEDIA_MOUNTED;
+      if(!mounted.equals(state))
+      {
+         return null;
+      }
 
-      m_drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-      m_drawerToggle.setDrawerIndicatorEnabled(true);
+      File externalFilesDir = context.getExternalFilesDir(null);
+      return externalFilesDir.getAbsolutePath() + File.separatorChar;
    }
 
    @Override
@@ -268,6 +241,7 @@ class FeedsActivity extends ActionBarActivity
    void onStart()
    {
       super.onStart();
+
       /* Stop the alarm service and reset the time to 0. */
       setServiceIntent(ALARM_SERVICE_STOP);
    }
@@ -311,19 +285,21 @@ class FeedsActivity extends ActionBarActivity
       return true;
    }
 
-   /* Changes the ManageFeedsRefresh menu item to an animation if m_mode = true. */
-   static
-   void setRefreshingIcon(boolean isSpinning, MenuItem item)
+   private
+   boolean isServiceRunning()
    {
-      /* Change it depending on the m_mode. */
-      if(isSpinning)
+      ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+      for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(
+            Integer.MAX_VALUE))
       {
-         MenuItemCompat.setActionView(item, R.layout.progress_circle);
+         String className = service.service.getClassName();
+         String serviceName = ServiceUpdate.class.getName();
+         if(serviceName.equals(className))
+         {
+            return true;
+         }
       }
-      else
-      {
-         MenuItemCompat.setActionView(item, null);
-      }
+      return false;
    }
 
    @Override
@@ -387,37 +363,6 @@ class FeedsActivity extends ActionBarActivity
       return true;
    }
 
-   static
-   void gotoLatestUnread(ListView listView)
-   {
-      Adapter listAdapter = listView.getAdapter();
-
-      int itemCount = listAdapter.getCount() - 1;
-      for(int i = itemCount; 0 <= i; i--)
-      {
-         FeedItem feedItem = (FeedItem) listAdapter.getItem(i);
-         if(!AdapterTags.S_READ_ITEM_TIMES.contains(feedItem.m_itemTime))
-         {
-            listView.setSelection(i);
-            break;
-         }
-      }
-
-      if(!listView.isShown() || 0 == itemCount)
-      {
-         Animation animation = new AlphaAnimation(0.0F, 1.0F);
-         animation.setDuration(TAGS_LIST_VIEW_FADE_IN_TIME);
-         listView.setAnimation(animation);
-         listView.setVisibility(View.VISIBLE);
-      }
-   }
-
-   String getNavigationTitle()
-   {
-      CharSequence title = m_actionBar.getTitle();
-      return title.toString();
-   }
-
    /* Updates and refreshes the tags with any new content. */
    private
    void refreshFeeds(MenuItem menuItem)
@@ -436,21 +381,77 @@ class FeedsActivity extends ActionBarActivity
       startService(intent);
    }
 
-   private
-   boolean isServiceRunning()
+   String getNavigationTitle()
    {
-      ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-      for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(
-            Integer.MAX_VALUE))
+      CharSequence title = m_actionBar.getTitle();
+      return title.toString();
+   }
+
+   static
+   void gotoLatestUnread(ListView listView)
+   {
+      Adapter listAdapter = listView.getAdapter();
+
+      int itemCount = listAdapter.getCount() - 1;
+      for(int i = itemCount; 0 <= i; i--)
       {
-         String className = service.service.getClassName();
-         String serviceName = ServiceUpdate.class.getName();
-         if(serviceName.equals(className))
+         FeedItem feedItem = (FeedItem) listAdapter.getItem(i);
+         if(!AdapterTags.READ_ITEM_TIMES.contains(feedItem.m_itemTime))
          {
-            return true;
+            listView.setSelection(i);
+            break;
          }
       }
-      return false;
+
+      if(!listView.isShown() || 0 == itemCount)
+      {
+         Animation animation = new AlphaAnimation(0.0F, 1.0F);
+         animation.setDuration(TAGS_LIST_VIEW_FADE_IN_TIME);
+         listView.setAnimation(animation);
+         listView.setVisibility(View.VISIBLE);
+      }
+   }
+
+   static
+   void showAddFilterDialog(Context context, FragmentManager fragmentManager)
+   {
+      LayoutInflater inflater = LayoutInflater.from(context);
+      View addFilterLayout = inflater.inflate(R.layout.add_filter_dialog, null);
+
+      String cancelText = context.getString(R.string.cancel_dialog);
+      String addText = context.getString(R.string.add_dialog);
+      String addFilterText = context.getString(R.string.add_filter);
+
+      String applicationFolder = getApplicationFolder(context);
+
+      String fragmentTag = "android:switcher:" + FragmentManage.VIEW_PAGER_ID + ':' + 2;
+      ListFragment listFragment = (ListFragment) fragmentManager.findFragmentByTag(fragmentTag);
+      BaseAdapter adapter = (BaseAdapter) listFragment.getListAdapter();
+
+      DialogInterface.OnClickListener onClickAdd = new OnClickFilterDialogAdd(addFilterLayout,
+            adapter, applicationFolder);
+
+      AlertDialog.Builder build = new AlertDialog.Builder(context);
+      build.setTitle(addFilterText);
+      build.setView(addFilterLayout);
+      build.setNegativeButton(cancelText, null);
+      build.setPositiveButton(addText, onClickAdd);
+      build.show();
+   }
+
+   /* Changes the ManageFeedsRefresh menu item to an animation. */
+   static
+   void setRefreshingIcon(boolean isSpinning, MenuItem item)
+   {
+      /* Change it depending on the m_mode. */
+      if(isSpinning)
+      {
+         MenuItemCompat.setActionView(item, R.layout.progress_circle);
+      }
+      else
+      {
+         MenuItemCompat.setActionView(item, null);
+      }
    }
 
    void setNavigationTitle(CharSequence title, boolean saveTitle)
