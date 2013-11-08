@@ -91,7 +91,7 @@ class AdapterNavigationDrawer extends BaseAdapter
          NavigationTagItem holder2;
          if(null == view)
          {
-            view = m_layoutInflater.inflate(R.layout.navigation_drawer_group_item, parent, false);
+            view = m_layoutInflater.inflate(R.layout.navigation_drawer_tag_item, parent, false);
             holder2 = new NavigationTagItem();
             holder2.m_tagTitle = (TextView) view.findViewById(R.id.tag_title);
             holder2.m_unreadCountView = (TextView) view.findViewById(R.id.unread_item);

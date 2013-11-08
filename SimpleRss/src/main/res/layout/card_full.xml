@@ -14,7 +14,7 @@
       android:paddingStart="8dp"
       android:paddingTop="6dp"
       android:text="@+id/title"
-      android:textAppearance="@android:style/TextAppearance.Medium"/>
+      android:textSize="16sp"/>
 
    <TextView
       android:id="@+id/url"
@@ -29,7 +29,7 @@
       android:paddingRight="8dp"
       android:paddingStart="8dp"
       android:text="@+id/url"
-      android:textAppearance="@android:style/TextAppearance.Small"/>
+      android:textSize="12sp"/>
 
    <ImageView
       android:id="@+id/image"
@@ -53,7 +53,7 @@
       android:paddingStart="8dp"
       android:paddingTop="2dp"
       android:text="@+id/description"
-      android:textAppearance="@android:style/TextAppearance.Small"/>
+      android:textSize="14sp"/>
 
    <ImageView
       android:id="@+id/white_left_shadow"

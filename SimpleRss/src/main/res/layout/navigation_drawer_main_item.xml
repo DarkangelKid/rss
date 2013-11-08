@@ -11,5 +11,5 @@
    android:paddingRight="48dp"
    android:paddingStart="8dp"
    android:text="@+id/menu_item"
-   android:textAppearance="@android:style/TextAppearance.Large"
+   android:textAppearance="@android:style/TextAppearance.Medium"
    android:textColor="#ffffff"/>
