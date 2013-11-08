@@ -21,7 +21,6 @@ class LayoutFeedItem extends RelativeLayout
    static        int       s_titleRead;
    static        int       s_notTitleRead;
    private final int       m_eightDp;
-   private final int       m_fourDp;
    private final TextView  m_titleView;
    private final TextView  m_urlView;
    private final TextView  m_descriptionView;
@@ -59,7 +58,6 @@ class LayoutFeedItem extends RelativeLayout
       DisplayMetrics displayMetrics = resources.getDisplayMetrics();
       float density = displayMetrics.density;
       m_eightDp = Math.round(density * 8.0F);
-      m_fourDp = m_eightDp / 2;
 
       /* Set the background color of the ListView items. */
       setBackgroundColor(Color.WHITE);
@@ -125,7 +123,7 @@ class LayoutFeedItem extends RelativeLayout
 
       if(!isImage && isDescription)
       {
-         m_descriptionView.setPadding(m_eightDp, m_fourDp / 2, m_eightDp, m_eightDp);
+         m_descriptionView.setPadding(m_eightDp, m_eightDp / 4, m_eightDp, m_eightDp);
       }
 
       /* Set the text colors based on whether the item has been read or not. */

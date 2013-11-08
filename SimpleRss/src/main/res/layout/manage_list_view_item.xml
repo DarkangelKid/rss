@@ -32,10 +32,47 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"/>
 
-   <include
-      layout="@layout/top_shadow"
-      android:layout_below="@+id/second_text"/>
+   <ImageView
+      android:id="@+id/white_left_shadow"
+      android:layout_width="3px"
+      android:layout_height="4px"
+      android:layout_alignParentLeft="true"
+      android:layout_below="@+id/second_text"
+      android:src="@drawable/left_white"/>
 
-   <include layout="@layout/shadow"/>
+   <ImageView
+      android:id="@+id/white_right_shadow"
+      android:layout_width="3px"
+      android:layout_height="4px"
+      android:layout_alignParentRight="true"
+      android:layout_below="@+id/second_text"
+      android:src="@drawable/right_white"/>
+
+   <ImageView
+      android:id="@+id/grey_left_shadow"
+      android:layout_width="3px"
+      android:layout_height="4px"
+      android:layout_alignParentLeft="true"
+      android:layout_below="@+id/white_left_shadow"
+      android:src="@drawable/left_grey"/>
+
+   <ImageView
+      android:id="@+id/grey_centre_shadow"
+      android:layout_width="match_parent"
+      android:layout_height="4px"
+      android:layout_below="@+id/white_left_shadow"
+      android:layout_toLeftOf="@+id/grey_right_shadow"
+      android:layout_toRightOf="@+id/grey_left_shadow"
+      android:scaleType="fitXY"
+      android:src="@drawable/bottom_grey"/>
+
+
+   <ImageView
+      android:id="@+id/grey_right_shadow"
+      android:layout_width="3px"
+      android:layout_height="4px"
+      android:layout_alignParentRight="true"
+      android:layout_below="@+id/white_right_shadow"
+      android:src="@drawable/right_grey"/>
 
 </merge>
