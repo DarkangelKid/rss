@@ -36,7 +36,6 @@ class OnPageChangeTags extends SimpleOnPageChangeListener
       /* Update the ActionBar subtitle. */
       String unread = (String) m_navigationAdapter.getItem(position);
       m_actionBar.setSubtitle("Unread: " + unread);
-
    }
 
    @Override
