@@ -7,7 +7,7 @@ import android.view.View;
 
 class OnClickDrawerToggle extends ActionBarDrawerToggle
 {
-   private final String        m_navigationText;
+   private final String m_navigationText;
    private final FeedsActivity m_activity;
 
    OnClickDrawerToggle(Activity activity, DrawerLayout drawerLayout)

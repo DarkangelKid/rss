@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -41,30 +42,28 @@ import java.util.regex.Pattern;
 public
 class ServiceUpdate extends IntentService
 {
-   static final         String           ITEM_LIST                   = "item_list.txt";
-   static final         String           CONTENT                     = "content.txt";
+   static final String ITEM_LIST = "item_list.txt";
+   static final String CONTENT = "content.txt";
    /* Folders */
-   static final         String           THUMBNAIL_DIR               = "thumbnails" +
-         File.separatorChar;
-   private static final char             ITEM_SEPARATOR              = '|';
+   static final String THUMBNAIL_DIR = "thumbnails" + File.separatorChar;
+   private static final char ITEM_SEPARATOR = '|';
    /* Parser saves */
-   private static final String           INDEX_IMAGE                 = "image|";
-   private static final String           INDEX_TIME                  = "pubDate|";
-   private static final String           INDEX_LINK                  = "link|";
-   private static final String           INDEX_HEIGHT                = "height|";
-   private static final String           INDEX_WIDTH                 = "width|";
-   private static final SimpleDateFormat RSS_DATE                    = new SimpleDateFormat(
+   private static final String INDEX_IMAGE = "image|";
+   private static final String INDEX_TIME = "pubDate|";
+   private static final String INDEX_LINK = "link|";
+   private static final String INDEX_HEIGHT = "height|";
+   private static final String INDEX_WIDTH = "width|";
+   private static final SimpleDateFormat RSS_DATE = new SimpleDateFormat(
          "EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
    @SuppressWarnings("HardcodedLineSeparator")
-   private static final Pattern          PATTERN_WHITESPACE          = Pattern.compile(
-         "[\\t\\n\\x0B\\f\\r\\|]");
-   private static final Pattern          PATTERN_CDATA               = Pattern.compile("\\<.*?\\>");
-   private static final String[]         DESIRED_TAGS                = {
+   private static final Pattern PATTERN_WHITESPACE = Pattern.compile("[\\t\\n\\x0B\\f\\r\\|]");
+   private static final Pattern PATTERN_CDATA = Pattern.compile("\\<.*?\\>");
+   private static final String[] DESIRED_TAGS = {
          "link", "published", "pubDate", "description", "title", "content", "entry", "item"
    };
-   private static final int              FEED_ITEM_INITIAL_CAPACITY  = 200;
-   private static final int              DEFAULT_MAX_HISTORY         = 10000;
-   private static final double           AMOUNT_OF_SCREEN_IMAGE_USES = 0.944;
+   private static final int FEED_ITEM_INITIAL_CAPACITY = 200;
+   private static final int DEFAULT_MAX_HISTORY = 10000;
+   private static final double AMOUNT_OF_SCREEN_IMAGE_USES = 0.944;
 
    public
    ServiceUpdate()
@@ -202,7 +201,7 @@ class ServiceUpdate extends IntentService
 
    private
    void parseFeed(String urlString, String feed, String applicationFolder)
-         throws XmlPullParserException, IOException
+         throws XmlPullParserException, MalformedURLException, IOException
    {
       String feedFolder = feed + File.separatorChar;
       String contentFileName = feedFolder + CONTENT;
@@ -306,7 +305,7 @@ class ServiceUpdate extends IntentService
                {
                   time.parse3339(contentText);
                }
-               catch(Exception ignored)
+               catch(RuntimeException ignored)
                {
                   Write.toLogFile("BUG : RFC3339, looks like: " + contentText, applicationFolder);
                   time.setToNow();
@@ -333,7 +332,7 @@ class ServiceUpdate extends IntentService
                   calendar.setTime(date);
                   timeLong = calendar.getTimeInMillis();
                }
-               catch(Exception ignored)
+               catch(ParseException ignored)
                {
                   Write.toLogFile("BUG : rfc882, looks like: " + contentText, applicationFolder);
                   time.setToNow();
@@ -485,7 +484,7 @@ class ServiceUpdate extends IntentService
    private static
    Set<String> fileToSet(String fileName, String fileFolder)
    {
-      Set<String> set = new LinkedHashSet<String>();
+      Set<String> set = new LinkedHashSet<String>(64);
 
       if(Read.isUnmounted())
       {

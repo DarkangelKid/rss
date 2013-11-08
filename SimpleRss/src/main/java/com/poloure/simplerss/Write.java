@@ -14,15 +14,15 @@ import java.util.List;
 
 class Write
 {
-   static final         String LOG_FILE     = "dump" + ".txt";
-   static final         int    MODE_REMOVE  = 1;
-   static final         int    MODE_REPLACE = 2;
-   private static final String TEMP         = ".temp" + ".txt";
+   static final String LOG_FILE = "dump.txt";
+   static final int MODE_REMOVE = 1;
+   static final int MODE_REPLACE = 2;
+   private static final String TEMP = ".temp.txt";
+   private static final String NEW_LINE = System.getProperty("line.separator");
    /* All functions in here must check that the media is available before
     * continuing. */
 
-   /* This function should be safe, returns false if it failed.
-    * NOT SAFE FOR INTERNAL IF FAILS. */
+   /* This function should be safe, returns false if it failed. */
    static
    void editLine(String fileName, CharSequence stringSearch, boolean containing,
          String applicationFolder, int mode, String replacementLine)
@@ -33,7 +33,6 @@ class Write
          return;
       }
 
-      String newLine = System.getProperty("line.separator");
       String filePath = applicationFolder + fileName;
       String tempPath = filePath + TEMP;
 
@@ -56,10 +55,13 @@ class Write
 
             for(String line : lines)
             {
-               if(containing && !line.contains(stringSearch) ||
-                     !containing && !line.equals(stringSearch))
+               boolean notEqualOrContaining = containing
+                     ? !line.contains(stringSearch)
+                     : !line.equals(stringSearch);
+
+               if(notEqualOrContaining)
                {
-                  out.write(line + newLine);
+                  out.write(line + NEW_LINE);
                }
                else if(MODE_REPLACE == mode)
                {
@@ -76,7 +78,7 @@ class Write
          }
       }
       /* If writing to the temp file fails, delete the temp file and return. */
-      catch(Exception e)
+      catch(IOException e)
       {
          e.printStackTrace();
 
@@ -116,7 +118,6 @@ class Write
          return;
       }
 
-      String newLine = System.getProperty("line.separator");
       String filePath = fileFolder + fileName;
 
       /* Delete file before writing new one. */
@@ -133,7 +134,7 @@ class Write
 
             for(Object item : content)
             {
-               out.write(item + newLine);
+               out.write(item + NEW_LINE);
             }
          }
          finally
@@ -167,8 +168,7 @@ class Write
    static
    void toLogFile(String text, String fileFolder)
    {
-      String newLine = System.getProperty("line.separator");
-      single(LOG_FILE, text + newLine, fileFolder);
+      single(LOG_FILE, text + NEW_LINE, fileFolder);
    }
 
    /* Function should be safe, returns false if fails. */

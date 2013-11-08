@@ -21,7 +21,8 @@ import android.widget.ListView;
 public
 class FragmentFeeds extends Fragment
 {
-   static final         int VIEW_PAGER_ID        = 0x1000;
+   static final int VIEW_PAGER_ID = 10000;
+   static final String FRAGMENT_ID_PREFIX = "android:switcher:10000:";
    private static final int PAGER_TITLE_STRIP_ID = 165143;
 
    static

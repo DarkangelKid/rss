@@ -8,9 +8,10 @@ import android.widget.TextView;
 
 class OnClickFilterDialogAdd implements DialogInterface.OnClickListener
 {
-   private final View        m_addFilterLayout;
+   private final View m_addFilterLayout;
    private final BaseAdapter m_adapter;
-   private final String      m_applicationFolder;
+   private final String m_applicationFolder;
+   private static final String NEW_LINE = System.getProperty("line.separator");
 
    OnClickFilterDialogAdd(View addFilterLayout, BaseAdapter adapterManageFilters,
          String applicationFolder)
@@ -24,21 +25,15 @@ class OnClickFilterDialogAdd implements DialogInterface.OnClickListener
    public
    void onClick(DialogInterface dialog, int which)
    {
-      String filter = getText((TextView) m_addFilterLayout);
+      String filter = ((TextView) m_addFilterLayout).getText().toString().trim();
       String fileName = FeedsActivity.FILTER_LIST;
       String[] filters = Read.file(fileName, m_applicationFolder);
       if(-1 == ServiceUpdate.index(filters, filter))
       {
-         String newLine = System.getProperty("line.separator");
-         Write.single(fileName, filter + newLine, m_applicationFolder);
+         Write.single(fileName, filter + NEW_LINE, m_applicationFolder);
       }
       m_adapter.notifyDataSetChanged();
       ((Dialog) dialog).hide();
    }
 
-   private static
-   String getText(TextView view)
-   {
-      return view.getText().toString().trim();
-   }
 }

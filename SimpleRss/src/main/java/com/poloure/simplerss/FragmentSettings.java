@@ -18,7 +18,7 @@ import android.view.ViewGroup;
 public
 class FragmentSettings extends Fragment
 {
-   private static final int VIEW_PAGER_ID        = 0x3000;
+   private static final int VIEW_PAGER_ID = 0x3000;
    private static final int PAGER_TITLE_STRIP_ID = 653142;
 
    static

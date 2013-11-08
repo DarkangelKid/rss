@@ -10,12 +10,12 @@ import android.widget.ListView;
 
 class OnLongClickManageFeedItem implements AdapterView.OnItemLongClickListener
 {
-   private final ListView             m_listView;
-   private final AlertDialog.Builder  m_builder;
-   private final String               m_applicationFolder;
-   private final String               m_allTag;
+   private final ListView m_listView;
+   private final AlertDialog.Builder m_builder;
+   private final String m_applicationFolder;
+   private final String m_allTag;
    private final FragmentPagerAdapter m_pagerAdapterFeeds;
-   private final BaseAdapter          m_navigationAdapter;
+   private final BaseAdapter m_navigationAdapter;
 
    OnLongClickManageFeedItem(ListView listView, FragmentPagerAdapter pagerAdapterFeeds,
          BaseAdapter navigationAdapter, AlertDialog.Builder builder, String applicationFolder,

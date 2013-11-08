@@ -11,7 +11,7 @@ import android.os.Build;
 class OnCardContextMenuClick implements DialogInterface.OnClickListener
 {
    private final CharSequence m_url;
-   private final Context      m_context;
+   private final Context m_context;
 
    OnCardContextMenuClick(CharSequence url, Context context)
    {

@@ -11,9 +11,8 @@ import java.util.regex.Pattern;
 
 class PagerAdapterFeeds extends FragmentPagerAdapter
 {
-   private static final Pattern     SPLIT_COMMA = Pattern.compile(",");
-   private static       Set<String> s_tagSet    = Collections.synchronizedSet(
-         new LinkedHashSet<String>(0));
+   private static final Pattern SPLIT_COMMA = Pattern.compile(",");
+   private static Set<String> s_tagSet = Collections.synchronizedSet(new LinkedHashSet<String>(0));
 
    PagerAdapterFeeds(FragmentManager fm)
    {
@@ -53,7 +52,6 @@ class PagerAdapterFeeds extends FragmentPagerAdapter
    {
       return s_tagSet.size();
    }
-   /* END */
 
    @Override
    public

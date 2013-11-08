@@ -12,7 +12,7 @@ import android.widget.ListView;
 class AsyncManageTagsRefresh extends AsyncTask<String, String[], Animation>
 {
    private static final int INFO_INITIAL_CAPACITY = 40;
-   private static final int FADE_IN_DURATION      = 330;
+   private static final int FADE_IN_DURATION = 330;
    private final ListView m_listView;
 
    private

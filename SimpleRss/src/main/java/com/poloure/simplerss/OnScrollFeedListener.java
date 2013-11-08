@@ -6,11 +6,11 @@ import android.widget.AbsListView;
 
 class OnScrollFeedListener implements AbsListView.OnScrollListener
 {
-   private final int                     m_listViewTopPadding;
-   private final String                  m_applicationFolder;
-   private final int                     m_page;
+   private final int m_listViewTopPadding;
+   private final String m_applicationFolder;
+   private final int m_page;
    private final AdapterNavigationDrawer m_adapterNavigationDrawer;
-   private final ActionBar               m_actionBar;
+   private final ActionBar m_actionBar;
 
    OnScrollFeedListener(AdapterNavigationDrawer adapterNavigationDrawer, ActionBar actionBar,
          String applicationFolder, int page, int listViewTopPadding)

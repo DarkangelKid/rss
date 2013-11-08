@@ -11,9 +11,9 @@ class AdapterManageFilters extends BaseAdapter
    private String[] m_filterTitles = new String[0];
 
    private final LayoutInflater m_layoutInflater;
-   private       TextView       m_titleView;
-   private final String         m_filterFileName;
-   private final String         m_applicationFolder;
+   private TextView m_titleView;
+   private final String m_filterFileName;
+   private final String m_applicationFolder;
 
    AdapterManageFilters(String applicationFolder, String filterFileName,
          LayoutInflater layoutInflater)

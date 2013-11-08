@@ -12,10 +12,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -24,17 +27,18 @@ import java.util.regex.Pattern;
 class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
 {
    /* Formats */
-   private static final String  INDEX_FORMAT       = "|f|%s|u|%s|t|%s|";
+   private static final String INDEX_FORMAT = "|f|%s|u|%s|t|%s|";
+   private static final String NEW_LINE = System.getProperty("line.separator");
    private static final Pattern ILLEGAL_FILE_CHARS = Pattern.compile("[/\\?%*|<>:]");
-   private static final Pattern SPLIT_SPACE        = Pattern.compile(" ");
-   private static final Pattern SPLIT_COMMA        = Pattern.compile(",");
-   private final Dialog               m_dialog;
-   private final String               m_oldFeedName;
-   private final String               m_applicationFolder;
-   private final String               m_allTag;
+   private static final Pattern SPLIT_SPACE = Pattern.compile(" ");
+   private static final Pattern SPLIT_COMMA = Pattern.compile(",");
+   private final Dialog m_dialog;
+   private final String m_oldFeedName;
+   private final String m_applicationFolder;
+   private final String m_allTag;
    private final FragmentPagerAdapter m_pagerAdapterFeeds;
-   private final BaseAdapter          m_navigationAdapter;
-   private final ListView             m_listView;
+   private final BaseAdapter m_navigationAdapter;
+   private final ListView m_listView;
 
    private
    AsyncCheckFeed(Dialog dialog, ListView listView, FragmentPagerAdapter pagerAdapterFeeds,
@@ -78,10 +82,11 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
    {
       /* Get the user's input. */
       CharSequence inputName = ((TextView) m_dialog.findViewById(R.id.name_edit)).getText();
-      String inputTags = ((TextView) m_dialog.findViewById(R.id.tag_edit)).getText().toString();
-      String inputUrl = ((TextView) m_dialog.findViewById(R.id.feed_url_edit)).getText().toString();
+      CharSequence inputTags = ((TextView) m_dialog.findViewById(R.id.tag_edit)).getText();
+      CharSequence inputUrlChar = ((TextView) m_dialog.findViewById(R.id.feed_url_edit)).getText();
+      String inputUrl = inputUrlChar.toString();
 
-      /* Form the array of urls we will check the validility of. */
+      /* Form the array of urls we will check the validity of. */
       String[] urlCheckList = inputUrl.contains("http") ? new String[]{inputUrl} : new String[]{
             "http://" + inputUrl, "https://" + inputUrl
       };
@@ -112,83 +117,84 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       return new String[]{url, title, tags};
    }
 
-   private static
-   String getFeedTitle(String urlString)
+   @Override
+   protected
+   void onPostExecute(String[] result)
    {
-      String feedTitle = "";
-      try
-      {
-         XmlPullParser parser = createXmlParser(urlString);
-         int eventType;
+      String feedUrlFromCheck = result[0];
+      String finalTitle = result[1];
+      String finalTag = result[2];
 
-         do
+      boolean isFeedValid = 0 != feedUrlFromCheck.length();
+      boolean isExistingFeed = 0 != m_oldFeedName.length();
+      Context context = m_dialog.getContext();
+
+      if(isFeedValid)
+      {
+         /* Create the csv. */
+         String feedInfo = String.format(INDEX_FORMAT, finalTitle, feedUrlFromCheck, finalTag) +
+               NEW_LINE;
+
+         if(isExistingFeed)
          {
-            parser.next();
-            eventType = parser.getEventType();
-            if(XmlPullParser.START_TAG == eventType)
+            /* Rename the folder if it is different. */
+            String oldFeedFolder = m_oldFeedName + File.separatorChar;
+            String newFeedFolder = finalTitle + File.separatorChar;
+
+            if(!m_oldFeedName.equals(finalTitle))
             {
-               String tag = parser.getName();
-               if("title".equals(tag))
-               {
-                  parser.next();
-                  feedTitle = parser.getText();
-               }
+               Write.moveFile(oldFeedFolder, newFeedFolder, m_applicationFolder);
             }
+
+            Write.editLine(Read.INDEX, m_oldFeedName, true, m_applicationFolder, Write.MODE_REPLACE,
+                  feedInfo);
+
          }
-         while(0 == feedTitle.length() && XmlPullParser.END_DOCUMENT != eventType);
-      }
-      catch(Exception ignored)
-      {
-      }
-      return feedTitle;
-   }
-
-   private static
-   boolean isValidFeed(String urlString)
-   {
-      boolean isValid = false;
-      try
-      {
-         XmlPullParser parser = createXmlParser(urlString);
-
-         parser.next();
-         int eventType = parser.getEventType();
-         if(XmlPullParser.START_TAG == eventType)
+         else
          {
-            String tag = parser.getName();
-            if("rss".equals(tag) || "feed".equals(tag))
-            {
-               isValid = true;
-            }
+            /* Save the feed to the index. */
+            Write.single(Read.INDEX, feedInfo, m_applicationFolder);
          }
+
+         /* Update the PagerAdapter for the tag fragments. */
+         PagerAdapterFeeds.getTagsFromDisk(m_applicationFolder, m_allTag);
+         m_pagerAdapterFeeds.notifyDataSetChanged();
+
+         /* Update the NavigationDrawer adapter.
+          * The subtitle of the actionbar should never change on an add of a feed.*/
+         AsyncRefreshNavigationAdapter.newInstance(m_navigationAdapter, m_applicationFolder);
+
+         /* TODO AsyncManageTagsRefresh.newInstance(tagListView); */
+         if(null != m_listView)
+         {
+            AsyncManageFeedsRefresh.newInstance(m_listView, m_applicationFolder);
+         }
+
+         m_dialog.dismiss();
       }
-      catch(Exception ignored)
+      else
       {
+         Button button = (Button) m_dialog.findViewById(R.id.positive_button);
+         button.setText(R.string.add_dialog);
+         button.setEnabled(true);
       }
-      return isValid;
+
+      /* Show added feed toast notification. */
+      String text = isFeedValid
+            ? context.getString(R.string.added_feed) + ' ' + finalTitle
+            : context.getString(R.string.invalid_feed);
+
+      Toast toast = Toast.makeText(context, text, Toast.LENGTH_SHORT);
+      toast.show();
    }
 
    private static
-   XmlPullParser createXmlParser(String urlString) throws Exception
+   String formatUserTagsInput(CharSequence userInputTags, String allTag)
    {
-      XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
-      factory.setNamespaceAware(true);
-      XmlPullParser parser = factory.newPullParser();
-
-      URL url = new URL(urlString);
-      InputStream inputStream = url.openStream();
-      parser.setInput(inputStream, null);
-      return parser;
-   }
-
-   private static
-   String formatUserTagsInput(String userInputTags, String allTag)
-   {
+      String inputTags = userInputTags.toString();
       Locale defaultLocale = Locale.getDefault();
 
-      String lowerTags = 0 == userInputTags.length()
-            ? allTag
-            : userInputTags.toLowerCase(defaultLocale);
+      String lowerTags = 0 == inputTags.length() ? allTag : inputTags.toLowerCase(defaultLocale);
 
       /* + 10 in case the user did not put spaces after the commas. */
       int tagInitialCapacity = lowerTags.length();
@@ -231,71 +237,86 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       return tagBuilder.toString();
    }
 
-   @Override
-   protected
-   void onPostExecute(String[] result)
+   private static
+   boolean isValidFeed(String urlString)
    {
-      String feedUrlFromCheck = result[0];
-      String finalTitle = result[1];
-      String finalTag = result[2];
-
-      boolean isFeedValid = 0 != feedUrlFromCheck.length();
-      boolean isExistingFeed = 0 != m_oldFeedName.length();
-      Context context = m_dialog.getContext();
-
-      if(isFeedValid)
+      boolean isValid = false;
+      try
       {
-         /* Create the csv. */
-         String feedInfo = String.format(INDEX_FORMAT, finalTitle, feedUrlFromCheck, finalTag) +
-               System.getProperty("line.separator");
+         XmlPullParser parser = createXmlParser(urlString);
 
-         if(isExistingFeed)
+         parser.next();
+         int eventType = parser.getEventType();
+         if(XmlPullParser.START_TAG == eventType)
          {
-            /* Rename the folder if it is different. */
-            String oldFeedFolder = m_oldFeedName + File.separator;
-            String newFeedFolder = finalTitle + File.separatorChar;
-
-            if(!m_oldFeedName.equals(finalTitle))
+            String tag = parser.getName();
+            if("rss".equals(tag) || "feed".equals(tag))
             {
-               Write.moveFile(oldFeedFolder, newFeedFolder, m_applicationFolder);
+               isValid = true;
             }
-
-            Write.editLine(Read.INDEX, m_oldFeedName, true, m_applicationFolder, Write.MODE_REPLACE,
-                  feedInfo);
-
          }
-         else
-         {
-            /* Save the feed to the index. */
-            Write.single(Read.INDEX, feedInfo, m_applicationFolder);
-         }
-
-         /* Update the PagerAdapter for the tag fragments. */
-         ((PagerAdapterFeeds) m_pagerAdapterFeeds).getTagsFromDisk(m_applicationFolder, m_allTag);
-         m_pagerAdapterFeeds.notifyDataSetChanged();
-
-         /* Update the NavigationDrawer adapter.
-         *  The subtitle of the actionbar should never change on an add of a feed.*/
-         AsyncRefreshNavigationAdapter.newInstance(m_navigationAdapter, m_applicationFolder);
-
-         /* TODO AsyncManageTagsRefresh.newInstance(tagListView); */
-         if(null != m_listView)
-         {
-            AsyncManageFeedsRefresh.newInstance(m_listView, m_applicationFolder);
-         }
-
-         /* Show added feed toast notification. */
-         String addedText = context.getString(R.string.added_feed) + ' ' + finalTitle;
-         Toast.makeText(context, addedText, Toast.LENGTH_SHORT).show();
-
-         m_dialog.dismiss();
       }
-      else
+      catch(MalformedURLException ignored)
       {
-         Button button = (Button) m_dialog.findViewById(R.id.positive_button);
-         button.setText(R.string.add_dialog);
-         button.setEnabled(true);
-         Toast.makeText(context, R.string.invalid_feed, Toast.LENGTH_SHORT).show();
       }
+      catch(IOException ignored)
+      {
+      }
+      catch(XmlPullParserException ignored)
+      {
+      }
+      return isValid;
+   }
+
+   private static
+   XmlPullParser createXmlParser(String urlString)
+         throws MalformedURLException, IOException, XmlPullParserException
+   {
+      XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+      factory.setNamespaceAware(true);
+      XmlPullParser parser = factory.newPullParser();
+
+      URL url = new URL(urlString);
+      InputStream inputStream = url.openStream();
+      parser.setInput(inputStream, null);
+      return parser;
+   }
+
+   private static
+   String getFeedTitle(String urlString)
+   {
+      String feedTitle = "";
+      try
+      {
+         XmlPullParser parser = createXmlParser(urlString);
+         int eventType;
+
+         do
+         {
+            parser.next();
+            eventType = parser.getEventType();
+            if(XmlPullParser.START_TAG == eventType)
+            {
+               String tag = parser.getName();
+               if("title".equals(tag))
+               {
+                  parser.next();
+                  feedTitle = parser.getText();
+               }
+            }
+         }
+         while(0 == feedTitle.length() && XmlPullParser.END_DOCUMENT != eventType);
+      }
+      catch(MalformedURLException ignored)
+      {
+      }
+      catch(IOException ignored)
+      {
+      }
+      catch(XmlPullParserException ignored)
+      {
+      }
+
+      return feedTitle;
    }
 }

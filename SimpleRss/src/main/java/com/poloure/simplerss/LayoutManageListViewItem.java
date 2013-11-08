@@ -11,6 +11,8 @@ import android.widget.TextView;
 
 class LayoutManageListViewItem extends RelativeLayout
 {
+   private static final AbsListView.LayoutParams LAYOUT_PARAMS = new AbsListView.LayoutParams(
+         ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
    private final TextView m_titleView;
    private final TextView m_subTitleView;
 
@@ -24,10 +26,7 @@ class LayoutManageListViewItem extends RelativeLayout
       m_subTitleView = (TextView) findViewById(R.id.second_text);
 
       /* Set the LayoutParams to match parent, match_parent. */
-      int matchParent = ViewGroup.LayoutParams.MATCH_PARENT;
-      AbsListView.LayoutParams layoutParams = new AbsListView.LayoutParams(matchParent,
-            matchParent);
-      setLayoutParams(layoutParams);
+      setLayoutParams(LAYOUT_PARAMS);
 
       /* Set the background color of the ListView items. */
       setBackgroundColor(Color.WHITE);

@@ -18,9 +18,11 @@ import android.view.ViewGroup;
 public
 class FragmentManage extends Fragment
 {
-   static final         int VIEW_PAGER_ID        = 0x2000;
+   static final int VIEW_PAGER_ID = 20000;
+   static final String FRAGMENT_TAGS_ID = "android:switcher:20000:0";
+   static final String FRAGMENT_FEEDS_ID = "android:switcher:20000:1";
+   static final String FRAGMENT_FILTERS_ID = "android:switcher:20000:2";
    private static final int PAGER_TITLE_STRIP_ID = 54218;
-   private ViewPager m_pager;
 
    static
    Fragment newInstance()
@@ -48,11 +50,11 @@ class FragmentManage extends Fragment
 
       PagerAdapter pagerAdapter = new PagerAdapterManage(fragmentManager, manageTitles);
 
-      m_pager = ViewPagerStrip.newInstance(activity, PAGER_TITLE_STRIP_ID);
-      m_pager.setAdapter(pagerAdapter);
-      m_pager.setId(VIEW_PAGER_ID);
+      ViewPager viewpager = ViewPagerStrip.newInstance(activity, PAGER_TITLE_STRIP_ID);
+      viewpager.setAdapter(pagerAdapter);
+      viewpager.setId(VIEW_PAGER_ID);
 
-      return m_pager;
+      return viewpager;
    }
 
    @Override

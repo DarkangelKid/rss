@@ -8,8 +8,8 @@ import java.io.File;
 class OnSeekBarChange implements SeekBar.OnSeekBarChangeListener
 {
    private final TextView m_seekText;
-   private final String   m_settingsFileName;
-   private final String   m_applicationFolder;
+   private final String m_settingsFileName;
+   private final String m_applicationFolder;
 
    OnSeekBarChange(TextView seekText, String settingFileName, String applicationFolder)
    {

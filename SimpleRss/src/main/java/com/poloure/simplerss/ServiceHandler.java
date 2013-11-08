@@ -11,8 +11,8 @@ import android.widget.ListView;
 class ServiceHandler extends Handler
 {
    private final FragmentManager m_fragmentManager;
-   private final MenuItem        m_refreshItem;
-   private final String          m_applicationFolder;
+   private final MenuItem m_refreshItem;
+   private final String m_applicationFolder;
 
    ServiceHandler(FragmentManager fragmentManager, MenuItem refreshItem, String applicationFolder)
    {
@@ -52,13 +52,12 @@ class ServiceHandler extends Handler
       {
          pagesToRefresh = new int[]{0, updatedPage};
       }
-      String tagPrefix = "android:switcher:" + FragmentFeeds.VIEW_PAGER_ID + ':';
 
       /* Refresh those Pages. */
       for(int page : pagesToRefresh)
       {
          ListFragment listFragment = (ListFragment) m_fragmentManager.findFragmentByTag(
-               tagPrefix + page);
+               FragmentFeeds.FRAGMENT_ID_PREFIX + page);
          ListView listView = listFragment.getListView();
 
          /* TODO isAllTag not 0. */

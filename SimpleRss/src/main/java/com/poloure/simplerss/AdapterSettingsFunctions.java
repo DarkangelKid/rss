@@ -9,18 +9,18 @@ import android.widget.TextView;
 
 class AdapterSettingsFunctions extends BaseAdapter
 {
-   private static final int   TYPE_HEADING        = 0;
-   private static final int   TYPE_CHECKBOX       = 1;
-   private static final int   TYPE_SEEK_BAR       = 2;
-   private static final int[] TYPES               = {TYPE_HEADING, TYPE_CHECKBOX, TYPE_SEEK_BAR};
-   private static final int   MAX_REFRESH_MINUTES = 1440;
-   private static final int   MAX_HISTORY_ITEMS   = 1000;
-   private final String[]       m_functionTitles;
-   private final String[]       m_functionSummaries;
-   private final Context        m_context;
-   private final String         m_applicationFolder;
+   private static final int TYPE_HEADING = 0;
+   private static final int TYPE_CHECKBOX = 1;
+   private static final int TYPE_SEEK_BAR = 2;
+   private static final int[] TYPES = {TYPE_HEADING, TYPE_CHECKBOX, TYPE_SEEK_BAR};
+   private static final int MAX_REFRESH_MINUTES = 1440;
+   private static final int MAX_HISTORY_ITEMS = 1000;
+   private final String[] m_functionTitles;
+   private final String[] m_functionSummaries;
+   private final Context m_context;
+   private final String m_applicationFolder;
    private final LayoutInflater m_layoutInflater;
-   private       TextView       m_titleView;
+   private TextView m_titleView;
 
    AdapterSettingsFunctions(Context context, String applicationFolder, String[] adapterTitles,
          String[] adapterSummaries)

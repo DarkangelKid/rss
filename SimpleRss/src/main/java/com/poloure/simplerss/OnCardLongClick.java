@@ -20,8 +20,7 @@ class OnCardLongClick implements View.OnLongClickListener
    public
    boolean onLongClick(View v)
    {
-      TextView textView = (TextView) v.findViewById(R.id.url);
-      CharSequence url = textView.getText();
+      CharSequence url = ((TextView) v.findViewById(R.id.url)).getText();
 
       DialogInterface.OnClickListener onClick = new OnCardContextMenuClick(url, m_context);
 

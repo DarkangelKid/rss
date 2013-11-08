@@ -5,13 +5,11 @@ import android.os.Environment;
 import org.apache.http.util.ByteArrayBuffer;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -156,13 +154,6 @@ class Read
       return lines;
    }
 
-   /* Wrapper for creating external BufferedReader. */
-   private static
-   BufferedReader reader(String path) throws FileNotFoundException
-   {
-      return new BufferedReader(new FileReader(path));
-   }
-
    static
    int count(String fileName, String applicationFolder)
    {
@@ -180,7 +171,7 @@ class Read
          try
          {
             byte[] c = new byte[COUNT_BUFFER_SIZE];
-            int readChars = 0;
+            int readChars;
             boolean endsWithoutNewLine = false;
             while(-1 != (readChars = is.read(c)))
             {

@@ -15,7 +15,7 @@ class AsyncLoadImage extends AsyncTask<Object, Void, Object[]>
 {
    private static final long IMAGE_FADE_IN_DURATION = 240L;
    private final ImageView m_imageView;
-   private       int       m_imageViewTag;
+   private int m_imageViewTag;
 
    private
    AsyncLoadImage(ImageView imageView)

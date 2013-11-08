@@ -9,8 +9,8 @@ import android.widget.BaseAdapter;
 class OnLongClickFilterItem implements AdapterView.OnItemLongClickListener
 {
    private final AlertDialog.Builder m_builder;
-   private final String              m_deleteString;
-   private final String              m_applicationFolder;
+   private final String m_deleteString;
+   private final String m_applicationFolder;
 
    OnLongClickFilterItem(AlertDialog.Builder builder, String deleteString, String applicationFolder)
    {

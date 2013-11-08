@@ -12,12 +12,12 @@ import java.io.File;
 
 class OnClickManageFeedDialogItem implements DialogInterface.OnClickListener
 {
-   private final ListView             m_listView;
-   private final String               m_feedName;
-   private final String               m_applicationFolder;
-   private final String               m_allTag;
+   private final ListView m_listView;
+   private final String m_feedName;
+   private final String m_applicationFolder;
+   private final String m_allTag;
    private final FragmentPagerAdapter m_pagerAdapterFeeds;
-   private final BaseAdapter          m_navigationAdapter;
+   private final BaseAdapter m_navigationAdapter;
 
    OnClickManageFeedDialogItem(ListView listView, FragmentPagerAdapter pagerAdapterFeeds,
          BaseAdapter navigationAdapter, String feedName, String applicationFolder, String allTag)
@@ -67,10 +67,11 @@ class OnClickManageFeedDialogItem implements DialogInterface.OnClickListener
          /* Show deleted feed toast notification. */
          Context context = ((Dialog) dialog).getContext();
          String deletedText = context.getString(R.string.deleted_feed) + ' ' + m_feedName;
-         Toast.makeText(context, deletedText, Toast.LENGTH_SHORT).show();
+         Toast toast = Toast.makeText(context, deletedText, Toast.LENGTH_SHORT);
+         toast.show();
 
          /* Update the PagerAdapter for the tag fragments. */
-         ((PagerAdapterFeeds) m_pagerAdapterFeeds).getTagsFromDisk(m_applicationFolder, m_allTag);
+         PagerAdapterFeeds.getTagsFromDisk(m_applicationFolder, m_allTag);
          m_pagerAdapterFeeds.notifyDataSetChanged();
       }
       if(isDelete || isClearContent)

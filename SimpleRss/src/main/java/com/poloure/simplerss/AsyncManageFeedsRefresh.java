@@ -47,7 +47,6 @@ class AsyncManageFeedsRefresh extends AsyncTask<String, CharSequence[], Animatio
    protected
    Animation doInBackground(String... applicationFolder)
    {
-      String newLine = System.getProperty("line.separator");
       String appFolder = applicationFolder[0];
 
       /* Read the ALL_TAG m_imageViewTag file for names, urls, and tags. */
@@ -66,15 +65,8 @@ class AsyncManageFeedsRefresh extends AsyncTask<String, CharSequence[], Animatio
          int feedContentSize = Read.count(feedContentFileName, appFolder);
 
          /* Build the info string. */
-         StringBuilder builder = new StringBuilder(80);
-         builder.append(feedUrls[i]);
-         builder.append("<br><b>Items: </b>");
-         builder.append(Integer.toString(feedContentSize));
-         builder.append(" · <b>");
-         builder.append(feedTags[i]);
-         builder.append("</b>");
-
-         feedInfoArray[i] = builder.toString();
+         feedInfoArray[i] = feedUrls[i] + "<br><b>Items: </b>" + Integer.toString(feedContentSize) +
+               " · <b>" + feedTags[i] + "</b>";
       }
       publishProgress(feedNames, feedInfoArray);
 

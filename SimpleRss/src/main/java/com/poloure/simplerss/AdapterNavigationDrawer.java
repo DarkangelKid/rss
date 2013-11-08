@@ -9,19 +9,19 @@ import android.widget.TextView;
 
 class AdapterNavigationDrawer extends BaseAdapter
 {
-   private static final int[] NAV_ICONS       = {
+   private static final int[] NAV_ICONS = {
          R.drawable.action_feeds, R.drawable.action_manage, R.drawable.action_settings,
    };
-   private static final int   TYPE_TITLE      = 0;
-   private static final int   TYPE_DIVIDER    = 1;
-   private static final int   TYPE_TAG        = 2;
-   private static final int[] TYPES           = {TYPE_TITLE, TYPE_DIVIDER, TYPE_TAG};
+   private static final int TYPE_TITLE = 0;
+   private static final int TYPE_DIVIDER = 1;
+   private static final int TYPE_TAG = 2;
+   private static final int[] TYPES = {TYPE_TITLE, TYPE_DIVIDER, TYPE_TAG};
    private static final int[] EMPTY_INT_ARRAY = new int[0];
-   private final int            m_twelveDp;
-   private final String[]       m_navigationTitles;
+   private final int m_twelveDp;
+   private final String[] m_navigationTitles;
    private final LayoutInflater m_layoutInflater;
-   private String[] m_tagArray    = new String[0];
-   private int[]    m_unreadArray = EMPTY_INT_ARRAY;
+   private String[] m_tagArray = new String[0];
+   private int[] m_unreadArray = EMPTY_INT_ARRAY;
 
    AdapterNavigationDrawer(String[] navigationTitles, int twelveDp, LayoutInflater layoutInflater)
    {

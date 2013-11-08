@@ -17,9 +17,9 @@ import java.util.Set;
 
 class AdapterTags extends BaseAdapter
 {
-   static final Set<Long>      READ_ITEM_TIMES = Collections.synchronizedSet(new HashSet<Long>(0));
-   final        List<FeedItem> m_items         = new ArrayList<FeedItem>(0);
-   final        List<Long>     m_times         = new ArrayList<Long>(0);
+   static final Set<Long> READ_ITEM_TIMES = Collections.synchronizedSet(new HashSet<Long>(0));
+   private final List<FeedItem> m_items = new ArrayList<FeedItem>(0);
+   final List<Long> m_times = new ArrayList<Long>(0);
    private final Context m_context;
    boolean m_isReadingItems = true;
 

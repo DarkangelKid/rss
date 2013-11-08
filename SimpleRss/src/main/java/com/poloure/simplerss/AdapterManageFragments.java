@@ -8,7 +8,7 @@ import android.widget.BaseAdapter;
 class AdapterManageFragments extends BaseAdapter
 {
    private final Context m_context;
-   private CharSequence[] m_firstArray  = new String[0];
+   private CharSequence[] m_firstArray = new String[0];
    private CharSequence[] m_secondArray = new String[0];
 
    AdapterManageFragments(Context context)

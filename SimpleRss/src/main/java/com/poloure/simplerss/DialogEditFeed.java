@@ -13,11 +13,11 @@ import android.widget.ListView;
 
 class DialogEditFeed extends Dialog
 {
-   private final String           m_oldFeedTitle;
-   private final String           m_applicationFolder;
-   private final String           m_allTag;
+   private final String m_oldFeedTitle;
+   private final String m_applicationFolder;
+   private final String m_allTag;
    private final FragmentActivity m_activity;
-   private final ListView         m_listView;
+   private final ListView m_listView;
 
    private
    DialogEditFeed(Context context, ListView listView, String oldFeedTitle, String applicationFolder,
@@ -55,7 +55,7 @@ class DialogEditFeed extends Dialog
    private
    class OnClickPositive implements View.OnClickListener
    {
-      private final Dialog   m_dialog;
+      private final Dialog m_dialog;
       private final ListView m_listView;
 
       OnClickPositive(Dialog dialog, ListView listView)

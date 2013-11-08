@@ -10,9 +10,11 @@ import android.widget.TextView;
 
 class LayoutSeekBar extends RelativeLayout
 {
+   private static final AbsListView.LayoutParams LAYOUT_PARAMS = new AbsListView.LayoutParams(
+         ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
    private final TextView m_titleView;
    private final TextView m_summaryView;
-   private final SeekBar  m_seekBar;
+   private final SeekBar m_seekBar;
    private final TextView m_seekText;
 
    LayoutSeekBar(Context context)
@@ -27,10 +29,7 @@ class LayoutSeekBar extends RelativeLayout
       m_seekText = (TextView) findViewById(R.id.seek_read);
 
       /* Set the LayoutParams to match parent, match_parent. */
-      int matchParent = ViewGroup.LayoutParams.MATCH_PARENT;
-      AbsListView.LayoutParams layoutParams = new AbsListView.LayoutParams(matchParent,
-            matchParent);
-      setLayoutParams(layoutParams);
+      setLayoutParams(LAYOUT_PARAMS);
 
       /* Set the background color of the ListView items. */
       setBackgroundColor(Color.WHITE);

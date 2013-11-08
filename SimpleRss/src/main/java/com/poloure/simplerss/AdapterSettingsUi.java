@@ -9,16 +9,16 @@ import android.widget.TextView;
 
 class AdapterSettingsUi extends BaseAdapter
 {
-   private static final int   TYPE_HEADING  = 0;
-   private static final int   TYPE_CHECKBOX = 1;
-   private static final int   TYPE_SEEK_BAR = 2;
-   private static final int[] TYPES         = {TYPE_HEADING, TYPE_CHECKBOX, TYPE_SEEK_BAR};
-   private final String[]       m_interfaceTitles;
-   private final String[]       m_interfaceSummaries;
+   private static final int TYPE_HEADING = 0;
+   private static final int TYPE_CHECKBOX = 1;
+   private static final int TYPE_SEEK_BAR = 2;
+   private static final int[] TYPES = {TYPE_HEADING, TYPE_CHECKBOX, TYPE_SEEK_BAR};
+   private final String[] m_interfaceTitles;
+   private final String[] m_interfaceSummaries;
    private final LayoutInflater m_layoutInflater;
-   private final String         m_applicationFolder;
-   private final Context        m_context;
-   private       TextView       m_settingsHeading;
+   private final String m_applicationFolder;
+   private final Context m_context;
+   private TextView m_settingsHeading;
 
    AdapterSettingsUi(Context context, String applicationFolder, String[] adapterTitles,
          String[] adapterSummaries, LayoutInflater layoutInflater)

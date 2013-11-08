@@ -10,6 +10,8 @@ import android.widget.TextView;
 
 class LayoutCheckBox extends RelativeLayout
 {
+   private static final AbsListView.LayoutParams LAYOUT_PARAMS = new AbsListView.LayoutParams(
+         ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
    private final TextView m_titleView;
    private final TextView m_summaryView;
    private final CheckBox m_checkbox;
@@ -25,10 +27,7 @@ class LayoutCheckBox extends RelativeLayout
       m_checkbox = (CheckBox) findViewById(R.id.checkbox);
 
       /* Set the LayoutParams to match parent, match_parent. */
-      int matchParent = ViewGroup.LayoutParams.MATCH_PARENT;
-      AbsListView.LayoutParams layoutParams = new AbsListView.LayoutParams(matchParent,
-            matchParent);
-      setLayoutParams(layoutParams);
+      setLayoutParams(LAYOUT_PARAMS);
 
       /* Set the background color of the ListView items. */
       setBackgroundColor(Color.WHITE);

@@ -13,11 +13,11 @@ import android.widget.ListAdapter;
 class OnClickNavDrawerItem implements AdapterView.OnItemClickListener
 {
    private final FragmentManager m_fragmentManager;
-   private final ActionBar       m_actionBar;
-   private final DrawerLayout    m_drawerLayout;
-   private final ListAdapter     m_navigationAdapter;
-   private final ViewPager       m_tagsViewPager;
-   private final String[]        m_navigationTitles;
+   private final ActionBar m_actionBar;
+   private final DrawerLayout m_drawerLayout;
+   private final ListAdapter m_navigationAdapter;
+   private final ViewPager m_tagsViewPager;
+   private final String[] m_navigationTitles;
 
    OnClickNavDrawerItem(FragmentManager fragmentManager, ActionBar actionBar,
          DrawerLayout drawerLayout, ListAdapter navigationAdapter, ViewPager tagsViewPager,

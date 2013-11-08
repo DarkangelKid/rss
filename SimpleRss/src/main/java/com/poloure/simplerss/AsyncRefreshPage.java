@@ -13,16 +13,17 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
 {
    private static final int MAX_DESCRIPTION_LENGTH = 360;
    private static final int MIN_DESCRIPTION_LENGTH = 8;
-   private static final int MIN_IMAGE_WIDTH        = 32;
-   private final String   m_applicationFolder;
+   private static final int MIN_IMAGE_WIDTH = 32;
+   private final String m_applicationFolder;
    private final ListView m_listView;
-   private final boolean  m_isAllTag;
+   private final boolean m_isAllTag;
 
    private
    AsyncRefreshPage(ListView listView, String applicationFolder, boolean isAllTag)
@@ -158,7 +159,9 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
 
       int mapSize = map.size();
       Collection<FeedItem> itemCollection = map.values();
-      List<Long> longList = Arrays.asList(map.keySet().toArray(new Long[mapSize]));
+      Set<Long> longSet = map.keySet();
+      Long[] longArray = longSet.toArray(new Long[mapSize]);
+      List<Long> longList = Arrays.asList(longArray);
 
       if(0 < itemCollection.size())
       {
@@ -167,7 +170,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       return null;
    }
 
-   public static
+   private static
    long fastParseLong(String s)
    {
       char[] chars = s.toCharArray();
@@ -180,7 +183,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       return num;
    }
 
-   public static
+   private static
    int fastParseInt(String s)
    {
       char[] chars = s.toCharArray();

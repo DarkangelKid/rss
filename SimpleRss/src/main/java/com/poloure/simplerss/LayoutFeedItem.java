@@ -13,17 +13,19 @@ import android.widget.TextView;
 
 class LayoutFeedItem extends RelativeLayout
 {
-   private static final float DEFAULT_CARD_OPACITY     = 0.66F;
-   private static final int   COLOR_TITLE_UNREAD       = Color.argb(255, 0, 0, 0);
-   private static final int   COLOR_DESCRIPTION_UNREAD = Color.argb(205, 0, 0, 0);
-   private static final int   COLOR_LINK_UNREAD        = Color.argb(128, 0, 0, 0);
-   static               float s_opacity                = DEFAULT_CARD_OPACITY;
-   static        int       s_titleRead;
-   static        int       s_notTitleRead;
-   private final int       m_eightDp;
-   private final TextView  m_titleView;
-   private final TextView  m_urlView;
-   private final TextView  m_descriptionView;
+   private static final int COLOR_TITLE_UNREAD = Color.argb(255, 0, 0, 0);
+   private static final int COLOR_DESCRIPTION_UNREAD = Color.argb(205, 0, 0, 0);
+   private static final int COLOR_LINK_UNREAD = Color.argb(128, 0, 0, 0);
+   private static final AbsListView.LayoutParams LAYOUT_PARAMS = new AbsListView.LayoutParams(
+         ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+   /* These are the default values. */
+   private static float s_opacity = 0.66F;
+   private static int s_titleRead = Color.argb(168, 0, 0, 0);
+   private static int s_notTitleRead = Color.argb(125, 0, 0, 0);
+   private final int m_eightDp;
+   private final TextView m_titleView;
+   private final TextView m_urlView;
+   private final TextView m_descriptionView;
    private final ImageView m_imageView;
    private final ImageView m_leftShadow;
    private final ImageView m_rightShadow;
@@ -44,14 +46,7 @@ class LayoutFeedItem extends RelativeLayout
       /* Set the long click listener for the item. */
       setOnLongClickListener(new OnCardLongClick(context));
 
-      /* Set the LayoutParams to match parent, match_parent. */
-      int matchParent = ViewGroup.LayoutParams.MATCH_PARENT;
-      AbsListView.LayoutParams layoutParams = new AbsListView.LayoutParams(matchParent,
-            matchParent);
-      setLayoutParams(layoutParams);
-
-      s_titleRead = Color.argb(Math.round(255.0F * DEFAULT_CARD_OPACITY), 0, 0, 0);
-      s_notTitleRead = Color.argb(Math.round(190.0F * DEFAULT_CARD_OPACITY), 0, 0, 0);
+      setLayoutParams(LAYOUT_PARAMS);
 
       /* Save DP values. */
       Resources resources = getResources();
