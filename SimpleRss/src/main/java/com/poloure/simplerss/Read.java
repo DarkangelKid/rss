@@ -21,11 +21,11 @@ import java.util.regex.Pattern;
 
 class Read
 {
-   static final         String  INDEX             = "index.txt";
-   private static final Pattern SPLIT_NEWLINE     = Pattern.compile("\n");
-   private static final char    ITEM_SEPARATOR    = '|';
-   private static final int     COUNT_BUFFER_SIZE = 8096;
-   private static final int     FILE_BUFFER_SIZE  = 8096;
+   static final String INDEX = "index.txt";
+   private static final Pattern SPLIT_NEWLINE = Pattern.compile("\n");
+   private static final char ITEM_SEPARATOR = '|';
+   private static final int COUNT_BUFFER_SIZE = 8096;
+   private static final int FILE_BUFFER_SIZE = 8096;
 
    /* All functions in here must check that the media is available before
     * continuing. */
@@ -68,10 +68,11 @@ class Read
             char firstChar = line.charAt(offset);
             int indexOfCh = typeString.indexOf(firstChar);
 
+            offset = nextSeparator + 1;
+            nextSeparator = line.indexOf(ITEM_SEPARATOR, offset);
+
             if(-1 != indexOfCh)
             {
-               offset = nextSeparator + 1;
-               nextSeparator = line.indexOf(ITEM_SEPARATOR, offset);
                types[indexOfCh][j] = line.substring(offset, nextSeparator);
             }
          }
@@ -79,15 +80,6 @@ class Read
 
       }
       return types;
-   }
-
-   static
-   boolean isUnmounted()
-   {
-      /* Check to see if we can Write to the media. */
-      String mounted = Environment.MEDIA_MOUNTED;
-      String externalStorageState = Environment.getExternalStorageState();
-      return !mounted.equals(externalStorageState);
    }
 
    /* This function is now safe. It will return a zero length array on error. */
@@ -152,6 +144,15 @@ class Read
       }
 
       return lines;
+   }
+
+   static
+   boolean isUnmounted()
+   {
+      /* Check to see if we can Write to the media. */
+      String mounted = Environment.MEDIA_MOUNTED;
+      String externalStorageState = Environment.getExternalStorageState();
+      return !mounted.equals(externalStorageState);
    }
 
    static

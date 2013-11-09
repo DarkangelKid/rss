@@ -45,11 +45,11 @@ class FeedsActivity extends ActionBarActivity
    private static final String READ_ITEMS = "read_items.txt";
    static final String SETTINGS_DIR = "settings" + File.separatorChar;
    static final String FILTER_LIST = "filter_list.txt";
-   private static final int ALARM_SERVICE_START = 1;
-   private static final int ALARM_SERVICE_STOP = 0;
-   private static final long MINUTE_VALUE = 60000L;
-   private static final int DEFAULT_REFRESH_TIME = 120;
-   private static final int TAGS_LIST_VIEW_FADE_IN_TIME = 240;
+   private static final byte ALARM_SERVICE_START = 1;
+   private static final byte ALARM_SERVICE_STOP = 0;
+   private static final int MINUTE_VALUE = 60000;
+   private static final byte DEFAULT_REFRESH_TIME = 120;
+   private static final short TAGS_LIST_VIEW_FADE_IN_TIME = 240;
    static Handler s_serviceHandler;
    String m_previousActionBarTitle;
    private ViewPager m_feedsViewPager;
@@ -77,7 +77,7 @@ class FeedsActivity extends ActionBarActivity
       DisplayMetrics displayMetrics = m_resources.getDisplayMetrics();
 
       /* Get what 12DP is for the AdapterNavigationDrawer compound drawable. */
-      int twelveDp = Math.round(displayMetrics.density * 12);
+      int twelveDp = Math.round(displayMetrics.density * 12.0F);
 
       /* Load the read items to the AdapterTag class. */
       if(0 == AdapterTags.READ_ITEM_TIMES.size())
@@ -169,7 +169,7 @@ class FeedsActivity extends ActionBarActivity
    }
 
    private
-   void setServiceIntent(int state)
+   void setServiceIntent(byte state)
    {
       String[] settingTitles = m_resources.getStringArray(R.array.settings_function_titles);
 
@@ -186,7 +186,7 @@ class FeedsActivity extends ActionBarActivity
       String[] settings = Read.file(SETTINGS_DIR + settingTitles[2] + ".txt", m_applicationFolder);
 
       int time = 0 == settings.length || 0 == settings[0].length()
-            ? DEFAULT_REFRESH_TIME
+            ? (int) DEFAULT_REFRESH_TIME
             : Integer.parseInt(settings[0]);
 
       /* Create intent, turn into pending intent, and get the alarm manager. */
@@ -199,7 +199,7 @@ class FeedsActivity extends ActionBarActivity
       /* Depending on the state string, start or stop the service. */
       if(ALARM_SERVICE_START == state)
       {
-         long interval = time * MINUTE_VALUE;
+         long interval = (long) time * (long) MINUTE_VALUE;
          long next = System.currentTimeMillis() + interval;
          am.setRepeating(AlarmManager.RTC_WAKEUP, next, interval, pendingIntent);
       }
@@ -405,7 +405,7 @@ class FeedsActivity extends ActionBarActivity
       if(!listView.isShown() || 0 == itemCount)
       {
          Animation animation = new AlphaAnimation(0.0F, 1.0F);
-         animation.setDuration(TAGS_LIST_VIEW_FADE_IN_TIME);
+         animation.setDuration((long) TAGS_LIST_VIEW_FADE_IN_TIME);
          listView.setAnimation(animation);
          listView.setVisibility(View.VISIBLE);
       }

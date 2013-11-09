@@ -49,7 +49,7 @@ class AdapterManageFilters extends BaseAdapter
    public
    long getItemId(int position)
    {
-      return position;
+      return (long) position;
    }
 
    @Override

@@ -16,6 +16,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -53,6 +54,9 @@ class ServiceUpdate extends IntentService
    private static final String INDEX_LINK = "link|";
    private static final String INDEX_HEIGHT = "height|";
    private static final String INDEX_WIDTH = "width|";
+   private static final String INDEX_MIME = "mime|";
+   private static final String MIME_GIF = "image/gif";
+   private static final byte COMPRESSION_JPEG = 80;
    private static final SimpleDateFormat RSS_DATE = new SimpleDateFormat(
          "EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
    @SuppressWarnings("HardcodedLineSeparator")
@@ -63,7 +67,7 @@ class ServiceUpdate extends IntentService
    };
    private static final int FEED_ITEM_INITIAL_CAPACITY = 200;
    private static final int DEFAULT_MAX_HISTORY = 10000;
-   private static final double AMOUNT_OF_SCREEN_IMAGE_USES = 0.944;
+   private static final float AMOUNT_OF_SCREEN_IMAGE_USES = 0.944F;
 
    public
    ServiceUpdate()
@@ -344,6 +348,7 @@ class ServiceUpdate extends IntentService
                feedItemBuilder.append(timeString);
                feedItemBuilder.append(ITEM_SEPARATOR);
             }
+            /* Content & description. */
             else if(-1 != index)
             {
                parser.next();
@@ -393,21 +398,27 @@ class ServiceUpdate extends IntentService
                   feedItemBuilder.append(INDEX_WIDTH);
                   feedItemBuilder.append(options.outWidth);
                   feedItemBuilder.append(ITEM_SEPARATOR);
+
                   feedItemBuilder.append(INDEX_HEIGHT);
                   feedItemBuilder.append(options.outHeight);
                   feedItemBuilder.append(ITEM_SEPARATOR);
+
+                  feedItemBuilder.append(INDEX_MIME);
+                  feedItemBuilder.append(options.outMimeType);
+                  feedItemBuilder.append(ITEM_SEPARATOR);
                }
-
-               String tagToAppend = DESIRED_TAGS[5].equals(tag) ? DESIRED_TAGS[3] : tag;
-
-               feedItemBuilder.append(tagToAppend);
-               feedItemBuilder.append(ITEM_SEPARATOR);
 
                /* Replace ALL_TAG <x> with nothing. */
                content = PATTERN_CDATA.matcher(content).replaceAll("").trim();
+               if(0 != content.length())
+               {
+                  String tagToAppend = DESIRED_TAGS[5].equals(tag) ? DESIRED_TAGS[3] : tag;
 
-               feedItemBuilder.append(content);
-               feedItemBuilder.append(ITEM_SEPARATOR);
+                  feedItemBuilder.append(tagToAppend);
+                  feedItemBuilder.append(ITEM_SEPARATOR);
+                  feedItemBuilder.append(content);
+                  feedItemBuilder.append(ITEM_SEPARATOR);
+               }
             }
          }
          else if(XmlPullParser.END_TAG == eventType)
@@ -461,24 +472,116 @@ class ServiceUpdate extends IntentService
       }
    }
 
-   /* index throws an ArrayOutOfBoundsException if not handled. */
-   static
-   <T> int index(T[] array, T value)
+   private static
+   void compressImage(String thumbnailDir, String imgLink, String imgName, Context context)
    {
-      if(null == array)
+      BitmapFactory.Options options = new BitmapFactory.Options();
+      options.inJustDecodeBounds = true;
+      InputStream inputStream;
+      try
       {
-         return -1;
+         URL imageUrl = new URL(imgLink);
+         inputStream = imageUrl.openStream();
+      }
+      catch(MalformedURLException ignored)
+      {
+         return;
+      }
+      catch(IOException ignored)
+      {
+         return;
       }
 
-      int arrayLength = array.length;
-      for(int i = 0; i < arrayLength; i++)
+      String applicationFolder = FeedsActivity.getApplicationFolder(context);
+      BitmapFactory.decodeStream(inputStream, null, options);
+
+      float widthTmp = (float) options.outWidth;
+      String mimeType = options.outMimeType;
+
+      FileOutputStream out = null;
+
+      if(MIME_GIF.equals(mimeType))
       {
-         if(array[i].equals(value))
+         try
          {
-            return i;
+            inputStream.close();
+            URL imageUrl = new URL(imgLink);
+            inputStream = imageUrl.openStream();
+            out = new FileOutputStream(applicationFolder + thumbnailDir + imgName);
+
+            byte[] buffer = new byte[1024];
+            int bytesRead = inputStream.read(buffer);
+            while(-1 != bytesRead)
+            {
+               out.write(buffer, 0, bytesRead);
+               bytesRead = inputStream.read(buffer);
+            }
+         }
+         catch(IOException ignored)
+         {
+         }
+         finally
+         {
+            close(out);
          }
       }
-      return -1;
+      else
+      {
+
+         Resources resources = context.getResources();
+         DisplayMetrics displayMetrics = resources.getDisplayMetrics();
+         float screenWidth = (float) displayMetrics.widthPixels * AMOUNT_OF_SCREEN_IMAGE_USES;
+         float inSample = widthTmp > screenWidth ? widthTmp / screenWidth : 1.0F;
+
+         try
+         {
+            inputStream.close();
+            URL imageUrl = new URL(imgLink);
+            inputStream = imageUrl.openStream();
+         }
+         catch(MalformedURLException ignored)
+         {
+            return;
+         }
+         catch(IOException ignored)
+         {
+            return;
+         }
+
+         BitmapFactory.Options o2 = new BitmapFactory.Options();
+         o2.inSampleSize = Math.round(inSample);
+         Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, o2);
+
+         try
+         {
+            out = new FileOutputStream(applicationFolder + thumbnailDir + imgName);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, (int) COMPRESSION_JPEG, out);
+         }
+         catch(FileNotFoundException e)
+         {
+            e.printStackTrace();
+         }
+         finally
+         {
+            close(out);
+         }
+      }
+   }
+
+   public static
+   void close(Closeable c)
+   {
+      if(null == c)
+      {
+         return;
+      }
+      try
+      {
+         c.close();
+      }
+      catch(IOException ignored)
+      {
+      }
    }
 
    private static
@@ -497,63 +600,23 @@ class ServiceUpdate extends IntentService
       return set;
    }
 
-   private static
-   void compressImage(String thumbnailDir, String imgLink, String imgName, Context context)
+   /* index throws an ArrayOutOfBoundsException if not handled. */
+   static
+   <T> int index(T[] array, T value)
    {
-      BitmapFactory.Options o = new BitmapFactory.Options();
-      o.inJustDecodeBounds = true;
-      InputStream inputStream;
-      try
+      if(null == array)
       {
-         URL imageUrl = new URL(imgLink);
-         inputStream = imageUrl.openStream();
-      }
-      catch(MalformedURLException ignored)
-      {
-         return;
-      }
-      catch(IOException ignored)
-      {
-         return;
+         return -1;
       }
 
-      BitmapFactory.decodeStream(inputStream, null, o);
-
-      float widthTmp = o.outWidth;
-
-      Resources resources = context.getResources();
-      DisplayMetrics displayMetrics = resources.getDisplayMetrics();
-      int screenWidth = (int) Math.round(displayMetrics.widthPixels * AMOUNT_OF_SCREEN_IMAGE_USES);
-      float inSample = widthTmp > screenWidth ? Math.round(widthTmp / screenWidth) : 1;
-
-      try
+      int arrayLength = array.length;
+      for(int i = 0; i < arrayLength; i++)
       {
-         inputStream.close();
-         URL imageUrl = new URL(imgLink);
-         inputStream = imageUrl.openStream();
+         if(array[i].equals(value))
+         {
+            return i;
+         }
       }
-      catch(MalformedURLException ignored)
-      {
-         return;
-      }
-      catch(IOException ignored)
-      {
-         return;
-      }
-
-      BitmapFactory.Options o2 = new BitmapFactory.Options();
-      o2.inSampleSize = Math.round(inSample);
-      Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, o2);
-
-      String storage = FeedsActivity.getApplicationFolder(context);
-      try
-      {
-         FileOutputStream out = new FileOutputStream(storage + thumbnailDir + imgName);
-         bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-      }
-      catch(FileNotFoundException e)
-      {
-         e.printStackTrace();
-      }
+      return -1;
    }
 }

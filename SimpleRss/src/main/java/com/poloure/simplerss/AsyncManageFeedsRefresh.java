@@ -13,7 +13,7 @@ import java.io.File;
 
 class AsyncManageFeedsRefresh extends AsyncTask<String, CharSequence[], Animation>
 {
-   private static final int FADE_IN_DURATION = 330;
+   private static final short FADE_IN_DURATION = 330;
    private final ListView m_listView;
 
    private
@@ -71,7 +71,7 @@ class AsyncManageFeedsRefresh extends AsyncTask<String, CharSequence[], Animatio
       publishProgress(feedNames, feedInfoArray);
 
       Animation fadeIn = new AlphaAnimation(0.0F, 1.0F);
-      fadeIn.setDuration(FADE_IN_DURATION);
+      fadeIn.setDuration((long) FADE_IN_DURATION);
       return fadeIn;
    }
 

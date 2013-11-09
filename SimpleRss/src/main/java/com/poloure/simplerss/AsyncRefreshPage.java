@@ -18,9 +18,9 @@ import java.util.TreeMap;
 
 class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
 {
-   private static final int MAX_DESCRIPTION_LENGTH = 360;
-   private static final int MIN_DESCRIPTION_LENGTH = 8;
-   private static final int MIN_IMAGE_WIDTH = 32;
+   private static final short MAX_DESCRIPTION_LENGTH = 360;
+   private static final byte MIN_DESCRIPTION_LENGTH = 8;
+   private static final byte MIN_IMAGE_WIDTH = 32;
    private final String m_applicationFolder;
    private final ListView m_listView;
    private final boolean m_isAllTag;
@@ -103,16 +103,16 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
                {
                   data.m_imageWidth = null == widths[i] || 0 == widths[i].length()
                         ? 0
-                        : fastParseInt(widths[i]);
+                        : fastParseShort(widths[i]);
 
                   /* If the image is large enough so that we should care about it. */
-                  if(MIN_IMAGE_WIDTH < data.m_imageWidth)
+                  if((int) MIN_IMAGE_WIDTH < (int) data.m_imageWidth)
                   {
                      int lastSlash = imageUrls[i].lastIndexOf(File.separatorChar) + 1;
                      data.m_imagePath = feedThumbnailDir + imageUrls[i].substring(lastSlash);
                      data.m_imageHeight = null == heights[i] || 0 == heights[i].length()
                            ? 0
-                           : fastParseInt(heights[i]);
+                           : fastParseShort(heights[i]);
                   }
                   else
                   {
@@ -122,11 +122,12 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
                   }
                }
 
-               if(null == descriptions[i] || MIN_DESCRIPTION_LENGTH > descriptions[i].length())
+               if(null == descriptions[i] ||
+                     (int) MIN_DESCRIPTION_LENGTH > descriptions[i].length())
                {
                   descriptions[i] = "";
                }
-               else if(MAX_DESCRIPTION_LENGTH <= descriptions[i].length())
+               else if((int) MAX_DESCRIPTION_LENGTH <= descriptions[i].length())
                {
                   descriptions[i] = descriptions[i].substring(0, MAX_DESCRIPTION_LENGTH);
                }
@@ -135,11 +136,11 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
                data.m_itemUrl = links[i];
                data.m_itemDescription = descriptions[i];
 
-               /* This is the time and it is never larger than MAX_INT. */
                data.m_itemTime = fastParseLong(times[i]);
 
                /* Do not add duplicates, do not add read items if opacity == 0 */
-               boolean notInAdapter = !adapterTag.m_times.contains(data.m_itemTime);
+               final List<Long> timeListInAdapter = adapterTag.getTimeList();
+               boolean notInAdapter = !timeListInAdapter.contains(data.m_itemTime);
                boolean isUnread = !AdapterTags.READ_ITEM_TIMES.contains(data.m_itemTime);
                boolean isOpaque = 0.0F != LayoutFeedItem.getReadItemOpacity();
 
@@ -170,32 +171,6 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       return null;
    }
 
-   private static
-   long fastParseLong(String s)
-   {
-      char[] chars = s.toCharArray();
-      long num = 0;
-
-      for(int i : chars)
-      {
-         num = num * 10 + i - 48;
-      }
-      return num;
-   }
-
-   private static
-   int fastParseInt(String s)
-   {
-      char[] chars = s.toCharArray();
-      int num = 0;
-
-      for(int i : chars)
-      {
-         num = num * 10 + i - 48;
-      }
-      return num;
-   }
-
    @Override
    protected
    void onPostExecute(Void result)
@@ -214,6 +189,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       int index = 0;
       long timeBefore = 0L;
       AdapterTags adapterTag = (AdapterTags) m_listView.getAdapter();
+      final List<Long> timeListInAdapter = adapterTag.getTimeList();
 
       /* If these are the first items to be added to the list. */
       if(0 == m_listView.getCount())
@@ -225,7 +201,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       {
          /* Get the time of the top item. */
          index = m_listView.getFirstVisiblePosition();
-         timeBefore = adapterTag.m_times.get(index);
+         timeBefore = timeListInAdapter.get(index);
 
          View v = m_listView.getChildAt(0);
          top = null == v ? 0 : v.getTop();
@@ -247,12 +223,11 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       {
          /* We now need to find the position of the item with the time timeBefore. */
          /* NOTE Do not change anything in itemList. */
-         List<Long> timeList = adapterTag.m_times;
-         int timeListSize = timeList.size();
+         int timeListSize = timeListInAdapter.size();
          int i = 0;
          while(i < timeListSize && 0 == index)
          {
-            boolean sameItem = timeBefore == timeList.get(i);
+            boolean sameItem = timeBefore == timeListInAdapter.get(i);
             if(sameItem)
             {
                index = i + 1;
@@ -267,5 +242,38 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       {
          FeedsActivity.gotoLatestUnread(m_listView);
       }
+   }
+
+   private static
+   short fastParseShort(String s)
+   {
+      char[] chars = s.toCharArray();
+      int num = 0;
+
+      for(char c : chars)
+      {
+         int value = (int) c - 48;
+         num = num * 10 + value;
+      }
+      /* We are not reading images larger than 32,767px so (short) is fine. */
+      return (short) num;
+   }
+
+   private static
+   long fastParseLong(String s)
+   {
+      if(s == null)
+      {
+         return 0L;
+      }
+      char[] chars = s.toCharArray();
+      long num = 0L;
+
+      for(char c : chars)
+      {
+         int value = (int) c - 48;
+         num = num * 10L + (long) value;
+      }
+      return num;
    }
 }

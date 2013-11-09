@@ -34,7 +34,7 @@ class OnSeekBarChange implements SeekBar.OnSeekBarChangeListener
       if(m_settingsFileName.contains("Read Item Opacity"))
       {
          /* Set the Opacity values. */
-         LayoutFeedItem.setReadItemOpacity(progress / 100.0F);
+         LayoutFeedItem.setReadItemOpacity((float) progress / 100.0F);
       }
    }
 

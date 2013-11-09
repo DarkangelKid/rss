@@ -54,7 +54,7 @@ class AdapterNavigationDrawer extends BaseAdapter
    public
    long getItemId(int position)
    {
-      return position;
+      return (long) position;
    }
 
    @Override

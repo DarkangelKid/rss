@@ -22,7 +22,7 @@ class LayoutFeedItem extends RelativeLayout
    private static float s_opacity = 0.66F;
    private static int s_titleRead = Color.argb(168, 0, 0, 0);
    private static int s_notTitleRead = Color.argb(125, 0, 0, 0);
-   private final int m_eightDp;
+   private final byte m_eightDp;
    private final TextView m_titleView;
    private final TextView m_urlView;
    private final TextView m_descriptionView;
@@ -51,8 +51,7 @@ class LayoutFeedItem extends RelativeLayout
       /* Save DP values. */
       Resources resources = getResources();
       DisplayMetrics displayMetrics = resources.getDisplayMetrics();
-      float density = displayMetrics.density;
-      m_eightDp = Math.round(density * 8.0F);
+      m_eightDp = (byte) Math.round(displayMetrics.density * 8.0F);
 
       /* Set the background color of the ListView items. */
       setBackgroundColor(Color.WHITE);
@@ -139,13 +138,13 @@ class LayoutFeedItem extends RelativeLayout
       DisplayMetrics displayMetrics = resources.getDisplayMetrics();
 
       String imagePath = FeedsActivity.getApplicationFolder(context) + feedItem.m_imagePath;
-      int imageWidth = feedItem.m_imageWidth;
-      int imageHeight = feedItem.m_imageHeight;
+      short imageWidth = feedItem.m_imageWidth;
+      short imageHeight = feedItem.m_imageHeight;
       int screenWidth = displayMetrics.widthPixels;
 
       ViewGroup.LayoutParams lp = imageView.getLayoutParams();
 
-      lp.height = (int) Math.round((double) screenWidth / imageWidth * imageHeight);
+      lp.height = Math.round((float) screenWidth / (float) imageWidth * (float) imageHeight);
       imageView.setLayoutParams(lp);
       imageView.setTag(position);
 

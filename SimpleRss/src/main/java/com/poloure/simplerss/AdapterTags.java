@@ -19,7 +19,7 @@ class AdapterTags extends BaseAdapter
 {
    static final Set<Long> READ_ITEM_TIMES = Collections.synchronizedSet(new HashSet<Long>(0));
    private final List<FeedItem> m_items = new ArrayList<FeedItem>(0);
-   final List<Long> m_times = new ArrayList<Long>(0);
+   private final List<Long> m_times = new ArrayList<Long>(0);
    private final Context m_context;
    boolean m_isReadingItems = true;
 
@@ -34,6 +34,12 @@ class AdapterTags extends BaseAdapter
       Collection<Long> longList = (Collection<Long>) items[1];
       m_items.addAll(0, longCollection);
       m_times.addAll(0, longList);
+   }
+
+   /* Do not edit the list once you get it. */
+   List<Long> getTimeList()
+   {
+      return m_times;
    }
 
    @Override
@@ -54,7 +60,7 @@ class AdapterTags extends BaseAdapter
    public
    long getItemId(int position)
    {
-      return position;
+      return (long) position;
    }
 
    @Override
@@ -75,7 +81,7 @@ class AdapterTags extends BaseAdapter
          String opacityPath = FeedsActivity.SETTINGS_DIR + settingTitles[1] + ".txt";
          String[] opacityFile = Read.file(opacityPath, applicationFolder);
 
-         boolean valueExists = 0 != opacityFile.length || 0 != opacityFile[0].length();
+         boolean valueExists = 0 != opacityFile.length && 0 != opacityFile[0].length();
          if(valueExists)
          {
             float opacity = Float.parseFloat(opacityFile[0]) / 100.0F;

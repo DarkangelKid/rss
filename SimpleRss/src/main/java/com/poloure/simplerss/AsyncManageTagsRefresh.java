@@ -11,8 +11,8 @@ import android.widget.ListView;
 
 class AsyncManageTagsRefresh extends AsyncTask<String, String[], Animation>
 {
-   private static final int INFO_INITIAL_CAPACITY = 40;
-   private static final int FADE_IN_DURATION = 330;
+   private static final byte INFO_INITIAL_CAPACITY = 40;
+   private static final short FADE_IN_DURATION = 330;
    private final ListView m_listView;
 
    private
@@ -65,7 +65,7 @@ class AsyncManageTagsRefresh extends AsyncTask<String, String[], Animation>
       String[] indexTags = feedsIndex[1];
 
       String[] feedInfoArray = new String[tagCount];
-      StringBuilder info = new StringBuilder(INFO_INITIAL_CAPACITY);
+      StringBuilder info = new StringBuilder((int) INFO_INITIAL_CAPACITY);
 
       for(int i = 0; i < tagCount; i++)
       {
@@ -103,7 +103,7 @@ class AsyncManageTagsRefresh extends AsyncTask<String, String[], Animation>
       publishProgress(feedTags, feedInfoArray);
 
       Animation fadeIn = new AlphaAnimation(0.0F, 1.0F);
-      fadeIn.setDuration(FADE_IN_DURATION);
+      fadeIn.setDuration((long) FADE_IN_DURATION);
       return fadeIn;
    }
 
