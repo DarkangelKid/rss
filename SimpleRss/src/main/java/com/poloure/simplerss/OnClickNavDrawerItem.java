@@ -75,6 +75,7 @@ class OnClickNavDrawerItem implements AdapterView.OnItemClickListener
       Fragment selectedFragment = m_fragmentManager.findFragmentByTag(selectedTitle);
 
       /* Hide the current fragment and display the selected one. */
+
       FragmentTransaction transaction = m_fragmentManager.beginTransaction();
       for(String navigationTitle : m_navigationTitles)
       {
@@ -84,6 +85,7 @@ class OnClickNavDrawerItem implements AdapterView.OnItemClickListener
             transaction.hide(frag);
          }
       }
+
       transaction.show(selectedFragment);
       transaction.commit();
    }

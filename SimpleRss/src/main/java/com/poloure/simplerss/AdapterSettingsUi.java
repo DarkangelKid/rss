@@ -1,7 +1,6 @@
 package com.poloure.simplerss;
 
 import android.content.Context;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -15,19 +14,16 @@ class AdapterSettingsUi extends BaseAdapter
    private static final int[] TYPES = {TYPE_HEADING, TYPE_CHECKBOX, TYPE_SEEK_BAR};
    private final String[] m_interfaceTitles;
    private final String[] m_interfaceSummaries;
-   private final LayoutInflater m_layoutInflater;
    private final String m_applicationFolder;
    private final Context m_context;
-   private TextView m_settingsHeading;
 
    AdapterSettingsUi(Context context, String applicationFolder, String[] adapterTitles,
-         String[] adapterSummaries, LayoutInflater layoutInflater)
+         String[] adapterSummaries)
    {
       m_context = context;
       m_applicationFolder = applicationFolder;
       m_interfaceTitles = adapterTitles.clone();
       m_interfaceSummaries = adapterSummaries.clone();
-      m_layoutInflater = layoutInflater;
    }
 
    @Override
@@ -62,13 +58,8 @@ class AdapterSettingsUi extends BaseAdapter
 
       if(TYPE_HEADING == viewType)
       {
-         if(null == view)
-         {
-            view = m_layoutInflater.inflate(R.layout.settings_heading, parent, false);
-            m_settingsHeading = (TextView) view.findViewById(R.id.settings_heading);
-         }
-
-         m_settingsHeading.setText(title);
+         view = null == view ? ViewSettingsHeader.newInstance(m_context) : convertView;
+         ((TextView) view).setText(title);
       }
       else if(TYPE_CHECKBOX == viewType)
       {

@@ -18,9 +18,9 @@ import java.util.TreeMap;
 
 class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
 {
-   private static final short MAX_DESCRIPTION_LENGTH = 360;
-   private static final byte MIN_DESCRIPTION_LENGTH = 8;
-   private static final byte MIN_IMAGE_WIDTH = 32;
+   private static final short MAX_DESCRIPTION_LENGTH = (short) 360;
+   private static final byte MIN_DESCRIPTION_LENGTH = (byte) 8;
+   private static final byte MIN_IMAGE_WIDTH = (byte) 32;
    private final String m_applicationFolder;
    private final ListView m_listView;
    private final boolean m_isAllTag;
@@ -102,7 +102,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
                if(null != imageUrls[i])
                {
                   data.m_imageWidth = null == widths[i] || 0 == widths[i].length()
-                        ? 0
+                        ? (short) 0
                         : fastParseShort(widths[i]);
 
                   /* If the image is large enough so that we should care about it. */
@@ -111,14 +111,14 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
                      int lastSlash = imageUrls[i].lastIndexOf(File.separatorChar) + 1;
                      data.m_imagePath = feedThumbnailDir + imageUrls[i].substring(lastSlash);
                      data.m_imageHeight = null == heights[i] || 0 == heights[i].length()
-                           ? 0
+                           ? (short) 0
                            : fastParseShort(heights[i]);
                   }
                   else
                   {
                      data.m_imagePath = "";
-                     data.m_imageWidth = 0;
-                     data.m_imageHeight = 0;
+                     data.m_imageWidth = (short) 0;
+                     data.m_imageHeight = (short) 0;
                   }
                }
 
@@ -129,7 +129,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
                }
                else if((int) MAX_DESCRIPTION_LENGTH <= descriptions[i].length())
                {
-                  descriptions[i] = descriptions[i].substring(0, MAX_DESCRIPTION_LENGTH);
+                  descriptions[i] = descriptions[i].substring(0, (int) MAX_DESCRIPTION_LENGTH);
                }
 
                data.m_itemTitle = null == titles[i] ? "" : titles[i];
@@ -144,12 +144,9 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
                boolean isUnread = !AdapterTags.READ_ITEM_TIMES.contains(data.m_itemTime);
                boolean isOpaque = 0.0F != LayoutFeedItem.getReadItemOpacity();
 
-               if(notInAdapter)
+               if(notInAdapter && isUnread || isOpaque)
                {
-                  if(isUnread || isOpaque)
-                  {
-                     map.put(data.m_itemTime, data);
-                  }
+                  map.put(data.m_itemTime, data);
                }
             }
          }
@@ -169,6 +166,39 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
          publishProgress(itemCollection, longList);
       }
       return null;
+   }
+
+   private static
+   long fastParseLong(String s)
+   {
+      if(null == s)
+      {
+         return 0L;
+      }
+      char[] chars = s.toCharArray();
+      long num = 0L;
+
+      for(char c : chars)
+      {
+         int value = (int) c - 48;
+         num = num * 10L + (long) value;
+      }
+      return num;
+   }
+
+   private static
+   short fastParseShort(String s)
+   {
+      char[] chars = s.toCharArray();
+      int num = 0;
+
+      for(char c : chars)
+      {
+         int value = (int) c - 48;
+         num = num * 10 + value;
+      }
+      /* We are not reading images larger than 32,767px so (short) is fine. */
+      return (short) num;
    }
 
    @Override
@@ -242,38 +272,5 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       {
          FeedsActivity.gotoLatestUnread(m_listView);
       }
-   }
-
-   private static
-   short fastParseShort(String s)
-   {
-      char[] chars = s.toCharArray();
-      int num = 0;
-
-      for(char c : chars)
-      {
-         int value = (int) c - 48;
-         num = num * 10 + value;
-      }
-      /* We are not reading images larger than 32,767px so (short) is fine. */
-      return (short) num;
-   }
-
-   private static
-   long fastParseLong(String s)
-   {
-      if(s == null)
-      {
-         return 0L;
-      }
-      char[] chars = s.toCharArray();
-      long num = 0L;
-
-      for(char c : chars)
-      {
-         int value = (int) c - 48;
-         num = num * 10L + (long) value;
-      }
-      return num;
    }
 }

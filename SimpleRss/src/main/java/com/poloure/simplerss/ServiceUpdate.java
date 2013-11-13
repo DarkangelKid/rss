@@ -56,7 +56,7 @@ class ServiceUpdate extends IntentService
    private static final String INDEX_WIDTH = "width|";
    private static final String INDEX_MIME = "mime|";
    private static final String MIME_GIF = "image/gif";
-   private static final byte COMPRESSION_JPEG = 80;
+   private static final byte COMPRESSION_JPEG = (byte) 80;
    private static final SimpleDateFormat RSS_DATE = new SimpleDateFormat(
          "EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
    @SuppressWarnings("HardcodedLineSeparator")

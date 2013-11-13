@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
+import android.support.v4.view.MenuItemCompat;
 import android.view.MenuItem;
 import android.widget.ListView;
 
@@ -17,6 +18,8 @@ class ServiceHandler extends Handler
    ServiceHandler(FragmentManager fragmentManager, MenuItem refreshItem, String applicationFolder)
    {
       m_fragmentManager = fragmentManager;
+
+      /* TODO, this is not the same MenuItem when you restart the app. */
       m_refreshItem = refreshItem;
       m_applicationFolder = applicationFolder;
    }
@@ -26,7 +29,8 @@ class ServiceHandler extends Handler
    public
    void handleMessage(Message msg)
    {
-      FeedsActivity.setRefreshingIcon(false, m_refreshItem);
+      /* Tell the refresh icon to stop spinning. */
+      MenuItemCompat.setActionView(m_refreshItem, null);
 
       Bundle bundle = msg.getData();
       if(null == bundle)
@@ -36,7 +40,7 @@ class ServiceHandler extends Handler
 
       int updatedPage = bundle.getInt("page_number");
 
-         /* Find which pages we want to refresh. */
+      /* Find which pages we want to refresh. */
       int tagsCount = PagerAdapterFeeds.getSize();
       int[] pagesToRefresh;
 
@@ -58,10 +62,12 @@ class ServiceHandler extends Handler
       {
          ListFragment listFragment = (ListFragment) m_fragmentManager.findFragmentByTag(
                FragmentFeeds.FRAGMENT_ID_PREFIX + page);
-         ListView listView = listFragment.getListView();
-
-         /* TODO isAllTag not 0. */
-         AsyncRefreshPage.newInstance(page, listView, m_applicationFolder, 0 == page);
+         if(null != listFragment)
+         {
+            /* TODO isAllTag not 0. */
+            ListView listView = listFragment.getListView();
+            AsyncRefreshPage.newInstance(page, listView, m_applicationFolder, 0 == page);
+         }
       }
    }
 }

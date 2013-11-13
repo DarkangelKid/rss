@@ -36,8 +36,7 @@ class ListFragmentSettingsUi extends ListFragment
       String[] interfaceSummaries = resources.getStringArray(R.array.settings_interface_summaries);
 
       setListAdapter(
-            new AdapterSettingsUi(context, applicationFolder, interfaceTitles, interfaceSummaries,
-                  layoutInflater));
+            new AdapterSettingsUi(context, applicationFolder, interfaceTitles, interfaceSummaries));
    }
 
    @Override

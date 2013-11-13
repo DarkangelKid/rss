@@ -42,7 +42,7 @@ class ListFragmentTag extends ListFragment
       AdapterNavigationDrawer adapterNavigationDrawer
             = (AdapterNavigationDrawer) navigationList.getAdapter();
 
-      ListAdapter listAdapter = new AdapterTags(activity);
+      ListAdapter listAdapter = new AdapterTags(activity, applicationFolder);
       setListAdapter(listAdapter);
 
       Bundle bundle = getArguments();

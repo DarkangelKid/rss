@@ -13,7 +13,7 @@ import java.io.File;
 
 class AsyncManageFeedsRefresh extends AsyncTask<String, CharSequence[], Animation>
 {
-   private static final short FADE_IN_DURATION = 330;
+   private static final short FADE_IN_DURATION = (short) 330;
    private final ListView m_listView;
 
    private

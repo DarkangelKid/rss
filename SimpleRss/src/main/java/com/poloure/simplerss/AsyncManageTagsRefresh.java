@@ -11,8 +11,8 @@ import android.widget.ListView;
 
 class AsyncManageTagsRefresh extends AsyncTask<String, String[], Animation>
 {
-   private static final byte INFO_INITIAL_CAPACITY = 40;
-   private static final short FADE_IN_DURATION = 330;
+   private static final byte INFO_INITIAL_CAPACITY = (byte) 40;
+   private static final short FADE_IN_DURATION = (short) 330;
    private final ListView m_listView;
 
    private

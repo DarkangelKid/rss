@@ -2,11 +2,9 @@ package com.poloure.simplerss;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,11 +19,13 @@ class AdapterTags extends BaseAdapter
    private final List<FeedItem> m_items = new ArrayList<FeedItem>(0);
    private final List<Long> m_times = new ArrayList<Long>(0);
    private final Context m_context;
+   private final String m_applicationFolder;
    boolean m_isReadingItems = true;
 
-   AdapterTags(Context context)
+   AdapterTags(Context context, String applicationFolder)
    {
       m_context = context;
+      m_applicationFolder = applicationFolder;
    }
 
    void prependArray(Object... items)
@@ -67,14 +67,15 @@ class AdapterTags extends BaseAdapter
    public
    View getView(int position, View convertView, ViewGroup parent)
    {
-      LayoutFeedItem view;
       boolean isNewView = null == convertView;
 
-      if(isNewView)
-      {
-         view = new LayoutFeedItem(m_context);
+      LayoutFeedItem view = isNewView
+            ? new LayoutFeedItem(m_context)
+            : (LayoutFeedItem) convertView;
 
-         /* Get the opacity value from file. */
+      float opacity = LayoutFeedItem.getReadItemOpacity();
+      if(0.0F > opacity)
+      {
          Resources resources = m_context.getResources();
          String applicationFolder = FeedsActivity.getApplicationFolder(m_context);
          String[] settingTitles = resources.getStringArray(R.array.settings_interface_titles);
@@ -82,35 +83,27 @@ class AdapterTags extends BaseAdapter
          String[] opacityFile = Read.file(opacityPath, applicationFolder);
 
          boolean valueExists = 0 != opacityFile.length && 0 != opacityFile[0].length();
-         if(valueExists)
-         {
-            float opacity = Float.parseFloat(opacityFile[0]) / 100.0F;
-            LayoutFeedItem.setReadItemOpacity(opacity);
-         }
-      }
-      else
-      {
-         view = (LayoutFeedItem) convertView;
-      }
 
-      view.setVisibility(View.VISIBLE);
+         LayoutFeedItem.setReadItemOpacity(
+               valueExists ? Float.parseFloat(opacityFile[0]) / 100.0F : 0.66F);
+      }
 
       FeedItem item = m_items.get(position);
       Long time = item.m_itemTime;
       boolean isRead = READ_ITEM_TIMES.contains(time);
 
-      view.showItem(item, position, isRead);
+      view.showItem(item, m_applicationFolder, position, isRead);
 
       /* If read and read items are hidden, remove the item. */
-      TextView textView = (TextView) view.findViewById(R.id.title);
+      /*TextView textView = (TextView) view.findViewById(R.id.title);
       int color = textView.getCurrentTextColor();
 
       if(Color.TRANSPARENT == color)
       {
          /* TODO, the item still shows empty space. */
-         view.setVisibility(View.GONE);
+        /* view.setVisibility(View.GONE);
          return view;
-      }
+      }*/
 
       /* The logic that tells whether the item is Read or not. */
       boolean isListViewShown = parent.isShown();

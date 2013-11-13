@@ -42,14 +42,14 @@ import java.util.Set;
 public
 class FeedsActivity extends ActionBarActivity
 {
-   private static final String READ_ITEMS = "read_items.txt";
    static final String SETTINGS_DIR = "settings" + File.separatorChar;
    static final String FILTER_LIST = "filter_list.txt";
-   private static final byte ALARM_SERVICE_START = 1;
-   private static final byte ALARM_SERVICE_STOP = 0;
+   private static final String READ_ITEMS = "read_items.txt";
+   private static final byte ALARM_SERVICE_START = (byte) 1;
+   private static final byte ALARM_SERVICE_STOP = (byte) 0;
    private static final int MINUTE_VALUE = 60000;
-   private static final byte DEFAULT_REFRESH_TIME = 120;
-   private static final short TAGS_LIST_VIEW_FADE_IN_TIME = 240;
+   private static final byte DEFAULT_REFRESH_TIME = (byte) 120;
+   private static final short TAGS_LIST_VIEW_FADE_IN_TIME = (short) 240;
    static Handler s_serviceHandler;
    String m_previousActionBarTitle;
    private ViewPager m_feedsViewPager;
@@ -281,23 +281,17 @@ class FeedsActivity extends ActionBarActivity
       time. */
       MenuItem refreshItem = menu.findItem(R.id.refresh);
       boolean serviceRunning = isServiceRunning();
-      setRefreshingIcon(serviceRunning, refreshItem);
-      return true;
-   }
 
-   /* Changes the ManageFeedsRefresh menu item to an animation. */
-   static
-   void setRefreshingIcon(boolean isSpinning, MenuItem item)
-   {
-      /* Change it depending on the m_mode. */
-      if(isSpinning)
+      if(serviceRunning)
       {
-         MenuItemCompat.setActionView(item, R.layout.progress_circle);
+         MenuItemCompat.setActionView(refreshItem, R.layout.progress_circle);
       }
       else
       {
-         MenuItemCompat.setActionView(item, null);
+         MenuItemCompat.setActionView(refreshItem, null);
       }
+
+      return true;
    }
 
    @Override

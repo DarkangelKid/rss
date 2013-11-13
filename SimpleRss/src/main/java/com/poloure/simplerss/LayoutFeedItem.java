@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.util.DisplayMetrics;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ImageView;
@@ -18,11 +17,10 @@ class LayoutFeedItem extends RelativeLayout
    private static final int COLOR_LINK_UNREAD = Color.argb(128, 0, 0, 0);
    private static final AbsListView.LayoutParams LAYOUT_PARAMS = new AbsListView.LayoutParams(
          ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-   /* These are the default values. */
-   private static float s_opacity = 0.66F;
+   private static float s_opacity = -1.0F;
    private static int s_titleRead = Color.argb(168, 0, 0, 0);
    private static int s_notTitleRead = Color.argb(125, 0, 0, 0);
-   private final byte m_eightDp;
+   private final int m_eightDp;
    private final TextView m_titleView;
    private final TextView m_urlView;
    private final TextView m_descriptionView;
@@ -51,7 +49,7 @@ class LayoutFeedItem extends RelativeLayout
       /* Save DP values. */
       Resources resources = getResources();
       DisplayMetrics displayMetrics = resources.getDisplayMetrics();
-      m_eightDp = (byte) Math.round(displayMetrics.density * 8.0F);
+      m_eightDp = Math.round(displayMetrics.density * 8.0F);
 
       /* Set the background color of the ListView items. */
       setBackgroundColor(Color.WHITE);
@@ -71,7 +69,7 @@ class LayoutFeedItem extends RelativeLayout
       s_notTitleRead = Color.argb(Math.round(190.0F * opacity), 0, 0, 0);
    }
 
-   void showItem(FeedItem feedItem, int position, boolean isRead)
+   void showItem(FeedItem feedItem, String applicationFolder, int position, boolean isRead)
    {
       String link = feedItem.m_itemUrl;
       String title = feedItem.m_itemTitle;
@@ -79,65 +77,47 @@ class LayoutFeedItem extends RelativeLayout
 
       m_titleView.setText(title);
       m_urlView.setText(link);
+
+      /* Set the text colors based on whether the item has been read or not. */
+      m_titleView.setTextColor(isRead ? s_titleRead : COLOR_TITLE_UNREAD);
+      m_urlView.setTextColor(isRead ? s_notTitleRead : COLOR_LINK_UNREAD);
+
       m_imageView.setImageDrawable(null);
 
       /* Figuring out what view type the item is. */
       boolean isImage = 0 != feedItem.m_imageWidth;
       boolean isDescription = null != description && 0 != description.length();
 
+      m_imageView.setVisibility(isImage ? VISIBLE : GONE);
+      m_descriptionView.setVisibility(isDescription ? VISIBLE : GONE);
+
       if(isImage)
       {
-         m_imageView.setVisibility(View.VISIBLE);
-         displayImage(m_imageView, position, feedItem, isRead);
+         displayImage(m_imageView, applicationFolder, position, feedItem, isRead);
       }
-      else
-      {
-         m_imageView.setVisibility(View.GONE);
-      }
-
       if(isDescription)
       {
-         m_descriptionView.setVisibility(View.VISIBLE);
+         int topPadding = isImage ? m_eightDp : Math.round((float) m_eightDp / 4.0F);
+         m_descriptionView.setPadding(m_eightDp, topPadding, m_eightDp, m_eightDp);
          m_descriptionView.setText(description);
-      }
-      else
-      {
-         m_descriptionView.setVisibility(View.GONE);
-      }
-
-      if(isImage && isDescription)
-      {
-         m_descriptionView.setPadding(m_eightDp, m_eightDp, m_eightDp, m_eightDp);
+         m_descriptionView.setTextColor(isRead ? s_notTitleRead : COLOR_DESCRIPTION_UNREAD);
       }
 
       /* Set whether the white shadows should show. */
       int shadowVisibility = isImage && !isDescription ? GONE : VISIBLE;
       m_leftShadow.setVisibility(shadowVisibility);
       m_rightShadow.setVisibility(shadowVisibility);
-
-      if(!isImage && isDescription)
-      {
-         m_descriptionView.setPadding(m_eightDp, m_eightDp / 4, m_eightDp, m_eightDp);
-      }
-
-      /* Set the text colors based on whether the item has been read or not. */
-      m_titleView.setTextColor(isRead ? s_titleRead : COLOR_TITLE_UNREAD);
-      m_urlView.setTextColor(isRead ? s_notTitleRead : COLOR_LINK_UNREAD);
-
-      if(null != m_descriptionView)
-      {
-         m_descriptionView.setTextColor(isRead ? s_notTitleRead : COLOR_DESCRIPTION_UNREAD);
-      }
    }
 
    private
-   void displayImage(ImageView imageView, int position, FeedItem feedItem, boolean isRead)
+   void displayImage(ImageView imageView, String applicationFolder, int position, FeedItem feedItem,
+         boolean isRead)
    {
       Context context = getContext();
       Resources resources = getResources();
       DisplayMetrics displayMetrics = resources.getDisplayMetrics();
 
-      String imagePath = FeedsActivity.getApplicationFolder(context) + feedItem.m_imagePath;
+      String imagePath = applicationFolder + feedItem.m_imagePath;
       short imageWidth = feedItem.m_imageWidth;
       short imageHeight = feedItem.m_imageHeight;
       int screenWidth = displayMetrics.widthPixels;
