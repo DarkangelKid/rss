@@ -18,7 +18,6 @@ class ViewSettingsHeader extends TextView
    private static final float PADDING_HORIZONTAL = 4.0F;
    private static final float TEXT_SIZE = 18.0F;
    private static final int UNIT_DIP = TypedValue.COMPLEX_UNIT_DIP;
-   private static final ColorDrawable GREY_LINE = new ColorDrawable(LINE_COLOR);
    private static final AbsListView.LayoutParams LAYOUT_PARAMS = new AbsListView.LayoutParams(
          ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 
@@ -31,13 +30,20 @@ class ViewSettingsHeader extends TextView
    static
    View newInstance(Context context)
    {
+      return newInstance(context, 0, -1.0F);
+   }
+
+   static
+   View newInstance(Context context, int lineColor, float textSize)
+   {
       TextView textView = new ViewSettingsHeader(context);
 
       Resources resources = context.getResources();
       DisplayMetrics displayMetrics = resources.getDisplayMetrics();
       int width = displayMetrics.widthPixels;
 
-      GREY_LINE.setBounds(0, 0, width, 4);
+      ColorDrawable greyLine = new ColorDrawable(0 == lineColor ? LINE_COLOR : lineColor);
+      greyLine.setBounds(0, 0, width, 4);
 
       float vPadding = TypedValue.applyDimension(UNIT_DIP, PADDING_VERTICAL, displayMetrics);
       float hPadding = TypedValue.applyDimension(UNIT_DIP, PADDING_HORIZONTAL, displayMetrics);
@@ -47,9 +53,9 @@ class ViewSettingsHeader extends TextView
 
       textView.setLayoutParams(LAYOUT_PARAMS);
       textView.setPadding(verticalPadding, horizontalPadding, verticalPadding, horizontalPadding);
-      textView.setCompoundDrawables(null, null, null, GREY_LINE);
+      textView.setCompoundDrawables(null, null, null, greyLine);
       textView.setCompoundDrawablePadding(8);
-      textView.setTextSize(UNIT_DIP, TEXT_SIZE);
+      textView.setTextSize(UNIT_DIP, 0.0F > textSize ? TEXT_SIZE : textSize);
       return textView;
    }
 }

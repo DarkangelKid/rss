@@ -1,6 +1,13 @@
 package com.poloure.simplerss;
 
+import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Build;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,15 +24,21 @@ class AdapterNavigationDrawer extends BaseAdapter
    private static final int TYPE_TAG = 2;
    private static final int[] TYPES = {TYPE_TITLE, TYPE_DIVIDER, TYPE_TAG};
    private static final int[] EMPTY_INT_ARRAY = new int[0];
+   private static final Typeface SANS_SERIF_LITE = Typeface.create("sans-serif-light",
+         Typeface.NORMAL);
+   private static final int COLOR_DIVIDER = Color.parseColor("#CCCCCC");
    private final int m_twelveDp;
    private final String[] m_navigationTitles;
+   private final Context m_context;
    private final LayoutInflater m_layoutInflater;
    private String[] m_tagArray = new String[0];
    private int[] m_unreadArray = EMPTY_INT_ARRAY;
 
-   AdapterNavigationDrawer(String[] navigationTitles, int twelveDp, LayoutInflater layoutInflater)
+   AdapterNavigationDrawer(String[] navigationTitles, Context context, int twelveDp,
+         LayoutInflater layoutInflater)
    {
       m_navigationTitles = navigationTitles.clone();
+      m_context = context;
       m_layoutInflater = layoutInflater;
       m_twelveDp = twelveDp;
    }
@@ -64,6 +77,7 @@ class AdapterNavigationDrawer extends BaseAdapter
       View view = convertView;
       int viewType = getItemViewType(position);
 
+      /* These are fine. */
       if(TYPE_TITLE == viewType)
       {
          if(null == view)
@@ -83,29 +97,46 @@ class AdapterNavigationDrawer extends BaseAdapter
       }
       else if(TYPE_DIVIDER == viewType && null == view)
       {
-         view = m_layoutInflater.inflate(R.layout.navigation_drawer_subtitle_divider, parent,
-               false);
+         String tagsTitle = m_context.getString(R.string.feed_tag_title);
+         view = ViewSettingsHeader.newInstance(m_context, COLOR_DIVIDER, 14.0F);
+         /* TODO Dip */
+         view.setPadding(32, 8, 32, 8);
+         ((TextView) view).setText(tagsTitle);
+         ((TextView) view).setTextColor(Color.WHITE);
       }
       else if(TYPE_TAG == viewType)
       {
-         NavigationTagItem holder2;
-         if(null == view)
+         boolean isNewView = null == convertView;
+
+         view = isNewView ? new TextView(m_context) : convertView;
+
+         if(isNewView)
          {
-            view = m_layoutInflater.inflate(R.layout.navigation_drawer_tag_item, parent, false);
-            holder2 = new NavigationTagItem();
-            holder2.m_tagTitle = (TextView) view.findViewById(R.id.tag_title);
-            holder2.m_unreadCountView = (TextView) view.findViewById(R.id.unread_item);
-            view.setTag(holder2);
-         }
-         else
-         {
-            holder2 = (NavigationTagItem) view.getTag();
+            Resources resources = m_context.getResources();
+            DisplayMetrics displayMetrics = resources.getDisplayMetrics();
+
+            float minHeightFloat = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 42.0F,
+                  displayMetrics);
+            int minHeight = Math.round(minHeightFloat);
+
+            float paddingSides = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16.0F,
+                  displayMetrics);
+            int padding = Math.round(paddingSides);
+
+            view.setPadding(padding, 0, padding, 0);
+            ((TextView) view).setMinHeight(minHeight);
+            ((TextView) view).setTextSize(TypedValue.COMPLEX_UNIT_SP, 16.0F);
+            ((TextView) view).setGravity(Gravity.CENTER_VERTICAL);
+            ((TextView) view).setTextColor(Color.WHITE);
+            ((TextView) view).setTypeface(SANS_SERIF_LITE);
          }
 
-         holder2.m_tagTitle.setText(m_tagArray[position - 4]);
-         String number = Integer.toString(m_unreadArray[position - 4]);
-         String unreadText = "0".equals(number) ? "" : number;
-         holder2.m_unreadCountView.setText(unreadText);
+         /* TODO Add unread count without a two extra views each. */
+         // String number = Integer.toString(m_unreadArray[position - 4]);
+         //String unreadText = "0".equals(number) ? "" : number;
+         String tagTitle = m_tagArray[position - 4];
+
+         ((TextView) view).setText(tagTitle);
       }
       return view;
    }
@@ -137,12 +168,5 @@ class AdapterNavigationDrawer extends BaseAdapter
    int getViewTypeCount()
    {
       return TYPES.length;
-   }
-
-   static
-   class NavigationTagItem
-   {
-      TextView m_tagTitle;
-      TextView m_unreadCountView;
    }
 }

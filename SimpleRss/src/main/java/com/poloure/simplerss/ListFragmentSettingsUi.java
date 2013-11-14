@@ -27,11 +27,9 @@ class ListFragmentSettingsUi extends ListFragment
       super.onActivityCreated(savedInstanceState);
       Context context = getActivity();
 
-      Resources resources = context.getResources();
-      LayoutInflater layoutInflater = getLayoutInflater(savedInstanceState);
-
       String applicationFolder = FeedsActivity.getApplicationFolder(context);
 
+      Resources resources = context.getResources();
       String[] interfaceTitles = resources.getStringArray(R.array.settings_interface_titles);
       String[] interfaceSummaries = resources.getStringArray(R.array.settings_interface_summaries);
 

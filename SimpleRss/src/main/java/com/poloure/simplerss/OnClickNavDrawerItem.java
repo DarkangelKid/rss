@@ -12,6 +12,8 @@ import android.widget.ListAdapter;
 
 class OnClickNavDrawerItem implements AdapterView.OnItemClickListener
 {
+   private static boolean s_settingsFragmentExists;
+   private static boolean s_manageFragmentExists;
    private final FragmentManager m_fragmentManager;
    private final ActionBar m_actionBar;
    private final DrawerLayout m_drawerLayout;
@@ -86,7 +88,29 @@ class OnClickNavDrawerItem implements AdapterView.OnItemClickListener
          }
       }
 
-      transaction.show(selectedFragment);
+      boolean manageClickedFirst = 1 == position && !s_manageFragmentExists;
+      boolean settingsClickedFirst = 2 == position && !s_settingsFragmentExists;
+      if(manageClickedFirst || settingsClickedFirst)
+      {
+         if(1 == position)
+         {
+            s_manageFragmentExists = true;
+         }
+         else
+         {
+            s_settingsFragmentExists = true;
+         }
+
+         Fragment fragment = 1 == position
+               ? FragmentManage.newInstance()
+               : FragmentSettings.newInstance();
+         transaction.add(R.id.content_frame, fragment, selectedTitle);
+      }
+      else
+      {
+         transaction.show(selectedFragment);
+      }
+
       transaction.commit();
    }
 }

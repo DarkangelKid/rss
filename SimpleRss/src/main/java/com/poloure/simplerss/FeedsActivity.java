@@ -90,7 +90,8 @@ class FeedsActivity extends ActionBarActivity
       String[] navigationTitles = m_resources.getStringArray(R.array.navigation_titles);
 
       m_drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-      m_adapterNavDrawer = new AdapterNavigationDrawer(navigationTitles, twelveDp, layoutInflater);
+      m_adapterNavDrawer = new AdapterNavigationDrawer(navigationTitles, this, twelveDp,
+            layoutInflater);
 
       /* Configure the ActionBar. */
       m_actionBar.setIcon(R.drawable.rss_icon);
@@ -117,17 +118,9 @@ class FeedsActivity extends ActionBarActivity
       if(null == savedInstanceState)
       {
          Fragment feedFragment = FragmentFeeds.newInstance();
-         Fragment fragmentManage = FragmentManage.newInstance();
-         Fragment fragmentSettings = FragmentSettings.newInstance();
-
-         int frame = R.id.content_frame;
 
          FragmentTransaction transaction = m_fragmentManager.beginTransaction();
-         transaction.add(frame, feedFragment, navigationTitles[0]);
-         transaction.add(frame, fragmentManage, navigationTitles[1]);
-         transaction.add(frame, fragmentSettings, navigationTitles[2]);
-         transaction.hide(fragmentManage);
-         transaction.hide(fragmentSettings);
+         transaction.add(R.id.content_frame, feedFragment, navigationTitles[0]);
          transaction.commit();
       }
    }
