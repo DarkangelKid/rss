@@ -55,6 +55,7 @@ class ListFragmentTag extends ListFragment
             adapterNavigationDrawer, actionBar, applicationFolder, position, listViewTopPadding);
 
       listView.setOnScrollListener(scrollListener);
+      listView.setOnItemLongClickListener(new OnCardLongClick(activity));
 
       if(0 == position)
       {

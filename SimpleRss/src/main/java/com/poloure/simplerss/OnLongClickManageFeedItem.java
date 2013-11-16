@@ -34,7 +34,11 @@ class OnLongClickManageFeedItem implements AdapterView.OnItemLongClickListener
    boolean onItemLongClick(AdapterView<?> parent, View view, int pos, long id)
    {
       Adapter adapter = parent.getAdapter();
-      String feedName = (String) adapter.getItem(pos);
+
+      /* TODO fix these chains up. */
+      String feedName = adapter.getItem(pos).toString();
+      feedName = feedName.substring(0, feedName.indexOf('\n'));
+
       m_builder.setItems(R.array.long_click_manage_feeds,
             new OnClickManageFeedDialogItem(m_listView, m_pagerAdapterFeeds, m_navigationAdapter,
                   feedName, m_applicationFolder, m_allTag));

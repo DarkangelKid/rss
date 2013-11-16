@@ -168,39 +168,6 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       return null;
    }
 
-   private static
-   long fastParseLong(String s)
-   {
-      if(null == s)
-      {
-         return 0L;
-      }
-      char[] chars = s.toCharArray();
-      long num = 0L;
-
-      for(char c : chars)
-      {
-         int value = (int) c - 48;
-         num = num * 10L + (long) value;
-      }
-      return num;
-   }
-
-   private static
-   short fastParseShort(String s)
-   {
-      char[] chars = s.toCharArray();
-      int num = 0;
-
-      for(char c : chars)
-      {
-         int value = (int) c - 48;
-         num = num * 10 + value;
-      }
-      /* We are not reading images larger than 32,767px so (short) is fine. */
-      return (short) num;
-   }
-
    @Override
    protected
    void onPostExecute(Void result)
@@ -221,13 +188,10 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       AdapterTags adapterTag = (AdapterTags) m_listView.getAdapter();
       final List<Long> timeListInAdapter = adapterTag.getTimeList();
 
-      /* If these are the first items to be added to the list. */
-      if(0 == m_listView.getCount())
-      {
-         m_listView.setVisibility(View.INVISIBLE);
-      }
+      boolean notFirstLoad = 0 != m_listView.getCount();
+
       /* Find the exact mPosition in the list. */
-      else
+      if(notFirstLoad)
       {
          /* Get the time of the top item. */
          index = m_listView.getFirstVisiblePosition();
@@ -249,7 +213,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       adapterTag.notifyDataSetChanged();
 
       /* If this was the first time loading the tag data, jump to the latest unread item. */
-      if(m_listView.isShown())
+      if(notFirstLoad)
       {
          /* We now need to find the position of the item with the time timeBefore. */
          /* NOTE Do not change anything in itemList. */
@@ -272,5 +236,38 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       {
          FeedsActivity.gotoLatestUnread(m_listView);
       }
+   }
+
+   private static
+   short fastParseShort(String s)
+   {
+      char[] chars = s.toCharArray();
+      int num = 0;
+
+      for(char c : chars)
+      {
+         int value = (int) c - 48;
+         num = num * 10 + value;
+      }
+      /* We are not reading images larger than 32,767px so (short) is fine. */
+      return (short) num;
+   }
+
+   private static
+   long fastParseLong(String s)
+   {
+      if(null == s)
+      {
+         return 0L;
+      }
+      char[] chars = s.toCharArray();
+      long num = 0L;
+
+      for(char c : chars)
+      {
+         int value = (int) c - 48;
+         num = num * 10L + (long) value;
+      }
+      return num;
    }
 }

@@ -59,7 +59,7 @@ class AdapterManageFilters extends BaseAdapter
       View view = convertView;
       if(null == view)
       {
-         view = m_layoutInflater.inflate(R.layout.manage_list_view_item, parent, false);
+         view = m_layoutInflater.inflate(R.layout.manage_item, parent, false);
          m_titleView = (TextView) view.findViewById(R.id.first_text);
       }
 

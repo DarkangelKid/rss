@@ -25,24 +25,17 @@ class LayoutFeedItem extends RelativeLayout
    private final TextView m_urlView;
    private final TextView m_descriptionView;
    private final ImageView m_imageView;
-   private final ImageView m_leftShadow;
-   private final ImageView m_rightShadow;
 
    LayoutFeedItem(Context context)
    {
       super(context);
-      inflate(context, R.layout.card_full, this);
+      inflate(context, R.layout.feed_item, this);
 
       /* Save the inflated views from the xml file as class fields. */
       m_titleView = (TextView) findViewById(R.id.title);
       m_urlView = (TextView) findViewById(R.id.url);
       m_descriptionView = (TextView) findViewById(R.id.description);
       m_imageView = (ImageView) findViewById(R.id.image);
-      m_leftShadow = (ImageView) findViewById(R.id.white_left_shadow);
-      m_rightShadow = (ImageView) findViewById(R.id.white_right_shadow);
-
-      /* Set the long click listener for the item. */
-      setOnLongClickListener(new OnCardLongClick(context));
 
       setLayoutParams(LAYOUT_PARAMS);
 
@@ -50,9 +43,6 @@ class LayoutFeedItem extends RelativeLayout
       Resources resources = getResources();
       DisplayMetrics displayMetrics = resources.getDisplayMetrics();
       m_eightDp = Math.round(displayMetrics.density * 8.0F);
-
-      /* Set the background color of the ListView items. */
-      setBackgroundColor(Color.WHITE);
    }
 
    static
@@ -102,11 +92,6 @@ class LayoutFeedItem extends RelativeLayout
          m_descriptionView.setText(description);
          m_descriptionView.setTextColor(isRead ? s_notTitleRead : COLOR_DESCRIPTION_UNREAD);
       }
-
-      /* Set whether the white shadows should show. */
-      int shadowVisibility = isImage && !isDescription ? GONE : VISIBLE;
-      m_leftShadow.setVisibility(shadowVisibility);
-      m_rightShadow.setVisibility(shadowVisibility);
    }
 
    private

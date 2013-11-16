@@ -43,7 +43,7 @@ class ViewSettingsHeader extends TextView
       int width = displayMetrics.widthPixels;
 
       ColorDrawable greyLine = new ColorDrawable(0 == lineColor ? LINE_COLOR : lineColor);
-      greyLine.setBounds(0, 0, width, 4);
+      greyLine.setBounds(0, 0, width, 3);
 
       float vPadding = TypedValue.applyDimension(UNIT_DIP, PADDING_VERTICAL, displayMetrics);
       float hPadding = TypedValue.applyDimension(UNIT_DIP, PADDING_HORIZONTAL, displayMetrics);

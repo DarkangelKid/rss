@@ -2,7 +2,6 @@ package com.poloure.simplerss;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.support.v7.app.ActionBarActivity;
@@ -28,8 +27,6 @@ class ListFragmentSettingsFunctions extends ListFragment
       super.onCreateView(inflater, container, savedInstanceState);
 
       ListView listView = (ListView) inflater.inflate(R.layout.listview, container, false);
-      listView.setDividerHeight(0);
-      listView.setBackgroundColor(Color.WHITE);
 
       return listView;
    }

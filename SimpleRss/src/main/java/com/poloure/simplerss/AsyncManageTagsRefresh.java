@@ -1,7 +1,13 @@
 package com.poloure.simplerss;
 
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.text.Editable;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.AbsoluteSizeSpan;
+import android.text.style.StyleSpan;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -9,10 +15,12 @@ import android.widget.Adapter;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 
-class AsyncManageTagsRefresh extends AsyncTask<String, String[], Animation>
+class AsyncManageTagsRefresh extends AsyncTask<String, Editable[], Animation>
 {
    private static final byte INFO_INITIAL_CAPACITY = (byte) 40;
    private static final short FADE_IN_DURATION = (short) 330;
+   private static final AbsoluteSizeSpan TITLE_SIZE = new AbsoluteSizeSpan(14, true);
+   private static final StyleSpan SPAN_BOLD = new StyleSpan(Typeface.BOLD);
    private final ListView m_listView;
 
    private
@@ -31,7 +39,7 @@ class AsyncManageTagsRefresh extends AsyncTask<String, String[], Animation>
    static
    void newInstance(ListView listView, String applicationFolder, String allTag)
    {
-      AsyncTask<String, String[], Animation> task = new AsyncManageTagsRefresh(listView);
+      AsyncTask<String, Editable[], Animation> task = new AsyncManageTagsRefresh(listView);
 
       if(Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT)
       {
@@ -63,8 +71,9 @@ class AsyncManageTagsRefresh extends AsyncTask<String, String[], Animation>
       String[][] feedsIndex = Read.csvFile(Read.INDEX, applicationFolder, 'f', 't');
       String[] indexNames = feedsIndex[0];
       String[] indexTags = feedsIndex[1];
+      int indexCount = indexNames.length;
 
-      String[] feedInfoArray = new String[tagCount];
+      Editable[] editables = new SpannableStringBuilder[tagCount];
       StringBuilder info = new StringBuilder((int) INFO_INITIAL_CAPACITY);
 
       for(int i = 0; i < tagCount; i++)
@@ -79,8 +88,7 @@ class AsyncManageTagsRefresh extends AsyncTask<String, String[], Animation>
          }
          else
          {
-            int feedsCount = indexNames.length;
-            for(int j = 0; j < feedsCount; j++)
+            for(int j = 0; j < indexCount; j++)
             {
                if(indexTags[j].contains(feedTags[i]))
                {
@@ -95,12 +103,25 @@ class AsyncManageTagsRefresh extends AsyncTask<String, String[], Animation>
             int infoSize = info.length();
             info.delete(infoSize - 2, infoSize);
          }
-         feedInfoArray[i] = "<b>Feeds: </b>" + feedCount + " · " + info;
-      }
-      /* 0 is meant to be total. */
-      feedInfoArray[0] = 0 + " items • " + feedInfoArray[0];
 
-      publishProgress(feedTags, feedInfoArray);
+         /* First, the title. */
+         Editable editable = new SpannableStringBuilder();
+         editable.append(feedTags[i]);
+         editable.setSpan(TITLE_SIZE, 0, editable.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+         editable.append("\n");
+
+         /* Next the info. */
+         int currentPosition = editable.length();
+         editable.append("Feeds: ");
+         editable.setSpan(SPAN_BOLD, currentPosition, editable.length(),
+               Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+         editable.append(Integer.toString(feedCount));
+         editable.append(" · ");
+         editable.append(info);
+         editables[i] = editable;
+      }
+
+      publishProgress(editables);
 
       Animation fadeIn = new AlphaAnimation(0.0F, 1.0F);
       fadeIn.setDuration((long) FADE_IN_DURATION);
@@ -120,12 +141,12 @@ class AsyncManageTagsRefresh extends AsyncTask<String, String[], Animation>
 
    @Override
    protected
-   void onProgressUpdate(String[][] values)
+   void onProgressUpdate(Editable[]... values)
    {
       BaseAdapter adapter = (BaseAdapter) m_listView.getAdapter();
       if(null != adapter)
       {
-         ((AdapterManageFragments) adapter).setArrays(values[0], values[1]);
+         ((AdapterManageFragments) adapter).setEditable(values[0]);
          adapter.notifyDataSetChanged();
       }
    }

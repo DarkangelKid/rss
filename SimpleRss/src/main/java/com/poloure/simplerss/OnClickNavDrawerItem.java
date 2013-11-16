@@ -12,8 +12,6 @@ import android.widget.ListAdapter;
 
 class OnClickNavDrawerItem implements AdapterView.OnItemClickListener
 {
-   private static boolean s_settingsFragmentExists;
-   private static boolean s_manageFragmentExists;
    private final FragmentManager m_fragmentManager;
    private final ActionBar m_actionBar;
    private final DrawerLayout m_drawerLayout;
@@ -73,34 +71,22 @@ class OnClickNavDrawerItem implements AdapterView.OnItemClickListener
          m_actionBar.setSubtitle(null);
       }
 
-      /* Get the selected fragment. */
-      Fragment selectedFragment = m_fragmentManager.findFragmentByTag(selectedTitle);
-
-      /* Hide the current fragment and display the selected one. */
-
+      /* Hide all the fragments*/
       FragmentTransaction transaction = m_fragmentManager.beginTransaction();
       for(String navigationTitle : m_navigationTitles)
       {
          Fragment frag = m_fragmentManager.findFragmentByTag(navigationTitle);
-         if(null != frag && !frag.equals(selectedFragment))
+         if(null != frag)
          {
             transaction.hide(frag);
          }
       }
 
-      boolean manageClickedFirst = 1 == position && !s_manageFragmentExists;
-      boolean settingsClickedFirst = 2 == position && !s_settingsFragmentExists;
-      if(manageClickedFirst || settingsClickedFirst)
-      {
-         if(1 == position)
-         {
-            s_manageFragmentExists = true;
-         }
-         else
-         {
-            s_settingsFragmentExists = true;
-         }
+      /* Get the selected fragment. */
+      Fragment selectedFragment = m_fragmentManager.findFragmentByTag(selectedTitle);
 
+      if(null == selectedFragment)
+      {
          Fragment fragment = 1 == position
                ? FragmentManage.newInstance()
                : FragmentSettings.newInstance();

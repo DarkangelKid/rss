@@ -1,5 +1,5 @@
 <resources>
-   <color name="custom_theme_color">#ffe5e5e5</color>
+   <color name="custom_theme_color">#00000000</color>
 
    <drawable name="divider_settings_dark">#cccccc</drawable>
    <drawable name="divider_settings_light">#e5e5e5</drawable>

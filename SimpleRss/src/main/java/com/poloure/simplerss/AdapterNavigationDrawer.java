@@ -26,7 +26,7 @@ class AdapterNavigationDrawer extends BaseAdapter
    private static final int[] EMPTY_INT_ARRAY = new int[0];
    private static final Typeface SANS_SERIF_LITE = Typeface.create("sans-serif-light",
          Typeface.NORMAL);
-   private static final int COLOR_DIVIDER = Color.parseColor("#CCCCCC");
+   private static final int COLOR_DIVIDER = Color.parseColor("#888888");
    private final int m_twelveDp;
    private final String[] m_navigationTitles;
    private final Context m_context;
@@ -98,7 +98,7 @@ class AdapterNavigationDrawer extends BaseAdapter
       else if(TYPE_DIVIDER == viewType && null == view)
       {
          String tagsTitle = m_context.getString(R.string.feed_tag_title);
-         view = ViewSettingsHeader.newInstance(m_context, COLOR_DIVIDER, 14.0F);
+         view = ViewSettingsHeader.newInstance(m_context, COLOR_DIVIDER, 12.0F);
          /* TODO Dip */
          view.setPadding(32, 8, 32, 8);
          ((TextView) view).setText(tagsTitle);

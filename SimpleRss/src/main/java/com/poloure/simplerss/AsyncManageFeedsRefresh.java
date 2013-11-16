@@ -1,7 +1,13 @@
 package com.poloure.simplerss;
 
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.text.Editable;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.AbsoluteSizeSpan;
+import android.text.style.StyleSpan;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -11,9 +17,11 @@ import android.widget.ListView;
 
 import java.io.File;
 
-class AsyncManageFeedsRefresh extends AsyncTask<String, CharSequence[], Animation>
+class AsyncManageFeedsRefresh extends AsyncTask<String, Editable[], Animation>
 {
    private static final short FADE_IN_DURATION = (short) 330;
+   private static final AbsoluteSizeSpan TITLE_SIZE = new AbsoluteSizeSpan(14, true);
+   private static final StyleSpan SPAN_BOLD = new StyleSpan(Typeface.BOLD);
    private final ListView m_listView;
 
    private
@@ -31,7 +39,7 @@ class AsyncManageFeedsRefresh extends AsyncTask<String, CharSequence[], Animatio
    static
    void newInstance(ListView listView, String applicationFolder)
    {
-      AsyncTask<String, CharSequence[], Animation> task = new AsyncManageFeedsRefresh(listView);
+      AsyncTask<String, Editable[], Animation> task = new AsyncManageFeedsRefresh(listView);
 
       if(Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT)
       {
@@ -49,26 +57,53 @@ class AsyncManageFeedsRefresh extends AsyncTask<String, CharSequence[], Animatio
    {
       String appFolder = applicationFolder[0];
 
-      /* Read the ALL_TAG m_imageViewTag file for names, urls, and tags. */
+      /* Read the index file for names, urls, and tags. */
       String[][] feedsIndex = Read.csvFile(Read.INDEX, appFolder, 'f', 'u', 't');
       String[] feedNames = feedsIndex[0];
       String[] feedUrls = feedsIndex[1];
       String[] feedTags = feedsIndex[2];
 
       int size = feedNames.length;
-      CharSequence[] feedInfoArray = new CharSequence[size];
+      Editable[] editables = new SpannableStringBuilder[size];
 
       for(int i = 0; i < size; i++)
       {
+         Editable editable = new SpannableStringBuilder();
+
+         /* Append the feed name. */
+         editable.append(feedNames[i]);
+         editable.append("\n");
+
+         /* Make the feed name size 16dip. */
+         int titleLength = feedNames[i].length();
+         editable.setSpan(TITLE_SIZE, 0, titleLength, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
          /* Form the path to the feed_content file. */
          String feedContentFileName = feedNames[i] + File.separatorChar + ServiceUpdate.CONTENT;
          int feedContentSize = Read.count(feedContentFileName, appFolder);
+         String contentSize = Integer.toString(feedContentSize);
 
-         /* Build the info string. */
-         feedInfoArray[i] = feedUrls[i] + "<br><b>Items: </b>" + Integer.toString(feedContentSize) +
-               " · <b>" + feedTags[i] + "</b>";
+         /* Append the url to the next line. */
+         editable.append(feedUrls[i]);
+         editable.append("\n");
+
+         /* Append an bold "Items :" text. */
+         int thirdLinePosition = editable.length();
+         editable.append("Items: ");
+         editable.setSpan(SPAN_BOLD, thirdLinePosition, editable.length(),
+               Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+         editable.append(contentSize);
+
+         editable.append(" · ");
+
+         /* Append the tags in bold. */
+         int currentPosition = editable.length();
+         editable.append(feedTags[i]);
+         editable.setSpan(SPAN_BOLD, currentPosition, editable.length(),
+               Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+         editables[i] = editable;
       }
-      publishProgress(feedNames, feedInfoArray);
+      publishProgress(editables);
 
       Animation fadeIn = new AlphaAnimation(0.0F, 1.0F);
       fadeIn.setDuration((long) FADE_IN_DURATION);
@@ -88,10 +123,10 @@ class AsyncManageFeedsRefresh extends AsyncTask<String, CharSequence[], Animatio
 
    @Override
    protected
-   void onProgressUpdate(CharSequence[]... values)
+   void onProgressUpdate(Editable[]... values)
    {
       BaseAdapter adapter = (BaseAdapter) m_listView.getAdapter();
-      ((AdapterManageFragments) adapter).setArrays(values[0], values[1]);
+      ((AdapterManageFragments) adapter).setEditable(values[0]);
       adapter.notifyDataSetChanged();
    }
 }

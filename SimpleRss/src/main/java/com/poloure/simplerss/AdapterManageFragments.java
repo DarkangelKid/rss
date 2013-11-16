@@ -1,6 +1,7 @@
 package com.poloure.simplerss;
 
 import android.content.Context;
+import android.text.Editable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -8,32 +9,30 @@ import android.widget.BaseAdapter;
 class AdapterManageFragments extends BaseAdapter
 {
    private final Context m_context;
-   private CharSequence[] m_firstArray = new String[0];
-   private CharSequence[] m_secondArray = new String[0];
+   private Editable[] m_editables = new Editable[0];
 
    AdapterManageFragments(Context context)
    {
       m_context = context;
    }
 
-   void setArrays(CharSequence[] titleArray, CharSequence... infoArray)
+   void setEditable(Editable[] titleArray)
    {
-      m_firstArray = titleArray.clone();
-      m_secondArray = infoArray.clone();
+      m_editables = titleArray.clone();
    }
 
    @Override
    public
    int getCount()
    {
-      return m_firstArray.length;
+      return m_editables.length;
    }
 
    @Override
    public
-   CharSequence getItem(int position)
+   Editable getItem(int position)
    {
-      return m_firstArray[position];
+      return m_editables[position];
    }
 
    @Override
@@ -48,7 +47,7 @@ class AdapterManageFragments extends BaseAdapter
    View getView(int position, View convertView, ViewGroup parent)
    {
       View view = null == convertView ? new LayoutManageListViewItem(m_context) : convertView;
-      ((LayoutManageListViewItem) view).showItem(m_firstArray[position], m_secondArray[position]);
+      ((LayoutManageListViewItem) view).showItem(m_editables[position]);
       return view;
    }
 }

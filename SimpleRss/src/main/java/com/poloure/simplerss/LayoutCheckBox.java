@@ -1,7 +1,6 @@
 package com.poloure.simplerss;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.CheckBox;
@@ -28,9 +27,6 @@ class LayoutCheckBox extends RelativeLayout
 
       /* Set the LayoutParams to match parent, match_parent. */
       setLayoutParams(LAYOUT_PARAMS);
-
-      /* Set the background color of the ListView items. */
-      setBackgroundColor(Color.WHITE);
    }
 
    void showItem(CharSequence title, CharSequence summary, String applicationFolder)
