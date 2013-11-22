@@ -7,10 +7,10 @@ import android.util.DisplayMetrics;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
-class LayoutFeedItem extends RelativeLayout
+class LayoutFeedItem extends LinearLayout
 {
    private static final int COLOR_TITLE_UNREAD = Color.argb(255, 0, 0, 0);
    private static final int COLOR_DESCRIPTION_UNREAD = Color.argb(205, 0, 0, 0);
@@ -20,9 +20,8 @@ class LayoutFeedItem extends RelativeLayout
    private static float s_opacity = -1.0F;
    private static int s_titleRead = Color.argb(168, 0, 0, 0);
    private static int s_notTitleRead = Color.argb(125, 0, 0, 0);
-   private final int m_eightDp;
+   private static float s_screenWidth;
    private final TextView m_titleView;
-   private final TextView m_urlView;
    private final TextView m_descriptionView;
    private final ImageView m_imageView;
 
@@ -31,18 +30,20 @@ class LayoutFeedItem extends RelativeLayout
       super(context);
       inflate(context, R.layout.feed_item, this);
 
+      if(0.0F == s_screenWidth)
+      {
+         Resources resources = context.getResources();
+         DisplayMetrics metrics = resources.getDisplayMetrics();
+         s_screenWidth = (float) metrics.widthPixels;
+      }
+
       /* Save the inflated views from the xml file as class fields. */
       m_titleView = (TextView) findViewById(R.id.title);
-      m_urlView = (TextView) findViewById(R.id.url);
       m_descriptionView = (TextView) findViewById(R.id.description);
       m_imageView = (ImageView) findViewById(R.id.image);
 
       setLayoutParams(LAYOUT_PARAMS);
-
-      /* Save DP values. */
-      Resources resources = getResources();
-      DisplayMetrics displayMetrics = resources.getDisplayMetrics();
-      m_eightDp = Math.round(displayMetrics.density * 8.0F);
+      setOrientation(VERTICAL);
    }
 
    static
@@ -59,19 +60,15 @@ class LayoutFeedItem extends RelativeLayout
       s_notTitleRead = Color.argb(Math.round(190.0F * opacity), 0, 0, 0);
    }
 
-   void showItem(FeedItem feedItem, String applicationFolder, int position, boolean isRead)
+   void showItem(FeedItem feedItem, String applicationFolder, int position, boolean isRead,
+         CharSequence editableTitle)
    {
-      String link = feedItem.m_itemUrl;
-      String title = feedItem.m_itemTitle;
       String description = feedItem.m_itemDescription;
 
-      m_titleView.setText(title);
-      m_urlView.setText(link);
+      m_titleView.setText(editableTitle);
 
       /* Set the text colors based on whether the item has been read or not. */
       m_titleView.setTextColor(isRead ? s_titleRead : COLOR_TITLE_UNREAD);
-      m_urlView.setTextColor(isRead ? s_notTitleRead : COLOR_LINK_UNREAD);
-
       m_imageView.setImageDrawable(null);
 
       /* Figuring out what view type the item is. */
@@ -83,36 +80,25 @@ class LayoutFeedItem extends RelativeLayout
 
       if(isImage)
       {
-         displayImage(m_imageView, applicationFolder, position, feedItem, isRead);
+         Context context = getContext();
+
+         short imageWidth = feedItem.m_imageWidth;
+         short imageHeight = feedItem.m_imageHeight;
+
+         ViewGroup.LayoutParams lp = m_imageView.getLayoutParams();
+
+         lp.height = Math.round((float) s_screenWidth / (float) imageWidth * (float) imageHeight);
+         m_imageView.setLayoutParams(lp);
+         m_imageView.setTag(position);
+
+         AsyncLoadImage.newInstance(m_imageView, applicationFolder, feedItem.m_imageName, position,
+               context, isRead, s_opacity);
       }
       if(isDescription)
       {
-         int topPadding = isImage ? m_eightDp : Math.round((float) m_eightDp / 4.0F);
-         m_descriptionView.setPadding(m_eightDp, topPadding, m_eightDp, m_eightDp);
          m_descriptionView.setText(description);
          m_descriptionView.setTextColor(isRead ? s_notTitleRead : COLOR_DESCRIPTION_UNREAD);
       }
    }
 
-   private
-   void displayImage(ImageView imageView, String applicationFolder, int position, FeedItem feedItem,
-         boolean isRead)
-   {
-      Context context = getContext();
-      Resources resources = getResources();
-      DisplayMetrics displayMetrics = resources.getDisplayMetrics();
-
-      String imagePath = applicationFolder + feedItem.m_imagePath;
-      short imageWidth = feedItem.m_imageWidth;
-      short imageHeight = feedItem.m_imageHeight;
-      int screenWidth = displayMetrics.widthPixels;
-
-      ViewGroup.LayoutParams lp = imageView.getLayoutParams();
-
-      lp.height = Math.round((float) screenWidth / (float) imageWidth * (float) imageHeight);
-      imageView.setLayoutParams(lp);
-      imageView.setTag(position);
-
-      AsyncLoadImage.newInstance(imageView, imagePath, position, context, isRead, s_opacity);
-   }
 }

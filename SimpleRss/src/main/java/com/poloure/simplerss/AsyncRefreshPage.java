@@ -1,7 +1,6 @@
 package com.poloure.simplerss;
 
 import android.os.AsyncTask;
-import android.os.Build;
 import android.view.View;
 import android.widget.Adapter;
 import android.widget.ListView;
@@ -38,14 +37,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
    {
       AsyncTask<Integer, Object, Void> task = new AsyncRefreshPage(listView, storage, isAllTag);
 
-      if(Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT)
-      {
          task.executeOnExecutor(THREAD_POOL_EXECUTOR, pageNumber);
-      }
-      else
-      {
-         task.execute(pageNumber);
-      }
    }
 
    @Override
@@ -109,14 +101,14 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
                   if((int) MIN_IMAGE_WIDTH < (int) data.m_imageWidth)
                   {
                      int lastSlash = imageUrls[i].lastIndexOf(File.separatorChar) + 1;
-                     data.m_imagePath = feedThumbnailDir + imageUrls[i].substring(lastSlash);
+                     data.m_imageName = feedThumbnailDir + imageUrls[i].substring(lastSlash);
                      data.m_imageHeight = null == heights[i] || 0 == heights[i].length()
                            ? (short) 0
                            : fastParseShort(heights[i]);
                   }
                   else
                   {
-                     data.m_imagePath = "";
+                     data.m_imageName = "";
                      data.m_imageWidth = (short) 0;
                      data.m_imageHeight = (short) 0;
                   }

@@ -1,10 +1,10 @@
 package com.poloure.simplerss;
 
+import android.app.FragmentManager;
+import android.app.ListFragment;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.ListFragment;
 import android.support.v4.view.MenuItemCompat;
 import android.view.MenuItem;
 import android.widget.ListView;

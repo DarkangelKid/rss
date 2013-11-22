@@ -1,10 +1,10 @@
 package com.poloure.simplerss;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.widget.BaseAdapter;
@@ -16,7 +16,7 @@ class DialogEditFeed extends Dialog
    private final String m_oldFeedTitle;
    private final String m_applicationFolder;
    private final String m_allTag;
-   private final FragmentActivity m_activity;
+   private final Activity m_activity;
    private final ListView m_listView;
 
    private
@@ -24,7 +24,7 @@ class DialogEditFeed extends Dialog
          String allTag)
    {
       super(context);
-      m_activity = (FragmentActivity) context;
+      m_activity = (Activity) context;
       m_listView = listView;
       m_oldFeedTitle = oldFeedTitle;
       m_applicationFolder = applicationFolder;

@@ -1,20 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu
-   xmlns:android="http://schemas.android.com/apk/res/android"
-   xmlns:app="http://schemas.android.com/apk/res-auto">
+   xmlns:android="http://schemas.android.com/apk/res/android">
    <item
       android:id="@+id/add_feed"
       android:icon="@drawable/add"
       android:title="@string/add_feed"
-      app:showAsAction="ifRoom"/>
+      android:showAsAction="always"/>
    <item
       android:id="@+id/unread"
       android:icon="@drawable/unread"
       android:title="@string/unread"
-      app:showAsAction="ifRoom"/>
+      android:showAsAction="always"/>
    <item
       android:id="@+id/refresh"
       android:icon="@drawable/ic_action_refresh"
       android:title="@string/refresh"
-      app:showAsAction="ifRoom"/>
+      android:showAsAction="always"/>
 </menu>

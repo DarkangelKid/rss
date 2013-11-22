@@ -3,7 +3,6 @@ package com.poloure.simplerss;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.view.View;
 
 import java.io.File;
@@ -11,9 +10,9 @@ import java.io.File;
 class OnClickImage implements View.OnClickListener
 {
    private static final String IMAGE_TYPE = "image" + File.separatorChar;
+   private static final char WEB_FILE_SUFFIX_SEPARATOR = '.';
    private final String m_imagePath;
    private final Context m_context;
-   private static final char WEB_FILE_SUFFIX_SEPARATOR = '.';
 
    OnClickImage(String imagePath, Context context)
    {
@@ -32,14 +31,7 @@ class OnClickImage implements View.OnClickListener
 
       Uri uri = Uri.fromFile(new File(m_imagePath));
 
-      if(Build.VERSION_CODES.JELLY_BEAN <= Build.VERSION.SDK_INT)
-      {
-         intent.setDataAndTypeAndNormalize(uri, IMAGE_TYPE + type);
-      }
-      else
-      {
-         intent.setDataAndType(uri, IMAGE_TYPE + type);
-      }
+      intent.setDataAndType(uri, IMAGE_TYPE + type);
 
       m_context.startActivity(intent);
    }

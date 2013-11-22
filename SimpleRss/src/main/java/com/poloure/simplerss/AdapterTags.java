@@ -2,9 +2,17 @@ package com.poloure.simplerss;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Typeface;
+import android.text.Editable;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.AbsoluteSizeSpan;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,6 +24,11 @@ import java.util.Set;
 class AdapterTags extends BaseAdapter
 {
    static final Set<Long> READ_ITEM_TIMES = Collections.synchronizedSet(new HashSet<Long>(0));
+   private static final AbsoluteSizeSpan TITLE_SIZE = new AbsoluteSizeSpan(14, true);
+   private static final AbsoluteSizeSpan LINK_SIZE = new AbsoluteSizeSpan(10, true);
+   private static final AbsoluteSizeSpan DESCRIPTION_SIZE = new AbsoluteSizeSpan(12, true);
+   private static final Typeface SANS_SERIF_LITE = Typeface.create("sans-serif-light",
+         Typeface.NORMAL);
    private final List<FeedItem> m_items = new ArrayList<FeedItem>(0);
    private final List<Long> m_times = new ArrayList<Long>(0);
    private final Context m_context;
@@ -44,9 +57,25 @@ class AdapterTags extends BaseAdapter
 
    @Override
    public
+   int getItemViewType(int position)
+   {
+      boolean isImage = 0 != m_items.get(position).m_imageWidth;
+
+      return isImage ? 1 : 0;
+   }
+
+   @Override
+   public
    int getCount()
    {
       return m_items.size();
+   }
+
+   @Override
+   public
+   int getViewTypeCount()
+   {
+      return 2;
    }
 
    @Override
@@ -68,10 +97,54 @@ class AdapterTags extends BaseAdapter
    View getView(int position, View convertView, ViewGroup parent)
    {
       boolean isNewView = null == convertView;
+      int viewType = getItemViewType(position);
+      FeedItem item = m_items.get(position);
 
-      LayoutFeedItem view = isNewView
-            ? new LayoutFeedItem(m_context)
-            : (LayoutFeedItem) convertView;
+      Long time = item.m_itemTime;
+      boolean isRead = READ_ITEM_TIMES.contains(time);
+
+      Editable editable = new SpannableStringBuilder();
+
+      /* TODO, set the text colors. */
+      /* First, the title. */
+      editable.append(item.m_itemTitle);
+      editable.setSpan(TITLE_SIZE, 0, editable.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+      editable.append("\n");
+
+      /* Next the link. */
+      int offset = editable.length();
+      editable.append(item.m_itemUrl);
+      editable.setSpan(LINK_SIZE, offset, editable.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+      View view;
+
+      if(0 == viewType)
+      {
+         /* Make the single TextView view. */
+         view = isNewView ? new TextView(m_context) : convertView;
+         editable.append("\n");
+
+         /* Finally the description. */
+         offset = editable.length();
+         editable.append(item.m_itemDescription);
+         editable.setSpan(DESCRIPTION_SIZE, offset, editable.length(),
+               Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+         ((TextView) view).setText(editable);
+         ((TextView) view).setTypeface(SANS_SERIF_LITE);
+         Resources resources = m_context.getResources();
+         DisplayMetrics metrics = resources.getDisplayMetrics();
+
+         int eight = Math.round(
+               TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8.0F, metrics));
+
+         view.setPadding(eight, eight, eight, eight);
+      }
+      else
+      {
+         view = isNewView ? new LayoutFeedItem(m_context) : convertView;
+         ((LayoutFeedItem) view).showItem(item, m_applicationFolder, position, isRead, editable);
+      }
 
       float opacity = LayoutFeedItem.getReadItemOpacity();
       if(0.0F > opacity)
@@ -84,15 +157,9 @@ class AdapterTags extends BaseAdapter
 
          boolean valueExists = 0 != opacityFile.length && 0 != opacityFile[0].length();
 
-         LayoutFeedItem.setReadItemOpacity(
-               valueExists ? Float.parseFloat(opacityFile[0]) / 100.0F : 0.66F);
+         float opacityFloat = valueExists ? Float.parseFloat(opacityFile[0]) / 100.0F : 0.66F;
+         LayoutFeedItem.setReadItemOpacity(opacityFloat);
       }
-
-      FeedItem item = m_items.get(position);
-      Long time = item.m_itemTime;
-      boolean isRead = READ_ITEM_TIMES.contains(time);
-
-      view.showItem(item, m_applicationFolder, position, isRead);
 
       /* If read and read items are hidden, remove the item. */
       /*TextView textView = (TextView) view.findViewById(R.id.title);
@@ -100,8 +167,7 @@ class AdapterTags extends BaseAdapter
 
       if(Color.TRANSPARENT == color)
       {
-         /* TODO, the item still shows empty space. */
-        /* view.setVisibility(View.GONE);
+         view.setVisibility(View.GONE);
          return view;
       }*/
 

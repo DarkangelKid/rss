@@ -2,7 +2,6 @@ package com.poloure.simplerss;
 
 import android.graphics.Typeface;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.text.Editable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -41,14 +40,7 @@ class AsyncManageFeedsRefresh extends AsyncTask<String, Editable[], Animation>
    {
       AsyncTask<String, Editable[], Animation> task = new AsyncManageFeedsRefresh(listView);
 
-      if(Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT)
-      {
          task.executeOnExecutor(THREAD_POOL_EXECUTOR, applicationFolder);
-      }
-      else
-      {
-         task.execute(applicationFolder);
-      }
    }
 
    @Override
@@ -68,6 +60,7 @@ class AsyncManageFeedsRefresh extends AsyncTask<String, Editable[], Animation>
 
       for(int i = 0; i < size; i++)
       {
+         /* New object here because we make it a reference in the array. */
          Editable editable = new SpannableStringBuilder();
 
          /* Append the feed name. */

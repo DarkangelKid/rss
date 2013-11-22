@@ -1,10 +1,10 @@
 package com.poloure.simplerss;
 
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.ListFragment;
+import android.app.ActionBar;
+import android.app.FragmentManager;
+import android.app.ListFragment;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.SimpleOnPageChangeListener;
-import android.support.v7.app.ActionBar;
 import android.widget.Adapter;
 import android.widget.BaseAdapter;
 import android.widget.ListView;

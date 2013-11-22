@@ -54,23 +54,24 @@ class AdapterSettingsFunctions extends BaseAdapter
    View getView(int position, View convertView, ViewGroup parent)
    {
       View view = convertView;
+      boolean isNewView = null == convertView;
       int viewType = getItemViewType(position);
       String title = m_functionTitles[position];
       String summary = m_functionSummaries[position];
 
       if(TYPE_HEADING == viewType)
       {
-         view = null == view ? ViewSettingsHeader.newInstance(m_context) : convertView;
+         view = isNewView ? ViewSettingsHeader.newInstance(m_context) : convertView;
          ((TextView) view).setText(title);
       }
       else if(TYPE_CHECKBOX == viewType)
       {
-         view = null == convertView ? new LayoutCheckBox(m_context) : convertView;
+         view = isNewView ? new LayoutCheckBox(m_context) : convertView;
          ((LayoutCheckBox) view).showItem(title, summary, m_applicationFolder);
       }
       else if(TYPE_SEEK_BAR == viewType)
       {
-         view = null == convertView ? new LayoutSeekBar(m_context) : convertView;
+         view = isNewView ? new LayoutSeekBar(m_context) : convertView;
 
          int max = 2 == position ? MAX_REFRESH_MINUTES : MAX_HISTORY_ITEMS;
 

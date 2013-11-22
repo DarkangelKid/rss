@@ -1,7 +1,6 @@
 package com.poloure.simplerss;
 
 import android.content.Context;
-import android.text.Editable;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.RelativeLayout;
@@ -25,7 +24,7 @@ class LayoutManageListViewItem extends RelativeLayout
       setLayoutParams(LAYOUT_PARAMS);
    }
 
-   void showItem(Editable text)
+   void showItem(CharSequence text)
    {
       m_titleView.setText(text);
    }

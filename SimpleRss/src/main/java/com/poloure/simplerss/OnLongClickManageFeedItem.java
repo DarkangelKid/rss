@@ -1,7 +1,7 @@
 package com.poloure.simplerss;
 
 import android.app.AlertDialog;
-import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v13.app.FragmentPagerAdapter;
 import android.view.View;
 import android.widget.Adapter;
 import android.widget.AdapterView;

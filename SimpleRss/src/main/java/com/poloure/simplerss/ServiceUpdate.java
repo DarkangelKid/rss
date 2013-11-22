@@ -132,7 +132,7 @@ class ServiceUpdate extends IntentService
       /* TODO GET UNREAD WITHOUT CONTEXT. int[] unreadCounts = FeedsActivity.getUnreadCounts
       (this); */
 
-      /* If activity is running. */
+      /* If action_bar_menu is running. */
       if(null != FeedsActivity.s_serviceHandler)
       {
          Message message = new Message();
@@ -568,7 +568,7 @@ class ServiceUpdate extends IntentService
       }
    }
 
-   public static
+   private static
    void close(Closeable c)
    {
       if(null == c)

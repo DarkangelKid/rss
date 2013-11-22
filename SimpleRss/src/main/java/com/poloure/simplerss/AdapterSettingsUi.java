@@ -52,23 +52,24 @@ class AdapterSettingsUi extends BaseAdapter
    View getView(int position, View convertView, ViewGroup parent)
    {
       View view = convertView;
+      boolean isNewView = null == convertView;
       int viewType = getItemViewType(position);
       String title = m_interfaceTitles[position];
       String summary = m_interfaceSummaries[position];
 
       if(TYPE_HEADING == viewType)
       {
-         view = null == view ? ViewSettingsHeader.newInstance(m_context) : convertView;
+         view = isNewView ? ViewSettingsHeader.newInstance(m_context) : convertView;
          ((TextView) view).setText(title);
       }
       else if(TYPE_CHECKBOX == viewType)
       {
-         view = null == convertView ? new LayoutCheckBox(m_context) : convertView;
+         view = isNewView ? new LayoutCheckBox(m_context) : convertView;
          ((LayoutCheckBox) view).showItem(title, summary, m_applicationFolder);
       }
       else if(TYPE_SEEK_BAR == viewType)
       {
-         view = null == convertView ? new LayoutSeekBar(m_context) : convertView;
+         view = isNewView ? new LayoutSeekBar(m_context) : convertView;
          ((LayoutSeekBar) view).showItem(title, summary, 100, m_applicationFolder);
       }
       return view;

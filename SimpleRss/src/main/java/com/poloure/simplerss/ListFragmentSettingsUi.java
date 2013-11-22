@@ -1,13 +1,12 @@
 package com.poloure.simplerss;
 
+import android.app.ListFragment;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
 
 /* Must be public for rotation. */
 public
@@ -41,9 +40,6 @@ class ListFragmentSettingsUi extends ListFragment
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
       super.onCreateView(inflater, container, savedInstanceState);
-
-      ListView listView = (ListView) inflater.inflate(R.layout.listview, container, false);
-
-      return listView;
+      return inflater.inflate(R.layout.listview, container, false);
    }
 }

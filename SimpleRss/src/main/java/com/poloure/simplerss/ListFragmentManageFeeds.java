@@ -1,13 +1,13 @@
 package com.poloure.simplerss;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ListFragment;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.ListFragment;
+import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -92,7 +92,7 @@ class ListFragmentManageFeeds extends ListFragment
    {
       super.onActivityCreated(savedInstanceState);
 
-      ActionBarActivity activity = (ActionBarActivity) getActivity();
+      Activity activity = getActivity();
       ListView listView = getListView();
       String applicationFolder = FeedsActivity.getApplicationFolder(activity);
 

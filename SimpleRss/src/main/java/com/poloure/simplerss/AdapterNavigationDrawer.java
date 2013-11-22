@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.os.Build;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -88,11 +87,7 @@ class AdapterNavigationDrawer extends BaseAdapter
          ((TextView) view).setText(m_navigationTitles[position]);
 
          /* Set the item's image as a CompoundDrawable of the textView. */
-         if(Build.VERSION_CODES.JELLY_BEAN_MR1 <= Build.VERSION.SDK_INT)
-         {
-            ((TextView) view).setCompoundDrawablesRelativeWithIntrinsicBounds(NAV_ICONS[position],
-                  0, 0, 0);
-         }
+         ((TextView) view).setCompoundDrawablesWithIntrinsicBounds(NAV_ICONS[position], 0, 0, 0);
          ((TextView) view).setCompoundDrawablePadding(m_twelveDp);
       }
       else if(TYPE_DIVIDER == viewType && null == view)

@@ -1,8 +1,7 @@
 package com.poloure.simplerss;
 
+import android.app.ActionBar;
 import android.os.AsyncTask;
-import android.os.Build;
-import android.support.v7.app.ActionBar;
 import android.widget.BaseAdapter;
 
 import java.io.File;
@@ -36,14 +35,7 @@ class AsyncRefreshNavigationAdapter extends AsyncTask<String, Void, int[]>
       AsyncTask<String, Void, int[]> task = new AsyncRefreshNavigationAdapter(adapterNavDrawer,
             actionBar, currentPage);
 
-      if(Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT)
-      {
          task.executeOnExecutor(THREAD_POOL_EXECUTOR, applicationFolder);
-      }
-      else
-      {
-         task.execute(applicationFolder);
-      }
    }
 
    /* Get the unread counts for the tags. */

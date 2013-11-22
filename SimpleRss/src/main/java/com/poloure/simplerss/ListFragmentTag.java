@@ -1,9 +1,9 @@
 package com.poloure.simplerss;
 
+import android.app.ActionBar;
+import android.app.Activity;
+import android.app.ListFragment;
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,8 +34,8 @@ class ListFragmentTag extends ListFragment
       super.onActivityCreated(savedInstanceState);
 
       ListView listView = getListView();
-      ActionBarActivity activity = (ActionBarActivity) getActivity();
-      ActionBar actionBar = activity.getSupportActionBar();
+      Activity activity = getActivity();
+      ActionBar actionBar = activity.getActionBar();
       String applicationFolder = FeedsActivity.getApplicationFolder(activity);
 
       ListView navigationList = (ListView) activity.findViewById(R.id.navigation_drawer);

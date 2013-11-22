@@ -1,6 +1,6 @@
 package com.poloure.simplerss;
 
-import android.support.v7.app.ActionBar;
+import android.app.ActionBar;
 import android.view.View;
 import android.widget.AbsListView;
 

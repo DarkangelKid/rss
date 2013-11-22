@@ -2,7 +2,6 @@ package com.poloure.simplerss;
 
 import android.graphics.Typeface;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.text.Editable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -41,14 +40,7 @@ class AsyncManageTagsRefresh extends AsyncTask<String, Editable[], Animation>
    {
       AsyncTask<String, Editable[], Animation> task = new AsyncManageTagsRefresh(listView);
 
-      if(Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT)
-      {
          task.executeOnExecutor(THREAD_POOL_EXECUTOR, allTag, applicationFolder);
-      }
-      else
-      {
-         task.execute(allTag, applicationFolder);
-      }
    }
 
    @Override
@@ -104,8 +96,10 @@ class AsyncManageTagsRefresh extends AsyncTask<String, Editable[], Animation>
             info.delete(infoSize - 2, infoSize);
          }
 
-         /* First, the title. */
+         /* New object here because we make it a reference in the array. */
          Editable editable = new SpannableStringBuilder();
+
+         /* First, the title. */
          editable.append(feedTags[i]);
          editable.setSpan(TITLE_SIZE, 0, editable.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
          editable.append("\n");

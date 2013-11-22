@@ -13,16 +13,23 @@ repositories {
 }
 
 android {
-    compileSdkVersion 18
-    buildToolsVersion "18.0.1"
+    compileSdkVersion 19
+    buildToolsVersion "19"
 
     defaultConfig {
-        minSdkVersion 7
-        targetSdkVersion 18
+        minSdkVersion 14
+        targetSdkVersion 19
+    }
+
+    buildTypes {
+        release {
+            runProguard true
+            proguardFile getDefaultProguardFile('proguard-android-optimize.txt')
+        }
     }
 }
 
 dependencies {
-    compile "com.android.support:support-v4:18.0.+"
-    compile 'com.android.support:appcompat-v7:18.0.0'
+    compile "com.android.support:support-v4:19.0.+"
+    compile "com.android.support:support-v13:19.0.+"
 }

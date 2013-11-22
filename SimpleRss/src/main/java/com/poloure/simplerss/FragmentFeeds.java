@@ -1,13 +1,13 @@
 package com.poloure.simplerss;
 
+import android.app.ActionBar;
+import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -35,7 +35,7 @@ class FragmentFeeds extends Fragment
    public
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
-      ActionBarActivity context = (ActionBarActivity) getActivity();
+      Activity context = getActivity();
 
       if(null == container)
       {
@@ -44,8 +44,8 @@ class FragmentFeeds extends Fragment
 
       setHasOptionsMenu(true);
       Resources resources = getResources();
-      ActionBar actionBar = context.getSupportActionBar();
-      FragmentManager fragmentManager = context.getSupportFragmentManager();
+      ActionBar actionBar = context.getActionBar();
+      FragmentManager fragmentManager = context.getFragmentManager();
       String applicationFolder = FeedsActivity.getApplicationFolder(context);
       String allTag = resources.getString(R.string.all_tag);
 

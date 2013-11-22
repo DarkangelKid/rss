@@ -5,37 +5,19 @@
       android:id="@+id/title"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:ellipsize="end"
       android:fontFamily="sans-serif-light"
-      android:maxLines="2"
       android:paddingEnd="8dp"
       android:paddingLeft="8dp"
       android:paddingRight="8dp"
       android:paddingStart="8dp"
       android:paddingTop="6dp"
-      android:text="@+id/title"
-      android:textSize="16sp"/>
-
-   <TextView
-      android:id="@+id/url"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_below="@+id/title"
-      android:fontFamily="sans-serif-light"
-      android:maxLines="1"
-      android:paddingBottom="4dp"
-      android:paddingEnd="8dp"
-      android:paddingLeft="8dp"
-      android:paddingRight="8dp"
-      android:paddingStart="8dp"
-      android:text="@+id/url"
-      android:textSize="12sp"/>
+      android:text="@+id/title"/>
 
    <ImageView
       android:id="@+id/image"
+      android:contentDescription="@string/access_image_description"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:layout_below="@+id/url"
       android:adjustViewBounds="true"
       android:paddingTop="4dp"
       android:scaleType="centerCrop"/>
@@ -44,15 +26,12 @@
       android:id="@+id/description"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:layout_below="@+id/image"
       android:fontFamily="sans-serif-light"
       android:paddingBottom="8dp"
       android:paddingEnd="8dp"
       android:paddingLeft="8dp"
       android:paddingRight="8dp"
       android:paddingStart="8dp"
-      android:paddingTop="2dp"
-      android:text="@+id/description"
       android:textSize="14sp"/>
 
 </merge>

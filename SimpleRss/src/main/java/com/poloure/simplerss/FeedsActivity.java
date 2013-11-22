@@ -1,8 +1,14 @@
 package com.poloure.simplerss;
 
+import android.app.ActionBar;
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
+import android.app.ListFragment;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -13,15 +19,9 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.ListFragment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -38,7 +38,7 @@ import java.io.File;
 import java.util.Set;
 
 public
-class FeedsActivity extends ActionBarActivity
+class FeedsActivity extends Activity
 {
    static final String SETTINGS_DIR = "settings" + File.separatorChar;
    static final String FILTER_LIST = "filter_list.txt";
@@ -68,9 +68,9 @@ class FeedsActivity extends ActionBarActivity
       setContentView(R.layout.navigation_drawer_and_content_frame);
 
       m_resources = getResources();
-      m_actionBar = getSupportActionBar();
+      m_actionBar = getActionBar();
       m_applicationFolder = getApplicationFolder(this);
-      m_fragmentManager = getSupportFragmentManager();
+      m_fragmentManager = getFragmentManager();
       LayoutInflater layoutInflater = getLayoutInflater();
       DisplayMetrics displayMetrics = m_resources.getDisplayMetrics();
 
@@ -123,38 +123,52 @@ class FeedsActivity extends ActionBarActivity
       }
    }
 
-   /* This is so the icon and text in the actionbar are selected. */
-   @Override
-   public
-   void onConfigurationChanged(Configuration newConfig)
+   static
+   String getApplicationFolder(Context context)
    {
-      super.onConfigurationChanged(newConfig);
-      m_drawerToggle.onConfigurationChanged(newConfig);
+      /* Check the media state for the desirable state. */
+      String state = Environment.getExternalStorageState();
+
+      String mounted = Environment.MEDIA_MOUNTED;
+      if(!mounted.equals(state))
+      {
+         return null;
+      }
+
+      File externalFilesDir = context.getExternalFilesDir(null);
+      return externalFilesDir.getAbsolutePath() + File.separatorChar;
    }
 
    @Override
    protected
-   void onStop()
+   void onPostCreate(Bundle savedInstanceState)
    {
-      super.onStop();
+      super.onPostCreate(savedInstanceState);
+      // Sync the toggle state after onRestoreInstanceState has occurred.
+      m_drawerToggle.syncState();
 
-      /* Set the alarm service to go of starting now. */
-      setServiceIntent(ALARM_SERVICE_START);
+      AsyncRefreshNavigationAdapter.newInstance((BaseAdapter) m_adapterNavDrawer, m_actionBar,
+            m_applicationFolder, 0);
 
-      Write.longSet(READ_ITEMS, AdapterTags.READ_ITEM_TIMES, m_applicationFolder);
+      m_feedsViewPager = (ViewPager) findViewById(FragmentFeeds.VIEW_PAGER_ID);
+      String[] navigationTitles = m_resources.getStringArray(R.array.navigation_titles);
+
+      /* Create the OnItemClickLister for the navigation list. */
+      AdapterView.OnItemClickListener onClick = new OnClickNavDrawerItem(m_fragmentManager,
+            m_actionBar, m_drawerLayout, m_adapterNavDrawer, m_feedsViewPager, navigationTitles);
+
+      ListView navigationList = (ListView) findViewById(R.id.navigation_drawer);
+      navigationList.setOnItemClickListener(onClick);
    }
 
    @Override
-   public
-   void onBackPressed()
+   protected
+   void onStart()
    {
-      super.onBackPressed();
+      super.onStart();
 
-      String feeds = m_resources.getStringArray(R.array.navigation_titles)[0];
-      m_actionBar.setTitle(feeds);
-
-      m_drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-      m_drawerToggle.setDrawerIndicatorEnabled(true);
+      /* Stop the alarm service and reset the time to 0. */
+      setServiceIntent(ALARM_SERVICE_STOP);
    }
 
    private
@@ -212,52 +226,38 @@ class FeedsActivity extends ActionBarActivity
       return intent;
    }
 
-   static
-   String getApplicationFolder(Context context)
+   @Override
+   protected
+   void onStop()
    {
-      /* Check the media state for the desirable state. */
-      String state = Environment.getExternalStorageState();
+      super.onStop();
 
-      String mounted = Environment.MEDIA_MOUNTED;
-      if(!mounted.equals(state))
-      {
-         return null;
-      }
+      /* Set the alarm service to go of starting now. */
+      setServiceIntent(ALARM_SERVICE_START);
 
-      File externalFilesDir = context.getExternalFilesDir(null);
-      return externalFilesDir.getAbsolutePath() + File.separatorChar;
+      Write.longSet(READ_ITEMS, AdapterTags.READ_ITEM_TIMES, m_applicationFolder);
+   }
+
+   /* This is so the icon and text in the actionbar are selected. */
+   @Override
+   public
+   void onConfigurationChanged(Configuration newConfig)
+   {
+      super.onConfigurationChanged(newConfig);
+      m_drawerToggle.onConfigurationChanged(newConfig);
    }
 
    @Override
-   protected
-   void onStart()
+   public
+   void onBackPressed()
    {
-      super.onStart();
+      super.onBackPressed();
 
-      /* Stop the alarm service and reset the time to 0. */
-      setServiceIntent(ALARM_SERVICE_STOP);
-   }
+      String feeds = m_resources.getStringArray(R.array.navigation_titles)[0];
+      m_actionBar.setTitle(feeds);
 
-   @Override
-   protected
-   void onPostCreate(Bundle savedInstanceState)
-   {
-      super.onPostCreate(savedInstanceState);
-      // Sync the toggle state after onRestoreInstanceState has occurred.
-      m_drawerToggle.syncState();
-
-      AsyncRefreshNavigationAdapter.newInstance((BaseAdapter) m_adapterNavDrawer, m_actionBar,
-            m_applicationFolder, 0);
-
-      m_feedsViewPager = (ViewPager) findViewById(FragmentFeeds.VIEW_PAGER_ID);
-      String[] navigationTitles = m_resources.getStringArray(R.array.navigation_titles);
-
-      /* Create the OnItemClickLister for the navigation list. */
-      AdapterView.OnItemClickListener onClick = new OnClickNavDrawerItem(m_fragmentManager,
-            m_actionBar, m_drawerLayout, m_adapterNavDrawer, m_feedsViewPager, navigationTitles);
-
-      ListView navigationList = (ListView) findViewById(R.id.navigation_drawer);
-      navigationList.setOnItemClickListener(onClick);
+      m_drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+      m_drawerToggle.setDrawerIndicatorEnabled(true);
    }
 
    @Override
@@ -267,7 +267,7 @@ class FeedsActivity extends ActionBarActivity
       menu.clear();
 
       MenuInflater menuInflater = getMenuInflater();
-      menuInflater.inflate(R.menu.activity, menu);
+      menuInflater.inflate(R.menu.action_bar_menu, menu);
 
       /* Set the refreshItem to spin if the service is running. The handler will stop it in due
       time. */

@@ -1,9 +1,9 @@
 package com.poloure.simplerss;
 
 import android.app.AlertDialog;
+import android.app.ListFragment;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,7 +28,9 @@ class ListFragmentManageFilters extends ListFragment
       super.onActivityCreated(savedInstanceState);
 
       Context context = getActivity();
-      LayoutInflater layoutInflater = getLayoutInflater(savedInstanceState);
+      LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(
+            Context.LAYOUT_INFLATER_SERVICE);
+
       String applicationFolder = FeedsActivity.getApplicationFolder(context);
 
       BaseAdapter baseAdapter = new AdapterManageFilters(applicationFolder,
