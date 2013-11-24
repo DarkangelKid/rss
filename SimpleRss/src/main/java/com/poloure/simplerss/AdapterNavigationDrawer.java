@@ -76,11 +76,12 @@ class AdapterNavigationDrawer extends BaseAdapter
    View getView(int position, View convertView, ViewGroup parent)
    {
       View view = convertView;
+      boolean isNewView = null == convertView;
       int viewType = getItemViewType(position);
 
       if(TYPE_TITLE == viewType)
       {
-         if(null == view)
+         if(isNewView)
          {
             Resources resources = m_context.getResources();
             DisplayMetrics metrics = resources.getDisplayMetrics();
@@ -139,12 +140,10 @@ class AdapterNavigationDrawer extends BaseAdapter
       }
       else if(TYPE_TAG == viewType)
       {
-         boolean isNewView = null == convertView;
-
-         view = isNewView ? new TextView(m_context) : convertView;
-
          if(isNewView)
          {
+            TextView textView = new TextView(m_context);
+
             Resources resources = m_context.getResources();
             DisplayMetrics displayMetrics = resources.getDisplayMetrics();
 
@@ -155,20 +154,24 @@ class AdapterNavigationDrawer extends BaseAdapter
                   displayMetrics);
             int padding = Math.round(paddingSides);
 
-            view.setPadding(padding, 0, padding, 0);
-            ((TextView) view).setMinHeight(minHeight);
-            ((TextView) view).setTextSize(SP, 16.0F);
-            ((TextView) view).setGravity(Gravity.CENTER_VERTICAL);
-            ((TextView) view).setTextColor(Color.WHITE);
-            ((TextView) view).setTypeface(SANS_SERIF_LITE);
+            int half = Math.round(padding * 0.5F);
+
+            textView.setPadding(padding, -half, padding, half);
+            textView.setMinHeight(minHeight);
+            textView.setTextSize(SP, 16.0F);
+            textView.setGravity(Gravity.CENTER_VERTICAL);
+            textView.setTextColor(Color.WHITE);
+            textView.setTypeface(SANS_SERIF_LITE);
+            textView.setLineSpacing(0.0F, 0.1F);
+
+            view = textView;
          }
 
-         /* TODO Add unread count without a two extra views each. */
-         // String number = Integer.toString(m_unreadArray[position - 4]);
-         //String unreadText = "0".equals(number) ? "" : number;
+         String number = Integer.toString(m_unreadArray[position - 4]);
+         String unreadText = "0".equals(number) ? "" : number;
          String tagTitle = m_tagArray[position - 4];
 
-         ((TextView) view).setText(tagTitle);
+         ((TextView) view).setText(tagTitle + "\n" + (char) 0x200F + unreadText);
       }
       return view;
    }
