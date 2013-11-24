@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+   xmlns:android="http://schemas.android.com/apk/res/android">
+   <PreferenceScreen
+      android:title="Appearance"
+      android:key="screen_preference">
+      <CheckBoxPreference
+         android:title="I am a boy"
+         android:key="next_screen_checkbox_preference"
+         android:summary="You are a boy"/>
+   </PreferenceScreen>
+   <PreferenceScreen android:title="Notifications">
+      <SwitchPreference
+         android:title="Notifications"
+         android:key="notifications_enabled"
+         android:defaultValue="true"
+         android:summaryOn="Notifications are enabled"
+         android:summaryOff="Notifications are disabled"
+         android:switchTextOn="On"
+         android:switchTextOff="Off"/>
+      <CheckBoxPreference
+         android:layout="?android:preferenceLayoutChild"
+         android:title="Temporary setting"
+         android:key="child_checkbox_preference"
+         android:summary="Ipsum dogs"
+         android:dependency="notifications_enabled"/>
+   </PreferenceScreen>
+   <PreferenceScreen android:title="Automatic Refreshing">
+      <SwitchPreference
+         android:title="Automatic Refreshing"
+         android:key="refreshing_enabled"
+         android:defaultValue="true"
+         android:summaryOn="Automatic refreshing is enabled"
+         android:summaryOff="Automatic refreshing is disabled"
+         android:switchTextOn="On"
+         android:switchTextOff="Off"/>
+      <ListPreference
+         android:entries="@array/refresh_interval_titles"
+         android:title="Refresh Interval"
+         android:key="refresh_interval"
+         android:summary="Time between two consecutive refreshes"
+         android:dependency="refreshing_enabled"
+         android:dialogTitle="Refresh Interval"
+         android:entryValues="@array/refresh_interval_values"/>
+      <CheckBoxPreference
+         android:layout="?android:preferenceLayoutChild"
+         android:title="Temporary setting"
+         android:key="child_checkbox_preference"
+         android:summary="Ipsum dogs"
+         android:dependency="refreshing_enabled"/>
+   </PreferenceScreen>
+   <PreferenceScreen android:title="Downloads">
+      <PreferenceCategory android:title="User Interface">
+         <EditTextPreference
+            android:title="How is baby made?"
+            android:key="edittext_preference"
+            android:summary="I saw a picture."
+            android:dialogTitle="Do you want to copy it?"/>
+      </PreferenceCategory>
+      <PreferenceCategory android:title="User Interface">
+         <EditTextPreference
+            android:title="How is baby made?"
+            android:key="edittext_preference"
+            android:summary="I saw a picture."
+            android:dialogTitle="Do you want to copy it?"/>
+      </PreferenceCategory>
+   </PreferenceScreen>
+   <PreferenceScreen android:title="Storage">
+      <SwitchPreference
+         android:title="External Storage"
+         android:key="external_enabled"
+         android:defaultValue="true"
+         android:summaryOn="Using external storage"
+         android:summaryOff="Using internal storage"
+         android:switchTextOn="Enabled"
+         android:switchTextOff="Disabled"/>
+      <EditTextPreference
+         android:title="External Storage Location"
+         android:key="data_location"
+         android:summary="Where to save app data"
+         android:dependency="external_enabled"
+         android:defaultValue="./Android/data/poloure.simplerss.com/files/"
+         android:dialogTitle="Application data path"/>
+      <PreferenceCategory android:title="Images">
+         <SwitchPreference
+            android:title="Download Images"
+            android:key="images_enabled"
+            android:defaultValue="true"
+            android:switchTextOn="Yes"
+            android:switchTextOff="No"/>
+         <CheckBoxPreference
+            android:title="Keep thumbnails only"
+            android:key="keep_only_thumbnails"
+            android:summary="Will not keep original images"
+            android:dependency="images_enabled"
+            android:defaultValue="true"/>
+         <ListPreference
+            android:entries="@array/thumbnail_quality"
+            android:title="Thumbnail Quality"
+            android:key="thumbnail_quality"
+            android:summary="Only affects new downloads"
+            android:dependency="images_enabled"
+            android:defaultValue="98"
+            android:dialogTitle="Thumbnail Quality"
+            android:entryValues="@array/thumbnail_quality_values"/>
+         <EditTextPreference
+            android:title="Image Storage Location"
+            android:key="images_location"
+            android:summary="Where to save images"
+            android:dependency="images_enabled"
+            android:defaultValue="./Android/data/poloure.simplerss.com/files/"
+            android:dialogTitle="Image directory"/>
+      </PreferenceCategory>
+   </PreferenceScreen>
+   <PreferenceScreen
+      android:title="Developer's Website"
+      android:summary="https://github.com/poloure">
+      <intent
+         android:action="android.intent.action.VIEW"
+         android:data="https://github.com/poloure"/>
+   </PreferenceScreen>
+</PreferenceScreen>

@@ -1,26 +1,16 @@
 package com.poloure.simplerss;
 
-import android.app.Activity;
 import android.app.Fragment;
-import android.app.FragmentManager;
-import android.content.res.Resources;
 import android.os.Bundle;
-import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
-import android.view.LayoutInflater;
+import android.preference.PreferenceFragment;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
 
 /* Must be public for rotation. */
 public
-class FragmentSettings extends Fragment
+class FragmentSettings extends PreferenceFragment
 {
-   private static final int VIEW_PAGER_ID = 0x3000;
-   private static final int PAGER_TITLE_STRIP_ID = 653142;
-
    static
    Fragment newInstance()
    {
@@ -29,29 +19,12 @@ class FragmentSettings extends Fragment
 
    @Override
    public
-   View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+   void onCreate(Bundle savedInstanceState)
    {
-      Activity activity = getActivity();
+      super.onCreate(savedInstanceState);
 
-      if(null == container)
-      {
-         return new View(activity);
-      }
-
+      addPreferencesFromResource(R.xml.preferences);
       setHasOptionsMenu(true);
-
-      Resources resources = getResources();
-      String[] settingsTitles = resources.getStringArray(R.array.settings_titles);
-
-      FragmentManager fragmentManager = getFragmentManager();
-
-      PagerAdapter pagerAdapter = new PagerAdapterSettings(fragmentManager, settingsTitles);
-
-      ViewPager pager = ViewPagerStrip.newInstance(activity, PAGER_TITLE_STRIP_ID);
-      pager.setAdapter(pagerAdapter);
-      pager.setId(VIEW_PAGER_ID);
-
-      return pager;
    }
 
    @Override

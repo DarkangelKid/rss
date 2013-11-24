@@ -23,34 +23,6 @@
       <item>إعدادات</item>
    </string-array>
 
-   <string-array name="settings_function_titles">
-      <item>Auto Refresh</item>
-      <item>Auto Refresh</item>
-      <item>Refresh Time</item>
-      <item>Notifications</item>
-      <item>Global Feed Settings</item>
-      <item>Max History</item>
-   </string-array>
-
-   <string-array name="settings_function_summaries">
-      <item>null</item>
-      <item>Check to enable auto refresh</item>
-      <item>Adjust auto refresh interval</item>
-      <item>Check to enable notifications</item>
-      <item>null</item>
-      <item>Number of items to keep per feed</item>
-   </string-array>
-
-   <string-array name="settings_interface_titles">
-      <item>Feed Display</item>
-      <item>Read Item Opacity</item>
-   </string-array>
-
-   <string-array name="settings_interface_summaries">
-      <item>EMPTY</item>
-      <item>0\%% is hidden, 100\%% disables effect</item>
-   </string-array>
-
    <string-array name="long_click_manage_feeds">
       <item>حذف</item>
       <item>مسح المحتوى‎</item>

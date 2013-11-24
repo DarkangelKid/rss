@@ -419,13 +419,9 @@ class ServiceUpdate extends IntentService
          }
          else if(XmlPullParser.END_DOCUMENT == eventType)
          {
-            Resources resources = getResources();
-            String[] settingTitles = resources.getStringArray(R.array.settings_function_titles);
-            String settingName = FeedsActivity.SETTINGS_DIR + settingTitles[5] + ".txt";
-            String[] check = Read.file(settingName, applicationFolder);
-            String setting = 0 == check.length ? "" : check[0];
-
-            int saveSize = 0 == setting.length() ? DEFAULT_MAX_HISTORY : Integer.parseInt(setting);
+            /* TODO Get MAX_HISTORY setting */
+            //int saveSize = 0 == setting.length() ? DEFAULT_MAX_HISTORY : Integer.parseInt
+            int saveSize = DEFAULT_MAX_HISTORY;
             int mapSize = map.size();
 
             saveSize = saveSize >= mapSize ? mapSize : saveSize;
@@ -455,42 +451,6 @@ class ServiceUpdate extends IntentService
          }
          parser.next();
       }
-   }
-
-   /* index throws an ArrayOutOfBoundsException if not handled. */
-   static
-   <T> int index(T[] array, T value)
-   {
-      if(null == array)
-      {
-         return -1;
-      }
-
-      int arrayLength = array.length;
-      for(int i = 0; i < arrayLength; i++)
-      {
-         if(array[i].equals(value))
-         {
-            return i;
-         }
-      }
-      return -1;
-   }
-
-   private static
-   Set<String> fileToSet(String fileName, String fileFolder)
-   {
-      Set<String> set = new LinkedHashSet<String>(64);
-
-      if(Read.isUnmounted())
-      {
-         return set;
-      }
-
-      String[] lines = Read.file(fileName, fileFolder);
-      Collections.addAll(set, lines);
-
-      return set;
    }
 
    private static
@@ -618,5 +578,41 @@ class ServiceUpdate extends IntentService
       catch(IOException ignored)
       {
       }
+   }
+
+   private static
+   Set<String> fileToSet(String fileName, String fileFolder)
+   {
+      Set<String> set = new LinkedHashSet<String>(64);
+
+      if(Read.isUnmounted())
+      {
+         return set;
+      }
+
+      String[] lines = Read.file(fileName, fileFolder);
+      Collections.addAll(set, lines);
+
+      return set;
+   }
+
+   /* index throws an ArrayOutOfBoundsException if not handled. */
+   static
+   <T> int index(T[] array, T value)
+   {
+      if(null == array)
+      {
+         return -1;
+      }
+
+      int arrayLength = array.length;
+      for(int i = 0; i < arrayLength; i++)
+      {
+         if(array[i].equals(value))
+         {
+            return i;
+         }
+      }
+      return -1;
    }
 }

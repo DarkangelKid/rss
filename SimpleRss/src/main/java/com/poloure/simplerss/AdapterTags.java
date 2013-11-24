@@ -20,7 +20,9 @@ import java.util.Set;
 class AdapterTags extends BaseAdapter
 {
    static final Set<Long> READ_ITEM_TIMES = Collections.synchronizedSet(new HashSet<Long>(0));
-   private static final Typeface SERIF = Typeface.create("serif", Typeface.NORMAL);
+   private static final Typeface SERIF = Typeface.create(Typeface.SERIF, Typeface.NORMAL);
+   private static final float ALPHA_READ_ITEM = 0.50F;
+   private static final float PADDING_BASIC_ITEM = 8.0F;
    private final List<FeedItem> m_items = new ArrayList<FeedItem>(0);
    private final List<Long> m_times = new ArrayList<Long>(0);
    private final Context m_context;
@@ -107,8 +109,9 @@ class AdapterTags extends BaseAdapter
             Resources resources = m_context.getResources();
             DisplayMetrics metrics = resources.getDisplayMetrics();
 
-            int eight = Math.round(
-                  TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8.0F, metrics));
+            float eightFloat = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                  PADDING_BASIC_ITEM, metrics);
+            int eight = Math.round(eightFloat);
 
             view.setPadding(eight, eight, eight, eight);
          }
@@ -121,7 +124,7 @@ class AdapterTags extends BaseAdapter
          ((LayoutFeedItem) view).showItem(item, m_applicationFolder, position, item.m_titleAndLink);
       }
 
-      view.setAlpha(isRead ? 0.50F : 1.0F);
+      view.setAlpha(isRead ? ALPHA_READ_ITEM : 1.0F);
 
       /* The logic that tells whether the item is Read or not. */
       boolean isListViewShown = parent.isShown();

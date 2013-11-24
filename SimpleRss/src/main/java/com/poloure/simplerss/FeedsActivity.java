@@ -333,10 +333,8 @@ class FeedsActivity extends Activity
 
       int currentPage = m_feedsViewPager.getCurrentItem();
 
-      String[] settingTitles = m_resources.getStringArray(R.array.settings_function_titles);
-
       Intent intent = new Intent(this, ServiceUpdate.class);
-      intent = configureServiceIntent(intent, currentPage, settingTitles, m_applicationFolder);
+      intent = configureServiceIntent(intent, currentPage, m_applicationFolder);
       startService(intent);
    }
 
@@ -360,11 +358,10 @@ class FeedsActivity extends Activity
    private
    void setServiceIntent(int state)
    {
-      String[] settingTitles = m_resources.getStringArray(R.array.settings_function_titles);
-
       /* Load the ManageFeedsRefresh boolean value from settings. */
-      String[] check = Read.file(SETTINGS_DIR + settingTitles[1] + ".txt", m_applicationFolder);
-      boolean refresh = 0 == check.length || !Boolean.parseBoolean(check[0]);
+      /* TODO Get AUTO_REFRESH setting. */
+      //boolean refresh = 0 == check.length || !Boolean.parseBoolean(check[0]);
+      boolean refresh = true;
 
       if(refresh && ALARM_SERVICE_START == state)
       {
@@ -372,15 +369,13 @@ class FeedsActivity extends Activity
       }
 
       /* Load the ManageFeedsRefresh time from settings. */
-      String[] settings = Read.file(SETTINGS_DIR + settingTitles[2] + ".txt", m_applicationFolder);
-
-      int time = 0 == settings.length || 0 == settings[0].length()
-            ? DEFAULT_REFRESH_TIME
-            : Integer.parseInt(settings[0]);
+      /* TODO Get AUTO_REFRESH_INTERVAL setting. */
+      //int time = 0 == settings.length || 0 == settings[0].length();
+      int time = 120;
 
       /* Create intent, turn into pending intent, and get the alarm manager. */
       Intent intent = new Intent(this, ServiceUpdate.class);
-      intent = configureServiceIntent(intent, 0, settingTitles, m_applicationFolder);
+      intent = configureServiceIntent(intent, 0, m_applicationFolder);
 
       PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, 0);
       AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
@@ -399,14 +394,12 @@ class FeedsActivity extends Activity
    }
 
    private static
-   Intent configureServiceIntent(Intent intent, int page, String[] settingTitles,
-         String applicationFolder)
+   Intent configureServiceIntent(Intent intent, int page, String applicationFolder)
    {
       /* Load notification boolean. */
-      String settingFileName = SETTINGS_DIR + settingTitles[3] + ".txt";
-      String[] check = Read.file(settingFileName, applicationFolder);
-
-      boolean notificationsEnabled = 0 != check.length && Boolean.parseBoolean(check[0]);
+      /* TODO Get NOTIFICATIONS_ENABLED setting. */
+      //boolean notificationsEnabled = 0 != check.length && Boolean.parseBoolean(check[0]);
+      boolean notificationsEnabled = true;
       intent.putExtra("GROUP_NUMBER", page);
       intent.putExtra("NOTIFICATIONS", notificationsEnabled);
       return intent;

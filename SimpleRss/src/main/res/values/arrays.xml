@@ -23,36 +23,49 @@
       <item>Settings</item>
    </string-array>
 
-   <string-array name="settings_function_titles">
-      <item>Auto Refresh</item>
-      <item>Auto Refresh</item>
-      <item>Refresh Time</item>
-      <item>Notifications</item>
-      <item>Global Feed Settings</item>
-      <item>Max History</item>
-   </string-array>
-
-   <string-array name="settings_function_summaries">
-      <item>null</item>
-      <item>Check to enable auto refresh</item>
-      <item>Adjust auto refresh interval</item>
-      <item>Check to enable notifications</item>
-      <item>null</item>
-      <item>Number of items to keep per feed</item>
-   </string-array>
-
-   <string-array name="settings_interface_titles">
-      <item>Feed Display</item>
-      <item>Read Item Opacity</item>
-   </string-array>
-
-   <string-array name="settings_interface_summaries">
-      <item>EMPTY</item>
-      <item>0\%% is hidden, 100\%% disables effect</item>
-   </string-array>
-
    <string-array name="long_click_manage_feeds">
       <item>Delete</item>
       <item>Clear Content</item>
    </string-array>
+
+   <string-array name="refresh_interval_titles">
+      <item>30 minutes</item>
+      <item>1 hour</item>
+      <item>2 hours</item>
+      <item>4 hours</item>
+      <item>8 hours</item>
+      <item>12 hours</item>
+      <item>1 day</item>
+   </string-array>
+
+   <string-array name="refresh_interval_values">
+      <item>30</item>
+      <item>60</item>
+      <item>120</item>
+      <item>240</item>
+      <item>480</item>
+      <item>720</item>
+      <item>1440</item>
+   </string-array>
+
+   <string-array name="thumbnail_quality">
+      <item>Very low</item>
+      <item>Low</item>
+      <item>Medium</item>
+      <item>High</item>
+      <item>Very High</item>
+      <item>Super</item>
+      <item>Max</item>
+   </string-array>
+
+   <string-array name="thumbnail_quality_values">
+      <item>30</item>
+      <item>60</item>
+      <item>80</item>
+      <item>90</item>
+      <item>95</item>
+      <item>98</item>
+      <item>100</item>
+   </string-array>
+
 </resources>

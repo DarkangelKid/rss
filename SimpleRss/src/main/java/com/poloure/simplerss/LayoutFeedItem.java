@@ -18,7 +18,7 @@ class LayoutFeedItem extends LinearLayout
    private static final int COLOR_DESCRIPTION_UNREAD = Color.argb(205, 0, 0, 0);
    private static final float TEXT_SIZE_DESCRIPTION = 14.0F;
    private static final float EIGHT_PADDING = 8.0F;
-   private static final Typeface SERIF = Typeface.create("serif", Typeface.NORMAL);
+   private static final Typeface SERIF = Typeface.create(Typeface.SERIF, Typeface.NORMAL);
    private static final AbsListView.LayoutParams LAYOUT_PARAMS = new AbsListView.LayoutParams(
          ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
    private static final ViewGroup.LayoutParams IMAGE_PARAMS = new ViewGroup.LayoutParams(
@@ -99,10 +99,7 @@ class LayoutFeedItem extends LinearLayout
          AsyncLoadImage.newInstance(m_imageView, applicationFolder, feedItem.m_imageName, position,
                context);
       }
-      if(isDescription)
-      {
-         m_descriptionView.setText(description);
-      }
+      if(isDescription) m_descriptionView.setText(description);
    }
 
 }

@@ -42,4 +42,5 @@
    <string name="notification_content_tag_item">%d tag has an unread item</string>
    <string name="notification_content_tag_items">%d tag has unread items</string>
    <string name="notification_content_tags">%d tags have unread items</string>
+
 </resources>
