@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -19,7 +20,10 @@ class AdapterNavigationDrawer extends BaseAdapter
    };
    private static final float MIN_HEIGHT_MAIN = 48.0F;
    private static final float HORIZONTAL_PADDING_MAIN = 8.0F;
+   private static final float HORIZONTAL_PADDING_SUB = 16.0F;
+   private static final float PADDING_COMPOUND_DRAWABLE = 12.0F;
    private static final float TEXT_SIZE_MAIN = 20.0F;
+   private static final ColorDrawable GREY_LINE = new ColorDrawable(Color.parseColor("#888888"));
    private static final int TYPE_TITLE = 0;
    private static final int TYPE_DIVIDER = 1;
    private static final int TYPE_TAG = 2;
@@ -27,20 +31,17 @@ class AdapterNavigationDrawer extends BaseAdapter
    private static final int[] EMPTY_INT_ARRAY = new int[0];
    private static final Typeface SANS_SERIF_LITE = Typeface.create("sans-serif-light",
          Typeface.NORMAL);
-   private static final int COLOR_DIVIDER = Color.parseColor("#888888");
    private static final int DIP = TypedValue.COMPLEX_UNIT_DIP;
    private static final int SP = TypedValue.COMPLEX_UNIT_SP;
-   private final int m_twelveDp;
    private final String[] m_navigationTitles;
    private final Context m_context;
    private String[] m_tagArray = new String[0];
    private int[] m_unreadArray = EMPTY_INT_ARRAY;
 
-   AdapterNavigationDrawer(String[] navigationTitles, Context context, int twelveDp)
+   AdapterNavigationDrawer(String[] navigationTitles, Context context)
    {
       m_navigationTitles = navigationTitles.clone();
       m_context = context;
-      m_twelveDp = twelveDp;
    }
 
    void setArrays(String[] tags, int[] unreadCounts)
@@ -90,6 +91,10 @@ class AdapterNavigationDrawer extends BaseAdapter
             float hPaddingFloat = TypedValue.applyDimension(DIP, HORIZONTAL_PADDING_MAIN, metrics);
             int hPadding = Math.round(hPaddingFloat);
 
+            float drawableFloat = TypedValue.applyDimension(DIP, PADDING_COMPOUND_DRAWABLE,
+                  metrics);
+            int paddingDrawable = Math.round(drawableFloat);
+
             TextView textView = new TextView(m_context);
             textView.setGravity(Gravity.CENTER_VERTICAL);
             textView.setTypeface(SANS_SERIF_LITE);
@@ -97,24 +102,40 @@ class AdapterNavigationDrawer extends BaseAdapter
             textView.setPadding(hPadding, 0, hPadding, 0);
             textView.setTextSize(SP, TEXT_SIZE_MAIN);
             textView.setTextColor(Color.WHITE);
+            textView.setCompoundDrawablePadding(paddingDrawable);
 
             view = textView;
          }
 
          ((TextView) view).setText(m_navigationTitles[position]);
-
-         /* Set the item's image as a CompoundDrawable of the textView. */
          ((TextView) view).setCompoundDrawablesWithIntrinsicBounds(NAV_ICONS[position], 0, 0, 0);
-         ((TextView) view).setCompoundDrawablePadding(m_twelveDp);
       }
       else if(TYPE_DIVIDER == viewType && null == view)
       {
+         TextView textView = new TextView(m_context);
+
          String tagsTitle = m_context.getString(R.string.feed_tag_title);
-         view = ViewSettingsHeader.newInstance(m_context, COLOR_DIVIDER, 12.0F);
-         /* TODO Dip */
-         view.setPadding(32, 8, 32, 8);
-         ((TextView) view).setText(tagsTitle);
-         ((TextView) view).setTextColor(Color.WHITE);
+         Resources resources = m_context.getResources();
+         DisplayMetrics metrics = resources.getDisplayMetrics();
+
+         int drawerWidth = parent.getWidth();
+         GREY_LINE.setBounds(0, 0, drawerWidth, 3);
+
+         float vPaddingFloat = TypedValue.applyDimension(DIP, HORIZONTAL_PADDING_SUB / 4.0F,
+               metrics);
+         float hPaddingFloat = TypedValue.applyDimension(DIP, HORIZONTAL_PADDING_SUB, metrics);
+
+         int vPadding = Math.round(vPaddingFloat);
+         int hPadding = Math.round(hPaddingFloat);
+
+         textView.setCompoundDrawables(null, null, null, GREY_LINE);
+         textView.setCompoundDrawablePadding(8);
+         textView.setPadding(hPadding, vPadding, hPadding, vPadding);
+         textView.setText(tagsTitle);
+         textView.setTextColor(Color.WHITE);
+         textView.setTextSize(DIP, 12.0F);
+
+         view = textView;
       }
       else if(TYPE_TAG == viewType)
       {
@@ -130,7 +151,8 @@ class AdapterNavigationDrawer extends BaseAdapter
             float minHeightFloat = TypedValue.applyDimension(DIP, 42.0F, displayMetrics);
             int minHeight = Math.round(minHeightFloat);
 
-            float paddingSides = TypedValue.applyDimension(DIP, 16.0F, displayMetrics);
+            float paddingSides = TypedValue.applyDimension(DIP, HORIZONTAL_PADDING_SUB,
+                  displayMetrics);
             int padding = Math.round(paddingSides);
 
             view.setPadding(padding, 0, padding, 0);

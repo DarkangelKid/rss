@@ -36,7 +36,8 @@ class OnClickNavDrawerItem implements AdapterView.OnItemClickListener
 
    @Override
    public
-   void onItemClick(AdapterView parent, View view, int position, long id)
+   void onItemClick(@SuppressWarnings("rawtypes") AdapterView parent, View view, int position,
+         long id)
    {
       /* Close the drawer on any click. This will call the OnDrawerClose of the DrawerToggle. */
       m_drawerLayout.closeDrawers();
