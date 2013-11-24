@@ -41,7 +41,7 @@ class ServiceHandler extends Handler
       int updatedPage = bundle.getInt("page_number");
 
       /* Find which pages we want to refresh. */
-      int tagsCount = PagerAdapterFeeds.getSize();
+      int tagsCount = PagerAdapterFeeds.s_tagSet.size();
       int[] pagesToRefresh;
 
       if(0 == updatedPage)

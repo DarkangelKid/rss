@@ -3,7 +3,9 @@ package com.poloure.simplerss;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ImageView;
@@ -14,13 +16,13 @@ class LayoutFeedItem extends LinearLayout
 {
    private static final int COLOR_TITLE_UNREAD = Color.argb(255, 0, 0, 0);
    private static final int COLOR_DESCRIPTION_UNREAD = Color.argb(205, 0, 0, 0);
-   private static final int COLOR_LINK_UNREAD = Color.argb(128, 0, 0, 0);
+   private static final float TEXT_SIZE_DESCRIPTION = 14.0F;
+   private static final float EIGHT_PADDING = 8.0F;
+   private static final Typeface SERIF = Typeface.create("serif", Typeface.NORMAL);
    private static final AbsListView.LayoutParams LAYOUT_PARAMS = new AbsListView.LayoutParams(
          ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-   private static float s_opacity = -1.0F;
-   private static int s_titleRead = Color.argb(168, 0, 0, 0);
-   private static int s_notTitleRead = Color.argb(125, 0, 0, 0);
-   private static float s_screenWidth;
+   private static final ViewGroup.LayoutParams IMAGE_PARAMS = new ViewGroup.LayoutParams(
+         ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
    private final TextView m_titleView;
    private final TextView m_descriptionView;
    private final ImageView m_imageView;
@@ -28,51 +30,54 @@ class LayoutFeedItem extends LinearLayout
    LayoutFeedItem(Context context)
    {
       super(context);
-      inflate(context, R.layout.feed_item, this);
 
-      if(0.0F == s_screenWidth)
-      {
-         Resources resources = context.getResources();
-         DisplayMetrics metrics = resources.getDisplayMetrics();
-         s_screenWidth = (float) metrics.widthPixels;
-      }
+      Resources resources = context.getResources();
+      DisplayMetrics metrics = resources.getDisplayMetrics();
+      float eightFloatDp = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, EIGHT_PADDING,
+            metrics);
+      int eightDp = Math.round(eightFloatDp);
 
-      /* Save the inflated views from the xml file as class fields. */
-      m_titleView = (TextView) findViewById(R.id.title);
-      m_descriptionView = (TextView) findViewById(R.id.description);
-      m_imageView = (ImageView) findViewById(R.id.image);
+      m_titleView = new TextView(context);
+      m_titleView.setTextColor(COLOR_TITLE_UNREAD);
+      m_titleView.setTypeface(SERIF);
+      m_titleView.setPadding(eightDp, eightDp, eightDp, eightDp);
+
+      m_descriptionView = new TextView(context);
+      m_descriptionView.setTextColor(COLOR_DESCRIPTION_UNREAD);
+      m_descriptionView.setTypeface(SERIF);
+      m_descriptionView.setPadding(eightDp, eightDp, eightDp, eightDp);
+      m_descriptionView.setTextSize(TypedValue.COMPLEX_UNIT_SP, TEXT_SIZE_DESCRIPTION);
+
+      m_imageView = new ImageView(context);
+      m_imageView.setLayoutParams(IMAGE_PARAMS);
+      m_imageView.setAdjustViewBounds(true);
+      m_imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
       setLayoutParams(LAYOUT_PARAMS);
       setOrientation(VERTICAL);
+
+      addView(m_titleView);
+      addView(m_imageView);
+      addView(m_descriptionView);
    }
 
-   static
-   float getReadItemOpacity()
+   @Override
+   public
+   boolean hasOverlappingRendering()
    {
-      return s_opacity;
+      return false;
    }
 
-   static
-   void setReadItemOpacity(float opacity)
-   {
-      s_opacity = opacity;
-      s_titleRead = Color.argb(Math.round(255.0F * opacity), 0, 0, 0);
-      s_notTitleRead = Color.argb(Math.round(190.0F * opacity), 0, 0, 0);
-   }
-
-   void showItem(FeedItem feedItem, String applicationFolder, int position, boolean isRead,
+   void showItem(FeedItem feedItem, String applicationFolder, int position,
          CharSequence editableTitle)
    {
       String description = feedItem.m_itemDescription;
 
       m_titleView.setText(editableTitle);
-
-      /* Set the text colors based on whether the item has been read or not. */
-      m_titleView.setTextColor(isRead ? s_titleRead : COLOR_TITLE_UNREAD);
       m_imageView.setImageDrawable(null);
 
       /* Figuring out what view type the item is. */
-      boolean isImage = 0 != feedItem.m_imageWidth;
+      boolean isImage = 0 != feedItem.m_EffImageHeight;
       boolean isDescription = null != description && 0 != description.length();
 
       m_imageView.setVisibility(isImage ? VISIBLE : GONE);
@@ -82,22 +87,21 @@ class LayoutFeedItem extends LinearLayout
       {
          Context context = getContext();
 
-         short imageWidth = feedItem.m_imageWidth;
-         short imageHeight = feedItem.m_imageHeight;
+         ViewGroup.LayoutParams params = m_imageView.getLayoutParams();
+         if(null != params)
+         {
+            params.height = feedItem.m_EffImageHeight;
+            m_imageView.setLayoutParams(params);
+         }
 
-         ViewGroup.LayoutParams lp = m_imageView.getLayoutParams();
-
-         lp.height = Math.round((float) s_screenWidth / (float) imageWidth * (float) imageHeight);
-         m_imageView.setLayoutParams(lp);
          m_imageView.setTag(position);
 
          AsyncLoadImage.newInstance(m_imageView, applicationFolder, feedItem.m_imageName, position,
-               context, isRead, s_opacity);
+               context);
       }
       if(isDescription)
       {
          m_descriptionView.setText(description);
-         m_descriptionView.setTextColor(isRead ? s_notTitleRead : COLOR_DESCRIPTION_UNREAD);
       }
    }
 

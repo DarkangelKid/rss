@@ -35,7 +35,7 @@ class AsyncRefreshNavigationAdapter extends AsyncTask<String, Void, int[]>
       AsyncTask<String, Void, int[]> task = new AsyncRefreshNavigationAdapter(adapterNavDrawer,
             actionBar, currentPage);
 
-         task.executeOnExecutor(THREAD_POOL_EXECUTOR, applicationFolder);
+      task.executeOnExecutor(THREAD_POOL_EXECUTOR, applicationFolder);
    }
 
    /* Get the unread counts for the tags. */

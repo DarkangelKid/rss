@@ -43,11 +43,10 @@ class FeedsActivity extends Activity
    static final String SETTINGS_DIR = "settings" + File.separatorChar;
    static final String FILTER_LIST = "filter_list.txt";
    private static final String READ_ITEMS = "read_items.txt";
-   private static final byte ALARM_SERVICE_START = (byte) 1;
-   private static final byte ALARM_SERVICE_STOP = (byte) 0;
+   private static final int ALARM_SERVICE_START = 1;
+   private static final int ALARM_SERVICE_STOP = 0;
    private static final int MINUTE_VALUE = 60000;
-   private static final byte DEFAULT_REFRESH_TIME = (byte) 120;
-   private static final short TAGS_LIST_VIEW_FADE_IN_TIME = (short) 240;
+   private static final int DEFAULT_REFRESH_TIME = 120;
    static Handler s_serviceHandler;
    String m_previousActionBarTitle;
    private ViewPager m_feedsViewPager;
@@ -88,8 +87,7 @@ class FeedsActivity extends Activity
       String[] navigationTitles = m_resources.getStringArray(R.array.navigation_titles);
 
       m_drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-      m_adapterNavDrawer = new AdapterNavigationDrawer(navigationTitles, this, twelveDp,
-            layoutInflater);
+      m_adapterNavDrawer = new AdapterNavigationDrawer(navigationTitles, this, twelveDp);
 
       /* Configure the ActionBar. */
       m_actionBar.setIcon(R.drawable.rss_icon);
@@ -123,22 +121,6 @@ class FeedsActivity extends Activity
       }
    }
 
-   static
-   String getApplicationFolder(Context context)
-   {
-      /* Check the media state for the desirable state. */
-      String state = Environment.getExternalStorageState();
-
-      String mounted = Environment.MEDIA_MOUNTED;
-      if(!mounted.equals(state))
-      {
-         return null;
-      }
-
-      File externalFilesDir = context.getExternalFilesDir(null);
-      return externalFilesDir.getAbsolutePath() + File.separatorChar;
-   }
-
    @Override
    protected
    void onPostCreate(Bundle savedInstanceState)
@@ -169,61 +151,6 @@ class FeedsActivity extends Activity
 
       /* Stop the alarm service and reset the time to 0. */
       setServiceIntent(ALARM_SERVICE_STOP);
-   }
-
-   private
-   void setServiceIntent(byte state)
-   {
-      String[] settingTitles = m_resources.getStringArray(R.array.settings_function_titles);
-
-      /* Load the ManageFeedsRefresh boolean value from settings. */
-      String[] check = Read.file(SETTINGS_DIR + settingTitles[1] + ".txt", m_applicationFolder);
-      boolean refresh = 0 == check.length || !Boolean.parseBoolean(check[0]);
-
-      if(refresh && ALARM_SERVICE_START == state)
-      {
-         return;
-      }
-
-      /* Load the ManageFeedsRefresh time from settings. */
-      String[] settings = Read.file(SETTINGS_DIR + settingTitles[2] + ".txt", m_applicationFolder);
-
-      int time = 0 == settings.length || 0 == settings[0].length()
-            ? (int) DEFAULT_REFRESH_TIME
-            : Integer.parseInt(settings[0]);
-
-      /* Create intent, turn into pending intent, and get the alarm manager. */
-      Intent intent = new Intent(this, ServiceUpdate.class);
-      intent = configureServiceIntent(intent, 0, settingTitles, m_applicationFolder);
-
-      PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, 0);
-      AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
-
-      /* Depending on the state string, start or stop the service. */
-      if(ALARM_SERVICE_START == state)
-      {
-         long interval = (long) time * (long) MINUTE_VALUE;
-         long next = System.currentTimeMillis() + interval;
-         am.setRepeating(AlarmManager.RTC_WAKEUP, next, interval, pendingIntent);
-      }
-      else if(ALARM_SERVICE_STOP == state)
-      {
-         am.cancel(pendingIntent);
-      }
-   }
-
-   private static
-   Intent configureServiceIntent(Intent intent, int page, String[] settingTitles,
-         String applicationFolder)
-   {
-      /* Load notification boolean. */
-      String settingFileName = SETTINGS_DIR + settingTitles[3] + ".txt";
-      String[] check = Read.file(settingFileName, applicationFolder);
-
-      boolean notificationsEnabled = 0 != check.length && Boolean.parseBoolean(check[0]);
-      intent.putExtra("GROUP_NUMBER", page);
-      intent.putExtra("NOTIFICATIONS", notificationsEnabled);
-      return intent;
    }
 
    @Override
@@ -286,23 +213,6 @@ class FeedsActivity extends Activity
       return true;
    }
 
-   private
-   boolean isServiceRunning()
-   {
-      ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-      for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(
-            Integer.MAX_VALUE))
-      {
-         String className = service.service.getClassName();
-         String serviceName = ServiceUpdate.class.getName();
-         if(serviceName.equals(className))
-         {
-            return true;
-         }
-      }
-      return false;
-   }
-
    @Override
    public
    boolean onOptionsItemSelected(MenuItem item)
@@ -362,47 +272,6 @@ class FeedsActivity extends Activity
       return true;
    }
 
-   /* Updates and refreshes the tags with any new content. */
-   private
-   void refreshFeeds(MenuItem menuItem)
-   {
-      MenuItemCompat.setActionView(menuItem, R.layout.progress_circle);
-
-      /* Set the service handler in FeedsActivity so we can check and call it from ServiceUpdate. */
-      s_serviceHandler = new ServiceHandler(m_fragmentManager, menuItem, m_applicationFolder);
-
-      int currentPage = m_feedsViewPager.getCurrentItem();
-
-      String[] settingTitles = m_resources.getStringArray(R.array.settings_function_titles);
-
-      Intent intent = new Intent(this, ServiceUpdate.class);
-      intent = configureServiceIntent(intent, currentPage, settingTitles, m_applicationFolder);
-      startService(intent);
-   }
-
-   String getNavigationTitle()
-   {
-      CharSequence title = m_actionBar.getTitle();
-      return title.toString();
-   }
-
-   static
-   void gotoLatestUnread(ListView listView)
-   {
-      Adapter listAdapter = listView.getAdapter();
-
-      int itemCount = listAdapter.getCount() - 1;
-      for(int i = itemCount; 0 <= i; i--)
-      {
-         FeedItem feedItem = (FeedItem) listAdapter.getItem(i);
-         if(!AdapterTags.READ_ITEM_TIMES.contains(feedItem.m_itemTime))
-         {
-            listView.setSelection(i);
-            break;
-         }
-      }
-   }
-
    private static
    void showAddFilterDialog(Context context, FragmentManager fragmentManager)
    {
@@ -428,6 +297,135 @@ class FeedsActivity extends Activity
       build.setNegativeButton(cancelText, null);
       build.setPositiveButton(addText, onClickAdd);
       build.show();
+   }
+
+   static
+   void gotoLatestUnread(ListView listView)
+   {
+      Adapter listAdapter = listView.getAdapter();
+
+      int itemCount = listAdapter.getCount() - 1;
+      for(int i = itemCount; 0 <= i; i--)
+      {
+         FeedItem feedItem = (FeedItem) listAdapter.getItem(i);
+         if(!AdapterTags.READ_ITEM_TIMES.contains(feedItem.m_itemTime))
+         {
+            listView.setSelection(i);
+            break;
+         }
+      }
+   }
+
+   String getNavigationTitle()
+   {
+      CharSequence title = m_actionBar.getTitle();
+      return title.toString();
+   }
+
+   /* Updates and refreshes the tags with any new content. */
+   private
+   void refreshFeeds(MenuItem menuItem)
+   {
+      MenuItemCompat.setActionView(menuItem, R.layout.progress_circle);
+
+      /* Set the service handler in FeedsActivity so we can check and call it from ServiceUpdate. */
+      s_serviceHandler = new ServiceHandler(m_fragmentManager, menuItem, m_applicationFolder);
+
+      int currentPage = m_feedsViewPager.getCurrentItem();
+
+      String[] settingTitles = m_resources.getStringArray(R.array.settings_function_titles);
+
+      Intent intent = new Intent(this, ServiceUpdate.class);
+      intent = configureServiceIntent(intent, currentPage, settingTitles, m_applicationFolder);
+      startService(intent);
+   }
+
+   private
+   boolean isServiceRunning()
+   {
+      ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+      for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(
+            Integer.MAX_VALUE))
+      {
+         String className = service.service.getClassName();
+         String serviceName = ServiceUpdate.class.getName();
+         if(serviceName.equals(className))
+         {
+            return true;
+         }
+      }
+      return false;
+   }
+
+   private
+   void setServiceIntent(int state)
+   {
+      String[] settingTitles = m_resources.getStringArray(R.array.settings_function_titles);
+
+      /* Load the ManageFeedsRefresh boolean value from settings. */
+      String[] check = Read.file(SETTINGS_DIR + settingTitles[1] + ".txt", m_applicationFolder);
+      boolean refresh = 0 == check.length || !Boolean.parseBoolean(check[0]);
+
+      if(refresh && ALARM_SERVICE_START == state)
+      {
+         return;
+      }
+
+      /* Load the ManageFeedsRefresh time from settings. */
+      String[] settings = Read.file(SETTINGS_DIR + settingTitles[2] + ".txt", m_applicationFolder);
+
+      int time = 0 == settings.length || 0 == settings[0].length()
+            ? DEFAULT_REFRESH_TIME
+            : Integer.parseInt(settings[0]);
+
+      /* Create intent, turn into pending intent, and get the alarm manager. */
+      Intent intent = new Intent(this, ServiceUpdate.class);
+      intent = configureServiceIntent(intent, 0, settingTitles, m_applicationFolder);
+
+      PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, 0);
+      AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+
+      /* Depending on the state string, start or stop the service. */
+      if(ALARM_SERVICE_START == state)
+      {
+         long interval = (long) time * (long) MINUTE_VALUE;
+         long next = System.currentTimeMillis() + interval;
+         am.setRepeating(AlarmManager.RTC_WAKEUP, next, interval, pendingIntent);
+      }
+      else if(ALARM_SERVICE_STOP == state)
+      {
+         am.cancel(pendingIntent);
+      }
+   }
+
+   private static
+   Intent configureServiceIntent(Intent intent, int page, String[] settingTitles,
+         String applicationFolder)
+   {
+      /* Load notification boolean. */
+      String settingFileName = SETTINGS_DIR + settingTitles[3] + ".txt";
+      String[] check = Read.file(settingFileName, applicationFolder);
+
+      boolean notificationsEnabled = 0 != check.length && Boolean.parseBoolean(check[0]);
+      intent.putExtra("GROUP_NUMBER", page);
+      intent.putExtra("NOTIFICATIONS", notificationsEnabled);
+      return intent;
+   }
+
+   static
+   String getApplicationFolder(Context context)
+   {
+      /* Check the media state for the desirable state. */
+      String state = Environment.getExternalStorageState();
+
+      String mounted = Environment.MEDIA_MOUNTED;
+      if(!mounted.equals(state))
+      {
+         return null;
+      }
+
+      File externalFilesDir = context.getExternalFilesDir(null);
+      return externalFilesDir.getAbsolutePath() + File.separatorChar;
    }
 
    void setNavigationTitle(CharSequence title, boolean saveTitle)

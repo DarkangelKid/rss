@@ -7,7 +7,6 @@ import android.graphics.Typeface;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -18,6 +17,9 @@ class AdapterNavigationDrawer extends BaseAdapter
    private static final int[] NAV_ICONS = {
          R.drawable.action_feeds, R.drawable.action_manage, R.drawable.action_settings,
    };
+   private static final float MIN_HEIGHT_MAIN = 48.0F;
+   private static final float HORIZONTAL_PADDING_MAIN = 8.0F;
+   private static final float TEXT_SIZE_MAIN = 20.0F;
    private static final int TYPE_TITLE = 0;
    private static final int TYPE_DIVIDER = 1;
    private static final int TYPE_TAG = 2;
@@ -26,19 +28,18 @@ class AdapterNavigationDrawer extends BaseAdapter
    private static final Typeface SANS_SERIF_LITE = Typeface.create("sans-serif-light",
          Typeface.NORMAL);
    private static final int COLOR_DIVIDER = Color.parseColor("#888888");
+   private static final int DIP = TypedValue.COMPLEX_UNIT_DIP;
+   private static final int SP = TypedValue.COMPLEX_UNIT_SP;
    private final int m_twelveDp;
    private final String[] m_navigationTitles;
    private final Context m_context;
-   private final LayoutInflater m_layoutInflater;
    private String[] m_tagArray = new String[0];
    private int[] m_unreadArray = EMPTY_INT_ARRAY;
 
-   AdapterNavigationDrawer(String[] navigationTitles, Context context, int twelveDp,
-         LayoutInflater layoutInflater)
+   AdapterNavigationDrawer(String[] navigationTitles, Context context, int twelveDp)
    {
       m_navigationTitles = navigationTitles.clone();
       m_context = context;
-      m_layoutInflater = layoutInflater;
       m_twelveDp = twelveDp;
    }
 
@@ -76,12 +77,28 @@ class AdapterNavigationDrawer extends BaseAdapter
       View view = convertView;
       int viewType = getItemViewType(position);
 
-      /* These are fine. */
       if(TYPE_TITLE == viewType)
       {
          if(null == view)
          {
-            view = m_layoutInflater.inflate(R.layout.navigation_drawer_main_item, parent, false);
+            Resources resources = m_context.getResources();
+            DisplayMetrics metrics = resources.getDisplayMetrics();
+
+            float minHeightFloat = TypedValue.applyDimension(DIP, MIN_HEIGHT_MAIN, metrics);
+            int minHeight = Math.round(minHeightFloat);
+
+            float hPaddingFloat = TypedValue.applyDimension(DIP, HORIZONTAL_PADDING_MAIN, metrics);
+            int hPadding = Math.round(hPaddingFloat);
+
+            TextView textView = new TextView(m_context);
+            textView.setGravity(Gravity.CENTER_VERTICAL);
+            textView.setTypeface(SANS_SERIF_LITE);
+            textView.setMinHeight(minHeight);
+            textView.setPadding(hPadding, 0, hPadding, 0);
+            textView.setTextSize(SP, TEXT_SIZE_MAIN);
+            textView.setTextColor(Color.WHITE);
+
+            view = textView;
          }
 
          ((TextView) view).setText(m_navigationTitles[position]);
@@ -110,17 +127,15 @@ class AdapterNavigationDrawer extends BaseAdapter
             Resources resources = m_context.getResources();
             DisplayMetrics displayMetrics = resources.getDisplayMetrics();
 
-            float minHeightFloat = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 42.0F,
-                  displayMetrics);
+            float minHeightFloat = TypedValue.applyDimension(DIP, 42.0F, displayMetrics);
             int minHeight = Math.round(minHeightFloat);
 
-            float paddingSides = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16.0F,
-                  displayMetrics);
+            float paddingSides = TypedValue.applyDimension(DIP, 16.0F, displayMetrics);
             int padding = Math.round(paddingSides);
 
             view.setPadding(padding, 0, padding, 0);
             ((TextView) view).setMinHeight(minHeight);
-            ((TextView) view).setTextSize(TypedValue.COMPLEX_UNIT_SP, 16.0F);
+            ((TextView) view).setTextSize(SP, 16.0F);
             ((TextView) view).setGravity(Gravity.CENTER_VERTICAL);
             ((TextView) view).setTextColor(Color.WHITE);
             ((TextView) view).setTypeface(SANS_SERIF_LITE);

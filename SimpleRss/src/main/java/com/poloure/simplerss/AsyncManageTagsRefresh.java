@@ -16,8 +16,8 @@ import android.widget.ListView;
 
 class AsyncManageTagsRefresh extends AsyncTask<String, Editable[], Animation>
 {
-   private static final byte INFO_INITIAL_CAPACITY = (byte) 40;
-   private static final short FADE_IN_DURATION = (short) 330;
+   private static final int INFO_INITIAL_CAPACITY = 40;
+   private static final int FADE_IN_DURATION = 330;
    private static final AbsoluteSizeSpan TITLE_SIZE = new AbsoluteSizeSpan(14, true);
    private static final StyleSpan SPAN_BOLD = new StyleSpan(Typeface.BOLD);
    private final ListView m_listView;
@@ -40,7 +40,7 @@ class AsyncManageTagsRefresh extends AsyncTask<String, Editable[], Animation>
    {
       AsyncTask<String, Editable[], Animation> task = new AsyncManageTagsRefresh(listView);
 
-         task.executeOnExecutor(THREAD_POOL_EXECUTOR, allTag, applicationFolder);
+      task.executeOnExecutor(THREAD_POOL_EXECUTOR, allTag, applicationFolder);
    }
 
    @Override
@@ -66,7 +66,7 @@ class AsyncManageTagsRefresh extends AsyncTask<String, Editable[], Animation>
       int indexCount = indexNames.length;
 
       Editable[] editables = new SpannableStringBuilder[tagCount];
-      StringBuilder info = new StringBuilder((int) INFO_INITIAL_CAPACITY);
+      StringBuilder info = new StringBuilder(INFO_INITIAL_CAPACITY);
 
       for(int i = 0; i < tagCount; i++)
       {

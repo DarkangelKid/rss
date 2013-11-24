@@ -1,12 +1,12 @@
 package com.poloure.simplerss;
 
+import android.text.Editable;
+
 class FeedItem
 {
-   String m_itemTitle;
-   String m_itemUrl;
    String m_itemDescription;
    String m_imageName;
-   short m_imageWidth;
-   short m_imageHeight;
+   int m_EffImageHeight;
    Long m_itemTime;
+   Editable m_titleAndLink;
 }

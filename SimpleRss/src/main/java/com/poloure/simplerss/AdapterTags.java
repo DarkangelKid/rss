@@ -3,10 +3,6 @@ package com.poloure.simplerss;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Typeface;
-import android.text.Editable;
-import android.text.SpannableStringBuilder;
-import android.text.Spanned;
-import android.text.style.AbsoluteSizeSpan;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
@@ -24,11 +20,7 @@ import java.util.Set;
 class AdapterTags extends BaseAdapter
 {
    static final Set<Long> READ_ITEM_TIMES = Collections.synchronizedSet(new HashSet<Long>(0));
-   private static final AbsoluteSizeSpan TITLE_SIZE = new AbsoluteSizeSpan(14, true);
-   private static final AbsoluteSizeSpan LINK_SIZE = new AbsoluteSizeSpan(10, true);
-   private static final AbsoluteSizeSpan DESCRIPTION_SIZE = new AbsoluteSizeSpan(12, true);
-   private static final Typeface SANS_SERIF_LITE = Typeface.create("sans-serif-light",
-         Typeface.NORMAL);
+   private static final Typeface SERIF = Typeface.create("serif", Typeface.NORMAL);
    private final List<FeedItem> m_items = new ArrayList<FeedItem>(0);
    private final List<Long> m_times = new ArrayList<Long>(0);
    private final Context m_context;
@@ -59,7 +51,7 @@ class AdapterTags extends BaseAdapter
    public
    int getItemViewType(int position)
    {
-      boolean isImage = 0 != m_items.get(position).m_imageWidth;
+      boolean isImage = 0 != m_items.get(position).m_EffImageHeight;
 
       return isImage ? 1 : 0;
    }
@@ -103,73 +95,33 @@ class AdapterTags extends BaseAdapter
       Long time = item.m_itemTime;
       boolean isRead = READ_ITEM_TIMES.contains(time);
 
-      Editable editable = new SpannableStringBuilder();
-
-      /* TODO, set the text colors. */
-      /* First, the title. */
-      editable.append(item.m_itemTitle);
-      editable.setSpan(TITLE_SIZE, 0, editable.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-      editable.append("\n");
-
-      /* Next the link. */
-      int offset = editable.length();
-      editable.append(item.m_itemUrl);
-      editable.setSpan(LINK_SIZE, offset, editable.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-
       View view;
 
       if(0 == viewType)
       {
          /* Make the single TextView view. */
          view = isNewView ? new TextView(m_context) : convertView;
-         editable.append("\n");
+         if(isNewView)
+         {
+            ((TextView) view).setTypeface(SERIF);
+            Resources resources = m_context.getResources();
+            DisplayMetrics metrics = resources.getDisplayMetrics();
 
-         /* Finally the description. */
-         offset = editable.length();
-         editable.append(item.m_itemDescription);
-         editable.setSpan(DESCRIPTION_SIZE, offset, editable.length(),
-               Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            int eight = Math.round(
+                  TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8.0F, metrics));
 
-         ((TextView) view).setText(editable);
-         ((TextView) view).setTypeface(SANS_SERIF_LITE);
-         Resources resources = m_context.getResources();
-         DisplayMetrics metrics = resources.getDisplayMetrics();
+            view.setPadding(eight, eight, eight, eight);
+         }
 
-         int eight = Math.round(
-               TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8.0F, metrics));
-
-         view.setPadding(eight, eight, eight, eight);
+         ((TextView) view).setText(item.m_titleAndLink);
       }
       else
       {
          view = isNewView ? new LayoutFeedItem(m_context) : convertView;
-         ((LayoutFeedItem) view).showItem(item, m_applicationFolder, position, isRead, editable);
+         ((LayoutFeedItem) view).showItem(item, m_applicationFolder, position, item.m_titleAndLink);
       }
 
-      float opacity = LayoutFeedItem.getReadItemOpacity();
-      if(0.0F > opacity)
-      {
-         Resources resources = m_context.getResources();
-         String applicationFolder = FeedsActivity.getApplicationFolder(m_context);
-         String[] settingTitles = resources.getStringArray(R.array.settings_interface_titles);
-         String opacityPath = FeedsActivity.SETTINGS_DIR + settingTitles[1] + ".txt";
-         String[] opacityFile = Read.file(opacityPath, applicationFolder);
-
-         boolean valueExists = 0 != opacityFile.length && 0 != opacityFile[0].length();
-
-         float opacityFloat = valueExists ? Float.parseFloat(opacityFile[0]) / 100.0F : 0.66F;
-         LayoutFeedItem.setReadItemOpacity(opacityFloat);
-      }
-
-      /* If read and read items are hidden, remove the item. */
-      /*TextView textView = (TextView) view.findViewById(R.id.title);
-      int color = textView.getCurrentTextColor();
-
-      if(Color.TRANSPARENT == color)
-      {
-         view.setVisibility(View.GONE);
-         return view;
-      }*/
+      view.setAlpha(isRead ? 0.50F : 1.0F);
 
       /* The logic that tells whether the item is Read or not. */
       boolean isListViewShown = parent.isShown();

@@ -53,10 +53,9 @@ class ServiceUpdate extends IntentService
    private static final String INDEX_TIME = "pubDate|";
    private static final String INDEX_LINK = "link|";
    private static final String INDEX_HEIGHT = "height|";
-   private static final String INDEX_WIDTH = "width|";
    private static final String INDEX_MIME = "mime|";
    private static final String MIME_GIF = "image/gif";
-   private static final byte COMPRESSION_JPEG = (byte) 80;
+   private static final int COMPRESSION_JPEG = 80;
    private static final SimpleDateFormat RSS_DATE = new SimpleDateFormat(
          "EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
    @SuppressWarnings("HardcodedLineSeparator")
@@ -67,7 +66,6 @@ class ServiceUpdate extends IntentService
    };
    private static final int FEED_ITEM_INITIAL_CAPACITY = 200;
    private static final int DEFAULT_MAX_HISTORY = 10000;
-   private static final float AMOUNT_OF_SCREEN_IMAGE_USES = 0.944F;
 
    public
    ServiceUpdate()
@@ -389,23 +387,9 @@ class ServiceUpdate extends IntentService
                   File file = new File(thumbnailPath);
                   if(!file.exists())
                   {
-                     compressImage(thumbnailDir, imgLink, imgName, this);
+                     feedItemBuilder = compressImage(thumbnailDir, imgLink, imgName, this,
+                           feedItemBuilder);
                   }
-
-                  /* ISSUE #194 */
-                  BitmapFactory.decodeFile(thumbnailPath, options);
-
-                  feedItemBuilder.append(INDEX_WIDTH);
-                  feedItemBuilder.append(options.outWidth);
-                  feedItemBuilder.append(ITEM_SEPARATOR);
-
-                  feedItemBuilder.append(INDEX_HEIGHT);
-                  feedItemBuilder.append(options.outHeight);
-                  feedItemBuilder.append(ITEM_SEPARATOR);
-
-                  feedItemBuilder.append(INDEX_MIME);
-                  feedItemBuilder.append(options.outMimeType);
-                  feedItemBuilder.append(ITEM_SEPARATOR);
                }
 
                /* Replace ALL_TAG <x> with nothing. */
@@ -424,9 +408,10 @@ class ServiceUpdate extends IntentService
          else if(XmlPullParser.END_TAG == eventType)
          {
             String tag = parser.getName();
+            boolean newItem = !longSet.contains(timeLong);
 
             /* "entry", "item" */
-            if(DESIRED_TAGS[6].equals(tag) || DESIRED_TAGS[7].equals(tag))
+            if(DESIRED_TAGS[6].equals(tag) || DESIRED_TAGS[7].equals(tag) && newItem)
             {
                String finalLine = feedItemBuilder.toString();
                map.put(timeLong, finalLine);
@@ -472,8 +457,45 @@ class ServiceUpdate extends IntentService
       }
    }
 
+   /* index throws an ArrayOutOfBoundsException if not handled. */
+   static
+   <T> int index(T[] array, T value)
+   {
+      if(null == array)
+      {
+         return -1;
+      }
+
+      int arrayLength = array.length;
+      for(int i = 0; i < arrayLength; i++)
+      {
+         if(array[i].equals(value))
+         {
+            return i;
+         }
+      }
+      return -1;
+   }
+
    private static
-   void compressImage(String thumbnailDir, String imgLink, String imgName, Context context)
+   Set<String> fileToSet(String fileName, String fileFolder)
+   {
+      Set<String> set = new LinkedHashSet<String>(64);
+
+      if(Read.isUnmounted())
+      {
+         return set;
+      }
+
+      String[] lines = Read.file(fileName, fileFolder);
+      Collections.addAll(set, lines);
+
+      return set;
+   }
+
+   private static
+   StringBuilder compressImage(String thumbnailDir, String imgLink, String imgName, Context context,
+         StringBuilder builder)
    {
       BitmapFactory.Options options = new BitmapFactory.Options();
       options.inJustDecodeBounds = true;
@@ -485,17 +507,22 @@ class ServiceUpdate extends IntentService
       }
       catch(MalformedURLException ignored)
       {
-         return;
+         return builder;
       }
       catch(IOException ignored)
       {
-         return;
+         return builder;
       }
+
+      Resources resources = context.getResources();
+      DisplayMetrics displayMetrics = resources.getDisplayMetrics();
+      float screenWidth = (float) displayMetrics.widthPixels;
 
       String applicationFolder = FeedsActivity.getApplicationFolder(context);
       BitmapFactory.decodeStream(inputStream, null, options);
 
-      float widthTmp = (float) options.outWidth;
+      float imageWidth = (float) options.outWidth;
+      float imageHeight = (float) options.outHeight;
       String mimeType = options.outMimeType;
 
       FileOutputStream out = null;
@@ -527,11 +554,7 @@ class ServiceUpdate extends IntentService
       }
       else
       {
-
-         Resources resources = context.getResources();
-         DisplayMetrics displayMetrics = resources.getDisplayMetrics();
-         float screenWidth = (float) displayMetrics.widthPixels * AMOUNT_OF_SCREEN_IMAGE_USES;
-         float inSample = widthTmp > screenWidth ? widthTmp / screenWidth : 1.0F;
+         float inSample = imageWidth > screenWidth ? imageWidth / screenWidth : 1.0F;
 
          try
          {
@@ -541,11 +564,11 @@ class ServiceUpdate extends IntentService
          }
          catch(MalformedURLException ignored)
          {
-            return;
+            return builder;
          }
          catch(IOException ignored)
          {
-            return;
+            return builder;
          }
 
          BitmapFactory.Options o2 = new BitmapFactory.Options();
@@ -555,7 +578,7 @@ class ServiceUpdate extends IntentService
          try
          {
             out = new FileOutputStream(applicationFolder + thumbnailDir + imgName);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, (int) COMPRESSION_JPEG, out);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, COMPRESSION_JPEG, out);
          }
          catch(FileNotFoundException e)
          {
@@ -566,6 +589,19 @@ class ServiceUpdate extends IntentService
             close(out);
          }
       }
+
+      int scaledHeight = Math.round(screenWidth / imageWidth * imageHeight);
+      String scaledHeightString = Integer.toString(scaledHeight);
+
+      builder.append(INDEX_HEIGHT);
+      builder.append(scaledHeightString);
+      builder.append(ITEM_SEPARATOR);
+
+      builder.append(INDEX_MIME);
+      builder.append(mimeType);
+      builder.append(ITEM_SEPARATOR);
+
+      return builder;
    }
 
    private static
@@ -582,41 +618,5 @@ class ServiceUpdate extends IntentService
       catch(IOException ignored)
       {
       }
-   }
-
-   private static
-   Set<String> fileToSet(String fileName, String fileFolder)
-   {
-      Set<String> set = new LinkedHashSet<String>(64);
-
-      if(Read.isUnmounted())
-      {
-         return set;
-      }
-
-      String[] lines = Read.file(fileName, fileFolder);
-      Collections.addAll(set, lines);
-
-      return set;
-   }
-
-   /* index throws an ArrayOutOfBoundsException if not handled. */
-   static
-   <T> int index(T[] array, T value)
-   {
-      if(null == array)
-      {
-         return -1;
-      }
-
-      int arrayLength = array.length;
-      for(int i = 0; i < arrayLength; i++)
-      {
-         if(array[i].equals(value))
-         {
-            return i;
-         }
-      }
-      return -1;
    }
 }

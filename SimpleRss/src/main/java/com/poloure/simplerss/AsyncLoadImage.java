@@ -14,7 +14,7 @@ import java.lang.ref.WeakReference;
 
 class AsyncLoadImage extends AsyncTask<Object, Void, Object[]>
 {
-   private static final short IMAGE_FADE_IN_DURATION = (short) 666;
+   private static final int IMAGE_FADE_IN_DURATION = 666;
    private final WeakReference<ImageView> m_imageView;
    private final int m_imageViewTag;
 
@@ -27,12 +27,11 @@ class AsyncLoadImage extends AsyncTask<Object, Void, Object[]>
 
    static
    void newInstance(ImageView imageView, String applicationFolder, String imageName,
-         int imageViewTag, Context context, boolean isRead, float opacity)
+         int imageViewTag, Context context)
    {
       AsyncTask<Object, Void, Object[]> task = new AsyncLoadImage(imageView, imageViewTag);
 
-      task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, applicationFolder, imageName,
-               context, isRead, opacity);
+      task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, applicationFolder, imageName, context);
    }
 
    @Override
@@ -41,12 +40,10 @@ class AsyncLoadImage extends AsyncTask<Object, Void, Object[]>
    {
       String imagePath = params[0] + (String) params[1];
       Context context = (Context) params[2];
-      boolean isRead = (Boolean) params[3];
-      float imageOpacity = isRead ? (Float) params[4] : 1.0F;
 
       BitmapFactory.Options o = new BitmapFactory.Options();
       o.inSampleSize = 1;
-      Animation fadeIn = new AlphaAnimation(0.0F, imageOpacity);
+      Animation fadeIn = new AlphaAnimation(0.0F, 1.0F);
       fadeIn.setDuration((long) IMAGE_FADE_IN_DURATION);
       fadeIn.setFillAfter(true);
       fadeIn.setInterpolator(new DecelerateInterpolator());
@@ -57,10 +54,8 @@ class AsyncLoadImage extends AsyncTask<Object, Void, Object[]>
          cancel(true);
          return null;
       }
-      else
-      {
-         imageView.setOnClickListener(new OnClickImage(imagePath, context));
-      }
+
+      imageView.setOnClickListener(new OnClickImage(imagePath, context));
 
       return new Object[]{
             BitmapFactory.decodeFile(imagePath, o), fadeIn
@@ -77,11 +72,7 @@ class AsyncLoadImage extends AsyncTask<Object, Void, Object[]>
       }
 
       ImageView imageView = m_imageView.get();
-      if(null == imageView || (Integer) imageView.getTag() != m_imageViewTag)
-      {
-         return;
-      }
-      else if(null != result[0])
+      if(null != imageView && (Integer) imageView.getTag() == m_imageViewTag && null != result[0])
       {
          imageView.setVisibility(View.VISIBLE);
          imageView.setImageBitmap((Bitmap) result[0]);

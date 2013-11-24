@@ -18,7 +18,7 @@ import java.io.File;
 
 class AsyncManageFeedsRefresh extends AsyncTask<String, Editable[], Animation>
 {
-   private static final short FADE_IN_DURATION = (short) 330;
+   private static final int FADE_IN_DURATION = 330;
    private static final AbsoluteSizeSpan TITLE_SIZE = new AbsoluteSizeSpan(14, true);
    private static final StyleSpan SPAN_BOLD = new StyleSpan(Typeface.BOLD);
    private final ListView m_listView;
@@ -40,7 +40,7 @@ class AsyncManageFeedsRefresh extends AsyncTask<String, Editable[], Animation>
    {
       AsyncTask<String, Editable[], Animation> task = new AsyncManageFeedsRefresh(listView);
 
-         task.executeOnExecutor(THREAD_POOL_EXECUTOR, applicationFolder);
+      task.executeOnExecutor(THREAD_POOL_EXECUTOR, applicationFolder);
    }
 
    @Override

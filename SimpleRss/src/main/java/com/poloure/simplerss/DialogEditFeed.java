@@ -56,12 +56,12 @@ class DialogEditFeed extends Dialog
    class OnClickPositive implements View.OnClickListener
    {
       private final Dialog m_dialog;
-      private final ListView m_listView;
+      private final ListView m_innerListView;
 
       OnClickPositive(Dialog dialog, ListView listView)
       {
          m_dialog = dialog;
-         m_listView = listView;
+         m_innerListView = listView;
       }
 
       @Override
@@ -74,7 +74,7 @@ class DialogEditFeed extends Dialog
          ListView navigationDrawer = (ListView) m_activity.findViewById(R.id.navigation_drawer);
          BaseAdapter navigationAdapter = (BaseAdapter) navigationDrawer.getAdapter();
 
-         AsyncCheckFeed.newInstance(m_dialog, m_listView, pagerAdapterFeeds, navigationAdapter,
+         AsyncCheckFeed.newInstance(m_dialog, m_innerListView, pagerAdapterFeeds, navigationAdapter,
                m_oldFeedTitle, m_applicationFolder, m_allTag);
       }
    }

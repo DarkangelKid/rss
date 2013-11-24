@@ -27,8 +27,8 @@ class OnCardContextMenuClick implements DialogInterface.OnClickListener
          ClipboardManager clipboard = (ClipboardManager) m_context.getSystemService(
                Context.CLIPBOARD_SERVICE);
 
-            ClipData clip = ClipData.newPlainText("Url", m_url);
-            clipboard.setPrimaryClip(clip);
+         ClipData clip = ClipData.newPlainText("Url", m_url);
+         clipboard.setPrimaryClip(clip);
       }
       else if(1 == position)
       {

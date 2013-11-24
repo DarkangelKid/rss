@@ -1,6 +1,12 @@
 package com.poloure.simplerss;
 
+import android.graphics.Color;
 import android.os.AsyncTask;
+import android.text.Editable;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.AbsoluteSizeSpan;
+import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.widget.Adapter;
 import android.widget.ListView;
@@ -17,9 +23,19 @@ import java.util.TreeMap;
 
 class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
 {
-   private static final short MAX_DESCRIPTION_LENGTH = (short) 360;
-   private static final byte MIN_DESCRIPTION_LENGTH = (byte) 8;
-   private static final byte MIN_IMAGE_WIDTH = (byte) 32;
+   private static final int MAX_DESCRIPTION_LENGTH = 360;
+   private static final int MIN_DESCRIPTION_LENGTH = 8;
+   private static final int MIN_IMAGE_HEIGHT = 32;
+   private static final ForegroundColorSpan COLOR_LINK = new ForegroundColorSpan(
+         Color.argb(128, 0, 0, 0));
+   private static final AbsoluteSizeSpan LINK_SIZE = new AbsoluteSizeSpan(10, true);
+   private static final ForegroundColorSpan COLOR_TITLE = new ForegroundColorSpan(
+         Color.argb(255, 0, 0, 0));
+   private static final AbsoluteSizeSpan TITLE_SIZE = new AbsoluteSizeSpan(14, true);
+   private static final ForegroundColorSpan COLOR_DESCRIPTION = new ForegroundColorSpan(
+         Color.argb(205, 0, 0, 0));
+   private static final AbsoluteSizeSpan DESCRIPTION_SIZE = new AbsoluteSizeSpan(12, true);
+   private static final int FULL_SPAN = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE;
    private final String m_applicationFolder;
    private final ListView m_listView;
    private final boolean m_isAllTag;
@@ -37,7 +53,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
    {
       AsyncTask<Integer, Object, Void> task = new AsyncRefreshPage(listView, storage, isAllTag);
 
-         task.executeOnExecutor(THREAD_POOL_EXECUTOR, pageNumber);
+      task.executeOnExecutor(THREAD_POOL_EXECUTOR, pageNumber);
    }
 
    @Override
@@ -61,6 +77,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       Map<Long, FeedItem> map = new TreeMap<Long, FeedItem>(reverse);
 
       AdapterTags adapterTag = (AdapterTags) m_listView.getAdapter();
+      final List<Long> timeListInAdapter = adapterTag.getTimeList();
 
       int feedsLength = feedNames.length;
       for(int j = 0; j < feedsLength; j++)
@@ -68,7 +85,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
          if(m_isAllTag || feedTags[j].contains(tag))
          {
             String[][] content = Read.csvFile(feedNames[j] + contentFile, m_applicationFolder, 't',
-                  'd', 'l', 'i', 'w', 'h', 'p');
+                  'd', 'l', 'i', 'h', 'p');
 
             if(0 == content.length)
             {
@@ -79,9 +96,8 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
             String[] descriptions = content[1];
             String[] links = content[2];
             String[] imageUrls = content[3];
-            String[] widths = content[4];
-            String[] heights = content[5];
-            String[] times = content[6];
+            String[] heights = content[4];
+            String[] times = content[5];
 
             String feedThumbnailDir = feedNames[j] + thumbnailDir;
 
@@ -93,50 +109,80 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
                /* Edit the data. */
                if(null != imageUrls[i])
                {
-                  data.m_imageWidth = null == widths[i] || 0 == widths[i].length()
-                        ? (short) 0
-                        : fastParseShort(widths[i]);
+
+                  data.m_EffImageHeight = null == heights[i] || 0 == heights[i].length()
+                        ? 0
+                        : fastParseInt(heights[i]);
 
                   /* If the image is large enough so that we should care about it. */
-                  if((int) MIN_IMAGE_WIDTH < (int) data.m_imageWidth)
+                  if(MIN_IMAGE_HEIGHT < data.m_EffImageHeight)
                   {
                      int lastSlash = imageUrls[i].lastIndexOf(File.separatorChar) + 1;
                      data.m_imageName = feedThumbnailDir + imageUrls[i].substring(lastSlash);
-                     data.m_imageHeight = null == heights[i] || 0 == heights[i].length()
-                           ? (short) 0
-                           : fastParseShort(heights[i]);
                   }
                   else
                   {
                      data.m_imageName = "";
-                     data.m_imageWidth = (short) 0;
-                     data.m_imageHeight = (short) 0;
+                     data.m_EffImageHeight = 0;
                   }
                }
 
-               if(null == descriptions[i] ||
-                     (int) MIN_DESCRIPTION_LENGTH > descriptions[i].length())
+               if(null == descriptions[i] || MIN_DESCRIPTION_LENGTH > descriptions[i].length())
                {
                   descriptions[i] = "";
                }
-               else if((int) MAX_DESCRIPTION_LENGTH <= descriptions[i].length())
+               else if(MAX_DESCRIPTION_LENGTH <= descriptions[i].length())
                {
-                  descriptions[i] = descriptions[i].substring(0, (int) MAX_DESCRIPTION_LENGTH);
+                  descriptions[i] = descriptions[i].substring(0, MAX_DESCRIPTION_LENGTH);
                }
 
-               data.m_itemTitle = null == titles[i] ? "" : titles[i];
-               data.m_itemUrl = links[i];
+               String itemTitle = null == titles[i] ? "" : titles[i];
+               String itemUrl = links[i];
                data.m_itemDescription = descriptions[i];
 
                data.m_itemTime = fastParseLong(times[i]);
 
-               /* Do not add duplicates, do not add read items if opacity == 0 */
-               final List<Long> timeListInAdapter = adapterTag.getTimeList();
-               boolean notInAdapter = !timeListInAdapter.contains(data.m_itemTime);
-               boolean isUnread = !AdapterTags.READ_ITEM_TIMES.contains(data.m_itemTime);
-               boolean isOpaque = 0.0F != LayoutFeedItem.getReadItemOpacity();
+               /* Make the editable. */
+               Editable editable = new SpannableStringBuilder();
 
-               if(notInAdapter && isUnread || isOpaque)
+                /* First, the title. */
+               int titleLength = itemTitle.length();
+               editable.append(itemTitle);
+               editable.setSpan(TITLE_SIZE, 0, titleLength, FULL_SPAN);
+               editable.setSpan(COLOR_TITLE, 0, titleLength, FULL_SPAN);
+               editable.append("\n");
+
+                /* Next the link. */
+               int linkStart = editable.length();
+
+               if(containsArabic(itemTitle))
+               {
+                  editable.append((char) 0x200F);
+               }
+               editable.append(itemUrl);
+               editable.setSpan(LINK_SIZE, linkStart, editable.length(), FULL_SPAN);
+               editable.setSpan(COLOR_LINK, linkStart, editable.length(), FULL_SPAN);
+
+               boolean isNoImage = 0 == data.m_EffImageHeight;
+               if(isNoImage)
+               {
+                  editable.append("\n");
+
+                  /* Finally the description. */
+                  int descriptionStart = editable.length();
+                  editable.append(data.m_itemDescription);
+                  editable.setSpan(DESCRIPTION_SIZE, descriptionStart, editable.length(),
+                        FULL_SPAN);
+                  editable.setSpan(COLOR_DESCRIPTION, descriptionStart, editable.length(),
+                        FULL_SPAN);
+               }
+
+               data.m_titleAndLink = editable;
+
+               /* Do not add duplicates, do not add read items if opacity == 0 */
+               boolean notInAdapter = !timeListInAdapter.contains(data.m_itemTime);
+
+               if(notInAdapter)
                {
                   map.put(data.m_itemTime, data);
                }
@@ -231,7 +277,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
    }
 
    private static
-   short fastParseShort(String s)
+   int fastParseInt(String s)
    {
       char[] chars = s.toCharArray();
       int num = 0;
@@ -241,8 +287,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
          int value = (int) c - 48;
          num = num * 10 + value;
       }
-      /* We are not reading images larger than 32,767px so (short) is fine. */
-      return (short) num;
+      return num;
    }
 
    private static
@@ -261,5 +306,31 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
          num = num * 10L + (long) value;
       }
       return num;
+   }
+
+   private static
+   boolean containsArabic(String text)
+   {
+      char[] chars = text.toCharArray();
+      for(char c : chars)
+      {
+         if(0x600 <= c && 0x6ff >= c)
+         {
+            return true;
+         }
+         if(0x750 <= c && 0x77f >= c)
+         {
+            return true;
+         }
+         if(0xfb50 <= c && 0xfc3f >= c)
+         {
+            return true;
+         }
+         if(0xfe70 <= c && 0xfefc >= c)
+         {
+            return true;
+         }
+      }
+      return false;
    }
 }
