@@ -312,21 +312,21 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
    boolean containsArabic(String text)
    {
       char[] chars = text.toCharArray();
-      for(char c : chars)
+      for(int i : chars)
       {
-         if(0x600 <= c && 0x6ff >= c)
+         if(0x600 <= i && 0x6ff >= i)
          {
             return true;
          }
-         if(0x750 <= c && 0x77f >= c)
+         if(0x750 <= i && 0x77f >= i)
          {
             return true;
          }
-         if(0xfb50 <= c && 0xfc3f >= c)
+         if(0xfb50 <= i && 0xfc3f >= i)
          {
             return true;
          }
-         if(0xfe70 <= c && 0xfefc >= c)
+         if(0xfe70 <= i && 0xfefc >= i)
          {
             return true;
          }

@@ -46,7 +46,6 @@ class FeedsActivity extends Activity
    private static final int ALARM_SERVICE_START = 1;
    private static final int ALARM_SERVICE_STOP = 0;
    private static final int MINUTE_VALUE = 60000;
-   private static final int DEFAULT_REFRESH_TIME = 120;
    static Handler s_serviceHandler;
    String m_previousActionBarTitle;
    private ViewPager m_feedsViewPager;
@@ -70,7 +69,6 @@ class FeedsActivity extends Activity
       m_actionBar = getActionBar();
       m_applicationFolder = getApplicationFolder(this);
       m_fragmentManager = getFragmentManager();
-      LayoutInflater layoutInflater = getLayoutInflater();
       DisplayMetrics displayMetrics = m_resources.getDisplayMetrics();
 
       /* Get what 12DP is for the AdapterNavigationDrawer compound drawable. */
@@ -334,7 +332,7 @@ class FeedsActivity extends Activity
       int currentPage = m_feedsViewPager.getCurrentItem();
 
       Intent intent = new Intent(this, ServiceUpdate.class);
-      intent = configureServiceIntent(intent, currentPage, m_applicationFolder);
+      intent = configureServiceIntent(intent, currentPage);
       startService(intent);
    }
 
@@ -368,14 +366,9 @@ class FeedsActivity extends Activity
          return;
       }
 
-      /* Load the ManageFeedsRefresh time from settings. */
-      /* TODO Get AUTO_REFRESH_INTERVAL setting. */
-      //int time = 0 == settings.length || 0 == settings[0].length();
-      int time = 120;
-
       /* Create intent, turn into pending intent, and get the alarm manager. */
       Intent intent = new Intent(this, ServiceUpdate.class);
-      intent = configureServiceIntent(intent, 0, m_applicationFolder);
+      intent = configureServiceIntent(intent, 0);
 
       PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, 0);
       AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
@@ -383,6 +376,8 @@ class FeedsActivity extends Activity
       /* Depending on the state string, start or stop the service. */
       if(ALARM_SERVICE_START == state)
       {
+         /* TODO Get AUTO_REFRESH_INTERVAL setting. */
+         int time = 120;
          long interval = (long) time * (long) MINUTE_VALUE;
          long next = System.currentTimeMillis() + interval;
          am.setRepeating(AlarmManager.RTC_WAKEUP, next, interval, pendingIntent);
@@ -394,13 +389,12 @@ class FeedsActivity extends Activity
    }
 
    private static
-   Intent configureServiceIntent(Intent intent, int page, String applicationFolder)
+   Intent configureServiceIntent(Intent intent, int page)
    {
-      /* Load notification boolean. */
       /* TODO Get NOTIFICATIONS_ENABLED setting. */
-      //boolean notificationsEnabled = 0 != check.length && Boolean.parseBoolean(check[0]);
-      boolean notificationsEnabled = true;
+
       intent.putExtra("GROUP_NUMBER", page);
+      boolean notificationsEnabled = true;
       intent.putExtra("NOTIFICATIONS", notificationsEnabled);
       return intent;
    }
