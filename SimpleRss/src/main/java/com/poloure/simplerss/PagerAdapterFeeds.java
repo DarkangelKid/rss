@@ -20,7 +20,13 @@ class PagerAdapterFeeds extends FragmentPagerAdapter
    }
 
    static
-   Set<String> getTagsFromDisk(String applicationFolder, String allTag)
+   Set<String> getTagsFromDisk(String applicationFolder)
+   {
+      return getAndSaveTagsFromDisk(applicationFolder, "");
+   }
+
+   static
+   Set<String> getAndSaveTagsFromDisk(String applicationFolder, String allTag)
    {
       Set<String> tagSet = Collections.synchronizedSet(new LinkedHashSet<String>(0));
       String[] tagArray = Read.csvFile(Read.INDEX, applicationFolder, 't')[0];
@@ -36,7 +42,10 @@ class PagerAdapterFeeds extends FragmentPagerAdapter
             tagSet.add(trimmedTag);
          }
       }
-      s_tagSet = tagSet;
+      if(0 != allTag.length())
+      {
+         s_tagSet = tagSet;
+      }
       return tagSet;
    }
 

@@ -9,10 +9,13 @@ import android.support.v4.view.MenuItemCompat;
 import android.view.MenuItem;
 import android.widget.ListView;
 
+import java.util.Arrays;
+import java.util.List;
+
 class ServiceHandler extends Handler
 {
+   static MenuItem s_refreshItem;
    private final FragmentManager m_fragmentManager;
-   private final MenuItem m_refreshItem;
    private final String m_applicationFolder;
 
    ServiceHandler(FragmentManager fragmentManager, MenuItem refreshItem, String applicationFolder)
@@ -20,7 +23,7 @@ class ServiceHandler extends Handler
       m_fragmentManager = fragmentManager;
 
       /* TODO, this is not the same MenuItem when you restart the app. */
-      m_refreshItem = refreshItem;
+      s_refreshItem = refreshItem;
       m_applicationFolder = applicationFolder;
    }
 
@@ -30,7 +33,7 @@ class ServiceHandler extends Handler
    void handleMessage(Message msg)
    {
       /* Tell the refresh icon to stop spinning. */
-      MenuItemCompat.setActionView(m_refreshItem, null);
+      MenuItemCompat.setActionView(s_refreshItem, null);
 
       Bundle bundle = msg.getData();
       if(null == bundle)
@@ -41,12 +44,12 @@ class ServiceHandler extends Handler
       int updatedPage = bundle.getInt("page_number");
 
       /* Find which pages we want to refresh. */
-      int tagsCount = PagerAdapterFeeds.s_tagSet.size();
-      int[] pagesToRefresh;
+      int tagsCount = PagerAdapterFeeds.getTagsFromDisk(m_applicationFolder).size();
+      Integer[] pagesToRefresh;
 
       if(0 == updatedPage)
       {
-         pagesToRefresh = new int[tagsCount];
+         pagesToRefresh = new Integer[tagsCount];
          for(int i = 0; i < tagsCount; i++)
          {
             pagesToRefresh[i] = i;
@@ -54,7 +57,7 @@ class ServiceHandler extends Handler
       }
       else
       {
-         pagesToRefresh = new int[]{0, updatedPage};
+         pagesToRefresh = new Integer[]{0, updatedPage};
       }
 
       /* Refresh those Pages. */
@@ -67,6 +70,13 @@ class ServiceHandler extends Handler
             /* TODO isAllTag not 0. */
             ListView listView = listFragment.getListView();
             AsyncRefreshPage.newInstance(page, listView, m_applicationFolder, 0 == page);
+         }
+         /* If a listFragment was null then the app must be closed. Save the pages to a file. */
+         else
+         {
+            List<Integer> pages = Arrays.asList(pagesToRefresh);
+            Write.collection("pages_to_refresh.txt", pages, m_applicationFolder);
+            return;
          }
       }
    }

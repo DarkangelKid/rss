@@ -71,7 +71,7 @@ class OnClickManageFeedDialogItem implements DialogInterface.OnClickListener
          toast.show();
 
          /* Update the PagerAdapter for the tag fragments. */
-         PagerAdapterFeeds.getTagsFromDisk(m_applicationFolder, m_allTag);
+         PagerAdapterFeeds.getAndSaveTagsFromDisk(m_applicationFolder, m_allTag);
          m_pagerAdapterFeeds.notifyDataSetChanged();
       }
       if(isDelete || isClearContent)

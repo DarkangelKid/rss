@@ -35,7 +35,6 @@ class OnLongClickManageFeedItem implements AdapterView.OnItemLongClickListener
    {
       Adapter adapter = parent.getAdapter();
 
-      /* TODO fix these chains up. */
       String feedName = adapter.getItem(pos).toString();
       feedName = feedName.substring(0, feedName.indexOf('\n'));
 

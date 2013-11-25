@@ -3,12 +3,14 @@ package com.poloure.simplerss;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.PowerManager;
+import android.preference.PreferenceManager;
 import android.text.format.Time;
 import android.util.DisplayMetrics;
 
@@ -55,6 +57,7 @@ class ServiceUpdate extends IntentService
    private static final String INDEX_HEIGHT = "height|";
    private static final String INDEX_MIME = "mime|";
    private static final String MIME_GIF = "image/gif";
+   private static final int MIN_IMAGE_WIDTH = 64;
    private static final int COMPRESSION_JPEG = 80;
    private static final SimpleDateFormat RSS_DATE = new SimpleDateFormat(
          "EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
@@ -85,7 +88,7 @@ class ServiceUpdate extends IntentService
       String applicationFolder = FeedsActivity.getApplicationFolder(this);
       String allTag = getString(R.string.all_tag);
 
-      Set<String> tagSet = PagerAdapterFeeds.getTagsFromDisk(applicationFolder, allTag);
+      Set<String> tagSet = PagerAdapterFeeds.getAndSaveTagsFromDisk(applicationFolder, allTag);
       int tagSize = tagSet.size();
       String tag = tagSet.toArray(new String[tagSize])[page];
 
@@ -420,7 +423,6 @@ class ServiceUpdate extends IntentService
          else if(XmlPullParser.END_DOCUMENT == eventType)
          {
             /* TODO Get MAX_HISTORY setting */
-            //int saveSize = 0 == setting.length() ? DEFAULT_MAX_HISTORY : Integer.parseInt
             int saveSize = DEFAULT_MAX_HISTORY;
             int mapSize = map.size();
 
@@ -453,6 +455,28 @@ class ServiceUpdate extends IntentService
       }
    }
 
+   /* index throws an ArrayOutOfBoundsException if not handled. */
+   static
+   <T> int index(T[] array, T value)
+   {
+      if(null == array)
+      {
+         return -1;
+      }
+
+      int arrayLength = array.length;
+      for(int i = 0; i < arrayLength; i++)
+      {
+         if(array[i].equals(value))
+         {
+            return i;
+         }
+      }
+      return -1;
+   }
+
+   ;
+
    private static
    StringBuilder compressImage(String thumbnailDir, String imgLink, String imgName, Context context,
          StringBuilder builder)
@@ -484,6 +508,32 @@ class ServiceUpdate extends IntentService
       float imageWidth = (float) options.outWidth;
       float imageHeight = (float) options.outHeight;
       String mimeType = options.outMimeType;
+
+      /* If the image is smaller than we care about, do not save it. */
+      if(imageWidth < MIN_IMAGE_WIDTH)
+      {
+         return builder;
+      }
+
+      /* Save these details before we possible return. */
+      int scaledHeight = Math.round(screenWidth / imageWidth * imageHeight);
+      String scaledHeightString = Integer.toString(scaledHeight);
+
+      builder.append(INDEX_HEIGHT);
+      builder.append(scaledHeightString);
+      builder.append(ITEM_SEPARATOR);
+
+      builder.append(INDEX_MIME);
+      builder.append(mimeType);
+      builder.append(ITEM_SEPARATOR);
+
+      /* If images are disabled. */
+      SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+      boolean imagesDisabled = !preferences.getBoolean("images_enabled", true);
+      if(imagesDisabled)
+      {
+         return builder;
+      }
 
       FileOutputStream out = null;
 
@@ -538,7 +588,11 @@ class ServiceUpdate extends IntentService
          try
          {
             out = new FileOutputStream(applicationFolder + thumbnailDir + imgName);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, COMPRESSION_JPEG, out);
+
+            /* Get the quality from settings. */
+            String qualityString = preferences.getString("thumbnail_quality", "75");
+            int quality = Integer.parseInt(qualityString);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, quality, out);
          }
          catch(FileNotFoundException e)
          {
@@ -549,17 +603,6 @@ class ServiceUpdate extends IntentService
             close(out);
          }
       }
-
-      int scaledHeight = Math.round(screenWidth / imageWidth * imageHeight);
-      String scaledHeightString = Integer.toString(scaledHeight);
-
-      builder.append(INDEX_HEIGHT);
-      builder.append(scaledHeightString);
-      builder.append(ITEM_SEPARATOR);
-
-      builder.append(INDEX_MIME);
-      builder.append(mimeType);
-      builder.append(ITEM_SEPARATOR);
 
       return builder;
    }
@@ -594,25 +637,5 @@ class ServiceUpdate extends IntentService
       Collections.addAll(set, lines);
 
       return set;
-   }
-
-   /* index throws an ArrayOutOfBoundsException if not handled. */
-   static
-   <T> int index(T[] array, T value)
-   {
-      if(null == array)
-      {
-         return -1;
-      }
-
-      int arrayLength = array.length;
-      for(int i = 0; i < arrayLength; i++)
-      {
-         if(array[i].equals(value))
-         {
-            return i;
-         }
-      }
-      return -1;
    }
 }

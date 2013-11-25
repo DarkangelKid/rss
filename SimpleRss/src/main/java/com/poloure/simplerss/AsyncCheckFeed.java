@@ -281,7 +281,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
          }
 
          /* Update the PagerAdapter for the tag fragments. */
-         PagerAdapterFeeds.getTagsFromDisk(m_applicationFolder, m_allTag);
+         PagerAdapterFeeds.getAndSaveTagsFromDisk(m_applicationFolder, m_allTag);
          m_pagerAdapterFeeds.notifyDataSetChanged();
 
          /* Update the NavigationDrawer adapter.

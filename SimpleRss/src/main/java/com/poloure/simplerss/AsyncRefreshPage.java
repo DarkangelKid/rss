@@ -25,7 +25,6 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
 {
    private static final int MAX_DESCRIPTION_LENGTH = 360;
    private static final int MIN_DESCRIPTION_LENGTH = 8;
-   private static final int MIN_IMAGE_HEIGHT = 32;
    private static final ForegroundColorSpan COLOR_LINK = new ForegroundColorSpan(
          Color.argb(128, 0, 0, 0));
    private static final AbsoluteSizeSpan LINK_SIZE = new AbsoluteSizeSpan(10, true);
@@ -109,21 +108,21 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
                /* Edit the data. */
                if(null != imageUrls[i])
                {
+                  int lastSlash = imageUrls[i].lastIndexOf(File.separatorChar) + 1;
+                  data.m_imageName = feedThumbnailDir + imageUrls[i].substring(lastSlash);
 
-                  data.m_EffImageHeight = null == heights[i] || 0 == heights[i].length()
-                        ? 0
-                        : fastParseInt(heights[i]);
-
-                  /* If the image is large enough so that we should care about it. */
-                  if(MIN_IMAGE_HEIGHT < data.m_EffImageHeight)
+                  /* If we have not downloaded the image yet, fake no image. */
+                  File image = new File(m_applicationFolder + data.m_imageName);
+                  if(!image.exists())
                   {
-                     int lastSlash = imageUrls[i].lastIndexOf(File.separatorChar) + 1;
-                     data.m_imageName = feedThumbnailDir + imageUrls[i].substring(lastSlash);
+                     data.m_EffImageHeight = 0;
+                     data.m_imageName = "";
                   }
                   else
                   {
-                     data.m_imageName = "";
-                     data.m_EffImageHeight = 0;
+                     data.m_EffImageHeight = null == heights[i] || 0 == heights[i].length()
+                           ? 0
+                           : fastParseInt(heights[i]);
                   }
                }
 
@@ -206,6 +205,64 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       return null;
    }
 
+   private static
+   boolean containsArabic(String text)
+   {
+      char[] chars = text.toCharArray();
+      for(int i : chars)
+      {
+         if(0x600 <= i && 0x6ff >= i)
+         {
+            return true;
+         }
+         if(0x750 <= i && 0x77f >= i)
+         {
+            return true;
+         }
+         if(0xfb50 <= i && 0xfc3f >= i)
+         {
+            return true;
+         }
+         if(0xfe70 <= i && 0xfefc >= i)
+         {
+            return true;
+         }
+      }
+      return false;
+   }
+
+   private static
+   long fastParseLong(String s)
+   {
+      if(null == s)
+      {
+         return 0L;
+      }
+      char[] chars = s.toCharArray();
+      long num = 0L;
+
+      for(char c : chars)
+      {
+         int value = (int) c - 48;
+         num = num * 10L + (long) value;
+      }
+      return num;
+   }
+
+   private static
+   int fastParseInt(String s)
+   {
+      char[] chars = s.toCharArray();
+      int num = 0;
+
+      for(char c : chars)
+      {
+         int value = (int) c - 48;
+         num = num * 10 + value;
+      }
+      return num;
+   }
+
    @Override
    protected
    void onPostExecute(Void result)
@@ -274,63 +331,5 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       {
          FeedsActivity.gotoLatestUnread(m_listView);
       }
-   }
-
-   private static
-   int fastParseInt(String s)
-   {
-      char[] chars = s.toCharArray();
-      int num = 0;
-
-      for(char c : chars)
-      {
-         int value = (int) c - 48;
-         num = num * 10 + value;
-      }
-      return num;
-   }
-
-   private static
-   long fastParseLong(String s)
-   {
-      if(null == s)
-      {
-         return 0L;
-      }
-      char[] chars = s.toCharArray();
-      long num = 0L;
-
-      for(char c : chars)
-      {
-         int value = (int) c - 48;
-         num = num * 10L + (long) value;
-      }
-      return num;
-   }
-
-   private static
-   boolean containsArabic(String text)
-   {
-      char[] chars = text.toCharArray();
-      for(int i : chars)
-      {
-         if(0x600 <= i && 0x6ff >= i)
-         {
-            return true;
-         }
-         if(0x750 <= i && 0x77f >= i)
-         {
-            return true;
-         }
-         if(0xfb50 <= i && 0xfc3f >= i)
-         {
-            return true;
-         }
-         if(0xfe70 <= i && 0xfefc >= i)
-         {
-            return true;
-         }
-      }
-      return false;
    }
 }

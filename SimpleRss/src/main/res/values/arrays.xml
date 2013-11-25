@@ -49,23 +49,23 @@
    </string-array>
 
    <string-array name="thumbnail_quality">
-      <item>Very low</item>
-      <item>Low</item>
-      <item>Medium</item>
-      <item>High</item>
-      <item>Very High</item>
-      <item>Super</item>
-      <item>Max</item>
+      <item>Objectionable</item>
+      <item>Questionable</item>
+      <item>Acceptable</item>
+      <item>Noticeable</item>
+      <item>Comparable</item>
+      <item>Indistinguishable</item>
+      <item>Impeccable</item>
    </string-array>
 
    <string-array name="thumbnail_quality_values">
-      <item>30</item>
-      <item>60</item>
-      <item>80</item>
-      <item>90</item>
+      <item>20</item>
+      <item>35</item>
+      <item>55</item>
+      <item>65</item>
+      <item>75</item>
+      <item>85</item>
       <item>95</item>
-      <item>98</item>
-      <item>100</item>
    </string-array>
 
 </resources>

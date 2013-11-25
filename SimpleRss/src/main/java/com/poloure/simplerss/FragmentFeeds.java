@@ -56,7 +56,7 @@ class FragmentFeeds extends Fragment
             actionBar, navigationAdapter, applicationFolder);
 
       PagerAdapter adapter = new PagerAdapterFeeds(fragmentManager);
-      PagerAdapterFeeds.getTagsFromDisk(applicationFolder, allTag);
+      PagerAdapterFeeds.getAndSaveTagsFromDisk(applicationFolder, allTag);
       adapter.notifyDataSetChanged();
 
       /* Create the ViewPager. */
