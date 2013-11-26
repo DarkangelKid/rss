@@ -23,7 +23,7 @@ class AdapterTags extends BaseAdapter
    private static final Typeface SERIF = Typeface.create(Typeface.SERIF, Typeface.NORMAL);
    private static final float ALPHA_READ_ITEM = 0.50F;
    private static final float PADDING_BASIC_ITEM = 8.0F;
-   private final List<FeedItem> m_items = new ArrayList<FeedItem>(0);
+   private final List<FeedItem> m_feedItems = new ArrayList<FeedItem>(0);
    private final List<Long> m_times = new ArrayList<Long>(0);
    private final Context m_context;
    private final String m_applicationFolder;
@@ -39,7 +39,7 @@ class AdapterTags extends BaseAdapter
    {
       Collection<FeedItem> longCollection = (Collection<FeedItem>) items[0];
       Collection<Long> longList = (Collection<Long>) items[1];
-      m_items.addAll(0, longCollection);
+      m_feedItems.addAll(0, longCollection);
       m_times.addAll(0, longList);
    }
 
@@ -53,7 +53,7 @@ class AdapterTags extends BaseAdapter
    public
    int getItemViewType(int position)
    {
-      boolean isImage = 0 != m_items.get(position).m_EffImageHeight;
+      boolean isImage = 0 != m_feedItems.get(position).m_EffImageHeight;
 
       return isImage ? 1 : 0;
    }
@@ -62,7 +62,7 @@ class AdapterTags extends BaseAdapter
    public
    int getCount()
    {
-      return m_items.size();
+      return m_feedItems.size();
    }
 
    @Override
@@ -76,7 +76,7 @@ class AdapterTags extends BaseAdapter
    public
    Object getItem(int position)
    {
-      return m_items.get(position);
+      return m_feedItems.get(position);
    }
 
    @Override
@@ -92,7 +92,7 @@ class AdapterTags extends BaseAdapter
    {
       boolean isNewView = null == convertView;
       int viewType = getItemViewType(position);
-      FeedItem item = m_items.get(position);
+      FeedItem item = m_feedItems.get(position);
 
       Long time = item.m_itemTime;
       boolean isRead = READ_ITEM_TIMES.contains(time);
@@ -114,6 +114,7 @@ class AdapterTags extends BaseAdapter
             int eight = Math.round(eightFloat);
 
             view.setPadding(eight, eight, eight, eight);
+            view.setId(100);
          }
 
          ((TextView) view).setText(item.m_titleAndLink);
@@ -132,7 +133,7 @@ class AdapterTags extends BaseAdapter
 
       if(isListViewShown && isNotLastItem && m_isReadingItems)
       {
-         FeedItem nextItem = m_items.get(position + 1);
+         FeedItem nextItem = m_feedItems.get(position + 1);
          READ_ITEM_TIMES.add(nextItem.m_itemTime);
       }
 

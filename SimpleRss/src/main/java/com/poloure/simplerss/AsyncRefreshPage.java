@@ -136,8 +136,8 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
                }
 
                String itemTitle = null == titles[i] ? "" : titles[i];
-               String itemUrl = links[i];
                data.m_itemDescription = descriptions[i];
+               data.m_url = links[i];
 
                data.m_itemTime = fastParseLong(times[i]);
 
@@ -158,7 +158,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
                {
                   editable.append((char) 0x200F);
                }
-               editable.append(itemUrl);
+               editable.append(data.m_url);
                editable.setSpan(LINK_SIZE, linkStart, editable.length(), FULL_SPAN);
                editable.setSpan(COLOR_LINK, linkStart, editable.length(), FULL_SPAN);
 
@@ -203,64 +203,6 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
          publishProgress(itemCollection, longList);
       }
       return null;
-   }
-
-   private static
-   boolean containsArabic(String text)
-   {
-      char[] chars = text.toCharArray();
-      for(int i : chars)
-      {
-         if(0x600 <= i && 0x6ff >= i)
-         {
-            return true;
-         }
-         if(0x750 <= i && 0x77f >= i)
-         {
-            return true;
-         }
-         if(0xfb50 <= i && 0xfc3f >= i)
-         {
-            return true;
-         }
-         if(0xfe70 <= i && 0xfefc >= i)
-         {
-            return true;
-         }
-      }
-      return false;
-   }
-
-   private static
-   long fastParseLong(String s)
-   {
-      if(null == s)
-      {
-         return 0L;
-      }
-      char[] chars = s.toCharArray();
-      long num = 0L;
-
-      for(char c : chars)
-      {
-         int value = (int) c - 48;
-         num = num * 10L + (long) value;
-      }
-      return num;
-   }
-
-   private static
-   int fastParseInt(String s)
-   {
-      char[] chars = s.toCharArray();
-      int num = 0;
-
-      for(char c : chars)
-      {
-         int value = (int) c - 48;
-         num = num * 10 + value;
-      }
-      return num;
    }
 
    @Override
@@ -331,5 +273,63 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       {
          FeedsActivity.gotoLatestUnread(m_listView);
       }
+   }
+
+   private static
+   int fastParseInt(String s)
+   {
+      char[] chars = s.toCharArray();
+      int num = 0;
+
+      for(char c : chars)
+      {
+         int value = (int) c - 48;
+         num = num * 10 + value;
+      }
+      return num;
+   }
+
+   private static
+   long fastParseLong(String s)
+   {
+      if(null == s)
+      {
+         return 0L;
+      }
+      char[] chars = s.toCharArray();
+      long num = 0L;
+
+      for(char c : chars)
+      {
+         int value = (int) c - 48;
+         num = num * 10L + (long) value;
+      }
+      return num;
+   }
+
+   private static
+   boolean containsArabic(String text)
+   {
+      char[] chars = text.toCharArray();
+      for(int i : chars)
+      {
+         if(0x600 <= i && 0x6ff >= i)
+         {
+            return true;
+         }
+         if(0x750 <= i && 0x77f >= i)
+         {
+            return true;
+         }
+         if(0xfb50 <= i && 0xfc3f >= i)
+         {
+            return true;
+         }
+         if(0xfe70 <= i && 0xfefc >= i)
+         {
+            return true;
+         }
+      }
+      return false;
    }
 }

@@ -22,14 +22,18 @@ import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
 import java.io.File;
 import java.util.Set;
@@ -167,7 +171,7 @@ class FeedsActivity extends Activity
    {
       super.onStop();
 
-      /* Set the alarm service to go of starting now. */
+      /* Set the alarm service to go off starting now. */
       setServiceIntent(ALARM_SERVICE_START);
 
       Write.longSet(READ_ITEMS, AdapterTags.READ_ITEM_TIMES, m_applicationFolder);
@@ -211,7 +215,7 @@ class FeedsActivity extends Activity
 
       if(serviceRunning)
       {
-         MenuItemCompat.setActionView(refreshItem, R.layout.progress_circle);
+         MenuItemCompat.setActionView(refreshItem, makeProgressBar(this));
       }
       else
       {
@@ -224,6 +228,20 @@ class FeedsActivity extends Activity
       ServiceHandler.s_refreshItem = refreshItem;
 
       return true;
+   }
+
+   private static
+   View makeProgressBar(Context context)
+   {
+      Resources resources = context.getResources();
+      DisplayMetrics metrics = resources.getDisplayMetrics();
+      float seven = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 7.0F, metrics);
+      int sevenBp = Math.round(seven);
+
+      ProgressBar progressBar = new ProgressBar(context);
+      progressBar.setPadding(sevenBp, sevenBp, sevenBp, sevenBp);
+
+      return progressBar;
    }
 
    @Override
@@ -303,7 +321,7 @@ class FeedsActivity extends Activity
    private
    void refreshFeeds(MenuItem menuItem)
    {
-      MenuItemCompat.setActionView(menuItem, R.layout.progress_circle);
+      MenuItemCompat.setActionView(menuItem, makeProgressBar(this));
 
       /* Set the service handler in FeedsActivity so we can check and call it from ServiceUpdate. */
       s_serviceHandler = new ServiceHandler(m_fragmentManager, menuItem, m_applicationFolder);

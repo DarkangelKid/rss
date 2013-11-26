@@ -41,6 +41,7 @@ class LayoutFeedItem extends LinearLayout
       m_titleView.setTextColor(COLOR_TITLE_UNREAD);
       m_titleView.setTypeface(SERIF);
       m_titleView.setPadding(eightDp, eightDp, eightDp, eightDp);
+      m_titleView.setId(100);
 
       m_descriptionView = new TextView(context);
       m_descriptionView.setTextColor(COLOR_DESCRIPTION_UNREAD);
