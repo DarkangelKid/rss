@@ -33,8 +33,6 @@ class OnCardLongClick implements AdapterView.OnItemLongClickListener
             ? titleLink.substring(firstNewLine)
             : titleLink.substring(firstNewLine, titleLink.indexOf('\n', firstNewLine + 1));
 
-      System.out.println(url);
-
       DialogInterface.OnClickListener onClick = new OnCardContextMenuClick(url.trim(), m_context);
 
       AlertDialog.Builder build = new AlertDialog.Builder(m_context);
