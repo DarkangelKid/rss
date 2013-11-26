@@ -4,14 +4,12 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
-import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.ListFragment;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -24,11 +22,9 @@ import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
@@ -249,16 +245,7 @@ class FeedsActivity extends Activity
       }
       else if(menuText.equals(addFeed))
       {
-         /* Deal with the case of add filter. */
-         ViewPager viewPager = (ViewPager) findViewById(FragmentManage.VIEW_PAGER_ID);
-         if(null != viewPager && 2 == viewPager.getCurrentItem() && viewPager.isShown())
-         {
-            showAddFilterDialog(this, m_fragmentManager);
-            return true;
-         }
-
-         /* The rest is the case of add/edit feed. */
-
+          /* The case of add/edit feed. */
          ListFragment listFragment = (ListFragment) m_fragmentManager.findFragmentByTag(
                FragmentManage.FRAGMENT_FEEDS_ID);
 
@@ -287,33 +274,6 @@ class FeedsActivity extends Activity
       }
 
       return true;
-   }
-
-   private static
-   void showAddFilterDialog(Context context, FragmentManager fragmentManager)
-   {
-      LayoutInflater inflater = LayoutInflater.from(context);
-      View addFilterLayout = inflater.inflate(R.layout.add_filter_dialog, null);
-
-      String cancelText = context.getString(R.string.cancel_dialog);
-      String addText = context.getString(R.string.add_dialog);
-      String addFilterText = context.getString(R.string.add_filter);
-
-      String applicationFolder = getApplicationFolder(context);
-
-      ListFragment listFragment = (ListFragment) fragmentManager.findFragmentByTag(
-            FragmentManage.FRAGMENT_FILTERS_ID);
-      BaseAdapter adapter = (BaseAdapter) listFragment.getListAdapter();
-
-      DialogInterface.OnClickListener onClickAdd = new OnClickFilterDialogAdd(addFilterLayout,
-            adapter, applicationFolder);
-
-      AlertDialog.Builder build = new AlertDialog.Builder(context);
-      build.setTitle(addFilterText);
-      build.setView(addFilterLayout);
-      build.setNegativeButton(cancelText, null);
-      build.setPositiveButton(addText, onClickAdd);
-      build.show();
    }
 
    static

@@ -154,7 +154,7 @@ class AdapterNavigationDrawer extends BaseAdapter
                   displayMetrics);
             int padding = Math.round(paddingSides);
 
-            int half = Math.round(padding * 0.5F);
+            int half = Math.round((float) padding * 0.5F);
 
             textView.setPadding(padding, -half, padding, half);
             textView.setMinHeight(minHeight);
@@ -171,7 +171,7 @@ class AdapterNavigationDrawer extends BaseAdapter
          String unreadText = "0".equals(number) ? "" : number;
          String tagTitle = m_tagArray[position - 4];
 
-         ((TextView) view).setText(tagTitle + "\n" + (char) 0x200F + unreadText);
+         ((TextView) view).setText(tagTitle + '\n' + (char) 0x200F + unreadText);
       }
       return view;
    }

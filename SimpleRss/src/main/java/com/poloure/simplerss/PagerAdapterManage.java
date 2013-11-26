@@ -32,14 +32,8 @@ class PagerAdapterManage extends FragmentPagerAdapter
    public
    Fragment getItem(int position)
    {
-      switch(position)
-      {
-         case 0:
-            return ListFragmentManageTags.newInstance();
-         case 1:
-            return ListFragmentManageFeeds.newInstance();
-         default:
-            return ListFragmentManageFilters.newInstance();
-      }
+      return 0 == position
+            ? ListFragmentManageTags.newInstance()
+            : ListFragmentManageFeeds.newInstance();
    }
 }

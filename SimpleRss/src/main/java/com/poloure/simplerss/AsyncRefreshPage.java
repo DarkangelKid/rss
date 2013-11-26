@@ -113,16 +113,16 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
 
                   /* If we have not downloaded the image yet, fake no image. */
                   File image = new File(m_applicationFolder + data.m_imageName);
-                  if(!image.exists())
-                  {
-                     data.m_EffImageHeight = 0;
-                     data.m_imageName = "";
-                  }
-                  else
+                  if(image.exists())
                   {
                      data.m_EffImageHeight = null == heights[i] || 0 == heights[i].length()
                            ? 0
                            : fastParseInt(heights[i]);
+                  }
+                  else
+                  {
+                     data.m_EffImageHeight = 0;
+                     data.m_imageName = "";
                   }
                }
 

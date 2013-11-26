@@ -58,7 +58,6 @@ class ServiceUpdate extends IntentService
    private static final String INDEX_MIME = "mime|";
    private static final String MIME_GIF = "image/gif";
    private static final int MIN_IMAGE_WIDTH = 64;
-   private static final int COMPRESSION_JPEG = 80;
    private static final SimpleDateFormat RSS_DATE = new SimpleDateFormat(
          "EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
    @SuppressWarnings("HardcodedLineSeparator")
@@ -475,8 +474,6 @@ class ServiceUpdate extends IntentService
       return -1;
    }
 
-   ;
-
    private static
    StringBuilder compressImage(String thumbnailDir, String imgLink, String imgName, Context context,
          StringBuilder builder)
@@ -510,7 +507,7 @@ class ServiceUpdate extends IntentService
       String mimeType = options.outMimeType;
 
       /* If the image is smaller than we care about, do not save it. */
-      if(imageWidth < MIN_IMAGE_WIDTH)
+      if(MIN_IMAGE_WIDTH > imageWidth)
       {
          return builder;
       }

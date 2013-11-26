@@ -18,10 +18,9 @@ import android.view.ViewGroup;
 public
 class FragmentManage extends Fragment
 {
-   static final int VIEW_PAGER_ID = 20000;
+   private static final int VIEW_PAGER_ID = 20000;
    static final String FRAGMENT_TAGS_ID = "android:switcher:20000:0";
    static final String FRAGMENT_FEEDS_ID = "android:switcher:20000:1";
-   static final String FRAGMENT_FILTERS_ID = "android:switcher:20000:2";
    private static final int PAGER_TITLE_STRIP_ID = 54218;
 
    static

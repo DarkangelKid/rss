@@ -9,7 +9,6 @@
    <string-array name="manage_titles">
       <item>Tags</item>
       <item>Feeds</item>
-      <item>Filters</item>
    </string-array>
 
    <string-array name="settings_titles">
