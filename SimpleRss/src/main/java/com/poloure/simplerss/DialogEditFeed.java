@@ -46,7 +46,15 @@ class DialogEditFeed extends Dialog
       setContentView(R.layout.add_rss_dialog);
 
       Button buttonNegative = (Button) findViewById(R.id.negative_button);
-      buttonNegative.setOnClickListener(new OnClickNegativeDialogButton(this));
+      buttonNegative.setOnClickListener(new View.OnClickListener()
+      {
+         @Override
+         public
+         void onClick(View v)
+         {
+            dismiss();
+         }
+      });
 
       Button buttonPositive = (Button) findViewById(R.id.positive_button);
       buttonPositive.setOnClickListener(new OnClickPositive(this, m_listView));

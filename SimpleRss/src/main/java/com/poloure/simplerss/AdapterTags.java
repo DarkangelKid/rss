@@ -1,14 +1,10 @@
 package com.poloure.simplerss;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Typeface;
-import android.util.DisplayMetrics;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -102,30 +98,18 @@ class AdapterTags extends BaseAdapter
       if(0 == viewType)
       {
          /* Make the single TextView view. */
-         view = isNewView ? new TextView(m_context) : convertView;
-         if(isNewView)
-         {
-            ((TextView) view).setTypeface(SERIF);
-            Resources resources = m_context.getResources();
-            DisplayMetrics metrics = resources.getDisplayMetrics();
-
-            float eightFloat = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                  PADDING_BASIC_ITEM, metrics);
-            int eight = Math.round(eightFloat);
-
-            view.setPadding(eight, eight, eight, eight);
-            view.setId(100);
-         }
-
-         ((TextView) view).setText(item.m_titleAndLink);
+         view = isNewView ? new LayoutFeedItemPlain(m_context) : convertView;
+         ((LayoutFeedItemPlain) view).showItem(item.m_itemTitle, item.m_url,
+               item.m_itemDescription);
       }
       else
       {
          view = isNewView ? new LayoutFeedItem(m_context) : convertView;
-         ((LayoutFeedItem) view).showItem(item, m_applicationFolder, position, item.m_titleAndLink);
+         ((LayoutFeedItem) view).showItem(item, m_applicationFolder, position);
       }
 
-      view.setAlpha(isRead ? ALPHA_READ_ITEM : 1.0F);
+      /* TODO set colors not alpha. */
+      //view.setAlpha(isRead ? ALPHA_READ_ITEM : 1.0F);
 
       /* The logic that tells whether the item is Read or not. */
       boolean isListViewShown = parent.isShown();

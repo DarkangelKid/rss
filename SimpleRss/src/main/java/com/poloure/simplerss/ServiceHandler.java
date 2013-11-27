@@ -9,9 +9,6 @@ import android.support.v4.view.MenuItemCompat;
 import android.view.MenuItem;
 import android.widget.ListView;
 
-import java.util.Arrays;
-import java.util.List;
-
 class ServiceHandler extends Handler
 {
    static MenuItem s_refreshItem;
@@ -45,11 +42,11 @@ class ServiceHandler extends Handler
 
       /* Find which pages we want to refresh. */
       int tagsCount = PagerAdapterFeeds.getTagsFromDisk(m_applicationFolder).size();
-      Integer[] pagesToRefresh;
+      int[] pagesToRefresh;
 
       if(0 == updatedPage)
       {
-         pagesToRefresh = new Integer[tagsCount];
+         pagesToRefresh = new int[tagsCount];
          for(int i = 0; i < tagsCount; i++)
          {
             pagesToRefresh[i] = i;
@@ -57,7 +54,7 @@ class ServiceHandler extends Handler
       }
       else
       {
-         pagesToRefresh = new Integer[]{0, updatedPage};
+         pagesToRefresh = new int[]{0, updatedPage};
       }
 
       /* Refresh those Pages. */
@@ -70,13 +67,6 @@ class ServiceHandler extends Handler
             /* TODO isAllTag not 0. */
             ListView listView = listFragment.getListView();
             AsyncRefreshPage.newInstance(page, listView, m_applicationFolder, 0 == page);
-         }
-         /* If a listFragment was null then the app must be closed. Save the pages to a file. */
-         else
-         {
-            List<Integer> pages = Arrays.asList(pagesToRefresh);
-            Write.collection("pages_to_refresh.txt", pages, m_applicationFolder);
-            return;
          }
       }
    }

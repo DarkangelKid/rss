@@ -76,7 +76,7 @@ class AsyncLoadImage extends AsyncTask<Object, Void, Object[]>
       {
          imageView.setVisibility(View.VISIBLE);
          imageView.setImageBitmap((Bitmap) result[0]);
-         imageView.startAnimation((Animation) result[1]);
+         //imageView.startAnimation((Animation) result[1]);
       }
    }
 }

@@ -94,7 +94,31 @@ class FeedsActivity extends Activity
       file.delete();
 
       /* Create the navigation drawer and set all the listeners for it. */
-      m_drawerToggle = new OnClickDrawerToggle(this, m_drawerLayout);
+      m_drawerToggle = new ActionBarDrawerToggle(this, m_drawerLayout, R.drawable.ic_drawer,
+            R.string.drawer_open, R.string.drawer_close)
+      {
+         String m_navigationText = getString(R.string.navigation_title);
+
+         @Override
+         public
+         void onDrawerOpened(View drawerView)
+         {
+            setNavigationTitle(m_navigationText, true);
+         }
+
+         @Override
+         public
+         void onDrawerClosed(View drawerView)
+         {
+            /* If the title is still R.string.navigation_title, change it to the previous title. */
+            String title = getNavigationTitle();
+            if(m_navigationText.equals(title))
+            {
+               String previousTitle = m_previousActionBarTitle;
+               setNavigationTitle(previousTitle, false);
+            }
+         }
+      };
       m_drawerLayout.setDrawerListener(m_drawerToggle);
 
       ListView navigationList = (ListView) findViewById(R.id.navigation_drawer);
@@ -109,6 +133,37 @@ class FeedsActivity extends Activity
          transaction.add(R.id.content_frame, feedFragment, navigationTitles[0]);
          transaction.commit();
       }
+   }
+
+   void setNavigationTitle(CharSequence title, boolean saveTitle)
+   {
+      if(saveTitle)
+      {
+         m_previousActionBarTitle = getNavigationTitle();
+      }
+      m_actionBar.setTitle(title);
+   }
+
+   static
+   String getApplicationFolder(Context context)
+   {
+      /* Check the media state for the desirable state. */
+      String state = Environment.getExternalStorageState();
+
+      String mounted = Environment.MEDIA_MOUNTED;
+      if(!mounted.equals(state))
+      {
+         return null;
+      }
+
+      File externalFilesDir = context.getExternalFilesDir(null);
+      return externalFilesDir.getAbsolutePath() + File.separatorChar;
+   }
+
+   String getNavigationTitle()
+   {
+      CharSequence title = m_actionBar.getTitle();
+      return title.toString();
    }
 
    @Override
@@ -142,27 +197,51 @@ class FeedsActivity extends Activity
       /* Stop the alarm service and reset the time to 0. */
       setServiceIntent(ALARM_SERVICE_STOP);
 
-      /* Refresh any pages that are scheduled to be updated. */
-      File tempPageFile = new File(m_applicationFolder + "pages_to_refresh.txt");
-      if(tempPageFile.exists())
-      {
-         String[] pagesToRefresh = Read.file("pages_to_refresh.txt", m_applicationFolder);
-         tempPageFile.delete();
+   }
 
-         /* Refresh the pages if they exist. */
-         for(String pageString : pagesToRefresh)
-         {
-            int page = Integer.parseInt(pageString);
-            ListFragment listFragment = (ListFragment) m_fragmentManager.findFragmentByTag(
-                  FragmentFeeds.FRAGMENT_ID_PREFIX + page);
-            if(null != listFragment)
-            {
-            /* TODO isAllTag not 0. */
-               ListView listView = listFragment.getListView();
-               AsyncRefreshPage.newInstance(page, listView, m_applicationFolder, 0 == page);
-            }
-         }
+   private
+   void setServiceIntent(int state)
+   {
+      /* Load the ManageFeedsRefresh boolean value from settings. */
+      SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+      boolean autoRefresh = preferences.getBoolean("refreshing_enabled", false);
+
+      if(!autoRefresh && ALARM_SERVICE_START == state)
+      {
+         return;
       }
+
+      /* Create intent, turn into pending intent, and get the alarm manager. */
+      Intent intent = new Intent(this, ServiceUpdate.class);
+      intent = configureServiceIntent(preferences, intent, 0);
+
+      PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, 0);
+      AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+
+      /* Depending on the state string, start or stop the service. */
+      if(ALARM_SERVICE_START == state)
+      {
+         String intervalString = preferences.getString("refresh_interval", "120");
+         int refreshInterval = Integer.parseInt(intervalString);
+
+         long interval = (long) refreshInterval * (long) MINUTE_VALUE;
+         long next = System.currentTimeMillis() + interval;
+         am.setRepeating(AlarmManager.RTC_WAKEUP, next, interval, pendingIntent);
+      }
+      else if(ALARM_SERVICE_STOP == state)
+      {
+         am.cancel(pendingIntent);
+      }
+   }
+
+   private static
+   Intent configureServiceIntent(SharedPreferences preferences, Intent intent, int page)
+   {
+      boolean notificationsEnabled = preferences.getBoolean("notifications_enabled", true);
+
+      intent.putExtra("GROUP_NUMBER", page);
+      intent.putExtra("NOTIFICATIONS", notificationsEnabled);
+      return intent;
    }
 
    @Override
@@ -171,10 +250,10 @@ class FeedsActivity extends Activity
    {
       super.onStop();
 
+      Write.longSet(READ_ITEMS, AdapterTags.READ_ITEM_TIMES, m_applicationFolder);
+
       /* Set the alarm service to go off starting now. */
       setServiceIntent(ALARM_SERVICE_START);
-
-      Write.longSet(READ_ITEMS, AdapterTags.READ_ITEM_TIMES, m_applicationFolder);
    }
 
    /* This is so the icon and text in the actionbar are selected. */
@@ -230,18 +309,21 @@ class FeedsActivity extends Activity
       return true;
    }
 
-   private static
-   View makeProgressBar(Context context)
+   private
+   boolean isServiceRunning()
    {
-      Resources resources = context.getResources();
-      DisplayMetrics metrics = resources.getDisplayMetrics();
-      float seven = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 7.0F, metrics);
-      int sevenBp = Math.round(seven);
-
-      ProgressBar progressBar = new ProgressBar(context);
-      progressBar.setPadding(sevenBp, sevenBp, sevenBp, sevenBp);
-
-      return progressBar;
+      ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+      for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(
+            Integer.MAX_VALUE))
+      {
+         String className = service.service.getClassName();
+         String serviceName = ServiceUpdate.class.getName();
+         if(serviceName.equals(className))
+         {
+            return true;
+         }
+      }
+      return false;
    }
 
    @Override
@@ -294,29 +376,6 @@ class FeedsActivity extends Activity
       return true;
    }
 
-   static
-   void gotoLatestUnread(ListView listView)
-   {
-      Adapter listAdapter = listView.getAdapter();
-
-      int itemCount = listAdapter.getCount() - 1;
-      for(int i = itemCount; 0 <= i; i--)
-      {
-         FeedItem feedItem = (FeedItem) listAdapter.getItem(i);
-         if(!AdapterTags.READ_ITEM_TIMES.contains(feedItem.m_itemTime))
-         {
-            listView.setSelection(i);
-            break;
-         }
-      }
-   }
-
-   String getNavigationTitle()
-   {
-      CharSequence title = m_actionBar.getTitle();
-      return title.toString();
-   }
-
    /* Updates and refreshes the tags with any new content. */
    private
    void refreshFeeds(MenuItem menuItem)
@@ -334,90 +393,34 @@ class FeedsActivity extends Activity
       startService(intent);
    }
 
-   private
-   boolean isServiceRunning()
+   static
+   void gotoLatestUnread(ListView listView)
    {
-      ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-      for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(
-            Integer.MAX_VALUE))
+      Adapter listAdapter = listView.getAdapter();
+
+      int itemCount = listAdapter.getCount() - 1;
+      for(int i = itemCount; 0 <= i; i--)
       {
-         String className = service.service.getClassName();
-         String serviceName = ServiceUpdate.class.getName();
-         if(serviceName.equals(className))
+         FeedItem feedItem = (FeedItem) listAdapter.getItem(i);
+         if(!AdapterTags.READ_ITEM_TIMES.contains(feedItem.m_itemTime))
          {
-            return true;
+            listView.setSelection(i);
+            break;
          }
-      }
-      return false;
-   }
-
-   private
-   void setServiceIntent(int state)
-   {
-      /* Load the ManageFeedsRefresh boolean value from settings. */
-      SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-      boolean autoRefresh = preferences.getBoolean("refreshing_enabled", false);
-
-      if(!autoRefresh && ALARM_SERVICE_START == state)
-      {
-         return;
-      }
-
-      /* Create intent, turn into pending intent, and get the alarm manager. */
-      Intent intent = new Intent(this, ServiceUpdate.class);
-      intent = configureServiceIntent(preferences, intent, 0);
-
-      PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, 0);
-      AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
-
-      /* Depending on the state string, start or stop the service. */
-      if(ALARM_SERVICE_START == state)
-      {
-         String intervalString = preferences.getString("refresh_interval", "120");
-         int refreshInterval = Integer.parseInt(intervalString);
-
-         long interval = (long) refreshInterval * (long) MINUTE_VALUE;
-         long next = System.currentTimeMillis() + interval;
-         am.setRepeating(AlarmManager.RTC_WAKEUP, next, interval, pendingIntent);
-      }
-      else if(ALARM_SERVICE_STOP == state)
-      {
-         am.cancel(pendingIntent);
       }
    }
 
    private static
-   Intent configureServiceIntent(SharedPreferences preferences, Intent intent, int page)
+   View makeProgressBar(Context context)
    {
-      boolean notificationsEnabled = preferences.getBoolean("notifications_enabled", true);
+      Resources resources = context.getResources();
+      DisplayMetrics metrics = resources.getDisplayMetrics();
+      float seven = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 7.0F, metrics);
+      int sevenBp = Math.round(seven);
 
-      intent.putExtra("GROUP_NUMBER", page);
-      intent.putExtra("NOTIFICATIONS", notificationsEnabled);
-      return intent;
-   }
+      ProgressBar progressBar = new ProgressBar(context);
+      progressBar.setPadding(sevenBp, sevenBp, sevenBp, sevenBp);
 
-   static
-   String getApplicationFolder(Context context)
-   {
-      /* Check the media state for the desirable state. */
-      String state = Environment.getExternalStorageState();
-
-      String mounted = Environment.MEDIA_MOUNTED;
-      if(!mounted.equals(state))
-      {
-         return null;
-      }
-
-      File externalFilesDir = context.getExternalFilesDir(null);
-      return externalFilesDir.getAbsolutePath() + File.separatorChar;
-   }
-
-   void setNavigationTitle(CharSequence title, boolean saveTitle)
-   {
-      if(saveTitle)
-      {
-         m_previousActionBarTitle = getNavigationTitle();
-      }
-      m_actionBar.setTitle(title);
+      return progressBar;
    }
 }

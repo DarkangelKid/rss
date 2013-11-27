@@ -2,8 +2,6 @@ package com.poloure.simplerss;
 
 import android.graphics.Color;
 import android.os.AsyncTask;
-import android.text.Editable;
-import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.ForegroundColorSpan;
@@ -53,6 +51,32 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       AsyncTask<Integer, Object, Void> task = new AsyncRefreshPage(listView, storage, isAllTag);
 
       task.executeOnExecutor(THREAD_POOL_EXECUTOR, pageNumber);
+   }
+
+   private static
+   boolean containsArabic(String text)
+   {
+      char[] chars = text.toCharArray();
+      for(int i : chars)
+      {
+         if(0x600 <= i && 0x6ff >= i)
+         {
+            return true;
+         }
+         if(0x750 <= i && 0x77f >= i)
+         {
+            return true;
+         }
+         if(0xfb50 <= i && 0xfc3f >= i)
+         {
+            return true;
+         }
+         if(0xfe70 <= i && 0xfefc >= i)
+         {
+            return true;
+         }
+      }
+      return false;
    }
 
    @Override
@@ -135,48 +159,16 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
                   descriptions[i] = descriptions[i].substring(0, MAX_DESCRIPTION_LENGTH);
                }
 
-               String itemTitle = null == titles[i] ? "" : titles[i];
+               data.m_itemTitle = null == titles[i] ? "" : titles[i];
                data.m_itemDescription = descriptions[i];
                data.m_url = links[i];
-
                data.m_itemTime = fastParseLong(times[i]);
 
-               /* Make the editable. */
-               Editable editable = new SpannableStringBuilder();
-
-                /* First, the title. */
-               int titleLength = itemTitle.length();
-               editable.append(itemTitle);
-               editable.setSpan(TITLE_SIZE, 0, titleLength, FULL_SPAN);
-               editable.setSpan(COLOR_TITLE, 0, titleLength, FULL_SPAN);
-               editable.append("\n");
-
-                /* Next the link. */
-               int linkStart = editable.length();
-
-               if(containsArabic(itemTitle))
+               /* TODO */
+               /*if(containsArabic(itemTitle))
                {
                   editable.append((char) 0x200F);
-               }
-               editable.append(data.m_url);
-               editable.setSpan(LINK_SIZE, linkStart, editable.length(), FULL_SPAN);
-               editable.setSpan(COLOR_LINK, linkStart, editable.length(), FULL_SPAN);
-
-               boolean isNoImage = 0 == data.m_EffImageHeight;
-               if(isNoImage)
-               {
-                  editable.append("\n");
-
-                  /* Finally the description. */
-                  int descriptionStart = editable.length();
-                  editable.append(data.m_itemDescription);
-                  editable.setSpan(DESCRIPTION_SIZE, descriptionStart, editable.length(),
-                        FULL_SPAN);
-                  editable.setSpan(COLOR_DESCRIPTION, descriptionStart, editable.length(),
-                        FULL_SPAN);
-               }
-
-               data.m_titleAndLink = editable;
+               }*/
 
                /* Do not add duplicates, do not add read items if opacity == 0 */
                boolean notInAdapter = !timeListInAdapter.contains(data.m_itemTime);
@@ -203,6 +195,38 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
          publishProgress(itemCollection, longList);
       }
       return null;
+   }
+
+   private static
+   long fastParseLong(String s)
+   {
+      if(null == s)
+      {
+         return 0L;
+      }
+      char[] chars = s.toCharArray();
+      long num = 0L;
+
+      for(char c : chars)
+      {
+         int value = (int) c - 48;
+         num = num * 10L + (long) value;
+      }
+      return num;
+   }
+
+   private static
+   int fastParseInt(String s)
+   {
+      char[] chars = s.toCharArray();
+      int num = 0;
+
+      for(char c : chars)
+      {
+         int value = (int) c - 48;
+         num = num * 10 + value;
+      }
+      return num;
    }
 
    @Override
@@ -273,63 +297,5 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       {
          FeedsActivity.gotoLatestUnread(m_listView);
       }
-   }
-
-   private static
-   int fastParseInt(String s)
-   {
-      char[] chars = s.toCharArray();
-      int num = 0;
-
-      for(char c : chars)
-      {
-         int value = (int) c - 48;
-         num = num * 10 + value;
-      }
-      return num;
-   }
-
-   private static
-   long fastParseLong(String s)
-   {
-      if(null == s)
-      {
-         return 0L;
-      }
-      char[] chars = s.toCharArray();
-      long num = 0L;
-
-      for(char c : chars)
-      {
-         int value = (int) c - 48;
-         num = num * 10L + (long) value;
-      }
-      return num;
-   }
-
-   private static
-   boolean containsArabic(String text)
-   {
-      char[] chars = text.toCharArray();
-      for(int i : chars)
-      {
-         if(0x600 <= i && 0x6ff >= i)
-         {
-            return true;
-         }
-         if(0x750 <= i && 0x77f >= i)
-         {
-            return true;
-         }
-         if(0xfb50 <= i && 0xfc3f >= i)
-         {
-            return true;
-         }
-         if(0xfe70 <= i && 0xfefc >= i)
-         {
-            return true;
-         }
-      }
-      return false;
    }
 }
