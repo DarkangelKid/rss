@@ -8,13 +8,11 @@ import android.text.Spanned;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.StyleSpan;
 import android.view.View;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
 import android.widget.Adapter;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 
-class AsyncManageTagsRefresh extends AsyncTask<String, Editable[], Animation>
+class AsyncManageTagsRefresh extends AsyncTask<String, Editable[], Void>
 {
    private static final int INFO_INITIAL_CAPACITY = 40;
    private static final int FADE_IN_DURATION = 330;
@@ -38,14 +36,14 @@ class AsyncManageTagsRefresh extends AsyncTask<String, Editable[], Animation>
    static
    void newInstance(ListView listView, String applicationFolder, String allTag)
    {
-      AsyncTask<String, Editable[], Animation> task = new AsyncManageTagsRefresh(listView);
+      AsyncTask<String, Editable[], Void> task = new AsyncManageTagsRefresh(listView);
 
       task.executeOnExecutor(THREAD_POOL_EXECUTOR, allTag, applicationFolder);
    }
 
    @Override
    protected
-   Animation doInBackground(String... allTagAndFolder)
+   Void doInBackground(String... allTagAndFolder)
    {
       /* Create the info strings for each tag. */
       String[] feedTags = PagerAdapterFeeds.getTagsArray();
@@ -116,19 +114,15 @@ class AsyncManageTagsRefresh extends AsyncTask<String, Editable[], Animation>
       }
 
       publishProgress(editables);
-
-      Animation fadeIn = new AlphaAnimation(0.0F, 1.0F);
-      fadeIn.setDuration((long) FADE_IN_DURATION);
-      return fadeIn;
+      return null;
    }
 
    @Override
    protected
-   void onPostExecute(Animation result)
+   void onPostExecute(Void result)
    {
       if(null != result && !m_listView.isShown())
       {
-         m_listView.setAnimation(result);
          m_listView.setVisibility(View.VISIBLE);
       }
    }

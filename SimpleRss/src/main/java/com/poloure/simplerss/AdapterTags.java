@@ -1,7 +1,6 @@
 package com.poloure.simplerss;
 
 import android.content.Context;
-import android.graphics.Typeface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -16,9 +15,10 @@ import java.util.Set;
 class AdapterTags extends BaseAdapter
 {
    static final Set<Long> READ_ITEM_TIMES = Collections.synchronizedSet(new HashSet<Long>(0));
-   private static final Typeface SERIF = Typeface.create(Typeface.SERIF, Typeface.NORMAL);
-   private static final float ALPHA_READ_ITEM = 0.50F;
-   private static final float PADDING_BASIC_ITEM = 8.0F;
+   private static final int TYPE_PLAIN = 0;
+   private static final int TYPE_IMAGE = 1;
+   private static final int TYPE_IMAGE_SANS_DESCRIPTION = 2;
+   private static final int TYPE_PLAIN_SANS_DESCRIPTION = 3;
    private final List<FeedItem> m_feedItems = new ArrayList<FeedItem>(0);
    private final List<Long> m_times = new ArrayList<Long>(0);
    private final Context m_context;
@@ -49,9 +49,31 @@ class AdapterTags extends BaseAdapter
    public
    int getItemViewType(int position)
    {
-      boolean isImage = 0 != m_feedItems.get(position).m_EffImageHeight;
+      FeedItem feedItem = m_feedItems.get(position);
 
-      return isImage ? 1 : 0;
+      boolean isImage = 0 != feedItem.m_EffImageHeight;
+      boolean isDescription = 0 != feedItem.m_itemDescriptionOne.length();
+
+      int type;
+
+      if(isImage && isDescription)
+      {
+         type = TYPE_IMAGE;
+      }
+      else if(isImage)
+      {
+         type = TYPE_IMAGE_SANS_DESCRIPTION;
+      }
+      else if(isDescription)
+      {
+         type = TYPE_PLAIN;
+      }
+      else
+      {
+         type = TYPE_PLAIN_SANS_DESCRIPTION;
+      }
+
+      return type;
    }
 
    @Override
@@ -65,7 +87,7 @@ class AdapterTags extends BaseAdapter
    public
    int getViewTypeCount()
    {
-      return 2;
+      return 4;
    }
 
    @Override
@@ -90,26 +112,45 @@ class AdapterTags extends BaseAdapter
       int viewType = getItemViewType(position);
       FeedItem item = m_feedItems.get(position);
 
-      Long time = item.m_itemTime;
-      boolean isRead = READ_ITEM_TIMES.contains(time);
+      //Long time = item.m_itemTime;
+      //boolean isRead = READ_ITEM_TIMES.contains(time);
 
       View view;
 
-      if(0 == viewType)
+      if(TYPE_PLAIN == viewType)
       {
-         /* Make the single TextView view. */
-         view = isNewView ? new LayoutFeedItemPlain(m_context) : convertView;
-         ((LayoutFeedItemPlain) view).showItem(item.m_itemTitle, item.m_url,
-               item.m_itemDescription);
+         view = isNewView ? ViewBasicFeed.newInstance(m_context) : convertView;
+         ((ViewBasicFeed) view).setTexts(item.m_itemTitle, item.m_url, item.m_itemDescriptionOne, item.m_itemDescriptionTwo, item.m_itemDescriptionThree);
+      }
+      else if(TYPE_IMAGE == viewType)
+      {
+         view = isNewView ? ViewImageFeed.newInstance(m_context) : convertView;
+
+         view.setTag(position);
+         ((ViewImageFeed) view).setBitmap(null);
+         view.setVisibility(View.INVISIBLE);
+         ((ViewImageFeed) view).setTexts(item.m_itemTitle, item.m_url, item.m_itemDescriptionOne, item.m_itemDescriptionTwo, item.m_itemDescriptionThree);
+         AsyncLoadImage.newInstance(view, m_applicationFolder, item.m_imageName, position,
+               m_context);
+      }
+      else if(TYPE_IMAGE_SANS_DESCRIPTION == viewType)
+      {
+         view = isNewView ? ViewImageSansDesFeed.newInstance(m_context) : convertView;
+
+         view.setTag(position);
+         ((ViewImageSansDesFeed) view).setBitmap(null);
+         view.setVisibility(View.INVISIBLE);
+         ((ViewImageSansDesFeed) view).setTexts(item.m_itemTitle, item.m_url);
+         AsyncLoadImage.newInstance(view, m_applicationFolder, item.m_imageName, position,
+               m_context);
       }
       else
       {
-         view = isNewView ? new LayoutFeedItem(m_context) : convertView;
-         ((LayoutFeedItem) view).showItem(item, m_applicationFolder, position);
+         view = isNewView ? ViewBasicSansDesFeed.newInstance(m_context) : convertView;
+         ((ViewBasicSansDesFeed) view).setTexts(item.m_itemTitle, item.m_url);
       }
 
       /* TODO set colors not alpha. */
-      //view.setAlpha(isRead ? ALPHA_READ_ITEM : 1.0F);
 
       /* The logic that tells whether the item is Read or not. */
       boolean isListViewShown = parent.isShown();

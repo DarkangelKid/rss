@@ -1,10 +1,6 @@
 package com.poloure.simplerss;
 
-import android.graphics.Color;
 import android.os.AsyncTask;
-import android.text.Spanned;
-import android.text.style.AbsoluteSizeSpan;
-import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.widget.Adapter;
 import android.widget.ListView;
@@ -23,16 +19,6 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
 {
    private static final int MAX_DESCRIPTION_LENGTH = 360;
    private static final int MIN_DESCRIPTION_LENGTH = 8;
-   private static final ForegroundColorSpan COLOR_LINK = new ForegroundColorSpan(
-         Color.argb(128, 0, 0, 0));
-   private static final AbsoluteSizeSpan LINK_SIZE = new AbsoluteSizeSpan(10, true);
-   private static final ForegroundColorSpan COLOR_TITLE = new ForegroundColorSpan(
-         Color.argb(255, 0, 0, 0));
-   private static final AbsoluteSizeSpan TITLE_SIZE = new AbsoluteSizeSpan(14, true);
-   private static final ForegroundColorSpan COLOR_DESCRIPTION = new ForegroundColorSpan(
-         Color.argb(205, 0, 0, 0));
-   private static final AbsoluteSizeSpan DESCRIPTION_SIZE = new AbsoluteSizeSpan(12, true);
-   private static final int FULL_SPAN = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE;
    private final String m_applicationFolder;
    private final ListView m_listView;
    private final boolean m_isAllTag;
@@ -159,10 +145,52 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
                   descriptions[i] = descriptions[i].substring(0, MAX_DESCRIPTION_LENGTH);
                }
 
-               data.m_itemTitle = null == titles[i] ? "" : titles[i];
-               data.m_itemDescription = descriptions[i];
-               data.m_url = links[i];
                data.m_itemTime = fastParseLong(times[i]);
+
+               String link = links[i];
+               String description = descriptions[i];
+               String title = null == titles[i] ? "" : titles[i];
+
+               /* MAKE THE TEXT THE CORRECT LENGTH. */
+               float viewWidth = (float) m_listView.getWidth();
+               String[] desLines = new String[3];
+
+               if(description.length() > 0)
+               {
+                  for(int x = 0; x < 3; x++)
+                  {
+                     int desChars = ViewBasicFeed.DES_PAINT
+                           .breakText(description, true, viewWidth - 40, null);
+                     int desSpace = description.lastIndexOf(' ', desChars);
+                     desChars = -1 == desSpace ? desChars : desSpace + 1;
+                     desLines[x] = description.substring(0, desChars);
+
+                     description = description.substring(desChars);
+                  }
+               }
+               else
+               {
+                  desLines[0] = "";
+                  desLines[1] = "";
+                  desLines[2] = "";
+               }
+
+               int titleChars = ViewBasicFeed.TITLE_PAINT
+                     .breakText(title, true, viewWidth - 40, null);
+               int linkChars = ViewBasicFeed.LINK_PAINT.breakText(link, true, viewWidth - 40, null);
+
+               int titleSpace = title.lastIndexOf(' ', titleChars);
+               int linkSpace = link.lastIndexOf(' ', linkChars);
+
+               data.m_itemTitle = title.substring(0, -1 == titleSpace ? titleChars : titleSpace);
+               data.m_url = link.substring(0, -1 == linkSpace ? linkChars : linkSpace);
+               data.m_urlFull = links[i];
+
+               data.m_itemDescriptionOne = desLines[0];
+               data.m_itemDescriptionTwo = desLines[1];
+               data.m_itemDescriptionThree = desLines[2];
+
+               /* END OF THAT. */
 
                /* TODO */
                /*if(containsArabic(itemTitle))
@@ -195,38 +223,6 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
          publishProgress(itemCollection, longList);
       }
       return null;
-   }
-
-   private static
-   long fastParseLong(String s)
-   {
-      if(null == s)
-      {
-         return 0L;
-      }
-      char[] chars = s.toCharArray();
-      long num = 0L;
-
-      for(char c : chars)
-      {
-         int value = (int) c - 48;
-         num = num * 10L + (long) value;
-      }
-      return num;
-   }
-
-   private static
-   int fastParseInt(String s)
-   {
-      char[] chars = s.toCharArray();
-      int num = 0;
-
-      for(char c : chars)
-      {
-         int value = (int) c - 48;
-         num = num * 10 + value;
-      }
-      return num;
    }
 
    @Override
@@ -297,5 +293,37 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       {
          FeedsActivity.gotoLatestUnread(m_listView);
       }
+   }
+
+   private static
+   int fastParseInt(String s)
+   {
+      char[] chars = s.toCharArray();
+      int num = 0;
+
+      for(char c : chars)
+      {
+         int value = (int) c - 48;
+         num = num * 10 + value;
+      }
+      return num;
+   }
+
+   private static
+   long fastParseLong(String s)
+   {
+      if(null == s)
+      {
+         return 0L;
+      }
+      char[] chars = s.toCharArray();
+      long num = 0L;
+
+      for(char c : chars)
+      {
+         int value = (int) c - 48;
+         num = num * 10L + (long) value;
+      }
+      return num;
    }
 }

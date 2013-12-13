@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 /* This is the context menu that appears when you long click a feed item (card). */
@@ -26,8 +25,28 @@ class OnFeedItemLongClick implements AdapterView.OnItemLongClickListener
    public
    boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id)
    {
-      TextView titleAndLinkView = (TextView) view.findViewById(100);
-      String link = titleAndLinkView.getText().toString().trim();
+      String urlView = "";
+
+      Class type = view.getClass();
+
+      if(type.equals(ViewBasicFeed.class))
+      {
+         urlView = ((ViewBasicFeed) view).m_link;
+      }
+      else if(type.equals(ViewImageFeed.class))
+      {
+         urlView = ((ViewImageFeed) view).m_link;
+      }
+      else if(type.equals(ViewBasicSansDesFeed.class))
+      {
+         urlView = ((ViewBasicSansDesFeed) view).m_link;
+      }
+      else if(type.equals(ViewImageSansDesFeed.class))
+      {
+         urlView = ((ViewImageSansDesFeed) view).m_link;
+      }
+
+      String link = urlView.trim();
 
       DialogInterface.OnClickListener onClick = new OnContextMenuClick(link);
 

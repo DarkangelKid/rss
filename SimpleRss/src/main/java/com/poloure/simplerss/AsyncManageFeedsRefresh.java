@@ -8,15 +8,13 @@ import android.text.Spanned;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.StyleSpan;
 import android.view.View;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
 import android.widget.Adapter;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 
 import java.io.File;
 
-class AsyncManageFeedsRefresh extends AsyncTask<String, Editable[], Animation>
+class AsyncManageFeedsRefresh extends AsyncTask<String, Editable[], Void>
 {
    private static final int FADE_IN_DURATION = 330;
    private static final AbsoluteSizeSpan TITLE_SIZE = new AbsoluteSizeSpan(14, true);
@@ -38,14 +36,14 @@ class AsyncManageFeedsRefresh extends AsyncTask<String, Editable[], Animation>
    static
    void newInstance(ListView listView, String applicationFolder)
    {
-      AsyncTask<String, Editable[], Animation> task = new AsyncManageFeedsRefresh(listView);
+      AsyncTask<String, Editable[], Void> task = new AsyncManageFeedsRefresh(listView);
 
       task.executeOnExecutor(THREAD_POOL_EXECUTOR, applicationFolder);
    }
 
    @Override
    protected
-   Animation doInBackground(String... applicationFolder)
+   Void doInBackground(String... applicationFolder)
    {
       String appFolder = applicationFolder[0];
 
@@ -97,19 +95,15 @@ class AsyncManageFeedsRefresh extends AsyncTask<String, Editable[], Animation>
          editables[i] = editable;
       }
       publishProgress(editables);
-
-      Animation fadeIn = new AlphaAnimation(0.0F, 1.0F);
-      fadeIn.setDuration((long) FADE_IN_DURATION);
-      return fadeIn;
+      return null;
    }
 
    @Override
    protected
-   void onPostExecute(Animation result)
+   void onPostExecute(Void result)
    {
       if(!m_listView.isShown())
       {
-         m_listView.setAnimation(result);
          m_listView.setVisibility(View.VISIBLE);
       }
    }

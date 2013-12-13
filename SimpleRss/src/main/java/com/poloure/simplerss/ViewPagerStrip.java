@@ -54,6 +54,7 @@ class ViewPagerStrip extends ViewPager
       /* Create the ViewPager. */
       ViewPager viewPager = new ViewPagerStrip(context);
       viewPager.setOffscreenPageLimit(OFF_SCREEN_PAGE_LIMIT);
+      viewPager.setBackgroundColor(Color.WHITE);
       viewPager.addView(pagerTitleStrip, LAYOUT_PARAMS);
 
       return viewPager;

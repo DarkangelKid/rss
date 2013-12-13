@@ -513,6 +513,7 @@ class ServiceUpdate extends IntentService
       }
 
       /* Save these details before we possible return. */
+      /* TODO no longer need scaledHeight. */
       int scaledHeight = Math.round(screenWidth / imageWidth * imageHeight);
       String scaledHeightString = Integer.toString(scaledHeight);
 
@@ -561,7 +562,8 @@ class ServiceUpdate extends IntentService
       }
       else
       {
-         float inSample = imageWidth > screenWidth ? imageWidth / screenWidth : 1.0F;
+         float inSample = imageWidth / screenWidth;
+         int height = Math.round(imageHeight / inSample);
 
          try
          {
@@ -579,8 +581,15 @@ class ServiceUpdate extends IntentService
          }
 
          BitmapFactory.Options o2 = new BitmapFactory.Options();
-         o2.inSampleSize = Math.round(inSample);
+         o2.inSampleSize = 1;
          Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, o2);
+
+         /* Scale it to the screen width. */
+         bitmap = Bitmap.createScaledBitmap(bitmap, (int) screenWidth, height, false);
+
+         /* Shrink it to IMAGE_HEIGHT. */
+         int newHeight = Math.min(bitmap.getHeight(), ViewImageFeed.IMAGE_HEIGHT);
+         bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), newHeight);
 
          try
          {
