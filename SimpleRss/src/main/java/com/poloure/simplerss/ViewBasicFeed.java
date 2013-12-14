@@ -28,9 +28,10 @@ class ViewBasicFeed extends View
 
    private static final int SP = TypedValue.COMPLEX_UNIT_SP;
    private static final int HEIGHT = 180;
-   String m_title = "Initial Text";
-   String m_link = "Initial Text";
-   String[] m_desLines = new String[3];
+   private final String[] m_desLines = new String[3];
+   String m_linkFull = "Initial Text";
+   private String m_title = "Initial Text";
+   private String m_link = "Initial Text";
 
    ViewBasicFeed(Context context)
    {
@@ -70,10 +71,12 @@ class ViewBasicFeed extends View
       DES_PAINT.setTextSize(descriptionSp);
    }
 
-   void setTexts(String title, String link, String desOne, String desTwo, String desThree)
+   void setTexts(String title, String link, String linkFull, String desOne, String desTwo,
+         String desThree)
    {
       m_title = title;
       m_link = link;
+      m_linkFull = linkFull;
       m_desLines[0] = desOne;
       m_desLines[1] = desTwo;
       m_desLines[2] = desThree;
@@ -90,13 +93,13 @@ class ViewBasicFeed extends View
       float titleHeight = TITLE_PAINT.getTextSize();
       float desHeight = DES_PAINT.getTextSize();
 
-      float verticalPosition = paddingTop + 20;
+      float verticalPosition = paddingTop + 20.0F;
       canvas.drawText(m_title, paddingStart, verticalPosition, TITLE_PAINT);
 
-      verticalPosition += titleHeight - 4;
+      verticalPosition += titleHeight - 4.0F;
       canvas.drawText(m_link, paddingStart, verticalPosition, LINK_PAINT);
 
-      verticalPosition += linkHeight + 10;
+      verticalPosition += linkHeight + 10.0F;
       canvas.drawText(m_desLines[0], paddingStart, verticalPosition, DES_PAINT);
 
       verticalPosition += desHeight;

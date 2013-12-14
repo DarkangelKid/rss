@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.support.v13.app.FragmentPagerAdapter;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -20,7 +21,7 @@ class PagerAdapterFeeds extends FragmentPagerAdapter
    }
 
    static
-   Set<String> getTagsFromDisk(String applicationFolder)
+   Collection<String> getTagsFromDisk(String applicationFolder)
    {
       return getAndSaveTagsFromDisk(applicationFolder, "");
    }

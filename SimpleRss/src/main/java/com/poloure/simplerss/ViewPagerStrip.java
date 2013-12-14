@@ -13,9 +13,9 @@ import android.view.ViewGroup;
 class ViewPagerStrip extends ViewPager
 {
    private static final int OFF_SCREEN_PAGE_LIMIT = 128;
-   private static final int VIEWPAGER_BACKGROUND_COLOR = Color.parseColor("#404040");
+   private static final int PAGER_TAB_STRIP_BACKGROUND = Color.parseColor("#404040");
    private static final float TEXT_VERTICAL_PADDING = 4.0F;
-   private static final float VIEWPAGER_TEXT_SIZE = 14.0F;
+   private static final float PAGER_TAB_STRIP_TEXT_SIZE = 14.0F;
    private static final LayoutParams LAYOUT_PARAMS = new LayoutParams();
 
    static
@@ -48,13 +48,12 @@ class ViewPagerStrip extends ViewPager
       pagerTitleStrip.setGravity(Gravity.START);
       pagerTitleStrip.setPadding(0, textPadding, 0, textPadding);
       pagerTitleStrip.setTextColor(Color.WHITE);
-      pagerTitleStrip.setTextSize(TypedValue.COMPLEX_UNIT_SP, VIEWPAGER_TEXT_SIZE);
-      pagerTitleStrip.setBackgroundColor(VIEWPAGER_BACKGROUND_COLOR);
+      pagerTitleStrip.setTextSize(TypedValue.COMPLEX_UNIT_SP, PAGER_TAB_STRIP_TEXT_SIZE);
+      pagerTitleStrip.setBackgroundColor(PAGER_TAB_STRIP_BACKGROUND);
 
       /* Create the ViewPager. */
       ViewPager viewPager = new ViewPagerStrip(context);
       viewPager.setOffscreenPageLimit(OFF_SCREEN_PAGE_LIMIT);
-      viewPager.setBackgroundColor(Color.WHITE);
       viewPager.addView(pagerTitleStrip, LAYOUT_PARAMS);
 
       return viewPager;

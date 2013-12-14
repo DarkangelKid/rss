@@ -41,7 +41,6 @@ import java.util.Set;
 public
 class FeedsActivity extends Activity
 {
-   static final String FILTER_LIST = "filter_list.txt";
    private static final String READ_ITEMS = "read_items.txt";
    private static final int ALARM_SERVICE_START = 1;
    private static final int ALARM_SERVICE_STOP = 0;
@@ -97,7 +96,7 @@ class FeedsActivity extends Activity
       m_drawerToggle = new ActionBarDrawerToggle(this, m_drawerLayout, R.drawable.ic_drawer,
             R.string.drawer_open, R.string.drawer_close)
       {
-         String m_navigationText = getString(R.string.navigation_title);
+         final String m_navigationText = getString(R.string.navigation_title);
 
          @Override
          public

@@ -68,17 +68,18 @@ class AsyncLoadImage extends AsyncTask<Object, Void, Bitmap>
       final View imageView = m_imageView.get();
       if(null != imageView && (Integer) imageView.getTag() == m_imageViewTag && null != result)
       {
-         try
+         Class type = imageView.getClass();
+         if(type.equals(ViewImageFeed.class))
          {
             ((ViewImageFeed) imageView).setBitmap(result);
          }
-         catch(ClassCastException e)
+         else
          {
             ((ViewImageSansDesFeed) imageView).setBitmap(result);
          }
          imageView.setVisibility(View.VISIBLE);
          Animation fadeIn = new AlphaAnimation(0.0F, 1.0F);
-         fadeIn.setDuration(100);
+         fadeIn.setDuration(100L);
 
          imageView.setAnimation(fadeIn);
       }

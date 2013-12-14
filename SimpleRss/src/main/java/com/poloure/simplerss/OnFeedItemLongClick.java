@@ -31,19 +31,19 @@ class OnFeedItemLongClick implements AdapterView.OnItemLongClickListener
 
       if(type.equals(ViewBasicFeed.class))
       {
-         urlView = ((ViewBasicFeed) view).m_link;
+         urlView = ((ViewBasicFeed) view).m_linkFull;
       }
       else if(type.equals(ViewImageFeed.class))
       {
-         urlView = ((ViewImageFeed) view).m_link;
+         urlView = ((ViewImageFeed) view).m_linkFull;
       }
       else if(type.equals(ViewBasicSansDesFeed.class))
       {
-         urlView = ((ViewBasicSansDesFeed) view).m_link;
+         urlView = ((ViewBasicSansDesFeed) view).m_linkFull;
       }
       else if(type.equals(ViewImageSansDesFeed.class))
       {
-         urlView = ((ViewImageSansDesFeed) view).m_link;
+         urlView = ((ViewImageSansDesFeed) view).m_linkFull;
       }
 
       String link = urlView.trim();

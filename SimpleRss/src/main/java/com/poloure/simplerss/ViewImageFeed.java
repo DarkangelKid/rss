@@ -26,13 +26,13 @@ class ViewImageFeed extends View
       TITLE_PAINT.setColor(Color.argb(255, 0, 0, 0));
       LINK_PAINT.setColor(Color.argb(165, 0, 0, 0));
       DES_PAINT.setColor(Color.argb(205, 0, 0, 0));
-      TITLE_PAINT.measureText("2");
    }
 
-   String m_title = "Initial Text";
-   String m_link = "Initial Text";
-   String[] m_desLines = new String[3];
-   Bitmap m_image;
+   private String m_title = "Initial Text";
+   private String m_link = "Initial Text";
+   String m_linkFull = "Initial Text";
+   private final String[] m_desLines = new String[3];
+   private Bitmap m_image;
    private static final int HEIGHT = 560;
 
    private
@@ -84,10 +84,12 @@ class ViewImageFeed extends View
       }
    }
 
-   void setTexts(String title, String link, String desOne, String desTwo, String desThree)
+   void setTexts(String title, String link, String linkFull, String desOne, String desTwo,
+         String desThree)
    {
       m_title = title;
       m_link = link;
+      m_linkFull = linkFull;
       m_desLines[0] = desOne;
       m_desLines[1] = desTwo;
       m_desLines[2] = desThree;
@@ -104,7 +106,7 @@ class ViewImageFeed extends View
       float titleHeight = TITLE_PAINT.getTextSize();
       float desHeight = DES_PAINT.getTextSize();
 
-      float verticalPosition = paddingTop + 20;
+      float verticalPosition = paddingTop + 20.0F;
       canvas.drawText(m_title, paddingStart, verticalPosition, TITLE_PAINT);
 
       verticalPosition += titleHeight;
@@ -113,10 +115,10 @@ class ViewImageFeed extends View
       verticalPosition += linkHeight;
       if(null != m_image)
       {
-         canvas.drawBitmap(m_image, 0, verticalPosition, TITLE_PAINT);
+         canvas.drawBitmap(m_image, 0.0F, verticalPosition, TITLE_PAINT);
       }
 
-      verticalPosition += IMAGE_HEIGHT + 32;
+      verticalPosition += (float) (IMAGE_HEIGHT + 32);
       canvas.drawText(m_desLines[0], paddingStart, verticalPosition, DES_PAINT);
 
       verticalPosition += desHeight;

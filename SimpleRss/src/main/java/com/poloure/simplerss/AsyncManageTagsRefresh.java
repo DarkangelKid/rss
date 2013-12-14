@@ -15,7 +15,6 @@ import android.widget.ListView;
 class AsyncManageTagsRefresh extends AsyncTask<String, Editable[], Void>
 {
    private static final int INFO_INITIAL_CAPACITY = 40;
-   private static final int FADE_IN_DURATION = 330;
    private static final AbsoluteSizeSpan TITLE_SIZE = new AbsoluteSizeSpan(14, true);
    private static final StyleSpan SPAN_BOLD = new StyleSpan(Typeface.BOLD);
    private final ListView m_listView;

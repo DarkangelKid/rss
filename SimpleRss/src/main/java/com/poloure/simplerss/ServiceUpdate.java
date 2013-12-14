@@ -211,7 +211,7 @@ class ServiceUpdate extends IntentService
       String contentFileName = feedFolder + CONTENT;
       String longFileName = feedFolder + ITEM_LIST;
       String thumbnailDir = feedFolder + THUMBNAIL_DIR;
-      /*String[] filters = Read.file(Constants.FILTER_LIST);*/
+      /* TODO String[] filters = Read.file(Constants.FILTER_LIST);*/
 
       /* Load the previously saved items to a map. */
       Set<String> set = fileToSet(contentFileName, applicationFolder);
@@ -311,7 +311,7 @@ class ServiceUpdate extends IntentService
                }
                catch(RuntimeException ignored)
                {
-                  Write.toLogFile("BUG : RFC3339, looks like: " + contentText, applicationFolder);
+                  System.out.println("BUG : RFC3339, looks like: " + contentText);
                   time.setToNow();
                }
 
@@ -338,7 +338,7 @@ class ServiceUpdate extends IntentService
                }
                catch(ParseException ignored)
                {
-                  Write.toLogFile("BUG : rfc882, looks like: " + contentText, applicationFolder);
+                  System.out.println("BUG : rfc882, looks like: " + contentText);
                   time.setToNow();
                   timeLong = time.toMillis(true);
                }
@@ -454,24 +454,20 @@ class ServiceUpdate extends IntentService
       }
    }
 
-   /* index throws an ArrayOutOfBoundsException if not handled. */
-   static
-   <T> int index(T[] array, T value)
+   private static
+   Set<String> fileToSet(String fileName, String fileFolder)
    {
-      if(null == array)
+      Set<String> set = new LinkedHashSet<String>(64);
+
+      if(Read.isUnmounted())
       {
-         return -1;
+         return set;
       }
 
-      int arrayLength = array.length;
-      for(int i = 0; i < arrayLength; i++)
-      {
-         if(array[i].equals(value))
-         {
-            return i;
-         }
-      }
-      return -1;
+      String[] lines = Read.file(fileName, fileFolder);
+      Collections.addAll(set, lines);
+
+      return set;
    }
 
    private static
@@ -507,20 +503,12 @@ class ServiceUpdate extends IntentService
       String mimeType = options.outMimeType;
 
       /* If the image is smaller than we care about, do not save it. */
-      if(MIN_IMAGE_WIDTH > imageWidth)
+      if((float) MIN_IMAGE_WIDTH > imageWidth)
       {
          return builder;
       }
 
       /* Save these details before we possible return. */
-      /* TODO no longer need scaledHeight. */
-      int scaledHeight = Math.round(screenWidth / imageWidth * imageHeight);
-      String scaledHeightString = Integer.toString(scaledHeight);
-
-      builder.append(INDEX_HEIGHT);
-      builder.append(scaledHeightString);
-      builder.append(ITEM_SEPARATOR);
-
       builder.append(INDEX_MIME);
       builder.append(mimeType);
       builder.append(ITEM_SEPARATOR);
@@ -629,19 +617,23 @@ class ServiceUpdate extends IntentService
       }
    }
 
-   private static
-   Set<String> fileToSet(String fileName, String fileFolder)
+   /* index throws an ArrayOutOfBoundsException if not handled. */
+   static
+   <T> int index(T[] array, T value)
    {
-      Set<String> set = new LinkedHashSet<String>(64);
-
-      if(Read.isUnmounted())
+      if(null == array)
       {
-         return set;
+         return -1;
       }
 
-      String[] lines = Read.file(fileName, fileFolder);
-      Collections.addAll(set, lines);
-
-      return set;
+      int arrayLength = array.length;
+      for(int i = 0; i < arrayLength; i++)
+      {
+         if(array[i].equals(value))
+         {
+            return i;
+         }
+      }
+      return -1;
    }
 }

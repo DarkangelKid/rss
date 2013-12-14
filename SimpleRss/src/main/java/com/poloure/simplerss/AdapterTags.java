@@ -51,7 +51,7 @@ class AdapterTags extends BaseAdapter
    {
       FeedItem feedItem = m_feedItems.get(position);
 
-      boolean isImage = 0 != feedItem.m_EffImageHeight;
+      boolean isImage = 0 != feedItem.m_imageName.length();
       boolean isDescription = 0 != feedItem.m_itemDescriptionOne.length();
 
       int type;
@@ -64,13 +64,9 @@ class AdapterTags extends BaseAdapter
       {
          type = TYPE_IMAGE_SANS_DESCRIPTION;
       }
-      else if(isDescription)
-      {
-         type = TYPE_PLAIN;
-      }
       else
       {
-         type = TYPE_PLAIN_SANS_DESCRIPTION;
+         type = isDescription ? TYPE_PLAIN : TYPE_PLAIN_SANS_DESCRIPTION;
       }
 
       return type;
@@ -120,7 +116,8 @@ class AdapterTags extends BaseAdapter
       if(TYPE_PLAIN == viewType)
       {
          view = isNewView ? ViewBasicFeed.newInstance(m_context) : convertView;
-         ((ViewBasicFeed) view).setTexts(item.m_itemTitle, item.m_url, item.m_itemDescriptionOne, item.m_itemDescriptionTwo, item.m_itemDescriptionThree);
+         ((ViewBasicFeed) view).setTexts(item.m_itemTitle, item.m_url, item.m_urlFull, item.m_itemDescriptionOne,
+               item.m_itemDescriptionTwo, item.m_itemDescriptionThree);
       }
       else if(TYPE_IMAGE == viewType)
       {
@@ -129,7 +126,8 @@ class AdapterTags extends BaseAdapter
          view.setTag(position);
          ((ViewImageFeed) view).setBitmap(null);
          view.setVisibility(View.INVISIBLE);
-         ((ViewImageFeed) view).setTexts(item.m_itemTitle, item.m_url, item.m_itemDescriptionOne, item.m_itemDescriptionTwo, item.m_itemDescriptionThree);
+         ((ViewImageFeed) view).setTexts(item.m_itemTitle, item.m_url, item.m_urlFull, item.m_itemDescriptionOne,
+               item.m_itemDescriptionTwo, item.m_itemDescriptionThree);
          AsyncLoadImage.newInstance(view, m_applicationFolder, item.m_imageName, position,
                m_context);
       }
@@ -140,14 +138,14 @@ class AdapterTags extends BaseAdapter
          view.setTag(position);
          ((ViewImageSansDesFeed) view).setBitmap(null);
          view.setVisibility(View.INVISIBLE);
-         ((ViewImageSansDesFeed) view).setTexts(item.m_itemTitle, item.m_url);
+         ((ViewImageSansDesFeed) view).setTexts(item.m_itemTitle, item.m_url, item.m_urlFull);
          AsyncLoadImage.newInstance(view, m_applicationFolder, item.m_imageName, position,
                m_context);
       }
       else
       {
          view = isNewView ? ViewBasicSansDesFeed.newInstance(m_context) : convertView;
-         ((ViewBasicSansDesFeed) view).setTexts(item.m_itemTitle, item.m_url);
+         ((ViewBasicSansDesFeed) view).setTexts(item.m_itemTitle, item.m_url, item.m_urlFull);
       }
 
       /* TODO set colors not alpha. */

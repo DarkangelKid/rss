@@ -22,13 +22,13 @@ class ViewImageSansDesFeed extends View
       LINK_PAINT.setAntiAlias(true);
       TITLE_PAINT.setColor(Color.argb(255, 0, 0, 0));
       LINK_PAINT.setColor(Color.argb(165, 0, 0, 0));
-      TITLE_PAINT.measureText("2");
    }
 
    private static final int HEIGHT = 500;
-   String m_title = "Initial Text";
-   String m_link = "Initial Text";
-   Bitmap m_image;
+   private String m_title = "Initial Text";
+   private String m_link = "Initial Text";
+   String m_linkFull = "Initial Text";
+   private Bitmap m_image;
 
    private
    ViewImageSansDesFeed(Context context)
@@ -77,10 +77,11 @@ class ViewImageSansDesFeed extends View
       }
    }
 
-   void setTexts(String title, String link)
+   void setTexts(String title, String link, String linkFull)
    {
       m_title = title;
       m_link = link;
+      m_linkFull = linkFull;
    }
 
    @Override
@@ -93,7 +94,7 @@ class ViewImageSansDesFeed extends View
       float linkHeight = LINK_PAINT.getTextSize();
       float titleHeight = TITLE_PAINT.getTextSize();
 
-      float verticalPosition = paddingTop + 20;
+      float verticalPosition = paddingTop + 20.0F;
       canvas.drawText(m_title, paddingStart, verticalPosition, TITLE_PAINT);
 
       verticalPosition += titleHeight;
@@ -102,7 +103,7 @@ class ViewImageSansDesFeed extends View
       verticalPosition += linkHeight;
       if(null != m_image)
       {
-         canvas.drawBitmap(m_image, 0, verticalPosition, TITLE_PAINT);
+         canvas.drawBitmap(m_image, 0.0F, verticalPosition, TITLE_PAINT);
       }
    }
 

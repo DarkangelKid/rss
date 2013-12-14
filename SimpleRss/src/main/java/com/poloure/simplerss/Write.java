@@ -165,12 +165,6 @@ class Write
       return new BufferedWriter(new FileWriter(filePath, appendToEnd));
    }
 
-   static
-   void toLogFile(String text, String fileFolder)
-   {
-      single(LOG_FILE, text + NEW_LINE, fileFolder);
-   }
-
    /* Function should be safe, returns false if fails. */
    static
    void single(String fileName, String stringToWrite, String fileFolder)

@@ -74,6 +74,9 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       String thumbnailDir = File.separatorChar + ServiceUpdate.THUMBNAIL_DIR;
       String contentFile = File.separatorChar + ServiceUpdate.CONTENT;
 
+      /* Create a String array to store the description lines. */
+      String[] desLines = new String[3];
+
       String[][] feedsIndex = Read.csvFile(Read.INDEX, m_applicationFolder, 'f', 't');
       if(0 == feedsIndex.length)
       {
@@ -94,7 +97,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
          if(m_isAllTag || feedTags[j].contains(tag))
          {
             String[][] content = Read.csvFile(feedNames[j] + contentFile, m_applicationFolder, 't',
-                  'd', 'l', 'i', 'h', 'p');
+                  'd', 'l', 'i', 'p');
 
             if(0 == content.length)
             {
@@ -105,8 +108,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
             String[] descriptions = content[1];
             String[] links = content[2];
             String[] imageUrls = content[3];
-            String[] heights = content[4];
-            String[] times = content[5];
+            String[] times = content[4];
 
             String feedThumbnailDir = feedNames[j] + thumbnailDir;
 
@@ -116,6 +118,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
                FeedItem data = new FeedItem();
 
                /* Edit the data. */
+               data.m_imageName = "";
                if(null != imageUrls[i])
                {
                   int lastSlash = imageUrls[i].lastIndexOf(File.separatorChar) + 1;
@@ -123,15 +126,8 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
 
                   /* If we have not downloaded the image yet, fake no image. */
                   File image = new File(m_applicationFolder + data.m_imageName);
-                  if(image.exists())
+                  if(!image.exists())
                   {
-                     data.m_EffImageHeight = null == heights[i] || 0 == heights[i].length()
-                           ? 0
-                           : fastParseInt(heights[i]);
-                  }
-                  else
-                  {
-                     data.m_EffImageHeight = 0;
                      data.m_imageName = "";
                   }
                }
@@ -151,16 +147,16 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
                String description = descriptions[i];
                String title = null == titles[i] ? "" : titles[i];
 
-               /* MAKE THE TEXT THE CORRECT LENGTH. */
+               /* Get the width of the ListView so we know where to break the text. */
                float viewWidth = (float) m_listView.getWidth();
-               String[] desLines = new String[3];
 
-               if(description.length() > 0)
+               /* MAKE THE TEXT THE CORRECT LENGTH. */
+               if(0 < description.length())
                {
-                  for(int x = 0; x < 3; x++)
+                  for(int x = 0; 3 > x; x++)
                   {
                      int desChars = ViewBasicFeed.DES_PAINT
-                           .breakText(description, true, viewWidth - 40, null);
+                           .breakText(description, true, viewWidth - 40.0F, null);
                      int desSpace = description.lastIndexOf(' ', desChars);
                      desChars = -1 == desSpace ? desChars : desSpace + 1;
                      desLines[x] = description.substring(0, desChars);
@@ -176,8 +172,9 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
                }
 
                int titleChars = ViewBasicFeed.TITLE_PAINT
-                     .breakText(title, true, viewWidth - 40, null);
-               int linkChars = ViewBasicFeed.LINK_PAINT.breakText(link, true, viewWidth - 40, null);
+                     .breakText(title, true, viewWidth - 40.0F, null);
+               int linkChars = ViewBasicFeed.LINK_PAINT
+                     .breakText(link, true, viewWidth - 40.0F, null);
 
                int titleSpace = title.lastIndexOf(' ', titleChars);
                int linkSpace = link.lastIndexOf(' ', linkChars);
@@ -225,6 +222,24 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       return null;
    }
 
+   private static
+   long fastParseLong(String s)
+   {
+      if(null == s)
+      {
+         return 0L;
+      }
+      char[] chars = s.toCharArray();
+      long num = 0L;
+
+      for(char c : chars)
+      {
+         int value = (int) c - 48;
+         num = num * 10L + (long) value;
+      }
+      return num;
+   }
+
    @Override
    protected
    void onPostExecute(Void result)
@@ -238,7 +253,6 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
    protected
    void onProgressUpdate(Object... values)
    {
-
       int top = 0;
       int index = 0;
       long timeBefore = 0L;
@@ -293,37 +307,5 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       {
          FeedsActivity.gotoLatestUnread(m_listView);
       }
-   }
-
-   private static
-   int fastParseInt(String s)
-   {
-      char[] chars = s.toCharArray();
-      int num = 0;
-
-      for(char c : chars)
-      {
-         int value = (int) c - 48;
-         num = num * 10 + value;
-      }
-      return num;
-   }
-
-   private static
-   long fastParseLong(String s)
-   {
-      if(null == s)
-      {
-         return 0L;
-      }
-      char[] chars = s.toCharArray();
-      long num = 0L;
-
-      for(char c : chars)
-      {
-         int value = (int) c - 48;
-         num = num * 10L + (long) value;
-      }
-      return num;
    }
 }
