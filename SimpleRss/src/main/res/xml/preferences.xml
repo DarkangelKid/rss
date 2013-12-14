@@ -104,10 +104,10 @@
          android:title="Image Storage Location"/>
    </PreferenceScreen>
    <PreferenceScreen
-      android:summary="https://github.com/poloure"
-      android:title="Developer's Website">
+      android:summary="https://github.com/Currfyg/simple-rss"
+      android:title="Application Source">
       <intent
          android:action="android.intent.action.VIEW"
-         android:data="https://github.com/poloure"/>
+         android:data="https://github.com/Currfyg/simple-rss"/>
    </PreferenceScreen>
 </PreferenceScreen>

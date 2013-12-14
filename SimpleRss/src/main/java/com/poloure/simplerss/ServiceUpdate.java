@@ -129,8 +129,8 @@ class ServiceUpdate extends IntentService
          }
       }
 
-      /* TODO GET UNREAD WITHOUT CONTEXT. int[] unreadCounts = FeedsActivity.getUnreadCounts
-      (this); */
+      /* TODO GET UNREAD WITHOUT CONTEXT.
+      int[] unreadCounts = FeedsActivity.getUnreadCounts(this); */
 
       /* If action_bar_menu is running. */
       if(null != FeedsActivity.s_serviceHandler)
