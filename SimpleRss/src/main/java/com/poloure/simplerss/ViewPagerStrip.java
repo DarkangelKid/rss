@@ -42,8 +42,8 @@ class ViewPagerStrip extends ViewPager
       /* Configure the PagerTitleStrip. */
       Resources resources = context.getResources();
       DisplayMetrics displayMetrics = resources.getDisplayMetrics();
-      float textVerticalPadding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-            TEXT_VERTICAL_PADDING, displayMetrics);
+      float textVerticalPadding = TypedValue
+            .applyDimension(TypedValue.COMPLEX_UNIT_DIP, TEXT_VERTICAL_PADDING, displayMetrics);
       int textPadding = Math.round(textVerticalPadding);
       pagerTitleStrip.setGravity(Gravity.START);
       pagerTitleStrip.setPadding(0, textPadding, 0, textPadding);

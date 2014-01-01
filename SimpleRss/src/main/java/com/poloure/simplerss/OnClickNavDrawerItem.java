@@ -87,8 +87,7 @@ class OnClickNavDrawerItem implements AdapterView.OnItemClickListener
 
       if(null == selectedFragment)
       {
-         Fragment fragment = 1 == position
-               ? FragmentManage.newInstance()
+         Fragment fragment = 1 == position ? FragmentManage.newInstance()
                : FragmentSettings.newInstance();
          transaction.add(R.id.content_frame, fragment, selectedTitle);
       }

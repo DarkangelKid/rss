@@ -92,6 +92,14 @@ class FeedsActivity extends Activity
       File file = new File(m_applicationFolder + Write.LOG_FILE);
       file.delete();
 
+      File widthFile = new File(m_applicationFolder + "width.txt");
+      if(!widthFile.exists())
+      {
+         DisplayMetrics metrics = m_resources.getDisplayMetrics();
+         String width = Integer.toString(metrics.widthPixels);
+         Write.single("width.txt", width, m_applicationFolder);
+      }
+
       /* Create the navigation drawer and set all the listeners for it. */
       m_drawerToggle = new ActionBarDrawerToggle(this, m_drawerLayout, R.drawable.ic_drawer,
             R.string.drawer_open, R.string.drawer_close)
@@ -173,8 +181,8 @@ class FeedsActivity extends Activity
       // Sync the toggle state after onRestoreInstanceState has occurred.
       m_drawerToggle.syncState();
 
-      AsyncRefreshNavigationAdapter.newInstance((BaseAdapter) m_adapterNavDrawer, m_actionBar,
-            m_applicationFolder, 0);
+      AsyncRefreshNavigationAdapter
+            .newInstance((BaseAdapter) m_adapterNavDrawer, m_actionBar, m_applicationFolder, 0);
 
       m_feedsViewPager = (ViewPager) findViewById(FragmentFeeds.VIEW_PAGER_ID);
       String[] navigationTitles = m_resources.getStringArray(R.array.navigation_titles);
@@ -312,8 +320,8 @@ class FeedsActivity extends Activity
    boolean isServiceRunning()
    {
       ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-      for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(
-            Integer.MAX_VALUE))
+      for(ActivityManager.RunningServiceInfo service : manager
+            .getRunningServices(Integer.MAX_VALUE))
       {
          String className = service.service.getClassName();
          String serviceName = ServiceUpdate.class.getName();
@@ -345,8 +353,8 @@ class FeedsActivity extends Activity
       else if(menuText.equals(addFeed))
       {
           /* The case of add/edit feed. */
-         ListFragment listFragment = (ListFragment) m_fragmentManager.findFragmentByTag(
-               FragmentManage.FRAGMENT_FEEDS_ID);
+         ListFragment listFragment = (ListFragment) m_fragmentManager
+               .findFragmentByTag(FragmentManage.FRAGMENT_FEEDS_ID);
 
          ListView listView = null == listFragment ? null : listFragment.getListView();
 
@@ -356,8 +364,8 @@ class FeedsActivity extends Activity
       {
          int currentPage = m_feedsViewPager.getCurrentItem();
 
-         ListFragment listFragment = (ListFragment) m_fragmentManager.findFragmentByTag(
-               FragmentFeeds.FRAGMENT_ID_PREFIX + currentPage);
+         ListFragment listFragment = (ListFragment) m_fragmentManager
+               .findFragmentByTag(FragmentFeeds.FRAGMENT_ID_PREFIX + currentPage);
 
          ListView listViewTags = listFragment.getListView();
 

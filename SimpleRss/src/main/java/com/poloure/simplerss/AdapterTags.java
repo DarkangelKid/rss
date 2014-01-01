@@ -111,41 +111,43 @@ class AdapterTags extends BaseAdapter
       //Long time = item.m_itemTime;
       //boolean isRead = READ_ITEM_TIMES.contains(time);
 
-      View view;
+      View view = convertView;
 
       if(TYPE_PLAIN == viewType)
       {
          view = isNewView ? ViewBasicFeed.newInstance(m_context) : convertView;
-         ((ViewBasicFeed) view).setTexts(item.m_itemTitle, item.m_url, item.m_urlFull, item.m_itemDescriptionOne,
-               item.m_itemDescriptionTwo, item.m_itemDescriptionThree);
+         ((ViewBasicFeed) view)
+               .setTexts(item.m_itemTitle, item.m_url, item.m_urlFull, item.m_itemDescriptionOne,
+                     item.m_itemDescriptionTwo, item.m_itemDescriptionThree);
       }
       else if(TYPE_IMAGE == viewType)
       {
          view = isNewView ? ViewImageFeed.newInstance(m_context) : convertView;
 
-         view.setTag(position);
          ((ViewImageFeed) view).setBitmap(null);
-         view.setVisibility(View.INVISIBLE);
-         ((ViewImageFeed) view).setTexts(item.m_itemTitle, item.m_url, item.m_urlFull, item.m_itemDescriptionOne,
-               item.m_itemDescriptionTwo, item.m_itemDescriptionThree);
-         AsyncLoadImage.newInstance(view, m_applicationFolder, item.m_imageName, position,
-               m_context);
+         ((ViewImageFeed) view)
+               .setTexts(item.m_itemTitle, item.m_url, item.m_urlFull, item.m_itemDescriptionOne,
+                     item.m_itemDescriptionTwo, item.m_itemDescriptionThree);
       }
       else if(TYPE_IMAGE_SANS_DESCRIPTION == viewType)
       {
          view = isNewView ? ViewImageSansDesFeed.newInstance(m_context) : convertView;
 
-         view.setTag(position);
          ((ViewImageSansDesFeed) view).setBitmap(null);
-         view.setVisibility(View.INVISIBLE);
          ((ViewImageSansDesFeed) view).setTexts(item.m_itemTitle, item.m_url, item.m_urlFull);
-         AsyncLoadImage.newInstance(view, m_applicationFolder, item.m_imageName, position,
-               m_context);
       }
       else
       {
          view = isNewView ? ViewBasicSansDesFeed.newInstance(m_context) : convertView;
          ((ViewBasicSansDesFeed) view).setTexts(item.m_itemTitle, item.m_url, item.m_urlFull);
+      }
+
+      /* If the view was an image, load the image. */
+      if(TYPE_IMAGE == viewType || TYPE_IMAGE_SANS_DESCRIPTION == viewType)
+      {
+         view.setTag(position);
+         AsyncLoadImage
+               .newInstance(view, m_applicationFolder, item.m_imageName, position, m_context);
       }
 
       /* TODO set colors not alpha. */

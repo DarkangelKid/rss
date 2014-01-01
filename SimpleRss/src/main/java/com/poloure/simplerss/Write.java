@@ -55,8 +55,7 @@ class Write
 
             for(String line : lines)
             {
-               boolean notEqualOrContaining = containing
-                     ? !line.contains(stringSearch)
+               boolean notEqualOrContaining = containing ? !line.contains(stringSearch)
                      : !line.equals(stringSearch);
 
                if(notEqualOrContaining)

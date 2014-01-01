@@ -77,11 +77,6 @@ class AsyncLoadImage extends AsyncTask<Object, Void, Bitmap>
          {
             ((ViewImageSansDesFeed) imageView).setBitmap(result);
          }
-         imageView.setVisibility(View.VISIBLE);
-         Animation fadeIn = new AlphaAnimation(0.0F, 1.0F);
-         fadeIn.setDuration(100L);
-
-         imageView.setAnimation(fadeIn);
       }
    }
 }

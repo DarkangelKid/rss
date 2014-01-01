@@ -60,8 +60,8 @@ class ServiceHandler extends Handler
       /* Refresh those Pages. */
       for(int page : pagesToRefresh)
       {
-         ListFragment listFragment = (ListFragment) m_fragmentManager.findFragmentByTag(
-               FragmentFeeds.FRAGMENT_ID_PREFIX + page);
+         ListFragment listFragment = (ListFragment) m_fragmentManager
+               .findFragmentByTag(FragmentFeeds.FRAGMENT_ID_PREFIX + page);
          if(null != listFragment)
          {
             /* TODO isAllTag not 0. */

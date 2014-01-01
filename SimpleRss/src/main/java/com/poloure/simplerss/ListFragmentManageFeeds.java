@@ -65,8 +65,8 @@ class ListFragmentManageFeeds extends ListFragment
          tag = content[2][position];
       }
 
-      Dialog editDialog = DialogEditFeed.newInstance(context, listView, oldFeedTitle,
-            applicationFolder, allTag);
+      Dialog editDialog = DialogEditFeed
+            .newInstance(context, listView, oldFeedTitle, applicationFolder, allTag);
       editDialog.show();
 
       /* If the mode is edit. */
@@ -78,8 +78,7 @@ class ListFragmentManageFeeds extends ListFragment
       }
 
       /* Get the text resources. */
-      int titleResource = MODE_ADD == position
-            ? R.string.add_dialog_title
+      int titleResource = MODE_ADD == position ? R.string.add_dialog_title
             : R.string.edit_dialog_title;
 
       String titleText = context.getString(titleResource);

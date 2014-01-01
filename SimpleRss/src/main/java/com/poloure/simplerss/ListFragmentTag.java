@@ -3,6 +3,7 @@ package com.poloure.simplerss;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ListFragment;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,8 +40,8 @@ class ListFragmentTag extends ListFragment
       String applicationFolder = FeedsActivity.getApplicationFolder(activity);
 
       ListView navigationList = (ListView) activity.findViewById(R.id.navigation_drawer);
-      AdapterNavigationDrawer adapterNavigationDrawer
-            = (AdapterNavigationDrawer) navigationList.getAdapter();
+      AdapterNavigationDrawer adapterNavigationDrawer = (AdapterNavigationDrawer) navigationList
+            .getAdapter();
 
       ListAdapter listAdapter = new AdapterTags(activity, applicationFolder);
       setListAdapter(listAdapter);
@@ -56,6 +57,7 @@ class ListFragmentTag extends ListFragment
 
       listView.setOnScrollListener(scrollListener);
       listView.setDividerHeight(0);
+      listView.setBackgroundColor(Color.WHITE);
       listView.setOnItemLongClickListener(new OnFeedItemLongClick(activity));
 
       if(0 == position)

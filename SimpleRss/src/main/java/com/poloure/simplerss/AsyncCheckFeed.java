@@ -91,8 +91,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
          if(isValidFeed(urlToCheck))
          {
             /* Did the user enter a feed name? If not, use the feed title found from the check. */
-            String tempTitle = 0 == inputName.length()
-                  ? getFeedTitle(urlToCheck)
+            String tempTitle = 0 == inputName.length() ? getFeedTitle(urlToCheck)
                   : inputName.toString();
 
             /* Replace any characters that are not allowed in file names. */
@@ -179,8 +178,8 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
    }
 
    private static
-   XmlPullParser createXmlParser(String urlString)
-         throws MalformedURLException, IOException, XmlPullParserException
+   XmlPullParser createXmlParser(String urlString) throws MalformedURLException, IOException,
+         XmlPullParserException
    {
       XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
       factory.setNamespaceAware(true);
@@ -257,7 +256,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       {
          /* Create the csv. */
          String feedInfo = String.format(INDEX_FORMAT, finalTitle, feedUrlFromCheck, finalTag) +
-               NEW_LINE;
+                           NEW_LINE;
 
          if(isExistingFeed)
          {
@@ -304,8 +303,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       }
 
       /* Show added feed toast notification. */
-      String text = isFeedValid
-            ? context.getString(R.string.added_feed) + ' ' + finalTitle
+      String text = isFeedValid ? context.getString(R.string.added_feed) + ' ' + finalTitle
             : context.getString(R.string.invalid_feed);
 
       Toast toast = Toast.makeText(context, text, Toast.LENGTH_SHORT);

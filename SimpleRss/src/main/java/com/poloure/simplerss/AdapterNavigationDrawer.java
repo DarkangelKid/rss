@@ -29,8 +29,8 @@ class AdapterNavigationDrawer extends BaseAdapter
    private static final int TYPE_TAG = 2;
    private static final int[] TYPES = {TYPE_TITLE, TYPE_DIVIDER, TYPE_TAG};
    private static final int[] EMPTY_INT_ARRAY = new int[0];
-   private static final Typeface SANS_SERIF_LITE = Typeface.create("sans-serif-light",
-         Typeface.NORMAL);
+   private static final Typeface SANS_SERIF_LITE = Typeface
+         .create("sans-serif-light", Typeface.NORMAL);
    private static final int DIP = TypedValue.COMPLEX_UNIT_DIP;
    private static final int SP = TypedValue.COMPLEX_UNIT_SP;
    private final String[] m_navigationTitles;
@@ -92,8 +92,8 @@ class AdapterNavigationDrawer extends BaseAdapter
             float hPaddingFloat = TypedValue.applyDimension(DIP, HORIZONTAL_PADDING_MAIN, metrics);
             int hPadding = Math.round(hPaddingFloat);
 
-            float drawableFloat = TypedValue.applyDimension(DIP, PADDING_COMPOUND_DRAWABLE,
-                  metrics);
+            float drawableFloat = TypedValue
+                  .applyDimension(DIP, PADDING_COMPOUND_DRAWABLE, metrics);
             int paddingDrawable = Math.round(drawableFloat);
 
             TextView textView = new TextView(m_context);
@@ -122,8 +122,8 @@ class AdapterNavigationDrawer extends BaseAdapter
          int drawerWidth = parent.getWidth();
          GREY_LINE.setBounds(0, 0, drawerWidth, 3);
 
-         float vPaddingFloat = TypedValue.applyDimension(DIP, HORIZONTAL_PADDING_SUB / 4.0F,
-               metrics);
+         float vPaddingFloat = TypedValue
+               .applyDimension(DIP, HORIZONTAL_PADDING_SUB / 4.0F, metrics);
          float hPaddingFloat = TypedValue.applyDimension(DIP, HORIZONTAL_PADDING_SUB, metrics);
 
          int vPadding = Math.round(vPaddingFloat);
@@ -150,8 +150,8 @@ class AdapterNavigationDrawer extends BaseAdapter
             float minHeightFloat = TypedValue.applyDimension(DIP, 42.0F, displayMetrics);
             int minHeight = Math.round(minHeightFloat);
 
-            float paddingSides = TypedValue.applyDimension(DIP, HORIZONTAL_PADDING_SUB,
-                  displayMetrics);
+            float paddingSides = TypedValue
+                  .applyDimension(DIP, HORIZONTAL_PADDING_SUB, displayMetrics);
             int padding = Math.round(paddingSides);
 
             int half = Math.round((float) padding * 0.5F);

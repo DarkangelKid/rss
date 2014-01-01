@@ -41,8 +41,8 @@ class OnScrollFeedListener implements AbsListView.OnScrollListener
             AdapterTags.READ_ITEM_TIMES.add(time);
          }
 
-         AsyncRefreshNavigationAdapter.newInstance(m_adapterNavigationDrawer, m_actionBar,
-               m_applicationFolder, m_page);
+         AsyncRefreshNavigationAdapter
+               .newInstance(m_adapterNavigationDrawer, m_actionBar, m_applicationFolder, m_page);
       }
    }
 

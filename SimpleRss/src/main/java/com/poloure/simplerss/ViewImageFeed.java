@@ -33,7 +33,7 @@ class ViewImageFeed extends View
    String m_linkFull = "Initial Text";
    private final String[] m_desLines = new String[3];
    private Bitmap m_image;
-   private static final int HEIGHT = 560;
+   private static final int HEIGHT = 550;
 
    private
    ViewImageFeed(Context context)

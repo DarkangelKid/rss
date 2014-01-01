@@ -24,7 +24,7 @@ class ViewImageSansDesFeed extends View
       LINK_PAINT.setColor(Color.argb(165, 0, 0, 0));
    }
 
-   private static final int HEIGHT = 500;
+   private static final int HEIGHT = 490;
    private String m_title = "Initial Text";
    private String m_link = "Initial Text";
    String m_linkFull = "Initial Text";

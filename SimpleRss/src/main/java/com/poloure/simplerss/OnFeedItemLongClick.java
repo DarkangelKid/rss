@@ -72,8 +72,8 @@ class OnFeedItemLongClick implements AdapterView.OnItemLongClickListener
       {
          if(0 == position)
          {
-            ClipboardManager clipboard = (ClipboardManager) m_context.getSystemService(
-                  Context.CLIPBOARD_SERVICE);
+            ClipboardManager clipboard = (ClipboardManager) m_context
+                  .getSystemService(Context.CLIPBOARD_SERVICE);
 
             ClipData clip = ClipData.newPlainText("Url", m_url);
             clipboard.setPrimaryClip(clip);

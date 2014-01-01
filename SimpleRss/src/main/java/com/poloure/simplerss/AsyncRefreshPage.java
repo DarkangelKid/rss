@@ -1,5 +1,6 @@
 package com.poloure.simplerss;
 
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.view.View;
 import android.widget.Adapter;
@@ -39,7 +40,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       task.executeOnExecutor(THREAD_POOL_EXECUTOR, pageNumber);
    }
 
-   private static
+   /*private static
    boolean containsArabic(String text)
    {
       char[] chars = text.toCharArray();
@@ -63,7 +64,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
          }
       }
       return false;
-   }
+   }*/
 
    @Override
    protected
@@ -96,8 +97,9 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       {
          if(m_isAllTag || feedTags[j].contains(tag))
          {
-            String[][] content = Read.csvFile(feedNames[j] + contentFile, m_applicationFolder, 't',
-                  'd', 'l', 'i', 'p');
+            String[][] content = Read
+                  .csvFile(feedNames[j] + contentFile, m_applicationFolder, 't', 'l', 'b', 'i', 'p',
+                        'x', 'y', 'z');
 
             if(0 == content.length)
             {
@@ -105,10 +107,13 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
             }
 
             String[] titles = content[0];
-            String[] descriptions = content[1];
-            String[] links = content[2];
+            String[] links = content[1];
+            String[] trimmedLinks = content[2];
             String[] imageUrls = content[3];
             String[] times = content[4];
+            String[] descriptionsX = content[5];
+            String[] descriptionsY = content[6];
+            String[] descriptionsZ = content[7];
 
             String feedThumbnailDir = feedNames[j] + thumbnailDir;
 
@@ -132,62 +137,18 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
                   }
                }
 
-               if(null == descriptions[i] || MIN_DESCRIPTION_LENGTH > descriptions[i].length())
-               {
-                  descriptions[i] = "";
-               }
-               else if(MAX_DESCRIPTION_LENGTH <= descriptions[i].length())
-               {
-                  descriptions[i] = descriptions[i].substring(0, MAX_DESCRIPTION_LENGTH);
-               }
+               boolean desTooShort = null == descriptionsX[i] ||
+                                     MIN_DESCRIPTION_LENGTH > descriptionsX[i].length();
+
+               data.m_itemDescriptionOne = desTooShort ? "" : descriptionsX[i];
+               data.m_itemDescriptionTwo = desTooShort ? "" : descriptionsY[i];
+               data.m_itemDescriptionThree = desTooShort ? "" : descriptionsZ[i];
 
                data.m_itemTime = fastParseLong(times[i]);
 
-               String link = links[i];
-               String description = descriptions[i];
-               String title = null == titles[i] ? "" : titles[i];
-
-               /* Get the width of the ListView so we know where to break the text. */
-               float viewWidth = (float) m_listView.getWidth();
-
-               /* MAKE THE TEXT THE CORRECT LENGTH. */
-               if(0 < description.length())
-               {
-                  for(int x = 0; 3 > x; x++)
-                  {
-                     int desChars = ViewBasicFeed.DES_PAINT
-                           .breakText(description, true, viewWidth - 40.0F, null);
-                     int desSpace = description.lastIndexOf(' ', desChars);
-                     desChars = -1 == desSpace ? desChars : desSpace + 1;
-                     desLines[x] = description.substring(0, desChars);
-
-                     description = description.substring(desChars);
-                  }
-               }
-               else
-               {
-                  desLines[0] = "";
-                  desLines[1] = "";
-                  desLines[2] = "";
-               }
-
-               int titleChars = ViewBasicFeed.TITLE_PAINT
-                     .breakText(title, true, viewWidth - 40.0F, null);
-               int linkChars = ViewBasicFeed.LINK_PAINT
-                     .breakText(link, true, viewWidth - 40.0F, null);
-
-               int titleSpace = title.lastIndexOf(' ', titleChars);
-               int linkSpace = link.lastIndexOf(' ', linkChars);
-
-               data.m_itemTitle = title.substring(0, -1 == titleSpace ? titleChars : titleSpace);
-               data.m_url = link.substring(0, -1 == linkSpace ? linkChars : linkSpace);
+               data.m_itemTitle = null == titles[i] ? "" : titles[i];
+               data.m_url = null == trimmedLinks[i] ? "" : trimmedLinks[i];
                data.m_urlFull = links[i];
-
-               data.m_itemDescriptionOne = desLines[0];
-               data.m_itemDescriptionTwo = desLines[1];
-               data.m_itemDescriptionThree = desLines[2];
-
-               /* END OF THAT. */
 
                /* TODO */
                /*if(containsArabic(itemTitle))
@@ -305,6 +266,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       }
       else
       {
+         m_listView.setBackgroundColor(Color.TRANSPARENT);
          FeedsActivity.gotoLatestUnread(m_listView);
       }
    }

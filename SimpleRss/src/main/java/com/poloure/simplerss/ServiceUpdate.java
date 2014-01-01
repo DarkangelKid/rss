@@ -52,10 +52,12 @@ class ServiceUpdate extends IntentService
    private static final char ITEM_SEPARATOR = '|';
    /* Parser saves */
    private static final String INDEX_IMAGE = "image|";
+   private static final String INDEX_TITLE = "title|";
    private static final String INDEX_TIME = "pubDate|";
    private static final String INDEX_LINK = "link|";
-   private static final String INDEX_HEIGHT = "height|";
+   private static final String INDEX_LINK_TRIMMED = "blink|";
    private static final String INDEX_MIME = "mime|";
+   private static final String[] INDEX_DES = {"x", "y", "z"};
    private static final String MIME_GIF = "image/gif";
    private static final int MIN_IMAGE_WIDTH = 64;
    private static final SimpleDateFormat RSS_DATE = new SimpleDateFormat(
@@ -68,6 +70,7 @@ class ServiceUpdate extends IntentService
    };
    private static final int FEED_ITEM_INITIAL_CAPACITY = 200;
    private static final int DEFAULT_MAX_HISTORY = 10000;
+   private int m_width = 100;
 
    public
    ServiceUpdate()
@@ -87,6 +90,9 @@ class ServiceUpdate extends IntentService
       String applicationFolder = FeedsActivity.getApplicationFolder(this);
       String allTag = getString(R.string.all_tag);
 
+      /* Read the screen width from file. */
+      m_width = Integer.parseInt(Read.file("width.txt", applicationFolder)[0]);
+
       Set<String> tagSet = PagerAdapterFeeds.getAndSaveTagsFromDisk(applicationFolder, allTag);
       int tagSize = tagSet.size();
       String tag = tagSet.toArray(new String[tagSize])[page];
@@ -105,8 +111,8 @@ class ServiceUpdate extends IntentService
          if(isAllTag || tags[i].contains(tag))
          {
             String path1 = applicationFolder + names[i] +
-                  File.separatorChar +
-                  THUMBNAIL_DIR;
+                           File.separatorChar +
+                           THUMBNAIL_DIR;
             File folder = new File(path1);
             folder.mkdirs();
 
@@ -204,8 +210,8 @@ class ServiceUpdate extends IntentService
    }
 
    private
-   void parseFeed(String urlString, String feed, String applicationFolder)
-         throws XmlPullParserException, MalformedURLException, IOException
+   void parseFeed(String urlString, String feed, String applicationFolder) throws
+         XmlPullParserException, MalformedURLException, IOException
    {
       String feedFolder = feed + File.separatorChar;
       String contentFileName = feedFolder + CONTENT;
@@ -294,8 +300,13 @@ class ServiceUpdate extends IntentService
                   parser.next();
                   link = parser.getText();
                }
+
                feedItemBuilder.append(INDEX_LINK);
                feedItemBuilder.append(link);
+               feedItemBuilder.append(ITEM_SEPARATOR);
+
+               feedItemBuilder.append(INDEX_LINK_TRIMMED);
+               feedItemBuilder = appendFitToScreen(feedItemBuilder, link);
                feedItemBuilder.append(ITEM_SEPARATOR);
             }
 
@@ -348,7 +359,21 @@ class ServiceUpdate extends IntentService
                feedItemBuilder.append(timeString);
                feedItemBuilder.append(ITEM_SEPARATOR);
             }
-            /* Content & description. */
+
+            /* Title. */
+            else if(4 == index)
+            {
+               parser.next();
+               String content = parser.getText();
+               content = null != content ? PATTERN_WHITESPACE.matcher(content).replaceAll(" ") : "";
+
+               /* "title|". */
+               feedItemBuilder.append(INDEX_TITLE);
+               feedItemBuilder = appendFitToScreen(feedItemBuilder, content);
+               feedItemBuilder.append(ITEM_SEPARATOR);
+            }
+
+            /* Content, description. */
             else if(-1 != index)
             {
                parser.next();
@@ -400,10 +425,17 @@ class ServiceUpdate extends IntentService
                {
                   String tagToAppend = DESIRED_TAGS[5].equals(tag) ? DESIRED_TAGS[3] : tag;
 
-                  feedItemBuilder.append(tagToAppend);
-                  feedItemBuilder.append(ITEM_SEPARATOR);
-                  feedItemBuilder.append(content);
-                  feedItemBuilder.append(ITEM_SEPARATOR);
+                  if(tagToAppend.equals(DESIRED_TAGS[3]))
+                  {
+                     feedItemBuilder = appendDesLines(feedItemBuilder, content);
+                  }
+                  else
+                  {
+                     feedItemBuilder.append(tagToAppend);
+                     feedItemBuilder.append(ITEM_SEPARATOR);
+                     feedItemBuilder.append(content);
+                     feedItemBuilder.append(ITEM_SEPARATOR);
+                  }
                }
             }
          }
@@ -452,6 +484,38 @@ class ServiceUpdate extends IntentService
          }
          parser.next();
       }
+   }
+
+   private
+   StringBuilder appendDesLines(StringBuilder builder, String content)
+   {
+      for(int x = 0; 3 > x; x++)
+      {
+         int desChars = ViewBasicFeed.DES_PAINT.breakText(content, true, m_width - 40.0F, null);
+         int desSpace = content.lastIndexOf(' ', desChars);
+         desChars = -1 == desSpace ? desChars : desSpace + 1;
+
+         builder.append(INDEX_DES[x]);
+         builder.append(ITEM_SEPARATOR);
+         builder.append(content.substring(0, desChars));
+         builder.append(ITEM_SEPARATOR);
+
+         content = content.substring(desChars);
+      }
+      return builder;
+   }
+
+   private
+   StringBuilder appendFitToScreen(StringBuilder builder, String content)
+   {
+      int titleChars = ViewBasicFeed.TITLE_PAINT.breakText(content, true, m_width - 40.0F, null);
+
+      int titleSpace = content.lastIndexOf(' ', titleChars);
+
+      String trimmed = content.substring(0, -1 == titleSpace ? titleChars : titleSpace);
+      builder.append(trimmed);
+
+      return builder;
    }
 
    private static
