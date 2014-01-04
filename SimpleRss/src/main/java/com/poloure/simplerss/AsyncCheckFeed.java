@@ -1,8 +1,12 @@
 package com.poloure.simplerss;
 
+import android.app.Activity;
 import android.app.Dialog;
+import android.app.FragmentManager;
+import android.app.ListFragment;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.support.v4.view.ViewPager;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -33,36 +37,26 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
    private final Dialog m_dialog;
    private final String m_oldFeedName;
    private final String m_applicationFolder;
-   private final String m_allTag;
-   private final PagerAdapterFeeds m_pagerAdapterFeeds;
-   private final BaseAdapter m_navigationAdapter;
-   private final ListView m_listView;
+   private final Activity m_activity;
 
    private
-   AsyncCheckFeed(Dialog dialog, ListView listView, PagerAdapterFeeds pagerAdapterFeeds,
-         BaseAdapter navigationAdapter, String currentTitle, String applicationFolder,
-         String allTag)
+   AsyncCheckFeed(Activity activity, Dialog dialog, String oldFeedName, String applicationFolder)
    {
       m_dialog = dialog;
-      m_listView = listView;
-      m_pagerAdapterFeeds = pagerAdapterFeeds;
-      m_navigationAdapter = navigationAdapter;
-      m_oldFeedName = currentTitle;
+      m_oldFeedName = oldFeedName;
       m_applicationFolder = applicationFolder;
-      m_allTag = allTag;
+      m_activity = activity;
 
-      Button button = (Button) m_dialog.findViewById(R.id.positive_button);
+      Button button = (Button) m_dialog.findViewById(DialogEditFeed.POSITIVE_BUTTON);
       button.setText(R.string.dialog_checking_feed);
       button.setEnabled(false);
    }
 
    static
-   void newInstance(Dialog dialog, ListView listView, PagerAdapterFeeds pagerAdapterFeeds,
-         BaseAdapter navigationAdapter, String oldFeedTitle, String applicationFolder,
-         String allTag)
+   void newInstance(Activity activity, Dialog dialog, String oldFeedTitle, String applicationFolder)
    {
-      AsyncTask<Void, Void, String[]> task = new AsyncCheckFeed(dialog, listView, pagerAdapterFeeds,
-            navigationAdapter, oldFeedTitle, applicationFolder, allTag);
+      AsyncTask<Void, Void, String[]> task = new AsyncCheckFeed(activity, dialog, oldFeedTitle,
+            applicationFolder);
 
       task.executeOnExecutor(THREAD_POOL_EXECUTOR);
    }
@@ -72,9 +66,10 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
    String[] doInBackground(Void... nothing)
    {
       /* Get the user's input. */
-      CharSequence inputName = ((TextView) m_dialog.findViewById(R.id.name_edit)).getText();
-      CharSequence inputTags = ((TextView) m_dialog.findViewById(R.id.tag_edit)).getText();
-      CharSequence inputUrlChar = ((TextView) m_dialog.findViewById(R.id.feed_url_edit)).getText();
+      CharSequence inputName = ((TextView) m_dialog.findViewById(DialogEditFeed.IDS[0])).getText();
+      CharSequence inputTags = ((TextView) m_dialog.findViewById(DialogEditFeed.IDS[2])).getText();
+      CharSequence inputUrlChar = ((TextView) m_dialog.findViewById(DialogEditFeed.IDS[1]))
+            .getText();
       String inputUrl = inputUrlChar.toString();
 
       /* Form the array of urls we will check the validity of. */
@@ -102,7 +97,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
          }
       }
 
-      String tags = formatUserTagsInput(inputTags, m_allTag);
+      String tags = formatUserTagsInput(inputTags);
 
       return new String[]{url, title, tags};
    }
@@ -189,11 +184,12 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       return parser;
    }
 
-   private static
-   String formatUserTagsInput(CharSequence userInputTags, String allTag)
+   private
+   String formatUserTagsInput(CharSequence userInputTags)
    {
       String inputTags = userInputTags.toString();
       Locale defaultLocale = Locale.getDefault();
+      String allTag = m_activity.getString(R.string.all_tag);
 
       String lowerTags = inputTags.isEmpty() ? allTag : inputTags.toLowerCase(defaultLocale);
 
@@ -278,24 +274,31 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
          }
 
          /* Update the PagerAdapter for the tag fragments. */
-         m_pagerAdapterFeeds.updateTags(m_applicationFolder, context);
+         ViewPager feedPager = (ViewPager) m_activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
+         PagerAdapterFeeds pagerAdapterFeeds = (PagerAdapterFeeds) feedPager.getAdapter();
+         pagerAdapterFeeds.updateTags(m_applicationFolder, context);
 
-         /* Update the NavigationDrawer adapter.
-          * The subtitle of the actionbar should never change on an add of a feed.*/
-         AsyncRefreshNavigationAdapter.newInstance(m_navigationAdapter, m_applicationFolder);
+         /* Update the NavigationDrawer adapter. */
+         ListView navigationDrawer = (ListView) m_activity.findViewById(R.id.navigation_drawer);
+         BaseAdapter navigationAdapter = (BaseAdapter) navigationDrawer.getAdapter();
+         AsyncRefreshNavigationAdapter.newInstance(navigationAdapter, m_applicationFolder);
 
          /* TODO AsyncManageTagsRefresh.newInstance(tagListView); */
-         if(null != m_listView)
+         FragmentManager fm = m_activity.getFragmentManager();
+         ListFragment listFragment = (ListFragment) fm
+               .findFragmentByTag(FragmentManage.FRAGMENT_FEEDS_ID);
+         if(null != listFragment)
          {
-            AsyncManageFeedsRefresh.newInstance(m_listView, m_applicationFolder);
+            ListView listView = listFragment.getListView();
+            AsyncManageFeedsRefresh.newInstance(listView, m_applicationFolder);
          }
 
          m_dialog.dismiss();
       }
       else
       {
-         Button button = (Button) m_dialog.findViewById(R.id.positive_button);
-         button.setText(R.string.add_dialog);
+         Button button = (Button) m_dialog.findViewById(DialogEditFeed.POSITIVE_BUTTON);
+         button.setText(R.string.accept_dialog);
          button.setEnabled(true);
       }
 

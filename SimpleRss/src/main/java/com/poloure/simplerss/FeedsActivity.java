@@ -352,13 +352,7 @@ class FeedsActivity extends Activity
       }
       else if(menuText.equals(addFeed))
       {
-          /* The case of add/edit feed. */
-         ListFragment listFragment = (ListFragment) m_fragmentManager
-               .findFragmentByTag(FragmentManage.FRAGMENT_FEEDS_ID);
-
-         ListView listView = null == listFragment ? null : listFragment.getListView();
-
-         ListFragmentManageFeeds.showEditDialog(listView, -1, m_applicationFolder, this);
+         ListFragmentManageFeeds.showEditDialog(this, -1, m_applicationFolder);
       }
       else if(menuText.equals(jumpTo))
       {

@@ -33,7 +33,13 @@ class Read
    static
    String[][] csvFile(String fileName, String applicationFolder, char... type)
    {
-      if(isUnmounted())
+      return csvFile(fileName, applicationFolder, false, type);
+   }
+
+   static
+   String[][] csvFile(String fileName, String applicationFolder, boolean skip, char... type)
+   {
+      if(skip || isUnmounted())
       {
          return new String[type.length][0];
       }
