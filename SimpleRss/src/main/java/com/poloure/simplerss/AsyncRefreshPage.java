@@ -18,7 +18,6 @@ import java.util.TreeMap;
 
 class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
 {
-   private static final int MAX_DESCRIPTION_LENGTH = 360;
    private static final int MIN_DESCRIPTION_LENGTH = 8;
    private final String m_applicationFolder;
    private final ListView m_listView;
@@ -71,12 +70,10 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
    Void doInBackground(Integer... page)
    {
       int pageNumber = page[0];
-      String tag = PagerAdapterFeeds.getTagsArray()[pageNumber];
+      String tag = PagerAdapterFeeds.TAG_LIST.get(pageNumber);
+
       String thumbnailDir = File.separatorChar + ServiceUpdate.THUMBNAIL_DIR;
       String contentFile = File.separatorChar + ServiceUpdate.CONTENT;
-
-      /* Create a String array to store the description lines. */
-      String[] desLines = new String[3];
 
       String[][] feedsIndex = Read.csvFile(Read.INDEX, m_applicationFolder, 'f', 't');
       if(0 == feedsIndex.length)
@@ -90,7 +87,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       Map<Long, FeedItem> map = new TreeMap<Long, FeedItem>(reverse);
 
       AdapterTags adapterTag = (AdapterTags) m_listView.getAdapter();
-      final List<Long> timeListInAdapter = adapterTag.getTimeList();
+      List<Long> timeListInAdapter = adapterTag.getTimeList();
 
       int feedsLength = feedNames.length;
       for(int j = 0; j < feedsLength; j++)
@@ -140,13 +137,13 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
                boolean desTooShort = null == descriptionsX[i] ||
                                      MIN_DESCRIPTION_LENGTH > descriptionsX[i].length();
 
-               data.m_itemDescriptionOne = desTooShort ? "" : descriptionsX[i];
-               data.m_itemDescriptionTwo = desTooShort ? "" : descriptionsY[i];
-               data.m_itemDescriptionThree = desTooShort ? "" : descriptionsZ[i];
+               data.m_descriptionOne = desTooShort ? "" : descriptionsX[i];
+               data.m_descriptionTwo = desTooShort ? "" : descriptionsY[i];
+               data.m_descriptionThree = desTooShort ? "" : descriptionsZ[i];
 
-               data.m_itemTime = fastParseLong(times[i]);
+               data.m_time = fastParseLong(times[i]);
 
-               data.m_itemTitle = null == titles[i] ? "" : titles[i];
+               data.m_title = null == titles[i] ? "" : titles[i];
                data.m_url = null == trimmedLinks[i] ? "" : trimmedLinks[i];
                data.m_urlFull = links[i];
 
@@ -157,11 +154,11 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
                }*/
 
                /* Do not add duplicates, do not add read items if opacity == 0 */
-               boolean notInAdapter = !timeListInAdapter.contains(data.m_itemTime);
+               boolean notInAdapter = !timeListInAdapter.contains(data.m_time);
 
                if(notInAdapter)
                {
-                  map.put(data.m_itemTime, data);
+                  map.put(data.m_time, data);
                }
             }
          }
@@ -176,7 +173,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       Long[] longArray = longSet.toArray(new Long[mapSize]);
       List<Long> longList = Arrays.asList(longArray);
 
-      if(0 < itemCollection.size())
+      if(!itemCollection.isEmpty())
       {
          publishProgress(itemCollection, longList);
       }
@@ -195,8 +192,8 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
 
       for(char c : chars)
       {
-         int value = (int) c - 48;
-         num = num * 10L + (long) value;
+         int value = c - 48;
+         num = num * 10L + value;
       }
       return num;
    }
@@ -218,7 +215,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       int index = 0;
       long timeBefore = 0L;
       AdapterTags adapterTag = (AdapterTags) m_listView.getAdapter();
-      final List<Long> timeListInAdapter = adapterTag.getTimeList();
+      List<Long> timeListInAdapter = adapterTag.getTimeList();
 
       boolean notFirstLoad = 0 != m_listView.getCount();
 

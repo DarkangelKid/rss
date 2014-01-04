@@ -35,12 +35,12 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
    private final String m_oldFeedName;
    private final String m_applicationFolder;
    private final String m_allTag;
-   private final FragmentPagerAdapter m_pagerAdapterFeeds;
+   private final PagerAdapterFeeds m_pagerAdapterFeeds;
    private final BaseAdapter m_navigationAdapter;
    private final ListView m_listView;
 
    private
-   AsyncCheckFeed(Dialog dialog, ListView listView, FragmentPagerAdapter pagerAdapterFeeds,
+   AsyncCheckFeed(Dialog dialog, ListView listView, PagerAdapterFeeds pagerAdapterFeeds,
          BaseAdapter navigationAdapter, String currentTitle, String applicationFolder,
          String allTag)
    {
@@ -58,7 +58,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
    }
 
    static
-   void newInstance(Dialog dialog, ListView listView, FragmentPagerAdapter pagerAdapterFeeds,
+   void newInstance(Dialog dialog, ListView listView, PagerAdapterFeeds pagerAdapterFeeds,
          BaseAdapter navigationAdapter, String oldFeedTitle, String applicationFolder,
          String allTag)
    {
@@ -131,7 +131,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
                }
             }
          }
-         while(0 == feedTitle.length() && XmlPullParser.END_DOCUMENT != eventType);
+         while(feedTitle.isEmpty() && XmlPullParser.END_DOCUMENT != eventType);
       }
       catch(MalformedURLException ignored)
       {
@@ -178,8 +178,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
    }
 
    private static
-   XmlPullParser createXmlParser(String urlString) throws MalformedURLException, IOException,
-         XmlPullParserException
+   XmlPullParser createXmlParser(String urlString) throws IOException, XmlPullParserException
    {
       XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
       factory.setNamespaceAware(true);
@@ -197,7 +196,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       String inputTags = userInputTags.toString();
       Locale defaultLocale = Locale.getDefault();
 
-      String lowerTags = 0 == inputTags.length() ? allTag : inputTags.toLowerCase(defaultLocale);
+      String lowerTags = inputTags.isEmpty() ? allTag : inputTags.toLowerCase(defaultLocale);
 
       /* + 10 in case the user did not put spaces after the commas. */
       int tagInitialCapacity = lowerTags.length();
@@ -214,7 +213,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
          /* The input tag is all lowercase. */
          for(String word : words)
          {
-            if(0 < word.length())
+            if(!word.isEmpty())
             {
                char firstLetter = word.charAt(0);
                char firstLetterUpper = Character.toUpperCase(firstLetter);
@@ -248,8 +247,8 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       String finalTitle = result[1];
       String finalTag = result[2];
 
-      boolean isFeedValid = 0 != feedUrlFromCheck.length();
-      boolean isExistingFeed = 0 != m_oldFeedName.length();
+      boolean isFeedValid = !feedUrlFromCheck.isEmpty();
+      boolean isExistingFeed = !m_oldFeedName.isEmpty();
       Context context = m_dialog.getContext();
 
       if(isFeedValid)
@@ -280,8 +279,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
          }
 
          /* Update the PagerAdapter for the tag fragments. */
-         PagerAdapterFeeds.getAndSaveTagsFromDisk(m_applicationFolder, m_allTag);
-         m_pagerAdapterFeeds.notifyDataSetChanged();
+         m_pagerAdapterFeeds.updateTags(m_applicationFolder, context);
 
          /* Update the NavigationDrawer adapter.
           * The subtitle of the actionbar should never change on an add of a feed.*/

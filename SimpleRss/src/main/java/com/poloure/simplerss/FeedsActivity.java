@@ -46,7 +46,7 @@ class FeedsActivity extends Activity
    private static final int ALARM_SERVICE_STOP = 0;
    private static final int MINUTE_VALUE = 60000;
    static Handler s_serviceHandler;
-   String m_previousActionBarTitle;
+   private String m_previousActionBarTitle;
    private ViewPager m_feedsViewPager;
    private ListAdapter m_adapterNavDrawer;
    private DrawerLayout m_drawerLayout;
@@ -70,7 +70,7 @@ class FeedsActivity extends Activity
       m_fragmentManager = getFragmentManager();
 
       /* Load the read items to the AdapterTag class. */
-      if(0 == AdapterTags.READ_ITEM_TIMES.size())
+      if(AdapterTags.READ_ITEM_TIMES.isEmpty())
       {
          Set<Long> set = Read.longSet(READ_ITEMS, m_applicationFolder);
          AdapterTags.READ_ITEM_TIMES.addAll(set);
@@ -211,9 +211,9 @@ class FeedsActivity extends Activity
    {
       /* Load the ManageFeedsRefresh boolean value from settings. */
       SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-      boolean autoRefresh = preferences.getBoolean("refreshing_enabled", false);
+      boolean refreshDisabled = !preferences.getBoolean("refreshing_enabled", false);
 
-      if(!autoRefresh && ALARM_SERVICE_START == state)
+      if(refreshDisabled && ALARM_SERVICE_START == state)
       {
          return;
       }
@@ -231,7 +231,7 @@ class FeedsActivity extends Activity
          String intervalString = preferences.getString("refresh_interval", "120");
          int refreshInterval = Integer.parseInt(intervalString);
 
-         long interval = (long) refreshInterval * (long) MINUTE_VALUE;
+         long interval = (long) refreshInterval * MINUTE_VALUE;
          long next = System.currentTimeMillis() + interval;
          am.setRepeating(AlarmManager.RTC_WAKEUP, next, interval, pendingIntent);
       }
@@ -409,7 +409,7 @@ class FeedsActivity extends Activity
       for(int i = itemCount; 0 <= i; i--)
       {
          FeedItem feedItem = (FeedItem) listAdapter.getItem(i);
-         if(!AdapterTags.READ_ITEM_TIMES.contains(feedItem.m_itemTime))
+         if(!AdapterTags.READ_ITEM_TIMES.contains(feedItem.m_time))
          {
             listView.setSelection(i);
             break;

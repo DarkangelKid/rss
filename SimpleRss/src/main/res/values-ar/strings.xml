@@ -1,42 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-   <string name="drawer_open">Open navigation drawer</string>
-   <string name="drawer_close">Close navigation drawer</string>
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
 
-   <string name="navigation_title">ملاحة</string>
+    <string name="navigation_title">ملاحة</string>
 
-   <string name="add_dialog_title">إضافة موجز</string>
-   <string name="edit_dialog_title">تعديل موجز‎</string>
+    <string name="add_dialog_title">إضافة موجز</string>
+    <string name="edit_dialog_title">تعديل موجز‎</string>
 
-   <string name="add_feed">اضافة</string>
-   <string name="unread">غير مقروء</string>
-   <string name="refresh">إعادة التحميل‎</string>
-   <string name="offline">Offline</string>
+    <string name="add_feed">اضافة</string>
+    <string name="unread">غير مقروء</string>
+    <string name="refresh">إعادة التحميل‎</string>
+    <string name="offline">Offline</string>
 
-   <string name="refresh_time_preferences">Refresh Time</string>
+    <string name="refresh_time_preferences">Refresh Time</string>
 
-   <string name="feed_name_dialog">إسم الموجز‎</string>
-   <string name="feed_name_hint">إختياري‎</string>
-   <string name="feed_url_dialog">رابط الموجز‎</string>
-   <string name="feed_url_hint">http://example.com/rss</string>
-   <string name="feed_tag_dialog">Tags</string>
-   <string name="feed_tag_title">Tags</string>
-   <string name="feed_tag_hint">tag one, tag two, …</string>
+    <string name="feed_name_dialog">إسم الموجز‎</string>
+    <string name="feed_name_hint">إختياري‎</string>
+    <string name="feed_url_dialog">رابط الموجز‎</string>
+    <string name="feed_url_hint">http://example.com/rss</string>
+    <string name="feed_tag_dialog">Tags</string>
+    <string name="feed_tag_title">Tags</string>
+    <string name="feed_tag_hint">tag one, tag two, …</string>
 
-   <string name="cancel_dialog">إلغاء‎</string>
-   <string name="add_dialog">اضافة</string>
-   <string name="dialog_checking_feed">Checking…</string>
-   <string name="invalid_feed">Invalid feed URL</string>
-   <string name="added_feed">Added </string>
-   <string name="deleted_feed">Deleted </string>
-   <string name="accept_dialog">قبول</string>
+    <string name="cancel_dialog">إلغاء‎</string>
+    <string name="add_dialog">اضافة</string>
+    <string name="dialog_checking_feed">Checking…</string>
+    <string name="invalid_feed">Invalid feed URL</string>
+    <string name="added_feed">Added </string>
+    <string name="deleted_feed">Deleted </string>
+    <string name="accept_dialog">قبول</string>
 
-   <string name="all_tag">كل</string>
+    <string name="all_tag">كل</string>
 
-   <string name="notification_title_singular">%d Unread Item</string>
-   <string name="notification_title_plural">%d Unread Items</string>
-   <string name="notification_content_tag_item">%d tag has an unread item</string>
-   <string name="notification_content_tag_items">%d tag has unread items</string>
-   <string name="notification_content_tags">%d tags have unread items</string>
+    <string name="notification_title_singular">%d Unread Item</string>
+    <string name="notification_title_plural">%d Unread Items</string>
+    <string name="notification_content_tag_item">%d tag has an unread item</string>
+    <string name="notification_content_tag_items">%d tag has unread items</string>
+    <string name="notification_content_tags">%d tags have unread items</string>
 
 </resources>

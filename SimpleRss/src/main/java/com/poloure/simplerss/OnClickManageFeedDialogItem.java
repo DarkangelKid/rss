@@ -3,7 +3,6 @@ package com.poloure.simplerss;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.support.v13.app.FragmentPagerAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -15,17 +14,15 @@ class OnClickManageFeedDialogItem implements DialogInterface.OnClickListener
    private final ListView m_listView;
    private final String m_feedName;
    private final String m_applicationFolder;
-   private final String m_allTag;
-   private final FragmentPagerAdapter m_pagerAdapterFeeds;
+   private final PagerAdapterFeeds m_pagerAdapterFeeds;
    private final BaseAdapter m_navigationAdapter;
 
-   OnClickManageFeedDialogItem(ListView listView, FragmentPagerAdapter pagerAdapterFeeds,
+   OnClickManageFeedDialogItem(ListView listView, PagerAdapterFeeds pagerAdapterFeeds,
          BaseAdapter navigationAdapter, String feedName, String applicationFolder, String allTag)
    {
       m_listView = listView;
       m_pagerAdapterFeeds = pagerAdapterFeeds;
       m_navigationAdapter = navigationAdapter;
-      m_allTag = allTag;
       m_feedName = feedName;
       m_applicationFolder = applicationFolder;
    }
@@ -71,8 +68,7 @@ class OnClickManageFeedDialogItem implements DialogInterface.OnClickListener
          toast.show();
 
          /* Update the PagerAdapter for the tag fragments. */
-         PagerAdapterFeeds.getAndSaveTagsFromDisk(m_applicationFolder, m_allTag);
-         m_pagerAdapterFeeds.notifyDataSetChanged();
+         m_pagerAdapterFeeds.updateTags(m_applicationFolder, context);
       }
       if(isDelete || isClearContent)
       {

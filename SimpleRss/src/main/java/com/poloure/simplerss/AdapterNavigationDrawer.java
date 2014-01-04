@@ -13,6 +13,10 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 class AdapterNavigationDrawer extends BaseAdapter
 {
    private static final int[] NAV_ICONS = {
@@ -35,7 +39,7 @@ class AdapterNavigationDrawer extends BaseAdapter
    private static final int SP = TypedValue.COMPLEX_UNIT_SP;
    private final String[] m_navigationTitles;
    private final Context m_context;
-   private String[] m_tagArray = new String[0];
+   private final List<String> m_tagArray = new ArrayList<String>(0);
    private int[] m_unreadArray = EMPTY_INT_ARRAY;
 
    AdapterNavigationDrawer(String[] navigationTitles, Context context)
@@ -44,9 +48,13 @@ class AdapterNavigationDrawer extends BaseAdapter
       m_context = context;
    }
 
-   void setArrays(String[] tags, int[] unreadCounts)
+   void setArrays(Collection<String> tags, int[] unreadCounts)
    {
-      m_tagArray = tags.clone();
+      if(!m_tagArray.equals(tags))
+      {
+         m_tagArray.clear();
+         m_tagArray.addAll(tags);
+      }
       m_unreadArray = unreadCounts.clone();
    }
 
@@ -54,7 +62,7 @@ class AdapterNavigationDrawer extends BaseAdapter
    public
    int getCount()
    {
-      return m_tagArray.length + 4;
+      return m_tagArray.size() + 4;
    }
 
    @Override
@@ -68,7 +76,7 @@ class AdapterNavigationDrawer extends BaseAdapter
    public
    long getItemId(int position)
    {
-      return (long) position;
+      return position;
    }
 
    @Override
@@ -154,7 +162,7 @@ class AdapterNavigationDrawer extends BaseAdapter
                   .applyDimension(DIP, HORIZONTAL_PADDING_SUB, displayMetrics);
             int padding = Math.round(paddingSides);
 
-            int half = Math.round((float) padding * 0.5F);
+            int half = Math.round(padding * 0.5F);
 
             textView.setPadding(padding, -half, padding, half);
             textView.setMinHeight(minHeight);
@@ -169,7 +177,7 @@ class AdapterNavigationDrawer extends BaseAdapter
 
          String number = Integer.toString(m_unreadArray[position - 4]);
          String unreadText = "0".equals(number) ? "" : number;
-         String tagTitle = m_tagArray[position - 4];
+         String tagTitle = m_tagArray.get(position - 4);
 
          ((TextView) view).setText(tagTitle + '\n' + (char) 0x200F + unreadText);
       }

@@ -43,11 +43,9 @@ class FragmentFeeds extends Fragment
       }
 
       setHasOptionsMenu(true);
-      Resources resources = getResources();
       ActionBar actionBar = context.getActionBar();
       FragmentManager fragmentManager = context.getFragmentManager();
       String applicationFolder = FeedsActivity.getApplicationFolder(context);
-      String allTag = resources.getString(R.string.all_tag);
 
       ListView navigationList = (ListView) context.findViewById(R.id.navigation_drawer);
       BaseAdapter navigationAdapter = (BaseAdapter) navigationList.getAdapter();
@@ -55,9 +53,8 @@ class FragmentFeeds extends Fragment
       ViewPager.OnPageChangeListener onTagPageChange = new OnPageChangeTags(fragmentManager,
             actionBar, navigationAdapter, applicationFolder);
 
-      PagerAdapter adapter = new PagerAdapterFeeds(fragmentManager);
-      PagerAdapterFeeds.getAndSaveTagsFromDisk(applicationFolder, allTag);
-      adapter.notifyDataSetChanged();
+      PagerAdapterFeeds adapter = new PagerAdapterFeeds(fragmentManager);
+      adapter.updateTags(applicationFolder, context);
 
       /* Create the ViewPager. */
       ViewPager viewPager = ViewPagerStrip.newInstance(context, PAGER_TITLE_STRIP_ID);

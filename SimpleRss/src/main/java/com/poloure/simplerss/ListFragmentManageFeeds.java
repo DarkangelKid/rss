@@ -102,7 +102,7 @@ class ListFragmentManageFeeds extends ListFragment
 
       /* Get the items that the onClick listener needs to refresh when deleting/clearing a feed. */
       ViewPager feedPager = (ViewPager) activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
-      FragmentPagerAdapter pagerAdapterFeeds = (FragmentPagerAdapter) feedPager.getAdapter();
+      PagerAdapterFeeds pagerAdapterFeeds = (PagerAdapterFeeds) feedPager.getAdapter();
 
       ListView navigationDrawer = (ListView) activity.findViewById(R.id.navigation_drawer);
       BaseAdapter navigationAdapter = (BaseAdapter) navigationDrawer.getAdapter();

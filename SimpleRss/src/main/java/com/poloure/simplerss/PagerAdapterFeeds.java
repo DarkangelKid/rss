@@ -2,36 +2,46 @@ package com.poloure.simplerss;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.Context;
 import android.support.v13.app.FragmentPagerAdapter;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
 class PagerAdapterFeeds extends FragmentPagerAdapter
 {
    private static final Pattern SPLIT_COMMA = Pattern.compile(",");
-   private static Set<String> s_tagSet = Collections.synchronizedSet(new LinkedHashSet<String>(0));
+   static final List<String> TAG_LIST = new ArrayList<String>(0);
 
    PagerAdapterFeeds(FragmentManager fm)
    {
       super(fm);
    }
 
-   static
-   Collection<String> getTagsFromDisk(String applicationFolder)
+   void updateTags(String applicationFolder, Context context)
    {
-      return getAndSaveTagsFromDisk(applicationFolder, "");
+      Set<String> tagSet = getTagsFromDisk(applicationFolder, context);
+      TAG_LIST.clear();
+      TAG_LIST.addAll(tagSet);
+
+      notifyDataSetChanged();
    }
 
    static
-   Set<String> getAndSaveTagsFromDisk(String applicationFolder, String allTag)
+   Set<String> getTagsFromDisk(String applicationFolder, Context context)
    {
       Set<String> tagSet = Collections.synchronizedSet(new LinkedHashSet<String>(0));
       String[] tagArray = Read.csvFile(Read.INDEX, applicationFolder, 't')[0];
 
+      /* Get the all tag from resources. */
+      String allTag = context.getString(R.string.all_tag);
+
+      /* Make the allTag the first tag. */
       tagSet.add(allTag);
 
       for(String tag : tagArray)
@@ -43,18 +53,8 @@ class PagerAdapterFeeds extends FragmentPagerAdapter
             tagSet.add(trimmedTag);
          }
       }
-      if(0 != allTag.length())
-      {
-         s_tagSet = tagSet;
-      }
-      return tagSet;
-   }
 
-   static
-   String[] getTagsArray()
-   {
-      int size = s_tagSet.size();
-      return s_tagSet.toArray(new String[size]);
+      return tagSet;
    }
 
    @Override
@@ -68,7 +68,7 @@ class PagerAdapterFeeds extends FragmentPagerAdapter
    public
    int getCount()
    {
-      return s_tagSet.size();
+      return TAG_LIST.size();
    }
 
    @Override
@@ -76,6 +76,6 @@ class PagerAdapterFeeds extends FragmentPagerAdapter
    String getPageTitle(int position)
    {
       int size = getCount();
-      return s_tagSet.toArray(new String[size])[position];
+      return TAG_LIST.toArray(new String[size])[position];
    }
 }

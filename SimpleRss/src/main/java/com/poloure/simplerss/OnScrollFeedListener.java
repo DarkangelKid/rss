@@ -37,7 +37,7 @@ class OnScrollFeedListener implements AbsListView.OnScrollListener
 
          if(isTopView && isVeryTop && isListViewShown && readingItems)
          {
-            Long time = ((FeedItem) adapterTags.getItem(0)).m_itemTime;
+            Long time = ((FeedItem) adapterTags.getItem(0)).m_time;
             AdapterTags.READ_ITEM_TIMES.add(time);
          }
 

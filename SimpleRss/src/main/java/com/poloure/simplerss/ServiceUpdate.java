@@ -60,9 +60,6 @@ class ServiceUpdate extends IntentService
    private static final String[] INDEX_DES = {"x", "y", "z"};
    private static final String MIME_GIF = "image/gif";
    private static final int MIN_IMAGE_WIDTH = 64;
-   private static final SimpleDateFormat RSS_DATE = new SimpleDateFormat(
-         "EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
-   @SuppressWarnings("HardcodedLineSeparator")
    private static final Pattern PATTERN_WHITESPACE = Pattern.compile("[\\t\\n\\x0B\\f\\r\\|]");
    private static final Pattern PATTERN_CDATA = Pattern.compile("\\<.*?\\>");
    private static final String[] DESIRED_TAGS = {
@@ -70,7 +67,6 @@ class ServiceUpdate extends IntentService
    };
    private static final int FEED_ITEM_INITIAL_CAPACITY = 200;
    private static final int DEFAULT_MAX_HISTORY = 10000;
-   private int m_width = 100;
 
    public
    ServiceUpdate()
@@ -88,20 +84,23 @@ class ServiceUpdate extends IntentService
 
       int page = intent.getIntExtra("GROUP_NUMBER", 0);
       String applicationFolder = FeedsActivity.getApplicationFolder(this);
-      String allTag = getString(R.string.all_tag);
 
-      /* Read the screen width from file. */
-      m_width = Integer.parseInt(Read.file("width.txt", applicationFolder)[0]);
+      /* Get the tagList (from disk if it is empty). */
+      List<String> tagList = PagerAdapterFeeds.TAG_LIST;
+      if(tagList.isEmpty())
+      {
+         Set<String> set = PagerAdapterFeeds.getTagsFromDisk(applicationFolder, this);
+         tagList.addAll(set);
+      }
 
-      Set<String> tagSet = PagerAdapterFeeds.getAndSaveTagsFromDisk(applicationFolder, allTag);
-      int tagSize = tagSet.size();
-      String tag = tagSet.toArray(new String[tagSize])[page];
+      String tag = tagList.get(page);
 
       String[][] content = Read.csvFile(Read.INDEX, applicationFolder, 'f', 'u', 't');
       String[] names = content[0];
       String[] urls = content[1];
       String[] tags = content[2];
 
+      String allTag = getString(R.string.all_tag);
       boolean isAllTag = tag.equals(allTag);
 
       /* Download and parse each feed in the index. */
@@ -211,13 +210,12 @@ class ServiceUpdate extends IntentService
 
    private
    void parseFeed(String urlString, String feed, String applicationFolder) throws
-         XmlPullParserException, MalformedURLException, IOException
+         XmlPullParserException, IOException
    {
       String feedFolder = feed + File.separatorChar;
       String contentFileName = feedFolder + CONTENT;
       String longFileName = feedFolder + ITEM_LIST;
       String thumbnailDir = feedFolder + THUMBNAIL_DIR;
-      /* TODO String[] filters = Read.file(Constants.FILTER_LIST);*/
 
       /* Load the previously saved items to a map. */
       Set<String> set = fileToSet(contentFileName, applicationFolder);
@@ -252,6 +250,10 @@ class ServiceUpdate extends IntentService
 
       StringBuilder feedItemBuilder = new StringBuilder(FEED_ITEM_INITIAL_CAPACITY);
 
+      Resources resources = getResources();
+      DisplayMetrics metrics = resources.getDisplayMetrics();
+      int screenWidth = metrics.widthPixels;
+
       boolean preEntry = true;
 
       while(preEntry)
@@ -273,6 +275,9 @@ class ServiceUpdate extends IntentService
       }
 
       long timeLong = 0L;
+
+      /* Create the date format. */
+      SimpleDateFormat rssDate = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
 
       while(true)
       {
@@ -306,7 +311,7 @@ class ServiceUpdate extends IntentService
                feedItemBuilder.append(ITEM_SEPARATOR);
 
                feedItemBuilder.append(INDEX_LINK_TRIMMED);
-               feedItemBuilder = appendFitToScreen(feedItemBuilder, link);
+               feedItemBuilder = appendFitToScreen(feedItemBuilder, link, screenWidth);
                feedItemBuilder.append(ITEM_SEPARATOR);
             }
 
@@ -343,7 +348,7 @@ class ServiceUpdate extends IntentService
                try
                {
                   Calendar calendar = Calendar.getInstance();
-                  Date date = RSS_DATE.parse(contentText);
+                  Date date = rssDate.parse(contentText);
                   calendar.setTime(date);
                   timeLong = calendar.getTimeInMillis();
                }
@@ -369,7 +374,7 @@ class ServiceUpdate extends IntentService
 
                /* "title|". */
                feedItemBuilder.append(INDEX_TITLE);
-               feedItemBuilder = appendFitToScreen(feedItemBuilder, content);
+               feedItemBuilder = appendFitToScreen(feedItemBuilder, content, screenWidth);
                feedItemBuilder.append(ITEM_SEPARATOR);
             }
 
@@ -421,13 +426,13 @@ class ServiceUpdate extends IntentService
 
                /* Replace ALL_TAG <x> with nothing. */
                content = PATTERN_CDATA.matcher(content).replaceAll("").trim();
-               if(0 != content.length())
+               if(!content.isEmpty())
                {
                   String tagToAppend = DESIRED_TAGS[5].equals(tag) ? DESIRED_TAGS[3] : tag;
 
                   if(tagToAppend.equals(DESIRED_TAGS[3]))
                   {
-                     feedItemBuilder = appendDesLines(feedItemBuilder, content);
+                     feedItemBuilder = appendDesLines(feedItemBuilder, content, screenWidth);
                   }
                   else
                   {
@@ -487,28 +492,30 @@ class ServiceUpdate extends IntentService
    }
 
    private
-   StringBuilder appendDesLines(StringBuilder builder, String content)
+   StringBuilder appendDesLines(StringBuilder builder, String content, int screenWidth)
    {
+      String contentCopy = content;
       for(int x = 0; 3 > x; x++)
       {
-         int desChars = ViewBasicFeed.DES_PAINT.breakText(content, true, m_width - 40.0F, null);
-         int desSpace = content.lastIndexOf(' ', desChars);
+         int desChars = ViewBasicFeed.DES_PAINT.breakText(contentCopy, true, screenWidth - 40.0F, null);
+         int desSpace = contentCopy.lastIndexOf(' ', desChars);
          desChars = -1 == desSpace ? desChars : desSpace + 1;
 
          builder.append(INDEX_DES[x]);
          builder.append(ITEM_SEPARATOR);
-         builder.append(content.substring(0, desChars));
+         builder.append(contentCopy.substring(0, desChars));
          builder.append(ITEM_SEPARATOR);
 
-         content = content.substring(desChars);
+         contentCopy = contentCopy.substring(desChars);
       }
       return builder;
    }
 
    private
-   StringBuilder appendFitToScreen(StringBuilder builder, String content)
+   StringBuilder appendFitToScreen(StringBuilder builder, String content, int screenWidth)
    {
-      int titleChars = ViewBasicFeed.TITLE_PAINT.breakText(content, true, m_width - 40.0F, null);
+      int titleChars = ViewBasicFeed.TITLE_PAINT
+            .breakText(content, true, (float) screenWidth - 40.0F, null);
 
       int titleSpace = content.lastIndexOf(' ', titleChars);
 
@@ -557,17 +564,17 @@ class ServiceUpdate extends IntentService
 
       Resources resources = context.getResources();
       DisplayMetrics displayMetrics = resources.getDisplayMetrics();
-      float screenWidth = (float) displayMetrics.widthPixels;
+      float screenWidth = displayMetrics.widthPixels;
 
       String applicationFolder = FeedsActivity.getApplicationFolder(context);
       BitmapFactory.decodeStream(inputStream, null, options);
 
-      float imageWidth = (float) options.outWidth;
-      float imageHeight = (float) options.outHeight;
+      float imageWidth = options.outWidth;
+      float imageHeight = options.outHeight;
       String mimeType = options.outMimeType;
 
       /* If the image is smaller than we care about, do not save it. */
-      if((float) MIN_IMAGE_WIDTH > imageWidth)
+      if(MIN_IMAGE_WIDTH > imageWidth)
       {
          return builder;
       }
@@ -682,7 +689,7 @@ class ServiceUpdate extends IntentService
    }
 
    /* index throws an ArrayOutOfBoundsException if not handled. */
-   static
+   private static
    <T> int index(T[] array, T value)
    {
       if(null == array)

@@ -42,7 +42,7 @@ class AsyncLoadImage extends AsyncTask<Object, Void, Bitmap>
       BitmapFactory.Options o = new BitmapFactory.Options();
       o.inSampleSize = 1;
       Animation fadeIn = new AlphaAnimation(0.0F, 1.0F);
-      fadeIn.setDuration((long) IMAGE_FADE_IN_DURATION);
+      fadeIn.setDuration(IMAGE_FADE_IN_DURATION);
       fadeIn.setFillAfter(true);
       fadeIn.setInterpolator(new DecelerateInterpolator());
 
@@ -65,7 +65,7 @@ class AsyncLoadImage extends AsyncTask<Object, Void, Bitmap>
          return;
       }
 
-      final View imageView = m_imageView.get();
+      View imageView = m_imageView.get();
       if(null != imageView && (Integer) imageView.getTag() == m_imageViewTag && null != result)
       {
          Class type = imageView.getClass();

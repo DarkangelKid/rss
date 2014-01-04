@@ -12,6 +12,8 @@ import android.widget.Adapter;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 
+import java.util.List;
+
 class AsyncManageTagsRefresh extends AsyncTask<String, Editable[], Void>
 {
    private static final int INFO_INITIAL_CAPACITY = 40;
@@ -45,8 +47,8 @@ class AsyncManageTagsRefresh extends AsyncTask<String, Editable[], Void>
    Void doInBackground(String... allTagAndFolder)
    {
       /* Create the info strings for each tag. */
-      String[] feedTags = PagerAdapterFeeds.getTagsArray();
-      int tagCount = feedTags.length;
+      List<String> tagList = PagerAdapterFeeds.TAG_LIST;
+      int tagCount = tagList.size();
 
       if(0 == tagCount)
       {
@@ -65,12 +67,13 @@ class AsyncManageTagsRefresh extends AsyncTask<String, Editable[], Void>
       Editable[] editables = new SpannableStringBuilder[tagCount];
       StringBuilder info = new StringBuilder(INFO_INITIAL_CAPACITY);
 
-      for(int i = 0; i < tagCount; i++)
+      int i = 0;
+      for(String tag : tagList)
       {
          info.setLength(0);
          int feedCount = 0;
 
-         if(feedTags[i].equals(allTag))
+         if(tag.equals(allTag))
          {
             info.append(tagCount);
             info.append(" tags");
@@ -79,7 +82,7 @@ class AsyncManageTagsRefresh extends AsyncTask<String, Editable[], Void>
          {
             for(int j = 0; j < indexCount; j++)
             {
-               if(indexTags[j].contains(feedTags[i]))
+               if(indexTags[j].contains(tag))
                {
                   info.append(indexNames[j]);
                   info.append(", ");
@@ -97,7 +100,7 @@ class AsyncManageTagsRefresh extends AsyncTask<String, Editable[], Void>
          Editable editable = new SpannableStringBuilder();
 
          /* First, the title. */
-         editable.append(feedTags[i]);
+         editable.append(tag);
          editable.setSpan(TITLE_SIZE, 0, editable.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
          editable.append("\n");
 
@@ -110,6 +113,7 @@ class AsyncManageTagsRefresh extends AsyncTask<String, Editable[], Void>
          editable.append(" · ");
          editable.append(info);
          editables[i] = editable;
+         i++;
       }
 
       publishProgress(editables);

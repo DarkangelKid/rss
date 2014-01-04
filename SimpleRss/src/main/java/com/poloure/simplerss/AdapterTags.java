@@ -51,8 +51,8 @@ class AdapterTags extends BaseAdapter
    {
       FeedItem feedItem = m_feedItems.get(position);
 
-      boolean isImage = 0 != feedItem.m_imageName.length();
-      boolean isDescription = 0 != feedItem.m_itemDescriptionOne.length();
+      boolean isImage = !feedItem.m_imageName.isEmpty();
+      boolean isDescription = !feedItem.m_descriptionOne.isEmpty();
 
       int type;
 
@@ -97,7 +97,7 @@ class AdapterTags extends BaseAdapter
    public
    long getItemId(int position)
    {
-      return (long) position;
+      return position;
    }
 
    @Override
@@ -108,42 +108,33 @@ class AdapterTags extends BaseAdapter
       int viewType = getItemViewType(position);
       FeedItem item = m_feedItems.get(position);
 
-      //Long time = item.m_itemTime;
+      //Long time = item.m_time;
       //boolean isRead = READ_ITEM_TIMES.contains(time);
+      boolean hasImage = TYPE_IMAGE == viewType || TYPE_IMAGE_SANS_DESCRIPTION == viewType;
+      boolean hasDes = TYPE_PLAIN == viewType || TYPE_IMAGE == viewType;
 
-      View view = convertView;
+      ViewCustom view = (ViewCustom) convertView;
 
-      if(TYPE_PLAIN == viewType)
+      if(isNewView)
       {
-         view = isNewView ? ViewBasicFeed.newInstance(m_context) : convertView;
-         ((ViewBasicFeed) view)
-               .setTexts(item.m_itemTitle, item.m_url, item.m_urlFull, item.m_itemDescriptionOne,
-                     item.m_itemDescriptionTwo, item.m_itemDescriptionThree);
+         if(hasImage)
+         {
+            view = hasDes ? new ViewImageFeed(m_context, 560)
+                 : new ViewImageSansDesFeed(m_context, 460);
+         }
+         else
+         {
+            view = hasDes ? new ViewBasicFeed(m_context, 180)
+                  : new ViewBasicSansDesFeed(m_context, 90);
+         }
       }
-      else if(TYPE_IMAGE == viewType)
-      {
-         view = isNewView ? ViewImageFeed.newInstance(m_context) : convertView;
 
-         ((ViewImageFeed) view).setBitmap(null);
-         ((ViewImageFeed) view)
-               .setTexts(item.m_itemTitle, item.m_url, item.m_urlFull, item.m_itemDescriptionOne,
-                     item.m_itemDescriptionTwo, item.m_itemDescriptionThree);
-      }
-      else if(TYPE_IMAGE_SANS_DESCRIPTION == viewType)
-      {
-         view = isNewView ? ViewImageSansDesFeed.newInstance(m_context) : convertView;
-
-         ((ViewImageSansDesFeed) view).setBitmap(null);
-         ((ViewImageSansDesFeed) view).setTexts(item.m_itemTitle, item.m_url, item.m_urlFull);
-      }
-      else
-      {
-         view = isNewView ? ViewBasicSansDesFeed.newInstance(m_context) : convertView;
-         ((ViewBasicSansDesFeed) view).setTexts(item.m_itemTitle, item.m_url, item.m_urlFull);
-      }
+      view.setBitmap(null);
+      view.setTexts(item.m_title, item.m_url, item.m_urlFull, item.m_descriptionOne,
+            item.m_descriptionTwo, item.m_descriptionThree);
 
       /* If the view was an image, load the image. */
-      if(TYPE_IMAGE == viewType || TYPE_IMAGE_SANS_DESCRIPTION == viewType)
+      if(hasImage)
       {
          view.setTag(position);
          AsyncLoadImage
@@ -159,7 +150,7 @@ class AdapterTags extends BaseAdapter
       if(isListViewShown && isNotLastItem && m_isReadingItems)
       {
          FeedItem nextItem = m_feedItems.get(position + 1);
-         READ_ITEM_TIMES.add(nextItem.m_itemTime);
+         READ_ITEM_TIMES.add(nextItem.m_time);
       }
 
       return view;

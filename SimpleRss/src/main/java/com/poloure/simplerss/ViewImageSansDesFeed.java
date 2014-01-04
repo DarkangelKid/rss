@@ -10,91 +10,25 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
 
-class ViewImageSansDesFeed extends View
+class ViewImageSansDesFeed extends ViewCustom
 {
-   private static final int SP = TypedValue.COMPLEX_UNIT_SP;
-   private static final Paint TITLE_PAINT = new Paint();
-   private static final Paint LINK_PAINT = new Paint();
-
-   static
+   ViewImageSansDesFeed(Context context, int height)
    {
-      TITLE_PAINT.setAntiAlias(true);
-      LINK_PAINT.setAntiAlias(true);
-      TITLE_PAINT.setColor(Color.argb(255, 0, 0, 0));
-      LINK_PAINT.setColor(Color.argb(165, 0, 0, 0));
-   }
-
-   private static final int HEIGHT = 490;
-   private String m_title = "Initial Text";
-   private String m_link = "Initial Text";
-   String m_linkFull = "Initial Text";
-   private Bitmap m_image;
-
-   private
-   ViewImageSansDesFeed(Context context)
-   {
-      super(context);
+      super(context, height);
       setLayerType(LAYER_TYPE_HARDWARE, null);
-   }
-
-   static
-   View newInstance(Context context)
-   {
-      ViewImageSansDesFeed view = new ViewImageSansDesFeed(context);
-
-      Resources resources = context.getResources();
-      DisplayMetrics metrics = resources.getDisplayMetrics();
-      float eightFloatDp = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8.0F, metrics);
-      int eightDp = Math.round(eightFloatDp);
-
-      view.setTextSizes();
-      view.setBackgroundColor(Color.WHITE);
-      view.setPadding(eightDp, eightDp, eightDp, eightDp);
-
-      return view;
-   }
-
-   private
-   void setTextSizes()
-   {
-      Context context = getContext();
-      Resources resources = context.getResources();
-      DisplayMetrics metrics = resources.getDisplayMetrics();
-
-      float titleSp = TypedValue.applyDimension(SP, 16.0F, metrics);
-      float linkSp = TypedValue.applyDimension(SP, 12.0F, metrics);
-
-      TITLE_PAINT.setTextSize(titleSp);
-      LINK_PAINT.setTextSize(linkSp);
-   }
-
-   void setBitmap(Bitmap bitmap)
-   {
-      m_image = bitmap;
-      if(null != bitmap)
-      {
-         invalidate();
-      }
-   }
-
-   void setTexts(String title, String link, String linkFull)
-   {
-      m_title = title;
-      m_link = link;
-      m_linkFull = linkFull;
    }
 
    @Override
    public
    void onDraw(Canvas canvas)
    {
-      float paddingStart = (float) getPaddingLeft();
-      float paddingTop = (float) getPaddingTop();
+      float paddingStart = getPaddingLeft();
+      float paddingVertical = getPaddingTop();
 
       float linkHeight = LINK_PAINT.getTextSize();
       float titleHeight = TITLE_PAINT.getTextSize();
 
-      float verticalPosition = paddingTop + 20.0F;
+      float verticalPosition = paddingVertical + 20.0F;
       canvas.drawText(m_title, paddingStart, verticalPosition, TITLE_PAINT);
 
       verticalPosition += titleHeight;
@@ -105,12 +39,5 @@ class ViewImageSansDesFeed extends View
       {
          canvas.drawBitmap(m_image, 0.0F, verticalPosition, TITLE_PAINT);
       }
-   }
-
-   @Override
-   protected
-   void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
-   {
-      setMeasuredDimension(widthMeasureSpec, HEIGHT);
    }
 }

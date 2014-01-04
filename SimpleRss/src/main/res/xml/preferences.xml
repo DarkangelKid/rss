@@ -1,113 +1,113 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen
-   xmlns:android="http://schemas.android.com/apk/res/android">
-   <PreferenceScreen
-      android:key="screen_preference"
-      android:title="Appearance">
-      <CheckBoxPreference
-         android:key="next_screen_checkbox_preference"
-         android:summary="You are a boy"
-         android:title="I am a boy"/>
-   </PreferenceScreen>
-   <PreferenceScreen android:title="Notifications">
-      <SwitchPreference
-         android:defaultValue="true"
-         android:key="notifications_enabled"
-         android:summaryOff="Notifications are disabled"
-         android:summaryOn="Notifications are enabled"
-         android:switchTextOff="Off"
-         android:switchTextOn="On"
-         android:title="Notifications"/>
-      <CheckBoxPreference
-         android:dependency="notifications_enabled"
-         android:key="child_checkbox_preference"
-         android:layout="?android:preferenceLayoutChild"
-         android:summary="Ipsum dogs"
-         android:title="Temporary setting"/>
-   </PreferenceScreen>
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceScreen
+        android:key="screen_preference"
+        android:title="Appearance">
+        <CheckBoxPreference
+            android:key="next_screen_checkbox_preference"
+            android:summary="You are a boy"
+            android:title="I am a boy"/>
+    </PreferenceScreen>
+    <PreferenceScreen android:title="Notifications">
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="notifications_enabled"
+            android:summaryOff="Notifications are disabled"
+            android:summaryOn="Notifications are enabled"
+            android:switchTextOff="Off"
+            android:switchTextOn="On"
+            android:title="Notifications"/>
+        <CheckBoxPreference
+            android:dependency="notifications_enabled"
+            android:key="child_checkbox_preference"
+            android:layout="?android:preferenceLayoutChild"
+            android:summary="Ipsum dogs"
+            android:title="Temporary setting"/>
+    </PreferenceScreen>
 
-   <PreferenceScreen android:title="Automatic Refreshing">
-      <SwitchPreference
-         android:defaultValue="true"
-         android:key="refreshing_enabled"
-         android:summaryOff="Automatic refreshing is disabled"
-         android:summaryOn="Automatic refreshing is enabled"
-         android:switchTextOff="Off"
-         android:switchTextOn="On"
-         android:title="Automatic Refreshing"/>
-      <ListPreference
-         android:defaultValue="120"
-         android:dependency="refreshing_enabled"
-         android:dialogTitle="Refresh Interval"
-         android:entries="@array/refresh_interval_titles"
-         android:entryValues="@array/refresh_interval_values"
-         android:key="refresh_interval"
-         android:summary="Time between two consecutive refreshes"
-         android:title="Refresh Interval"/>
-   </PreferenceScreen>
+    <PreferenceScreen android:title="Automatic Refreshing">
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="refreshing_enabled"
+            android:summaryOff="Automatic refreshing is disabled"
+            android:summaryOn="Automatic refreshing is enabled"
+            android:switchTextOff="Off"
+            android:switchTextOn="On"
+            android:title="Automatic Refreshing"/>
+        <ListPreference
+            android:defaultValue="120"
+            android:dependency="refreshing_enabled"
+            android:dialogTitle="Refresh Interval"
+            android:entries="@array/refresh_interval_titles"
+            android:entryValues="@array/refresh_interval_values"
+            android:key="refresh_interval"
+            android:summary="Time between two consecutive refreshes"
+            android:title="Refresh Interval"/>
+    </PreferenceScreen>
 
-   <PreferenceScreen android:title="Storage">
-      <SwitchPreference
-         android:defaultValue="true"
-         android:key="external_enabled"
-         android:summaryOff="Using internal storage"
-         android:summaryOn="Using external storage"
-         android:switchTextOff="Disabled"
-         android:switchTextOn="Enabled"
-         android:title="External Storage"/>
-      <EditTextPreference
-         android:defaultValue="./Android/data/poloure.simplerss.com/files/"
-         android:dependency="external_enabled"
-         android:dialogTitle="Application data path"
-         android:key="data_location"
-         android:summary="Where to save app data"
-         android:title="External Storage Location"/>
-   </PreferenceScreen>
+    <PreferenceScreen android:title="Storage">
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="external_enabled"
+            android:summaryOff="Using internal storage"
+            android:summaryOn="Using external storage"
+            android:switchTextOff="Disabled"
+            android:switchTextOn="Enabled"
+            android:title="External Storage"/>
+        <EditTextPreference
+            android:defaultValue="./Android/data/poloure.simplerss.com/files/"
+            android:dependency="external_enabled"
+            android:dialogTitle="Application data path"
+            android:key="data_location"
+            android:summary="Where to save app data"
+            android:title="External Storage Location"/>
+    </PreferenceScreen>
 
-   <PreferenceScreen android:title="Images">
-      <SwitchPreference
-         android:defaultValue="true"
-         android:key="images_enabled"
-         android:switchTextOff="No"
-         android:switchTextOn="Yes"
-         android:title="Download Images"/>
-      <SwitchPreference
-         android:defaultValue="false"
-         android:dependency="images_enabled"
-         android:key="images_mobile"
-         android:summaryOff="Using Wi-Fi only"
-         android:summaryOn="Using Wi-Fi and mobile networks"
-         android:switchTextOff="No"
-         android:switchTextOn="Yes"
-         android:title="Use Mobile Networks"/>
-      <CheckBoxPreference
-         android:defaultValue="true"
-         android:dependency="images_enabled"
-         android:key="keep_only_thumbnails"
-         android:summary="Will not keep original images"
-         android:title="Keep thumbnails only"/>
-      <ListPreference
-         android:defaultValue="75"
-         android:dependency="images_enabled"
-         android:dialogTitle="Thumbnail Quality (JPEG)"
-         android:entries="@array/thumbnail_quality"
-         android:entryValues="@array/thumbnail_quality_values"
-         android:key="thumbnail_quality"
-         android:summary="Only affects new downloads"
-         android:title="Thumbnail Quality (JPEG)"/>
-      <EditTextPreference
-         android:defaultValue="./Android/data/poloure.simplerss.com/files/"
-         android:dependency="images_enabled"
-         android:dialogTitle="Image directory"
-         android:key="images_location"
-         android:summary="Where to save images"
-         android:title="Image Storage Location"/>
-   </PreferenceScreen>
-   <PreferenceScreen
-      android:summary="https://github.com/Currfyg/simple-rss"
-      android:title="Application Source">
-      <intent
-         android:action="android.intent.action.VIEW"
-         android:data="https://github.com/Currfyg/simple-rss"/>
-   </PreferenceScreen>
+    <PreferenceScreen android:title="Images">
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="images_enabled"
+            android:switchTextOff="No"
+            android:switchTextOn="Yes"
+            android:title="Download Images"/>
+        <SwitchPreference
+            android:defaultValue="false"
+            android:dependency="images_enabled"
+            android:key="images_mobile"
+            android:summaryOff="Using Wi-Fi only"
+            android:summaryOn="Using Wi-Fi and mobile networks"
+            android:switchTextOff="No"
+            android:switchTextOn="Yes"
+            android:title="Use Mobile Networks"/>
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:dependency="images_enabled"
+            android:key="keep_only_thumbnails"
+            android:summary="Will not keep original images"
+            android:title="Keep thumbnails only"/>
+        <ListPreference
+            android:defaultValue="75"
+            android:dependency="images_enabled"
+            android:dialogTitle="Thumbnail Quality (JPEG)"
+            android:entries="@array/thumbnail_quality"
+            android:entryValues="@array/thumbnail_quality_values"
+            android:key="thumbnail_quality"
+            android:summary="Only affects new downloads"
+            android:title="Thumbnail Quality (JPEG)"/>
+        <EditTextPreference
+            android:defaultValue="./Android/data/poloure.simplerss.com/files/"
+            android:dependency="images_enabled"
+            android:dialogTitle="Image directory"
+            android:key="images_location"
+            android:summary="Where to save images"
+            android:title="Image Storage Location"/>
+    </PreferenceScreen>
+    <PreferenceScreen
+        android:summary="https://github.com/Currfyg/simple-rss"
+        android:title="Application Source">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="https://github.com/Currfyg/simple-rss"/>
+    </PreferenceScreen>
 </PreferenceScreen>

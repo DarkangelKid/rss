@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.widget.BaseAdapter;
 
 import java.io.File;
+import java.util.List;
 import java.util.Set;
 
 class AsyncRefreshNavigationAdapter extends AsyncTask<String, Void, int[]>
@@ -46,7 +47,7 @@ class AsyncRefreshNavigationAdapter extends AsyncTask<String, Void, int[]>
       String appFolder = applicationFolder[0];
 
       /* If null was passed into the task, count the unread items. */
-      String[] currentTags = PagerAdapterFeeds.getTagsArray();
+      List<String> currentTags = PagerAdapterFeeds.TAG_LIST;
 
       String[][] content = Read.csvFile(Read.INDEX, appFolder, 'f', 't');
       String[] indexNames = content[0];
@@ -54,7 +55,7 @@ class AsyncRefreshNavigationAdapter extends AsyncTask<String, Void, int[]>
 
       String append = File.separatorChar + ServiceUpdate.ITEM_LIST;
       int total = 0;
-      int tagCount = currentTags.length;
+      int tagCount = currentTags.size();
       int indexTagsCount = indexTags.length;
 
       int[] unreadCounts = new int[tagCount];
@@ -65,7 +66,7 @@ class AsyncRefreshNavigationAdapter extends AsyncTask<String, Void, int[]>
          /* For each index entry. */
          for(int j = 0; j < indexTagsCount; j++)
          {
-            if(indexTags[j].contains(currentTags[i]))
+            if(indexTags[j].contains(currentTags.get(i)))
             {
                String longFile = indexNames[j] + append;
                Set<Long> longSet = Read.longSet(longFile, appFolder);
@@ -86,8 +87,7 @@ class AsyncRefreshNavigationAdapter extends AsyncTask<String, Void, int[]>
    void onPostExecute(int[] result)
    {
       /* Set the titles & counts arrays in this file and notify the adapter. */
-      String[] tags = PagerAdapterFeeds.getTagsArray();
-      m_adapterNavDrawer.setArrays(tags, result);
+      m_adapterNavDrawer.setArrays(PagerAdapterFeeds.TAG_LIST, result);
       m_adapterNavDrawer.notifyDataSetChanged();
 
       /* Update the subtitle if actionBar != null. */
