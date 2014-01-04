@@ -19,8 +19,8 @@ class AdapterTags extends BaseAdapter
    private static final int TYPE_IMAGE = 1;
    private static final int TYPE_IMAGE_SANS_DESCRIPTION = 2;
    private static final int TYPE_PLAIN_SANS_DESCRIPTION = 3;
+   final List<Long> m_times = new ArrayList<Long>(0);
    private final List<FeedItem> m_feedItems = new ArrayList<FeedItem>(0);
-   private final List<Long> m_times = new ArrayList<Long>(0);
    private final Context m_context;
    private final String m_applicationFolder;
    boolean m_isReadingItems = true;
@@ -39,12 +39,6 @@ class AdapterTags extends BaseAdapter
       m_times.addAll(0, longList);
    }
 
-   /* Do not edit the list once you get it. */
-   List<Long> getTimeList()
-   {
-      return m_times;
-   }
-
    @Override
    public
    int getItemViewType(int position)
@@ -52,24 +46,10 @@ class AdapterTags extends BaseAdapter
       FeedItem feedItem = m_feedItems.get(position);
 
       boolean isImage = !feedItem.m_imageName.isEmpty();
-      boolean isDescription = !feedItem.m_descriptionOne.isEmpty();
+      boolean isDes = !feedItem.m_desLines[0].isEmpty();
 
-      int type;
-
-      if(isImage && isDescription)
-      {
-         type = TYPE_IMAGE;
-      }
-      else if(isImage)
-      {
-         type = TYPE_IMAGE_SANS_DESCRIPTION;
-      }
-      else
-      {
-         type = isDescription ? TYPE_PLAIN : TYPE_PLAIN_SANS_DESCRIPTION;
-      }
-
-      return type;
+      return isImage ? isDes ? TYPE_IMAGE : TYPE_IMAGE_SANS_DESCRIPTION
+            : isDes ? TYPE_PLAIN : TYPE_PLAIN_SANS_DESCRIPTION;
    }
 
    @Override
@@ -104,36 +84,32 @@ class AdapterTags extends BaseAdapter
    public
    View getView(int position, View convertView, ViewGroup parent)
    {
-      boolean isNewView = null == convertView;
       int viewType = getItemViewType(position);
       FeedItem item = m_feedItems.get(position);
 
       //Long time = item.m_time;
       //boolean isRead = READ_ITEM_TIMES.contains(time);
-      boolean hasImage = TYPE_IMAGE == viewType || TYPE_IMAGE_SANS_DESCRIPTION == viewType;
+      boolean hasImg = TYPE_IMAGE == viewType || TYPE_IMAGE_SANS_DESCRIPTION == viewType;
       boolean hasDes = TYPE_PLAIN == viewType || TYPE_IMAGE == viewType;
 
       ViewCustom view = (ViewCustom) convertView;
 
-      if(isNewView)
+      if(null == convertView)
       {
-         if(hasImage)
-         {
-            view = hasDes ? new ViewImageFeed(m_context, 560)
-                  : new ViewImageSansDesFeed(m_context, 460);
-         }
-         else
-         {
-            view = hasDes ? new ViewBasicFeed(m_context, 180)
-                  : new ViewBasicSansDesFeed(m_context, 90);
-         }
+         view = new ViewCustom(m_context, hasImg ? hasDes ? 560 : 460 : hasDes ? 180 : 90);
       }
 
-      view.setTexts(item.m_title, item.m_url, item.m_urlFull, item.m_descriptionOne,
-            item.m_descriptionTwo, item.m_descriptionThree);
+      /* Set the information. */
+      view.m_title = item.m_title;
+      view.m_link = item.m_url;
+      view.m_linkFull = item.m_urlFull;
+      if(hasDes)
+      {
+         System.arraycopy(item.m_desLines, 0, view.m_desLines, 0, 3);
+      }
 
       /* If the view was an image, load the image. */
-      if(hasImage)
+      if(hasImg)
       {
          view.setBitmap(null);
          view.setTag(position);

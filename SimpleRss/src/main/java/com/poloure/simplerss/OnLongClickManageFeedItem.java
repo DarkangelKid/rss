@@ -12,18 +12,15 @@ class OnLongClickManageFeedItem implements AdapterView.OnItemLongClickListener
    private final ListView m_listView;
    private final AlertDialog.Builder m_builder;
    private final String m_applicationFolder;
-   private final String m_allTag;
    private final PagerAdapterFeeds m_pagerAdapterFeeds;
    private final BaseAdapter m_navigationAdapter;
 
    OnLongClickManageFeedItem(ListView listView, PagerAdapterFeeds pagerAdapterFeeds,
-         BaseAdapter navigationAdapter, AlertDialog.Builder builder, String applicationFolder,
-         String allTag)
+         BaseAdapter navigationAdapter, AlertDialog.Builder builder, String applicationFolder)
    {
       m_listView = listView;
       m_pagerAdapterFeeds = pagerAdapterFeeds;
       m_navigationAdapter = navigationAdapter;
-      m_allTag = allTag;
       m_builder = builder;
       m_applicationFolder = applicationFolder;
    }

@@ -106,12 +106,10 @@ class ListFragmentManageFeeds extends ListFragment
       ListView navigationDrawer = (ListView) activity.findViewById(R.id.navigation_drawer);
       BaseAdapter navigationAdapter = (BaseAdapter) navigationDrawer.getAdapter();
 
-      String allTag = activity.getString(R.string.all_tag);
-
       setListAdapter(listAdapter);
       listView.setOnItemLongClickListener(
             new OnLongClickManageFeedItem(listView, pagerAdapterFeeds, navigationAdapter, build,
-                  applicationFolder, allTag));
+                  applicationFolder));
       AsyncManageFeedsRefresh.newInstance(listView, applicationFolder);
    }
 }

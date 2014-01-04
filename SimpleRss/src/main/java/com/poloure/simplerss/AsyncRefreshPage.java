@@ -87,7 +87,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       Map<Long, FeedItem> map = new TreeMap<Long, FeedItem>(reverse);
 
       AdapterTags adapterTag = (AdapterTags) m_listView.getAdapter();
-      List<Long> timeListInAdapter = adapterTag.getTimeList();
+      List<Long> timeListInAdapter = adapterTag.m_times;
 
       int feedsLength = feedNames.length;
       for(int j = 0; j < feedsLength; j++)
@@ -137,9 +137,11 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
                boolean desTooShort = null == descriptionsX[i] ||
                                      MIN_DESCRIPTION_LENGTH > descriptionsX[i].length();
 
-               data.m_descriptionOne = desTooShort ? "" : descriptionsX[i];
-               data.m_descriptionTwo = desTooShort ? "" : descriptionsY[i];
-               data.m_descriptionThree = desTooShort ? "" : descriptionsZ[i];
+               String[] desLines = {descriptionsX[i], descriptionsY[i], descriptionsZ[i]};
+               for(int k = 0; 3 > k; k++)
+               {
+                  data.m_desLines[k] = desTooShort ? "" : desLines[k];
+               }
 
                data.m_time = fastParseLong(times[i]);
 
@@ -215,7 +217,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
       int index = 0;
       long timeBefore = 0L;
       AdapterTags adapterTag = (AdapterTags) m_listView.getAdapter();
-      List<Long> timeListInAdapter = adapterTag.getTimeList();
+      List<Long> timeListInAdapter = adapterTag.m_times;
 
       boolean notFirstLoad = 0 != m_listView.getCount();
 

@@ -62,9 +62,6 @@ class ListFragmentTag extends ListFragment
 
       if(0 == position)
       {
-         /* This forces the paint object to be created to the page refresh knows sizes. */
-         new ViewCustom(activity, 0);
-
          AsyncRefreshPage.newInstance(0, listView, applicationFolder, true);
       }
    }

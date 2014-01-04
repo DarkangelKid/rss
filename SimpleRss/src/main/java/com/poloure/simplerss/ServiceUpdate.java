@@ -85,6 +85,9 @@ class ServiceUpdate extends IntentService
       int page = intent.getIntExtra("GROUP_NUMBER", 0);
       String applicationFolder = FeedsActivity.getApplicationFolder(this);
 
+      /* Make a new paint object. */
+      new ViewCustom(this, 0);
+
       /* Get the tagList (from disk if it is empty). */
       List<String> tagList = PagerAdapterFeeds.TAG_LIST;
       if(tagList.isEmpty())
@@ -311,7 +314,7 @@ class ServiceUpdate extends IntentService
                feedItemBuilder.append(ITEM_SEPARATOR);
 
                feedItemBuilder.append(INDEX_LINK_TRIMMED);
-               feedItemBuilder = appendFitToScreen(feedItemBuilder, link, screenWidth);
+               feedItemBuilder = appendFitToScreen(feedItemBuilder, link, screenWidth, 1);
                feedItemBuilder.append(ITEM_SEPARATOR);
             }
 
@@ -374,7 +377,7 @@ class ServiceUpdate extends IntentService
 
                /* "title|". */
                feedItemBuilder.append(INDEX_TITLE);
-               feedItemBuilder = appendFitToScreen(feedItemBuilder, content, screenWidth);
+               feedItemBuilder = appendFitToScreen(feedItemBuilder, content, screenWidth, 0);
                feedItemBuilder.append(ITEM_SEPARATOR);
             }
 
@@ -497,7 +500,7 @@ class ServiceUpdate extends IntentService
       String contentCopy = content;
       for(int x = 0; 3 > x; x++)
       {
-         int desChars = ViewBasicFeed.DES_PAINT
+         int desChars = ViewCustom.PAINTS[2]
                .breakText(contentCopy, true, screenWidth - 40.0F, null);
          int desSpace = contentCopy.lastIndexOf(' ', desChars);
          desChars = -1 == desSpace ? desChars : desSpace + 1;
@@ -513,14 +516,13 @@ class ServiceUpdate extends IntentService
    }
 
    private static
-   StringBuilder appendFitToScreen(StringBuilder builder, String content, int screenWidth)
+   StringBuilder appendFitToScreen(StringBuilder builder, String content, int screenWidth, int ind)
    {
-      int titleChars = ViewBasicFeed.TITLE_PAINT
-            .breakText(content, true, screenWidth - 40.0F, null);
+      int chars = ViewCustom.PAINTS[ind].breakText(content, true, screenWidth - 40.0F, null);
 
-      int titleSpace = content.lastIndexOf(' ', titleChars);
+      int space = content.lastIndexOf(' ', chars);
 
-      String trimmed = content.substring(0, -1 == titleSpace ? titleChars : titleSpace);
+      String trimmed = content.substring(0, -1 == space ? chars : space);
       builder.append(trimmed);
 
       return builder;
@@ -648,7 +650,7 @@ class ServiceUpdate extends IntentService
          bitmap = Bitmap.createScaledBitmap(bitmap, (int) screenWidth, height, false);
 
          /* Shrink it to IMAGE_HEIGHT. */
-         int newHeight = Math.min(bitmap.getHeight(), ViewImageFeed.IMAGE_HEIGHT);
+         int newHeight = Math.min(bitmap.getHeight(), ViewCustom.IMAGE_HEIGHT);
          bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), newHeight);
 
          try
