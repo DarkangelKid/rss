@@ -18,7 +18,7 @@ class OnClickManageFeedDialogItem implements DialogInterface.OnClickListener
    private final BaseAdapter m_navigationAdapter;
 
    OnClickManageFeedDialogItem(ListView listView, PagerAdapterFeeds pagerAdapterFeeds,
-         BaseAdapter navigationAdapter, String feedName, String applicationFolder, String allTag)
+         BaseAdapter navigationAdapter, String feedName, String applicationFolder)
    {
       m_listView = listView;
       m_pagerAdapterFeeds = pagerAdapterFeeds;

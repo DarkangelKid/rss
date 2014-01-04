@@ -1,7 +1,6 @@
 package com.poloure.simplerss;
 
 import android.app.AlertDialog;
-import android.support.v13.app.FragmentPagerAdapter;
 import android.view.View;
 import android.widget.Adapter;
 import android.widget.AdapterView;
@@ -40,7 +39,7 @@ class OnLongClickManageFeedItem implements AdapterView.OnItemLongClickListener
 
       m_builder.setItems(R.array.long_click_manage_feeds,
             new OnClickManageFeedDialogItem(m_listView, m_pagerAdapterFeeds, m_navigationAdapter,
-                  feedName, m_applicationFolder, m_allTag));
+                  feedName, m_applicationFolder));
       m_builder.show();
       return true;
    }

@@ -25,27 +25,7 @@ class OnFeedItemLongClick implements AdapterView.OnItemLongClickListener
    public
    boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id)
    {
-      String urlView = "";
-
-      Class type = view.getClass();
-
-      if(type.equals(ViewBasicFeed.class))
-      {
-         urlView = ((ViewBasicFeed) view).m_linkFull;
-      }
-      else if(type.equals(ViewImageFeed.class))
-      {
-         urlView = ((ViewImageFeed) view).m_linkFull;
-      }
-      else if(type.equals(ViewBasicSansDesFeed.class))
-      {
-         urlView = ((ViewBasicSansDesFeed) view).m_linkFull;
-      }
-      else if(type.equals(ViewImageSansDesFeed.class))
-      {
-         urlView = ((ViewImageSansDesFeed) view).m_linkFull;
-      }
-
+      String urlView = ((ViewCustom) view).m_linkFull;
       String link = urlView.trim();
 
       DialogInterface.OnClickListener onClick = new OnContextMenuClick(link);

@@ -1,13 +1,7 @@
 package com.poloure.simplerss;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.util.DisplayMetrics;
-import android.util.TypedValue;
-import android.view.View;
 
 class ViewBasicFeed extends ViewCustom
 {

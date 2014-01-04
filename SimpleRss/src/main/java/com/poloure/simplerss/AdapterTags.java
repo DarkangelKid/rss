@@ -120,7 +120,7 @@ class AdapterTags extends BaseAdapter
          if(hasImage)
          {
             view = hasDes ? new ViewImageFeed(m_context, 560)
-                 : new ViewImageSansDesFeed(m_context, 460);
+                  : new ViewImageSansDesFeed(m_context, 460);
          }
          else
          {
@@ -129,13 +129,13 @@ class AdapterTags extends BaseAdapter
          }
       }
 
-      view.setBitmap(null);
       view.setTexts(item.m_title, item.m_url, item.m_urlFull, item.m_descriptionOne,
             item.m_descriptionTwo, item.m_descriptionThree);
 
       /* If the view was an image, load the image. */
       if(hasImage)
       {
+         view.setBitmap(null);
          view.setTag(position);
          AsyncLoadImage
                .newInstance(view, m_applicationFolder, item.m_imageName, position, m_context);

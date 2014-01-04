@@ -3,7 +3,6 @@ package com.poloure.simplerss;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.AsyncTask;
-import android.support.v13.app.FragmentPagerAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;

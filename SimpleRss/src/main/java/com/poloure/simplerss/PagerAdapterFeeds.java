@@ -6,7 +6,6 @@ import android.content.Context;
 import android.support.v13.app.FragmentPagerAdapter;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;

@@ -491,13 +491,14 @@ class ServiceUpdate extends IntentService
       }
    }
 
-   private
+   private static
    StringBuilder appendDesLines(StringBuilder builder, String content, int screenWidth)
    {
       String contentCopy = content;
       for(int x = 0; 3 > x; x++)
       {
-         int desChars = ViewBasicFeed.DES_PAINT.breakText(contentCopy, true, screenWidth - 40.0F, null);
+         int desChars = ViewBasicFeed.DES_PAINT
+               .breakText(contentCopy, true, screenWidth - 40.0F, null);
          int desSpace = contentCopy.lastIndexOf(' ', desChars);
          desChars = -1 == desSpace ? desChars : desSpace + 1;
 
@@ -511,11 +512,11 @@ class ServiceUpdate extends IntentService
       return builder;
    }
 
-   private
+   private static
    StringBuilder appendFitToScreen(StringBuilder builder, String content, int screenWidth)
    {
       int titleChars = ViewBasicFeed.TITLE_PAINT
-            .breakText(content, true, (float) screenWidth - 40.0F, null);
+            .breakText(content, true, screenWidth - 40.0F, null);
 
       int titleSpace = content.lastIndexOf(' ', titleChars);
 

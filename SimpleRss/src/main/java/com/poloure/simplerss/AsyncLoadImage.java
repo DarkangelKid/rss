@@ -14,21 +14,21 @@ import java.lang.ref.WeakReference;
 class AsyncLoadImage extends AsyncTask<Object, Void, Bitmap>
 {
    private static final int IMAGE_FADE_IN_DURATION = 666;
-   private final WeakReference<View> m_imageView;
-   private final int m_imageViewTag;
+   private final WeakReference<ViewCustom> m_view;
+   private final int m_viewTag;
 
    private
-   AsyncLoadImage(View imageView, int imageViewTag)
+   AsyncLoadImage(ViewCustom view, int viewTag)
    {
-      m_imageView = new WeakReference<View>(imageView);
-      m_imageViewTag = imageViewTag;
+      m_view = new WeakReference<ViewCustom>(view);
+      m_viewTag = viewTag;
    }
 
    static
-   void newInstance(View imageView, String applicationFolder, String imageName, int imageViewTag,
+   void newInstance(ViewCustom view, String applicationFolder, String imageName, int viewTag,
          Context context)
    {
-      AsyncTask<Object, Void, Bitmap> task = new AsyncLoadImage(imageView, imageViewTag);
+      AsyncTask<Object, Void, Bitmap> task = new AsyncLoadImage(view, viewTag);
 
       task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, applicationFolder, imageName, context);
    }
@@ -46,7 +46,7 @@ class AsyncLoadImage extends AsyncTask<Object, Void, Bitmap>
       fadeIn.setFillAfter(true);
       fadeIn.setInterpolator(new DecelerateInterpolator());
 
-      View viewReference = m_imageView.get();
+      View viewReference = m_view.get();
       if(null == viewReference)
       {
          cancel(true);
@@ -65,18 +65,10 @@ class AsyncLoadImage extends AsyncTask<Object, Void, Bitmap>
          return;
       }
 
-      View imageView = m_imageView.get();
-      if(null != imageView && (Integer) imageView.getTag() == m_imageViewTag && null != result)
+      ViewCustom view = m_view.get();
+      if(null != view && (Integer) view.getTag() == m_viewTag && null != result)
       {
-         Class type = imageView.getClass();
-         if(type.equals(ViewImageFeed.class))
-         {
-            ((ViewImageFeed) imageView).setBitmap(result);
-         }
-         else
-         {
-            ((ViewImageSansDesFeed) imageView).setBitmap(result);
-         }
+         view.setBitmap(result);
       }
    }
 }
