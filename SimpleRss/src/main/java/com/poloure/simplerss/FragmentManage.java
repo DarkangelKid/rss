@@ -22,7 +22,8 @@ import android.widget.ListView;
 public
 class FragmentManage extends Fragment
 {
-   final ListView m_listView;
+   private final ListView m_listView;
+   static final int LIST_VIEW_MANAGE = 5634126;
 
    FragmentManage(Activity activity)
    {
@@ -36,6 +37,7 @@ class FragmentManage extends Fragment
 
       BaseAdapter baseAdapter = new AdapterManageFragments(activity);
       fragment.m_listView.setAdapter(baseAdapter);
+      fragment.m_listView.setId(LIST_VIEW_MANAGE);
 
       /* Set the onItemClickListener that makes the EditDialog show. */
       fragment.m_listView.setOnItemClickListener(new AdapterView.OnItemClickListener()
@@ -48,13 +50,6 @@ class FragmentManage extends Fragment
             dialog.show();
          }
       });
-
-      /* Set the background to white.*/
-      fragment.m_listView.setBackgroundColor(Color.WHITE);
-
-      /* Create a slight grey divider. */
-      fragment.m_listView.setDivider(new ColorDrawable(Color.argb(255, 237, 237, 237)));
-      fragment.m_listView.setDividerHeight(2);
 
       /* Make an alertDialog for the long click of a list item. */
       AlertDialog.Builder build = new AlertDialog.Builder(activity);
@@ -79,6 +74,13 @@ class FragmentManage extends Fragment
    public
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
+      /* Set the background to white.*/
+      m_listView.setBackgroundColor(Color.WHITE);
+
+      /* Create a slight grey divider. */
+      m_listView.setDivider(new ColorDrawable(Color.argb(255, 237, 237, 237)));
+      m_listView.setDividerHeight(2);
+
       return m_listView;
    }
 

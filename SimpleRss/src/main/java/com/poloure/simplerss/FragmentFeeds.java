@@ -1,6 +1,5 @@
 package com.poloure.simplerss;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -21,7 +20,6 @@ class FragmentFeeds extends Fragment
 {
    static final int VIEW_PAGER_ID = 10000;
    static final String FRAGMENT_ID_PREFIX = "android:switcher:10000:";
-   private static final int PAGER_TITLE_STRIP_ID = 165143;
 
    static
    Fragment newInstance()
@@ -33,29 +31,28 @@ class FragmentFeeds extends Fragment
    public
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
-      Activity context = getActivity();
+      Activity activity = getActivity();
 
       if(null == container)
       {
-         return new View(context);
+         return new View(activity);
       }
 
       setHasOptionsMenu(true);
-      ActionBar actionBar = context.getActionBar();
-      FragmentManager fragmentManager = context.getFragmentManager();
-      String applicationFolder = FeedsActivity.getApplicationFolder(context);
 
-      ListView navigationList = (ListView) context.findViewById(R.id.navigation_drawer);
+      ListView navigationList = (ListView) activity.findViewById(R.id.navigation_drawer);
       BaseAdapter navigationAdapter = (BaseAdapter) navigationList.getAdapter();
 
-      ViewPager.OnPageChangeListener onTagPageChange = new OnPageChangeTags(fragmentManager,
-            actionBar, navigationAdapter, applicationFolder);
+      String applicationFolder = FeedsActivity.getApplicationFolder(activity);
+      ViewPager.OnPageChangeListener onTagPageChange = new OnPageChangeTags(activity,
+            navigationAdapter, applicationFolder);
 
+      FragmentManager fragmentManager = activity.getFragmentManager();
       PagerAdapterFeeds adapter = new PagerAdapterFeeds(fragmentManager);
-      adapter.updateTags(applicationFolder, context);
+      adapter.updateTags(applicationFolder, activity);
 
       /* Create the ViewPager. */
-      ViewPager viewPager = ViewPagerStrip.newInstance(context, PAGER_TITLE_STRIP_ID);
+      ViewPager viewPager = ViewPagerStrip.newInstance(activity);
       viewPager.setAdapter(adapter);
       viewPager.setOnPageChangeListener(onTagPageChange);
       viewPager.setId(VIEW_PAGER_ID);

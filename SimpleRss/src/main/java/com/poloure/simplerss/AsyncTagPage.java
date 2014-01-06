@@ -1,6 +1,5 @@
 package com.poloure.simplerss;
 
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.view.View;
 import android.widget.Adapter;
@@ -38,32 +37,6 @@ class AsyncTagPage extends AsyncTask<Integer, Object, Void>
 
       task.executeOnExecutor(THREAD_POOL_EXECUTOR, pageNumber);
    }
-
-   /*private static
-   boolean containsArabic(String text)
-   {
-      char[] chars = text.toCharArray();
-      for(int i : chars)
-      {
-         if(0x600 <= i && 0x6ff >= i)
-         {
-            return true;
-         }
-         if(0x750 <= i && 0x77f >= i)
-         {
-            return true;
-         }
-         if(0xfb50 <= i && 0xfc3f >= i)
-         {
-            return true;
-         }
-         if(0xfe70 <= i && 0xfefc >= i)
-         {
-            return true;
-         }
-      }
-      return false;
-   }*/
 
    @Override
    protected
@@ -148,12 +121,6 @@ class AsyncTagPage extends AsyncTask<Integer, Object, Void>
                data.m_title = null == titles[i] ? "" : titles[i];
                data.m_url = null == trimmedLinks[i] ? "" : trimmedLinks[i];
                data.m_urlFull = links[i];
-
-               /* TODO */
-               /*if(containsArabic(itemTitle))
-               {
-                  editable.append((char) 0x200F);
-               }*/
 
                /* Do not add duplicates, do not add read items if opacity == 0 */
                boolean notInAdapter = !timeListInAdapter.contains(data.m_time);
@@ -265,7 +232,6 @@ class AsyncTagPage extends AsyncTask<Integer, Object, Void>
       }
       else
       {
-         m_listView.setBackgroundColor(Color.TRANSPARENT);
          FeedsActivity.gotoLatestUnread(m_listView);
       }
    }

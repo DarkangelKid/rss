@@ -18,7 +18,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
-import java.io.Closeable;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -72,6 +72,33 @@ class ServiceUpdate extends IntentService
    ServiceUpdate()
    {
       super("Service");
+   }
+
+   private static
+   void collection(String fileName, Iterable<?> content, String fileFolder)
+   {
+      if(Read.isUnmounted())
+      {
+         return;
+      }
+
+      BufferedWriter out = Write.open(fileFolder + fileName, false);
+
+      try
+      {
+         for(Object item : content)
+         {
+            out.write(item + Write.NEW_LINE);
+         }
+      }
+      catch(IOException e)
+      {
+         e.printStackTrace();
+      }
+      finally
+      {
+         Read.close(out);
+      }
    }
 
    @Override
@@ -421,7 +448,7 @@ class ServiceUpdate extends IntentService
             List<String> valueList = Arrays.asList(mapValues);
             List<Long> keyList = Arrays.asList(mapKeys);
 
-            Write.collection(contentFileName, valueList, applicationFolder);
+            collection(contentFileName, valueList, applicationFolder);
             Write.longSet(longFileName, keyList, applicationFolder);
 
             return;
@@ -555,7 +582,7 @@ class ServiceUpdate extends IntentService
          }
          finally
          {
-            close(out);
+            Read.close(out);
          }
       }
       else
@@ -583,7 +610,7 @@ class ServiceUpdate extends IntentService
          Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, o2);
 
          /* Scale it to the screen width. */
-         bitmap = Bitmap.createScaledBitmap(bitmap, (int) screenWidth, height, false);
+         bitmap = Bitmap.createScaledBitmap(bitmap, Math.round(screenWidth), height, false);
 
          /* Shrink it to IMAGE_HEIGHT. */
          int newHeight = Math.min(bitmap.getHeight(), ViewCustom.IMAGE_HEIGHT);
@@ -604,27 +631,11 @@ class ServiceUpdate extends IntentService
          }
          finally
          {
-            close(out);
+            Read.close(out);
          }
       }
 
       return builder;
-   }
-
-   private static
-   void close(Closeable c)
-   {
-      if(null == c)
-      {
-         return;
-      }
-      try
-      {
-         c.close();
-      }
-      catch(IOException ignored)
-      {
-      }
    }
 
    /* index throws an ArrayOutOfBoundsException if not handled. */

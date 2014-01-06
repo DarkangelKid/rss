@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-   <color name="custom_theme_color">#00000000</color>
+   <color name="transparent">#00000000</color>
 
    <style name="Transparent" parent="android:Theme.Holo.Light.DarkActionBar">
-      <item name="android:windowBackground">@color/custom_theme_color</item>
-      <item name="android:colorBackground">@color/custom_theme_color</item>
+      <item name="android:windowBackground">@color/transparent</item>
+      <item name="android:colorBackground">@color/transparent</item>
    </style>
 
 </resources>

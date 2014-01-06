@@ -94,6 +94,9 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, int[]>
       if(null != m_actionBar)
       {
          String unread = m_adapterNavDrawer.getItem(m_currentPage);
+
+         /* TODO */
+         /* String unreadText = context.getString(R.string.subtitle_unread); */
          m_actionBar.setSubtitle("Unread: " + unread);
       }
    }

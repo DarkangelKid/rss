@@ -15,6 +15,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,6 +58,42 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
             applicationFolder);
 
       task.executeOnExecutor(THREAD_POOL_EXECUTOR);
+   }
+
+   private static
+   void moveFile(String originalName, String resultingName, String storage)
+   {
+      File originalFile = new File(storage + originalName);
+      File resultingFile = new File(storage + resultingName);
+
+      originalFile.renameTo(resultingFile);
+   }
+
+   /* Function should be safe, returns false if fails. */
+   static
+   void AppendToIndex(String lineToAppend, String applicationFolder)
+   {
+      if(Read.isUnmounted())
+      {
+         return;
+      }
+
+      String filePath = applicationFolder + Read.INDEX;
+
+      BufferedWriter out = Write.open(filePath, true);
+
+      try
+      {
+         out.write(lineToAppend);
+      }
+      catch(IOException e)
+      {
+         e.printStackTrace();
+      }
+      finally
+      {
+         Read.close(out);
+      }
    }
 
    @Override
@@ -258,17 +295,17 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
 
             if(!m_oldFeedName.equals(finalTitle))
             {
-               Write.moveFile(oldFeedFolder, newFeedFolder, m_applicationFolder);
+               moveFile(oldFeedFolder, newFeedFolder, m_applicationFolder);
             }
 
-            Write.editLine(Read.INDEX, m_oldFeedName, true, m_applicationFolder, Write.MODE_REPLACE,
+            Write.editIndexLineContaining(m_oldFeedName, m_applicationFolder, Write.MODE_REPLACE,
                   feedInfo);
 
          }
          else
          {
             /* Save the feed to the index. */
-            Write.single(Read.INDEX, feedInfo, m_applicationFolder);
+            AppendToIndex(feedInfo, m_applicationFolder);
          }
 
          /* Update the PagerAdapter for the tag fragments. */
@@ -281,8 +318,13 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
          BaseAdapter navigationAdapter = (BaseAdapter) navigationDrawer.getAdapter();
          AsyncNavigationAdapter.newInstance(navigationAdapter, m_applicationFolder);
 
-         /* TODO Get the manage ListView. */
-         //AsyncManage.newInstance(m_listView, m_applicationFolder);
+         /* Get the manage ListView and update it. */
+         ListView listView = (ListView) m_activity.findViewById(FragmentManage.LIST_VIEW_MANAGE);
+         if(null != listView)
+         {
+            BaseAdapter adapter = (BaseAdapter) listView.getAdapter();
+            AsyncManage.newInstance(adapter, m_applicationFolder);
+         }
 
          m_dialog.dismiss();
       }

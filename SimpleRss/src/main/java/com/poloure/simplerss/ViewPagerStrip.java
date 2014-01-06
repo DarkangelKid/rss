@@ -16,6 +16,7 @@ class ViewPagerStrip extends ViewPager
    private static final int PAGER_TAB_STRIP_BACKGROUND = Color.parseColor("#404040");
    private static final float TEXT_VERTICAL_PADDING = 4.0F;
    private static final float PAGER_TAB_STRIP_TEXT_SIZE = 14.0F;
+   private static final int PAGER_TITLE_STRIP_ID = 165143;
    private static final LayoutParams LAYOUT_PARAMS = new LayoutParams();
 
    static
@@ -32,11 +33,11 @@ class ViewPagerStrip extends ViewPager
    }
 
    static
-   ViewPager newInstance(Context context, int pagerTitleStripId)
+   ViewPager newInstance(Context context)
    {
       /* Create the PagerTitleStrip. */
       PagerTitleStrip pagerTitleStrip = new PagerTitleStrip(context);
-      pagerTitleStrip.setId(pagerTitleStripId);
+      pagerTitleStrip.setId(PAGER_TITLE_STRIP_ID);
       pagerTitleStrip.setGravity(Gravity.START);
 
       /* Configure the PagerTitleStrip. */

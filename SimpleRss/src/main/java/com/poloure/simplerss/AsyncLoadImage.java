@@ -6,14 +6,12 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.animation.DecelerateInterpolator;
 
 import java.lang.ref.WeakReference;
 
 class AsyncLoadImage extends AsyncTask<Object, Void, Bitmap>
 {
-   private static final int IMAGE_FADE_IN_DURATION = 666;
+   private static final int IMAGE_FADE_IN_DURATION = 166;
    private final WeakReference<ViewCustom> m_view;
    private final int m_viewTag;
 
@@ -41,10 +39,6 @@ class AsyncLoadImage extends AsyncTask<Object, Void, Bitmap>
 
       BitmapFactory.Options o = new BitmapFactory.Options();
       o.inSampleSize = 1;
-      Animation fadeIn = new AlphaAnimation(0.0F, 1.0F);
-      fadeIn.setDuration(IMAGE_FADE_IN_DURATION);
-      fadeIn.setFillAfter(true);
-      fadeIn.setInterpolator(new DecelerateInterpolator());
 
       View viewReference = m_view.get();
       if(null == viewReference)
@@ -68,7 +62,11 @@ class AsyncLoadImage extends AsyncTask<Object, Void, Bitmap>
       ViewCustom view = m_view.get();
       if(null != view && (Integer) view.getTag() == m_viewTag && null != result)
       {
+         AlphaAnimation animation = new AlphaAnimation(0.0F, 1.0F);
+         animation.setDuration(IMAGE_FADE_IN_DURATION);
+         animation.setFillAfter(true);
          view.setBitmap(result);
+         view.setAnimation(animation);
       }
    }
 }

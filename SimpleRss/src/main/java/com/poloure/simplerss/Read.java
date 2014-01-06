@@ -5,14 +5,15 @@ import android.os.Environment;
 import org.apache.http.util.ByteArrayBuffer;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.LinkedHashSet;
@@ -24,22 +25,12 @@ class Read
    static final String INDEX = "index.txt";
    private static final Pattern SPLIT_NEWLINE = Pattern.compile("\n");
    private static final char ITEM_SEPARATOR = '|';
-   private static final int COUNT_BUFFER_SIZE = 8096;
    private static final int FILE_BUFFER_SIZE = 8096;
-
-   /* All functions in here must check that the media is available before
-    * continuing. */
 
    static
    String[][] csvFile(String fileName, String applicationFolder, char... type)
    {
-      return csvFile(fileName, applicationFolder, false, type);
-   }
-
-   static
-   String[][] csvFile(String fileName, String applicationFolder, boolean skip, char... type)
-   {
-      if(skip || isUnmounted())
+      if(isUnmounted())
       {
          return new String[type.length][0];
       }
@@ -127,21 +118,8 @@ class Read
          }
          finally
          {
-            if(null != f)
-            {
-               f.close();
-            }
+            close(f);
          }
-      }
-      catch(FileNotFoundException ignored)
-      {
-         //e.printStackTrace();
-         return new String[0];
-      }
-      catch(UnsupportedEncodingException e)
-      {
-         e.printStackTrace();
-         return new String[0];
       }
       catch(IOException e)
       {
@@ -162,53 +140,16 @@ class Read
    }
 
    static
-   int count(String fileName, String applicationFolder)
+   BufferedReader open(String file)
    {
-      if(isUnmounted())
-      {
-         return 0;
-      }
-
-      String filePath = applicationFolder + fileName;
-      int count = 0;
-
       try
       {
-         InputStream is = new BufferedInputStream(new FileInputStream(filePath));
-         try
-         {
-            byte[] c = new byte[COUNT_BUFFER_SIZE];
-            int readChars;
-            boolean endsWithoutNewLine = false;
-            while(-1 != (readChars = is.read(c)))
-            {
-               for(int i = 0; i < readChars; ++i)
-               {
-                  if('\n' == c[i])
-                  {
-                     ++count;
-                  }
-               }
-               endsWithoutNewLine = '\n' != c[readChars - 1];
-            }
-            if(endsWithoutNewLine)
-            {
-               ++count;
-            }
-         }
-         finally
-         {
-            is.close();
-         }
+         return new BufferedReader(new FileReader(file));
       }
       catch(FileNotFoundException ignored)
       {
+         return null;
       }
-      catch(IOException ignored)
-      {
-      }
-
-      return count;
    }
 
    static
@@ -247,13 +188,26 @@ class Read
          }
 
       }
-      catch(FileNotFoundException ignored)
-      {
-      }
       catch(IOException e)
       {
          e.printStackTrace();
       }
       return longSet;
+   }
+
+   static
+   void close(Closeable c)
+   {
+      if(null == c)
+      {
+         return;
+      }
+      try
+      {
+         c.close();
+      }
+      catch(IOException ignored)
+      {
+      }
    }
 }

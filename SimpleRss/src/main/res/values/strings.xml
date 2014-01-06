@@ -13,7 +13,7 @@
    <string name="refresh">Refresh</string>
    <string name="offline">Offline</string>
 
-   <string name="refresh_time_preferences">Refresh Time</string>
+   <string name="subtitle_unread">Unread:</string>
 
    <string name="feed_name_dialog">Feed Name</string>
    <string name="feed_name_hint">optional</string>
@@ -24,7 +24,6 @@
    <string name="feed_tag_hint">tag one, tag two, …</string>
 
    <string name="cancel_dialog">Cancel</string>
-   <string name="add_dialog">Add</string>
    <string name="dialog_checking_feed">Checking…</string>
    <string name="invalid_feed">Invalid feed URL</string>
    <string name="added_feed">Added </string>
@@ -32,11 +31,5 @@
    <string name="accept_dialog">Accept</string>
 
    <string name="all_tag">All</string>
-
-   <string name="notification_title_singular">1 Unread Item</string>
-   <string name="notification_title_plural">%d Unread Items</string>
-   <string name="notification_content_tag_item">%d tag has an unread item</string>
-   <string name="notification_content_tag_items">%d tag has unread items</string>
-   <string name="notification_content_tags">%d tags have unread items</string>
 
 </resources>

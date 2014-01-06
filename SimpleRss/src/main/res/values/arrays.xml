@@ -3,17 +3,6 @@
    <string-array name="card_click_menu">
       <item>Copy URL to clipboard</item>
       <item>Open in browser</item>
-      <item>Save image to storage</item>
-   </string-array>
-
-   <string-array name="manage_titles">
-      <item>Tags</item>
-      <item>Feeds</item>
-   </string-array>
-
-   <string-array name="settings_titles">
-      <item>Functions</item>
-      <item>Interface</item>
    </string-array>
 
    <string-array name="navigation_titles">

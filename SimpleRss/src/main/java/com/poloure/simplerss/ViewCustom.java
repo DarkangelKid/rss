@@ -30,13 +30,20 @@ class ViewCustom extends View
    String m_title;
    String m_link;
    String m_linkFull;
-   String[] m_desLines = new String[3];
+   final String[] m_desLines = new String[3];
    private final int m_height;
 
    @Override
    public
    void onDraw(Canvas canvas)
    {
+      /* If the canvas is meant to draw a bitmap but it is null, draw nothing.
+         NOTE: This value must change if the AdapterTags heights are changing. */
+      if(200 < getHeight() && null == m_image)
+      {
+         return;
+      }
+
       float verticalPosition = drawBase(canvas);
       verticalPosition = drawBitmap(canvas, verticalPosition);
       if(null != m_desLines && 0 != m_desLines.length && null != m_desLines[0])
@@ -62,7 +69,7 @@ class ViewCustom extends View
          PAINTS[i].setTextSize(size);
       }
 
-      setBackgroundColor(Color.WHITE);
+      setBackgroundColor(Color.TRANSPARENT);
       setLayerType(LAYER_TYPE_HARDWARE, null);
       setPadding(eightDp, eightDp, eightDp, eightDp);
    }
@@ -92,10 +99,11 @@ class ViewCustom extends View
 
    void drawDes(Canvas canvas, float verticalPosition)
    {
+      float position = verticalPosition;
       for(int i = 0; 3 > i; i++)
       {
-         canvas.drawText(m_desLines[i], getPaddingLeft(), verticalPosition, PAINTS[2]);
-         verticalPosition += PAINTS[2].getTextSize();
+         canvas.drawText(m_desLines[i], getPaddingLeft(), position, PAINTS[2]);
+         position += PAINTS[2].getTextSize();
       }
    }
 

@@ -5,15 +5,15 @@
       android:id="@+id/add_feed"
       android:icon="@drawable/add"
       android:title="@string/add_feed"
-      android:showAsAction="always"/>
+      android:showAsAction="ifRoom"/>
    <item
       android:id="@+id/unread"
       android:icon="@drawable/unread"
       android:title="@string/unread"
-      android:showAsAction="always"/>
+      android:showAsAction="ifRoom"/>
    <item
       android:id="@+id/refresh"
       android:icon="@drawable/ic_action_refresh"
       android:title="@string/refresh"
-      android:showAsAction="always"/>
+      android:showAsAction="ifRoom"/>
 </menu>

@@ -59,7 +59,7 @@ class OnClickManageFeedDialogItem implements DialogInterface.OnClickListener
       if(isDelete)
       {
          /* Delete the feed. */
-         Write.editLine(Read.INDEX, m_feedName, true, m_applicationFolder, Write.MODE_REMOVE, "");
+         Write.editIndexLineContaining(m_feedName, m_applicationFolder, Write.MODE_REMOVE, "");
 
          /* Show deleted feed toast notification. */
          Context context = ((Dialog) dialog).getContext();

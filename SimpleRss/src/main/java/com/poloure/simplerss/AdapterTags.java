@@ -109,17 +109,6 @@ class AdapterTags extends BaseAdapter
          System.arraycopy(item.m_desLines, 0, view.m_desLines, 0, 3);
       }
 
-      /* If the view was an image, load the image. */
-      if(hasImg)
-      {
-         view.setBitmap(null);
-         view.setTag(position);
-         AsyncLoadImage
-               .newInstance(view, m_applicationFolder, item.m_imageName, position, m_context);
-      }
-
-      /* TODO set colors not alpha. */
-
       /* The logic that tells whether the item is Read or not. */
       boolean isListViewShown = parent.isShown();
       boolean isNotLastItem = position + 1 < getCount();
@@ -128,6 +117,15 @@ class AdapterTags extends BaseAdapter
       {
          FeedItem nextItem = m_feedItems.get(position + 1);
          READ_ITEM_TIMES.add(nextItem.m_time);
+      }
+
+      /* If the view was an image, load the image. */
+      if(hasImg)
+      {
+         view.setBitmap(null);
+         view.setTag(position);
+         AsyncLoadImage
+               .newInstance(view, m_applicationFolder, item.m_imageName, position, m_context);
       }
 
       return view;

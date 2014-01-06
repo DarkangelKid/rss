@@ -57,7 +57,6 @@ class ListFragmentTag extends ListFragment
 
       listView.setOnScrollListener(scrollListener);
       listView.setDividerHeight(0);
-      listView.setBackgroundColor(Color.WHITE);
       listView.setOnItemLongClickListener(new OnFeedItemLongClick(activity));
 
       if(0 == position)
@@ -70,8 +69,13 @@ class ListFragmentTag extends ListFragment
    public
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
-      super.onCreateView(inflater, container, savedInstanceState);
+      ListView listView = new ListView(getActivity());
 
-      return inflater.inflate(R.layout.listview, container, false);
+      /* Set to android.R.id.list so that the ListFragment knows to use this list. */
+      listView.setId(android.R.id.list);
+      listView.setBackgroundColor(Color.WHITE);
+      listView.setFadingEdgeLength(0);
+
+      return listView;
    }
 }

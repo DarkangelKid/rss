@@ -1,6 +1,6 @@
 package com.poloure.simplerss;
 
-import android.app.ActionBar;
+import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.ListFragment;
 import android.support.v4.view.ViewPager;
@@ -13,16 +13,13 @@ class OnPageChangeTags extends SimpleOnPageChangeListener
 {
    /* This is because we steal the unread counts from this BaseAdapter. */
    private final BaseAdapter m_navigationAdapter;
-   private final FragmentManager m_fragmentManager;
-   private final ActionBar m_actionBar;
+   private final Activity m_activity;
    private final String m_applicationFolder;
    private int m_position;
 
-   OnPageChangeTags(FragmentManager fragmentManager, ActionBar actionBar,
-         BaseAdapter navigationAdapter, String applicationFolder)
+   OnPageChangeTags(Activity activity, BaseAdapter navigationAdapter, String applicationFolder)
    {
-      m_fragmentManager = fragmentManager;
-      m_actionBar = actionBar;
+      m_activity = activity;
       m_navigationAdapter = navigationAdapter;
       m_applicationFolder = applicationFolder;
    }
@@ -33,31 +30,32 @@ class OnPageChangeTags extends SimpleOnPageChangeListener
    {
       m_position = position;
 
-      /* Update the ActionBar subtitle. */
+      /* Get the unread count from the navigation drawer Adapter.*/
       String unread = (String) m_navigationAdapter.getItem(position);
-      m_actionBar.setSubtitle("Unread: " + unread);
+
+      /* Set the subtitle to the unread count. */
+      String unreadText = m_activity.getString(R.string.subtitle_unread);
+      m_activity.getActionBar().setSubtitle(unreadText + ' ' + unread);
    }
 
    @Override
    public
    void onPageScrollStateChanged(int state)
    {
-      if(ViewPager.SCROLL_STATE_IDLE != state)
+      if(ViewPager.SCROLL_STATE_IDLE == state)
       {
-         return;
+         /* Refresh the page if it has no items on display. */
+         String fragmentTag = FragmentFeeds.FRAGMENT_ID_PREFIX + m_position;
+         FragmentManager manager = m_activity.getFragmentManager();
+         ListFragment tagFragment = (ListFragment) manager.findFragmentByTag(fragmentTag);
+         Adapter listAdapter = tagFragment.getListAdapter();
+
+         /* If the page has no items in the ListView yet, refresh the page. */
+         if(0 == listAdapter.getCount())
+         {
+            ListView listView = tagFragment.getListView();
+            AsyncTagPage.newInstance(m_position, listView, m_applicationFolder, 0 == m_position);
+         }
       }
-
-      /* Refresh the page if it has no items on display. */
-      String fragmentTag = FragmentFeeds.FRAGMENT_ID_PREFIX + m_position;
-      ListFragment tagFragment = (ListFragment) m_fragmentManager.findFragmentByTag(fragmentTag);
-      Adapter listAdapter = tagFragment.getListAdapter();
-
-      /* If the page has no items in the ListView yet, refresh the page. */
-      if(0 == listAdapter.getCount())
-      {
-         ListView listView = tagFragment.getListView();
-         AsyncTagPage.newInstance(m_position, listView, m_applicationFolder, 0 == m_position);
-      }
-
    }
 }

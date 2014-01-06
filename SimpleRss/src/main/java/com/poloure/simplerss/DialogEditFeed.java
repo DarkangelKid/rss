@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
@@ -91,11 +92,14 @@ class DialogEditFeed extends Dialog
          editTexts[i].setId(IDS[i]);
          editTexts[i].setSingleLine(true);
          editTexts[i].setHint(HINTS[i]);
-         editTexts[i].setText(content[i][m_position]);
+         editTexts[i].setText(-1 == m_position ? "" : content[i][m_position]);
 
          layout.addView(textView);
          layout.addView(editTexts[i]);
       }
+
+      editTexts[1].setImeOptions(InputType.TYPE_TEXT_VARIATION_URI);
+      editTexts[1].setImeOptions(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
 
       /* Get what the feed used to be called. */
       String oldTitle = -1 == m_position ? "" : content[0][m_position];

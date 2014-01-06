@@ -9,7 +9,9 @@ import android.text.style.AbsoluteSizeSpan;
 import android.text.style.StyleSpan;
 import android.widget.BaseAdapter;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 
 class AsyncManage extends AsyncTask<String, Editable[], Void>
 {
@@ -29,6 +31,41 @@ class AsyncManage extends AsyncTask<String, Editable[], Void>
       AsyncTask<String, Editable[], Void> task = new AsyncManage(manageAdapter);
 
       task.executeOnExecutor(THREAD_POOL_EXECUTOR, applicationFolder);
+   }
+
+   private static
+   int count(String fileName, String applicationFolder)
+   {
+      if(Read.isUnmounted())
+      {
+         return 0;
+      }
+
+      BufferedReader read = Read.open(applicationFolder + fileName);
+
+      /* If the file does not exist. */
+      if(null == read)
+      {
+         return 0;
+      }
+
+      int count = 0;
+      try
+      {
+         while(null != read.readLine())
+         {
+            count++;
+         }
+      }
+      catch(IOException ignored)
+      {
+      }
+      finally
+      {
+         Read.close(read);
+      }
+
+      return count;
    }
 
    @Override
@@ -61,7 +98,7 @@ class AsyncManage extends AsyncTask<String, Editable[], Void>
 
          /* Form the path to the feed_content file. */
          String feedContentFileName = feedNames[i] + File.separatorChar + ServiceUpdate.CONTENT;
-         int feedContentSize = Read.count(feedContentFileName, appFolder);
+         int feedContentSize = count(feedContentFileName, appFolder);
          String contentSize = Integer.toString(feedContentSize);
 
          /* Append the url to the next line. */
