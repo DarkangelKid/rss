@@ -1,7 +1,6 @@
 package com.poloure.simplerss;
 
 import android.app.ActionBar;
-import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -58,7 +57,7 @@ class OnClickNavDrawerItem implements AdapterView.OnItemClickListener
       /* Set the ActionBar title without saving the previous title (not changing to navTitle). */
       m_actionBar.setTitle(selectedTitle);
 
-      /* Set the ActionBar subtitle accordingly. */
+      /* TODO (getString(R.string.subtitle_unread)) Set the ActionBar subtitle accordingly. */
       boolean updateSubTitle = feedsWasClicked || tagWasClicked;
       String subtitle = updateSubTitle ? "Unread: " + m_navAdapter.getItem(currentPage) : null;
       m_actionBar.setSubtitle(subtitle);
@@ -79,10 +78,7 @@ class OnClickNavDrawerItem implements AdapterView.OnItemClickListener
 
       if(null == selectedFragment)
       {
-         Activity activity = (Activity) m_drawerLayout.getContext();
-         String applicationFolder = FeedsActivity.getApplicationFolder(activity);
-
-         Fragment fragment = 1 == position ? FragmentManage.newInstance(activity, applicationFolder)
+         Fragment fragment = 1 == position ? FragmentManage.newInstance()
                : FragmentSettings.newInstance();
 
          transaction.add(R.id.content_frame, fragment, selectedTitle);

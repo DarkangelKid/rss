@@ -22,25 +22,30 @@ import android.widget.ListView;
 public
 class FragmentManage extends Fragment
 {
-   private final ListView m_listView;
    static final int LIST_VIEW_MANAGE = 5634126;
 
-   FragmentManage(Activity activity)
+   static
+   Fragment newInstance()
    {
-      m_listView = new ListView(activity);
+      return new FragmentManage();
    }
 
-   static
-   Fragment newInstance(final Activity activity, final String applicationFolder)
+   @Override
+   public
+   View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
-      FragmentManage fragment = new FragmentManage(activity);
+      final Activity activity = (Activity) container.getContext();
+
+      final String applicationFolder = FeedsActivity.getApplicationFolder(activity);
 
       BaseAdapter baseAdapter = new AdapterManageFragments(activity);
-      fragment.m_listView.setAdapter(baseAdapter);
-      fragment.m_listView.setId(LIST_VIEW_MANAGE);
+
+      ListView listView = new ListView(activity);
+      listView.setAdapter(baseAdapter);
+      listView.setId(LIST_VIEW_MANAGE);
 
       /* Set the onItemClickListener that makes the EditDialog show. */
-      fragment.m_listView.setOnItemClickListener(new AdapterView.OnItemClickListener()
+      listView.setOnItemClickListener(new AdapterView.OnItemClickListener()
       {
          @Override
          public
@@ -61,27 +66,20 @@ class FragmentManage extends Fragment
       ListView navigationDrawer = (ListView) activity.findViewById(R.id.navigation_drawer);
       BaseAdapter navigationAdapter = (BaseAdapter) navigationDrawer.getAdapter();
 
-      fragment.m_listView.setOnItemLongClickListener(
-            new OnLongClickManageFeedItem(fragment.m_listView, pagerAdapterFeeds, navigationAdapter,
-                  build, applicationFolder));
+      listView.setOnItemLongClickListener(
+            new OnLongClickManageFeedItem(listView, pagerAdapterFeeds, navigationAdapter, build,
+                  applicationFolder));
+
+      /* Set the background to white.*/
+      listView.setBackgroundColor(Color.WHITE);
+
+      /* Create a slight grey divider. */
+      listView.setDivider(new ColorDrawable(Color.argb(255, 237, 237, 237)));
+      listView.setDividerHeight(2);
 
       AsyncManage.newInstance(baseAdapter, applicationFolder);
 
-      return fragment;
-   }
-
-   @Override
-   public
-   View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
-   {
-      /* Set the background to white.*/
-      m_listView.setBackgroundColor(Color.WHITE);
-
-      /* Create a slight grey divider. */
-      m_listView.setDivider(new ColorDrawable(Color.argb(255, 237, 237, 237)));
-      m_listView.setDividerHeight(2);
-
-      return m_listView;
+      return listView;
    }
 
    @Override
