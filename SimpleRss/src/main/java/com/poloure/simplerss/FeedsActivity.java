@@ -178,11 +178,70 @@ class FeedsActivity extends Activity
             .newInstance((BaseAdapter) m_adapterNavDrawer, m_actionBar, m_applicationFolder, 0);
 
       m_feedsViewPager = (ViewPager) findViewById(FragmentFeeds.VIEW_PAGER_ID);
-      String[] navigationTitles = m_resources.getStringArray(R.array.navigation_titles);
+      final String[] navigationTitles = m_resources.getStringArray(R.array.navigation_titles);
 
       /* Create the OnItemClickLister for the navigation list. */
-      AdapterView.OnItemClickListener onClick = new OnClickNavDrawerItem(m_fragmentManager,
-            m_actionBar, m_drawerLayout, m_adapterNavDrawer, m_feedsViewPager, navigationTitles);
+      AdapterView.OnItemClickListener onClick = new AdapterView.OnItemClickListener()
+      {
+         @Override
+         public
+         void onItemClick(AdapterView<?> parent, View view, int position, long id)
+         {
+            /* Close the drawer on any click. This will call the OnDrawerClose of the DrawerToggle. */
+            m_drawerLayout.closeDrawers();
+
+            boolean tagWasClicked = 3 < position;
+            boolean feedsWasClicked = 0 == position;
+            int currentPage = m_feedsViewPager.getCurrentItem();
+            boolean clickedDifferentPage = currentPage != position;
+            String feedTitle = navigationTitles[0];
+
+            /* Determine the new title based on the position of the item clicked. */
+            String selectedTitle = tagWasClicked ? feedTitle : navigationTitles[position];
+
+            /* If the item selected was a tag, change the FragmentFeeds ViewPager to that page. */
+            if(tagWasClicked && clickedDifferentPage)
+            {
+               m_feedsViewPager.setCurrentItem(position - 4);
+            }
+
+            /* Set the ActionBar title without saving the previous title. */
+            m_actionBar.setTitle(selectedTitle);
+
+            /* TODO (getString(R.string.subtitle_unread)) Set the ActionBar subtitle accordingly. */
+            boolean update = feedsWasClicked || tagWasClicked;
+            String subtitle = update ? "Unread: " + m_adapterNavDrawer.getItem(currentPage) : null;
+            m_actionBar.setSubtitle(subtitle);
+
+            /* Hide all the fragments*/
+            FragmentTransaction transaction = m_fragmentManager.beginTransaction();
+            for(String navigationTitle : navigationTitles)
+            {
+               Fragment frag = m_fragmentManager.findFragmentByTag(navigationTitle);
+               if(null != frag)
+               {
+                  transaction.hide(frag);
+               }
+            }
+
+            /* Get the selected fragment. */
+            Fragment selectedFragment = m_fragmentManager.findFragmentByTag(selectedTitle);
+
+            if(null == selectedFragment)
+            {
+               Fragment fragment = 1 == position ? FragmentManage.newInstance()
+                     : FragmentSettings.newInstance();
+
+               transaction.add(R.id.content_frame, fragment, selectedTitle);
+            }
+            else
+            {
+               transaction.show(selectedFragment);
+            }
+
+            transaction.commit();
+         }
+      };
 
       ListView navigationList = (ListView) findViewById(R.id.navigation_drawer);
       navigationList.setOnItemClickListener(onClick);
