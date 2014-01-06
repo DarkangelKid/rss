@@ -3,4 +3,6 @@
 /local.properties
 /.idea/workspace.xml
 .DS_Store
-android-test.keystore
+/android-test.keystore
+/SimpleRss/SimpleRss-SimpleRss.iml
+/SimpleRss.iml
