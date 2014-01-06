@@ -69,7 +69,6 @@ class AdapterManageFragments extends BaseAdapter
          view.setTextColor(COLOR_TEXT);
          view.setPadding(eightDp, eightDp, eightDp, eightDp);
          view.setGravity(Gravity.CENTER_VERTICAL);
-         view.setBackgroundColor(Color.WHITE);
       }
 
       view.setText(m_editables[position]);

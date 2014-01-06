@@ -2,8 +2,6 @@ package com.poloure.simplerss;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.FragmentManager;
-import android.app.ListFragment;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.support.v4.view.ViewPager;
@@ -47,7 +45,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       m_applicationFolder = applicationFolder;
       m_activity = activity;
 
-      Button button = (Button) m_dialog.findViewById(DialogEditFeed.POSITIVE_BUTTON);
+      Button button = (Button) m_dialog.findViewById(DialogEditFeed.BUTTON_IDS[1]);
       button.setText(R.string.dialog_checking_feed);
       button.setEnabled(false);
    }
@@ -281,23 +279,16 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
          /* Update the NavigationDrawer adapter. */
          ListView navigationDrawer = (ListView) m_activity.findViewById(R.id.navigation_drawer);
          BaseAdapter navigationAdapter = (BaseAdapter) navigationDrawer.getAdapter();
-         AsyncRefreshNavigationAdapter.newInstance(navigationAdapter, m_applicationFolder);
+         AsyncNavigationAdapter.newInstance(navigationAdapter, m_applicationFolder);
 
-         /* TODO AsyncManageTagsRefresh.newInstance(tagListView); */
-         FragmentManager fm = m_activity.getFragmentManager();
-         ListFragment listFragment = (ListFragment) fm
-               .findFragmentByTag(FragmentManage.FRAGMENT_FEEDS_ID);
-         if(null != listFragment)
-         {
-            ListView listView = listFragment.getListView();
-            AsyncManageFeedsRefresh.newInstance(listView, m_applicationFolder);
-         }
+         /* TODO Get the manage ListView. */
+         //AsyncManage.newInstance(m_listView, m_applicationFolder);
 
          m_dialog.dismiss();
       }
       else
       {
-         Button button = (Button) m_dialog.findViewById(DialogEditFeed.POSITIVE_BUTTON);
+         Button button = (Button) m_dialog.findViewById(DialogEditFeed.BUTTON_IDS[1]);
          button.setText(R.string.accept_dialog);
          button.setEnabled(true);
       }

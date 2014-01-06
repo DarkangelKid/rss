@@ -62,7 +62,7 @@ class ListFragmentTag extends ListFragment
 
       if(0 == position)
       {
-         AsyncRefreshPage.newInstance(0, listView, applicationFolder, true);
+         AsyncTagPage.newInstance(0, listView, applicationFolder, true);
       }
    }
 

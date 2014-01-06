@@ -4,6 +4,7 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
+import android.app.Dialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -92,14 +93,6 @@ class FeedsActivity extends Activity
       File file = new File(m_applicationFolder + Write.LOG_FILE);
       file.delete();
 
-      File widthFile = new File(m_applicationFolder + "width.txt");
-      if(!widthFile.exists())
-      {
-         DisplayMetrics metrics = m_resources.getDisplayMetrics();
-         String width = Integer.toString(metrics.widthPixels);
-         Write.single("width.txt", width, m_applicationFolder);
-      }
-
       /* Create the navigation drawer and set all the listeners for it. */
       m_drawerToggle = new ActionBarDrawerToggle(this, m_drawerLayout, R.drawable.ic_drawer,
             R.string.drawer_open, R.string.drawer_close)
@@ -131,7 +124,7 @@ class FeedsActivity extends Activity
       ListView navigationList = (ListView) findViewById(R.id.navigation_drawer);
       navigationList.setAdapter(m_adapterNavDrawer);
 
-      /* Create the MANAGE_FRAGMENTS that go inside the content frame. */
+      /* Create the FragmentFeeds that go inside the content frame. */
       if(null == savedInstanceState)
       {
          Fragment feedFragment = FragmentFeeds.newInstance();
@@ -181,7 +174,7 @@ class FeedsActivity extends Activity
       // Sync the toggle state after onRestoreInstanceState has occurred.
       m_drawerToggle.syncState();
 
-      AsyncRefreshNavigationAdapter
+      AsyncNavigationAdapter
             .newInstance((BaseAdapter) m_adapterNavDrawer, m_actionBar, m_applicationFolder, 0);
 
       m_feedsViewPager = (ViewPager) findViewById(FragmentFeeds.VIEW_PAGER_ID);
@@ -220,7 +213,7 @@ class FeedsActivity extends Activity
 
       /* Create intent, turn into pending intent, and get the alarm manager. */
       Intent intent = new Intent(this, ServiceUpdate.class);
-      intent = configureServiceIntent(preferences, intent, 0);
+      intent.putExtra("GROUP_NUMBER", 0);
 
       PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, 0);
       AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
@@ -239,16 +232,6 @@ class FeedsActivity extends Activity
       {
          am.cancel(pendingIntent);
       }
-   }
-
-   private static
-   Intent configureServiceIntent(SharedPreferences preferences, Intent intent, int page)
-   {
-      boolean notificationsEnabled = preferences.getBoolean("notifications_enabled", true);
-
-      intent.putExtra("GROUP_NUMBER", page);
-      intent.putExtra("NOTIFICATIONS", notificationsEnabled);
-      return intent;
    }
 
    @Override
@@ -309,8 +292,7 @@ class FeedsActivity extends Activity
       }
 
       /* Update the MenuItem in the ServiceHandler so when the service finishes, the icon changes
-         correctly.
-       */
+         correctly.*/
       ServiceHandler.s_refreshItem = refreshItem;
 
       return true;
@@ -352,7 +334,9 @@ class FeedsActivity extends Activity
       }
       else if(menuText.equals(addFeed))
       {
-         ListFragmentManageFeeds.showEditDialog(this, -1, m_applicationFolder);
+         int position = -1;
+         Dialog dialog = DialogEditFeed.newInstance(this, position, m_applicationFolder);
+         dialog.show();
       }
       else if(menuText.equals(jumpTo))
       {
@@ -387,10 +371,9 @@ class FeedsActivity extends Activity
       s_serviceHandler = new ServiceHandler(m_fragmentManager, menuItem, m_applicationFolder);
 
       int currentPage = m_feedsViewPager.getCurrentItem();
-      SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
       Intent intent = new Intent(this, ServiceUpdate.class);
-      intent = configureServiceIntent(preferences, intent, currentPage);
+      intent.putExtra("GROUP_NUMBER", currentPage);
       startService(intent);
    }
 

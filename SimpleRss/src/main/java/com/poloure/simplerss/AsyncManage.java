@@ -7,35 +7,26 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.StyleSpan;
-import android.view.View;
-import android.widget.Adapter;
 import android.widget.BaseAdapter;
-import android.widget.ListView;
 
 import java.io.File;
 
-class AsyncManageFeedsRefresh extends AsyncTask<String, Editable[], Void>
+class AsyncManage extends AsyncTask<String, Editable[], Void>
 {
    private static final AbsoluteSizeSpan TITLE_SIZE = new AbsoluteSizeSpan(14, true);
    private static final StyleSpan SPAN_BOLD = new StyleSpan(Typeface.BOLD);
-   private final ListView m_listView;
+   private final BaseAdapter m_manageAdapter;
 
    private
-   AsyncManageFeedsRefresh(ListView listView)
+   AsyncManage(BaseAdapter manageAdapter)
    {
-      m_listView = listView;
-
-      Adapter adapter = listView.getAdapter();
-      if(0 == adapter.getCount())
-      {
-         m_listView.setVisibility(View.INVISIBLE);
-      }
+      m_manageAdapter = manageAdapter;
    }
 
    static
-   void newInstance(ListView listView, String applicationFolder)
+   void newInstance(BaseAdapter manageAdapter, String applicationFolder)
    {
-      AsyncTask<String, Editable[], Void> task = new AsyncManageFeedsRefresh(listView);
+      AsyncTask<String, Editable[], Void> task = new AsyncManage(manageAdapter);
 
       task.executeOnExecutor(THREAD_POOL_EXECUTOR, applicationFolder);
    }
@@ -99,20 +90,9 @@ class AsyncManageFeedsRefresh extends AsyncTask<String, Editable[], Void>
 
    @Override
    protected
-   void onPostExecute(Void result)
-   {
-      if(!m_listView.isShown())
-      {
-         m_listView.setVisibility(View.VISIBLE);
-      }
-   }
-
-   @Override
-   protected
    void onProgressUpdate(Editable[]... values)
    {
-      BaseAdapter adapter = (BaseAdapter) m_listView.getAdapter();
-      ((AdapterManageFragments) adapter).setEditable(values[0]);
-      adapter.notifyDataSetChanged();
+      ((AdapterManageFragments) m_manageAdapter).setEditable(values[0]);
+      m_manageAdapter.notifyDataSetChanged();
    }
 }

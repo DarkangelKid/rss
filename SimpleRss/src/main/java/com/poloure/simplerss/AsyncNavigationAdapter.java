@@ -8,14 +8,14 @@ import java.io.File;
 import java.util.List;
 import java.util.Set;
 
-class AsyncRefreshNavigationAdapter extends AsyncTask<String, Void, int[]>
+class AsyncNavigationAdapter extends AsyncTask<String, Void, int[]>
 {
    private final AdapterNavigationDrawer m_adapterNavDrawer;
    private final ActionBar m_actionBar;
    private final int m_currentPage;
 
    private
-   AsyncRefreshNavigationAdapter(BaseAdapter adapterNavDrawer, ActionBar actionBar, int currentPage)
+   AsyncNavigationAdapter(BaseAdapter adapterNavDrawer, ActionBar actionBar, int currentPage)
    {
       m_adapterNavDrawer = (AdapterNavigationDrawer) adapterNavDrawer;
       m_actionBar = actionBar;
@@ -33,8 +33,8 @@ class AsyncRefreshNavigationAdapter extends AsyncTask<String, Void, int[]>
    void newInstance(BaseAdapter adapterNavDrawer, ActionBar actionBar, String applicationFolder,
          int currentPage)
    {
-      AsyncTask<String, Void, int[]> task = new AsyncRefreshNavigationAdapter(adapterNavDrawer,
-            actionBar, currentPage);
+      AsyncTask<String, Void, int[]> task = new AsyncNavigationAdapter(adapterNavDrawer, actionBar,
+            currentPage);
 
       task.executeOnExecutor(THREAD_POOL_EXECUTOR, applicationFolder);
    }

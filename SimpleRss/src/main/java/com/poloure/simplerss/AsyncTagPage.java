@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
+class AsyncTagPage extends AsyncTask<Integer, Object, Void>
 {
    private static final int MIN_DESCRIPTION_LENGTH = 8;
    private final String m_applicationFolder;
@@ -24,7 +24,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
    private final boolean m_isAllTag;
 
    private
-   AsyncRefreshPage(ListView listView, String applicationFolder, boolean isAllTag)
+   AsyncTagPage(ListView listView, String applicationFolder, boolean isAllTag)
    {
       m_listView = listView;
       m_applicationFolder = applicationFolder;
@@ -34,7 +34,7 @@ class AsyncRefreshPage extends AsyncTask<Integer, Object, Void>
    static
    void newInstance(int pageNumber, ListView listView, String storage, boolean isAllTag)
    {
-      AsyncTask<Integer, Object, Void> task = new AsyncRefreshPage(listView, storage, isAllTag);
+      AsyncTask<Integer, Object, Void> task = new AsyncTagPage(listView, storage, isAllTag);
 
       task.executeOnExecutor(THREAD_POOL_EXECUTOR, pageNumber);
    }

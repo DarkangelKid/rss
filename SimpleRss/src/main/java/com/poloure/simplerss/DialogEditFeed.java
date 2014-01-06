@@ -18,7 +18,7 @@ import android.widget.TextView;
 class DialogEditFeed extends Dialog
 {
    private final String m_applicationFolder;
-   static final int POSITIVE_BUTTON = 2501;
+   static final int[] BUTTON_IDS = {2501, 2502};
    static final int[] IDS = {2601, 2602, 2603};
    private static final int[] HINTS = {
          R.string.feed_name_hint, R.string.feed_url_hint, R.string.feed_tag_hint
@@ -42,7 +42,14 @@ class DialogEditFeed extends Dialog
    static
    Dialog newInstance(Activity activity, int position, String applicationFolder)
    {
-      return new DialogEditFeed(activity, position, applicationFolder);
+      Dialog dialog = new DialogEditFeed(activity, position, applicationFolder);
+
+      /* Get the text resources and set the title of the dialog. */
+      int titleResource = -1 == position ? R.string.add_dialog_title : R.string.edit_dialog_title;
+      String titleText = activity.getString(titleResource);
+      dialog.setTitle(titleText);
+
+      return dialog;
    }
 
    @Override
@@ -74,20 +81,27 @@ class DialogEditFeed extends Dialog
       tagEdit.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
 
       EditText[] editTexts = {new EditText(m_activity), new EditText(m_activity), tagEdit};
+      String[][] content = Read.csvFile(Read.INDEX, m_applicationFolder, 'f', 'u', 't');
 
       for(int i = 0; 3 > i; i++)
       {
+         TextView textView = new TextView(m_activity);
+         textView.setText(TEXTS[i]);
+
          editTexts[i].setId(IDS[i]);
          editTexts[i].setSingleLine(true);
          editTexts[i].setHint(HINTS[i]);
+         editTexts[i].setText(content[i][m_position]);
 
-         TextView textView = new TextView(m_activity);
-         textView.setText(TEXTS[i]);
          layout.addView(textView);
          layout.addView(editTexts[i]);
       }
 
-      /* Create the button listener. */
+      /* Get what the feed used to be called. */
+      String oldTitle = -1 == m_position ? "" : content[0][m_position];
+
+      /* Create the button OnClickListeners. */
+      View.OnClickListener positiveButtonClick = new OnClickPositive(this, oldTitle);
       View.OnClickListener negativeButtonClick = new View.OnClickListener()
       {
          @Override
@@ -98,31 +112,12 @@ class DialogEditFeed extends Dialog
          }
       };
 
-      View.OnClickListener positiveButtonClick;
-
-      /* Read the feed item's information from disk if we are editing. */
-      if(-1 == m_position)
-      {
-         positiveButtonClick = new OnClickPositive(this, "");
-      }
-      else
-      {
-         String[][] content = Read.csvFile(Read.INDEX, m_applicationFolder, 'f', 'u', 't');
-
-         for(int i = 0; 3 > i; i++)
-         {
-            editTexts[i].setText(content[i][m_position]);
-         }
-
-         positiveButtonClick = new OnClickPositive(this, content[0][m_position]);
-      }
-
       View.OnClickListener[] onClickListeners = {negativeButtonClick, positiveButtonClick};
 
       /* Create the buttons. */
-      LinearLayout buttonLayout = new LinearLayout(m_activity);
-      buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
-      buttonLayout.setWeightSum(1.0f);
+      LinearLayout buttonBar = new LinearLayout(m_activity);
+      buttonBar.setOrientation(LinearLayout.HORIZONTAL);
+      buttonBar.setWeightSum(1.0f);
       Button[] buttons = new Button[2];
 
       LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
@@ -132,19 +127,18 @@ class DialogEditFeed extends Dialog
       {
          buttons[i] = new Button(m_activity);
          buttons[i].setText(BTEXTS[i]);
+         buttons[i].setId(BUTTON_IDS[i]);
          buttons[i].setLayoutParams(params);
          buttons[i].setBackgroundResource(R.drawable.dialog_select);
          buttons[i].setOnClickListener(onClickListeners[i]);
-         buttonLayout.addView(buttons[i]);
+         buttonBar.addView(buttons[i]);
       }
-
-      buttons[1].setId(POSITIVE_BUTTON);
 
       /* Create the top layout. */
       LinearLayout topLayout = new LinearLayout(m_activity);
       topLayout.setOrientation(LinearLayout.VERTICAL);
       topLayout.addView(layout);
-      topLayout.addView(buttonLayout);
+      topLayout.addView(buttonBar);
 
       setContentView(topLayout);
    }

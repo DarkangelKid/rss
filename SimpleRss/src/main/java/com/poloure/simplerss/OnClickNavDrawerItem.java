@@ -1,6 +1,7 @@
 package com.poloure.simplerss;
 
 import android.app.ActionBar;
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -15,7 +16,7 @@ class OnClickNavDrawerItem implements AdapterView.OnItemClickListener
    private final FragmentManager m_fragmentManager;
    private final ActionBar m_actionBar;
    private final DrawerLayout m_drawerLayout;
-   private final ListAdapter m_navigationAdapter;
+   private final ListAdapter m_navAdapter;
    private final ViewPager m_tagsViewPager;
    private final String[] m_navigationTitles;
 
@@ -26,12 +27,10 @@ class OnClickNavDrawerItem implements AdapterView.OnItemClickListener
       m_fragmentManager = fragmentManager;
       m_actionBar = actionBar;
       m_drawerLayout = drawerLayout;
-      m_navigationAdapter = navigationAdapter;
+      m_navAdapter = navigationAdapter;
       m_tagsViewPager = tagsViewPager;
 
-      /* This is finished with at the end of the Activity's onCreate so it is safe to share. */
-      //noinspection AssignmentToCollectionOrArrayFieldFromParameter
-      m_navigationTitles = navigationTitles;
+      m_navigationTitles = navigationTitles.clone();
    }
 
    @Override
@@ -43,7 +42,8 @@ class OnClickNavDrawerItem implements AdapterView.OnItemClickListener
 
       boolean tagWasClicked = 3 < position;
       boolean feedsWasClicked = 0 == position;
-      boolean clickedDifferentPage = m_tagsViewPager.getCurrentItem() != position;
+      int currentPage = m_tagsViewPager.getCurrentItem();
+      boolean clickedDifferentPage = currentPage != position;
       String feedTitle = m_navigationTitles[0];
 
       /* Determine the new title based on the position of the item clicked. */
@@ -59,17 +59,9 @@ class OnClickNavDrawerItem implements AdapterView.OnItemClickListener
       m_actionBar.setTitle(selectedTitle);
 
       /* Set the ActionBar subtitle accordingly. */
-      if(feedsWasClicked || tagWasClicked)
-      {
-         int currentPage = m_tagsViewPager.getCurrentItem();
-
-         String unread = (String) m_navigationAdapter.getItem(currentPage);
-         m_actionBar.setSubtitle("Unread: " + unread);
-      }
-      else
-      {
-         m_actionBar.setSubtitle(null);
-      }
+      boolean updateSubTitle = feedsWasClicked || tagWasClicked;
+      String subtitle = updateSubTitle ? "Unread: " + m_navAdapter.getItem(currentPage) : null;
+      m_actionBar.setSubtitle(subtitle);
 
       /* Hide all the fragments*/
       FragmentTransaction transaction = m_fragmentManager.beginTransaction();
@@ -87,8 +79,12 @@ class OnClickNavDrawerItem implements AdapterView.OnItemClickListener
 
       if(null == selectedFragment)
       {
-         Fragment fragment = 1 == position ? FragmentManage.newInstance()
+         Activity activity = (Activity) m_drawerLayout.getContext();
+         String applicationFolder = FeedsActivity.getApplicationFolder(activity);
+
+         Fragment fragment = 1 == position ? FragmentManage.newInstance(activity, applicationFolder)
                : FragmentSettings.newInstance();
+
          transaction.add(R.id.content_frame, fragment, selectedTitle);
       }
       else

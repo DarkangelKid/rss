@@ -54,7 +54,7 @@ class OnClickManageFeedDialogItem implements DialogInterface.OnClickListener
       boolean isDelete = 0 == which;
       boolean isClearContent = 1 == which;
 
-      /* This if statement must come first since the AsyncRefreshNavigationAdapter relies on the
+      /* This if statement must come first since the AsyncNavigationAdapter relies on the
       tagList in the PagerAdapterFeeds. */
       if(isDelete)
       {
@@ -75,11 +75,10 @@ class OnClickManageFeedDialogItem implements DialogInterface.OnClickListener
          deleteDirectory(new File(feedFolderPath));
 
          /* Update the navigationDrawer without the ActionBar. */
-         AsyncRefreshNavigationAdapter.newInstance(m_navigationAdapter, m_applicationFolder);
+         AsyncNavigationAdapter.newInstance(m_navigationAdapter, m_applicationFolder);
 
          /* Refresh pages and navigation counts. */
-         AsyncManageFeedsRefresh.newInstance(m_listView, m_applicationFolder);
-         // TODO Update.manageTags();
+         AsyncManage.newInstance((BaseAdapter) m_listView.getAdapter(), m_applicationFolder);
       }
    }
 }

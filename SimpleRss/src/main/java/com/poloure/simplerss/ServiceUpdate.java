@@ -85,7 +85,7 @@ class ServiceUpdate extends IntentService
       int page = intent.getIntExtra("GROUP_NUMBER", 0);
       String applicationFolder = FeedsActivity.getApplicationFolder(this);
 
-      /* Make a new paint object. */
+      /* Make a new paint object so we can break texts. */
       new ViewCustom(this, 0);
 
       /* Get the tagList (from disk if it is empty). */
@@ -126,19 +126,12 @@ class ServiceUpdate extends IntentService
             {
                e.printStackTrace();
             }
-            catch(MalformedURLException e)
-            {
-               e.printStackTrace();
-            }
             catch(IOException e)
             {
                e.printStackTrace();
             }
          }
       }
-
-      /* TODO GET UNREAD WITHOUT CONTEXT.
-      int[] unreadCounts = FeedsActivity.getUnreadCounts(this); */
 
       /* If action_bar_menu is running. */
       if(null != FeedsActivity.s_serviceHandler)
@@ -149,63 +142,6 @@ class ServiceUpdate extends IntentService
          message.setData(bundle);
          FeedsActivity.s_serviceHandler.sendMessage(message);
       }
-      /*else if(0 != unreadCounts[0] && intent.getBooleanExtra("NOTIFICATIONS", false))
-      {
-         /* Calculate the number of tags with new items. */
-         /*int tagItems = 1;
-         int sizes = unreadCounts.length;
-
-         for(int i = 1; i < sizes; i++)
-         {
-            int count = unreadCounts[i];
-            if(0 != count)
-            {
-               tagItems++;
-            }
-         }
-
-         String titleSingle = getString(R.string.notification_title_singular);
-         String titlePlural = getString(R.string.notification_title_plural);
-         String contentSingleItem = getString(R.string.notification_content_tag_item);
-         String contentSingleTag = getString(R.string.notification_content_tag_items);
-         String contentPluralTag = getString(R.string.notification_content_tags);
-
-         String notificationTitle = 1 == unreadCounts[0]
-               ? String.format(titleSingle, 1)
-               : String.format(titlePlural, unreadCounts[0]);
-
-         String notificationContent;
-         if(1 == unreadCounts[0] && 1 == tagItems - 1)
-         {
-            notificationContent = contentSingleItem;
-         }
-         else
-         {
-            notificationContent = 1 < unreadCounts[0] && 1 == tagItems - 1
-                  ? contentSingleTag
-                  : String.format(contentPluralTag, tagItems - 1);
-         }
-
-         Intent notificationIntent = new Intent(this, FeedsActivity.class);
-
-         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-
-         stackBuilder.addParentStack(FeedsActivity.class);
-         stackBuilder.addNextIntent(notificationIntent);
-         PendingIntent pendingIntent = stackBuilder.getPendingIntent(0,
-               PendingIntent.FLAG_UPDATE_CURRENT);
-
-         Builder builder = new Builder(this);
-         builder.setSmallIcon(R.drawable.rss_icon);
-         builder.setContentTitle(notificationTitle);
-         builder.setContentText(notificationContent);
-         builder.setAutoCancel(true);
-         builder.setContentIntent(pendingIntent);
-
-         NotificationManager notificationManager = (NotificationManager) getSystemService(
-               Context.NOTIFICATION_SERVICE);
-         notificationManager.notify(1, builder.build());
-      }*/
 
       wakeLock.release();
       stopSelf();

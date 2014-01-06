@@ -27,9 +27,9 @@ class ViewCustom extends View
    }
 
    private Bitmap m_image;
-   String m_title = "Initial Text";
-   String m_link = "Initial Text";
-   String m_linkFull = "Initial Text";
+   String m_title;
+   String m_link;
+   String m_linkFull;
    String[] m_desLines = new String[3];
    private final int m_height;
 
@@ -108,7 +108,10 @@ class ViewCustom extends View
       }
       else
       {
-         return verticalPosition;
+         Resources resources = getResources();
+         DisplayMetrics metrics = resources.getDisplayMetrics();
+         float four = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4.0f, metrics);
+         return verticalPosition + Math.round(four);
       }
    }
 

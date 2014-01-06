@@ -96,7 +96,8 @@ class AdapterTags extends BaseAdapter
 
       if(null == convertView)
       {
-         view = new ViewCustom(m_context, hasImg ? hasDes ? 560 : 460 : hasDes ? 180 : 90);
+         /* TODO These are pix not Dip. */
+         view = new ViewCustom(m_context, hasImg ? hasDes ? 564 : 464 : hasDes ? 184 : 94);
       }
 
       /* Set the information. */
