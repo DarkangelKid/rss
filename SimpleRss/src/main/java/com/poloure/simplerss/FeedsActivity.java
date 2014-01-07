@@ -45,7 +45,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Adapter;
 import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -64,99 +63,8 @@ class FeedsActivity extends Activity
    private String m_previousActionBarTitle;
    private ViewPager m_feedsViewPager;
    private ListAdapter m_adapterNavDrawer;
-   private DrawerLayout m_drawerLayout;
    private ActionBarDrawerToggle m_drawerToggle;
-   private ActionBar m_actionBar;
-   private FragmentManager m_fragmentManager;
    private String m_applicationFolder;
-   private Resources m_resources;
-
-   @Override
-   public
-   void onCreate(Bundle savedInstanceState)
-   {
-      super.onCreate(savedInstanceState);
-
-      setContentView(R.layout.navigation_drawer_and_content_frame);
-
-      m_resources = getResources();
-      m_actionBar = getActionBar();
-      m_applicationFolder = getApplicationFolder(this);
-      m_fragmentManager = getFragmentManager();
-
-      /* Load the read items to the AdapterTag class. */
-      if(AdapterTags.READ_ITEM_TIMES.isEmpty())
-      {
-         Set<Long> set = Read.longSet(READ_ITEMS, m_applicationFolder);
-         AdapterTags.READ_ITEM_TIMES.addAll(set);
-      }
-
-      /* Get the navigation drawer titles. */
-      String[] navigationTitles = m_resources.getStringArray(R.array.navigation_titles);
-
-      m_drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-      m_adapterNavDrawer = new AdapterNavigationDrawer(navigationTitles, this);
-
-      /* Configure the ActionBar. */
-      m_actionBar.setIcon(R.drawable.rss_icon);
-      m_actionBar.setDisplayHomeAsUpEnabled(true);
-      m_actionBar.setHomeButtonEnabled(true);
-      m_actionBar.setTitle(navigationTitles[0]);
-
-      /* Delete the log file. */
-      File file = new File(m_applicationFolder + Write.LOG_FILE);
-      file.delete();
-
-      /* Create the navigation drawer and set all the listeners for it. */
-      m_drawerToggle = new ActionBarDrawerToggle(this, m_drawerLayout, R.drawable.ic_drawer,
-            R.string.drawer_open, R.string.drawer_close)
-      {
-         final String m_navigationText = getString(R.string.navigation_title);
-
-         @Override
-         public
-         void onDrawerOpened(View drawerView)
-         {
-            setNavigationTitle(m_navigationText, true);
-         }
-
-         @Override
-         public
-         void onDrawerClosed(View drawerView)
-         {
-            /* If the title is still R.string.navigation_title, change it to the previous title. */
-            String title = getNavigationTitle();
-            if(m_navigationText.equals(title))
-            {
-               String previousTitle = m_previousActionBarTitle;
-               setNavigationTitle(previousTitle, false);
-            }
-         }
-      };
-      m_drawerLayout.setDrawerListener(m_drawerToggle);
-
-      ListView navigationList = (ListView) findViewById(R.id.navigation_drawer);
-      navigationList.setAdapter(m_adapterNavDrawer);
-
-      /* Create the FragmentFeeds that go inside the content frame. */
-      if(null == savedInstanceState)
-      {
-         Fragment feedFragment = FragmentFeeds.newInstance();
-
-         FragmentTransaction transaction = m_fragmentManager.beginTransaction();
-         transaction.add(R.id.content_frame, feedFragment, navigationTitles[0]);
-         transaction.commit();
-      }
-   }
-
-   void setNavigationTitle(CharSequence title, boolean saveTitle)
-   {
-      if(saveTitle)
-      {
-         m_previousActionBarTitle = getNavigationTitle();
-      }
-      m_actionBar.setTitle(title);
-   }
 
    static
    String getApplicationFolder(Context context)
@@ -174,10 +82,119 @@ class FeedsActivity extends Activity
       return externalFilesDir.getAbsolutePath() + File.separatorChar;
    }
 
-   String getNavigationTitle()
+   static
+   void gotoLatestUnread(ListView listView)
    {
-      CharSequence title = m_actionBar.getTitle();
-      return title.toString();
+      Adapter listAdapter = listView.getAdapter();
+
+      int itemCount = listAdapter.getCount() - 1;
+      for(int i = itemCount; 0 <= i; i--)
+      {
+         FeedItem feedItem = (FeedItem) listAdapter.getItem(i);
+         if(!AdapterTags.READ_ITEM_TIMES.contains(feedItem.m_time))
+         {
+            listView.setSelection(i);
+            break;
+         }
+      }
+   }
+
+   private static
+   View makeProgressBar(Context context)
+   {
+      ProgressBar progressBar = new ProgressBar(context);
+      Utilities.setPaddingEqual(progressBar, Utilities.getDp(7.0F));
+
+      return progressBar;
+   }
+
+   @Override
+   public
+   void onCreate(Bundle savedInstanceState)
+   {
+      super.onCreate(savedInstanceState);
+
+      setContentView(R.layout.navigation_drawer_and_content_frame);
+
+      m_applicationFolder = getApplicationFolder(this);
+
+      /* Load the read items to the AdapterTag class. */
+      if(AdapterTags.READ_ITEM_TIMES.isEmpty())
+      {
+         Set<Long> set = Read.longSet(READ_ITEMS, m_applicationFolder);
+         AdapterTags.READ_ITEM_TIMES.addAll(set);
+      }
+
+      /* Get the navigation drawer titles. */
+      Resources resources = getResources();
+      String[] navigationTitles = resources.getStringArray(R.array.navigation_titles);
+
+      m_adapterNavDrawer = new AdapterNavigationDrawer(navigationTitles, this);
+
+      /* Configure the ActionBar. */
+      final ActionBar actionBar = getActionBar();
+      actionBar.setIcon(R.drawable.rss_icon);
+      actionBar.setDisplayHomeAsUpEnabled(true);
+      actionBar.setHomeButtonEnabled(true);
+      actionBar.setTitle(navigationTitles[0]);
+
+      DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+      /* Create the navigation drawer and set all the listeners for it. */
+      m_drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.drawable.ic_drawer,
+            R.string.drawer_open, R.string.drawer_close)
+      {
+         final String m_navigationText = getString(R.string.navigation_title);
+
+         @Override
+         public
+         void onDrawerOpened(View drawerView)
+         {
+            setNavigationTitle(m_navigationText, true);
+         }
+
+         @Override
+         public
+         void onDrawerClosed(View drawerView)
+         {
+            /* If the title is still R.string.navigation_title, change it to the previous title. */
+            CharSequence titleChars = actionBar.getTitle();
+            String title = titleChars.toString();
+
+            if(m_navigationText.equals(title))
+            {
+               String previousTitle = m_previousActionBarTitle;
+               setNavigationTitle(previousTitle, false);
+            }
+         }
+      };
+      drawerLayout.setDrawerListener(m_drawerToggle);
+
+      /* The R.id.content_frame is child 0, the R.id.navigation_list is child 1. */
+      ListView navigationList = (ListView) drawerLayout.getChildAt(1);
+      navigationList.setAdapter(m_adapterNavDrawer);
+
+      /* Create the FragmentFeeds that go inside the content frame. */
+      if(null == savedInstanceState)
+      {
+         Fragment feedFragment = FragmentFeeds.newInstance();
+
+         FragmentManager manager = getFragmentManager();
+         FragmentTransaction transaction = manager.beginTransaction();
+         transaction.add(R.id.content_frame, feedFragment, navigationTitles[0]);
+         transaction.commit();
+      }
+   }
+
+   void setNavigationTitle(CharSequence title, boolean saveTitle)
+   {
+      ActionBar actionBar = getActionBar();
+      if(saveTitle)
+      {
+         CharSequence titleChars = actionBar.getTitle();
+         m_previousActionBarTitle = titleChars.toString();
+      }
+      actionBar.setTitle(title);
    }
 
    @Override
@@ -188,11 +205,13 @@ class FeedsActivity extends Activity
       // Sync the toggle state after onRestoreInstanceState has occurred.
       m_drawerToggle.syncState();
 
-      AsyncNavigationAdapter
-            .newInstance((BaseAdapter) m_adapterNavDrawer, m_actionBar, m_applicationFolder, 0);
+      final ActionBar actionBar = getActionBar();
+      Resources resources = getResources();
+
+      AsyncNavigationAdapter.newInstance(this, m_applicationFolder, 0);
 
       m_feedsViewPager = (ViewPager) findViewById(FragmentFeeds.VIEW_PAGER_ID);
-      final String[] navigationTitles = m_resources.getStringArray(R.array.navigation_titles);
+      final String[] navigationTitles = resources.getStringArray(R.array.navigation_titles);
 
       /* Create the OnItemClickLister for the navigation list. */
       AdapterView.OnItemClickListener onClick = new AdapterView.OnItemClickListener()
@@ -204,7 +223,8 @@ class FeedsActivity extends Activity
 
             /* Close the drawer on any click. This will call the OnDrawerClose of the
             DrawerToggle. */
-            m_drawerLayout.closeDrawers();
+            DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+            drawerLayout.closeDrawers();
 
             boolean tagWasClicked = 3 < position;
             boolean feedsWasClicked = 0 == position;
@@ -222,18 +242,20 @@ class FeedsActivity extends Activity
             }
 
             /* Set the ActionBar title without saving the previous title. */
-            m_actionBar.setTitle(selectedTitle);
+            actionBar.setTitle(selectedTitle);
 
-            /* TODO (getString(R.string.subtitle_unread)) Set the ActionBar subtitle accordingly. */
             boolean update = feedsWasClicked || tagWasClicked;
-            String subtitle = update ? "Unread: " + m_adapterNavDrawer.getItem(currentPage) : null;
-            m_actionBar.setSubtitle(subtitle);
+            String unreadText = getString(R.string.subtitle_unread);
+            String subtitle = update ? unreadText + ' ' + m_adapterNavDrawer.getItem(currentPage)
+                  : null;
+            actionBar.setSubtitle(subtitle);
 
             /* Hide all the fragments*/
-            FragmentTransaction transaction = m_fragmentManager.beginTransaction();
+            FragmentManager manager = getFragmentManager();
+            FragmentTransaction transaction = manager.beginTransaction();
             for(String navigationTitle : navigationTitles)
             {
-               Fragment frag = m_fragmentManager.findFragmentByTag(navigationTitle);
+               Fragment frag = manager.findFragmentByTag(navigationTitle);
                if(null != frag)
                {
                   transaction.hide(frag);
@@ -241,7 +263,7 @@ class FeedsActivity extends Activity
             }
 
             /* Get the selected fragment. */
-            Fragment selectedFragment = m_fragmentManager.findFragmentByTag(selectedTitle);
+            Fragment selectedFragment = manager.findFragmentByTag(selectedTitle);
 
             if(null == selectedFragment)
             {
@@ -259,7 +281,7 @@ class FeedsActivity extends Activity
          }
       };
 
-      ListView navigationList = (ListView) findViewById(R.id.navigation_drawer);
+      ListView navigationList = (ListView) findViewById(R.id.navigation_list);
       navigationList.setOnItemClickListener(onClick);
    }
 
@@ -336,10 +358,14 @@ class FeedsActivity extends Activity
    {
       super.onBackPressed();
 
-      String feeds = m_resources.getStringArray(R.array.navigation_titles)[0];
-      m_actionBar.setTitle(feeds);
+      Resources resources = getResources();
+      String feeds = resources.getStringArray(R.array.navigation_titles)[0];
 
-      m_drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+      ActionBar actionBar = getActionBar();
+      actionBar.setTitle(feeds);
+
+      DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+      drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
       m_drawerToggle.setDrawerIndicatorEnabled(true);
    }
 
@@ -403,7 +429,8 @@ class FeedsActivity extends Activity
       {
          int currentPage = m_feedsViewPager.getCurrentItem();
 
-         ListFragment listFragment = (ListFragment) m_fragmentManager
+         FragmentManager manager = getFragmentManager();
+         ListFragment listFragment = (ListFragment) manager
                .findFragmentByTag(FragmentFeeds.FRAGMENT_ID_PREFIX + currentPage);
 
          ListView listViewTags = listFragment.getListView();
@@ -429,40 +456,13 @@ class FeedsActivity extends Activity
       MenuItemCompat.setActionView(menuItem, makeProgressBar(this));
 
       /* Set the service handler in FeedsActivity so we can check and call it from ServiceUpdate. */
-      s_serviceHandler = new ServiceHandler(m_fragmentManager, menuItem, m_applicationFolder);
+      FragmentManager manager = getFragmentManager();
+      s_serviceHandler = new ServiceHandler(manager, menuItem, m_applicationFolder);
 
       int currentPage = m_feedsViewPager.getCurrentItem();
 
       Intent intent = new Intent(this, ServiceUpdate.class);
       intent.putExtra("GROUP_NUMBER", currentPage);
       startService(intent);
-   }
-
-   static
-   void gotoLatestUnread(ListView listView)
-   {
-      Adapter listAdapter = listView.getAdapter();
-
-      int itemCount = listAdapter.getCount() - 1;
-      for(int i = itemCount; 0 <= i; i--)
-      {
-         FeedItem feedItem = (FeedItem) listAdapter.getItem(i);
-         if(!AdapterTags.READ_ITEM_TIMES.contains(feedItem.m_time))
-         {
-            listView.setSelection(i);
-            break;
-         }
-      }
-   }
-
-   private static
-   View makeProgressBar(Context context)
-   {
-      int sevenDp = Utilities.getDp(7.0F);
-
-      ProgressBar progressBar = new ProgressBar(context);
-      progressBar.setPadding(sevenDp, sevenDp, sevenDp, sevenDp);
-
-      return progressBar;
    }
 }

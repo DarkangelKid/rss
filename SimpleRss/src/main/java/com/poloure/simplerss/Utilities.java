@@ -21,9 +21,12 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 class Utilities
 {
+   static final int EIGHT_DP = getDp(8.0F);
+
    static
    void showMenuItems(Menu menu, boolean add, boolean unread, boolean refresh)
    {
@@ -46,5 +49,11 @@ class Utilities
       DisplayMetrics metrics = resources.getDisplayMetrics();
       float floatDp = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, pixels, metrics);
       return Math.round(floatDp);
+   }
+
+   static
+   void setPaddingEqual(View view, int padding)
+   {
+      view.setPadding(padding, padding, padding, padding);
    }
 }

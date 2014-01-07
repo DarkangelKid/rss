@@ -72,12 +72,10 @@ class AdapterManageFragments extends BaseAdapter
       TextView view = (TextView) convertView;
       if(isNewView)
       {
-         int eightDp = Utilities.getDp(8.0F);
-
          view = new TextView(m_context);
          view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.0F);
          view.setTextColor(COLOR_TEXT);
-         view.setPadding(eightDp, eightDp, eightDp, eightDp);
+         Utilities.setPaddingEqual(view, Utilities.EIGHT_DP);
          view.setGravity(Gravity.CENTER_VERTICAL);
       }
 

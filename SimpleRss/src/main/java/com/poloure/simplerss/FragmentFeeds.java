@@ -50,7 +50,7 @@ class FragmentFeeds extends Fragment
 
       Activity activity = getActivity();
 
-      ListView navigationList = (ListView) activity.findViewById(R.id.navigation_drawer);
+      ListView navigationList = (ListView) activity.findViewById(R.id.navigation_list);
       BaseAdapter navigationAdapter = (BaseAdapter) navigationList.getAdapter();
 
       String applicationFolder = FeedsActivity.getApplicationFolder(activity);

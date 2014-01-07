@@ -77,8 +77,6 @@ class DialogEditFeed extends Dialog
    {
       super.onCreate(savedInstanceState);
 
-      int eightDp = Utilities.getDp(8.0F);
-
       /* Get the current tags. */
       int tagListSize = PagerAdapterFeeds.TAG_LIST.size();
       String[] tags = PagerAdapterFeeds.TAG_LIST.toArray(new String[tagListSize]);
@@ -86,7 +84,7 @@ class DialogEditFeed extends Dialog
       /* Configure the ViewGroup. */
       LinearLayout layout = new LinearLayout(m_activity);
       layout.setOrientation(LinearLayout.VERTICAL);
-      layout.setPadding(eightDp, eightDp, eightDp, 0);
+      layout.setPadding(Utilities.EIGHT_DP, Utilities.EIGHT_DP, Utilities.EIGHT_DP, 0);
 
       /* Make the tag EditText. */
       int oneLine = android.R.layout.simple_dropdown_item_1line;

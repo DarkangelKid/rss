@@ -16,7 +16,7 @@
 
 package com.poloure.simplerss;
 
-import android.app.ActionBar;
+import android.app.Activity;
 import android.view.View;
 import android.widget.AbsListView;
 
@@ -25,14 +25,12 @@ class OnScrollFeedListener implements AbsListView.OnScrollListener
    private final int m_listViewTopPadding;
    private final String m_applicationFolder;
    private final int m_page;
-   private final AdapterNavigationDrawer m_adapterNavigationDrawer;
-   private final ActionBar m_actionBar;
+   private final Activity m_activity;
 
-   OnScrollFeedListener(AdapterNavigationDrawer adapterNavigationDrawer, ActionBar actionBar,
-         String applicationFolder, int page, int listViewTopPadding)
+   OnScrollFeedListener(Activity activity, String applicationFolder, int page,
+         int listViewTopPadding)
    {
-      m_adapterNavigationDrawer = adapterNavigationDrawer;
-      m_actionBar = actionBar;
+      m_activity = activity;
       m_applicationFolder = applicationFolder;
       m_page = page;
       m_listViewTopPadding = listViewTopPadding;
@@ -46,6 +44,7 @@ class OnScrollFeedListener implements AbsListView.OnScrollListener
       {
          AdapterTags adapterTags = (AdapterTags) view.getAdapter();
          View topView = view.getChildAt(0);
+
          boolean isTopView = null != topView;
          boolean isVeryTop = isTopView && m_listViewTopPadding == topView.getTop();
          boolean isListViewShown = view.isShown();
@@ -57,8 +56,7 @@ class OnScrollFeedListener implements AbsListView.OnScrollListener
             AdapterTags.READ_ITEM_TIMES.add(time);
          }
 
-         AsyncNavigationAdapter
-               .newInstance(m_adapterNavigationDrawer, m_actionBar, m_applicationFolder, m_page);
+         AsyncNavigationAdapter.newInstance(m_activity, m_applicationFolder, m_page);
       }
    }
 

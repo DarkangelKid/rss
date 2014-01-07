@@ -17,7 +17,6 @@
 package com.poloure.simplerss;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.Fragment;
 import android.graphics.Color;
@@ -73,18 +72,12 @@ class FragmentManage extends Fragment
          }
       });
 
-      /* Make an alertDialog for the long click of a list item. */
-      AlertDialog.Builder build = new AlertDialog.Builder(activity);
-
       /* Get the items that the onClick listener needs to refresh when deleting/clearing a feed. */
       ViewPager feedPager = (ViewPager) activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
       PagerAdapterFeeds pagerAdapterFeeds = (PagerAdapterFeeds) feedPager.getAdapter();
 
-      ListView navigationDrawer = (ListView) activity.findViewById(R.id.navigation_drawer);
-      BaseAdapter navigationAdapter = (BaseAdapter) navigationDrawer.getAdapter();
-
       listView.setOnItemLongClickListener(
-            new OnLongClickManageFeedItem(listView, pagerAdapterFeeds, navigationAdapter, build,
+            new OnLongClickManageFeedItem(activity, listView, pagerAdapterFeeds,
                   applicationFolder));
 
       /* Create a slight grey divider. */

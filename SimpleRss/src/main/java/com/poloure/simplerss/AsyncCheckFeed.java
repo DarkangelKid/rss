@@ -86,7 +86,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
    }
 
    /* Function should be safe, returns false if fails. */
-   static
+   private static
    void AppendToIndex(String lineToAppend, String applicationFolder)
    {
       if(Read.isUnmounted())
@@ -121,7 +121,8 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       CharSequence inputTags = ((TextView) m_dialog.findViewById(DialogEditFeed.IDS[2])).getText();
       CharSequence inputUrlChar = ((TextView) m_dialog.findViewById(DialogEditFeed.IDS[1]))
             .getText();
-      String inputUrl = inputUrlChar.toString();
+
+      String inputUrl = null == inputUrlChar ? "" : inputUrlChar.toString();
 
       /* Form the array of urls we will check the validity of. */
       String[] urlCheckList = inputUrl.contains("http") ? new String[]{inputUrl} : new String[]{
@@ -330,9 +331,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
          pagerAdapterFeeds.updateTags(m_applicationFolder, context);
 
          /* Update the NavigationDrawer adapter. */
-         ListView navigationDrawer = (ListView) m_activity.findViewById(R.id.navigation_drawer);
-         BaseAdapter navigationAdapter = (BaseAdapter) navigationDrawer.getAdapter();
-         AsyncNavigationAdapter.newInstance(navigationAdapter, m_applicationFolder);
+         AsyncNavigationAdapter.newInstance(m_activity, m_applicationFolder, -1);
 
          /* Get the manage ListView and update it. */
          ListView listView = (ListView) m_activity.findViewById(FragmentManage.LIST_VIEW_MANAGE);

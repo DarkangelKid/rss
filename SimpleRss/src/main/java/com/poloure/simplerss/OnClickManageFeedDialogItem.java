@@ -16,6 +16,7 @@
 
 package com.poloure.simplerss;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -27,18 +28,18 @@ import java.io.File;
 
 class OnClickManageFeedDialogItem implements DialogInterface.OnClickListener
 {
+   private final Activity m_activity;
    private final ListView m_listView;
    private final String m_feedName;
    private final String m_applicationFolder;
    private final PagerAdapterFeeds m_pagerAdapterFeeds;
-   private final BaseAdapter m_navigationAdapter;
 
-   OnClickManageFeedDialogItem(ListView listView, PagerAdapterFeeds pagerAdapterFeeds,
-         BaseAdapter navigationAdapter, String feedName, String applicationFolder)
+   OnClickManageFeedDialogItem(Activity activity, ListView listView,
+         PagerAdapterFeeds pagerAdapterFeeds, String feedName, String applicationFolder)
    {
+      m_activity = activity;
       m_listView = listView;
       m_pagerAdapterFeeds = pagerAdapterFeeds;
-      m_navigationAdapter = navigationAdapter;
       m_feedName = feedName;
       m_applicationFolder = applicationFolder;
    }
@@ -91,7 +92,7 @@ class OnClickManageFeedDialogItem implements DialogInterface.OnClickListener
          deleteDirectory(new File(feedFolderPath));
 
          /* Update the navigationDrawer without the ActionBar. */
-         AsyncNavigationAdapter.newInstance(m_navigationAdapter, m_applicationFolder);
+         AsyncNavigationAdapter.newInstance(m_activity, m_applicationFolder, -1);
 
          /* Refresh pages and navigation counts. */
          AsyncManage.newInstance((BaseAdapter) m_listView.getAdapter(), m_applicationFolder);

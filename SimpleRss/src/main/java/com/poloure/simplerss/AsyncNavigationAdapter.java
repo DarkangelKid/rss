@@ -17,8 +17,9 @@
 package com.poloure.simplerss;
 
 import android.app.ActionBar;
+import android.app.Activity;
 import android.os.AsyncTask;
-import android.widget.BaseAdapter;
+import android.widget.ListView;
 
 import java.io.File;
 import java.util.List;
@@ -26,32 +27,20 @@ import java.util.Set;
 
 class AsyncNavigationAdapter extends AsyncTask<String, Void, int[]>
 {
-   private final AdapterNavigationDrawer m_adapterNavDrawer;
-   private final ActionBar m_actionBar;
+   private final Activity m_activity;
    private final int m_currentPage;
 
    private
-   AsyncNavigationAdapter(BaseAdapter adapterNavDrawer, ActionBar actionBar, int currentPage)
+   AsyncNavigationAdapter(Activity activity, int currentPage)
    {
-      m_adapterNavDrawer = (AdapterNavigationDrawer) adapterNavDrawer;
-      m_actionBar = actionBar;
+      m_activity = activity;
       m_currentPage = currentPage;
    }
 
-   /* For when the user is updating the navigation drawer not from the Feeds page. */
    static
-   void newInstance(BaseAdapter adapterNavDrawer, String applicationFolder)
+   void newInstance(Activity activity, String applicationFolder, int currentPage)
    {
-      newInstance(adapterNavDrawer, null, applicationFolder, -1);
-   }
-
-   static
-   void newInstance(BaseAdapter adapterNavDrawer, ActionBar actionBar, String applicationFolder,
-         int currentPage)
-   {
-      AsyncTask<String, Void, int[]> task = new AsyncNavigationAdapter(adapterNavDrawer, actionBar,
-            currentPage);
-
+      AsyncTask<String, Void, int[]> task = new AsyncNavigationAdapter(activity, currentPage);
       task.executeOnExecutor(THREAD_POOL_EXECUTOR, applicationFolder);
    }
 
@@ -103,17 +92,21 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, int[]>
    void onPostExecute(int[] result)
    {
       /* Set the titles & counts arrays in this file and notify the adapter. */
-      m_adapterNavDrawer.setArrays(PagerAdapterFeeds.TAG_LIST, result);
-      m_adapterNavDrawer.notifyDataSetChanged();
+      ListView navigationList = (ListView) m_activity.findViewById(R.id.navigation_list);
+      AdapterNavigationDrawer adapterNavDrawer = (AdapterNavigationDrawer) navigationList
+            .getAdapter();
+
+      adapterNavDrawer.setArrays(PagerAdapterFeeds.TAG_LIST, result);
+      adapterNavDrawer.notifyDataSetChanged();
 
       /* Update the subtitle if actionBar != null. */
-      if(null != m_actionBar)
+      ActionBar actionBar = m_activity.getActionBar();
+      if(-1 != m_currentPage)
       {
-         String unread = m_adapterNavDrawer.getItem(m_currentPage);
+         String unread = adapterNavDrawer.getItem(m_currentPage);
 
-         /* TODO */
-         /* String unreadText = context.getString(R.string.subtitle_unread); */
-         m_actionBar.setSubtitle("Unread: " + unread);
+         String unreadText = m_activity.getString(R.string.subtitle_unread);
+         actionBar.setSubtitle(unreadText + ' ' + unread);
       }
    }
 }

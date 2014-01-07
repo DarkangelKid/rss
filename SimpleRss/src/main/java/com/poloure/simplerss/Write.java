@@ -26,7 +26,6 @@ import java.io.IOException;
 
 class Write
 {
-   static final String LOG_FILE = "dump.txt";
    static final int MODE_REMOVE = 1;
    static final int MODE_REPLACE = 2;
    static final String NEW_LINE = System.getProperty("line.separator");

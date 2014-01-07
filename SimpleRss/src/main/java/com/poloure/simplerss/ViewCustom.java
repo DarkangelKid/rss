@@ -82,10 +82,8 @@ class ViewCustom extends View
          PAINTS[i].setTextSize(size);
       }
 
-      int eightDp = Utilities.getDp(8.0F);
-
       setLayerType(LAYER_TYPE_HARDWARE, null);
-      setPadding(eightDp, eightDp, eightDp, eightDp);
+      Utilities.setPaddingEqual(this, Utilities.EIGHT_DP);
    }
 
    void setBitmap(Bitmap bitmap)

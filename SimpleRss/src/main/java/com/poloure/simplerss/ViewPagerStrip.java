@@ -28,9 +28,9 @@ class ViewPagerStrip extends ViewPager
 {
    private static final int OFF_SCREEN_PAGE_LIMIT = 128;
    private static final int PAGER_TAB_STRIP_BACKGROUND = Color.parseColor("#404040");
-   private static final float TEXT_VERTICAL_PADDING = 4.0F;
    private static final float PAGER_TAB_STRIP_TEXT_SIZE = 14.0F;
    private static final int PAGER_TITLE_STRIP_ID = 165143;
+   private static final int TEXT_PADDING = Utilities.getDp(4.0F);
    private static final LayoutParams LAYOUT_PARAMS = new LayoutParams();
 
    static
@@ -55,10 +55,8 @@ class ViewPagerStrip extends ViewPager
       pagerTitleStrip.setGravity(Gravity.START);
 
       /* Configure the PagerTitleStrip. */
-      int textPadding = Utilities.getDp(TEXT_VERTICAL_PADDING);
-
       pagerTitleStrip.setGravity(Gravity.START);
-      pagerTitleStrip.setPadding(0, textPadding, 0, textPadding);
+      pagerTitleStrip.setPadding(0, TEXT_PADDING, 0, TEXT_PADDING);
       pagerTitleStrip.setTextColor(Color.WHITE);
       pagerTitleStrip.setTextSize(TypedValue.COMPLEX_UNIT_SP, PAGER_TAB_STRIP_TEXT_SIZE);
       pagerTitleStrip.setBackgroundColor(PAGER_TAB_STRIP_BACKGROUND);
