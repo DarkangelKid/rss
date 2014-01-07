@@ -17,11 +17,9 @@
 package com.poloure.simplerss;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.support.v4.view.PagerTitleStrip;
 import android.support.v4.view.ViewPager;
-import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.ViewGroup;
@@ -57,11 +55,8 @@ class ViewPagerStrip extends ViewPager
       pagerTitleStrip.setGravity(Gravity.START);
 
       /* Configure the PagerTitleStrip. */
-      Resources resources = context.getResources();
-      DisplayMetrics displayMetrics = resources.getDisplayMetrics();
-      float textVerticalPadding = TypedValue
-            .applyDimension(TypedValue.COMPLEX_UNIT_DIP, TEXT_VERTICAL_PADDING, displayMetrics);
-      int textPadding = Math.round(textVerticalPadding);
+      int textPadding = Utilities.getDp(TEXT_VERTICAL_PADDING);
+
       pagerTitleStrip.setGravity(Gravity.START);
       pagerTitleStrip.setPadding(0, textPadding, 0, textPadding);
       pagerTitleStrip.setTextColor(Color.WHITE);

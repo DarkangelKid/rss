@@ -39,8 +39,6 @@ import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
-import android.util.DisplayMetrics;
-import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -460,13 +458,10 @@ class FeedsActivity extends Activity
    private static
    View makeProgressBar(Context context)
    {
-      Resources resources = context.getResources();
-      DisplayMetrics metrics = resources.getDisplayMetrics();
-      float seven = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 7.0F, metrics);
-      int sevenBp = Math.round(seven);
+      int sevenDp = Utilities.getDp(7.0F);
 
       ProgressBar progressBar = new ProgressBar(context);
-      progressBar.setPadding(sevenBp, sevenBp, sevenBp, sevenBp);
+      progressBar.setPadding(sevenDp, sevenDp, sevenDp, sevenDp);
 
       return progressBar;
    }

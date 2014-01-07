@@ -17,10 +17,8 @@
 package com.poloure.simplerss;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.text.Editable;
-import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -74,11 +72,7 @@ class AdapterManageFragments extends BaseAdapter
       TextView view = (TextView) convertView;
       if(isNewView)
       {
-         Resources resources = m_context.getResources();
-         DisplayMetrics metrics = resources.getDisplayMetrics();
-
-         float eightDpFloat = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8.0F, metrics);
-         int eightDp = Math.round(eightDpFloat);
+         int eightDp = Utilities.getDp(8.0F);
 
          view = new TextView(m_context);
          view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.0F);

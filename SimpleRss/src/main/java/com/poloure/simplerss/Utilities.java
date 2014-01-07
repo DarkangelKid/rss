@@ -16,6 +16,9 @@
 
 package com.poloure.simplerss;
 
+import android.content.res.Resources;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -34,5 +37,14 @@ class Utilities
          unreadMenu.setVisible(unread);
          refreshMenu.setVisible(refresh);
       }
+   }
+
+   static
+   int getDp(float pixels)
+   {
+      Resources resources = Resources.getSystem();
+      DisplayMetrics metrics = resources.getDisplayMetrics();
+      float floatDp = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, pixels, metrics);
+      return Math.round(floatDp);
    }
 }

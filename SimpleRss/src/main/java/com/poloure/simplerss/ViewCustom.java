@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -75,8 +74,6 @@ class ViewCustom extends View
 
       Resources resources = context.getResources();
       DisplayMetrics metrics = resources.getDisplayMetrics();
-      float eightFloatDp = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8.0F, metrics);
-      int eightDp = Math.round(eightFloatDp);
 
       /* Set text sizes of the paints. */
       for(int i = 0; 3 > i; i++)
@@ -84,6 +81,8 @@ class ViewCustom extends View
          float size = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, SIZES[i], metrics);
          PAINTS[i].setTextSize(size);
       }
+
+      int eightDp = Utilities.getDp(8.0F);
 
       setLayerType(LAYER_TYPE_HARDWARE, null);
       setPadding(eightDp, eightDp, eightDp, eightDp);
@@ -131,10 +130,7 @@ class ViewCustom extends View
       }
       else
       {
-         Resources resources = getResources();
-         DisplayMetrics metrics = resources.getDisplayMetrics();
-         float four = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4.0f, metrics);
-         return verticalPosition + Math.round(four);
+         return verticalPosition + Utilities.getDp(4.0F);
       }
    }
 

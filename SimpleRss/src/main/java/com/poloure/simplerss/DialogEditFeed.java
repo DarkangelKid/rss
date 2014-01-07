@@ -18,14 +18,11 @@ package com.poloure.simplerss;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
 import android.text.InputType;
-import android.util.DisplayMetrics;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -80,11 +77,7 @@ class DialogEditFeed extends Dialog
    {
       super.onCreate(savedInstanceState);
 
-      /* Get 8Dip. */
-      Resources resources = m_activity.getResources();
-      DisplayMetrics metrics = resources.getDisplayMetrics();
-      float eightDp = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8.0F, metrics);
-      int eight = Math.round(eightDp);
+      int eightDp = Utilities.getDp(8.0F);
 
       /* Get the current tags. */
       int tagListSize = PagerAdapterFeeds.TAG_LIST.size();
@@ -93,7 +86,7 @@ class DialogEditFeed extends Dialog
       /* Configure the ViewGroup. */
       LinearLayout layout = new LinearLayout(m_activity);
       layout.setOrientation(LinearLayout.VERTICAL);
-      layout.setPadding(eight, eight, eight, 0);
+      layout.setPadding(eightDp, eightDp, eightDp, 0);
 
       /* Make the tag EditText. */
       int oneLine = android.R.layout.simple_dropdown_item_1line;
