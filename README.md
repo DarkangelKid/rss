@@ -3,6 +3,8 @@ SimpleRss
 
 News Aggregator for Android 4.+.
 
+You can find the latest signed APK in the apk folder. 
+
 Building
 ===
 
