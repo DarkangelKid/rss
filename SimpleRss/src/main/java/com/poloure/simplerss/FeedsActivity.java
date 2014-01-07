@@ -357,16 +357,9 @@ class FeedsActivity extends Activity
       /* Set the refreshItem to spin if the service is running. The handler will stop it in due
       time. */
       MenuItem refreshItem = menu.findItem(R.id.refresh);
-      boolean serviceRunning = isServiceRunning();
 
-      if(serviceRunning)
-      {
-         MenuItemCompat.setActionView(refreshItem, makeProgressBar(this));
-      }
-      else
-      {
-         MenuItemCompat.setActionView(refreshItem, null);
-      }
+      View refreshIcon = isServiceRunning() ? makeProgressBar(this) : null;
+      MenuItemCompat.setActionView(refreshItem, refreshIcon);
 
       /* Update the MenuItem in the ServiceHandler so when the service finishes, the icon changes
          correctly.*/
@@ -396,20 +389,13 @@ class FeedsActivity extends Activity
    public
    boolean onOptionsItemSelected(MenuItem item)
    {
-      /* If the user has clicked the title and the title says R.string.offline. */
-      String navigationTitle = getNavigationTitle();
       CharSequence menuText = item.getTitle();
 
-      String offline = getString(R.string.offline);
       String addFeed = getString(R.string.add_feed);
       String jumpTo = getString(R.string.unread);
       String refresh = getString(R.string.refresh);
 
-      if(offline.equals(navigationTitle))
-      {
-         onBackPressed();
-      }
-      else if(menuText.equals(addFeed))
+      if(menuText.equals(addFeed))
       {
          int position = -1;
          Dialog dialog = DialogEditFeed.newInstance(this, position, m_applicationFolder);

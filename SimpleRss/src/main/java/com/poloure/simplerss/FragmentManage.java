@@ -50,6 +50,8 @@ class FragmentManage extends Fragment
    public
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
+      setHasOptionsMenu(true);
+
       final Activity activity = (Activity) container.getContext();
 
       final String applicationFolder = FeedsActivity.getApplicationFolder(activity);
@@ -99,15 +101,6 @@ class FragmentManage extends Fragment
    public
    void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
    {
-      MenuItem refreshMenu = menu.findItem(R.id.refresh);
-      MenuItem unreadMenu = menu.findItem(R.id.unread);
-      MenuItem addFeedMenu = menu.findItem(R.id.add_feed);
-
-      if(null != refreshMenu && null != unreadMenu && null != addFeedMenu)
-      {
-         refreshMenu.setVisible(false);
-         unreadMenu.setVisible(false);
-         addFeedMenu.setVisible(true);
-      }
+      Utilities.showMenuItems(menu, true, false, false);
    }
 }

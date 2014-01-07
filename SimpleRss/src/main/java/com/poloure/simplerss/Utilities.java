@@ -16,39 +16,23 @@
 
 package com.poloure.simplerss;
 
-import android.app.Fragment;
-import android.os.Bundle;
-import android.preference.PreferenceFragment;
-import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
 
-/* Must be public for rotation. */
-public
-class FragmentSettings extends PreferenceFragment
+class Utilities
 {
    static
-   Fragment newInstance()
+   void showMenuItems(Menu menu, boolean add, boolean unread, boolean refresh)
    {
-      return new FragmentSettings();
-   }
+      MenuItem addFeedMenu = menu.findItem(R.id.add_feed);
+      MenuItem unreadMenu = menu.findItem(R.id.unread);
+      MenuItem refreshMenu = menu.findItem(R.id.refresh);
 
-   @Override
-   public
-   void onCreate(Bundle savedInstanceState)
-   {
-      super.onCreate(savedInstanceState);
-      setHasOptionsMenu(true);
-      addPreferencesFromResource(R.xml.preferences);
-   }
-
-   @Override
-   public
-   void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
-   {
-      Utilities.showMenuItems(menu, false, false, false);
+      if(null != refreshMenu && null != unreadMenu && null != addFeedMenu)
+      {
+         addFeedMenu.setVisible(add);
+         unreadMenu.setVisible(unread);
+         refreshMenu.setVisible(refresh);
+      }
    }
 }

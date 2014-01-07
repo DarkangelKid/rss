@@ -47,14 +47,9 @@ class FragmentFeeds extends Fragment
    public
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
-      Activity activity = getActivity();
-
-      if(null == container)
-      {
-         return new View(activity);
-      }
-
       setHasOptionsMenu(true);
+
+      Activity activity = getActivity();
 
       ListView navigationList = (ListView) activity.findViewById(R.id.navigation_drawer);
       BaseAdapter navigationAdapter = (BaseAdapter) navigationList.getAdapter();
@@ -80,15 +75,6 @@ class FragmentFeeds extends Fragment
    public
    void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
    {
-      MenuItem refreshMenu = menu.findItem(R.id.refresh);
-      MenuItem unreadMenu = menu.findItem(R.id.unread);
-      MenuItem addFeedMenu = menu.findItem(R.id.add_feed);
-
-      if(null != refreshMenu && null != unreadMenu && null != addFeedMenu)
-      {
-         refreshMenu.setVisible(true);
-         unreadMenu.setVisible(true);
-         addFeedMenu.setVisible(true);
-      }
+      Utilities.showMenuItems(menu, true, true, true);
    }
 }
