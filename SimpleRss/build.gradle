@@ -25,7 +25,7 @@ android {
         release {
             runProguard true
             zipAlign true
-            proguardFile '/opt/android-sdk/tools/proguard/examples/proguardall.pro'
+            proguardFile 'proguard.pro'
         }
     }
 }

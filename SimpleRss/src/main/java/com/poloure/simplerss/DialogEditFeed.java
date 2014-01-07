@@ -19,6 +19,9 @@ package com.poloure.simplerss;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.res.Resources;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.DisplayMetrics;
@@ -34,7 +37,6 @@ import android.widget.TextView;
 
 class DialogEditFeed extends Dialog
 {
-   private final String m_applicationFolder;
    static final int[] BUTTON_IDS = {2501, 2502};
    static final int[] IDS = {2601, 2602, 2603};
    private static final int[] HINTS = {
@@ -44,6 +46,9 @@ class DialogEditFeed extends Dialog
          R.string.feed_name_dialog, R.string.feed_url_dialog, R.string.feed_tag_dialog
    };
    private static final int[] BTEXTS = {R.string.cancel_dialog, R.string.accept_dialog};
+   private static final int COLOR_UNSELECTED = Color.argb(0, 0, 0, 0);
+   private static final int COLOR_SELECTED = Color.parseColor("#ff33b5e5");
+   private final String m_applicationFolder;
    private final Activity m_activity;
    private final int m_position;
 
@@ -143,14 +148,25 @@ class DialogEditFeed extends Dialog
       LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 0.5f);
 
+      /* Set up objects used for the StateListDrawable. */
+      int[] unselected = {android.R.attr.drawable};
+      int[] selected = {android.R.attr.state_pressed};
+      ColorDrawable colorUnselected = new ColorDrawable(COLOR_UNSELECTED);
+      ColorDrawable colorSelected = new ColorDrawable(COLOR_SELECTED);
+
       for(int i = 0; 2 > i; i++)
       {
          buttons[i] = new Button(m_activity);
          buttons[i].setText(BTEXTS[i]);
          buttons[i].setId(BUTTON_IDS[i]);
          buttons[i].setLayoutParams(params);
-         /* TODO Make this code. States: Selected - ff33b5e5, unselected - 00000000. */
-         //buttons[i].setBackgroundResource(R.drawable.dialog_select);
+
+         /* Create the state drawable for each button. */
+         StateListDrawable states = new StateListDrawable();
+         states.addState(unselected, colorUnselected);
+         states.addState(selected, colorSelected);
+
+         buttons[i].setBackgroundDrawable(states);
          buttons[i].setOnClickListener(onClickListeners[i]);
          buttonBar.addView(buttons[i]);
       }

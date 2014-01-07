@@ -17,7 +17,6 @@
 package com.poloure.simplerss;
 
 import android.app.Fragment;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 import android.view.LayoutInflater;
@@ -52,7 +51,6 @@ class FragmentSettings extends PreferenceFragment
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
       View view = super.onCreateView(inflater, container, savedInstanceState);
-      view.setBackgroundColor(Color.WHITE);
       return view;
    }
 

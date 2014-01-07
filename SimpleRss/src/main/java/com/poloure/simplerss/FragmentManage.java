@@ -86,9 +86,6 @@ class FragmentManage extends Fragment
             new OnLongClickManageFeedItem(listView, pagerAdapterFeeds, navigationAdapter, build,
                   applicationFolder));
 
-      /* Set the background to white.*/
-      listView.setBackgroundColor(Color.WHITE);
-
       /* Create a slight grey divider. */
       listView.setDivider(new ColorDrawable(Color.argb(255, 237, 237, 237)));
       listView.setDividerHeight(2);

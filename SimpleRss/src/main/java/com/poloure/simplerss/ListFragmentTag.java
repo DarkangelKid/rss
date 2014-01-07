@@ -19,7 +19,6 @@ package com.poloure.simplerss;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ListFragment;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -89,7 +88,6 @@ class ListFragmentTag extends ListFragment
 
       /* Set to android.R.id.list so that the ListFragment knows to use this list. */
       listView.setId(android.R.id.list);
-      listView.setBackgroundColor(Color.WHITE);
       listView.setFadingEdgeLength(0);
 
       return listView;

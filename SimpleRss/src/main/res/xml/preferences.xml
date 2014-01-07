@@ -19,10 +19,6 @@
    <PreferenceScreen
       android:key="screen_preference"
       android:title="Appearance">
-      <CheckBoxPreference
-         android:key="next_screen_checkbox_preference"
-         android:summary="You are a boy"
-         android:title="I am a boy"/>
    </PreferenceScreen>
    <PreferenceScreen android:title="Notifications">
       <SwitchPreference
@@ -67,16 +63,16 @@
          android:key="external_enabled"
          android:summaryOff="Using internal storage"
          android:summaryOn="Using external storage"
-         android:switchTextOff="Disabled"
-         android:switchTextOn="Enabled"
-         android:title="External Storage"/>
+         android:switchTextOff="Off"
+         android:switchTextOn="On"
+         android:title="External Storage (WIP)"/>
       <EditTextPreference
          android:defaultValue="./Android/data/poloure.simplerss.com/files/"
          android:dependency="external_enabled"
          android:dialogTitle="Application data path"
          android:key="data_location"
          android:summary="Where to save app data"
-         android:title="External Storage Location"/>
+         android:title="External Storage Location (WIP)"/>
    </PreferenceScreen>
 
    <PreferenceScreen android:title="Images">
@@ -94,13 +90,13 @@
          android:summaryOn="Using Wi-Fi and mobile networks"
          android:switchTextOff="No"
          android:switchTextOn="Yes"
-         android:title="Use Mobile Networks"/>
+         android:title="Use Mobile Networks (WIP)"/>
       <CheckBoxPreference
          android:defaultValue="true"
          android:dependency="images_enabled"
          android:key="keep_only_thumbnails"
          android:summary="Will not keep original images"
-         android:title="Keep thumbnails only"/>
+         android:title="Keep thumbnails only (WIP)"/>
       <ListPreference
          android:defaultValue="75"
          android:dependency="images_enabled"
@@ -116,13 +112,13 @@
          android:dialogTitle="Image directory"
          android:key="images_location"
          android:summary="Where to save images"
-         android:title="Image Storage Location"/>
+         android:title="Image Storage Location (WIP)"/>
    </PreferenceScreen>
    <PreferenceScreen
-      android:summary="https://github.com/Currfyg/simple-rss"
-      android:title="Application Source">
+      android:summary="https://github.com/poloure/rss"
+      android:title="Source Code">
       <intent
          android:action="android.intent.action.VIEW"
-         android:data="https://github.com/Currfyg/simple-rss"/>
+         android:data="https://github.com/poloure/rss"/>
    </PreferenceScreen>
 </PreferenceScreen>

@@ -3,9 +3,14 @@ SimpleRss
 
 News Aggregator for Android 4.+.
 
+Building
+===
+
+Make sure to have the android-sdk, and git installed.
+
 To clone the repository:
 ```
-   https://github.com/poloure/rss.git
+   git clone https://github.com/poloure/rss.git
 ```
 
 To build the code using Gradle:
@@ -18,6 +23,9 @@ To Install the apk to a device connected with adb:
 ```
    adb install -r SimpleRss/build/apk/SimpleRss-debug-unaligned.apk
 ```
+
+Bugs
+===
 
 If you experience any crashes, connect to usb enable USB Debugging in
 Androids Settings:Developer options and use:

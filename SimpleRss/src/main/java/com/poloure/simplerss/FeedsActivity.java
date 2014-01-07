@@ -204,7 +204,8 @@ class FeedsActivity extends Activity
          void onItemClick(AdapterView<?> parent, View view, int position, long id)
          {
 
-            /* Close the drawer on any click. This will call the OnDrawerClose of the DrawerToggle. */
+            /* Close the drawer on any click. This will call the OnDrawerClose of the
+            DrawerToggle. */
             m_drawerLayout.closeDrawers();
 
             boolean tagWasClicked = 3 < position;

@@ -85,6 +85,7 @@ class ViewCustom extends View
          PAINTS[i].setTextSize(size);
       }
 
+      /* TODO Is this line needed ? */
       setBackgroundColor(Color.TRANSPARENT);
       setLayerType(LAYER_TYPE_HARDWARE, null);
       setPadding(eightDp, eightDp, eightDp, eightDp);
