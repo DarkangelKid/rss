@@ -22,7 +22,6 @@ import android.app.ListFragment;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.SimpleOnPageChangeListener;
 import android.widget.Adapter;
-import android.widget.BaseAdapter;
 import android.widget.ListView;
 
 class OnPageChangeTags extends SimpleOnPageChangeListener

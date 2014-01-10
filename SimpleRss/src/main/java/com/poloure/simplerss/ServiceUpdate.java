@@ -43,7 +43,6 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -59,6 +58,7 @@ class ServiceUpdate extends IntentService
 {
    static final String ITEM_LIST = "item_list.txt";
    static final String CONTENT = "content.txt";
+   
    /* Folders */
    static final String THUMBNAIL_DIR = "thumbnails" + File.separatorChar;
    private static final char ITEM_SEPARATOR = '|';
@@ -76,7 +76,6 @@ class ServiceUpdate extends IntentService
       static final String TIME = "pubDate";
       static final String LINK = "link";
       static final String LINK_TRIMMED = "blink";
-      static final String MIME = "mime";
       static final String[] DES = {"x", "y", "z"};
    }
 
@@ -322,23 +321,21 @@ class ServiceUpdate extends IntentService
       int namesLength = names.length;
       for(int i = 0; i < namesLength; i++)
       {
+         /* TODO: tagOne|tagsTwo|etc.contains(gsT) returns true but should be false. */
          if(isAllTag || tags[i].contains(tag))
          {
-            String path1 = applicationFolder + names[i] +
-                           File.separatorChar +
-                           THUMBNAIL_DIR;
-            File folder = new File(path1);
+            /* Create all the folders down to the thumbnail folder. */
+            File folder = new File(applicationFolder + names[i] +
+                                   File.separatorChar +
+                                   THUMBNAIL_DIR);
             folder.mkdirs();
 
             try
             {
                parseFeed(urls[i], names[i], applicationFolder);
             }
-            catch(XmlPullParserException e)
-            {
-               e.printStackTrace();
-            }
-            catch(IOException e)
+            /* Multi catch XmlPullParserException & IOException. */
+            catch(Exception e)
             {
                e.printStackTrace();
             }
@@ -359,6 +356,21 @@ class ServiceUpdate extends IntentService
       stopSelf();
    }
 
+   private static
+   String getContent(XmlPullParser parser)
+   {
+      try
+      {
+         parser.next();
+      }
+      catch(Exception ignored)
+      {
+         return "";
+      }
+      String content = parser.getText();
+      return null == content ? "" : Patterns.WHITESPACE.matcher(content).replaceAll(" ");
+   }
+
    private
    void parseFeed(String urlString, String feed, String applicationFolder) throws
          XmlPullParserException, IOException
@@ -373,13 +385,12 @@ class ServiceUpdate extends IntentService
       Set<Long> longSet = Read.longSet(longFileName, applicationFolder);
 
       int setSize = set.size();
-      String[] lines = set.toArray(new String[setSize]);
-
       int longSize = longSet.size();
+
+      String[] lines = set.toArray(new String[setSize]);
       Long[] longs = longSet.toArray(new Long[longSize]);
 
-      Comparator<Long> longComparator = Collections.reverseOrder();
-      Map<Long, String> map = new TreeMap<Long, String>(longComparator);
+      Map<Long, String> map = new TreeMap<Long, String>(Collections.reverseOrder());
 
       for(int i = 0; i < setSize; i++)
       {
@@ -417,10 +428,11 @@ class ServiceUpdate extends IntentService
          }
       }
 
-      while(true)
-      {
-         int eventType = parser.getEventType();
+      int eventType = parser.getEventType();
 
+      /* This is the main part that parses for each feed item/entry. */
+      while(XmlPullParser.END_DOCUMENT != eventType)
+      {
          if(XmlPullParser.START_TAG == eventType)
          {
             String tag = parser.getName();
@@ -436,35 +448,22 @@ class ServiceUpdate extends IntentService
                String link = parser.getAttributeValue(null, "href");
                if(null == link)
                {
-                  parser.next();
-                  link = parser.getText();
+                  link = getContent(parser);
                }
-
                appendItem(builder, Index.LINK, link);
                appendItem(builder, Index.LINK_TRIMMED, fitToScreen(link, 1));
             }
             else if(Tags.PUBLISHED.equals(tag) || Tags.PUBDATE.equals(tag))
             {
-               parser.next();
-               String content = parser.getText();
-
-               appendPublishedTime(builder, content, tag);
+               appendPublishedTime(builder, getContent(parser), tag);
             }
             else if(Tags.TITLE.equals(tag))
             {
-               parser.next();
-               String content = parser.getText();
-               content = null != content ? Patterns.WHITESPACE.matcher(content).replaceAll(" ")
-                     : "";
-
-               appendItem(builder, Index.TITLE, fitToScreen(content, 0));
+               appendItem(builder, Index.TITLE, fitToScreen(getContent(parser), 0));
             }
             else if(Tags.CONTENT.equals(tag) || Tags.DES.equals(tag))
             {
-               parser.next();
-               String content = parser.getText();
-               content = null != content ? Patterns.WHITESPACE.matcher(content).replaceAll(" ")
-                     : "";
+               String content = getContent(parser);
 
                /* Here we want to parse the html for the first image. */
                Matcher matcherImg = Patterns.IMG.matcher(content);
@@ -491,10 +490,7 @@ class ServiceUpdate extends IntentService
 
                /* Replace all the html tags with nothing. */
                content = Patterns.CDATA.matcher(content).replaceAll("").trim();
-               if(!content.isEmpty())
-               {
-                  builder = appendDesLines(builder, content);
-               }
+               builder = appendDesLines(builder, content);
             }
          }
          else if(XmlPullParser.END_TAG == eventType)
@@ -507,14 +503,12 @@ class ServiceUpdate extends IntentService
                map.put(m_timeCurrentItem, builder.toString());
             }
          }
-         else if(XmlPullParser.END_DOCUMENT == eventType)
-         {
-            writeCollection(contentFileName, map.values(), applicationFolder);
-            Write.longSet(longFileName, map.keySet(), applicationFolder);
-
-            return;
-         }
          parser.next();
+         eventType = parser.getEventType();
       }
+
+      /* We have finished forming the sets and we can save the new files to disk. */
+      writeCollection(contentFileName, map.values(), applicationFolder);
+      Write.longSet(longFileName, map.keySet(), applicationFolder);
    }
 }
