@@ -245,7 +245,7 @@ class FeedsActivity extends Activity
             /* Set the ActionBar title without saving the previous title. */
             actionBar.setTitle(selectedTitle);
 
-            Utilities.updateSubtitleCount(activity, feedsWasClicked || tagWasClicked ? currentPage : null);
+            Utilities.updateSubtitleCount(activity, feedsWasClicked || tagWasClicked ? currentPage : -1);
 
             FragmentManager manager = getFragmentManager();
             FragmentTransaction transaction = manager.beginTransaction();
