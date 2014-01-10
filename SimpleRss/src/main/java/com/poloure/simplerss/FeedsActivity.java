@@ -206,6 +206,7 @@ class FeedsActivity extends Activity
       m_drawerToggle.syncState();
 
       final ActionBar actionBar = getActionBar();
+      final Activity activity = this;
       Resources resources = getResources();
 
       AsyncNavigationAdapter.newInstance(this, m_applicationFolder, 0);
@@ -244,37 +245,36 @@ class FeedsActivity extends Activity
             /* Set the ActionBar title without saving the previous title. */
             actionBar.setTitle(selectedTitle);
 
-            boolean update = feedsWasClicked || tagWasClicked;
-            String unreadText = getString(R.string.subtitle_unread);
-            String subtitle = update ? unreadText + ' ' + m_adapterNavDrawer.getItem(currentPage)
-                  : null;
-            actionBar.setSubtitle(subtitle);
+            Utilities.updateSubtitleCount(activity, feedsWasClicked || tagWasClicked ? currentPage : null);
 
-            /* Hide all the fragments*/
             FragmentManager manager = getFragmentManager();
             FragmentTransaction transaction = manager.beginTransaction();
+
+            /* For each of the navigation titles, decide what to do with its fragment. */
             for(String navigationTitle : navigationTitles)
             {
                Fragment frag = manager.findFragmentByTag(navigationTitle);
-               if(null != frag)
+               /* If the title is the one that was clicked, show it. */
+               if(selectedTitle.equals(navigationTitle))
+               {
+                  Fragment selectedFragment = manager.findFragmentByTag(selectedTitle);
+
+                  if(null == selectedFragment)
+                  {
+                     Fragment fragment = 1 == position ? FragmentManage.newInstance()
+                           : FragmentSettings.newInstance();
+
+                     transaction.add(R.id.content_frame, fragment, selectedTitle);
+                  }
+                  else
+                  {
+                     transaction.show(selectedFragment);
+                  }
+               }
+               else if(null != frag)
                {
                   transaction.hide(frag);
                }
-            }
-
-            /* Get the selected fragment. */
-            Fragment selectedFragment = manager.findFragmentByTag(selectedTitle);
-
-            if(null == selectedFragment)
-            {
-               Fragment fragment = 1 == position ? FragmentManage.newInstance()
-                     : FragmentSettings.newInstance();
-
-               transaction.add(R.id.content_frame, fragment, selectedTitle);
-            }
-            else
-            {
-               transaction.show(selectedFragment);
             }
 
             transaction.commit();
@@ -350,23 +350,6 @@ class FeedsActivity extends Activity
    {
       super.onConfigurationChanged(newConfig);
       m_drawerToggle.onConfigurationChanged(newConfig);
-   }
-
-   @Override
-   public
-   void onBackPressed()
-   {
-      super.onBackPressed();
-
-      Resources resources = getResources();
-      String feeds = resources.getStringArray(R.array.navigation_titles)[0];
-
-      ActionBar actionBar = getActionBar();
-      actionBar.setTitle(feeds);
-
-      DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-      drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-      m_drawerToggle.setDrawerIndicatorEnabled(true);
    }
 
    @Override

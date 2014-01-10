@@ -16,7 +16,6 @@
 
 package com.poloure.simplerss;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.widget.ListView;
@@ -99,14 +98,7 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, int[]>
       adapterNavDrawer.setArrays(PagerAdapterFeeds.TAG_LIST, result);
       adapterNavDrawer.notifyDataSetChanged();
 
-      /* Update the subtitle if actionBar != null. */
-      ActionBar actionBar = m_activity.getActionBar();
-      if(-1 != m_currentPage)
-      {
-         String unread = adapterNavDrawer.getItem(m_currentPage);
-
-         String unreadText = m_activity.getString(R.string.subtitle_unread);
-         actionBar.setSubtitle(unreadText + ' ' + unread);
-      }
+      /* Update the subtitle. */
+      Utilities.updateSubtitleCount(m_activity, m_currentPage);
    }
 }

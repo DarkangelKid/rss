@@ -55,7 +55,7 @@ class FragmentFeeds extends Fragment
 
       String applicationFolder = FeedsActivity.getApplicationFolder(activity);
       ViewPager.OnPageChangeListener onTagPageChange = new OnPageChangeTags(activity,
-            navigationAdapter, applicationFolder);
+            applicationFolder);
 
       FragmentManager fragmentManager = activity.getFragmentManager();
       PagerAdapterFeeds adapter = new PagerAdapterFeeds(fragmentManager);

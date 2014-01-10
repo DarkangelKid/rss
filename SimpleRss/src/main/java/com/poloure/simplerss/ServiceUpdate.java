@@ -42,7 +42,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -56,6 +55,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public
@@ -67,22 +67,35 @@ class ServiceUpdate extends IntentService
    static final String THUMBNAIL_DIR = "thumbnails" + File.separatorChar;
    private static final char ITEM_SEPARATOR = '|';
    /* Parser saves */
-   private static final String INDEX_IMAGE = "image|";
-   private static final String INDEX_TITLE = "title|";
-   private static final String INDEX_TIME = "pubDate|";
-   private static final String INDEX_LINK = "link|";
-   private static final String INDEX_LINK_TRIMMED = "blink|";
-   private static final String INDEX_MIME = "mime|";
+   private static final String INDEX_IMAGE = "image";
+   private static final String INDEX_TITLE = "title";
+   private static final String INDEX_TIME = "pubDate";
+   private static final String INDEX_LINK = "link";
+   private static final String INDEX_LINK_TRIMMED = "blink";
+   private static final String INDEX_MIME = "mime";
    private static final String[] INDEX_DES = {"x", "y", "z"};
-   private static final String MIME_GIF = "image/gif";
    private static final int MIN_IMAGE_WIDTH = 64;
    private static final Pattern PATTERN_WHITESPACE = Pattern.compile("[\\t\\n\\x0B\\f\\r\\|]");
    private static final Pattern PATTERN_CDATA = Pattern.compile("\\<.*?\\>");
-   private static final String[] DESIRED_TAGS = {
-         "link", "published", "pubDate", "description", "title", "content", "entry", "item"
-   };
+   private static final Pattern PATTERN_IMG = Pattern.compile("(?i)<a([^>]+)>(.+?)</a>");
+   private static final Pattern PATTERN_HREF = Pattern
+         .compile("\\s*(?i)href\\s*=\\s*(\"([^\"]*\")|'[^']*'|([^'\">\\s]+))");
+   private static final Pattern PATTERN_APOS = Pattern.compile("'");
+   private static final Pattern PATTERN_QUOT = Pattern.compile("\"");
+
+   private static final String TAG_LINK = "link";
+   private static final String TAG_PUBLISHED = "published";
+   private static final String TAG_PUBDATE = "pubDate";
+   private static final String TAG_DES = "description";
+   private static final String TAG_TITLE = "title";
+   private static final String TAG_CONTENT = "content";
+   private static final String TAG_ENTRY = "entry";
+   private static final String TAG_ITEM = "item";
+
    private static final int FEED_ITEM_INITIAL_CAPACITY = 200;
    private static final int DEFAULT_MAX_HISTORY = 10000;
+
+   private long m_timeCurrentItem;
 
    public
    ServiceUpdate()
@@ -115,6 +128,196 @@ class ServiceUpdate extends IntentService
       {
          Read.close(out);
       }
+   }
+
+   private static
+   StringBuilder appendDesLines(StringBuilder builder, String content, int screenWidth)
+   {
+      String contentCopy = content;
+      for(int x = 0; 3 > x; x++)
+      {
+         int desChars = ViewCustom.PAINTS[2]
+               .breakText(contentCopy, true, screenWidth - 40.0F, null);
+         int desSpace = contentCopy.lastIndexOf(' ', desChars);
+         desChars = -1 == desSpace ? desChars : desSpace + 1;
+
+         builder = appendItem(builder, INDEX_DES[x], contentCopy.substring(0, desChars));
+
+         contentCopy = contentCopy.substring(desChars);
+      }
+      return builder;
+   }
+
+   private static
+   String fitToScreen(String content, int screenWidth, int ind)
+   {
+      int chars = ViewCustom.PAINTS[ind].breakText(content, true, screenWidth - 40.0F, null);
+      int space = content.lastIndexOf(' ', chars);
+
+      return content.substring(0, -1 == space ? chars : space);
+   }
+
+   private static
+   Set<String> fileToSet(String fileName, String fileFolder)
+   {
+      Set<String> set = new LinkedHashSet<String>(64);
+
+      if(Read.isUnmounted())
+      {
+         return set;
+      }
+
+      String[] lines = Read.file(fileName, fileFolder);
+      Collections.addAll(set, lines);
+
+      return set;
+   }
+
+   private static
+   StringBuilder compressImage(String thumbnailDir, String imgLink, String imgName, Context context,
+         StringBuilder builder)
+   {
+      BitmapFactory.Options options = new BitmapFactory.Options();
+      options.inJustDecodeBounds = true;
+      InputStream inputStream;
+      try
+      {
+         URL imageUrl = new URL(imgLink);
+         inputStream = imageUrl.openStream();
+      }
+      catch(MalformedURLException ignored)
+      {
+         return builder;
+      }
+      catch(IOException ignored)
+      {
+         return builder;
+      }
+
+      Resources resources = context.getResources();
+      DisplayMetrics displayMetrics = resources.getDisplayMetrics();
+      float screenWidth = displayMetrics.widthPixels;
+
+      String applicationFolder = FeedsActivity.getApplicationFolder(context);
+      BitmapFactory.decodeStream(inputStream, null, options);
+
+      float imageWidth = options.outWidth;
+      float imageHeight = options.outHeight;
+      String mimeType = options.outMimeType;
+
+      /* If the image is smaller than we care about, do not save it. */
+      if(MIN_IMAGE_WIDTH > imageWidth)
+      {
+         return builder;
+      }
+
+      /* Save these details before we possible return. */
+      builder = appendItem(builder, INDEX_MIME, mimeType);
+
+      /* If images are disabled. */
+      SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+      boolean imagesDisabled = !preferences.getBoolean("images_enabled", true);
+      if(imagesDisabled)
+      {
+         return builder;
+      }
+
+      float inSample = imageWidth / screenWidth;
+      int height = Math.round(imageHeight / inSample);
+
+      try
+      {
+         inputStream.close();
+         URL imageUrl = new URL(imgLink);
+         inputStream = imageUrl.openStream();
+      }
+      catch(MalformedURLException ignored)
+      {
+         return builder;
+      }
+      catch(IOException ignored)
+      {
+         return builder;
+      }
+
+      BitmapFactory.Options o2 = new BitmapFactory.Options();
+      o2.inSampleSize = 1;
+      Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, o2);
+
+         /* Scale it to the screen width. */
+      bitmap = Bitmap.createScaledBitmap(bitmap, Math.round(screenWidth), height, false);
+
+         /* Shrink it to IMAGE_HEIGHT. */
+      int newHeight = Math.min(bitmap.getHeight(), ViewCustom.IMAGE_HEIGHT);
+      bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), newHeight);
+
+      FileOutputStream out = null;
+
+      try
+      {
+         out = new FileOutputStream(applicationFolder + thumbnailDir + imgName);
+
+            /* Get the quality from settings. */
+         String qualityString = preferences.getString("thumbnail_quality", "75");
+         int quality = Integer.parseInt(qualityString);
+         bitmap.compress(Bitmap.CompressFormat.JPEG, quality, out);
+      }
+      catch(FileNotFoundException e)
+      {
+         e.printStackTrace();
+      }
+      finally
+      {
+         Read.close(out);
+      }
+
+
+      return builder;
+   }
+
+   private static
+   StringBuilder appendItem(StringBuilder builder, String tag, String content)
+   {
+      builder.append(tag);
+      builder.append(ITEM_SEPARATOR);
+      builder.append(content);
+      builder.append(ITEM_SEPARATOR);
+      return builder;
+   }
+
+   private
+   StringBuilder appendPublishedTime(StringBuilder builder, String content, String tag)
+   {
+      Time time = new Time();
+
+      try
+      {
+         /* <published> - It is an atom feed it will be one of four RFC3339 formats. */
+         if(TAG_PUBLISHED.equals(tag))
+         {
+            time.parse3339(content);
+            m_timeCurrentItem = time.toMillis(true);
+         }
+         /* <pubDate> - It follows the rss 2.0 specification for rfc882. */
+         else
+         {
+            Calendar calendar = Calendar.getInstance();
+            SimpleDateFormat rssDate = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z",
+                  Locale.ENGLISH);
+            Date date = rssDate.parse(content);
+            calendar.setTime(date);
+            m_timeCurrentItem = calendar.getTimeInMillis();
+         }
+      }
+      /* Exception here because we can not use multi catch ParseException & RuntimeException. */
+      catch(Exception ignored)
+      {
+         System.out.println("BUG : Could not parse: " + content);
+         time.setToNow();
+         m_timeCurrentItem = time.toMillis(true);
+      }
+
+      return appendItem(builder, INDEX_TIME, Long.toString(m_timeCurrentItem));
    }
 
    @Override
@@ -217,8 +420,6 @@ class ServiceUpdate extends IntentService
          map.put(longs[i], lines[i]);
       }
 
-      Time time = new Time();
-
       XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
       factory.setNamespaceAware(true);
       XmlPullParser parser = factory.newPullParser();
@@ -227,15 +428,13 @@ class ServiceUpdate extends IntentService
       InputStream inputStream = url.openStream();
       parser.setInput(inputStream, null);
 
-      BitmapFactory.Options options = new BitmapFactory.Options();
-      options.inJustDecodeBounds = true;
-
-      StringBuilder feedItemBuilder = new StringBuilder(FEED_ITEM_INITIAL_CAPACITY);
+      StringBuilder builder = new StringBuilder(FEED_ITEM_INITIAL_CAPACITY);
 
       Resources resources = getResources();
       DisplayMetrics metrics = resources.getDisplayMetrics();
       int screenWidth = metrics.widthPixels;
 
+      /* Skip everything in the xml file until we arrive at an 'entry' or 'item' open tag. */
       boolean preEntry = true;
 
       while(preEntry)
@@ -245,7 +444,7 @@ class ServiceUpdate extends IntentService
          if(XmlPullParser.START_TAG == eventType)
          {
             String tag = parser.getName();
-            if(DESIRED_TAGS[6].equals(tag) || DESIRED_TAGS[7].equals(tag))
+            if(TAG_ENTRY.equals(tag) || TAG_ITEM.equals(tag))
             {
                preEntry = false;
             }
@@ -256,11 +455,6 @@ class ServiceUpdate extends IntentService
          }
       }
 
-      long timeLong = 0L;
-
-      /* Create the date format. */
-      SimpleDateFormat rssDate = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
-
       while(true)
       {
          int eventType = parser.getEventType();
@@ -269,17 +463,13 @@ class ServiceUpdate extends IntentService
          {
             String tag = parser.getName();
 
-            int index = index(DESIRED_TAGS, tag);
-            String timeString;
-
-            /* "entry", "item" */
-            if(5 < index)
+            if(TAG_ENTRY.equals(tag) || TAG_ITEM.equals(tag))
             {
-               feedItemBuilder.setLength(0);
-               feedItemBuilder.append(ITEM_SEPARATOR);
-               timeLong = 0L;
+               builder.setLength(0);
+               builder.append(ITEM_SEPARATOR);
+               m_timeCurrentItem = 0L;
             }
-            else if(0 == index)
+            else if(TAG_LINK.equals(tag))
             {
                String link = parser.getAttributeValue(null, "href");
                if(null == link)
@@ -288,154 +478,78 @@ class ServiceUpdate extends IntentService
                   link = parser.getText();
                }
 
-               feedItemBuilder.append(INDEX_LINK);
-               feedItemBuilder.append(link);
-               feedItemBuilder.append(ITEM_SEPARATOR);
-
-               feedItemBuilder.append(INDEX_LINK_TRIMMED);
-               feedItemBuilder = appendFitToScreen(feedItemBuilder, link, screenWidth, 1);
-               feedItemBuilder.append(ITEM_SEPARATOR);
+               builder = appendItem(builder, INDEX_LINK, link);
+               builder = appendItem(builder, INDEX_LINK_TRIMMED, fitToScreen(link, screenWidth, 1));
             }
-
-            /* "published" - It is an atom feed it will be one of four RFC3339 formats. */
-            else if(1 == index)
+            else if(TAG_PUBLISHED.equals(tag) || TAG_PUBDATE.equals(tag))
             {
                parser.next();
-               String contentText = parser.getText();
+               String content = parser.getText();
 
-               try
-               {
-                  time.parse3339(contentText);
-               }
-               catch(RuntimeException ignored)
-               {
-                  System.out.println("BUG : RFC3339, looks like: " + contentText);
-                  time.setToNow();
-               }
-
-               timeLong = time.toMillis(true);
-
-               timeString = Long.toString(timeLong);
-               feedItemBuilder.append(INDEX_TIME);
-               feedItemBuilder.append(timeString);
-               feedItemBuilder.append(ITEM_SEPARATOR);
+               builder = appendPublishedTime(builder, content, tag);
             }
-
-            /* "pubDate" - It follows the rss 2.0 specification for rfc882. */
-            else if(2 == index)
-            {
-               parser.next();
-               String contentText = parser.getText();
-
-               try
-               {
-                  Calendar calendar = Calendar.getInstance();
-                  Date date = rssDate.parse(contentText);
-                  calendar.setTime(date);
-                  timeLong = calendar.getTimeInMillis();
-               }
-               catch(ParseException ignored)
-               {
-                  System.out.println("BUG : rfc882, looks like: " + contentText);
-                  time.setToNow();
-                  timeLong = time.toMillis(true);
-               }
-
-               timeString = Long.toString(timeLong);
-               feedItemBuilder.append(INDEX_TIME);
-               feedItemBuilder.append(timeString);
-               feedItemBuilder.append(ITEM_SEPARATOR);
-            }
-
-            /* Title. */
-            else if(4 == index)
+            else if(TAG_TITLE.equals(tag))
             {
                parser.next();
                String content = parser.getText();
                content = null != content ? PATTERN_WHITESPACE.matcher(content).replaceAll(" ") : "";
 
-               /* "title|". */
-               feedItemBuilder.append(INDEX_TITLE);
-               feedItemBuilder = appendFitToScreen(feedItemBuilder, content, screenWidth, 0);
-               feedItemBuilder.append(ITEM_SEPARATOR);
+               builder = appendItem(builder, INDEX_TITLE, fitToScreen(content, screenWidth, 0));
             }
-
-            /* Content, description. */
-            else if(-1 != index)
+            else if(TAG_CONTENT.equals(tag) || TAG_DES.equals(tag))
             {
                parser.next();
                String content = parser.getText();
                content = null != content ? PATTERN_WHITESPACE.matcher(content).replaceAll(" ") : "";
 
-               int imgPosition = content.indexOf("img");
-               int srcPosition = content.indexOf("src", imgPosition);
-               if(-1 != imgPosition && -1 != srcPosition)
+               /* Here we want to parse the html for the first image. */
+               Matcher matcherImg = PATTERN_IMG.matcher(content);
+
+               if(matcherImg.find())
                {
-                  /* Find which mark is being used. */
-                  int apostrophePosition = content.indexOf('\'', srcPosition);
-                  int quotePosition = content.indexOf('\"', srcPosition);
-                  int usedMarkPosition;
+                  String href = matcherImg.group(1);
+                  Matcher matcherHref = PATTERN_HREF.matcher(href);
 
-                  if(-1 != apostrophePosition && -1 != quotePosition)
+                  if(matcherHref.find())
                   {
-                     usedMarkPosition = Math.min(apostrophePosition, quotePosition);
-                  }
-                  else
-                  {
-                     usedMarkPosition = -1 == quotePosition ? apostrophePosition : quotePosition;
-                  }
+                     /* If we get here, we have an image to save. */
+                     String imgLink = matcherHref.group(1);
 
-                  char quote = content.charAt(usedMarkPosition);
-                  int finalPosition = content.indexOf(quote, usedMarkPosition + 1);
+                     /* Get rid of any apostrophes and quotation marks in the link. */
+                     imgLink = PATTERN_APOS.matcher(imgLink).replaceAll("");
+                     imgLink = PATTERN_QUOT.matcher(imgLink).replaceAll("");
 
-                  String imgLink = content.substring(usedMarkPosition + 1, finalPosition);
-                  feedItemBuilder.append(INDEX_IMAGE);
-                  feedItemBuilder.append(imgLink);
-                  feedItemBuilder.append(ITEM_SEPARATOR);
+                     builder = appendItem(builder, INDEX_IMAGE, imgLink);
 
-                  int lastSlash = imgLink.lastIndexOf('/') + 1;
-                  String imgName = imgLink.substring(lastSlash);
+                     int lastSlash = imgLink.lastIndexOf('/') + 1;
+                     String imgName = imgLink.substring(lastSlash);
 
-                  String thumbnailPath = applicationFolder + thumbnailDir + imgName;
+                     String thumbnailPath = applicationFolder + thumbnailDir + imgName;
 
-                  File file = new File(thumbnailPath);
-                  if(!file.exists())
-                  {
-                     feedItemBuilder = compressImage(thumbnailDir, imgLink, imgName, this,
-                           feedItemBuilder);
+                     File file = new File(thumbnailPath);
+                     if(!file.exists())
+                     {
+                        builder = compressImage(thumbnailDir, imgLink, imgName, this, builder);
+                     }
                   }
                }
 
-               /* Replace ALL_TAG <x> with nothing. */
+               /* Replace all the html tags with nothing. */
                content = PATTERN_CDATA.matcher(content).replaceAll("").trim();
                if(!content.isEmpty())
                {
-                  String tagToAppend = DESIRED_TAGS[5].equals(tag) ? DESIRED_TAGS[3] : tag;
-
-                  if(tagToAppend.equals(DESIRED_TAGS[3]))
-                  {
-                     feedItemBuilder = appendDesLines(feedItemBuilder, content, screenWidth);
-                  }
-                  else
-                  {
-                     feedItemBuilder.append(tagToAppend);
-                     feedItemBuilder.append(ITEM_SEPARATOR);
-                     feedItemBuilder.append(content);
-                     feedItemBuilder.append(ITEM_SEPARATOR);
-                  }
+                  builder = appendDesLines(builder, content, screenWidth);
                }
             }
          }
          else if(XmlPullParser.END_TAG == eventType)
          {
             String tag = parser.getName();
-            boolean newItem = !longSet.contains(timeLong);
+            boolean newItem = !longSet.contains(m_timeCurrentItem);
 
-            /* "entry", "item" */
-            if(DESIRED_TAGS[6].equals(tag) || DESIRED_TAGS[7].equals(tag) && newItem)
+            if(TAG_ENTRY.equals(tag) || TAG_ITEM.equals(tag) && newItem)
             {
-               String finalLine = feedItemBuilder.toString();
-               map.put(timeLong, finalLine);
+               map.put(m_timeCurrentItem, builder.toString());
             }
          }
          else if(XmlPullParser.END_DOCUMENT == eventType)
@@ -471,206 +585,5 @@ class ServiceUpdate extends IntentService
          }
          parser.next();
       }
-   }
-
-   private static
-   StringBuilder appendDesLines(StringBuilder builder, String content, int screenWidth)
-   {
-      String contentCopy = content;
-      for(int x = 0; 3 > x; x++)
-      {
-         int desChars = ViewCustom.PAINTS[2]
-               .breakText(contentCopy, true, screenWidth - 40.0F, null);
-         int desSpace = contentCopy.lastIndexOf(' ', desChars);
-         desChars = -1 == desSpace ? desChars : desSpace + 1;
-
-         builder.append(INDEX_DES[x]);
-         builder.append(ITEM_SEPARATOR);
-         builder.append(contentCopy.substring(0, desChars));
-         builder.append(ITEM_SEPARATOR);
-
-         contentCopy = contentCopy.substring(desChars);
-      }
-      return builder;
-   }
-
-   private static
-   StringBuilder appendFitToScreen(StringBuilder builder, String content, int screenWidth, int ind)
-   {
-      int chars = ViewCustom.PAINTS[ind].breakText(content, true, screenWidth - 40.0F, null);
-
-      int space = content.lastIndexOf(' ', chars);
-
-      String trimmed = content.substring(0, -1 == space ? chars : space);
-      builder.append(trimmed);
-
-      return builder;
-   }
-
-   private static
-   Set<String> fileToSet(String fileName, String fileFolder)
-   {
-      Set<String> set = new LinkedHashSet<String>(64);
-
-      if(Read.isUnmounted())
-      {
-         return set;
-      }
-
-      String[] lines = Read.file(fileName, fileFolder);
-      Collections.addAll(set, lines);
-
-      return set;
-   }
-
-   private static
-   StringBuilder compressImage(String thumbnailDir, String imgLink, String imgName, Context context,
-         StringBuilder builder)
-   {
-      BitmapFactory.Options options = new BitmapFactory.Options();
-      options.inJustDecodeBounds = true;
-      InputStream inputStream;
-      try
-      {
-         URL imageUrl = new URL(imgLink);
-         inputStream = imageUrl.openStream();
-      }
-      catch(MalformedURLException ignored)
-      {
-         return builder;
-      }
-      catch(IOException ignored)
-      {
-         return builder;
-      }
-
-      Resources resources = context.getResources();
-      DisplayMetrics displayMetrics = resources.getDisplayMetrics();
-      float screenWidth = displayMetrics.widthPixels;
-
-      String applicationFolder = FeedsActivity.getApplicationFolder(context);
-      BitmapFactory.decodeStream(inputStream, null, options);
-
-      float imageWidth = options.outWidth;
-      float imageHeight = options.outHeight;
-      String mimeType = options.outMimeType;
-
-      /* If the image is smaller than we care about, do not save it. */
-      if(MIN_IMAGE_WIDTH > imageWidth)
-      {
-         return builder;
-      }
-
-      /* Save these details before we possible return. */
-      builder.append(INDEX_MIME);
-      builder.append(mimeType);
-      builder.append(ITEM_SEPARATOR);
-
-      /* If images are disabled. */
-      SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-      boolean imagesDisabled = !preferences.getBoolean("images_enabled", true);
-      if(imagesDisabled)
-      {
-         return builder;
-      }
-
-      FileOutputStream out = null;
-
-      if(MIME_GIF.equals(mimeType))
-      {
-         try
-         {
-            inputStream.close();
-            URL imageUrl = new URL(imgLink);
-            inputStream = imageUrl.openStream();
-            out = new FileOutputStream(applicationFolder + thumbnailDir + imgName);
-
-            byte[] buffer = new byte[1024];
-            int bytesRead = inputStream.read(buffer);
-            while(-1 != bytesRead)
-            {
-               out.write(buffer, 0, bytesRead);
-               bytesRead = inputStream.read(buffer);
-            }
-         }
-         catch(IOException ignored)
-         {
-         }
-         finally
-         {
-            Read.close(out);
-         }
-      }
-      else
-      {
-         float inSample = imageWidth / screenWidth;
-         int height = Math.round(imageHeight / inSample);
-
-         try
-         {
-            inputStream.close();
-            URL imageUrl = new URL(imgLink);
-            inputStream = imageUrl.openStream();
-         }
-         catch(MalformedURLException ignored)
-         {
-            return builder;
-         }
-         catch(IOException ignored)
-         {
-            return builder;
-         }
-
-         BitmapFactory.Options o2 = new BitmapFactory.Options();
-         o2.inSampleSize = 1;
-         Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, o2);
-
-         /* Scale it to the screen width. */
-         bitmap = Bitmap.createScaledBitmap(bitmap, Math.round(screenWidth), height, false);
-
-         /* Shrink it to IMAGE_HEIGHT. */
-         int newHeight = Math.min(bitmap.getHeight(), ViewCustom.IMAGE_HEIGHT);
-         bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), newHeight);
-
-         try
-         {
-            out = new FileOutputStream(applicationFolder + thumbnailDir + imgName);
-
-            /* Get the quality from settings. */
-            String qualityString = preferences.getString("thumbnail_quality", "75");
-            int quality = Integer.parseInt(qualityString);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, quality, out);
-         }
-         catch(FileNotFoundException e)
-         {
-            e.printStackTrace();
-         }
-         finally
-         {
-            Read.close(out);
-         }
-      }
-
-      return builder;
-   }
-
-   /* index throws an ArrayOutOfBoundsException if not handled. */
-   private static
-   <T> int index(T[] array, T value)
-   {
-      if(null == array)
-      {
-         return -1;
-      }
-
-      int arrayLength = array.length;
-      for(int i = 0; i < arrayLength; i++)
-      {
-         if(array[i].equals(value))
-         {
-            return i;
-         }
-      }
-      return -1;
    }
 }

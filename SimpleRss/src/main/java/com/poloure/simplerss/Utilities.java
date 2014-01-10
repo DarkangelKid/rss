@@ -16,12 +16,16 @@
 
 package com.poloure.simplerss;
 
+import android.app.ActionBar;
+import android.app.Activity;
 import android.content.res.Resources;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Adapter;
+import android.widget.ListView;
 
 class Utilities
 {
@@ -39,6 +43,31 @@ class Utilities
          addFeedMenu.setVisible(add);
          unreadMenu.setVisible(unread);
          refreshMenu.setVisible(refresh);
+      }
+   }
+
+   static
+   void updateSubtitleCount(Activity activity, int page)
+   {
+      ListView navigationList = (ListView) activity.findViewById(R.id.navigation_list);
+      if(null != navigationList)
+      {
+         ActionBar actionBar = activity.getActionBar();
+         if(null != actionBar)
+         {
+            if(-1 == page)
+            {
+               actionBar.setSubtitle(null);
+            }
+            else
+            {
+               Adapter adapter = navigationList.getAdapter();
+               String unreadCount = (String) adapter.getItem(page);
+
+               String unreadText = activity.getString(R.string.subtitle_unread);
+               actionBar.setSubtitle(unreadText + ' ' + unreadCount);
+            }
+         }
       }
    }
 
