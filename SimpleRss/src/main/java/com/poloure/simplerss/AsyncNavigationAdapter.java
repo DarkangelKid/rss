@@ -22,6 +22,9 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -50,43 +53,48 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, NavItem[]>
    NavItem[] doInBackground(String... applicationFolder)
    {
       String appFolder = applicationFolder[0];
-
-      /* If null was passed into the task, count the unread items. */
-      List<String> currentTags = PagerAdapterFeeds.TAG_LIST;
-
-      String[][] content = Read.csvFile(Read.INDEX, appFolder, 'f', 't');
-      String[] indexNames = content[0];
-      String[] indexTags = content[1];
-
       String append = File.separatorChar + ServiceUpdate.ITEM_LIST;
-      int total = 0;
-      int tagCount = currentTags.size();
-      int indexTagsCount = indexTags.length;
 
-      NavItem[] navItems = new NavItem[tagCount];
+      /* Read the index file for an array of feed names and feed tags. */
+      String[][] content = Read.csvFile(Read.INDEX, appFolder, 'f', 't');
+      String[] feedNames = content[0];
+      String[] feedTags = content[1];
 
-      /* TODO each longSet is read multiple times. */
+      /* Get the total number of tags and feeds that exist. */
+      int tagTotal = PagerAdapterFeeds.TAG_LIST.size();
+      int feedTotal = feedNames.length;
 
-      /* For each tag. */
-      for(int i = 1; i < tagCount; i++)
+      /* Make a NavItem for each tag we will display in the navigation drawer. */
+      NavItem[] navItems = new NavItem[tagTotal];
+
+      /* This is a list of Sets each containing all of the feed's items. */
+      List<Set<Long>> feedItems = new ArrayList<>(feedTotal);
+      for(String feedName : feedNames)
       {
-         navItems[i] = new NavItem(PagerAdapterFeeds.TAG_LIST.get(i), 0);
-         /* For each index entry. */
-         for(int j = 0; j < indexTagsCount; j++)
-         {
-            if(indexTags[j].contains(currentTags.get(i)))
-            {
-               String longFile = indexNames[j] + append;
-               Set<Long> longSet = Read.longSet(longFile, appFolder);
-
-               longSet.removeAll(AdapterTags.READ_ITEM_TIMES);
-               navItems[i].m_count += longSet.size();
-            }
-         }
-         total += navItems[i].m_count;
+         feedItems.add(Read.longSet(feedName + append, appFolder));
       }
 
-      navItems[0] = new NavItem(PagerAdapterFeeds.TAG_LIST.get(0), total);
+      /* Create a temporary collection we will .clear() each iteration of the next for loop. */
+      Collection<Long> itemsInTag = new HashSet<>(0);
+
+      /* For each tag excluding the all tag. */
+      for(int i = 0; tagTotal > i; i++)
+      {
+         String tag = PagerAdapterFeeds.TAG_LIST.get(i);
+
+         /* For each feed, if the feed ∈ this tag, add the feed items to the tag collection. */
+         for(int j = 0; j < feedTotal; j++)
+         {
+            /* If the feed's index entry (tag1, tag2, etc) contains this tag or is the all tag. */
+            if(0 == i || feedTags[j].contains(tag))
+            {
+               itemsInTag.addAll(feedItems.get(j));
+            }
+         }
+         itemsInTag.removeAll(AdapterTags.READ_ITEM_TIMES);
+         navItems[i] = new NavItem(tag, itemsInTag.size());
+         itemsInTag.clear();
+      }
 
       return navItems;
    }

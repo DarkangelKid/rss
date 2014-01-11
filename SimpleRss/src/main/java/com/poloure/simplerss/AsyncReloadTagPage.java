@@ -222,14 +222,14 @@ class AsyncReloadTagPage extends AsyncTask<Integer, Object, Void>
       adapterTag.notifyDataSetChanged();
 
       /* We now need to find the position of the item with the time timeBefore. */
-      int newPositionOfTop = adapterTag.m_times.indexOf(timeBefore) + 1;
+      int newPositionOfTop = adapterTag.m_times.indexOf(timeBefore);
       if(-1 == newPositionOfTop)
       {
          FeedsActivity.gotoLatestUnread(m_listView);
       }
       else
       {
-         m_listView.setSelectionFromTop(newPositionOfTop, top - m_listView.getPaddingTop());
+         m_listView.setSelectionFromTop(newPositionOfTop + 1, top - m_listView.getPaddingTop());
       }
    }
 }
