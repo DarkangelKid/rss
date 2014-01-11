@@ -28,7 +28,6 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 class AdapterNavigationDrawer extends BaseAdapter
@@ -36,10 +35,12 @@ class AdapterNavigationDrawer extends BaseAdapter
    private static final int[] NAV_ICONS = {
          R.drawable.action_feeds, R.drawable.action_manage, R.drawable.action_settings,
    };
-   private static final float MIN_HEIGHT_MAIN = 48.0F;
-   private static final float HORIZONTAL_PADDING_MAIN = 8.0F;
-   private static final float HORIZONTAL_PADDING_SUB = 16.0F;
-   private static final float PADDING_COMPOUND_DRAWABLE = 12.0F;
+   private static final int MIN_HEIGHT_MAIN = Utilities.getDp(48.0F);
+   private static final int MIN_HEIGHT_TAG = Utilities.getDp(42.0F);
+   private static final int VPADDING_DIV = Utilities.getDp(4.0F);
+   private static final int VPADDING_MAIN = Utilities.getDp(8.0F);
+   private static final int HPADDING_TAG = Utilities.getDp(16.0F);
+   private static final int PADDING_COMPOUND_DRAWABLE = Utilities.getDp(12.0F);
    private static final float TEXT_SIZE_MAIN = 20.0F;
    private static final ColorDrawable GREY_LINE = new ColorDrawable(Color.parseColor("#888888"));
    private static final int TYPE_TITLE = 0;
@@ -52,23 +53,13 @@ class AdapterNavigationDrawer extends BaseAdapter
 
    private final String[] m_navigationTitles;
    private final Context m_context;
-   private final List<String> m_tagArray = new ArrayList<>(0);
-   private int[] m_unreadArray = EMPTY_INT_ARRAY;
+   List<String> m_tagArray = new ArrayList<>(0);
+   int[] m_unreadArray = EMPTY_INT_ARRAY;
 
    AdapterNavigationDrawer(String[] navigationTitles, Context context)
    {
       m_navigationTitles = navigationTitles.clone();
       m_context = context;
-   }
-
-   void setArrays(Collection<String> tags, int[] unreadCounts)
-   {
-      if(!m_tagArray.equals(tags))
-      {
-         m_tagArray.clear();
-         m_tagArray.addAll(tags);
-      }
-      m_unreadArray = unreadCounts.clone();
    }
 
    @Override
@@ -78,6 +69,7 @@ class AdapterNavigationDrawer extends BaseAdapter
       return m_tagArray.size() + 4;
    }
 
+   /* This is used to set the subtitle count. */
    @Override
    public
    String getItem(int position)
@@ -96,81 +88,60 @@ class AdapterNavigationDrawer extends BaseAdapter
    public
    View getView(int position, View convertView, ViewGroup parent)
    {
-      View view = convertView;
-      boolean isNewView = null == convertView;
+      TextView view = (TextView) convertView;
       int viewType = getItemViewType(position);
+
+      if(null == convertView)
+      {
+         view = new TextView(m_context);
+         view.setTextColor(Color.WHITE);
+         view.setTypeface(SANS_SERIF_LITE);
+         view.setGravity(Gravity.CENTER_VERTICAL);
+      }
 
       if(TYPE_TITLE == viewType)
       {
-         if(isNewView)
+         if(null == convertView)
          {
-            int minHeight = Utilities.getDp(MIN_HEIGHT_MAIN);
-            int hPadding = Utilities.getDp(HORIZONTAL_PADDING_MAIN);
-            int paddingDrawable = Utilities.getDp(PADDING_COMPOUND_DRAWABLE);
-
-            TextView textView = new TextView(m_context);
-            textView.setGravity(Gravity.CENTER_VERTICAL);
-            textView.setTypeface(SANS_SERIF_LITE);
-            textView.setMinHeight(minHeight);
-            textView.setPadding(hPadding, 0, hPadding, 0);
-            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, TEXT_SIZE_MAIN);
-            textView.setTextColor(Color.WHITE);
-            textView.setCompoundDrawablePadding(paddingDrawable);
-
-            view = textView;
+            view.setMinHeight(MIN_HEIGHT_MAIN);
+            view.setPadding(VPADDING_MAIN, 0, VPADDING_MAIN, 0);
+            view.setTextSize(TypedValue.COMPLEX_UNIT_SP, TEXT_SIZE_MAIN);
+            view.setCompoundDrawablePadding(PADDING_COMPOUND_DRAWABLE);
          }
 
-         ((TextView) view).setText(m_navigationTitles[position]);
-         ((TextView) view).setCompoundDrawablesWithIntrinsicBounds(NAV_ICONS[position], 0, 0, 0);
+         view.setText(m_navigationTitles[position]);
+         view.setCompoundDrawablesWithIntrinsicBounds(NAV_ICONS[position], 0, 0, 0);
       }
-      else if(TYPE_DIVIDER == viewType && null == view)
+      else if(TYPE_DIVIDER == viewType && null == convertView)
       {
-         TextView textView = new TextView(m_context);
-
-         String tagsTitle = m_context.getString(R.string.feed_tag_title);
+         String tagsTitle = m_context.getString(R.string.navigation_drawer_tag_title);
 
          int drawerWidth = parent.getWidth();
          GREY_LINE.setBounds(0, 0, drawerWidth, 3);
 
-         int vPadding = Utilities.getDp(HORIZONTAL_PADDING_SUB / 4.0F);
-         int hPadding = Utilities.getDp(HORIZONTAL_PADDING_SUB);
-
-         textView.setCompoundDrawables(null, null, null, GREY_LINE);
-         textView.setCompoundDrawablePadding(8);
-         textView.setPadding(hPadding, vPadding, hPadding, vPadding);
-         textView.setText(tagsTitle);
-         textView.setTextColor(Color.WHITE);
-         textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.0F);
-
-         view = textView;
+         view.setCompoundDrawables(null, null, null, GREY_LINE);
+         view.setCompoundDrawablePadding(VPADDING_MAIN);
+         view.setPadding(HPADDING_TAG, VPADDING_DIV, HPADDING_TAG, VPADDING_DIV);
+         view.setText(tagsTitle);
+         view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14.0F);
       }
       else if(TYPE_TAG == viewType)
       {
-         if(isNewView)
+         if(null == convertView)
          {
-            TextView textView = new TextView(m_context);
+            view.setMinHeight(MIN_HEIGHT_TAG);
+            view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16.0F);
 
-            int minHeight = Utilities.getDp(42.0F);
-            int padding = Utilities.getDp(HORIZONTAL_PADDING_SUB);
-            int half = Math.round(padding * 0.5F);
-
-            textView.setPadding(padding, -half, padding, half);
-            textView.setMinHeight(minHeight);
-            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16.0F);
-            textView.setGravity(Gravity.CENTER_VERTICAL);
-            textView.setTextColor(Color.WHITE);
-            textView.setTypeface(SANS_SERIF_LITE);
-            textView.setLineSpacing(0.0F, 0.1F);
-
-            view = textView;
+            /* This is what allows us to put two lines on the same line in one view. */
+            view.setPadding(HPADDING_TAG, -VPADDING_MAIN, HPADDING_TAG, VPADDING_MAIN);
+            view.setLineSpacing(0.0F, 0.1F);
          }
 
-         String number = Integer.toString(m_unreadArray[position - 4]);
-         String unreadText = "0".equals(number) ? "" : number;
-         String tagTitle = m_tagArray.get(position - 4);
+         int count = m_unreadArray[position - 4];
+         String tag = m_tagArray.get(position - 4);
 
-         /* This here allows the unread counter to be aligned to the right. */
-         ((TextView) view).setText(tagTitle + '\n' + (char) 0x200F + unreadText);
+         /* This RTL (char) 0x200F allows the unread counter to be aligned to the right. */
+         view.setText(tag + '\n' + (char) 0x200F + (0 == count ? "" : count));
       }
       return view;
    }
@@ -186,14 +157,7 @@ class AdapterNavigationDrawer extends BaseAdapter
    public
    int getItemViewType(int position)
    {
-      if(3 > position)
-      {
-         return TYPE_TITLE;
-      }
-      else
-      {
-         return 3 == position ? TYPE_DIVIDER : TYPE_TAG;
-      }
+      return 3 > position ? TYPE_TITLE : 3 == position ? TYPE_DIVIDER : TYPE_TAG;
    }
 
    @Override

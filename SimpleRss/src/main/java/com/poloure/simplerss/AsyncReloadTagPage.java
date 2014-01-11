@@ -172,7 +172,7 @@ class AsyncReloadTagPage extends AsyncTask<Integer, Object, Void>
 
       for(char c : chars)
       {
-         int value = (int) c - 48;
+         int value = c - 48;
          num = num * 10L + value;
       }
       return num;

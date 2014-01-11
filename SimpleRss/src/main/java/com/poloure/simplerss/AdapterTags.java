@@ -94,7 +94,6 @@ class AdapterTags extends BaseAdapter
    View getView(int position, View convertView, ViewGroup parent)
    {
       int viewType = getItemViewType(position);
-      FeedItem item = m_feedItems.get(position);
 
       //boolean isRead = READ_ITEM_TIMES.contains(item.m_time);
       boolean hasImg = TYPE_IMAGE == viewType || TYPE_IMAGE_SANS_DESCRIPTION == viewType;
@@ -105,13 +104,11 @@ class AdapterTags extends BaseAdapter
             : new ViewCustom(m_context, hasImg ? hasDes ? 564 : 464 : hasDes ? 184 : 94);
 
       /* Set the information. */
+      FeedItem item = m_feedItems.get(position);
       view.m_item = item;
 
       /* The logic that tells whether the item is Read or not. */
-      boolean isListViewShown = parent.isShown();
-      boolean isNotLastItem = position + 1 < getCount();
-
-      if(isListViewShown && isNotLastItem && m_isReadingItems)
+      if(parent.isShown() && position + 1 < m_feedItems.size() && m_isReadingItems)
       {
          FeedItem nextItem = m_feedItems.get(position + 1);
          READ_ITEM_TIMES.add(nextItem.m_time);

@@ -95,7 +95,9 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, int[]>
       AdapterNavigationDrawer adapterNavDrawer = (AdapterNavigationDrawer) navigationList
             .getAdapter();
 
-      adapterNavDrawer.setArrays(PagerAdapterFeeds.TAG_LIST, result);
+      /* Update the data in the adapter. */
+      adapterNavDrawer.m_tagArray = PagerAdapterFeeds.TAG_LIST;
+      adapterNavDrawer.m_unreadArray = result.clone();
       adapterNavDrawer.notifyDataSetChanged();
 
       /* Update the subtitle. */
