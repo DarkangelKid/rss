@@ -18,13 +18,14 @@ package com.poloure.simplerss;
 
 import android.app.Activity;
 import android.os.AsyncTask;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import java.io.File;
 import java.util.List;
 import java.util.Set;
 
-class AsyncNavigationAdapter extends AsyncTask<String, Void, int[]>
+class AsyncNavigationAdapter extends AsyncTask<String, Void, NavItem[]>
 {
    private final Activity m_activity;
    private final int m_currentPage;
@@ -39,14 +40,14 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, int[]>
    static
    void newInstance(Activity activity, String applicationFolder, int currentPage)
    {
-      AsyncTask<String, Void, int[]> task = new AsyncNavigationAdapter(activity, currentPage);
+      AsyncTask<String, Void, NavItem[]> task = new AsyncNavigationAdapter(activity, currentPage);
       task.executeOnExecutor(THREAD_POOL_EXECUTOR, applicationFolder);
    }
 
    /* Get the unread counts for the tags. */
    @Override
    protected
-   int[] doInBackground(String... applicationFolder)
+   NavItem[] doInBackground(String... applicationFolder)
    {
       String appFolder = applicationFolder[0];
 
@@ -62,11 +63,14 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, int[]>
       int tagCount = currentTags.size();
       int indexTagsCount = indexTags.length;
 
-      int[] unreadCounts = new int[tagCount];
+      NavItem[] navItems = new NavItem[tagCount];
+
+      /* TODO each longSet is read multiple times. */
 
       /* For each tag. */
       for(int i = 1; i < tagCount; i++)
       {
+         navItems[i] = new NavItem(PagerAdapterFeeds.TAG_LIST.get(i), 0);
          /* For each index entry. */
          for(int j = 0; j < indexTagsCount; j++)
          {
@@ -76,29 +80,29 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, int[]>
                Set<Long> longSet = Read.longSet(longFile, appFolder);
 
                longSet.removeAll(AdapterTags.READ_ITEM_TIMES);
-               unreadCounts[i] += longSet.size();
+               navItems[i].m_count += longSet.size();
             }
          }
-         total += unreadCounts[i];
+         total += navItems[i].m_count;
       }
 
-      unreadCounts[0] = total;
-      return unreadCounts;
+      navItems[0] = new NavItem(PagerAdapterFeeds.TAG_LIST.get(0), total);
+
+      return navItems;
    }
 
    @Override
    protected
-   void onPostExecute(int[] result)
+   void onPostExecute(NavItem[] result)
    {
       /* Set the titles & counts arrays in this file and notify the adapter. */
       ListView navigationList = (ListView) m_activity.findViewById(R.id.navigation_list);
-      AdapterNavigationDrawer adapterNavDrawer = (AdapterNavigationDrawer) navigationList
-            .getAdapter();
+      ArrayAdapter<?> adapter = (ArrayAdapter<?>) navigationList.getAdapter();
 
       /* Update the data in the adapter. */
-      adapterNavDrawer.m_tagArray = PagerAdapterFeeds.TAG_LIST;
-      adapterNavDrawer.m_unreadArray = result.clone();
-      adapterNavDrawer.notifyDataSetChanged();
+      adapter.clear();
+      adapter.addAll(result);
+      adapter.notifyDataSetChanged();
 
       /* Update the subtitle. */
       Utilities.updateSubtitleCount(m_activity, m_currentPage);

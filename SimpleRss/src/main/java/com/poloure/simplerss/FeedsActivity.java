@@ -128,8 +128,6 @@ class FeedsActivity extends Activity
       Resources resources = getResources();
       String[] navigationTitles = resources.getStringArray(R.array.navigation_titles);
 
-      ListAdapter m_adapterNavDrawer = new AdapterNavigationDrawer(navigationTitles, this);
-
       /* Configure the ActionBar. */
       final ActionBar actionBar = getActionBar();
       actionBar.setIcon(R.drawable.rss_icon);
@@ -171,7 +169,7 @@ class FeedsActivity extends Activity
 
       /* The R.id.content_frame is child 0, the R.id.navigation_list is child 1. */
       ListView navigationList = (ListView) drawerLayout.getChildAt(1);
-      navigationList.setAdapter(m_adapterNavDrawer);
+      navigationList.setAdapter(new AdapterNavigationDrawer(this, android.R.id.list));
 
       /* Create the FragmentFeeds that go inside the content frame. */
       if(null == savedInstanceState)
@@ -293,7 +291,6 @@ class FeedsActivity extends Activity
 
       /* Stop the alarm service and reset the time to 0. */
       setServiceIntent(ALARM_SERVICE_STOP);
-
    }
 
    private

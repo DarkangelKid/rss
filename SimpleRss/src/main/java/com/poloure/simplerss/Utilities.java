@@ -37,6 +37,7 @@ import java.net.URL;
 
 class Utilities
 {
+   static final DisplayMetrics METRICS = Resources.getSystem().getDisplayMetrics();
    static final int EIGHT_DP = getDp(8.0F);
 
    static
@@ -68,10 +69,10 @@ class Utilities
          else
          {
             Adapter adapter = navigationList.getAdapter();
-            String unreadCount = (String) adapter.getItem(page);
+            int count = ((NavItem) adapter.getItem(page)).m_count;
 
             String unreadText = activity.getString(R.string.subtitle_unread);
-            actionBar.setSubtitle(unreadText + ' ' + unreadCount);
+            actionBar.setSubtitle(unreadText + ' ' + count);
          }
       }
    }
@@ -79,16 +80,14 @@ class Utilities
    static
    int getDp(float pixels)
    {
-      DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
-      float floatDp = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, pixels, metrics);
+      float floatDp = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, pixels, METRICS);
       return Math.round(floatDp);
    }
 
    static
    float getSp(float pixels)
    {
-      DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
-      return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, pixels, metrics);
+      return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, pixels, METRICS);
    }
 
    static
