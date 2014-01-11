@@ -399,27 +399,16 @@ class ServiceUpdate extends IntentService
       StringBuilder builder = new StringBuilder(FEED_ITEM_INITIAL_CAPACITY);
 
       /* Skip everything in the xml file until we arrive at an 'entry' or 'item' open tag. */
-      boolean preEntry = true;
-
-      while(preEntry)
+      int eventType;
+      do
       {
          parser.next();
-         int eventType = parser.getEventType();
-         if(XmlPullParser.START_TAG == eventType)
-         {
-            String tag = parser.getName();
-            if(Tags.ENTRY.equals(tag) || Tags.ITEM.equals(tag))
-            {
-               preEntry = false;
-            }
-         }
-         else if(XmlPullParser.END_DOCUMENT == eventType)
-         {
-            return;
-         }
+         eventType = parser.getEventType();
       }
-
-      int eventType = parser.getEventType();
+      /* !(A && (B || C)) = (!A || !B) && (!A || !C). */
+      while((XmlPullParser.START_TAG != eventType || !Tags.ENTRY.equals(parser.getName())) &&
+            (XmlPullParser.START_TAG != eventType || !Tags.ITEM.equals(parser.getName())) &&
+            XmlPullParser.END_DOCUMENT != eventType);
 
       /* This is the main part that parses for each feed item/entry. */
       while(XmlPullParser.END_DOCUMENT != eventType)
