@@ -82,10 +82,16 @@ class Utilities
    static
    int getDp(float pixels)
    {
-      Resources resources = Resources.getSystem();
-      DisplayMetrics metrics = resources.getDisplayMetrics();
+      DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
       float floatDp = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, pixels, metrics);
       return Math.round(floatDp);
+   }
+
+   static
+   float getSp(float pixels)
+   {
+      DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
+      return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, pixels, metrics);
    }
 
    static

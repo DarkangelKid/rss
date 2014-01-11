@@ -127,7 +127,6 @@ class ServiceUpdate extends IntentService
       {
          e.printStackTrace();
       }
-
    }
 
    private static

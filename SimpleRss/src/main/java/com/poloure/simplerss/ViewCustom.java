@@ -37,6 +37,7 @@ class ViewCustom extends View
       for(int i = 0; 3 > i; i++)
       {
          PAINTS[i] = new Paint(Paint.ANTI_ALIAS_FLAG);
+         PAINTS[i].setTextSize(Utilities.getSp(SIZES[i]));
          PAINTS[i].setARGB(COLORS[i], 0, 0, 0);
       }
    }
@@ -71,16 +72,6 @@ class ViewCustom extends View
    {
       super(context);
       m_height = height;
-
-      Resources resources = context.getResources();
-      DisplayMetrics metrics = resources.getDisplayMetrics();
-
-      /* Set text sizes of the paints. */
-      for(int i = 0; 3 > i; i++)
-      {
-         float size = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, SIZES[i], metrics);
-         PAINTS[i].setTextSize(size);
-      }
 
       setLayerType(LAYER_TYPE_HARDWARE, null);
       Utilities.setPaddingEqual(this, Utilities.EIGHT_DP);
