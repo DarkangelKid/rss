@@ -16,7 +16,6 @@
 
 package com.poloure.simplerss;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ListFragment;
 import android.os.Bundle;
@@ -27,7 +26,6 @@ import android.widget.AbsListView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
-/* Must be public for rotation. */
 public
 class ListFragmentTag extends ListFragment
 {
@@ -51,12 +49,7 @@ class ListFragmentTag extends ListFragment
 
       ListView listView = getListView();
       Activity activity = getActivity();
-      ActionBar actionBar = activity.getActionBar();
       String applicationFolder = FeedsActivity.getApplicationFolder(activity);
-
-      ListView navigationList = (ListView) activity.findViewById(R.id.navigation_list);
-      AdapterNavigationDrawer adapterNavigationDrawer = (AdapterNavigationDrawer) navigationList
-            .getAdapter();
 
       ListAdapter listAdapter = new AdapterTags(activity, applicationFolder);
       setListAdapter(listAdapter);

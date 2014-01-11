@@ -22,7 +22,6 @@ import android.preference.PreferenceFragment;
 import android.view.Menu;
 import android.view.MenuInflater;
 
-/* Must be public for rotation. */
 public
 class FragmentSettings extends PreferenceFragment
 {

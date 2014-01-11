@@ -27,6 +27,7 @@ import android.widget.BaseAdapter;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 
 class AsyncManage extends AsyncTask<String, Editable[], Void>
@@ -52,21 +53,8 @@ class AsyncManage extends AsyncTask<String, Editable[], Void>
    private static
    int count(String fileName, String applicationFolder)
    {
-      if(Read.isUnmounted())
-      {
-         return 0;
-      }
-
-      BufferedReader read = Read.open(applicationFolder + fileName);
-
-      /* If the file does not exist. */
-      if(null == read)
-      {
-         return 0;
-      }
-
       int count = 0;
-      try
+      try(BufferedReader read = new BufferedReader(new FileReader(applicationFolder + fileName)))
       {
          while(null != read.readLine())
          {
@@ -75,10 +63,6 @@ class AsyncManage extends AsyncTask<String, Editable[], Void>
       }
       catch(IOException ignored)
       {
-      }
-      finally
-      {
-         Read.close(read);
       }
 
       return count;
@@ -113,7 +97,8 @@ class AsyncManage extends AsyncTask<String, Editable[], Void>
          editable.setSpan(TITLE_SIZE, 0, titleLength, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
          /* Form the path to the feed_content file. */
-         String feedContentFileName = feedNames[i] + File.separatorChar + ServiceUpdate.CONTENT;
+         String feedContentFileName = feedNames[i] + File.separatorChar +
+                                      ServiceUpdate.CONTENT_FILE;
          int feedContentSize = count(feedContentFileName, appFolder);
          String contentSize = Integer.toString(feedContentSize);
 

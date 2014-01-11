@@ -62,7 +62,6 @@ class FeedsActivity extends Activity
    static Handler s_serviceHandler;
    private String m_previousActionBarTitle;
    private ViewPager m_feedsViewPager;
-   private ListAdapter m_adapterNavDrawer;
    private ActionBarDrawerToggle m_drawerToggle;
    private String m_applicationFolder;
 
@@ -129,7 +128,7 @@ class FeedsActivity extends Activity
       Resources resources = getResources();
       String[] navigationTitles = resources.getStringArray(R.array.navigation_titles);
 
-      m_adapterNavDrawer = new AdapterNavigationDrawer(navigationTitles, this);
+      ListAdapter m_adapterNavDrawer = new AdapterNavigationDrawer(navigationTitles, this);
 
       /* Configure the ActionBar. */
       final ActionBar actionBar = getActionBar();

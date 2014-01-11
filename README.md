@@ -1,7 +1,7 @@
 SimpleRss
 ===
 
-News Aggregator for Android 4.+.
+News Aggregator for Android 4.4+.
 
 You can find the latest signed APK in the apk folder. 
 

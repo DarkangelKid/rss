@@ -52,7 +52,7 @@ class AdapterNavigationDrawer extends BaseAdapter
 
    private final String[] m_navigationTitles;
    private final Context m_context;
-   private final List<String> m_tagArray = new ArrayList<String>(0);
+   private final List<String> m_tagArray = new ArrayList<>(0);
    private int[] m_unreadArray = EMPTY_INT_ARRAY;
 
    AdapterNavigationDrawer(String[] navigationTitles, Context context)

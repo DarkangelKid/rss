@@ -62,7 +62,7 @@ class AsyncTagPage extends AsyncTask<Integer, Object, Void>
       String tag = PagerAdapterFeeds.TAG_LIST.get(pageNumber);
 
       String thumbnailDir = File.separatorChar + ServiceUpdate.THUMBNAIL_DIR;
-      String contentFile = File.separatorChar + ServiceUpdate.CONTENT;
+      String contentFile = File.separatorChar + ServiceUpdate.CONTENT_FILE;
 
       String[][] feedsIndex = Read.csvFile(Read.INDEX, m_applicationFolder, 'f', 't');
       if(0 == feedsIndex.length)
@@ -73,7 +73,7 @@ class AsyncTagPage extends AsyncTask<Integer, Object, Void>
       String[] feedTags = feedsIndex[1];
 
       Comparator<Long> reverse = Collections.reverseOrder();
-      Map<Long, FeedItem> map = new TreeMap<Long, FeedItem>(reverse);
+      Map<Long, FeedItem> map = new TreeMap<>(reverse);
 
       AdapterTags adapterTag = (AdapterTags) m_listView.getAdapter();
       List<Long> timeListInAdapter = adapterTag.m_times;
@@ -177,7 +177,7 @@ class AsyncTagPage extends AsyncTask<Integer, Object, Void>
 
       for(char c : chars)
       {
-         int value = c - 48;
+         int value = (int) c - 48;
          num = num * 10L + value;
       }
       return num;

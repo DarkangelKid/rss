@@ -35,8 +35,8 @@ class AdapterTags extends BaseAdapter
    private static final int TYPE_IMAGE = 1;
    private static final int TYPE_IMAGE_SANS_DESCRIPTION = 2;
    private static final int TYPE_PLAIN_SANS_DESCRIPTION = 3;
-   final List<Long> m_times = new ArrayList<Long>(0);
-   private final List<FeedItem> m_feedItems = new ArrayList<FeedItem>(0);
+   final List<Long> m_times = new ArrayList<>(0);
+   private final List<FeedItem> m_feedItems = new ArrayList<>(0);
    private final Context m_context;
    private final String m_applicationFolder;
    boolean m_isReadingItems = true;

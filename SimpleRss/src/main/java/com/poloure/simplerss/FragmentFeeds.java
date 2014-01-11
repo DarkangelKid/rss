@@ -26,10 +26,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.ListView;
 
-/* Must be public for rotation. */
 public
 class FragmentFeeds extends Fragment
 {
@@ -49,9 +46,6 @@ class FragmentFeeds extends Fragment
       setHasOptionsMenu(true);
 
       Activity activity = getActivity();
-
-      ListView navigationList = (ListView) activity.findViewById(R.id.navigation_list);
-      BaseAdapter navigationAdapter = (BaseAdapter) navigationList.getAdapter();
 
       String applicationFolder = FeedsActivity.getApplicationFolder(activity);
       ViewPager.OnPageChangeListener onTagPageChange = new OnPageChangeTags(activity,

@@ -27,6 +27,14 @@ import android.view.View;
 import android.widget.Adapter;
 import android.widget.ListView;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+
 class Utilities
 {
    static final int EIGHT_DP = getDp(8.0F);
@@ -84,5 +92,18 @@ class Utilities
    void setPaddingEqual(View view, int padding)
    {
       view.setPadding(padding, padding, padding, padding);
+   }
+
+   static
+   XmlPullParser createXmlParser(String urlString) throws IOException, XmlPullParserException
+   {
+      XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+      factory.setNamespaceAware(true);
+      XmlPullParser parser = factory.newPullParser();
+
+      URL url = new URL(urlString);
+      InputStream inputStream = url.openStream();
+      parser.setInput(inputStream, null);
+      return parser;
    }
 }

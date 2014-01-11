@@ -88,7 +88,7 @@ class DialogEditFeed extends Dialog
 
       /* Make the tag EditText. */
       int oneLine = android.R.layout.simple_dropdown_item_1line;
-      ArrayAdapter<String> adapter = new ArrayAdapter<String>(m_activity, oneLine, tags);
+      ArrayAdapter<String> adapter = new ArrayAdapter<>(m_activity, oneLine, tags);
       MultiAutoCompleteTextView tagEdit = new MultiAutoCompleteTextView(m_activity);
       tagEdit.setAdapter(adapter);
       tagEdit.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
@@ -157,7 +157,7 @@ class DialogEditFeed extends Dialog
          states.addState(unselected, colorUnselected);
          states.addState(selected, colorSelected);
 
-         buttons[i].setBackgroundDrawable(states);
+         buttons[i].setBackground(states);
          buttons[i].setOnClickListener(onClickListeners[i]);
          buttonBar.addView(buttons[i]);
       }

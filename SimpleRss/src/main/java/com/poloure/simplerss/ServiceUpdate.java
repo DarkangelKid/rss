@@ -31,15 +31,16 @@ import android.text.format.Time;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
@@ -57,16 +58,18 @@ public
 class ServiceUpdate extends IntentService
 {
    static final String ITEM_LIST = "item_list.txt";
-   static final String CONTENT = "content.txt";
-   
+   static final String CONTENT_FILE = "content.txt";
+
    /* Folders */
    static final String THUMBNAIL_DIR = "thumbnails" + File.separatorChar;
    private static final char ITEM_SEPARATOR = '|';
    private static final int MIN_IMAGE_WIDTH = 64;
    private static final int FEED_ITEM_INITIAL_CAPACITY = 200;
-   private long m_timeCurrentItem = 0L;
+   private long m_timeCurrentItem;
 
    private static final float SCREEN_WIDTH = Resources.getSystem().getDisplayMetrics().widthPixels;
+   private static final float USABLE_WIDTH_TEXT = SCREEN_WIDTH - 40.0F;
+   private static final int INITIAL_TAG_SET_SIZE = 128;
 
    private static
    class Index
@@ -84,9 +87,9 @@ class ServiceUpdate extends IntentService
    {
       static final String LINK = "link";
       static final String PUBLISHED = "published";
-      static final String PUBDATE = "pubDate";
+      static final String PUB_DATE = "pubDate";
       static final String TITLE = "title";
-      static final String DES = "description";
+      static final String DESCRIPTION = "description";
       static final String CONTENT = "content";
       static final String ENTRY = "entry";
       static final String ITEM = "item";
@@ -98,9 +101,9 @@ class ServiceUpdate extends IntentService
       static final Pattern WHITESPACE = Pattern.compile("[\\t\\n\\x0B\\f\\r\\|]");
       static final Pattern CDATA = Pattern.compile("\\<.*?\\>");
       static final Pattern IMG = Pattern.compile("(?i)<img([^>]+)/>");
-      static final Pattern HREF = Pattern
+      static final Pattern SRC = Pattern
             .compile("\\s*(?i)src\\s*=\\s*(\"([^\"]*\")|'[^']*'|([^'\">\\s]+))");
-      static final Pattern APOS = Pattern.compile("'");
+      static final Pattern APOSTROPHE = Pattern.compile("'");
       static final Pattern QUOT = Pattern.compile("\"");
    }
 
@@ -113,14 +116,7 @@ class ServiceUpdate extends IntentService
    private static
    void writeCollection(String fileName, Iterable<?> content, String fileFolder)
    {
-      if(Read.isUnmounted())
-      {
-         return;
-      }
-
-      BufferedWriter out = Write.open(fileFolder + fileName, false);
-
-      try
+      try(BufferedWriter out = new BufferedWriter(new FileWriter(fileFolder + fileName, false)))
       {
          for(Object item : content)
          {
@@ -131,10 +127,7 @@ class ServiceUpdate extends IntentService
       {
          e.printStackTrace();
       }
-      finally
-      {
-         Read.close(out);
-      }
+
    }
 
    private static
@@ -143,8 +136,7 @@ class ServiceUpdate extends IntentService
       String contentCopy = content;
       for(int x = 0; 3 > x; x++)
       {
-         int desChars = ViewCustom.PAINTS[2]
-               .breakText(contentCopy, true, SCREEN_WIDTH - 40.0F, null);
+         int desChars = ViewCustom.PAINTS[2].breakText(contentCopy, true, USABLE_WIDTH_TEXT, null);
          int desSpace = contentCopy.lastIndexOf(' ', desChars);
          desChars = -1 == desSpace ? desChars : desSpace + 1;
 
@@ -158,7 +150,7 @@ class ServiceUpdate extends IntentService
    private static
    String fitToScreen(String content, int ind)
    {
-      int chars = ViewCustom.PAINTS[ind].breakText(content, true, SCREEN_WIDTH - 40.0F, null);
+      int chars = ViewCustom.PAINTS[ind].breakText(content, true, USABLE_WIDTH_TEXT, null);
       int space = content.lastIndexOf(' ', chars);
 
       return content.substring(0, -1 == space ? chars : space);
@@ -167,13 +159,13 @@ class ServiceUpdate extends IntentService
    private static
    Set<String> fileToSet(String fileName, String fileFolder)
    {
-      Set<String> set = new LinkedHashSet<String>(64);
+      Set<String> set = new LinkedHashSet<>(INITIAL_TAG_SET_SIZE);
       Collections.addAll(set, Read.file(fileName, fileFolder));
       return set;
    }
 
    private static
-   void getThumbnail(String thumbnailDir, String imgLink, Context context)
+   void getThumbnail(StringBuilder build, String thumbnailDir, String imgLink, Context context)
    {
       /* Find out if images are disabled. */
       SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -184,60 +176,43 @@ class ServiceUpdate extends IntentService
       String imageName = imgLink.substring(imgLink.lastIndexOf('/') + 1);
       String thumbnailPath = applicationFolder + thumbnailDir + imageName;
 
-      File file = new File(thumbnailPath);
-      if(imagesDisabled || file.exists())
+      File imageFile = new File(thumbnailPath);
+      if(imagesDisabled || imageFile.exists())
       {
          return;
       }
 
-      InputStream inputStream;
-      try
+      try(BufferedInputStream input = new BufferedInputStream(new URL(imgLink).openStream());
+          BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(imageFile)))
       {
-         URL imageUrl = new URL(imgLink);
-         inputStream = imageUrl.openStream();
-      }
-      /* Multi catch MalformedURLException & IOException. */
-      catch(Exception ignored)
-      {
-         return;
-      }
+         Bitmap bitmap = BitmapFactory.decodeStream(input);
 
-      Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+         /* If the image is smaller than we care about, do not save it. */
+         if(MIN_IMAGE_WIDTH > bitmap.getWidth())
+         {
+            return;
+         }
 
-      /* If the image is smaller than we care about, do not save it. */
-      if(MIN_IMAGE_WIDTH > bitmap.getWidth())
-      {
-         return;
-      }
+         appendItem(build, Index.IMAGE, imgLink);
 
-      float scale = bitmap.getWidth() / SCREEN_WIDTH;
-      int desiredHeight = Math.round(bitmap.getHeight() / scale);
+         float scale = bitmap.getWidth() / SCREEN_WIDTH;
+         int desiredHeight = Math.round(bitmap.getHeight() / scale);
 
-      /* Scale it to the screen width. */
-      bitmap = Bitmap.createScaledBitmap(bitmap, Math.round(SCREEN_WIDTH), desiredHeight, false);
+         /* Scale it to the screen width. */
+         bitmap = Bitmap.createScaledBitmap(bitmap, Math.round(SCREEN_WIDTH), desiredHeight, false);
 
-      /* Shrink it to IMAGE_HEIGHT. */
-      int newHeight = Math.min(bitmap.getHeight(), ViewCustom.IMAGE_HEIGHT);
-      bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), newHeight);
-
-      FileOutputStream out = null;
-
-      try
-      {
-         out = new FileOutputStream(applicationFolder + thumbnailDir + imageName);
+         /* Shrink it to IMAGE_HEIGHT if that is more than the scaled height. */
+         int newHeight = Math.min(bitmap.getHeight(), ViewCustom.IMAGE_HEIGHT);
+         bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), newHeight);
 
          /* Get the quality from settings. */
          String qualityString = preferences.getString("thumbnail_quality", "75");
          int quality = Integer.parseInt(qualityString);
-         bitmap.compress(Bitmap.CompressFormat.JPEG, quality, out);
+         bitmap.compress(Bitmap.CompressFormat.WEBP, quality, out);
       }
-      catch(FileNotFoundException e)
+      catch(IOException e)
       {
          e.printStackTrace();
-      }
-      finally
-      {
-         Read.close(out);
       }
    }
 
@@ -274,8 +249,7 @@ class ServiceUpdate extends IntentService
             m_timeCurrentItem = calendar.getTimeInMillis();
          }
       }
-      /* Exception here because we can not use multi catch ParseException & RuntimeException. */
-      catch(Exception ignored)
+      catch(ParseException | RuntimeException ignored)
       {
          System.out.println("BUG : Could not parse: " + content);
          time.setToNow();
@@ -334,8 +308,7 @@ class ServiceUpdate extends IntentService
             {
                parseFeed(urls[i], names[i], applicationFolder);
             }
-            /* Multi catch XmlPullParserException & IOException. */
-            catch(Exception e)
+            catch(IOException | XmlPullParserException e)
             {
                e.printStackTrace();
             }
@@ -363,7 +336,7 @@ class ServiceUpdate extends IntentService
       {
          parser.next();
       }
-      catch(Exception ignored)
+      catch(XmlPullParserException | IOException ignored)
       {
          return "";
       }
@@ -371,12 +344,36 @@ class ServiceUpdate extends IntentService
       return null == content ? "" : Patterns.WHITESPACE.matcher(content).replaceAll(" ");
    }
 
+   private static
+   void parseHtmlForImage(Context context, CharSequence html, StringBuilder build, String thumbDir)
+   {
+      Matcher matcherImg = Patterns.IMG.matcher(html);
+
+      if(matcherImg.find())
+      {
+         String src = matcherImg.group(1);
+         Matcher matcherHref = Patterns.SRC.matcher(src);
+
+         if(matcherHref.find())
+         {
+            /* If we get here, we have an image to download and save. */
+            String imgLink = matcherHref.group(1);
+
+            /* Get rid of any apostrophes and quotation marks in the link. */
+            imgLink = Patterns.APOSTROPHE.matcher(imgLink).replaceAll("");
+            imgLink = Patterns.QUOT.matcher(imgLink).replaceAll("");
+
+            getThumbnail(build, thumbDir, imgLink, context);
+         }
+      }
+   }
+
    private
    void parseFeed(String urlString, String feed, String applicationFolder) throws
          XmlPullParserException, IOException
    {
       String feedFolder = feed + File.separatorChar;
-      String contentFileName = feedFolder + CONTENT;
+      String contentFileName = feedFolder + CONTENT_FILE;
       String longFileName = feedFolder + ITEM_LIST;
       String thumbnailDir = feedFolder + THUMBNAIL_DIR;
 
@@ -390,20 +387,14 @@ class ServiceUpdate extends IntentService
       String[] lines = set.toArray(new String[setSize]);
       Long[] longs = longSet.toArray(new Long[longSize]);
 
-      Map<Long, String> map = new TreeMap<Long, String>(Collections.reverseOrder());
+      Map<Long, String> map = new TreeMap<>(Collections.reverseOrder());
 
       for(int i = 0; i < setSize; i++)
       {
          map.put(longs[i], lines[i]);
       }
 
-      XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
-      factory.setNamespaceAware(true);
-      XmlPullParser parser = factory.newPullParser();
-
-      URL url = new URL(urlString);
-      InputStream inputStream = url.openStream();
-      parser.setInput(inputStream, null);
+      XmlPullParser parser = Utilities.createXmlParser(urlString);
 
       StringBuilder builder = new StringBuilder(FEED_ITEM_INITIAL_CAPACITY);
 
@@ -436,61 +427,37 @@ class ServiceUpdate extends IntentService
          if(XmlPullParser.START_TAG == eventType)
          {
             String tag = parser.getName();
-
-            if(Tags.ENTRY.equals(tag) || Tags.ITEM.equals(tag))
+            switch(tag)
             {
-               builder.setLength(0);
-               builder.append(ITEM_SEPARATOR);
-               m_timeCurrentItem = 0L;
-            }
-            else if(Tags.LINK.equals(tag))
-            {
-               String link = parser.getAttributeValue(null, "href");
-               if(null == link)
-               {
-                  link = getContent(parser);
-               }
-               appendItem(builder, Index.LINK, link);
-               appendItem(builder, Index.LINK_TRIMMED, fitToScreen(link, 1));
-            }
-            else if(Tags.PUBLISHED.equals(tag) || Tags.PUBDATE.equals(tag))
-            {
-               appendPublishedTime(builder, getContent(parser), tag);
-            }
-            else if(Tags.TITLE.equals(tag))
-            {
-               appendItem(builder, Index.TITLE, fitToScreen(getContent(parser), 0));
-            }
-            else if(Tags.CONTENT.equals(tag) || Tags.DES.equals(tag))
-            {
-               String content = getContent(parser);
-
-               /* Here we want to parse the html for the first image. */
-               Matcher matcherImg = Patterns.IMG.matcher(content);
-
-               if(matcherImg.find())
-               {
-                  String href = matcherImg.group(1);
-                  Matcher matcherHref = Patterns.HREF.matcher(href);
-
-                  if(matcherHref.find())
+               case Tags.ENTRY:
+               case Tags.ITEM:
+                  builder.setLength(0);
+                  builder.append(ITEM_SEPARATOR);
+                  m_timeCurrentItem = 0L;
+                  break;
+               case Tags.LINK:
+                  String link = parser.getAttributeValue(null, "href");
+                  if(null == link)
                   {
-                     /* If we get here, we have an image to save. */
-                     String imgLink = matcherHref.group(1);
-
-                     /* Get rid of any apostrophes and quotation marks in the link. */
-                     imgLink = Patterns.APOS.matcher(imgLink).replaceAll("");
-                     imgLink = Patterns.QUOT.matcher(imgLink).replaceAll("");
-
-                     appendItem(builder, Index.IMAGE, imgLink);
-
-                     getThumbnail(thumbnailDir, imgLink, this);
+                     link = getContent(parser);
                   }
-               }
-
-               /* Replace all the html tags with nothing. */
-               content = Patterns.CDATA.matcher(content).replaceAll("").trim();
-               builder = appendDesLines(builder, content);
+                  appendItem(builder, Index.LINK, link);
+                  appendItem(builder, Index.LINK_TRIMMED, fitToScreen(link, 1));
+                  break;
+               case Tags.PUBLISHED:
+               case Tags.PUB_DATE:
+                  appendPublishedTime(builder, getContent(parser), tag);
+                  break;
+               case Tags.TITLE:
+                  appendItem(builder, Index.TITLE, fitToScreen(getContent(parser), 0));
+                  break;
+               case Tags.CONTENT:
+               case Tags.DESCRIPTION:
+                  String content = getContent(parser);
+                  parseHtmlForImage(this, content, builder, thumbnailDir);
+                  content = Patterns.CDATA.matcher(content).replaceAll("").trim();
+                  builder = appendDesLines(builder, content);
+                  break;
             }
          }
          else if(XmlPullParser.END_TAG == eventType)

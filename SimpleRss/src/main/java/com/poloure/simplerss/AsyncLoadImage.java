@@ -34,7 +34,7 @@ class AsyncLoadImage extends AsyncTask<Object, Void, Bitmap>
    private
    AsyncLoadImage(ViewCustom view, int viewTag)
    {
-      m_view = new WeakReference<ViewCustom>(view);
+      m_view = new WeakReference<>(view);
       m_viewTag = viewTag;
    }
 

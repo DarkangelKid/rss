@@ -32,7 +32,6 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 
-/* Must be public for rotation. */
 public
 class FragmentManage extends Fragment
 {

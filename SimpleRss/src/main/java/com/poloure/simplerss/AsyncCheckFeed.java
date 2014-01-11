@@ -29,15 +29,11 @@ import android.widget.Toast;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -79,36 +75,22 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
    private static
    void moveFile(String originalName, String resultingName, String storage)
    {
-      File originalFile = new File(storage + originalName);
-      File resultingFile = new File(storage + resultingName);
-
-      originalFile.renameTo(resultingFile);
+      new File(storage + originalName).renameTo(new File(storage + resultingName));
    }
 
    /* Function should be safe, returns false if fails. */
    private static
-   void AppendToIndex(String lineToAppend, String applicationFolder)
+   void AppendLineToIndex(String lineToAppend, String applicationFolder)
    {
-      if(Read.isUnmounted())
-      {
-         return;
-      }
-
       String filePath = applicationFolder + Read.INDEX;
 
-      BufferedWriter out = Write.open(filePath, true);
-
-      try
+      try(BufferedWriter out = new BufferedWriter(new FileWriter(filePath, true)))
       {
          out.write(lineToAppend);
       }
       catch(IOException e)
       {
          e.printStackTrace();
-      }
-      finally
-      {
-         Read.close(out);
       }
    }
 
@@ -160,9 +142,8 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       String feedTitle = "";
       try
       {
-         XmlPullParser parser = createXmlParser(urlString);
+         XmlPullParser parser = Utilities.createXmlParser(urlString);
          int eventType;
-
          do
          {
             parser.next();
@@ -179,16 +160,10 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
          }
          while(feedTitle.isEmpty() && XmlPullParser.END_DOCUMENT != eventType);
       }
-      catch(MalformedURLException ignored)
+      catch(IOException | XmlPullParserException ignored)
       {
+         feedTitle = "No Title - " + System.currentTimeMillis();
       }
-      catch(IOException ignored)
-      {
-      }
-      catch(XmlPullParserException ignored)
-      {
-      }
-
       return feedTitle;
    }
 
@@ -198,7 +173,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       boolean isValid = false;
       try
       {
-         XmlPullParser parser = createXmlParser(urlString);
+         XmlPullParser parser = Utilities.createXmlParser(urlString);
 
          parser.next();
          int eventType = parser.getEventType();
@@ -211,44 +186,27 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
             }
          }
       }
-      catch(MalformedURLException ignored)
-      {
-      }
-      catch(IOException ignored)
-      {
-      }
-      catch(XmlPullParserException ignored)
+      catch(IOException | XmlPullParserException ignored)
       {
       }
       return isValid;
-   }
-
-   private static
-   XmlPullParser createXmlParser(String urlString) throws IOException, XmlPullParserException
-   {
-      XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
-      factory.setNamespaceAware(true);
-      XmlPullParser parser = factory.newPullParser();
-
-      URL url = new URL(urlString);
-      InputStream inputStream = url.openStream();
-      parser.setInput(inputStream, null);
-      return parser;
    }
 
    private
    String formatUserTagsInput(CharSequence userInputTags)
    {
       String inputTags = userInputTags.toString();
-      Locale defaultLocale = Locale.getDefault();
       String allTag = m_activity.getString(R.string.all_tag);
 
-      String lowerTags = inputTags.isEmpty() ? allTag : inputTags.toLowerCase(defaultLocale);
+      if(inputTags.isEmpty())
+      {
+         return allTag;
+      }
+
+      String lowerTags = inputTags.toLowerCase();
 
       /* + 10 in case the user did not put spaces after the commas. */
-      int tagInitialCapacity = lowerTags.length();
-      StringBuilder tagBuilder = new StringBuilder(tagInitialCapacity + 10);
-
+      StringBuilder tagBuilder = new StringBuilder(lowerTags.length() + 10);
       String[] tags = SPLIT_COMMA.split(lowerTags);
 
       /* For each tag. */
@@ -322,7 +280,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
          else
          {
             /* Save the feed to the index. */
-            AppendToIndex(feedInfo, m_applicationFolder);
+            AppendLineToIndex(feedInfo, m_applicationFolder);
          }
 
          /* Update the PagerAdapter for the tag fragments. */
