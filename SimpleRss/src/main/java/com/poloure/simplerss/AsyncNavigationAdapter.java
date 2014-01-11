@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 class AsyncNavigationAdapter extends AsyncTask<String, Void, NavItem[]>
 {
@@ -68,7 +67,7 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, NavItem[]>
       NavItem[] navItems = new NavItem[tagTotal];
 
       /* This is a list of Sets each containing all of the feed's items. */
-      List<Set<Long>> feedItems = new ArrayList<>(feedTotal);
+      List<Collection<Long>> feedItems = new ArrayList<>(feedTotal);
       for(String feedName : feedNames)
       {
          feedItems.add(Read.longSet(feedName + append, appFolder));
