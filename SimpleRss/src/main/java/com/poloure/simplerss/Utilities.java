@@ -58,23 +58,20 @@ class Utilities
    void updateSubtitleCount(Activity activity, int page)
    {
       ListView navigationList = (ListView) activity.findViewById(R.id.navigation_list);
-      if(null != navigationList)
+      ActionBar actionBar = activity.getActionBar();
+      if(null != navigationList && null != actionBar)
       {
-         ActionBar actionBar = activity.getActionBar();
-         if(null != actionBar)
+         if(-1 == page)
          {
-            if(-1 == page)
-            {
-               actionBar.setSubtitle(null);
-            }
-            else
-            {
-               Adapter adapter = navigationList.getAdapter();
-               String unreadCount = (String) adapter.getItem(page);
+            actionBar.setSubtitle(null);
+         }
+         else
+         {
+            Adapter adapter = navigationList.getAdapter();
+            String unreadCount = (String) adapter.getItem(page);
 
-               String unreadText = activity.getString(R.string.subtitle_unread);
-               actionBar.setSubtitle(unreadText + ' ' + unreadCount);
-            }
+            String unreadText = activity.getString(R.string.subtitle_unread);
+            actionBar.setSubtitle(unreadText + ' ' + unreadCount);
          }
       }
    }

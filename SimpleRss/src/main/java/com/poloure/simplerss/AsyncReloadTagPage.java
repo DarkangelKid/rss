@@ -25,13 +25,12 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-class AsyncTagPage extends AsyncTask<Integer, Object, Void>
+class AsyncReloadTagPage extends AsyncTask<Integer, Object, Void>
 {
    private static final int MIN_DESCRIPTION_LENGTH = 8;
    private final String m_applicationFolder;
@@ -39,7 +38,7 @@ class AsyncTagPage extends AsyncTask<Integer, Object, Void>
    private final boolean m_isAllTag;
 
    private
-   AsyncTagPage(ListView listView, String applicationFolder, boolean isAllTag)
+   AsyncReloadTagPage(ListView listView, String applicationFolder, boolean isAllTag)
    {
       m_listView = listView;
       m_applicationFolder = applicationFolder;
@@ -49,7 +48,7 @@ class AsyncTagPage extends AsyncTask<Integer, Object, Void>
    static
    void newInstance(int pageNumber, ListView listView, String storage, boolean isAllTag)
    {
-      AsyncTask<Integer, Object, Void> task = new AsyncTagPage(listView, storage, isAllTag);
+      AsyncTask<Integer, Object, Void> task = new AsyncReloadTagPage(listView, storage, isAllTag);
 
       task.executeOnExecutor(THREAD_POOL_EXECUTOR, pageNumber);
    }
@@ -72,11 +71,9 @@ class AsyncTagPage extends AsyncTask<Integer, Object, Void>
       String[] feedNames = feedsIndex[0];
       String[] feedTags = feedsIndex[1];
 
-      Comparator<Long> reverse = Collections.reverseOrder();
-      Map<Long, FeedItem> map = new TreeMap<>(reverse);
+      Map<Long, FeedItem> map = new TreeMap<>(Collections.reverseOrder());
 
       AdapterTags adapterTag = (AdapterTags) m_listView.getAdapter();
-      List<Long> timeListInAdapter = adapterTag.m_times;
 
       int feedsLength = feedNames.length;
       for(int j = 0; j < feedsLength; j++)
@@ -138,10 +135,8 @@ class AsyncTagPage extends AsyncTask<Integer, Object, Void>
                data.m_url = null == trimmedLinks[i] ? "" : trimmedLinks[i];
                data.m_urlFull = links[i];
 
-               /* Do not add duplicates, do not add read items if opacity == 0 */
-               boolean notInAdapter = !timeListInAdapter.contains(data.m_time);
-
-               if(notInAdapter)
+               /* Do not add duplicates. */
+               if(!adapterTag.m_times.contains(data.m_time))
                {
                   map.put(data.m_time, data);
                }
@@ -197,19 +192,17 @@ class AsyncTagPage extends AsyncTask<Integer, Object, Void>
    void onProgressUpdate(Object... values)
    {
       int top = 0;
-      int index = 0;
       long timeBefore = 0L;
       AdapterTags adapterTag = (AdapterTags) m_listView.getAdapter();
-      List<Long> timeListInAdapter = adapterTag.m_times;
 
       boolean notFirstLoad = 0 != m_listView.getCount();
 
-      /* Find the exact mPosition in the list. */
+      /* Find the top visible item and pixel offset of this item in the list. */
       if(notFirstLoad)
       {
          /* Get the time of the top item. */
-         index = m_listView.getFirstVisiblePosition();
-         timeBefore = timeListInAdapter.get(index);
+         int topVisibleItem = m_listView.getFirstVisiblePosition();
+         timeBefore = adapterTag.m_feedItems.get(topVisibleItem).m_time;
 
          View v = m_listView.getChildAt(0);
          top = null == v ? 0 : v.getTop();
@@ -223,32 +216,20 @@ class AsyncTagPage extends AsyncTask<Integer, Object, Void>
          }
       }
 
-      adapterTag.prependArray(values[0], values[1]);
+      /* Prepend the new items (that were not in the adapter already) to the adapter lists. */
+      adapterTag.m_feedItems.addAll(0, (Collection<FeedItem>) values[0]);
+      adapterTag.m_times.addAll(0, (Collection<Long>) values[1]);
       adapterTag.notifyDataSetChanged();
 
-      /* If this was the first time loading the tag data, jump to the latest unread item. */
-      if(notFirstLoad)
+      /* We now need to find the position of the item with the time timeBefore. */
+      int newPositionOfTop = adapterTag.m_times.indexOf(timeBefore) + 1;
+      if(-1 == newPositionOfTop)
       {
-         /* We now need to find the position of the item with the time timeBefore. */
-         /* NOTE Do not change anything in itemList. */
-         int timeListSize = timeListInAdapter.size();
-         int i = 0;
-         while(i < timeListSize && 0 == index)
-         {
-            boolean sameItem = timeBefore == timeListInAdapter.get(i);
-            if(sameItem)
-            {
-               index = i + 1;
-            }
-            i++;
-         }
-
-         int listViewPaddingTop = m_listView.getPaddingTop();
-         m_listView.setSelectionFromTop(index, top - listViewPaddingTop);
+         FeedsActivity.gotoLatestUnread(m_listView);
       }
       else
       {
-         FeedsActivity.gotoLatestUnread(m_listView);
+         m_listView.setSelectionFromTop(newPositionOfTop, top - m_listView.getPaddingTop());
       }
    }
 }

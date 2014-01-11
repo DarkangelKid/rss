@@ -63,7 +63,8 @@ class OnPageChangeTags extends SimpleOnPageChangeListener
          if(0 == listAdapter.getCount())
          {
             ListView listView = tagFragment.getListView();
-            AsyncTagPage.newInstance(m_position, listView, m_applicationFolder, 0 == m_position);
+            AsyncReloadTagPage
+                  .newInstance(m_position, listView, m_applicationFolder, 0 == m_position);
          }
       }
    }

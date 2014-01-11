@@ -35,8 +35,10 @@ class AdapterTags extends BaseAdapter
    private static final int TYPE_IMAGE = 1;
    private static final int TYPE_IMAGE_SANS_DESCRIPTION = 2;
    private static final int TYPE_PLAIN_SANS_DESCRIPTION = 3;
+
+   /* We use indexOf on this Long list so it can not be a set. */
    final List<Long> m_times = new ArrayList<>(0);
-   private final List<FeedItem> m_feedItems = new ArrayList<>(0);
+   final List<FeedItem> m_feedItems = new ArrayList<>(0);
    private final Context m_context;
    private final String m_applicationFolder;
    boolean m_isReadingItems = true;
@@ -45,14 +47,6 @@ class AdapterTags extends BaseAdapter
    {
       m_context = context;
       m_applicationFolder = applicationFolder;
-   }
-
-   void prependArray(Object... items)
-   {
-      Collection<FeedItem> longCollection = (Collection<FeedItem>) items[0];
-      Collection<Long> longList = (Collection<Long>) items[1];
-      m_feedItems.addAll(0, longCollection);
-      m_times.addAll(0, longList);
    }
 
    @Override

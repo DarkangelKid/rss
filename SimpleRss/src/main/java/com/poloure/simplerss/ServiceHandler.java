@@ -83,7 +83,7 @@ class ServiceHandler extends Handler
          {
             /* TODO isAllTag not 0. */
             ListView listView = listFragment.getListView();
-            AsyncTagPage.newInstance(page, listView, m_applicationFolder, 0 == page);
+            AsyncReloadTagPage.newInstance(page, listView, m_applicationFolder, 0 == page);
          }
       }
    }

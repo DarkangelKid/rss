@@ -17,12 +17,9 @@
 package com.poloure.simplerss;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.util.DisplayMetrics;
-import android.util.TypedValue;
 import android.view.View;
 
 class ViewCustom extends View
