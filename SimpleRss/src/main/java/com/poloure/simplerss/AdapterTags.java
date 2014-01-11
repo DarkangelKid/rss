@@ -22,7 +22,6 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -97,27 +96,16 @@ class AdapterTags extends BaseAdapter
       int viewType = getItemViewType(position);
       FeedItem item = m_feedItems.get(position);
 
-      //Long time = item.m_time;
-      //boolean isRead = READ_ITEM_TIMES.contains(time);
+      //boolean isRead = READ_ITEM_TIMES.contains(item.m_time);
       boolean hasImg = TYPE_IMAGE == viewType || TYPE_IMAGE_SANS_DESCRIPTION == viewType;
       boolean hasDes = TYPE_PLAIN == viewType || TYPE_IMAGE == viewType;
 
-      ViewCustom view = (ViewCustom) convertView;
-
-      if(null == convertView)
-      {
-         /* TODO These are pix not Dip. */
-         view = new ViewCustom(m_context, hasImg ? hasDes ? 564 : 464 : hasDes ? 184 : 94);
-      }
+      /* TODO These are pix not Dip. */
+      ViewCustom view = null != convertView ? (ViewCustom) convertView
+            : new ViewCustom(m_context, hasImg ? hasDes ? 564 : 464 : hasDes ? 184 : 94);
 
       /* Set the information. */
-      view.m_title = item.m_title;
-      view.m_link = item.m_url;
-      view.m_linkFull = item.m_urlFull;
-      if(hasDes)
-      {
-         System.arraycopy(item.m_desLines, 0, view.m_desLines, 0, 3);
-      }
+      view.m_item = item;
 
       /* The logic that tells whether the item is Read or not. */
       boolean isListViewShown = parent.isShown();

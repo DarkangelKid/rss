@@ -40,10 +40,7 @@ class ViewCustom extends View
    }
 
    private Bitmap m_image;
-   String m_title;
-   String m_link;
-   String m_linkFull;
-   final String[] m_desLines = new String[3];
+   FeedItem m_item;
    private final int m_height;
 
    @Override
@@ -59,7 +56,7 @@ class ViewCustom extends View
 
       float verticalPosition = drawBase(canvas);
       verticalPosition = drawBitmap(canvas, verticalPosition);
-      if(null != m_desLines && 0 != m_desLines.length && null != m_desLines[0])
+      if(null != m_item.m_desLines && 0 != m_item.m_desLines.length && null != m_item.m_desLines[0])
       {
          drawDes(canvas, verticalPosition);
       }
@@ -89,11 +86,11 @@ class ViewCustom extends View
       float verticalPosition = getPaddingTop() + 20.0F;
 
       /* Draw the title. */
-      canvas.drawText(m_title, getPaddingLeft(), verticalPosition, PAINTS[0]);
+      canvas.drawText(m_item.m_title, getPaddingLeft(), verticalPosition, PAINTS[0]);
       verticalPosition += PAINTS[0].getTextSize();
 
       /* Draw the link. */
-      canvas.drawText(m_link, getPaddingLeft(), verticalPosition, PAINTS[1]);
+      canvas.drawText(m_item.m_url, getPaddingLeft(), verticalPosition, PAINTS[1]);
       return verticalPosition + PAINTS[1].getTextSize();
    }
 
@@ -102,7 +99,7 @@ class ViewCustom extends View
       float position = verticalPosition;
       for(int i = 0; 3 > i; i++)
       {
-         canvas.drawText(m_desLines[i], getPaddingLeft(), position, PAINTS[2]);
+         canvas.drawText(m_item.m_desLines[i], getPaddingLeft(), position, PAINTS[2]);
          position += PAINTS[2].getTextSize();
       }
    }

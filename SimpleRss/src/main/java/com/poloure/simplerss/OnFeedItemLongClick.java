@@ -41,8 +41,7 @@ class OnFeedItemLongClick implements AdapterView.OnItemLongClickListener
    public
    boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id)
    {
-      String urlView = ((ViewCustom) view).m_linkFull;
-      String link = urlView.trim();
+      String link = ((ViewCustom) view).m_item.m_urlFull.trim();
 
       DialogInterface.OnClickListener onClick = new OnContextMenuClick(link);
 
