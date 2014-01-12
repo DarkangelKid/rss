@@ -23,6 +23,8 @@
    <string name="unread">غير مقروء</string>
    <string name="refresh">إعادة التحميل‎</string>
 
+   <string name="subtitle_unread">الغير مقروء:</string>
+
    <string name="feed_name_dialog">إسم الموجز‎</string>
    <string name="feed_name_hint">إختياري‎</string>
    <string name="feed_url_dialog">رابط الموجز‎</string>

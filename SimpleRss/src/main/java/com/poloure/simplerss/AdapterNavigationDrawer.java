@@ -123,14 +123,18 @@ class AdapterNavigationDrawer extends ArrayAdapter<NavItem>
       {
          case Types.TITLE:
             view.setText(m_navigationTitles[position]);
-            view.setCompoundDrawablesWithIntrinsicBounds(NAV_ICONS[position], 0, 0, 0);
+            view.setCompoundDrawablesRelativeWithIntrinsicBounds(NAV_ICONS[position], 0, 0, 0);
             break;
          case Types.TAG:
             int count = getItem(position - 4).m_count;
             String tag = getItem(position - 4).m_title;
 
             /* This RTL (char) 0x200F allows the unread counter to be aligned to the right. */
-            view.setText(tag + '\n' + (char) 0x200F + (0 == count ? "" : count));
+            String allTag = m_context.getString(R.string.all_tag);
+            tag = Utilities.isRtl(allTag.charAt(0)) ? (char) 0x200F + tag + '\n' + (char) 0x200E
+                  : (char) 0x200E + tag + '\n' + (char) 0x200F;
+
+            view.setText(tag + (0 == count ? "" : Utilities.getLocaleInt(count)));
       }
 
       return view;

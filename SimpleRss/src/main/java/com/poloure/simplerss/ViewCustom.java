@@ -17,6 +17,7 @@
 package com.poloure.simplerss;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -28,6 +29,7 @@ class ViewCustom extends View
    static final Paint[] PAINTS = new Paint[3];
    private static final int[] COLORS = {255, 165, 205};
    private static final float[] SIZES = {16.0F, 12.0F, 14.0F};
+   private static final int screen = Resources.getSystem().getDisplayMetrics().widthPixels;
 
    static
    {
@@ -86,22 +88,53 @@ class ViewCustom extends View
       float verticalPosition = getPaddingTop() + 20.0F;
 
       /* Draw the title. */
-      canvas.drawText(m_item.m_title, getPaddingLeft(), verticalPosition, PAINTS[0]);
-      verticalPosition += PAINTS[0].getTextSize();
+      //if((char) 0x200F == m_item.m_title.charAt(0))
+      if(Utilities.isRtl(m_item.m_title.charAt(0)))
+      {
+         PAINTS[0].setTextAlign(Paint.Align.RIGHT);
+         PAINTS[1].setTextAlign(Paint.Align.RIGHT);
 
-      /* Draw the link. */
-      canvas.drawText(m_item.m_url, getPaddingLeft(), verticalPosition, PAINTS[1]);
+         canvas.drawText(m_item.m_title, screen - getPaddingRight(), verticalPosition, PAINTS[0]);
+         verticalPosition += PAINTS[0].getTextSize();
+
+         canvas.drawText(m_item.m_url, screen - getPaddingRight(), verticalPosition, PAINTS[1]);
+
+         /* Reset the paints. */
+         PAINTS[0].setTextAlign(Paint.Align.LEFT);
+         PAINTS[1].setTextAlign(Paint.Align.LEFT);
+      }
+      else
+      {
+         canvas.drawText(m_item.m_title, getPaddingLeft(), verticalPosition, PAINTS[0]);
+         verticalPosition += PAINTS[0].getTextSize();
+
+         canvas.drawText(m_item.m_url, getPaddingLeft(), verticalPosition, PAINTS[1]);
+      }
+
       return verticalPosition + PAINTS[1].getTextSize();
    }
 
    void drawDes(Canvas canvas, float verticalPosition)
    {
+      if(m_item.m_desLines[0].isEmpty())
+      {
+         return;
+      }
+
       float position = verticalPosition;
+
+      boolean rtl = Utilities.isRtl(m_item.m_desLines[0].charAt(0));
+      if(rtl)
+      {
+         PAINTS[2].setTextAlign(Paint.Align.RIGHT);
+      }
       for(int i = 0; 3 > i; i++)
       {
-         canvas.drawText(m_item.m_desLines[i], getPaddingLeft(), position, PAINTS[2]);
+         canvas.drawText(m_item.m_desLines[i], rtl ? screen - getPaddingRight() : getPaddingLeft(),
+               position, PAINTS[2]);
          position += PAINTS[2].getTextSize();
       }
+      PAINTS[2].setTextAlign(Paint.Align.LEFT);
    }
 
    float drawBitmap(Canvas canvas, float verticalPosition)

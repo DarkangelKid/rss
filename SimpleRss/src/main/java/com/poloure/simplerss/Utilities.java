@@ -35,6 +35,8 @@ import org.xmlpull.v1.XmlPullParserFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 class Utilities
 {
@@ -58,9 +60,16 @@ class Utilities
             int count = ((NavItem) adapter.getItem(page)).m_count;
 
             String unreadText = activity.getString(R.string.subtitle_unread);
-            actionBar.setSubtitle(unreadText + ' ' + count);
+            actionBar.setSubtitle(unreadText + ' ' + getLocaleInt(count));
          }
       }
+   }
+
+   static
+   String getLocaleInt(Integer count)
+   {
+      NumberFormat format = NumberFormat.getNumberInstance(Locale.getDefault());
+      return format.format(count);
    }
 
    static
@@ -113,5 +122,27 @@ class Utilities
              .show(manager.findFragmentByTag(newTag))
              .commit();
       activity.m_currentFragment = newTag;
+   }
+
+   static
+   boolean isRtl(char c)
+   {
+      if(0x600 <= c && 0x6ff >= c)
+      {
+         return true;
+      }
+      if(0x750 <= c && 0x77f >= c)
+      {
+         return true;
+      }
+      if(0xfb50 <= c && 0xfc3f >= c)
+      {
+         return true;
+      }
+      if(0xfe70 <= c && 0xfefc >= c)
+      {
+         return true;
+      }
+      return false;
    }
 }

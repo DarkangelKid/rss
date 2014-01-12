@@ -30,6 +30,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -119,9 +120,12 @@ class FeedsActivity extends Activity
       final FeedsActivity activity = this;
       final String[] navigationTitles = resources.getStringArray(R.array.navigation_titles);
 
+      Drawable appIcon = resources.getDrawable(R.drawable.rss_icon);
+      appIcon.setAutoMirrored(true);
+
       /* Configure the ActionBar. */
       ActionBar actionBar = getActionBar();
-      actionBar.setIcon(R.drawable.rss_icon);
+      actionBar.setIcon(appIcon);
       actionBar.setDisplayHomeAsUpEnabled(true);
       actionBar.setHomeButtonEnabled(true);
       actionBar.setTitle(navigationTitles[0]);
