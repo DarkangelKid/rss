@@ -33,7 +33,8 @@ class AdapterNavigationDrawer extends ArrayAdapter<NavItem>
          R.drawable.action_feeds, R.drawable.action_manage, R.drawable.action_settings,
    };
 
-   private static class Paddings
+   private static
+   class Paddings
    {
       static final int V_MAIN = Utilities.getDp(8.0F);
       static final int H_MAIN = 0;
@@ -44,7 +45,8 @@ class AdapterNavigationDrawer extends ArrayAdapter<NavItem>
       static final int COMPOUND_DRAWABLE = Utilities.getDp(12.0F);
    }
 
-   private static class TextSizes
+   private static
+   class TextSizes
    {
       static final float MAIN = 20.0F;
       static final float DIV = 14.0F;
@@ -54,22 +56,23 @@ class AdapterNavigationDrawer extends ArrayAdapter<NavItem>
    private static final int MIN_HEIGHT_MAIN = Utilities.getDp(48.0F);
    private static final int MIN_HEIGHT_TAG = Utilities.getDp(42.0F);
 
-   private static class Types
+   private static
+   class Types
    {
       static final int TITLE = 0;
       static final int DIVIDER = 1;
       static final int TAG = 2;
    }
 
-   private static final Typeface SANS_SERIF_LITE = Typeface
-         .create("sans-serif-light", Typeface.NORMAL);
+   private static final Typeface SANS_SERIF_LITE = Typeface.create("sans-serif-light",
+         Typeface.NORMAL);
 
    private final String[] m_navigationTitles;
    private final Context m_context;
 
-   AdapterNavigationDrawer(Context context, int resource)
+   AdapterNavigationDrawer(Context context)
    {
-      super(context, resource);
+      super(context, android.R.id.list);
       m_navigationTitles = context.getResources().getStringArray(R.array.navigation_titles);
       m_context = context;
    }

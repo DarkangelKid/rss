@@ -104,7 +104,7 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, NavItem[]>
    {
       /* Set the titles & counts arrays in this file and notify the adapter. */
       ListView navigationList = (ListView) m_activity.findViewById(R.id.navigation_list);
-      ArrayAdapter<?> adapter = (ArrayAdapter<?>) navigationList.getAdapter();
+      ArrayAdapter<NavItem> adapter = (ArrayAdapter<NavItem>) navigationList.getAdapter();
 
       /* Update the data in the adapter. */
       adapter.clear();
@@ -112,6 +112,6 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, NavItem[]>
       adapter.notifyDataSetChanged();
 
       /* Update the subtitle. */
-      Utilities.updateSubtitleCount(m_activity, m_currentPage);
+      Utilities.updateSubtitle(m_activity, m_currentPage);
    }
 }

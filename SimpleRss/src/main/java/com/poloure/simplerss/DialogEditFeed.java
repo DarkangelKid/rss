@@ -42,7 +42,7 @@ class DialogEditFeed extends Dialog
    private static final int[] TEXTS = {
          R.string.feed_name_dialog, R.string.feed_url_dialog, R.string.feed_tag_dialog
    };
-   private static final int[] BTEXTS = {R.string.cancel_dialog, R.string.accept_dialog};
+   private static final int[] BUTTON_TEXTS = {R.string.cancel_dialog, R.string.accept_dialog};
    private static final int COLOR_UNSELECTED = Color.argb(0, 0, 0, 0);
    private static final int COLOR_SELECTED = Color.parseColor("#ff33b5e5");
    private final String m_applicationFolder;
@@ -148,7 +148,7 @@ class DialogEditFeed extends Dialog
       for(int i = 0; 2 > i; i++)
       {
          buttons[i] = new Button(m_activity);
-         buttons[i].setText(BTEXTS[i]);
+         buttons[i].setText(BUTTON_TEXTS[i]);
          buttons[i].setId(BUTTON_IDS[i]);
          buttons[i].setLayoutParams(params);
 

@@ -60,7 +60,6 @@ class ServiceUpdate extends IntentService
    static final String ITEM_LIST = "item_list.txt";
    static final String CONTENT_FILE = "content.txt";
 
-   /* Folders */
    static final String THUMBNAIL_DIR = "thumbnails" + File.separatorChar;
    private static final char ITEM_SEPARATOR = '|';
    private static final int MIN_IMAGE_WIDTH = 64;
@@ -101,8 +100,8 @@ class ServiceUpdate extends IntentService
       static final Pattern WHITESPACE = Pattern.compile("[\\t\\n\\x0B\\f\\r\\|]");
       static final Pattern CDATA = Pattern.compile("\\<.*?\\>");
       static final Pattern IMG = Pattern.compile("(?i)<img([^>]+)/>");
-      static final Pattern SRC = Pattern
-            .compile("\\s*(?i)src\\s*=\\s*(\"([^\"]*\")|'[^']*'|([^'\">\\s]+))");
+      static final Pattern SRC = Pattern.compile(
+            "\\s*(?i)src\\s*=\\s*(\"([^\"]*\")|'[^']*'|([^'\">\\s]+))");
       static final Pattern APOSTROPHE = Pattern.compile("'");
       static final Pattern QUOT = Pattern.compile("\"");
    }

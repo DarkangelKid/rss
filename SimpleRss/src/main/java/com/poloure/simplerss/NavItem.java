@@ -18,8 +18,8 @@ package com.poloure.simplerss;
 
 class NavItem
 {
-   String m_title;
-   int m_count;
+   final String m_title;
+   final int m_count;
 
    NavItem(String title, int count)
    {

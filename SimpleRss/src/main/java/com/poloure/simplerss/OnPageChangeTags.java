@@ -44,7 +44,7 @@ class OnPageChangeTags extends SimpleOnPageChangeListener
       m_position = position;
 
       /* Set the subtitle to the unread count. */
-      Utilities.updateSubtitleCount(m_activity, position);
+      Utilities.updateSubtitle(m_activity, position);
    }
 
    @Override
@@ -63,8 +63,8 @@ class OnPageChangeTags extends SimpleOnPageChangeListener
          if(0 == listAdapter.getCount())
          {
             ListView listView = tagFragment.getListView();
-            AsyncReloadTagPage
-                  .newInstance(m_position, listView, m_applicationFolder, 0 == m_position);
+            AsyncReloadTagPage.newInstance(m_position, listView, m_applicationFolder,
+                  0 == m_position);
          }
       }
    }

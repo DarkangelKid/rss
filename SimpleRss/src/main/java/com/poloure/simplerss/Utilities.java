@@ -18,6 +18,8 @@ package com.poloure.simplerss;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.FragmentManager;
+import android.content.Context;
 import android.content.res.Resources;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -26,6 +28,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Adapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -37,7 +40,7 @@ import java.net.URL;
 
 class Utilities
 {
-   static final DisplayMetrics METRICS = Resources.getSystem().getDisplayMetrics();
+   private static final DisplayMetrics METRICS = Resources.getSystem().getDisplayMetrics();
    static final int EIGHT_DP = getDp(8.0F);
 
    static
@@ -56,7 +59,7 @@ class Utilities
    }
 
    static
-   void updateSubtitleCount(Activity activity, int page)
+   void updateSubtitle(Activity activity, int page)
    {
       ListView navigationList = (ListView) activity.findViewById(R.id.navigation_list);
       ActionBar actionBar = activity.getActionBar();
@@ -107,5 +110,25 @@ class Utilities
       InputStream inputStream = url.openStream();
       parser.setInput(inputStream, null);
       return parser;
+   }
+
+   static
+   View makeProgressBar(Context context)
+   {
+      ProgressBar progressBar = new ProgressBar(context);
+      setPaddingEqual(progressBar, getDp(7.0F));
+
+      return progressBar;
+   }
+
+   static
+   void switchFragments(FeedsActivity activity, String oldTag, String newTag)
+   {
+      FragmentManager manager = activity.getFragmentManager();
+      manager.beginTransaction()
+             .hide(manager.findFragmentByTag(oldTag))
+             .show(manager.findFragmentByTag(newTag))
+             .commit();
+      activity.m_currentFragment = newTag;
    }
 }

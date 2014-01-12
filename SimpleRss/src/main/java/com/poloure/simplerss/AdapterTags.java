@@ -119,8 +119,8 @@ class AdapterTags extends BaseAdapter
       {
          view.setBitmap(null);
          view.setTag(position);
-         AsyncLoadImage
-               .newInstance(view, m_applicationFolder, item.m_imageName, position, m_context);
+         AsyncLoadImage.newInstance(view, m_applicationFolder, item.m_imageName, position,
+               m_context);
       }
 
       return view;

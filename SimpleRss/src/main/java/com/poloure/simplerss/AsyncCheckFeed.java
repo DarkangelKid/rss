@@ -101,8 +101,8 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       /* Get the user's input. */
       CharSequence inputName = ((TextView) m_dialog.findViewById(DialogEditFeed.IDS[0])).getText();
       CharSequence inputTags = ((TextView) m_dialog.findViewById(DialogEditFeed.IDS[2])).getText();
-      CharSequence inputUrlChar = ((TextView) m_dialog.findViewById(DialogEditFeed.IDS[1]))
-            .getText();
+      CharSequence inputUrlChar = ((TextView) m_dialog.findViewById(
+            DialogEditFeed.IDS[1])).getText();
 
       String inputUrl = null == inputUrlChar ? "" : inputUrlChar.toString();
 

@@ -80,9 +80,8 @@ class AsyncReloadTagPage extends AsyncTask<Integer, Object, Void>
       {
          if(m_isAllTag || feedTags[j].contains(tag))
          {
-            String[][] content = Read
-                  .csvFile(feedNames[j] + contentFile, m_applicationFolder, 't', 'l', 'b', 'i', 'p',
-                        'x', 'y', 'z');
+            String[][] content = Read.csvFile(feedNames[j] + contentFile, m_applicationFolder, 't',
+                  'l', 'b', 'i', 'p', 'x', 'y', 'z');
 
             if(0 == content.length)
             {

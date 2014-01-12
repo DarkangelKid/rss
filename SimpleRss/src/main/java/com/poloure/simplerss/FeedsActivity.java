@@ -45,9 +45,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Adapter;
 import android.widget.AdapterView;
-import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 
 import java.io.File;
 import java.util.Set;
@@ -64,6 +62,8 @@ class FeedsActivity extends Activity
    private ViewPager m_feedsViewPager;
    private ActionBarDrawerToggle m_drawerToggle;
    private String m_applicationFolder;
+
+   String m_currentFragment;
 
    static
    String getApplicationFolder(Context context)
@@ -98,15 +98,6 @@ class FeedsActivity extends Activity
       }
    }
 
-   private static
-   View makeProgressBar(Context context)
-   {
-      ProgressBar progressBar = new ProgressBar(context);
-      Utilities.setPaddingEqual(progressBar, Utilities.getDp(7.0F));
-
-      return progressBar;
-   }
-
    @Override
    public
    void onCreate(Bundle savedInstanceState)
@@ -126,7 +117,8 @@ class FeedsActivity extends Activity
 
       /* Get the navigation drawer titles. */
       Resources resources = getResources();
-      String[] navigationTitles = resources.getStringArray(R.array.navigation_titles);
+      final FeedsActivity activity = this;
+      final String[] navigationTitles = resources.getStringArray(R.array.navigation_titles);
 
       /* Configure the ActionBar. */
       final ActionBar actionBar = getActionBar();
@@ -135,7 +127,7 @@ class FeedsActivity extends Activity
       actionBar.setHomeButtonEnabled(true);
       actionBar.setTitle(navigationTitles[0]);
 
-      DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+      final DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
       /* Create the navigation drawer and set all the listeners for it. */
       m_drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.drawable.ic_drawer,
@@ -169,17 +161,52 @@ class FeedsActivity extends Activity
 
       /* The R.id.content_frame is child 0, the R.id.navigation_list is child 1. */
       ListView navigationList = (ListView) drawerLayout.getChildAt(1);
-      navigationList.setAdapter(new AdapterNavigationDrawer(this, android.R.id.list));
+      navigationList.setAdapter(new AdapterNavigationDrawer(this));
 
-      /* Create the FragmentFeeds that go inside the content frame. */
+      navigationList.setOnItemClickListener(new AdapterView.OnItemClickListener()
+      {
+         @Override
+         public
+         void onItemClick(AdapterView<?> parent, View view, int position, long id)
+         {
+            /* Close the drawer. This will call the OnDrawerClose of the
+            DrawerToggle. */
+            drawerLayout.closeDrawers();
+
+            /* Set the title and switch fragment. */
+            String selectedTitle = navigationTitles[3 < position ? 0 : position];
+            Utilities.switchFragments(activity, m_currentFragment, selectedTitle);
+            getActionBar().setTitle(selectedTitle);
+
+            if(2 < position)
+            {
+               m_feedsViewPager.setCurrentItem(position - 4);
+            }
+            else
+            {
+               Utilities.updateSubtitle(activity,
+                     0 == position ? m_feedsViewPager.getCurrentItem() : -1);
+            }
+         }
+      });
+
+      /* Create and hide the fragments that go inside the content frame. */
       if(null == savedInstanceState)
       {
-         Fragment feedFragment = FragmentFeeds.newInstance();
+         Fragment[] fragments = {
+               FragmentFeeds.newInstance(),
+               FragmentManage.newInstance(),
+               FragmentSettings.newInstance()
+         };
 
-         FragmentManager manager = getFragmentManager();
-         FragmentTransaction transaction = manager.beginTransaction();
-         transaction.add(R.id.content_frame, feedFragment, navigationTitles[0]);
+         FragmentTransaction transaction = getFragmentManager().beginTransaction();
+         for(int i = 0; 3 > i; i++)
+         {
+            transaction.add(R.id.content_frame, fragments[i], navigationTitles[i])
+                       .hide(fragments[0 == i ? 1 : i]);
+         }
          transaction.commit();
+         m_currentFragment = navigationTitles[0];
       }
    }
 
@@ -202,85 +229,9 @@ class FeedsActivity extends Activity
       // Sync the toggle state after onRestoreInstanceState has occurred.
       m_drawerToggle.syncState();
 
-      final ActionBar actionBar = getActionBar();
-      final Activity activity = this;
-      Resources resources = getResources();
-
       AsyncNavigationAdapter.newInstance(this, m_applicationFolder, 0);
 
       m_feedsViewPager = (ViewPager) findViewById(FragmentFeeds.VIEW_PAGER_ID);
-      final String[] navigationTitles = resources.getStringArray(R.array.navigation_titles);
-
-      /* Create the OnItemClickLister for the navigation list. */
-      AdapterView.OnItemClickListener onClick = new AdapterView.OnItemClickListener()
-      {
-         @Override
-         public
-         void onItemClick(AdapterView<?> parent, View view, int position, long id)
-         {
-
-            /* Close the drawer on any click. This will call the OnDrawerClose of the
-            DrawerToggle. */
-            DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-            drawerLayout.closeDrawers();
-
-            boolean tagWasClicked = 3 < position;
-            boolean feedsWasClicked = 0 == position;
-            int currentPage = m_feedsViewPager.getCurrentItem();
-            boolean clickedDifferentPage = currentPage != position;
-            String feedTitle = navigationTitles[0];
-
-            /* Determine the new title based on the position of the item clicked. */
-            String selectedTitle = tagWasClicked ? feedTitle : navigationTitles[position];
-
-            /* If the item selected was a tag, change the FragmentFeeds ViewPager to that page. */
-            if(tagWasClicked && clickedDifferentPage)
-            {
-               m_feedsViewPager.setCurrentItem(position - 4);
-            }
-
-            /* Set the ActionBar title without saving the previous title. */
-            actionBar.setTitle(selectedTitle);
-
-            Utilities.updateSubtitleCount(activity,
-                  feedsWasClicked || tagWasClicked ? currentPage : -1);
-
-            FragmentManager manager = getFragmentManager();
-            FragmentTransaction transaction = manager.beginTransaction();
-
-            /* For each of the navigation titles, decide what to do with its fragment. */
-            for(String navigationTitle : navigationTitles)
-            {
-               Fragment frag = manager.findFragmentByTag(navigationTitle);
-               /* If the title is the one that was clicked, show it. */
-               if(selectedTitle.equals(navigationTitle))
-               {
-                  Fragment selectedFragment = manager.findFragmentByTag(selectedTitle);
-
-                  if(null == selectedFragment)
-                  {
-                     Fragment fragment = 1 == position ? FragmentManage.newInstance()
-                           : FragmentSettings.newInstance();
-
-                     transaction.add(R.id.content_frame, fragment, selectedTitle);
-                  }
-                  else
-                  {
-                     transaction.show(selectedFragment);
-                  }
-               }
-               else if(null != frag)
-               {
-                  transaction.hide(frag);
-               }
-            }
-
-            transaction.commit();
-         }
-      };
-
-      ListView navigationList = (ListView) findViewById(R.id.navigation_list);
-      navigationList.setOnItemClickListener(onClick);
    }
 
    @Override
@@ -362,7 +313,7 @@ class FeedsActivity extends Activity
       time. */
       MenuItem refreshItem = menu.findItem(R.id.refresh);
 
-      View refreshIcon = isServiceRunning() ? makeProgressBar(this) : null;
+      View refreshIcon = isServiceRunning() ? Utilities.makeProgressBar(this) : null;
       MenuItemCompat.setActionView(refreshItem, refreshIcon);
 
       /* Update the MenuItem in the ServiceHandler so when the service finishes, the icon changes
@@ -376,8 +327,8 @@ class FeedsActivity extends Activity
    boolean isServiceRunning()
    {
       ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-      for(ActivityManager.RunningServiceInfo service : manager
-            .getRunningServices(Integer.MAX_VALUE))
+      for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(
+            Integer.MAX_VALUE))
       {
          String className = service.service.getClassName();
          String serviceName = ServiceUpdate.class.getName();
@@ -410,8 +361,8 @@ class FeedsActivity extends Activity
          int currentPage = m_feedsViewPager.getCurrentItem();
 
          FragmentManager manager = getFragmentManager();
-         ListFragment listFragment = (ListFragment) manager
-               .findFragmentByTag(FragmentFeeds.FRAGMENT_ID_PREFIX + currentPage);
+         ListFragment listFragment = (ListFragment) manager.findFragmentByTag(
+               FragmentFeeds.FRAGMENT_ID_PREFIX + currentPage);
 
          ListView listViewTags = listFragment.getListView();
 
@@ -433,7 +384,7 @@ class FeedsActivity extends Activity
    private
    void refreshFeeds(MenuItem menuItem)
    {
-      MenuItemCompat.setActionView(menuItem, makeProgressBar(this));
+      MenuItemCompat.setActionView(menuItem, Utilities.makeProgressBar(this));
 
       /* Set the service handler in FeedsActivity so we can check and call it from ServiceUpdate. */
       FragmentManager manager = getFragmentManager();
