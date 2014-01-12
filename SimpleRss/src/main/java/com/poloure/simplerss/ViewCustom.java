@@ -89,7 +89,7 @@ class ViewCustom extends View
 
       /* Draw the title. */
       //if((char) 0x200F == m_item.m_title.charAt(0))
-      if(Utilities.isRtl(m_item.m_title.charAt(0)))
+      if(Utilities.isTextRtl(m_item.m_title))
       {
          PAINTS[0].setTextAlign(Paint.Align.RIGHT);
          PAINTS[1].setTextAlign(Paint.Align.RIGHT);
@@ -123,7 +123,7 @@ class ViewCustom extends View
 
       float position = verticalPosition;
 
-      boolean rtl = Utilities.isRtl(m_item.m_desLines[0].charAt(0));
+      boolean rtl = Utilities.isTextRtl(m_item.m_desLines[0]);
       if(rtl)
       {
          PAINTS[2].setTextAlign(Paint.Align.RIGHT);

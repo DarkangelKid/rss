@@ -80,6 +80,9 @@ class AsyncManage extends AsyncTask<String, Editable[], Void>
       String[] feedUrls = feedsIndex[1];
       String[] feedTags = feedsIndex[2];
 
+      boolean rtl = Utilities.isTextRtl(PagerAdapterFeeds.TAG_LIST.get(0));
+      char direction = rtl ? (char) 0x200F : (char) 0x200E;
+
       int size = feedNames.length;
       Editable[] editables = new SpannableStringBuilder[size];
 
@@ -89,25 +92,28 @@ class AsyncManage extends AsyncTask<String, Editable[], Void>
          Editable editable = new SpannableStringBuilder();
 
          /* Append the feed name. */
+         editable.append(direction);
          editable.append(feedNames[i]);
          editable.append("\n");
 
          /* Make the feed name size 16dip. */
-         int titleLength = feedNames[i].length();
+         int titleLength = editable.length();
          editable.setSpan(TITLE_SIZE, 0, titleLength, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
          /* Form the path to the feed_content file. */
          String feedContentFileName = feedNames[i] + File.separatorChar +
                                       ServiceUpdate.CONTENT_FILE;
          int feedContentSize = count(feedContentFileName, appFolder);
-         String contentSize = Integer.toString(feedContentSize);
+         String contentSize = Utilities.getLocaleInt(feedContentSize);
 
          /* Append the url to the next line. */
+         editable.append(direction);
          editable.append(feedUrls[i]);
          editable.append("\n");
 
          /* Append an bold "Items :" text. */
          int thirdLinePosition = editable.length();
+         editable.append(direction);
          editable.append("Items: ");
          editable.setSpan(SPAN_BOLD, thirdLinePosition, editable.length(),
                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);

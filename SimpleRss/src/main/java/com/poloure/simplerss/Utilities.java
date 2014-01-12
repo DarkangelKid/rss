@@ -21,6 +21,7 @@ import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.res.Resources;
+import android.text.TextDirectionHeuristics;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
@@ -125,24 +126,8 @@ class Utilities
    }
 
    static
-   boolean isRtl(char c)
+   boolean isTextRtl(CharSequence c)
    {
-      if(0x600 <= c && 0x6ff >= c)
-      {
-         return true;
-      }
-      if(0x750 <= c && 0x77f >= c)
-      {
-         return true;
-      }
-      if(0xfb50 <= c && 0xfc3f >= c)
-      {
-         return true;
-      }
-      if(0xfe70 <= c && 0xfefc >= c)
-      {
-         return true;
-      }
-      return false;
+      return TextDirectionHeuristics.FIRSTSTRONG_LTR.isRtl(c, 0, c.length() - 1);
    }
 }

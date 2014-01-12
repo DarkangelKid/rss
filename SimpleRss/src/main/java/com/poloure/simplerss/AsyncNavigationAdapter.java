@@ -24,6 +24,7 @@ import android.widget.ListView;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -74,7 +75,7 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, NavItem[]>
       }
 
       /* Create a temporary collection we will .clear() each iteration of the next for loop. */
-      Collection<Long> itemsInTag = new HashSet<>(0);
+      Collection<Long> itemsInTag = Collections.synchronizedCollection(new HashSet<Long>(0));
 
       /* For each tag excluding the all tag. */
       for(int i = 0; tagTotal > i; i++)
