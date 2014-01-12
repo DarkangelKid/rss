@@ -24,8 +24,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -47,8 +45,6 @@ class FragmentManage extends Fragment
    public
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
-      setHasOptionsMenu(true);
-
       final Activity activity = (Activity) container.getContext();
 
       final String applicationFolder = FeedsActivity.getApplicationFolder(activity);
@@ -86,12 +82,5 @@ class FragmentManage extends Fragment
       AsyncManage.newInstance(baseAdapter, applicationFolder);
 
       return listView;
-   }
-
-   @Override
-   public
-   void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
-   {
-      Utilities.showMenuItems(menu, true, false, false);
    }
 }

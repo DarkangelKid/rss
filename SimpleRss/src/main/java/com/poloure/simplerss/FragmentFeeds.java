@@ -22,8 +22,6 @@ import android.app.FragmentManager;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -43,8 +41,6 @@ class FragmentFeeds extends Fragment
    public
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
-      setHasOptionsMenu(true);
-
       Activity activity = getActivity();
 
       String applicationFolder = FeedsActivity.getApplicationFolder(activity);
@@ -62,12 +58,5 @@ class FragmentFeeds extends Fragment
       viewPager.setId(VIEW_PAGER_ID);
 
       return viewPager;
-   }
-
-   @Override
-   public
-   void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
-   {
-      Utilities.showMenuItems(menu, true, true, true);
    }
 }

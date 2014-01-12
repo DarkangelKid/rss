@@ -23,8 +23,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Adapter;
 import android.widget.ListView;
@@ -42,21 +40,6 @@ class Utilities
 {
    private static final DisplayMetrics METRICS = Resources.getSystem().getDisplayMetrics();
    static final int EIGHT_DP = getDp(8.0F);
-
-   static
-   void showMenuItems(Menu menu, boolean add, boolean unread, boolean refresh)
-   {
-      MenuItem addFeedMenu = menu.findItem(R.id.add_feed);
-      MenuItem unreadMenu = menu.findItem(R.id.unread);
-      MenuItem refreshMenu = menu.findItem(R.id.refresh);
-
-      if(null != refreshMenu && null != unreadMenu && null != addFeedMenu)
-      {
-         addFeedMenu.setVisible(add);
-         unreadMenu.setVisible(unread);
-         refreshMenu.setVisible(refresh);
-      }
-   }
 
    static
    void updateSubtitle(Activity activity, int page)

@@ -19,8 +19,6 @@ package com.poloure.simplerss;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
-import android.view.Menu;
-import android.view.MenuInflater;
 
 public
 class FragmentSettings extends PreferenceFragment
@@ -36,14 +34,6 @@ class FragmentSettings extends PreferenceFragment
    void onCreate(Bundle savedInstanceState)
    {
       super.onCreate(savedInstanceState);
-      setHasOptionsMenu(true);
       addPreferencesFromResource(R.xml.preferences);
-   }
-
-   @Override
-   public
-   void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
-   {
-      Utilities.showMenuItems(menu, false, false, false);
    }
 }

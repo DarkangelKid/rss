@@ -20,7 +20,6 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
-import android.app.Dialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -58,10 +57,10 @@ class FeedsActivity extends Activity
    private static final int ALARM_SERVICE_STOP = 0;
    private static final int MINUTE_VALUE = 60000;
    static Handler s_serviceHandler;
-   private String m_previousActionBarTitle;
    private ViewPager m_feedsViewPager;
    private ActionBarDrawerToggle m_drawerToggle;
    private String m_applicationFolder;
+   private boolean m_showMenuItems = true;
 
    String m_currentFragment;
 
@@ -121,7 +120,7 @@ class FeedsActivity extends Activity
       final String[] navigationTitles = resources.getStringArray(R.array.navigation_titles);
 
       /* Configure the ActionBar. */
-      final ActionBar actionBar = getActionBar();
+      ActionBar actionBar = getActionBar();
       actionBar.setIcon(R.drawable.rss_icon);
       actionBar.setDisplayHomeAsUpEnabled(true);
       actionBar.setHomeButtonEnabled(true);
@@ -133,28 +132,13 @@ class FeedsActivity extends Activity
       m_drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.drawable.ic_drawer,
             R.string.drawer_open, R.string.drawer_close)
       {
-         final String m_navigationText = getString(R.string.navigation_title);
-
          @Override
          public
-         void onDrawerOpened(View drawerView)
+         void onDrawerSlide(View drawerView, float slideOffset)
          {
-            setNavigationTitle(m_navigationText, true);
-         }
-
-         @Override
-         public
-         void onDrawerClosed(View drawerView)
-         {
-            /* If the title is still R.string.navigation_title, change it to the previous title. */
-            CharSequence titleChars = actionBar.getTitle();
-            String title = titleChars.toString();
-
-            if(m_navigationText.equals(title))
-            {
-               String previousTitle = m_previousActionBarTitle;
-               setNavigationTitle(previousTitle, false);
-            }
+            super.onDrawerSlide(drawerView, slideOffset);
+            m_showMenuItems = 0.0F == slideOffset;
+            invalidateOptionsMenu();
          }
       };
       drawerLayout.setDrawerListener(m_drawerToggle);
@@ -208,17 +192,6 @@ class FeedsActivity extends Activity
          transaction.commit();
          m_currentFragment = navigationTitles[0];
       }
-   }
-
-   void setNavigationTitle(CharSequence title, boolean saveTitle)
-   {
-      ActionBar actionBar = getActionBar();
-      if(saveTitle)
-      {
-         CharSequence titleChars = actionBar.getTitle();
-         m_previousActionBarTitle = titleChars.toString();
-      }
-      actionBar.setTitle(title);
    }
 
    @Override
@@ -302,6 +275,31 @@ class FeedsActivity extends Activity
 
    @Override
    public
+   boolean onOptionsItemSelected(MenuItem item)
+   {
+      return m_drawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
+   }
+
+   @Override
+   public
+   boolean onPrepareOptionsMenu(Menu menu)
+   {
+      /* If the title is not the feeds title, disable the buttons accordingly. */
+      String title = getActionBar().getTitle().toString();
+      String[] titles = getResources().getStringArray(R.array.navigation_titles);
+
+      boolean[] show = titles[0].equals(title) ? new boolean[]{true, true, true}
+            : new boolean[]{titles[1].equals(title), false, false};
+
+      for(int i = 0; i < menu.size(); i++)
+      {
+         menu.getItem(i).setEnabled(m_showMenuItems && show[i]);
+      }
+      return true;
+   }
+
+   @Override
+   public
    boolean onCreateOptionsMenu(Menu menu)
    {
       menu.clear();
@@ -309,17 +307,14 @@ class FeedsActivity extends Activity
       MenuInflater menuInflater = getMenuInflater();
       menuInflater.inflate(R.menu.action_bar_menu, menu);
 
-      /* Set the refreshItem to spin if the service is running. The handler will stop it in due
-      time. */
+      /* Set the refreshItem to spin if the service is running. The handler will stop it. */
       MenuItem refreshItem = menu.findItem(R.id.refresh);
 
       View refreshIcon = isServiceRunning() ? Utilities.makeProgressBar(this) : null;
       MenuItemCompat.setActionView(refreshItem, refreshIcon);
 
-      /* Update the MenuItem in the ServiceHandler so when the service finishes, the icon changes
-         correctly.*/
+      /* Update the MenuItem in the ServiceHandler so when the service finishes, the icon changes.*/
       ServiceHandler.s_refreshItem = refreshItem;
-
       return true;
    }
 
@@ -340,49 +335,28 @@ class FeedsActivity extends Activity
       return false;
    }
 
-   @Override
    public
-   boolean onOptionsItemSelected(MenuItem item)
+   void onAddClick(MenuItem menuItem)
    {
-      CharSequence menuText = item.getTitle();
-
-      String addFeed = getString(R.string.add_feed);
-      String jumpTo = getString(R.string.unread);
-      String refresh = getString(R.string.refresh);
-
-      if(menuText.equals(addFeed))
-      {
-         int position = -1;
-         Dialog dialog = DialogEditFeed.newInstance(this, position, m_applicationFolder);
-         dialog.show();
-      }
-      else if(menuText.equals(jumpTo))
-      {
-         int currentPage = m_feedsViewPager.getCurrentItem();
-
-         FragmentManager manager = getFragmentManager();
-         ListFragment listFragment = (ListFragment) manager.findFragmentByTag(
-               FragmentFeeds.FRAGMENT_ID_PREFIX + currentPage);
-
-         ListView listViewTags = listFragment.getListView();
-
-         gotoLatestUnread(listViewTags);
-      }
-      else if(menuText.equals(refresh))
-      {
-         refreshFeeds(item);
-      }
-      else
-      {
-         return m_drawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
-      }
-
-      return true;
+      DialogEditFeed.newInstance(this, -1, m_applicationFolder).show();
    }
 
-   /* Updates and refreshes the tags with any new content. */
-   private
-   void refreshFeeds(MenuItem menuItem)
+   public
+   void onUnreadClick(MenuItem menuItem)
+   {
+      int currentPage = m_feedsViewPager.getCurrentItem();
+
+      FragmentManager manager = getFragmentManager();
+      ListFragment listFragment = (ListFragment) manager.findFragmentByTag(
+            FragmentFeeds.FRAGMENT_ID_PREFIX + currentPage);
+
+      ListView listViewTags = listFragment.getListView();
+
+      gotoLatestUnread(listViewTags);
+   }
+
+   public
+   void onRefreshClick(MenuItem menuItem)
    {
       MenuItemCompat.setActionView(menuItem, Utilities.makeProgressBar(this));
 
@@ -390,10 +364,8 @@ class FeedsActivity extends Activity
       FragmentManager manager = getFragmentManager();
       s_serviceHandler = new ServiceHandler(manager, menuItem, m_applicationFolder);
 
-      int currentPage = m_feedsViewPager.getCurrentItem();
-
       Intent intent = new Intent(this, ServiceUpdate.class);
-      intent.putExtra("GROUP_NUMBER", currentPage);
+      intent.putExtra("GROUP_NUMBER", m_feedsViewPager.getCurrentItem());
       startService(intent);
    }
 }
