@@ -18,9 +18,13 @@ package com.poloure.simplerss;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.Fragment;
+import android.app.ListFragment;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.support.v4.view.ViewPager;
+import android.text.Editable;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -265,10 +269,8 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
             {
                moveFile(m_oldFeedName, finalTitle, m_applicationFolder);
             }
-
             Write.editIndexLineContaining(m_oldFeedName, m_applicationFolder, Write.MODE_REPLACE,
                   feedInfo);
-
          }
          else
          {
@@ -285,14 +287,15 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
          AsyncNavigationAdapter.newInstance(m_activity, m_applicationFolder, -1);
 
          /* Get the manage ListView and update it. */
-         /* TODO
-         ListView listView = (ListView) m_activity.findViewById(ListFragmentManage
-         .LIST_VIEW_MANAGE);
-         if(null != listView)
+         String[] navTitles = m_activity.getResources().getStringArray(R.array.navigation_titles);
+         Fragment fragment = m_activity.getFragmentManager().findFragmentByTag(navTitles[1]);
+
+         if(null != fragment)
          {
-            AsyncManage.newInstance((ArrayAdapter<Editable>) listView.getAdapter(),
+            AsyncManage.newInstance(
+                  (ArrayAdapter<Editable>) ((ListFragment) fragment).getListAdapter(),
                   m_applicationFolder);
-         }*/
+         }
 
          m_dialog.dismiss();
       }
