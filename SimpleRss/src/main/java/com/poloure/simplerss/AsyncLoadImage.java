@@ -30,19 +30,21 @@ class AsyncLoadImage extends AsyncTask<Object, Void, Bitmap>
    private static final int IMAGE_FADE_IN_DURATION = 166;
    private final WeakReference<ViewCustom> m_view;
    private final int m_viewTag;
+   private final float m_opacity;
 
    private
-   AsyncLoadImage(ViewCustom view, int viewTag)
+   AsyncLoadImage(ViewCustom view, int viewTag, float opacity)
    {
       m_view = new WeakReference<>(view);
       m_viewTag = viewTag;
+      m_opacity = opacity;
    }
 
    static
    void newInstance(ViewCustom view, String applicationFolder, String imageName, int viewTag,
-         Context context)
+         Context context, float opacity)
    {
-      AsyncTask<Object, Void, Bitmap> task = new AsyncLoadImage(view, viewTag);
+      AsyncTask<Object, Void, Bitmap> task = new AsyncLoadImage(view, viewTag, opacity);
 
       task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, applicationFolder, imageName, context);
    }
@@ -78,7 +80,7 @@ class AsyncLoadImage extends AsyncTask<Object, Void, Bitmap>
       ViewCustom view = m_view.get();
       if(null != view && (Integer) view.getTag() == m_viewTag && null != result)
       {
-         AlphaAnimation animation = new AlphaAnimation(0.0F, 1.0F);
+         AlphaAnimation animation = new AlphaAnimation(0.0F, m_opacity);
          animation.setDuration(IMAGE_FADE_IN_DURATION);
          animation.setFillAfter(true);
          view.setBitmap(result);

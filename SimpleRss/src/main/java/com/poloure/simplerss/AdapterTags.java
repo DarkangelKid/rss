@@ -95,7 +95,6 @@ class AdapterTags extends BaseAdapter
    {
       int viewType = getItemViewType(position);
 
-      //boolean isRead = READ_ITEM_TIMES.contains(item.m_time);
       boolean hasImg = TYPE_IMAGE == viewType || TYPE_IMAGE_SANS_DESCRIPTION == viewType;
       boolean hasDes = TYPE_PLAIN == viewType || TYPE_IMAGE == viewType;
 
@@ -105,7 +104,10 @@ class AdapterTags extends BaseAdapter
 
       /* Set the information. */
       FeedItem item = m_feedItems.get(position);
+      boolean isRead = READ_ITEM_TIMES.contains(item.m_time);
       view.m_item = item;
+
+      view.setAlpha(isRead && !hasImg ? 0.5F : 1.0F);
 
       /* The logic that tells whether the item is Read or not. */
       if(parent.isShown() && position + 1 < m_feedItems.size() && m_isReadingItems)
@@ -120,7 +122,7 @@ class AdapterTags extends BaseAdapter
          view.setBitmap(null);
          view.setTag(position);
          AsyncLoadImage.newInstance(view, m_applicationFolder, item.m_imageName, position,
-               m_context);
+               m_context, isRead ? 0.5F : 1.0F);
       }
 
       return view;

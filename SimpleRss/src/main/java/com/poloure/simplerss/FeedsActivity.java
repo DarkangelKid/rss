@@ -47,7 +47,6 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import java.io.File;
-import java.util.Set;
 
 public
 class FeedsActivity extends Activity
@@ -70,8 +69,7 @@ class FeedsActivity extends Activity
       /* Check the media state for the desirable state. */
       String state = Environment.getExternalStorageState();
 
-      String mounted = Environment.MEDIA_MOUNTED;
-      if(!mounted.equals(state))
+      if(!Environment.MEDIA_MOUNTED.equals(state))
       {
          return null;
       }
@@ -84,9 +82,7 @@ class FeedsActivity extends Activity
    void gotoLatestUnread(ListView listView)
    {
       Adapter listAdapter = listView.getAdapter();
-
-      int itemCount = listAdapter.getCount() - 1;
-      for(int i = itemCount; 0 <= i; i--)
+      for(int i = listAdapter.getCount() - 1; 0 <= i; i--)
       {
          FeedItem feedItem = (FeedItem) listAdapter.getItem(i);
          if(!AdapterTags.READ_ITEM_TIMES.contains(feedItem.m_time))
@@ -108,11 +104,7 @@ class FeedsActivity extends Activity
       m_applicationFolder = getApplicationFolder(this);
 
       /* Load the read items to the AdapterTag class. */
-      if(AdapterTags.READ_ITEM_TIMES.isEmpty())
-      {
-         Set<Long> set = Read.longSet(READ_ITEMS, m_applicationFolder);
-         AdapterTags.READ_ITEM_TIMES.addAll(set);
-      }
+      AdapterTags.READ_ITEM_TIMES.addAll(Read.longSet(READ_ITEMS, m_applicationFolder));
 
       /* Get the navigation drawer titles. */
       Resources resources = getResources();

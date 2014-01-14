@@ -32,7 +32,6 @@
    <string name="feed_url_dialog">Feed URL</string>
    <string name="feed_url_hint">http://example.com/rss</string>
    <string name="feed_tag_dialog">Tags</string>
-   <string name="tag_title">Tags</string>
    <string name="feed_tag_hint">tag one, tag two, …</string>
 
    <string name="cancel_dialog">Cancel</string>

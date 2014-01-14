@@ -27,7 +27,7 @@ class ViewCustom extends View
 {
    static final int IMAGE_HEIGHT = 360;
    static final Paint[] PAINTS = new Paint[3];
-   private static final int[] COLORS = {255, 165, 205};
+   private static final int[] COLORS = {0, 90, 50};
    private static final float[] SIZES = {16.0F, 12.0F, 14.0F};
    private static final int screen = Resources.getSystem().getDisplayMetrics().widthPixels;
 
@@ -37,7 +37,7 @@ class ViewCustom extends View
       {
          PAINTS[i] = new Paint(Paint.ANTI_ALIAS_FLAG);
          PAINTS[i].setTextSize(Utilities.getSp(SIZES[i]));
-         PAINTS[i].setARGB(COLORS[i], 0, 0, 0);
+         PAINTS[i].setARGB(255, COLORS[i], COLORS[i], COLORS[i]);
       }
    }
 
