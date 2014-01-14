@@ -17,11 +17,7 @@
 package com.poloure.simplerss;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
-import android.util.TypedValue;
-import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -33,39 +29,8 @@ class AdapterNavigationDrawer extends ArrayAdapter<NavItem>
          R.drawable.action_feeds, R.drawable.action_manage, R.drawable.action_settings,
    };
 
-   private static
-   class Paddings
-   {
-      static final int V_MAIN = Utilities.getDp(8.0F);
-      static final int H_MAIN = 0;
-      static final int V_TAG = Utilities.getDp(8.0F);
-      static final int H_TAG = Utilities.getDp(16.0F);
-      static final int V_DIV = Utilities.getDp(4.0F);
-      static final int H_DIV = Utilities.getDp(16.0F);
-      static final int COMPOUND_DRAWABLE = Utilities.getDp(12.0F);
-   }
-
-   private static
-   class TextSizes
-   {
-      static final float MAIN = 20.0F;
-      static final float DIV = 14.0F;
-      static final float TAG = 16.0F;
-   }
-
-   private static final int MIN_HEIGHT_MAIN = Utilities.getDp(48.0F);
-   private static final int MIN_HEIGHT_TAG = Utilities.getDp(42.0F);
-
-   private static
-   class Types
-   {
-      static final int TITLE = 0;
-      static final int DIVIDER = 1;
-      static final int TAG = 2;
-   }
-
-   private static final Typeface SANS_SERIF_LITE = Typeface.create("sans-serif-light",
-         Typeface.NORMAL);
+   private static final int TITLE = 0;
+   private static final int TAG = 1;
 
    private final String[] m_navigationTitles;
    private final Context m_context;
@@ -81,91 +46,53 @@ class AdapterNavigationDrawer extends ArrayAdapter<NavItem>
    public
    View getView(int position, View convertView, ViewGroup parent)
    {
-      TextView view = (TextView) convertView;
       int viewType = getItemViewType(position);
+      LayoutInflater inflater = LayoutInflater.from(m_context);
 
-      if(null == convertView)
+      int id = TITLE == viewType ? R.layout.navigation_text_view_main
+            : R.layout.navigation_text_view_tag;
+
+      TextView view = (TextView) (null == convertView ? inflater.inflate(id, null) : convertView);
+
+      if(TITLE == viewType)
       {
-         view = new TextView(m_context);
-         view.setTextColor(Color.WHITE);
-         view.setTypeface(SANS_SERIF_LITE);
-         view.setGravity(Gravity.CENTER_VERTICAL);
-
-         switch(viewType)
-         {
-            case Types.TITLE:
-               view.setMinHeight(MIN_HEIGHT_MAIN);
-               view.setPadding(Paddings.V_MAIN, Paddings.H_MAIN, Paddings.V_MAIN, Paddings.H_MAIN);
-               view.setTextSize(TypedValue.COMPLEX_UNIT_SP, TextSizes.MAIN);
-               view.setCompoundDrawablePadding(Paddings.COMPOUND_DRAWABLE);
-               break;
-            case Types.DIVIDER:
-               ColorDrawable divider = new ColorDrawable(Color.parseColor("#888888"));
-               divider.setBounds(0, 0, parent.getWidth(), 3);
-
-               view.setCompoundDrawables(null, null, null, divider);
-               view.setCompoundDrawablePadding(Paddings.V_MAIN);
-               view.setPadding(Paddings.H_DIV, Paddings.V_DIV, Paddings.H_DIV, Paddings.V_DIV);
-               view.setText(m_context.getString(R.string.tag_title));
-               view.setTextSize(TypedValue.COMPLEX_UNIT_SP, TextSizes.DIV);
-               break;
-            case Types.TAG:
-               view.setMinHeight(MIN_HEIGHT_TAG);
-               view.setTextSize(TypedValue.COMPLEX_UNIT_SP, TextSizes.TAG);
-
-               /* This is what allows us to put two lines on the same line in one view. */
-               view.setPadding(Paddings.H_TAG, -Paddings.V_TAG, Paddings.H_TAG, Paddings.V_TAG);
-               view.setLineSpacing(0.0F, 0.1F);
-         }
+         view.setText(m_navigationTitles[position]);
+         view.setCompoundDrawablesRelativeWithIntrinsicBounds(NAV_ICONS[position], 0, 0, 0);
       }
-
-      switch(viewType)
+      else
       {
-         case Types.TITLE:
-            view.setText(m_navigationTitles[position]);
-            view.setCompoundDrawablesRelativeWithIntrinsicBounds(NAV_ICONS[position], 0, 0, 0);
-            break;
-         case Types.TAG:
-            int count = getItem(position - 4).m_count;
-            String tag = getItem(position - 4).m_title;
+         int count = getItem(position - 3).m_count;
+         String tag = getItem(position - 3).m_title;
 
-            /* This RTL (char) 0x200F allows the unread counter to be aligned to the right. */
-            String allTag = m_context.getString(R.string.all_tag);
-            tag = Utilities.isTextRtl(allTag) ? (char) 0x200F + tag + '\n' + (char) 0x200E
-                  : (char) 0x200E + tag + '\n' + (char) 0x200F;
+         /* This RTL (char) 0x200F allows the unread counter to be aligned to the right. */
+         String allTag = m_context.getString(R.string.all_tag);
+         tag = Utilities.isTextRtl(allTag) ? (char) 0x200F + tag + '\n' + (char) 0x200E
+               : (char) 0x200E + tag + '\n' + (char) 0x200F;
 
-            view.setText(tag + (0 == count ? "" : Utilities.getLocaleInt(count)));
+         view.setText(tag + (0 == count ? "" : Utilities.getLocaleInt(count)));
       }
-
       return view;
-   }
-
-   @Override
-   public
-   boolean isEnabled(int position)
-   {
-      return 3 != position;
    }
 
    @Override
    public
    int getCount()
    {
-      /* Because we have the extra four views that are not tags. */
-      return super.getCount() + 4;
+      /* Because we have the extra three views that are not tags. */
+      return super.getCount() + 3;
    }
 
    @Override
    public
    int getItemViewType(int position)
    {
-      return 3 > position ? Types.TITLE : 3 == position ? Types.DIVIDER : Types.TAG;
+      return 3 > position ? TITLE : TAG;
    }
 
    @Override
    public
    int getViewTypeCount()
    {
-      return 3;
+      return 2;
    }
 }

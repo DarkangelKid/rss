@@ -31,10 +31,8 @@
       android:layout_height="match_parent"
       android:layout_gravity="start"
       android:background="#1f1f1f"
-      android:choiceMode="singleChoice"
       android:divider="#00000000"
       android:dividerHeight="0dp"
-      android:drawSelectorOnTop="false"
       android:scrollbars="none"/>
 
 </android.support.v4.widget.DrawerLayout>

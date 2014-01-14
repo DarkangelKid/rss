@@ -28,7 +28,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -157,18 +156,16 @@ class FeedsActivity extends Activity
          public
          void onItemClick(AdapterView<?> parent, View view, int position, long id)
          {
-            /* Close the drawer. This will call the OnDrawerClose of the
-            DrawerToggle. */
             drawerLayout.closeDrawers();
 
             /* Set the title and switch fragment. */
-            String selectedTitle = navigationTitles[3 < position ? 0 : position];
+            String selectedTitle = navigationTitles[2 < position ? 0 : position];
             Utilities.switchFragments(activity, m_currentFragment, selectedTitle);
             getActionBar().setTitle(selectedTitle);
 
             if(2 < position)
             {
-               m_feedsViewPager.setCurrentItem(position - 4);
+               m_feedsViewPager.setCurrentItem(position - 3);
             }
             else
             {
@@ -265,15 +262,6 @@ class FeedsActivity extends Activity
 
       /* Set the alarm service to go off starting now. */
       setServiceIntent(ALARM_SERVICE_START);
-   }
-
-   /* This is so the icon and text in the actionbar are selected. */
-   @Override
-   public
-   void onConfigurationChanged(Configuration newConfig)
-   {
-      super.onConfigurationChanged(newConfig);
-      m_drawerToggle.onConfigurationChanged(newConfig);
    }
 
    @Override
