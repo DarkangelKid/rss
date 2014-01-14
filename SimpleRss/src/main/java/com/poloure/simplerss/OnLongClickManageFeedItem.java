@@ -18,6 +18,7 @@ package com.poloure.simplerss;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.widget.Adapter;
 import android.widget.AdapterView;
@@ -28,14 +29,11 @@ class OnLongClickManageFeedItem implements AdapterView.OnItemLongClickListener
    private final Activity m_activity;
    private final ListView m_listView;
    private final String m_applicationFolder;
-   private final PagerAdapterFeeds m_pagerAdapterFeeds;
 
-   OnLongClickManageFeedItem(Activity activity, ListView listView,
-         PagerAdapterFeeds pagerAdapterFeeds, String applicationFolder)
+   OnLongClickManageFeedItem(Activity activity, ListView listView, String applicationFolder)
    {
       m_activity = activity;
       m_listView = listView;
-      m_pagerAdapterFeeds = pagerAdapterFeeds;
       m_applicationFolder = applicationFolder;
    }
 
@@ -50,8 +48,11 @@ class OnLongClickManageFeedItem implements AdapterView.OnItemLongClickListener
 
       AlertDialog.Builder build = new AlertDialog.Builder(m_activity);
 
+      ViewPager feedPager = (ViewPager) m_activity.findViewById(R.id.view_pager_tags);
+      PagerAdapterFeeds pagerAdapterFeeds = (PagerAdapterFeeds) feedPager.getAdapter();
+
       build.setItems(R.array.long_click_manage_feeds,
-            new OnClickManageFeedDialogItem(m_activity, m_listView, m_pagerAdapterFeeds, feedName,
+            new OnClickManageFeedDialogItem(m_activity, m_listView, pagerAdapterFeeds, feedName,
                   m_applicationFolder));
       build.show();
       return true;

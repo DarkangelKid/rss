@@ -35,28 +35,26 @@ class Write
    {
       /* Read the file to an array, if the file does not exist, return. */
       String[] lines = Read.file(Read.INDEX, applicationFolder);
-      if(0 == lines.length)
+      if(0 != lines.length)
       {
-         return;
-      }
-
-      String filePath = applicationFolder + Read.INDEX;
-      try(BufferedWriter out = new BufferedWriter(new FileWriter(filePath, false)))
-      {
-         for(String line : lines)
+         String filePath = applicationFolder + Read.INDEX;
+         try(BufferedWriter out = new BufferedWriter(new FileWriter(filePath, false)))
          {
-            if(!line.contains(stringSearch))
+            for(String line : lines)
             {
-               out.write(line + NEW_LINE);
-            }
-            else if(MODE_REPLACE == mode)
-            {
-               out.write(replacementLine);
+               if(!line.contains(stringSearch))
+               {
+                  out.write(line + NEW_LINE);
+               }
+               else if(MODE_REPLACE == mode)
+               {
+                  out.write(replacementLine);
+               }
             }
          }
-      }
-      catch(IOException ignored)
-      {
+         catch(IOException ignored)
+         {
+         }
       }
    }
 

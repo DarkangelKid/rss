@@ -26,7 +26,6 @@ import android.widget.ListView;
 
 class OnPageChangeTags extends SimpleOnPageChangeListener
 {
-   /* This is because we steal the unread counts from this BaseAdapter. */
    private final Activity m_activity;
    private final String m_applicationFolder;
    private int m_position;
@@ -54,7 +53,7 @@ class OnPageChangeTags extends SimpleOnPageChangeListener
       if(ViewPager.SCROLL_STATE_IDLE == state)
       {
          /* Refresh the page if it has no items on display. */
-         String fragmentTag = FragmentFeeds.FRAGMENT_ID_PREFIX + m_position;
+         String fragmentTag = Utilities.FRAGMENT_ID_PREFIX + m_position;
          FragmentManager manager = m_activity.getFragmentManager();
          ListFragment tagFragment = (ListFragment) manager.findFragmentByTag(fragmentTag);
          Adapter listAdapter = tagFragment.getListAdapter();

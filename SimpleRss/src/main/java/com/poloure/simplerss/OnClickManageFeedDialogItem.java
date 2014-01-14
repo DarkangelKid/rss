@@ -20,7 +20,8 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.widget.BaseAdapter;
+import android.text.Editable;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -95,7 +96,8 @@ class OnClickManageFeedDialogItem implements DialogInterface.OnClickListener
          AsyncNavigationAdapter.newInstance(m_activity, m_applicationFolder, -1);
 
          /* Refresh pages and navigation counts. */
-         AsyncManage.newInstance((BaseAdapter) m_listView.getAdapter(), m_applicationFolder);
+         AsyncManage.newInstance((ArrayAdapter<Editable>) m_listView.getAdapter(),
+               m_applicationFolder);
       }
    }
 }

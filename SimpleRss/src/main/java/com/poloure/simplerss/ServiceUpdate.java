@@ -367,7 +367,7 @@ class ServiceUpdate extends IntentService
    }
 
    private
-   void parseFeed(String urlString, String feed, String applicationFolder) throws
+   void parseFeed(CharSequence urlString, String feed, String applicationFolder) throws
          XmlPullParserException, IOException
    {
       String feedFolder = feed + File.separatorChar;

@@ -78,7 +78,7 @@ class ServiceHandler extends Handler
       for(int page : pagesToRefresh)
       {
          ListFragment listFragment = (ListFragment) m_fragmentManager.findFragmentByTag(
-               FragmentFeeds.FRAGMENT_ID_PREFIX + page);
+               Utilities.FRAGMENT_ID_PREFIX + page);
          if(null != listFragment)
          {
             /* TODO isAllTag not 0. */

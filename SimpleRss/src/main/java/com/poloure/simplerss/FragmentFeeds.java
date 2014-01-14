@@ -18,7 +18,6 @@ package com.poloure.simplerss;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.app.FragmentManager;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
@@ -28,15 +27,6 @@ import android.view.ViewGroup;
 public
 class FragmentFeeds extends Fragment
 {
-   static final int VIEW_PAGER_ID = 10000;
-   static final String FRAGMENT_ID_PREFIX = "android:switcher:10000:";
-
-   static
-   Fragment newInstance()
-   {
-      return new FragmentFeeds();
-   }
-
    @Override
    public
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -47,15 +37,15 @@ class FragmentFeeds extends Fragment
       ViewPager.OnPageChangeListener onTagPageChange = new OnPageChangeTags(activity,
             applicationFolder);
 
-      FragmentManager fragmentManager = activity.getFragmentManager();
-      PagerAdapterFeeds adapter = new PagerAdapterFeeds(fragmentManager);
+      PagerAdapterFeeds adapter = new PagerAdapterFeeds(activity.getFragmentManager());
       adapter.updateTags(applicationFolder, activity);
 
-      /* Create the ViewPager. */
-      ViewPager viewPager = ViewPagerStrip.newInstance(activity);
+      /* Inflate and configure the ViewPager. */
+      ViewPager viewPager = (ViewPager) inflater.inflate(R.layout.view_pager_tags, container,
+            false);
       viewPager.setAdapter(adapter);
+      viewPager.setOffscreenPageLimit(128);
       viewPager.setOnPageChangeListener(onTagPageChange);
-      viewPager.setId(VIEW_PAGER_ID);
 
       return viewPager;
    }

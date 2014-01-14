@@ -21,9 +21,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.support.v4.view.ViewPager;
-import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -101,20 +99,18 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       /* Get the user's input. */
       CharSequence inputName = ((TextView) m_dialog.findViewById(DialogEditFeed.IDS[0])).getText();
       CharSequence inputTags = ((TextView) m_dialog.findViewById(DialogEditFeed.IDS[2])).getText();
-      CharSequence inputUrlChar = ((TextView) m_dialog.findViewById(
-            DialogEditFeed.IDS[1])).getText();
+      CharSequence inputUrl = ((TextView) m_dialog.findViewById(DialogEditFeed.IDS[1])).getText();
 
-      String inputUrl = null == inputUrlChar ? "" : inputUrlChar.toString();
+      inputUrl = null == inputUrl ? "" : inputUrl;
+      inputName = null == inputName ? "" : inputName;
 
       /* Form the array of urls we will check the validity of. */
-      String[] urlCheckList = inputUrl.contains("http") ? new String[]{inputUrl} : new String[]{
-            "http://" + inputUrl, "https://" + inputUrl
-      };
+      CharSequence[] urlCheckList = {inputUrl, "https://" + inputUrl, "http://" + inputUrl};
 
       String url = "";
       String title = "";
 
-      for(String urlToCheck : urlCheckList)
+      for(CharSequence urlToCheck : urlCheckList)
       {
          if(isValidFeed(urlToCheck))
          {
@@ -126,7 +122,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
             Matcher matcher = ILLEGAL_FILE_CHARS.matcher(tempTitle);
             title = matcher.replaceAll("");
 
-            url = urlToCheck;
+            url = urlToCheck.toString();
             break;
          }
       }
@@ -137,12 +133,12 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
    }
 
    private static
-   String getFeedTitle(String urlString)
+   String getFeedTitle(CharSequence url)
    {
       String feedTitle = "";
       try
       {
-         XmlPullParser parser = Utilities.createXmlParser(urlString);
+         XmlPullParser parser = Utilities.createXmlParser(url);
          int eventType;
          do
          {
@@ -168,12 +164,12 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
    }
 
    private static
-   boolean isValidFeed(String urlString)
+   boolean isValidFeed(CharSequence urlString)
    {
       boolean isValid = false;
       try
       {
-         XmlPullParser parser = Utilities.createXmlParser(urlString);
+         XmlPullParser parser = Utilities.createXmlParser(urlString.toString());
 
          parser.next();
          int eventType = parser.getEventType();
@@ -265,12 +261,9 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
          if(isExistingFeed)
          {
             /* Rename the folder if it is different. */
-            String oldFeedFolder = m_oldFeedName + File.separatorChar;
-            String newFeedFolder = finalTitle + File.separatorChar;
-
             if(!m_oldFeedName.equals(finalTitle))
             {
-               moveFile(oldFeedFolder, newFeedFolder, m_applicationFolder);
+               moveFile(m_oldFeedName, finalTitle, m_applicationFolder);
             }
 
             Write.editIndexLineContaining(m_oldFeedName, m_applicationFolder, Write.MODE_REPLACE,
@@ -284,7 +277,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
          }
 
          /* Update the PagerAdapter for the tag fragments. */
-         ViewPager feedPager = (ViewPager) m_activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
+         ViewPager feedPager = (ViewPager) m_activity.findViewById(R.id.view_pager_tags);
          PagerAdapterFeeds pagerAdapterFeeds = (PagerAdapterFeeds) feedPager.getAdapter();
          pagerAdapterFeeds.updateTags(m_applicationFolder, context);
 
@@ -292,12 +285,14 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
          AsyncNavigationAdapter.newInstance(m_activity, m_applicationFolder, -1);
 
          /* Get the manage ListView and update it. */
-         ListView listView = (ListView) m_activity.findViewById(FragmentManage.LIST_VIEW_MANAGE);
+         /* TODO
+         ListView listView = (ListView) m_activity.findViewById(ListFragmentManage
+         .LIST_VIEW_MANAGE);
          if(null != listView)
          {
-            BaseAdapter adapter = (BaseAdapter) listView.getAdapter();
-            AsyncManage.newInstance(adapter, m_applicationFolder);
-         }
+            AsyncManage.newInstance((ArrayAdapter<Editable>) listView.getAdapter(),
+                  m_applicationFolder);
+         }*/
 
          m_dialog.dismiss();
       }

@@ -16,19 +16,12 @@
 
 package com.poloure.simplerss;
 
-import android.app.Fragment;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 
 public
 class FragmentSettings extends PreferenceFragment
 {
-   static
-   Fragment newInstance()
-   {
-      return new FragmentSettings();
-   }
-
    @Override
    public
    void onCreate(Bundle savedInstanceState)

@@ -182,17 +182,16 @@ class FeedsActivity extends Activity
       if(null == savedInstanceState)
       {
          Fragment[] fragments = {
-               FragmentFeeds.newInstance(),
-               FragmentManage.newInstance(),
-               FragmentSettings.newInstance()
+               new FragmentFeeds(), new ListFragmentManage(), new FragmentSettings()
          };
 
          FragmentTransaction transaction = getFragmentManager().beginTransaction();
          for(int i = 0; 3 > i; i++)
          {
             transaction.add(R.id.content_frame, fragments[i], navigationTitles[i])
-                       .hide(fragments[0 == i ? 1 : i]);
+                       .hide(fragments[i]);
          }
+         transaction.show(fragments[0]);
          transaction.commit();
          m_currentFragment = navigationTitles[0];
       }
@@ -208,7 +207,7 @@ class FeedsActivity extends Activity
 
       AsyncNavigationAdapter.newInstance(this, m_applicationFolder, 0);
 
-      m_feedsViewPager = (ViewPager) findViewById(FragmentFeeds.VIEW_PAGER_ID);
+      m_feedsViewPager = (ViewPager) findViewById(R.id.view_pager_tags);
    }
 
    @Override
@@ -342,7 +341,7 @@ class FeedsActivity extends Activity
    public
    void onAddClick(MenuItem menuItem)
    {
-      DialogEditFeed.newInstance(this, -1, m_applicationFolder).show();
+      DialogEditFeed.newInstance(this, -1).show();
    }
 
    public
@@ -352,7 +351,7 @@ class FeedsActivity extends Activity
 
       FragmentManager manager = getFragmentManager();
       ListFragment listFragment = (ListFragment) manager.findFragmentByTag(
-            FragmentFeeds.FRAGMENT_ID_PREFIX + currentPage);
+            Utilities.FRAGMENT_ID_PREFIX + currentPage);
 
       ListView listViewTags = listFragment.getListView();
 

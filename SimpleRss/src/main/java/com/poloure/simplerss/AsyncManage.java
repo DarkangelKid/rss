@@ -23,7 +23,7 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.StyleSpan;
-import android.widget.BaseAdapter;
+import android.widget.ArrayAdapter;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -34,16 +34,16 @@ class AsyncManage extends AsyncTask<String, Editable[], Void>
 {
    private static final AbsoluteSizeSpan TITLE_SIZE = new AbsoluteSizeSpan(14, true);
    private static final StyleSpan SPAN_BOLD = new StyleSpan(Typeface.BOLD);
-   private final BaseAdapter m_manageAdapter;
+   private final ArrayAdapter<Editable> m_manageAdapter;
 
    private
-   AsyncManage(BaseAdapter manageAdapter)
+   AsyncManage(ArrayAdapter<Editable> manageAdapter)
    {
       m_manageAdapter = manageAdapter;
    }
 
    static
-   void newInstance(BaseAdapter manageAdapter, String applicationFolder)
+   void newInstance(ArrayAdapter<Editable> manageAdapter, String applicationFolder)
    {
       AsyncTask<String, Editable[], Void> task = new AsyncManage(manageAdapter);
 
@@ -136,7 +136,7 @@ class AsyncManage extends AsyncTask<String, Editable[], Void>
    protected
    void onProgressUpdate(Editable[]... values)
    {
-      ((AdapterManageFragments) m_manageAdapter).setEditable(values[0]);
-      m_manageAdapter.notifyDataSetChanged();
+      m_manageAdapter.clear();
+      m_manageAdapter.addAll(values[0]);
    }
 }

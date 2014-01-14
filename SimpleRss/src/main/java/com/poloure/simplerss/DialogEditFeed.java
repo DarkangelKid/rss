@@ -50,18 +50,18 @@ class DialogEditFeed extends Dialog
    private final int m_position;
 
    private
-   DialogEditFeed(Activity activity, int position, String applicationFolder)
+   DialogEditFeed(Activity activity, int position)
    {
       super(activity, android.R.style.Theme_Holo_Light_Dialog);
       m_activity = activity;
       m_position = position;
-      m_applicationFolder = applicationFolder;
+      m_applicationFolder = FeedsActivity.getApplicationFolder(activity);
    }
 
    static
-   Dialog newInstance(Activity activity, int position, String applicationFolder)
+   Dialog newInstance(Activity activity, int position)
    {
-      Dialog dialog = new DialogEditFeed(activity, position, applicationFolder);
+      Dialog dialog = new DialogEditFeed(activity, position);
 
       /* Get the text resources and set the title of the dialog. */
       int titleResource = -1 == position ? R.string.add_dialog_title : R.string.edit_dialog_title;

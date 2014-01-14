@@ -41,6 +41,7 @@ import java.util.Locale;
 
 class Utilities
 {
+   static final String FRAGMENT_ID_PREFIX = "android:switcher:" + R.id.view_pager_tags + ':';
    private static final DisplayMetrics METRICS = Resources.getSystem().getDisplayMetrics();
    static final int EIGHT_DP = getDp(8.0F);
 
@@ -93,13 +94,13 @@ class Utilities
    }
 
    static
-   XmlPullParser createXmlParser(String urlString) throws IOException, XmlPullParserException
+   XmlPullParser createXmlParser(CharSequence urlString) throws IOException, XmlPullParserException
    {
       XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
       factory.setNamespaceAware(true);
       XmlPullParser parser = factory.newPullParser();
 
-      URL url = new URL(urlString);
+      URL url = new URL(urlString.toString());
       InputStream inputStream = url.openStream();
       parser.setInput(inputStream, null);
       return parser;
