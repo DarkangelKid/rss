@@ -25,6 +25,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -33,54 +34,39 @@ class Read
 {
    static final String INDEX = "index.txt";
    private static final Pattern SPLIT_NEWLINE = Pattern.compile("\n");
-   private static final char ITEM_SEPARATOR = '|';
+   private static final String ITEM_SEPARATOR = "\\|";
    private static final int FILE_BUFFER_SIZE = 8096;
 
    static
    String[][] csvFile(String fileName, String applicationFolder, char... type)
    {
       String[] lines = file(fileName, applicationFolder);
-      int numberOfLines = lines.length;
+      int lineCount = lines.length;
 
-      if(0 == numberOfLines)
-      {
-         return new String[type.length][0];
-      }
-
-      String[][] types = new String[type.length][numberOfLines];
+      String[][] out = new String[type.length][lineCount];
       String typeString = new String(type);
 
-      for(int j = 0; j < numberOfLines; j++)
+      /* Fill the arrays with empty strings. */
+      for(String[] array : out)
       {
-         String line = lines[j];
+         Arrays.fill(array, "");
+      }
 
-         int offset = 0;
-         int nextSeparator;
+      for(int i = 0; i < lineCount; i++)
+      {
+         String[] lineContent = lines[i].split(ITEM_SEPARATOR);
 
-         do
+         /* Replace any elements that we have in the line. */
+         for(int j = 1; j < lineContent.length - 1; j += 2)
          {
-            offset = line.indexOf(ITEM_SEPARATOR, offset) + 1;
-            nextSeparator = line.indexOf(ITEM_SEPARATOR, offset);
-            if(-1 == nextSeparator)
+            int index = typeString.indexOf(lineContent[j].charAt(0));
+            if(-1 != index && !lineContent[j + 1].isEmpty())
             {
-               break;
-            }
-
-            char firstChar = line.charAt(offset);
-            int indexOfCh = typeString.indexOf(firstChar);
-
-            offset = nextSeparator + 1;
-            nextSeparator = line.indexOf(ITEM_SEPARATOR, offset);
-
-            if(-1 != indexOfCh)
-            {
-               types[indexOfCh][j] = line.substring(offset, nextSeparator);
+               out[index][i] = lineContent[j + 1];
             }
          }
-         while(-1 != nextSeparator);
-
       }
-      return types;
+      return out;
    }
 
    /* This function will return a zero length array on error. */

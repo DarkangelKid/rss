@@ -64,7 +64,6 @@ class AsyncManage extends AsyncTask<String, Editable[], Void>
       catch(IOException ignored)
       {
       }
-
       return count;
    }
 

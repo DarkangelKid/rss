@@ -23,13 +23,16 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.view.View;
 
+import java.util.Calendar;
+
 class ViewCustom extends View
 {
    static final int IMAGE_HEIGHT = 360;
    static final Paint[] PAINTS = new Paint[3];
    private static final int[] COLORS = {0, 90, 50};
    private static final float[] SIZES = {16.0F, 12.0F, 14.0F};
-   private static final int screen = Resources.getSystem().getDisplayMetrics().widthPixels;
+   private static final int SCREEN = Resources.getSystem().getDisplayMetrics().widthPixels;
+   private static final char[] INITIALS = {'d', 'h', 'm'};
 
    static
    {
@@ -94,10 +97,16 @@ class ViewCustom extends View
          PAINTS[0].setTextAlign(Paint.Align.RIGHT);
          PAINTS[1].setTextAlign(Paint.Align.RIGHT);
 
-         canvas.drawText(m_item.m_title, screen - getPaddingRight(), verticalPosition, PAINTS[0]);
+         canvas.drawText(m_item.m_title, SCREEN - getPaddingRight(), verticalPosition, PAINTS[0]);
+
+         /* Draw the time. */
+         PAINTS[1].setTextAlign(Paint.Align.LEFT);
+         canvas.drawText(getTime(m_item.m_time), getPaddingLeft(), verticalPosition, PAINTS[1]);
+         PAINTS[1].setTextAlign(Paint.Align.RIGHT);
+
          verticalPosition += PAINTS[0].getTextSize();
 
-         canvas.drawText(m_item.m_url, screen - getPaddingRight(), verticalPosition, PAINTS[1]);
+         canvas.drawText(m_item.m_url, SCREEN - getPaddingRight(), verticalPosition, PAINTS[1]);
 
          /* Reset the paints. */
          PAINTS[0].setTextAlign(Paint.Align.LEFT);
@@ -106,6 +115,13 @@ class ViewCustom extends View
       else
       {
          canvas.drawText(m_item.m_title, getPaddingLeft(), verticalPosition, PAINTS[0]);
+
+         /* Draw the time. */
+         PAINTS[1].setTextAlign(Paint.Align.RIGHT);
+         canvas.drawText(getTime(m_item.m_time), SCREEN - getPaddingRight(), verticalPosition,
+               PAINTS[1]);
+         PAINTS[1].setTextAlign(Paint.Align.LEFT);
+
          verticalPosition += PAINTS[0].getTextSize();
 
          canvas.drawText(m_item.m_url, getPaddingLeft(), verticalPosition, PAINTS[1]);
@@ -130,7 +146,7 @@ class ViewCustom extends View
       }
       for(int i = 0; 3 > i; i++)
       {
-         canvas.drawText(m_item.m_desLines[i], rtl ? screen - getPaddingRight() : getPaddingLeft(),
+         canvas.drawText(m_item.m_desLines[i], rtl ? SCREEN - getPaddingRight() : getPaddingLeft(),
                position, PAINTS[2]);
          position += PAINTS[2].getTextSize();
       }
@@ -148,6 +164,28 @@ class ViewCustom extends View
       {
          return verticalPosition + Utilities.getDp(4.0F);
       }
+   }
+
+   static
+   String getTime(long time)
+   {
+      Long timeAgo = Calendar.getInstance().getTimeInMillis() - time;
+
+      /* Format the time. */
+      Long[] periods = {timeAgo / 86400000, timeAgo / 3600000 % 24, timeAgo / 60000 % 60};
+
+      StringBuilder builder = new StringBuilder(16);
+      for(int i = 0; periods.length > i; i++)
+      {
+         if(0L != periods[i])
+         {
+            builder.append(Utilities.getLocaleLong(periods[i]));
+            builder.append(INITIALS[i]);
+            builder.append(' ');
+         }
+      }
+      builder.deleteCharAt(builder.length() - 1);
+      return builder.toString();
    }
 
    @Override

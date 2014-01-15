@@ -28,6 +28,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.text.format.Time;
+import android.view.View;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -65,6 +66,7 @@ class ServiceUpdate extends IntentService
    private static final int MIN_IMAGE_WIDTH = 64;
    private static final int FEED_ITEM_INITIAL_CAPACITY = 200;
    private long m_timeCurrentItem;
+   private static final int TIME_SPACE = Utilities.getDp(66.0F);
 
    private static final float SCREEN_WIDTH = Resources.getSystem().getDisplayMetrics().widthPixels;
    private static final float USABLE_WIDTH_TEXT = SCREEN_WIDTH - 40.0F;
@@ -146,9 +148,9 @@ class ServiceUpdate extends IntentService
    }
 
    private static
-   String fitToScreen(String content, int ind)
+   String fitToScreen(String content, int ind, float extra)
    {
-      int chars = ViewCustom.PAINTS[ind].breakText(content, true, USABLE_WIDTH_TEXT, null);
+      int chars = ViewCustom.PAINTS[ind].breakText(content, true, USABLE_WIDTH_TEXT - extra, null);
       int space = content.lastIndexOf(' ', chars);
 
       return content.substring(0, -1 == space ? chars : space);
@@ -269,7 +271,7 @@ class ServiceUpdate extends IntentService
       String applicationFolder = FeedsActivity.getApplicationFolder(this);
 
       /* Make a new paint object so we can break texts. */
-      new ViewCustom(this, 0);
+      View view = new ViewCustom(this, 0);
 
       /* Get the tagList (from disk if it is empty). */
       List<String> tagList = PagerAdapterFeeds.TAG_LIST;
@@ -282,29 +284,24 @@ class ServiceUpdate extends IntentService
       String tag = tagList.get(page);
 
       String[][] content = Read.csvFile(Read.INDEX, applicationFolder, 'f', 'u', 't');
-      String[] names = content[0];
-      String[] urls = content[1];
-      String[] tags = content[2];
 
       String allTag = getString(R.string.all_tag);
       boolean isAllTag = tag.equals(allTag);
 
       /* Download and parse each feed in the index. */
-      int namesLength = names.length;
-      for(int i = 0; i < namesLength; i++)
+      for(int i = 0; i < content[0].length; i++)
       {
          /* TODO: tagOne|tagsTwo|etc.contains(gsT) returns true but should be false. */
-         if(isAllTag || tags[i].contains(tag))
+         if(isAllTag || content[2][i].contains(tag))
          {
             /* Create all the folders down to the thumbnail folder. */
-            File folder = new File(applicationFolder + names[i] +
-                                   File.separatorChar +
+            File folder = new File(applicationFolder + content[0][i] + File.separatorChar +
                                    THUMBNAIL_DIR);
             folder.mkdirs();
 
             try
             {
-               parseFeed(urls[i], names[i], applicationFolder);
+               parseFeed(content[1][i], content[0][i], applicationFolder);
             }
             catch(IOException | XmlPullParserException e)
             {
@@ -429,14 +426,14 @@ class ServiceUpdate extends IntentService
                      link = getContent(parser);
                   }
                   appendItem(builder, Index.LINK, link);
-                  appendItem(builder, Index.LINK_TRIMMED, fitToScreen(link, 1));
+                  appendItem(builder, Index.LINK_TRIMMED, fitToScreen(link, 1, 0.0F));
                   break;
                case Tags.PUBLISHED:
                case Tags.PUB_DATE:
                   appendPublishedTime(builder, getContent(parser), tag);
                   break;
                case Tags.TITLE:
-                  appendItem(builder, Index.TITLE, fitToScreen(getContent(parser), 0));
+                  appendItem(builder, Index.TITLE, fitToScreen(getContent(parser), 0, TIME_SPACE));
                   break;
                case Tags.CONTENT:
                case Tags.DESCRIPTION:

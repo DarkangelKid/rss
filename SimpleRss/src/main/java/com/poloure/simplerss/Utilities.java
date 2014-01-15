@@ -75,9 +75,17 @@ class Utilities
    }
 
    static
+   String getLocaleLong(Long count)
+   {
+      NumberFormat format = NumberFormat.getNumberInstance(Locale.getDefault());
+      return format.format(count);
+   }
+
+   static
    int getDp(float pixels)
    {
-      float floatDp = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, pixels, METRICS);
+      DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
+      float floatDp = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, pixels, metrics);
       return Math.round(floatDp);
    }
 
