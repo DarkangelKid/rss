@@ -1,8 +1,2 @@
 .gradle
 .idea
-local.properties
-/.idea/workspace.xml
-.DS_Store
-android-test.keystore
-SimpleRss/SimpleRss-SimpleRss.iml
-SimpleRss.iml
