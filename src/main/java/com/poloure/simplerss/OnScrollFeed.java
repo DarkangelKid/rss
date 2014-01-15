@@ -20,15 +20,14 @@ import android.app.Activity;
 import android.view.View;
 import android.widget.AbsListView;
 
-class OnScrollFeedListener implements AbsListView.OnScrollListener
+class OnScrollFeed implements AbsListView.OnScrollListener
 {
    private final int m_listViewTopPadding;
    private final String m_applicationFolder;
    private final int m_page;
    private final Activity m_activity;
 
-   OnScrollFeedListener(Activity activity, String applicationFolder, int page,
-         int listViewTopPadding)
+   OnScrollFeed(Activity activity, String applicationFolder, int page, int listViewTopPadding)
    {
       m_activity = activity;
       m_applicationFolder = applicationFolder;

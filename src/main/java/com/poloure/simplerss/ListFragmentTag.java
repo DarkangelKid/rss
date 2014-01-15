@@ -18,13 +18,18 @@ package com.poloure.simplerss;
 
 import android.app.Activity;
 import android.app.ListFragment;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.view.ContextMenu;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.ListAdapter;
+import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 public
 class ListFragmentTag extends ListFragment
@@ -47,24 +52,17 @@ class ListFragmentTag extends ListFragment
    {
       super.onActivityCreated(savedInstanceState);
 
-      ListView listView = getListView();
       Activity activity = getActivity();
+      int position = getArguments().getInt(POSITION_KEY);
       String applicationFolder = FeedsActivity.getApplicationFolder(activity);
 
-      ListAdapter listAdapter = new AdapterTags(activity, applicationFolder);
-      setListAdapter(listAdapter);
+      setListAdapter(new AdapterTags(activity, applicationFolder));
 
-      Bundle bundle = getArguments();
-      int position = bundle.getInt(POSITION_KEY);
-
-      /* Get what the listViewTopPadding is. */
-      int listViewTopPadding = listView.getPaddingTop();
-
-      AbsListView.OnScrollListener scrollListener = new OnScrollFeedListener(activity,
-            applicationFolder, position, listViewTopPadding);
-
-      listView.setOnScrollListener(scrollListener);
-      listView.setOnItemLongClickListener(new OnFeedItemLongClick(activity));
+      ListView listView = getListView();
+      listView.setOnScrollListener(
+            new OnScrollFeed(activity, applicationFolder, position, listView.getPaddingTop()));
+      listView.setDividerHeight(0);
+      registerForContextMenu(listView);
 
       if(0 == position)
       {
@@ -74,15 +72,38 @@ class ListFragmentTag extends ListFragment
 
    @Override
    public
-   View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+   void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo)
    {
-      ListView listView = new ListView(getActivity());
+      super.onCreateContextMenu(menu, v, menuInfo);
+      getActivity().getMenuInflater().inflate(R.menu.context_menu, menu);
+   }
 
-      /* Set to android.R.id.list so that the ListFragment knows to use this list. */
-      listView.setId(android.R.id.list);
-      listView.setFadingEdgeLength(0);
-      listView.setDividerHeight(0);
+   @Override
+   public
+   boolean onContextItemSelected(MenuItem item)
+   {
+      AdapterView.AdapterContextMenuInfo info
+            = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+      String url = ((ViewCustom) info.targetView).m_item.m_urlFull;
+      Context context = getActivity();
 
-      return listView;
+      switch(item.getItemId())
+      {
+         case R.id.copy:
+            ClipboardManager clipboard = (ClipboardManager) context.getSystemService(
+                  Context.CLIPBOARD_SERVICE);
+            clipboard.setPrimaryClip(ClipData.newPlainText("Url", url));
+
+            Toast toast = Toast.makeText(context, "URL Copied: " + url, Toast.LENGTH_SHORT);
+            toast.show();
+            return true;
+         case R.id.open:
+            Uri uri = Uri.parse(url);
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            context.startActivity(intent);
+            return true;
+         default:
+            return super.onContextItemSelected(item);
+      }
    }
 }
