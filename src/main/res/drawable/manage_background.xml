@@ -14,10 +14,9 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:padding="8dp"
-          android:textColor="#4d4d4d"
-          android:textSize="12sp"
-          android:background="@drawable/manage_background"/>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+   <item android:drawable="@color/holo_light_selected" android:state_activated="true"/>
+   <item android:drawable="@color/holo_light_selected" android:state_checked="true"/>
+   <item android:drawable="@color/holo_light_selected" android:state_selected="true"/>
+   <item android:drawable="@android:color/transparent"/>
+</selector>

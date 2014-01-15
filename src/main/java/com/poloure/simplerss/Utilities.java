@@ -33,6 +33,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -138,5 +139,22 @@ class Utilities
    boolean isTextRtl(CharSequence c)
    {
       return TextDirectionHeuristics.FIRSTSTRONG_LTR.isRtl(c, 0, c.length() - 1);
+   }
+
+   static
+   boolean deleteDirectory(File directory)
+   {
+      if(directory.isDirectory())
+      {
+         for(String child : directory.list())
+         {
+            boolean success = !deleteDirectory(new File(directory, child));
+            if(success)
+            {
+               return false;
+            }
+         }
+      }
+      return directory.delete();
    }
 }

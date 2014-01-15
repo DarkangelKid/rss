@@ -28,7 +28,6 @@
    <string name="feed_name_dialog">إسم الموجز‎</string>
    <string name="feed_name_hint">إختياري‎</string>
    <string name="feed_url_dialog">رابط الموجز‎</string>
-   <string name="feed_url_hint">http://example.com/rss</string>
 
    <string name="cancel_dialog">إلغاء‎</string>
    <string name="accept_dialog">قبول</string>

@@ -15,20 +15,10 @@
 -->
 
 <resources>
-   <string-array name="card_click_menu">
-      <item>Copy URL to clipboard</item>
-      <item>Open in browser</item>
-   </string-array>
-
    <string-array name="navigation_titles">
       <item>Feeds</item>
       <item>Manage</item>
       <item>Settings</item>
-   </string-array>
-
-   <string-array name="long_click_manage_feeds">
-      <item>Delete</item>
-      <item>Clear Content</item>
    </string-array>
 
    <string-array name="refresh_interval_titles">

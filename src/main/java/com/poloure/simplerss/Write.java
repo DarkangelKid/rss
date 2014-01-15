@@ -30,7 +30,7 @@ class Write
    static final String NEW_LINE = System.getProperty("line.separator");
 
    static
-   void editIndexLineContaining(CharSequence stringSearch, String applicationFolder, int mode,
+   void editIndexLine(CharSequence stringSearch, String applicationFolder, int mode,
          String replacementLine)
    {
       /* Read the file to an array, if the file does not exist, return. */

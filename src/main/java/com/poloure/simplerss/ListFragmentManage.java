@@ -20,10 +20,18 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.app.ListFragment;
 import android.os.Bundle;
+import android.support.v4.view.ViewPager;
 import android.text.Editable;
+import android.util.SparseBooleanArray;
+import android.view.ActionMode;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
+import java.io.File;
 
 public
 class ListFragmentManage extends ListFragment
@@ -34,14 +42,80 @@ class ListFragmentManage extends ListFragment
    {
       super.onActivityCreated(savedInstanceState);
 
-      Activity activity = getActivity();
-      String applicationFolder = FeedsActivity.getApplicationFolder(activity);
+      final Activity activity = getActivity();
+      final ListView listView = getListView();
+      final String applicationFolder = FeedsActivity.getApplicationFolder(activity);
 
-      ArrayAdapter<Editable> baseAdapter = new ArrayAdapter<>(activity, R.layout.manage_text_view);
+      final ArrayAdapter<Editable> baseAdapter = new ArrayAdapter<>(activity,
+            R.layout.manage_text_view);
 
       setListAdapter(baseAdapter);
-      getListView().setOnItemLongClickListener(
-            new OnLongClickManageFeedItem(activity, getListView(), applicationFolder));
+
+      registerForContextMenu(listView);
+      listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
+      listView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener()
+      {
+         @Override
+         public
+         void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked)
+         {
+         }
+
+         @Override
+         public
+         boolean onActionItemClicked(ActionMode mode, MenuItem item)
+         {
+            SparseBooleanArray checked = listView.getCheckedItemPositions();
+            for(int i = 0; checked.size() > i; i++)
+            {
+               if(checked.valueAt(i))
+               {
+                  String text = baseAdapter.getItem(checked.keyAt(i)).toString();
+                  String feedName = text.substring(1, text.indexOf('\n'));
+
+                  switch(item.getItemId())
+                  {
+                     case R.id.delete:
+                        Write.editIndexLine(feedName, applicationFolder, Write.MODE_REMOVE, "");
+                     case R.id.clear_content:
+                        Utilities.deleteDirectory(new File(applicationFolder + feedName));
+                  }
+               }
+            }
+
+            ViewPager feedPager = (ViewPager) activity.findViewById(R.id.view_pager_tags);
+            PagerAdapterFeeds pagerAdapterFeeds = (PagerAdapterFeeds) feedPager.getAdapter();
+
+            pagerAdapterFeeds.updateTags(applicationFolder, activity);
+            AsyncNavigationAdapter.newInstance(activity, applicationFolder, -1);
+            AsyncManage.newInstance((ArrayAdapter<Editable>) listView.getAdapter(),
+                  applicationFolder);
+
+            mode.finish();
+            return true;
+         }
+
+         @Override
+         public
+         boolean onCreateActionMode(ActionMode mode, Menu menu)
+         {
+            mode.getMenuInflater().inflate(R.menu.context_manage, menu);
+            return true;
+         }
+
+         @Override
+         public
+         void onDestroyActionMode(ActionMode mode)
+         {
+         }
+
+         @Override
+         public
+         boolean onPrepareActionMode(ActionMode mode, Menu menu)
+         {
+            return false;
+         }
+      });
 
       AsyncManage.newInstance(baseAdapter, applicationFolder);
    }

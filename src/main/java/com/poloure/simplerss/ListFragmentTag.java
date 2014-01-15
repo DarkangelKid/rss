@@ -76,6 +76,7 @@ class ListFragmentTag extends ListFragment
    {
       super.onCreateContextMenu(menu, v, menuInfo);
       getActivity().getMenuInflater().inflate(R.menu.context_menu, menu);
+      menu.setHeaderTitle("URL");
    }
 
    @Override
@@ -87,23 +88,23 @@ class ListFragmentTag extends ListFragment
       String url = ((ViewCustom) info.targetView).m_item.m_urlFull;
       Context context = getActivity();
 
-      switch(item.getItemId())
+      if(R.id.copy == item.getItemId())
       {
-         case R.id.copy:
-            ClipboardManager clipboard = (ClipboardManager) context.getSystemService(
-                  Context.CLIPBOARD_SERVICE);
-            clipboard.setPrimaryClip(ClipData.newPlainText("Url", url));
+         ClipboardManager clipboard = (ClipboardManager) context.getSystemService(
+               Context.CLIPBOARD_SERVICE);
+         clipboard.setPrimaryClip(ClipData.newPlainText("Url", url));
 
-            Toast toast = Toast.makeText(context, "URL Copied: " + url, Toast.LENGTH_SHORT);
-            toast.show();
-            return true;
-         case R.id.open:
-            Uri uri = Uri.parse(url);
-            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-            context.startActivity(intent);
-            return true;
-         default:
-            return super.onContextItemSelected(item);
+         Toast toast = Toast.makeText(context, getString(R.string.url_copied) + ' ' + url,
+               Toast.LENGTH_SHORT);
+         toast.show();
+         return true;
+      }
+      else
+      {
+         context.startActivity(
+               new Intent(R.id.open == item.getItemId() ? Intent.ACTION_VIEW : Intent.EXTRA_TEXT,
+                     Uri.parse(url)));
+         return true;
       }
    }
 }

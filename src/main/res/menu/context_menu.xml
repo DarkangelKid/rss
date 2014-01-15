@@ -17,15 +17,12 @@
 <menu
    xmlns:android="http://schemas.android.com/apk/res/android">
    <item
-      android:title="Open"
-      android:id="@+id/open"
-      android:showAsAction="ifRoom"/>
+      android:title="@string/feed_item_context_open"
+      android:id="@+id/open"/>
    <item
-      android:title="Copy"
-      android:id="@+id/copy"
-      android:showAsAction="ifRoom"/>
+      android:title="@string/feed_item_context_copy"
+      android:id="@+id/copy"/>
    <item
-      android:title="Share"
-      android:id="@+id/share"
-      android:showAsAction="ifRoom"/>
+      android:title="@string/feed_item_context_share"
+      android:id="@+id/share"/>
 </menu>

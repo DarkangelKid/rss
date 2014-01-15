@@ -269,8 +269,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
             {
                moveFile(m_oldFeedName, finalTitle, m_applicationFolder);
             }
-            Write.editIndexLineContaining(m_oldFeedName, m_applicationFolder, Write.MODE_REPLACE,
-                  feedInfo);
+            Write.editIndexLine(m_oldFeedName, m_applicationFolder, Write.MODE_REPLACE, feedInfo);
          }
          else
          {

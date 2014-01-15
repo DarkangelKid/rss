@@ -14,12 +14,16 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<resources>
-
-   <string-array name="navigation_titles">
-      <item>تلقيمات‎</item>
-      <item>تنظيم</item>
-      <item>إعدادات</item>
-   </string-array>
-
-</resources>
+<menu
+   xmlns:android="http://schemas.android.com/apk/res/android">
+   <item
+      android:title="@string/manage_item_clear_content"
+      android:id="@+id/clear_content"
+      android:icon="@android:drawable/ic_menu_revert"
+      android:showAsAction="ifRoom"/>
+   <item
+      android:title="@string/manage_item_delete"
+      android:id="@+id/delete"
+      android:icon="@android:drawable/ic_menu_delete"
+      android:showAsAction="ifRoom"/>
+</menu>
