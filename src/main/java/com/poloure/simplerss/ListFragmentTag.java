@@ -94,16 +94,14 @@ class ListFragmentTag extends ListFragment
                Context.CLIPBOARD_SERVICE);
          clipboard.setPrimaryClip(ClipData.newPlainText("Url", url));
 
-         Toast toast = Toast.makeText(context, getString(R.string.url_copied) + ' ' + url,
+         Toast toast = Toast.makeText(context, getString(R.string.toast_url_copied) + ' ' + url,
                Toast.LENGTH_SHORT);
          toast.show();
          return true;
       }
       else
       {
-         context.startActivity(
-               new Intent(R.id.open == item.getItemId() ? Intent.ACTION_VIEW : Intent.EXTRA_TEXT,
-                     Uri.parse(url)));
+         context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
          return true;
       }
    }

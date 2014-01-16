@@ -61,4 +61,10 @@
       <item>95</item>
    </string-array>
 
+   <string-array name="time_initials">
+      <item>d</item>
+      <item>h</item>
+      <item>m</item>
+   </string-array>
+
 </resources>

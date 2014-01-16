@@ -61,7 +61,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       m_activity = activity;
 
       Button button = (Button) m_dialog.findViewById(DialogEditFeed.BUTTON_IDS[1]);
-      button.setText(R.string.dialog_checking_feed);
+      button.setText(R.string.dialog_checking);
       button.setEnabled(false);
    }
 
@@ -293,7 +293,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
          {
             AsyncManage.newInstance(
                   (ArrayAdapter<Editable>) ((ListFragment) fragment).getListAdapter(),
-                  m_applicationFolder);
+                  context.getResources(), m_applicationFolder);
          }
 
          m_dialog.dismiss();
@@ -301,13 +301,13 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       else
       {
          Button button = (Button) m_dialog.findViewById(DialogEditFeed.BUTTON_IDS[1]);
-         button.setText(R.string.accept_dialog);
+         button.setText(R.string.dialog_accept);
          button.setEnabled(true);
       }
 
       /* Show added feed toast notification. */
-      String text = isFeedValid ? context.getString(R.string.added_feed) + ' ' + finalTitle
-            : context.getString(R.string.invalid_feed);
+      String text = isFeedValid ? context.getString(R.string.toast_added_feed) + ' ' + finalTitle
+            : context.getString(R.string.toast_invalid_feed);
 
       Toast toast = Toast.makeText(context, text, Toast.LENGTH_SHORT);
       toast.show();

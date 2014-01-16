@@ -16,22 +16,89 @@
 
 <resources>
 
-   <string name="add_dialog_title">إضافة موجز</string>
-   <string name="edit_dialog_title">تعديل موجز‎</string>
-
-   <string name="add_feed">اضافة</string>
-   <string name="unread">غير مقروء</string>
-   <string name="refresh">إعادة التحميل‎</string>
-
-   <string name="subtitle_unread">الغير مقروء:</string>
-
-   <string name="feed_name_dialog">إسم الموجز‎</string>
-   <string name="feed_name_hint">إختياري‎</string>
-   <string name="feed_url_dialog">رابط الموجز‎</string>
-
-   <string name="cancel_dialog">إلغاء‎</string>
-   <string name="accept_dialog">قبول</string>
-
+   <!-- The All tag.-->
    <string name="all_tag">كل</string>
+
+   <!-- Navigation drawer toggle accessibility descriptions.-->
+   <string name="drawer_open">فتح القائمة الرئيسية</string>
+   <string name="drawer_close">غلق القائمة الرئيسية‎</string>
+
+   <!-- ActionBar icon descriptions. -->
+   <string name="actionbar_add">اضافة</string>
+   <string name="actionbar_unread">غير مقروء</string>
+   <string name="actionbar_refresh">إعادة التحميل‎</string>
+
+   <!-- ActionBar subtitle for unread items. -->
+   <string name="actionbar_subtitle_unread">الغير مقروء:</string>
+
+   <!-- Add/Edit feed dialog titles. -->
+   <string name="dialog_title_add">إضافة موجز</string>
+   <string name="dialog_title_edit">تعديل موجز‎</string>
+
+   <!-- Add/Edit feed dialog TextView titles. -->
+   <string name="dialog_feed_name">إسم الموجز‎</string>
+   <string name="dialog_feed_url">رابط الموجز‎</string>
+   <string name="dialog_feed_tag">سمات</string>
+
+   <!-- Add/Edit feed dialog EditText hints. -->
+   <string name="dialog_feed_name_hint">إختياري‎</string>
+   <string name="dialog_feed_url_hint">example.com/rss</string>
+   <string name="dialog_feed_tag_hint">السمة الأولى، السمة الثانية،…‎</string>
+
+   <!-- Add/Edit feed dialog button texts. -->
+   <string name="dialog_cancel">إلغاء‎</string>
+   <string name="dialog_accept">قبول</string>
+   <string name="dialog_checking">يتم الفحص…</string>
+
+   <!-- Long click feed item context menu. -->
+   <string name="feed_item_context_open">فتح</string>
+   <string name="feed_item_context_copy">نسخ</string>
+
+   <!-- Toast notifications. -->
+   <string name="toast_url_copied">تم نسخ الرابط:</string>
+   <string name="toast_invalid_feed">رابط غير صحيح</string>
+   <string name="toast_added_feed">تم الاضافة بنجاح</string>
+
+   <!-- Manage context action bar icon descriptions. -->
+   <string name="manage_item_clear_content">مسح محتوى الصفحات</string>
+   <string name="manage_item_delete">مسح الصفحات‎</string>
+
+   <!-- Manage feed item count. -->
+   <string name="manage_feed_item_count">مدخلات:</string>
+
+   <!-- Settings general strings. -->
+   <string name="switch_off">إبقاف</string>
+   <string name="switch_on">تشغيل</string>
+
+   <string name="switch_no">لا</string>
+   <string name="switch_yes">نعم</string>
+
+   <!-- Settings appearance strings. -->
+   <string name="appearance">شكل الصفحة</string>
+
+   <!-- Settings notification strings. -->
+   <string name="notifications">الإشعارات</string>
+   <string name="notifications_disabled">توقيف الإشعارات</string>
+   <string name="notifications_enabled">تشغيل الإشعارات</string>
+
+   <!-- Settings automatic Refreshing strings. -->
+   <string name="automatic_refreshing">تحديث تلقائي</string>
+   <string name="automatic_refreshing_disabled">تعطيل التحديث التلقائي</string>
+   <string name="automatic_refreshing_enabled">تشغيل التحديث التلقائي</string>
+
+   <string name="automatic_refreshing_interval">تحديث كل:</string>
+   <string name="automatic_refreshing_interval_summary">الفاصل بين كل تحديث</string>
+
+   <!-- Settings storage strings. -->
+   <string name="storage">قرص التخزين </string>
+
+   <!-- Settings images strings. -->
+   <string name="images">صور</string>
+   <string name="images_download">حفظ الصور</string>
+   <string name="images_thumbnail_quality">(WebP) جودة الصورة المصغرة</string>
+   <string name="images_thumbnail_quality_summary">يؤثر على التنزيلات الجديدة فقط</string>
+
+   <!-- Settings source code. -->
+   <string name="source_code">شفرة المصدر</string>
 
 </resources>

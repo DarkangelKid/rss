@@ -37,12 +37,14 @@ class DialogEditFeed extends Dialog
    static final int[] BUTTON_IDS = {2501, 2502};
    static final int[] IDS = {2601, 2602, 2603};
    private static final int[] HINTS = {
-         R.string.feed_name_hint, R.string.feed_url_hint, R.string.feed_tag_hint
+         R.string.dialog_feed_name_hint,
+         R.string.dialog_feed_url_hint,
+         R.string.dialog_feed_tag_hint
    };
    private static final int[] TEXTS = {
-         R.string.feed_name_dialog, R.string.feed_url_dialog, R.string.feed_tag_dialog
+         R.string.dialog_feed_name, R.string.dialog_feed_url, R.string.dialog_feed_tag
    };
-   private static final int[] BUTTON_TEXTS = {R.string.cancel_dialog, R.string.accept_dialog};
+   private static final int[] BUTTON_TEXTS = {R.string.dialog_cancel, R.string.dialog_accept};
    private static final int COLOR_UNSELECTED = Color.argb(0, 0, 0, 0);
    private static final int COLOR_SELECTED = Color.parseColor("#ff33b5e5");
    private final String m_applicationFolder;
@@ -64,7 +66,7 @@ class DialogEditFeed extends Dialog
       Dialog dialog = new DialogEditFeed(activity, position);
 
       /* Get the text resources and set the title of the dialog. */
-      int titleResource = -1 == position ? R.string.add_dialog_title : R.string.edit_dialog_title;
+      int titleResource = -1 == position ? R.string.dialog_title_add : R.string.dialog_title_edit;
       String titleText = activity.getString(titleResource);
       dialog.setTitle(titleText);
 

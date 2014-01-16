@@ -62,7 +62,7 @@ class Utilities
             Adapter adapter = navigationList.getAdapter();
             int count = ((NavItem) adapter.getItem(page)).m_count;
 
-            String unreadText = activity.getString(R.string.subtitle_unread);
+            String unreadText = activity.getString(R.string.actionbar_subtitle_unread);
             actionBar.setSubtitle(unreadText + ' ' + getLocaleInt(count));
          }
       }

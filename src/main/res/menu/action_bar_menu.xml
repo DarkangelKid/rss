@@ -17,16 +17,16 @@
 <menu
    xmlns:android="http://schemas.android.com/apk/res/android">
    <item
-      android:title="@string/add_feed"
+      android:title="@string/actionbar_add"
       android:onClick="onAddClick"
       android:showAsAction="ifRoom"/>
    <item
-      android:title="@string/unread"
+      android:title="@string/actionbar_unread"
       android:onClick="onUnreadClick"
       android:showAsAction="ifRoom"/>
    <item
       android:id="@+id/refresh"
-      android:title="@string/refresh"
+      android:title="@string/actionbar_refresh"
       android:onClick="onRefreshClick"
       android:showAsAction="ifRoom"/>
 </menu>

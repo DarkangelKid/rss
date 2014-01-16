@@ -88,7 +88,7 @@ class ListFragmentManage extends ListFragment
 
             pagerAdapterFeeds.updateTags(applicationFolder, activity);
             AsyncNavigationAdapter.newInstance(activity, applicationFolder, -1);
-            AsyncManage.newInstance((ArrayAdapter<Editable>) listView.getAdapter(),
+            AsyncManage.newInstance((ArrayAdapter<Editable>) listView.getAdapter(), getResources(),
                   applicationFolder);
 
             mode.finish();
@@ -117,7 +117,7 @@ class ListFragmentManage extends ListFragment
          }
       });
 
-      AsyncManage.newInstance(baseAdapter, applicationFolder);
+      AsyncManage.newInstance(baseAdapter, getResources(), applicationFolder);
    }
 
    @Override

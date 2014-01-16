@@ -15,41 +15,90 @@
 -->
 
 <resources>
+
+   <!-- The All tag.-->
+   <string name="all_tag">All</string>
+
+   <!-- Navigation drawer toggle accessibility descriptions.-->
    <string name="drawer_open">Open navigation drawer</string>
    <string name="drawer_close">Close navigation drawer</string>
 
-   <string name="add_dialog_title">Add Feed</string>
-   <string name="edit_dialog_title">Edit Feed</string>
+   <!-- ActionBar icon descriptions. -->
+   <string name="actionbar_add">Add</string>
+   <string name="actionbar_unread">Unread</string>
+   <string name="actionbar_refresh">Refresh</string>
 
-   <string name="add_feed">Add</string>
-   <string name="unread">Unread</string>
-   <string name="refresh">Refresh</string>
+   <!-- ActionBar subtitle for unread items. -->
+   <string name="actionbar_subtitle_unread">Unread:</string>
 
-   <string name="subtitle_unread">Unread:</string>
+   <!-- Add/Edit feed dialog titles. -->
+   <string name="dialog_title_add">Add Feed</string>
+   <string name="dialog_title_edit">Edit Feed</string>
 
-   <string name="feed_name_dialog">Feed Name</string>
-   <string name="feed_name_hint">optional</string>
-   <string name="feed_url_dialog">Feed URL</string>
-   <string name="feed_url_hint">example.com/rss</string>
-   <string name="feed_tag_dialog">Tags</string>
-   <string name="feed_tag_hint">tag one, tag two, …</string>
+   <!-- Add/Edit feed dialog TextView titles. -->
+   <string name="dialog_feed_name">Feed Name</string>
+   <string name="dialog_feed_url">Feed URL</string>
+   <string name="dialog_feed_tag">Tags</string>
 
+   <!-- Add/Edit feed dialog EditText hints. -->
+   <string name="dialog_feed_name_hint">optional</string>
+   <string name="dialog_feed_url_hint">example.com/rss</string>
+   <string name="dialog_feed_tag_hint">tag one, tag two, …</string>
+
+   <!-- Add/Edit feed dialog button texts. -->
+   <string name="dialog_cancel">Cancel</string>
+   <string name="dialog_accept">Accept</string>
+   <string name="dialog_checking">Checking…</string>
+
+   <!-- Long click feed item context menu. -->
    <string name="feed_item_context_open">Open</string>
    <string name="feed_item_context_copy">Copy</string>
-   <string name="feed_item_context_share">Share</string>
 
+   <!-- Toast notifications. -->
+   <string name="toast_url_copied">URL Copied:</string>
+   <string name="toast_invalid_feed">Invalid feed URL</string>
+   <string name="toast_added_feed">Added</string>
+
+   <!-- Manage context action bar icon descriptions. -->
    <string name="manage_item_clear_content">Clear Content</string>
    <string name="manage_item_delete">Delete Feed</string>
 
+   <!-- Manage feed item count. -->
+   <string name="manage_feed_item_count">Items:</string>
 
-   <string name="url_copied">"URL Copied:</string>
+   <!-- Settings general strings. -->
+   <string name="switch_off">Off</string>
+   <string name="switch_on">On</string>
 
-   <string name="cancel_dialog">Cancel</string>
-   <string name="dialog_checking_feed">Checking…</string>
-   <string name="invalid_feed">Invalid feed URL</string>
-   <string name="added_feed">Added </string>
-   <string name="accept_dialog">Accept</string>
+   <string name="switch_no">No</string>
+   <string name="switch_yes">Yes</string>
 
-   <string name="all_tag">All</string>
+   <!-- Settings appearance strings. -->
+   <string name="appearance">Appearance</string>
+
+   <!-- Settings notification strings. -->
+   <string name="notifications">Notifications</string>
+   <string name="notifications_disabled">Notifications are disabled</string>
+   <string name="notifications_enabled">Notifications are enabled</string>
+
+   <!-- Settings automatic Refreshing strings. -->
+   <string name="automatic_refreshing">Automatic Refreshing</string>
+   <string name="automatic_refreshing_disabled">Automatic refreshing is disabled</string>
+   <string name="automatic_refreshing_enabled">Automatic refreshing is enabled</string>
+
+   <string name="automatic_refreshing_interval">Refresh Interval</string>
+   <string name="automatic_refreshing_interval_summary">Time between two consecutive refreshes</string>
+
+   <!-- Settings storage strings. -->
+   <string name="storage">Storage</string>
+
+   <!-- Settings images strings. -->
+   <string name="images">Images</string>
+   <string name="images_download">Download Images</string>
+   <string name="images_thumbnail_quality">Thumbnail Quality (WebP)</string>
+   <string name="images_thumbnail_quality_summary">Only affects new downloads</string>
+
+   <!-- Settings source code. -->
+   <string name="source_code">Source Code</string>
 
 </resources>

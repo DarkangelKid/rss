@@ -16,6 +16,7 @@
 
 package com.poloure.simplerss;
 
+import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.text.Editable;
@@ -35,17 +36,20 @@ class AsyncManage extends AsyncTask<String, Editable[], Void>
    private static final AbsoluteSizeSpan TITLE_SIZE = new AbsoluteSizeSpan(14, true);
    private static final StyleSpan SPAN_BOLD = new StyleSpan(Typeface.BOLD);
    private final ArrayAdapter<Editable> m_manageAdapter;
+   private final Resources m_resources;
 
    private
-   AsyncManage(ArrayAdapter<Editable> manageAdapter)
+   AsyncManage(ArrayAdapter<Editable> manageAdapter, Resources resources)
    {
+      m_resources = resources;
       m_manageAdapter = manageAdapter;
    }
 
    static
-   void newInstance(ArrayAdapter<Editable> manageAdapter, String applicationFolder)
+   void newInstance(ArrayAdapter<Editable> manageAdapter, Resources resources,
+         String applicationFolder)
    {
-      AsyncTask<String, Editable[], Void> task = new AsyncManage(manageAdapter);
+      AsyncTask<String, Editable[], Void> task = new AsyncManage(manageAdapter, resources);
 
       task.executeOnExecutor(THREAD_POOL_EXECUTOR, applicationFolder);
    }
@@ -91,7 +95,12 @@ class AsyncManage extends AsyncTask<String, Editable[], Void>
          Editable editable = new SpannableStringBuilder();
 
          /* Append the feed name. */
-         editable.append(direction);
+         /* If this is a RTL language but the feed name is LTR, make it RTL.
+            The first char must always be a LTR/RTL char for the app to work. */
+         if(direction != feedNames[i].charAt(0))
+         {
+            editable.append(direction);
+         }
          editable.append(feedNames[i]);
          editable.append("\n");
 
@@ -112,8 +121,8 @@ class AsyncManage extends AsyncTask<String, Editable[], Void>
 
          /* Append an bold "Items :" text. */
          int thirdLinePosition = editable.length();
-         editable.append(direction);
-         editable.append("Items: ");
+         editable.append(m_resources.getString(R.string.manage_feed_item_count));
+         editable.append(' ');
          editable.setSpan(SPAN_BOLD, thirdLinePosition, editable.length(),
                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
          editable.append(contentSize);

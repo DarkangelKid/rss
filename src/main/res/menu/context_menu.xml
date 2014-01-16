@@ -22,7 +22,4 @@
    <item
       android:title="@string/feed_item_context_copy"
       android:id="@+id/copy"/>
-   <item
-      android:title="@string/feed_item_context_share"
-      android:id="@+id/share"/>
 </menu>
