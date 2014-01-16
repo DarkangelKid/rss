@@ -66,7 +66,7 @@ class ServiceUpdate extends IntentService
    private static final int MIN_IMAGE_WIDTH = 64;
    private static final int FEED_ITEM_INITIAL_CAPACITY = 200;
    private long m_timeCurrentItem;
-   private static final int TIME_SPACE = Utilities.getDp(66.0F);
+   private static final int TIME_SPACE = Utilities.getDp(80.0F);
 
    private static final float SCREEN_WIDTH = Resources.getSystem().getDisplayMetrics().widthPixels;
    private static final float USABLE_WIDTH_TEXT = SCREEN_WIDTH - 40.0F;

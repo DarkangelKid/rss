@@ -32,7 +32,6 @@ class ViewCustom extends View
    private static final int[] COLORS = {0, 90, 50};
    private static final float[] SIZES = {16.0F, 12.0F, 14.0F};
    private static final int SCREEN = Resources.getSystem().getDisplayMetrics().widthPixels;
-   private static final char[] INITIALS = {'d', 'h', 'm'};
 
    static
    {
@@ -101,7 +100,8 @@ class ViewCustom extends View
 
          /* Draw the time. */
          PAINTS[1].setTextAlign(Paint.Align.LEFT);
-         canvas.drawText(getTime(m_item.m_time), getPaddingLeft(), verticalPosition, PAINTS[1]);
+         canvas.drawText(getTime(m_item.m_time, getContext()), getPaddingLeft(),
+               verticalPosition, PAINTS[1]);
          PAINTS[1].setTextAlign(Paint.Align.RIGHT);
 
          verticalPosition += PAINTS[0].getTextSize();
@@ -118,8 +118,8 @@ class ViewCustom extends View
 
          /* Draw the time. */
          PAINTS[1].setTextAlign(Paint.Align.RIGHT);
-         canvas.drawText(getTime(m_item.m_time), SCREEN - getPaddingRight(), verticalPosition,
-               PAINTS[1]);
+         canvas.drawText(getTime(m_item.m_time, getContext()), SCREEN - getPaddingRight(),
+               verticalPosition, PAINTS[1]);
          PAINTS[1].setTextAlign(Paint.Align.LEFT);
 
          verticalPosition += PAINTS[0].getTextSize();
@@ -167,20 +167,21 @@ class ViewCustom extends View
    }
 
    static
-   String getTime(long time)
+   String getTime(long time, Context context)
    {
       Long timeAgo = Calendar.getInstance().getTimeInMillis() - time;
 
       /* Format the time. */
       Long[] periods = {timeAgo / 86400000, timeAgo / 3600000 % 24, timeAgo / 60000 % 60};
+      String[] timeStrings = context.getResources().getStringArray(R.array.time_initials);
 
-      StringBuilder builder = new StringBuilder(16);
+      StringBuilder builder = new StringBuilder(48);
       for(int i = 0; periods.length > i; i++)
       {
          if(0L != periods[i])
          {
             builder.append(Utilities.getLocaleLong(periods[i]));
-            builder.append(INITIALS[i]);
+            builder.append(timeStrings[i]);
             builder.append(' ');
          }
       }
