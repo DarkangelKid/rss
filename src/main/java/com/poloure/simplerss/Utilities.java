@@ -60,6 +60,10 @@ class Utilities
          else
          {
             Adapter adapter = navigationList.getAdapter();
+            if(0 == adapter.getCount())
+            {
+               navigationList.setAdapter(new AdapterNavigationDrawer(activity));
+            }
             int count = ((NavItem) adapter.getItem(page)).m_count;
 
             String unreadText = activity.getString(R.string.actionbar_subtitle_unread);

@@ -17,10 +17,14 @@
 <PreferenceScreen
    xmlns:android="http://schemas.android.com/apk/res/android">
 
-   <PreferenceScreen android:title="@string/appearance">
+   <PreferenceScreen
+      android:title="@string/appearance"
+      android:icon="@drawable/ic_action_brightness_medium">
    </PreferenceScreen>
 
-   <PreferenceScreen android:title="@string/notifications">
+   <PreferenceScreen
+      android:title="@string/notifications"
+      android:icon="@drawable/ic_action_chat">
       <SwitchPreference
          android:defaultValue="true"
          android:key="notifications_enabled"
@@ -31,7 +35,9 @@
          android:title="@string/notifications"/>
    </PreferenceScreen>
 
-   <PreferenceScreen android:title="@string/automatic_refreshing">
+   <PreferenceScreen
+      android:title="@string/automatic_refreshing"
+      android:icon="@drawable/ic_action_refresh">
       <SwitchPreference
          android:defaultValue="true"
          android:key="refreshing_enabled"
@@ -51,10 +57,14 @@
          android:title="@string/automatic_refreshing_interval"/>
    </PreferenceScreen>
 
-   <PreferenceScreen android:title="@string/storage">
+   <PreferenceScreen
+      android:title="@string/storage"
+      android:icon="@drawable/ic_action_sd_storage">
    </PreferenceScreen>
 
-   <PreferenceScreen android:title="@string/images">
+   <PreferenceScreen
+      android:title="@string/images"
+      android:icon="@drawable/ic_action_picture">
       <SwitchPreference
          android:defaultValue="true"
          android:key="images_enabled"
@@ -74,7 +84,8 @@
 
    <PreferenceScreen
       android:summary="https://github.com/poloure/rss"
-      android:title="@string/source_code">
+      android:title="@string/source_code"
+      android:icon="@drawable/ic_action_about">
       <intent
          android:action="android.intent.action.VIEW"
          android:data="https://github.com/poloure/rss"/>

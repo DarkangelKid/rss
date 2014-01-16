@@ -65,33 +65,43 @@ class ListFragmentManage extends ListFragment
          public
          boolean onActionItemClicked(ActionMode mode, MenuItem item)
          {
-            SparseBooleanArray checked = listView.getCheckedItemPositions();
-            for(int i = 0; checked.size() > i; i++)
+            if(R.id.select_all == item.getItemId())
             {
-               if(checked.valueAt(i))
+               for(int i = 0; listView.getCount() > i; i++)
                {
-                  String text = baseAdapter.getItem(checked.keyAt(i)).toString();
-                  String feedName = text.substring(1, text.indexOf('\n'));
-
-                  switch(item.getItemId())
-                  {
-                     case R.id.delete:
-                        Write.editIndexLine(feedName, applicationFolder, Write.MODE_REMOVE, "");
-                     case R.id.clear_content:
-                        Utilities.deleteDirectory(new File(applicationFolder + feedName));
-                  }
+                  listView.setItemChecked(i, true);
                }
             }
+            else
+            {
+               SparseBooleanArray checked = listView.getCheckedItemPositions();
+               for(int i = 0; checked.size() > i; i++)
+               {
+                  if(checked.valueAt(i))
+                  {
+                     String text = baseAdapter.getItem(checked.keyAt(i)).toString();
+                     String feedName = text.substring(1, text.indexOf('\n'));
 
-            ViewPager feedPager = (ViewPager) activity.findViewById(R.id.view_pager_tags);
-            PagerAdapterFeeds pagerAdapterFeeds = (PagerAdapterFeeds) feedPager.getAdapter();
+                     switch(item.getItemId())
+                     {
+                        case R.id.delete_feed:
+                           Write.editIndexLine(feedName, applicationFolder, Write.MODE_REMOVE, "");
+                        case R.id.delete_content:
+                           Utilities.deleteDirectory(new File(applicationFolder + feedName));
+                     }
+                  }
+               }
 
-            pagerAdapterFeeds.updateTags(applicationFolder, activity);
-            AsyncNavigationAdapter.newInstance(activity, applicationFolder, -1);
-            AsyncManage.newInstance((ArrayAdapter<Editable>) listView.getAdapter(), getResources(),
-                  applicationFolder);
+               ViewPager feedPager = (ViewPager) activity.findViewById(R.id.view_pager_tags);
+               PagerAdapterFeeds pagerAdapterFeeds = (PagerAdapterFeeds) feedPager.getAdapter();
 
-            mode.finish();
+               pagerAdapterFeeds.updateTags(applicationFolder, activity);
+               AsyncNavigationAdapter.newInstance(activity, applicationFolder, -1);
+               AsyncManage.newInstance((ArrayAdapter<Editable>) listView.getAdapter(),
+                     getResources(), applicationFolder);
+
+               mode.finish();
+            }
             return true;
          }
 
