@@ -21,9 +21,8 @@
           android:lineSpacingExtra="0px"
           android:lineSpacingMultiplier="0.1"
           android:minHeight="42dp"
-          android:paddingBottom="14dp"
+          android:paddingTop="12dp"
           android:paddingEnd="16dp"
           android:paddingStart="20dp"
-          android:gravity="center_vertical"
           android:textColor="@android:color/white"
           android:textSize="16sp"/>

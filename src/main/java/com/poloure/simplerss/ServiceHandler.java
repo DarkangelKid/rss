@@ -81,7 +81,6 @@ class ServiceHandler extends Handler
                Utilities.FRAGMENT_ID_PREFIX + page);
          if(null != listFragment)
          {
-            /* TODO isAllTag not 0. */
             ListView listView = listFragment.getListView();
             AsyncReloadTagPage.newInstance(page, listView, m_applicationFolder, 0 == page);
          }
