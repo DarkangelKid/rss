@@ -43,7 +43,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Adapter;
-import android.widget.AdapterView;
 import android.widget.ListView;
 
 import java.io.File;
@@ -56,43 +55,18 @@ class FeedsActivity extends Activity
    private static final int ALARM_SERVICE_STOP = 0;
    private static final int MINUTE_VALUE = 60000;
    static Handler s_serviceHandler;
-   private ViewPager m_feedsViewPager;
    private ActionBarDrawerToggle m_drawerToggle;
    private String m_applicationFolder;
-   private boolean m_showMenuItems = true;
+   boolean m_showMenuItems = true;
 
    String m_currentFragment;
 
-   static
-   String getApplicationFolder(Context context)
-   {
-      /* Check the media state for the desirable state. */
-      String state = Environment.getExternalStorageState();
+   /* Start of ordered state changes of the Activity.
+    *
+    *
+    */
 
-      if(!Environment.MEDIA_MOUNTED.equals(state))
-      {
-         return null;
-      }
-
-      File externalFilesDir = context.getExternalFilesDir(null);
-      return externalFilesDir.getAbsolutePath() + File.separatorChar;
-   }
-
-   static
-   void gotoLatestUnread(ListView listView)
-   {
-      Adapter listAdapter = listView.getAdapter();
-      for(int i = listAdapter.getCount() - 1; 0 <= i; i--)
-      {
-         FeedItem feedItem = (FeedItem) listAdapter.getItem(i);
-         if(!AdapterTags.READ_ITEM_TIMES.contains(feedItem.m_time))
-         {
-            listView.setSelection(i);
-            break;
-         }
-      }
-   }
-
+   /* Called only when no remnants of the Activity exist. */
    @Override
    public
    void onCreate(Bundle savedInstanceState)
@@ -108,95 +82,58 @@ class FeedsActivity extends Activity
 
       /* Get the navigation drawer titles. */
       Resources resources = getResources();
-      final FeedsActivity activity = this;
-      final String[] navigationTitles = resources.getStringArray(R.array.navigation_titles);
-
-      Drawable appIcon = resources.getDrawable(R.drawable.rss_icon);
-      appIcon.setAutoMirrored(true);
+      String[] navigationTitles = resources.getStringArray(R.array.navigation_titles);
 
       /* Configure the ActionBar. */
+      Drawable appIcon = resources.getDrawable(R.drawable.rss_icon);
       ActionBar actionBar = getActionBar();
-      actionBar.setIcon(appIcon);
-      actionBar.setDisplayHomeAsUpEnabled(true);
-      actionBar.setHomeButtonEnabled(true);
-      actionBar.setTitle(navigationTitles[0]);
+      if(null != actionBar)
+      {
+         actionBar.setDisplayHomeAsUpEnabled(true);
+         actionBar.setHomeButtonEnabled(true);
+         actionBar.setTitle(navigationTitles[0]);
+         if(null != appIcon)
+         {
+            appIcon.setAutoMirrored(true);
+            actionBar.setIcon(appIcon);
+         }
+      }
 
-      final DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+      DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
       /* Create the navigation drawer and set all the listeners for it. */
-      m_drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.drawable.ic_drawer,
-            R.string.drawer_open, R.string.drawer_close)
-      {
-         @Override
-         public
-         void onDrawerSlide(View drawerView, float slideOffset)
-         {
-            super.onDrawerSlide(drawerView, slideOffset);
-            m_showMenuItems = 0.0F == slideOffset;
-            invalidateOptionsMenu();
-         }
-      };
+      m_drawerToggle = new OnActionBarDrawerToggle(this, drawerLayout);
       drawerLayout.setDrawerListener(m_drawerToggle);
 
-      /* The R.id.content_frame is child 0, the R.id.navigation_list is child 1. */
-      ListView navigationList = (ListView) drawerLayout.getChildAt(1);
+      ListView navigationList = (ListView) findViewById(R.id.navigation_list);
       navigationList.setAdapter(new AdapterNavigationDrawer(this));
-
-      navigationList.setOnItemClickListener(new AdapterView.OnItemClickListener()
-      {
-         @Override
-         public
-         void onItemClick(AdapterView<?> parent, View view, int position, long id)
-         {
-            drawerLayout.closeDrawers();
-
-            /* Set the title and switch fragment. */
-            String selectedTitle = navigationTitles[2 < position ? 0 : position];
-            Utilities.switchFragments(activity, m_currentFragment, selectedTitle);
-            getActionBar().setTitle(selectedTitle);
-
-            if(2 < position)
-            {
-               m_feedsViewPager.setCurrentItem(position - 3);
-            }
-            else
-            {
-               Utilities.updateSubtitle(activity,
-                     0 == position ? m_feedsViewPager.getCurrentItem() : -1);
-            }
-         }
-      });
+      navigationList.setOnItemClickListener(new OnNavigationListItemClick(this));
 
       /* Create and hide the fragments that go inside the content frame. */
-      if(null == savedInstanceState)
-      {
-         Fragment[] fragments = {
-               new FragmentFeeds(), new ListFragmentManage(), new FragmentSettings()
-         };
+      Fragment[] fragments = {
+            new FragmentFeeds(), new ListFragmentManage(), new FragmentSettings()
+      };
 
-         FragmentTransaction transaction = getFragmentManager().beginTransaction();
-         for(int i = 0; 3 > i; i++)
+      FragmentTransaction transaction = getFragmentManager().beginTransaction();
+      for(int i = 0; fragments.length > i; i++)
+      {
+         if(!fragments[i].isInLayout())
          {
-            transaction.add(R.id.content_frame, fragments[i], navigationTitles[i])
-                       .hide(fragments[i]);
+            transaction.add(R.id.content_frame, fragments[i], navigationTitles[i]);
          }
-         transaction.show(fragments[0]);
-         transaction.commit();
-         m_currentFragment = navigationTitles[0];
+         transaction.hide(fragments[i]);
       }
+      transaction.show(fragments[0]);
+      transaction.commit();
+      m_currentFragment = navigationTitles[0];
    }
 
+   /* Called only when the app is coming from onStop() (not visible). */
    @Override
    protected
-   void onPostCreate(Bundle savedInstanceState)
+   void onRestart()
    {
-      super.onPostCreate(savedInstanceState);
-      // Sync the toggle state after onRestoreInstanceState has occurred.
-      m_drawerToggle.syncState();
-
-      AsyncNavigationAdapter.newInstance(this, m_applicationFolder, 0);
-
-      m_feedsViewPager = (ViewPager) findViewById(R.id.view_pager_tags);
+      super.onRestart();
    }
 
    @Override
@@ -204,9 +141,141 @@ class FeedsActivity extends Activity
    void onStart()
    {
       super.onStart();
+   }
 
-      /* Stop the alarm service and reset the time to 0. */
+   /* Load the saved state from configuration change. */
+   @Override
+   protected
+   void onRestoreInstanceState(Bundle savedInstanceState)
+   {
+      super.onRestoreInstanceState(savedInstanceState);
+   }
+
+   /* Stop the alarm service and reset the time to 0 every time the user sees the activity. */
+   @Override
+   protected
+   void onResume()
+   {
+      super.onResume();
+      m_drawerToggle.syncState();
       setServiceIntent(ALARM_SERVICE_STOP);
+
+      /* Update the navigation adapter. */
+      AsyncNavigationAdapter.newInstance(this, m_applicationFolder, 0);
+   }
+
+   /* Activity is now running.
+    *
+    * These methods are for any state change post running.
+    */
+
+   /* Add information to outState that will be passed to onCreate(Bundle savedStateInstance) &
+    * onRestoreInstanceState(Bundle savedInstanceState). */
+   @Override
+   protected
+   void onSaveInstanceState(Bundle outState)
+   {
+      super.onSaveInstanceState(outState);
+   }
+
+   @Override
+   protected
+   void onPause()
+   {
+      super.onPause();
+   }
+
+   /* Start the alarm service every time the activity is not visible. */
+   @Override
+   protected
+   void onStop()
+   {
+      super.onStop();
+      setServiceIntent(ALARM_SERVICE_START);
+   }
+
+   /* Save any data stored in memory to disk before destroyed. */
+   @Override
+   protected
+   void onDestroy()
+   {
+      super.onDestroy();
+      Write.longSet(READ_ITEMS, AdapterTags.READ_ITEM_TIMES, m_applicationFolder);
+   }
+
+   /* Option menu methods.
+    *
+    *
+    */
+
+   @Override
+   public
+   boolean onOptionsItemSelected(MenuItem item)
+   {
+      return m_drawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
+   }
+
+   @Override
+   public
+   boolean onPrepareOptionsMenu(Menu menu)
+   {
+      /* If the title is not the feeds title, disable the buttons accordingly. */
+      ActionBar actionBar = getActionBar();
+      String[] titles = getResources().getStringArray(R.array.navigation_titles);
+
+      if(null != actionBar)
+      {
+         String title = actionBar.getTitle().toString();
+
+         boolean[] show = titles[0].equals(title) ? new boolean[]{true, true, true}
+               : new boolean[]{titles[1].equals(title), false, false};
+
+         for(int i = 0; i < menu.size(); i++)
+         {
+            menu.getItem(i).setEnabled(m_showMenuItems && show[i]);
+         }
+      }
+      return true;
+   }
+
+   @Override
+   public
+   boolean onCreateOptionsMenu(Menu menu)
+   {
+      menu.clear();
+
+      MenuInflater menuInflater = getMenuInflater();
+      menuInflater.inflate(R.menu.action_bar_menu, menu);
+
+      /* Set the refreshItem to spin if the service is running. The handler will stop it. */
+      MenuItem refreshItem = menu.findItem(R.id.refresh);
+
+      View refreshIcon = isServiceRunning() ? Utilities.makeProgressBar(this) : null;
+      MenuItemCompat.setActionView(refreshItem, refreshIcon);
+
+      /* Update the MenuItem in the ServiceHandler so when the service finishes, the icon changes.*/
+      ServiceHandler.s_refreshItem = refreshItem;
+      return true;
+   }
+
+   /* The end of overridden methods.
+    *
+    *
+    */
+
+   private
+   boolean isServiceRunning()
+   {
+      ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+      for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(
+            Integer.MAX_VALUE))
+      {
+         if(ServiceUpdate.class.getName().equals(service.service.getClassName()))
+         {
+            return true;
+         }
+      }
+      return false;
    }
 
    private
@@ -244,80 +313,6 @@ class FeedsActivity extends Activity
       }
    }
 
-   @Override
-   protected
-   void onStop()
-   {
-      super.onStop();
-
-      Write.longSet(READ_ITEMS, AdapterTags.READ_ITEM_TIMES, m_applicationFolder);
-
-      /* Set the alarm service to go off starting now. */
-      setServiceIntent(ALARM_SERVICE_START);
-   }
-
-   @Override
-   public
-   boolean onOptionsItemSelected(MenuItem item)
-   {
-      return m_drawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
-   }
-
-   @Override
-   public
-   boolean onPrepareOptionsMenu(Menu menu)
-   {
-      /* If the title is not the feeds title, disable the buttons accordingly. */
-      String title = getActionBar().getTitle().toString();
-      String[] titles = getResources().getStringArray(R.array.navigation_titles);
-
-      boolean[] show = titles[0].equals(title) ? new boolean[]{true, true, true}
-            : new boolean[]{titles[1].equals(title), false, false};
-
-      for(int i = 0; i < menu.size(); i++)
-      {
-         menu.getItem(i).setEnabled(m_showMenuItems && show[i]);
-      }
-      return true;
-   }
-
-   @Override
-   public
-   boolean onCreateOptionsMenu(Menu menu)
-   {
-      menu.clear();
-
-      MenuInflater menuInflater = getMenuInflater();
-      menuInflater.inflate(R.menu.action_bar_menu, menu);
-
-      /* Set the refreshItem to spin if the service is running. The handler will stop it. */
-      MenuItem refreshItem = menu.findItem(R.id.refresh);
-
-      View refreshIcon = isServiceRunning() ? Utilities.makeProgressBar(this) : null;
-      MenuItemCompat.setActionView(refreshItem, refreshIcon);
-
-      /* Update the MenuItem in the ServiceHandler so when the service finishes, the icon changes.*/
-      ServiceHandler.s_refreshItem = refreshItem;
-      return true;
-   }
-
-   private
-   boolean isServiceRunning()
-   {
-      ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-      for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(
-            Integer.MAX_VALUE))
-      {
-         String className = service.service.getClassName();
-         String serviceName = ServiceUpdate.class.getName();
-         if(serviceName.equals(className))
-         {
-            return true;
-         }
-      }
-      return false;
-   }
-
    public
    void onAddClick(MenuItem menuItem)
    {
@@ -327,15 +322,17 @@ class FeedsActivity extends Activity
    public
    void onUnreadClick(MenuItem menuItem)
    {
-      int currentPage = m_feedsViewPager.getCurrentItem();
+      ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager_tags);
+      int currentPage = viewPager.getCurrentItem();
 
       FragmentManager manager = getFragmentManager();
       ListFragment listFragment = (ListFragment) manager.findFragmentByTag(
             Utilities.FRAGMENT_ID_PREFIX + currentPage);
 
-      ListView listViewTags = listFragment.getListView();
-
-      gotoLatestUnread(listViewTags);
+      if(null != listFragment)
+      {
+         gotoLatestUnread(listFragment.getListView());
+      }
    }
 
    public
@@ -345,10 +342,41 @@ class FeedsActivity extends Activity
 
       /* Set the service handler in FeedsActivity so we can check and call it from ServiceUpdate. */
       FragmentManager manager = getFragmentManager();
+      ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager_tags);
       s_serviceHandler = new ServiceHandler(manager, menuItem, m_applicationFolder);
 
       Intent intent = new Intent(this, ServiceUpdate.class);
-      intent.putExtra("GROUP_NUMBER", m_feedsViewPager.getCurrentItem());
+      intent.putExtra("GROUP_NUMBER", viewPager.getCurrentItem());
       startService(intent);
    }
+
+   static
+   String getApplicationFolder(Context context)
+   {
+      /* Check the media state for the desirable state. */
+      String state = Environment.getExternalStorageState();
+      File externalFilesDir = context.getExternalFilesDir(null);
+
+      if(!Environment.MEDIA_MOUNTED.equals(state) || null == externalFilesDir)
+      {
+         return null;
+      }
+      return externalFilesDir.getAbsolutePath() + File.separatorChar;
+   }
+
+   static
+   void gotoLatestUnread(ListView listView)
+   {
+      Adapter listAdapter = listView.getAdapter();
+      for(int i = listAdapter.getCount() - 1; 0 <= i; i--)
+      {
+         FeedItem feedItem = (FeedItem) listAdapter.getItem(i);
+         if(!AdapterTags.READ_ITEM_TIMES.contains(feedItem.m_time))
+         {
+            listView.setSelection(i);
+            break;
+         }
+      }
+   }
+
 }
