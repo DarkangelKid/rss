@@ -60,14 +60,13 @@ class Utilities
          else
          {
             Adapter adapter = navigationList.getAdapter();
-            if(0 == adapter.getCount())
+            if(0 != adapter.getCount() - 3)
             {
-               navigationList.setAdapter(new AdapterNavigationDrawer(activity));
-            }
-            int count = ((NavItem) adapter.getItem(page)).m_count;
+               String unreadText = activity.getString(R.string.actionbar_subtitle_unread);
+               int count = ((NavItem) adapter.getItem(page)).m_count;
 
-            String unreadText = activity.getString(R.string.actionbar_subtitle_unread);
-            actionBar.setSubtitle(unreadText + ' ' + getLocaleInt(count));
+               actionBar.setSubtitle(unreadText + ' ' + getLocaleInt(count));
+            }
          }
       }
    }
@@ -129,11 +128,11 @@ class Utilities
    }
 
    static
-   void switchFragments(FeedsActivity activity, String oldTag, String newTag)
+   void switchFragments(FeedsActivity activity, String newTag)
    {
       FragmentManager manager = activity.getFragmentManager();
       manager.beginTransaction()
-             .hide(manager.findFragmentByTag(oldTag))
+             .hide(manager.findFragmentByTag(activity.m_currentFragment))
              .show(manager.findFragmentByTag(newTag))
              .commit();
       activity.m_currentFragment = newTag;

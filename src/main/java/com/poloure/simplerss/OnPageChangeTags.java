@@ -56,14 +56,17 @@ class OnPageChangeTags extends SimpleOnPageChangeListener
          String fragmentTag = Utilities.FRAGMENT_ID_PREFIX + m_position;
          FragmentManager manager = m_activity.getFragmentManager();
          ListFragment tagFragment = (ListFragment) manager.findFragmentByTag(fragmentTag);
-         Adapter listAdapter = tagFragment.getListAdapter();
-
-         /* If the page has no items in the ListView yet, refresh the page. */
-         if(0 == listAdapter.getCount())
+         if(null != tagFragment)
          {
-            ListView listView = tagFragment.getListView();
-            AsyncReloadTagPage.newInstance(m_position, listView, m_applicationFolder,
-                  0 == m_position);
+            Adapter listAdapter = tagFragment.getListAdapter();
+
+            /* If the page has no items in the ListView yet, refresh the page. */
+            if(null != listAdapter && 0 == listAdapter.getCount())
+            {
+               ListView listView = tagFragment.getListView();
+               AsyncReloadTagPage.newInstance(m_position, listView, m_applicationFolder,
+                     0 == m_position);
+            }
          }
       }
    }

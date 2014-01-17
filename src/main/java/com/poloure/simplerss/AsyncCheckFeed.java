@@ -19,6 +19,7 @@ package com.poloure.simplerss;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.app.ListFragment;
 import android.content.Context;
 import android.os.AsyncTask;
@@ -286,8 +287,8 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
          AsyncNavigationAdapter.newInstance(m_activity, m_applicationFolder, -1);
 
          /* Get the manage ListView and update it. */
-         String[] navTitles = m_activity.getResources().getStringArray(R.array.navigation_titles);
-         Fragment fragment = m_activity.getFragmentManager().findFragmentByTag(navTitles[1]);
+         FragmentManager manager = m_activity.getFragmentManager();
+         Fragment fragment = manager.findFragmentByTag(FeedsActivity.FRAGMENT_TAGS[1]);
 
          if(null != fragment)
          {

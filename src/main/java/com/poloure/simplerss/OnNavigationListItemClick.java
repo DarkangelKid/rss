@@ -39,15 +39,18 @@ class OnNavigationListItemClick implements AdapterView.OnItemClickListener
       DrawerLayout drawerLayout = (DrawerLayout) m_activity.findViewById(R.id.drawer_layout);
       drawerLayout.closeDrawers();
 
-      String[] navTitles = m_activity.getResources().getStringArray(R.array.navigation_titles);
-      ActionBar actionBar = m_activity.getActionBar();
+      /* Get the the position (of FRAGMENT_TAGS) we should be changing to. */
+      int selectedFragment = 2 < position ? 0 : position;
 
-      /* Set the title and switch fragment. */
-      String selectedTitle = navTitles[2 < position ? 0 : position];
-      Utilities.switchFragments(m_activity, m_activity.m_currentFragment, selectedTitle);
+      /* Switch the content frame fragment. */
+      Utilities.switchFragments(m_activity, FeedsActivity.FRAGMENT_TAGS[selectedFragment]);
+
+      /* Update the action bar subtitle. */
+      ActionBar actionBar = m_activity.getActionBar();
       if(null != actionBar)
       {
-         actionBar.setTitle(selectedTitle);
+         String[] navTitles = m_activity.getResources().getStringArray(R.array.navigation_titles);
+         actionBar.setTitle(navTitles[selectedFragment]);
       }
 
       ViewPager viewPager = (ViewPager) m_activity.findViewById(R.id.view_pager_tags);

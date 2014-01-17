@@ -61,6 +61,8 @@ class FeedsActivity extends Activity
 
    String m_currentFragment;
 
+   static final String[] FRAGMENT_TAGS = {"Feeds", "Manage", "Settings"};
+
    /* Start of ordered state changes of the Activity.
     *
     *
@@ -80,18 +82,18 @@ class FeedsActivity extends Activity
       /* Load the read items to the AdapterTag class. */
       AdapterTags.READ_ITEM_TIMES.addAll(Read.longSet(READ_ITEMS, m_applicationFolder));
 
-      /* Get the navigation drawer titles. */
-      Resources resources = getResources();
-      String[] navigationTitles = resources.getStringArray(R.array.navigation_titles);
-
       /* Configure the ActionBar. */
-      Drawable appIcon = resources.getDrawable(R.drawable.rss_icon);
       ActionBar actionBar = getActionBar();
       if(null != actionBar)
       {
+         Resources resources = getResources();
+         String[] navigationTitles = resources.getStringArray(R.array.navigation_titles);
+
+         actionBar.setTitle(navigationTitles[0]);
          actionBar.setDisplayHomeAsUpEnabled(true);
          actionBar.setHomeButtonEnabled(true);
-         actionBar.setTitle(navigationTitles[0]);
+
+         Drawable appIcon = resources.getDrawable(R.drawable.rss_icon);
          if(null != appIcon)
          {
             appIcon.setAutoMirrored(true);
@@ -99,9 +101,8 @@ class FeedsActivity extends Activity
          }
       }
 
-      DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-
       /* Create the navigation drawer and set all the listeners for it. */
+      DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
       m_drawerToggle = new OnActionBarDrawerToggle(this, drawerLayout);
       drawerLayout.setDrawerListener(m_drawerToggle);
 
@@ -109,23 +110,27 @@ class FeedsActivity extends Activity
       navigationList.setAdapter(new AdapterNavigationDrawer(this));
       navigationList.setOnItemClickListener(new OnNavigationListItemClick(this));
 
-      /* Create and hide the fragments that go inside the content frame. */
-      Fragment[] fragments = {
-            new FragmentFeeds(), new ListFragmentManage(), new FragmentSettings()
-      };
+      /* This method calls navigationList.getAdapter(). */
+      AsyncNavigationAdapter.newInstance(this, m_applicationFolder, 0);
 
-      FragmentTransaction transaction = getFragmentManager().beginTransaction();
-      for(int i = 0; fragments.length > i; i++)
+      /* Create and hide the fragments that go inside the content frame. */
+      FragmentManager manager = getFragmentManager();
+      FragmentTransaction transaction = manager.beginTransaction();
+
+      for(int i = 0; FRAGMENT_TAGS.length > i; i++)
       {
-         if(!fragments[i].isInLayout())
+         Fragment fragment = getFragment(manager, FRAGMENT_TAGS[i], i);
+         if(!fragment.isAdded())
          {
-            transaction.add(R.id.content_frame, fragments[i], navigationTitles[i]);
+            transaction.add(R.id.content_frame, fragment, FRAGMENT_TAGS[i]);
          }
-         transaction.hide(fragments[i]);
+         if(0 != i && !fragment.isHidden())
+         {
+            transaction.hide(fragment);
+         }
       }
-      transaction.show(fragments[0]);
       transaction.commit();
-      m_currentFragment = navigationTitles[0];
+      m_currentFragment = FRAGMENT_TAGS[0];
    }
 
    /* Called only when the app is coming from onStop() (not visible). */
@@ -364,6 +369,25 @@ class FeedsActivity extends Activity
       return externalFilesDir.getAbsolutePath() + File.separatorChar;
    }
 
+   private static
+   Fragment getFragment(FragmentManager manager, String tag, int position)
+   {
+      Fragment fragment = manager.findFragmentByTag(tag);
+      if(null == fragment)
+      {
+         switch(position)
+         {
+            case 0:
+               return new FragmentFeeds();
+            case 1:
+               return new ListFragmentManage();
+            case 2:
+               return new FragmentSettings();
+         }
+      }
+      return fragment;
+   }
+
    static
    void gotoLatestUnread(ListView listView)
    {
@@ -378,5 +402,4 @@ class FeedsActivity extends Activity
          }
       }
    }
-
 }

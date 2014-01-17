@@ -110,7 +110,6 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, NavItem[]>
       /* Update the data in the adapter. */
       adapter.clear();
       adapter.addAll(result);
-      adapter.notifyDataSetChanged();
 
       /* Update the subtitle. */
       Utilities.updateSubtitle(m_activity, m_currentPage);

@@ -100,8 +100,8 @@ class ViewCustom extends View
 
          /* Draw the time. */
          PAINTS[1].setTextAlign(Paint.Align.LEFT);
-         canvas.drawText(getTime(m_item.m_time, getContext()), getPaddingLeft(),
-               verticalPosition, PAINTS[1]);
+         canvas.drawText(getTime(m_item.m_time, getContext()), getPaddingLeft(), verticalPosition,
+               PAINTS[1]);
          PAINTS[1].setTextAlign(Paint.Align.RIGHT);
 
          verticalPosition += PAINTS[0].getTextSize();
@@ -166,7 +166,7 @@ class ViewCustom extends View
       }
    }
 
-   static
+   private static
    String getTime(long time, Context context)
    {
       Long timeAgo = Calendar.getInstance().getTimeInMillis() - time;
