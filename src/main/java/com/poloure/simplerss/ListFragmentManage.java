@@ -29,7 +29,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 
 public
@@ -50,10 +49,15 @@ class ListFragmentManage extends ListFragment
       listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
       listView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener()
       {
+         private int m_count;
+
          @Override
          public
          void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked)
          {
+            m_count += checked ? 1 : -1;
+            mode.setTitle(
+                  Utilities.getLocaleInt(m_count) + ' ' + getString(R.string.managed_selected));
          }
 
          @Override
@@ -62,10 +66,12 @@ class ListFragmentManage extends ListFragment
          {
             if(R.id.select_all == item.getItemId())
             {
-               for(int i = 0; listView.getCount() > i; i++)
+               for(m_count = 0; listView.getCount() > m_count; m_count++)
                {
-                  listView.setItemChecked(i, true);
+                  listView.setItemChecked(m_count, true);
                }
+               mode.setTitle(
+                     Utilities.getLocaleInt(m_count) + ' ' + getString(R.string.managed_selected));
             }
             else
             {
@@ -120,6 +126,7 @@ class ListFragmentManage extends ListFragment
          public
          void onDestroyActionMode(ActionMode mode)
          {
+            m_count = 0;
          }
 
          @Override

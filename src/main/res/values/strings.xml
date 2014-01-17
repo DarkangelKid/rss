@@ -61,6 +61,7 @@
 
    <!-- Manage context action bar icon descriptions. -->
    <string name="manage_select_all">Select All</string>
+   <string name="managed_selected">selected</string>
    <string name="manage_item_clear_content">Delete Content</string>
    <string name="manage_item_delete">Delete Feed</string>
 

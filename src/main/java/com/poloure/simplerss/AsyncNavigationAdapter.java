@@ -22,6 +22,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -53,19 +54,16 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, NavItem[]>
    {
       /* Read the index file for an array of feed names and feed tags. */
       String[][] content = Read.csvFile(m_activity, Read.INDEX, 'f', 't');
-      String[] feedNames = content[0];
-      String[] feedTags = content[1];
 
       /* Get the total number of tags and feeds that exist. */
       int tagTotal = PagerAdapterFeeds.TAG_LIST.size();
-      int feedTotal = feedNames.length;
 
       /* Make a NavItem for each tag we will display in the navigation drawer. */
       NavItem[] navItems = new NavItem[tagTotal];
 
       /* This is a list of Sets each containing all of the feed's items. */
-      List<Collection<Long>> feedItems = new ArrayList<>(feedTotal);
-      for(String feedName : feedNames)
+      List<Collection<Long>> feedItems = new ArrayList<>(content[0].length);
+      for(String feedName : content[0])
       {
          feedItems.add(Read.longSet(m_activity, feedName + ServiceUpdate.ITEM_LIST));
       }
@@ -79,10 +77,11 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, NavItem[]>
          String tag = PagerAdapterFeeds.TAG_LIST.get(i);
 
          /* For each feed, if the feed ∈ this tag, add the feed items to the tag collection. */
-         for(int j = 0; j < feedTotal; j++)
+         for(int j = 0; j < content[0].length; j++)
          {
             /* If the feed's index entry (tag1, tag2, etc) contains this tag or is the all tag. */
-            if(0 == i || feedTags[j].contains(tag))
+            if(0 == i ||
+               Arrays.asList(PagerAdapterFeeds.SPLIT_COMMA.split(content[1][j])).contains(tag))
             {
                itemsInTag.addAll(feedItems.get(j));
             }
