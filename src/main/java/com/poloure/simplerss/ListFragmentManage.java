@@ -29,9 +29,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
+import android.widget.ListAdapter;
 import android.widget.ListView;
-
-import java.io.File;
 
 public
 class ListFragmentManage extends ListFragment
@@ -44,12 +43,8 @@ class ListFragmentManage extends ListFragment
 
       final Activity activity = getActivity();
       final ListView listView = getListView();
-      final String applicationFolder = FeedsActivity.getApplicationFolder(activity);
 
-      final ArrayAdapter<Editable> baseAdapter = new ArrayAdapter<>(activity,
-            R.layout.manage_text_view);
-
-      setListAdapter(baseAdapter);
+      setListAdapter(new ArrayAdapter<>(activity, R.layout.manage_text_view));
 
       registerForContextMenu(listView);
       listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
@@ -74,20 +69,29 @@ class ListFragmentManage extends ListFragment
             }
             else
             {
+               /* Read this once so that the positions are the same. */
+               String[][] content = Read.csvFile(activity, Read.INDEX, 'f', 'u', 't');
+
                SparseBooleanArray checked = listView.getCheckedItemPositions();
                for(int i = 0; checked.size() > i; i++)
                {
                   if(checked.valueAt(i))
                   {
-                     String text = baseAdapter.getItem(checked.keyAt(i)).toString();
-                     String feedName = text.substring(1, text.indexOf('\n'));
+                     int position = checked.keyAt(i);
+
+                     String feedName = content[0][position];
+                     String oldLine = String.format(AsyncCheckFeed.INDEX_FORMAT, feedName,
+                           content[1][position], content[2][position]);
 
                      switch(item.getItemId())
                      {
                         case R.id.delete_feed:
-                           Write.editIndexLine(feedName, applicationFolder, Write.MODE_REMOVE, "");
+                           Write.editIndexLine(activity, oldLine, Write.MODE_REMOVE, "");
                         case R.id.delete_content:
-                           Utilities.deleteDirectory(new File(applicationFolder + feedName));
+                           for(String file : ServiceUpdate.FEED_FILES)
+                           {
+                              activity.deleteFile(feedName + file);
+                           }
                      }
                   }
                }
@@ -95,10 +99,9 @@ class ListFragmentManage extends ListFragment
                ViewPager feedPager = (ViewPager) activity.findViewById(R.id.view_pager_tags);
                PagerAdapterFeeds pagerAdapterFeeds = (PagerAdapterFeeds) feedPager.getAdapter();
 
-               pagerAdapterFeeds.updateTags(applicationFolder, activity);
-               AsyncNavigationAdapter.newInstance(activity, applicationFolder, -1);
-               AsyncManage.newInstance((ArrayAdapter<Editable>) listView.getAdapter(),
-                     getResources(), applicationFolder);
+               pagerAdapterFeeds.updateTags(activity);
+               AsyncNavigationAdapter.newInstance(activity, -1);
+               AsyncManage.newInstance(activity, (ArrayAdapter<Editable>) listView.getAdapter());
 
                mode.finish();
             }
@@ -126,8 +129,18 @@ class ListFragmentManage extends ListFragment
             return false;
          }
       });
+   }
 
-      AsyncManage.newInstance(baseAdapter, getResources(), applicationFolder);
+   /* Called when the fragment is shown and when the Add/Edit dialog closes. */
+   @Override
+   public
+   void onHiddenChanged(boolean hidden)
+   {
+      super.onHiddenChanged(hidden);
+      if(!hidden)
+      {
+         AsyncManage.newInstance(getActivity(), (ArrayAdapter<Editable>) getListAdapter());
+      }
    }
 
    @Override

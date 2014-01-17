@@ -16,7 +16,7 @@
 
 package com.poloure.simplerss;
 
-import android.content.res.Resources;
+import android.content.Context;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.text.Editable;
@@ -27,38 +27,37 @@ import android.text.style.StyleSpan;
 import android.widget.ArrayAdapter;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 class AsyncManage extends AsyncTask<String, Editable[], Void>
 {
    private static final AbsoluteSizeSpan TITLE_SIZE = new AbsoluteSizeSpan(14, true);
    private static final StyleSpan SPAN_BOLD = new StyleSpan(Typeface.BOLD);
    private final ArrayAdapter<Editable> m_manageAdapter;
-   private final Resources m_resources;
+   private final Context m_context;
 
    private
-   AsyncManage(ArrayAdapter<Editable> manageAdapter, Resources resources)
+   AsyncManage(Context context, ArrayAdapter<Editable> manageAdapter)
    {
-      m_resources = resources;
+      m_context = context;
       m_manageAdapter = manageAdapter;
    }
 
    static
-   void newInstance(ArrayAdapter<Editable> manageAdapter, Resources resources,
-         String applicationFolder)
+   void newInstance(Context context, ArrayAdapter<Editable> manageAdapter)
    {
-      AsyncTask<String, Editable[], Void> task = new AsyncManage(manageAdapter, resources);
+      AsyncTask<String, Editable[], Void> task = new AsyncManage(context, manageAdapter);
 
-      task.executeOnExecutor(THREAD_POOL_EXECUTOR, applicationFolder);
+      task.executeOnExecutor(THREAD_POOL_EXECUTOR);
    }
 
    private static
-   int count(String fileName, String applicationFolder)
+   int count(Context context, String fileName)
    {
       int count = 0;
-      try(BufferedReader read = new BufferedReader(new FileReader(applicationFolder + fileName)))
+      try(BufferedReader read = new BufferedReader(
+            new InputStreamReader(context.openFileInput(fileName))))
       {
          while(null != read.readLine())
          {
@@ -75,10 +74,8 @@ class AsyncManage extends AsyncTask<String, Editable[], Void>
    protected
    Void doInBackground(String... applicationFolder)
    {
-      String appFolder = applicationFolder[0];
-
       /* Read the index file for names, urls, and tags. */
-      String[][] feedsIndex = Read.csvFile(Read.INDEX, appFolder, 'f', 'u', 't');
+      String[][] feedsIndex = Read.csvFile(m_context, Read.INDEX, 'f', 'u', 't');
       String[] feedNames = feedsIndex[0];
       String[] feedUrls = feedsIndex[1];
       String[] feedTags = feedsIndex[2];
@@ -102,26 +99,25 @@ class AsyncManage extends AsyncTask<String, Editable[], Void>
             editable.append(direction);
          }
          editable.append(feedNames[i]);
-         editable.append("\n");
+         editable.append(Write.NEW_LINE);
 
          /* Make the feed name size 16dip. */
          int titleLength = editable.length();
          editable.setSpan(TITLE_SIZE, 0, titleLength, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
          /* Form the path to the feed_content file. */
-         String feedContentFileName = feedNames[i] + File.separatorChar +
-                                      ServiceUpdate.CONTENT_FILE;
-         int feedContentSize = count(feedContentFileName, appFolder);
+         String feedContentFileName = feedNames[i] + ServiceUpdate.CONTENT_FILE;
+         int feedContentSize = count(m_context, feedContentFileName);
          String contentSize = Utilities.getLocaleInt(feedContentSize);
 
          /* Append the url to the next line. */
          editable.append(direction);
          editable.append(feedUrls[i]);
-         editable.append("\n");
+         editable.append(Write.NEW_LINE);
 
          /* Append an bold "Items :" text. */
          int thirdLinePosition = editable.length();
-         editable.append(m_resources.getString(R.string.manage_feed_item_count));
+         editable.append(m_context.getString(R.string.manage_feed_item_count));
          editable.append(' ');
          editable.setSpan(SPAN_BOLD, thirdLinePosition, editable.length(),
                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);

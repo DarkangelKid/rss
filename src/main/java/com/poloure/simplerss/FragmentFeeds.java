@@ -33,12 +33,10 @@ class FragmentFeeds extends Fragment
    {
       Activity activity = getActivity();
 
-      String applicationFolder = FeedsActivity.getApplicationFolder(activity);
-      ViewPager.OnPageChangeListener onTagPageChange = new OnPageChangeTags(activity,
-            applicationFolder);
+      ViewPager.OnPageChangeListener onTagPageChange = new OnPageChangeTags(activity);
 
       PagerAdapterFeeds adapter = new PagerAdapterFeeds(activity.getFragmentManager());
-      adapter.updateTags(applicationFolder, activity);
+      adapter.updateTags(activity);
 
       /* Inflate and configure the ViewPager. */
       ViewPager viewPager = (ViewPager) inflater.inflate(R.layout.view_pager_tags, container,

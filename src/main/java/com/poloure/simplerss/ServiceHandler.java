@@ -22,22 +22,21 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.view.MenuItemCompat;
+import android.text.Editable;
 import android.view.MenuItem;
-import android.widget.ListView;
+import android.widget.ArrayAdapter;
 
 class ServiceHandler extends Handler
 {
    static MenuItem s_refreshItem;
    private final FragmentManager m_fragmentManager;
-   private final String m_applicationFolder;
 
-   ServiceHandler(FragmentManager fragmentManager, MenuItem refreshItem, String applicationFolder)
+   ServiceHandler(FragmentManager fragmentManager, MenuItem refreshItem)
    {
       m_fragmentManager = fragmentManager;
 
       /* TODO, this is not the same MenuItem when you restart the app. */
       s_refreshItem = refreshItem;
-      m_applicationFolder = applicationFolder;
    }
 
    /* The stuff we would like to run when the service completes. */
@@ -54,36 +53,24 @@ class ServiceHandler extends Handler
          return;
       }
 
-      int updatedPage = bundle.getInt("page_number");
+      int page = bundle.getInt("page_number");
 
-      /* Find which pages we want to refresh. */
-      /* Because this method is only called when the activity exists, TAG_LIST should exist. */
-      int tagsCount = PagerAdapterFeeds.TAG_LIST.size();
-      int[] pagesToRefresh;
+      /* Refresh the tag page. */
+      ListFragment listFragment = (ListFragment) m_fragmentManager.findFragmentByTag(
+            Utilities.FRAGMENT_ID_PREFIX + page);
 
-      if(0 == updatedPage)
+      if(null != listFragment)
       {
-         pagesToRefresh = new int[tagsCount];
-         for(int i = 0; i < tagsCount; i++)
-         {
-            pagesToRefresh[i] = i;
-         }
-      }
-      else
-      {
-         pagesToRefresh = new int[]{0, updatedPage};
+         AsyncReloadTagPage.newInstance(page, listFragment.getListView());
       }
 
-      /* Refresh those Pages. */
-      for(int page : pagesToRefresh)
+      /* Update the manage page if we can see it. */
+      ListFragment manageFragment = (ListFragment) m_fragmentManager.findFragmentByTag(
+            FeedsActivity.FRAGMENT_TAGS[1]);
+      if(null != manageFragment && manageFragment.isVisible())
       {
-         ListFragment listFragment = (ListFragment) m_fragmentManager.findFragmentByTag(
-               Utilities.FRAGMENT_ID_PREFIX + page);
-         if(null != listFragment)
-         {
-            ListView listView = listFragment.getListView();
-            AsyncReloadTagPage.newInstance(page, listView, m_applicationFolder, 0 == page);
-         }
+         AsyncManage.newInstance(manageFragment.getActivity(),
+               (ArrayAdapter<Editable>) manageFragment.getListAdapter());
       }
    }
 }

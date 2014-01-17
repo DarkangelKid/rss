@@ -33,7 +33,6 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -130,10 +129,15 @@ class Utilities
    static
    void switchFragments(FeedsActivity activity, String newTag)
    {
+      /* If the page is our current page, return. */
+      if(activity.m_currentFragment.equals(newTag))
+      {
+         return;
+      }
       FragmentManager manager = activity.getFragmentManager();
       manager.beginTransaction()
-             .hide(manager.findFragmentByTag(activity.m_currentFragment))
-             .show(manager.findFragmentByTag(newTag))
+             .hide(FeedsActivity.getFragment(manager, activity.m_currentFragment))
+             .show(FeedsActivity.getFragment(manager, newTag))
              .commit();
       activity.m_currentFragment = newTag;
    }
@@ -142,22 +146,5 @@ class Utilities
    boolean isTextRtl(CharSequence c)
    {
       return TextDirectionHeuristics.FIRSTSTRONG_LTR.isRtl(c, 0, c.length() - 1);
-   }
-
-   static
-   boolean deleteDirectory(File directory)
-   {
-      if(directory.isDirectory())
-      {
-         for(String child : directory.list())
-         {
-            boolean success = !deleteDirectory(new File(directory, child));
-            if(success)
-            {
-               return false;
-            }
-         }
-      }
-      return directory.delete();
    }
 }

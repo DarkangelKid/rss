@@ -23,41 +23,39 @@ import android.os.AsyncTask;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 
-class AsyncLoadImage extends AsyncTask<Object, Void, Bitmap>
+class AsyncLoadImage extends AsyncTask<String, Void, Bitmap>
 {
    private static final int IMAGE_FADE_IN_DURATION = 166;
    private final WeakReference<ViewCustom> m_view;
    private final int m_viewTag;
    private final float m_opacity;
+   private final Context m_context;
 
    private
    AsyncLoadImage(ViewCustom view, int viewTag, float opacity)
    {
+      m_context = view.getContext();
       m_view = new WeakReference<>(view);
       m_viewTag = viewTag;
       m_opacity = opacity;
    }
 
    static
-   void newInstance(ViewCustom view, String applicationFolder, String imageName, int viewTag,
-         Context context, float opacity)
+   void newInstance(ViewCustom view, String imageName, int viewTag, float opacity)
    {
-      AsyncTask<Object, Void, Bitmap> task = new AsyncLoadImage(view, viewTag, opacity);
+      AsyncTask<String, Void, Bitmap> task = new AsyncLoadImage(view, viewTag, opacity);
 
-      task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, applicationFolder, imageName, context);
+      task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, imageName);
    }
 
    @Override
    protected
-   Bitmap doInBackground(Object... params)
+   Bitmap doInBackground(String... params)
    {
-      String imagePath = params[0] + (String) params[1];
-
-      BitmapFactory.Options o = new BitmapFactory.Options();
-      o.inSampleSize = 1;
-
       View viewReference = m_view.get();
       if(null == viewReference)
       {
@@ -65,7 +63,14 @@ class AsyncLoadImage extends AsyncTask<Object, Void, Bitmap>
          return null;
       }
 
-      return BitmapFactory.decodeFile(imagePath, o);
+      try(FileInputStream in = m_context.openFileInput(params[0]))
+      {
+         return BitmapFactory.decodeStream(in);
+      }
+      catch(IOException ignored)
+      {
+         return null;
+      }
    }
 
    @Override

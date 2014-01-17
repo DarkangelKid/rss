@@ -22,6 +22,7 @@ import android.content.Context;
 import android.support.v13.app.FragmentPagerAdapter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -30,7 +31,7 @@ import java.util.regex.Pattern;
 
 class PagerAdapterFeeds extends FragmentPagerAdapter
 {
-   private static final Pattern SPLIT_COMMA = Pattern.compile(",");
+   static final Pattern SPLIT_COMMA = Pattern.compile(", ");
    static final List<String> TAG_LIST = new ArrayList<>(0);
 
    PagerAdapterFeeds(FragmentManager fm)
@@ -38,9 +39,9 @@ class PagerAdapterFeeds extends FragmentPagerAdapter
       super(fm);
    }
 
-   void updateTags(String applicationFolder, Context context)
+   void updateTags(Context context)
    {
-      Set<String> tagSet = getTagsFromDisk(applicationFolder, context);
+      Set<String> tagSet = getTagsFromDisk(context);
       TAG_LIST.clear();
       TAG_LIST.addAll(tagSet);
 
@@ -48,10 +49,10 @@ class PagerAdapterFeeds extends FragmentPagerAdapter
    }
 
    static
-   Set<String> getTagsFromDisk(String applicationFolder, Context context)
+   Set<String> getTagsFromDisk(Context context)
    {
       Set<String> tagSet = Collections.synchronizedSet(new LinkedHashSet<String>(0));
-      String[] tagArray = Read.csvFile(Read.INDEX, applicationFolder, 't')[0];
+      String[] tagArray = Read.csvFile(context, Read.INDEX, 't')[0];
 
       /* Get the all tag from resources. */
       String allTag = context.getString(R.string.all_tag);
@@ -61,14 +62,8 @@ class PagerAdapterFeeds extends FragmentPagerAdapter
 
       for(String tag : tagArray)
       {
-         String[] tags = SPLIT_COMMA.split(tag);
-         for(String singleTag : tags)
-         {
-            String trimmedTag = singleTag.trim();
-            tagSet.add(trimmedTag);
-         }
+         tagSet.addAll(Arrays.asList(SPLIT_COMMA.split(tag)));
       }
-
       return tagSet;
    }
 

@@ -34,31 +34,34 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.channels.FileChannel;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
 {
    /* Formats */
-   private static final String INDEX_FORMAT = "|f|%s|u|%s|t|%s|";
-   private static final String NEW_LINE = System.getProperty("line.separator");
+   static final String INDEX_FORMAT = "|f|%s|u|%s|t|%s|";
    private static final Pattern ILLEGAL_FILE_CHARS = Pattern.compile("[/\\?%*|<>:]");
    private static final Pattern SPLIT_SPACE = Pattern.compile(" ");
    private static final Pattern SPLIT_COMMA = Pattern.compile(",");
    private final Dialog m_dialog;
+   private final String m_oldIndexLine;
    private final String m_oldFeedName;
-   private final String m_applicationFolder;
    private final Activity m_activity;
 
    private
-   AsyncCheckFeed(Activity activity, Dialog dialog, String oldFeedName, String applicationFolder)
+   AsyncCheckFeed(Activity activity, Dialog dialog, String oldIndexLine, String oldFeedName)
    {
       m_dialog = dialog;
+      m_oldIndexLine = oldIndexLine;
       m_oldFeedName = oldFeedName;
-      m_applicationFolder = applicationFolder;
       m_activity = activity;
 
       Button button = (Button) m_dialog.findViewById(DialogEditFeed.BUTTON_IDS[1]);
@@ -67,27 +70,37 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
    }
 
    static
-   void newInstance(Activity activity, Dialog dialog, String oldFeedTitle, String applicationFolder)
+   void newInstance(Activity activity, Dialog dialog, String oldIndexLine, String oldFeedName)
    {
-      AsyncTask<Void, Void, String[]> task = new AsyncCheckFeed(activity, dialog, oldFeedTitle,
-            applicationFolder);
+      AsyncTask<Void, Void, String[]> task = new AsyncCheckFeed(activity, dialog, oldIndexLine,
+            oldFeedName);
 
       task.executeOnExecutor(THREAD_POOL_EXECUTOR);
    }
 
    private static
-   void moveFile(String originalName, String resultingName, String storage)
+   void renameFeed(Context context, String oldName, String newName)
    {
-      new File(storage + originalName).renameTo(new File(storage + resultingName));
+      for(String file : ServiceUpdate.FEED_FILES)
+      {
+         try(FileInputStream in = context.openFileInput(oldName + file);
+             FileOutputStream out = context.openFileOutput(newName + file, Context.MODE_PRIVATE);
+             FileChannel inChannel = in.getChannel())
+         {
+            inChannel.transferTo(0, inChannel.size(), out.getChannel());
+         }
+         catch(IOException ignored)
+         {
+         }
+      }
    }
 
    /* Function should be safe, returns false if fails. */
    private static
-   void AppendLineToIndex(String lineToAppend, String applicationFolder)
+   void AppendLineToIndex(Context context, String lineToAppend)
    {
-      String filePath = applicationFolder + Read.INDEX;
-
-      try(BufferedWriter out = new BufferedWriter(new FileWriter(filePath, true)))
+      try(BufferedWriter out = new BufferedWriter(
+            new OutputStreamWriter(context.openFileOutput(Read.INDEX, Context.MODE_APPEND))))
       {
          out.write(lineToAppend);
       }
@@ -126,6 +139,19 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
             /* Replace any characters that are not allowed in file names. */
             Matcher matcher = ILLEGAL_FILE_CHARS.matcher(tempTitle);
             title = matcher.replaceAll("");
+
+            /* Read the titles to a List. */
+            if(!m_oldFeedName.equals(title))
+            {
+               List<String> titles = Arrays.asList(Read.csvFile(m_activity, Read.INDEX, 'f')[0]);
+
+               /* Make sure no two titles are the same. */
+               if(titles.contains(title))
+               {
+                  /* This is not really in a loop so this is the only time this line runs. */
+                  title += " " + System.currentTimeMillis();
+               }
+            }
 
             url = urlToCheck.toString();
             break;
@@ -238,9 +264,15 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
          tagBuilder.append(", ");
       }
 
-      /* Delete the last comma and space. */
+      /* Delete the last space. */
       int builderLength = tagBuilder.length();
-      tagBuilder.setLength(builderLength - 2);
+      tagBuilder.setLength(builderLength - 1);
+
+      /* Remove all trailing commas. */
+      while(',' == tagBuilder.charAt(tagBuilder.length() - 1))
+      {
+         tagBuilder.setLength(tagBuilder.length() - 1);
+      }
 
       return tagBuilder.toString();
    }
@@ -260,43 +292,41 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       if(isFeedValid)
       {
          /* Create the csv. */
-         String feedInfo = String.format(INDEX_FORMAT, finalTitle, feedUrlFromCheck, finalTag) +
-                           NEW_LINE;
+         String newIndexLine = String.format(INDEX_FORMAT, finalTitle, feedUrlFromCheck, finalTag) +
+                               Write.NEW_LINE;
 
          if(isExistingFeed)
          {
             /* Rename the folder if it is different. */
             if(!m_oldFeedName.equals(finalTitle))
             {
-               moveFile(m_oldFeedName, finalTitle, m_applicationFolder);
+               renameFeed(context, m_oldFeedName, finalTitle);
             }
-            Write.editIndexLine(m_oldFeedName, m_applicationFolder, Write.MODE_REPLACE, feedInfo);
+            Write.editIndexLine(context, m_oldIndexLine, Write.MODE_REPLACE, newIndexLine);
          }
          else
          {
             /* Save the feed to the index. */
-            AppendLineToIndex(feedInfo, m_applicationFolder);
+            AppendLineToIndex(context, newIndexLine);
          }
 
          /* Update the PagerAdapter for the tag fragments. */
          ViewPager feedPager = (ViewPager) m_activity.findViewById(R.id.view_pager_tags);
          PagerAdapterFeeds pagerAdapterFeeds = (PagerAdapterFeeds) feedPager.getAdapter();
-         pagerAdapterFeeds.updateTags(m_applicationFolder, context);
+         pagerAdapterFeeds.updateTags(context);
 
          /* Update the NavigationDrawer adapter. */
-         AsyncNavigationAdapter.newInstance(m_activity, m_applicationFolder, -1);
+         AsyncNavigationAdapter.newInstance(m_activity, -1);
 
          /* Get the manage ListView and update it. */
          FragmentManager manager = m_activity.getFragmentManager();
          Fragment fragment = manager.findFragmentByTag(FeedsActivity.FRAGMENT_TAGS[1]);
 
-         if(null != fragment)
+         if(null != fragment && fragment.isVisible())
          {
-            AsyncManage.newInstance(
-                  (ArrayAdapter<Editable>) ((ListFragment) fragment).getListAdapter(),
-                  context.getResources(), m_applicationFolder);
+            AsyncManage.newInstance(context,
+                  (ArrayAdapter<Editable>) ((ListFragment) fragment).getListAdapter());
          }
-
          m_dialog.dismiss();
       }
       else

@@ -16,12 +16,13 @@
 
 package com.poloure.simplerss;
 
+import android.content.Context;
+
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.DataOutputStream;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 
 class Write
 {
@@ -30,19 +31,19 @@ class Write
    static final String NEW_LINE = System.getProperty("line.separator");
 
    static
-   void editIndexLine(CharSequence stringSearch, String applicationFolder, int mode,
-         String replacementLine)
+   void editIndexLine(Context context, CharSequence stringSearch, int mode, String replacementLine)
    {
       /* Read the file to an array, if the file does not exist, return. */
-      String[] lines = Read.file(Read.INDEX, applicationFolder);
+      String[] lines = Read.file(context, Read.INDEX);
       if(0 != lines.length)
       {
-         String filePath = applicationFolder + Read.INDEX;
-         try(BufferedWriter out = new BufferedWriter(new FileWriter(filePath, false)))
+         String filePath = Read.INDEX;
+         try(BufferedWriter out = new BufferedWriter(
+               new OutputStreamWriter(context.openFileOutput(filePath, Context.MODE_PRIVATE))))
          {
             for(String line : lines)
             {
-               if(!line.contains(stringSearch))
+               if(!line.equals(stringSearch))
                {
                   out.write(line + NEW_LINE);
                }
@@ -59,12 +60,10 @@ class Write
    }
 
    static
-   void longSet(String fileName, Iterable<Long> longSet, String fileFolder)
+   void longSet(Context context, String fileName, Iterable<Long> longSet)
    {
-      String filePath = fileFolder + fileName;
-
       try(DataOutputStream out = new DataOutputStream(
-            new BufferedOutputStream(new FileOutputStream(filePath))))
+            new BufferedOutputStream(context.openFileOutput(fileName, Context.MODE_PRIVATE))))
       {
          for(long l : longSet)
          {

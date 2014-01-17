@@ -16,31 +16,30 @@
 
 package com.poloure.simplerss;
 
-import org.apache.http.util.ByteArrayBuffer;
+import android.content.Context;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 class Read
 {
    static final String INDEX = "index.txt";
-   private static final Pattern SPLIT_NEWLINE = Pattern.compile("\n");
    private static final String ITEM_SEPARATOR = "\\|";
-   private static final int FILE_BUFFER_SIZE = 8096;
 
    static
-   String[][] csvFile(String fileName, String applicationFolder, char... type)
+   String[][] csvFile(Context context, String fileName, char... type)
    {
-      String[] lines = file(fileName, applicationFolder);
+      String[] lines = file(context, fileName);
       int lineCount = lines.length;
 
       String[][] out = new String[type.length][lineCount];
@@ -71,47 +70,46 @@ class Read
 
    /* This function will return a zero length array on error. */
    static
-   String[] file(String fileName, String applicationFolder)
+   String[] file(Context context, String fileName)
    {
-      String[] lines;
+      List<String> list = new ArrayList<>(32);
 
-      /* Begin reading the file to the String array. */
-      String filePath = applicationFolder + fileName;
-
-      try(FileInputStream f = new FileInputStream(filePath); FileChannel ch = f.getChannel())
+      try(BufferedReader in = new BufferedReader(
+            new InputStreamReader(context.openFileInput(fileName))))
       {
-         ByteArrayBuffer builder = new ByteArrayBuffer(FILE_BUFFER_SIZE);
-         MappedByteBuffer mb = ch.map(FileChannel.MapMode.READ_ONLY, 0L, ch.size());
-         byte[] bufferArray = new byte[FILE_BUFFER_SIZE];
-
-         while(mb.hasRemaining())
+         String line;
+         while(null != (line = in.readLine()))
          {
-            int nGet = Math.min(mb.remaining(), FILE_BUFFER_SIZE);
-            mb.get(bufferArray, 0, nGet);
-            builder.append(bufferArray, 0, nGet);
+            list.add(line);
          }
-
-         byte[] bytes = builder.toByteArray();
-         CharSequence fullFile = new String(bytes);
-
-         lines = SPLIT_NEWLINE.split(fullFile);
       }
-      catch(IOException e)
+      catch(IOException ignored)
       {
-         e.printStackTrace();
          return new String[0];
       }
-      return lines;
+      return list.toArray(new String[list.size()]);
    }
 
    static
-   Set<Long> longSet(String fileName, String fileFolder)
+   boolean fileExists(Context context, String fileName)
+   {
+      try(FileInputStream in = context.openFileInput(fileName))
+      {
+      }
+      catch(IOException ignored)
+      {
+         return false;
+      }
+      return true;
+   }
+
+   static
+   Set<Long> longSet(Context context, String fileName)
    {
       Set<Long> longSet = new LinkedHashSet<>(64);
 
-      String filePath = fileFolder + fileName;
       try(DataInputStream in = new DataInputStream(
-            new BufferedInputStream(new FileInputStream(filePath))))
+            new BufferedInputStream(context.openFileInput(fileName))))
       {
          while(true)
          {

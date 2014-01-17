@@ -25,13 +25,11 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.ListFragment;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -45,8 +43,6 @@ import android.view.View;
 import android.widget.Adapter;
 import android.widget.ListView;
 
-import java.io.File;
-
 public
 class FeedsActivity extends Activity
 {
@@ -56,12 +52,14 @@ class FeedsActivity extends Activity
    private static final int MINUTE_VALUE = 60000;
    static Handler s_serviceHandler;
    private ActionBarDrawerToggle m_drawerToggle;
-   private String m_applicationFolder;
    boolean m_showMenuItems = true;
 
    String m_currentFragment;
 
-   static final String[] FRAGMENT_TAGS = {"Feeds", "Manage", "Settings"};
+   private static final String FEED_TAG = "Feeds";
+   private static final String MANAGE_TAG = "Manage";
+   private static final String SETTINGS_TAG = "Settings";
+   static final String[] FRAGMENT_TAGS = {FEED_TAG, MANAGE_TAG, SETTINGS_TAG};
 
    /* Start of ordered state changes of the Activity.
     *
@@ -77,10 +75,8 @@ class FeedsActivity extends Activity
 
       setContentView(R.layout.navigation_drawer_and_content_frame);
 
-      m_applicationFolder = getApplicationFolder(this);
-
       /* Load the read items to the AdapterTag class. */
-      AdapterTags.READ_ITEM_TIMES.addAll(Read.longSet(READ_ITEMS, m_applicationFolder));
+      AdapterTags.READ_ITEM_TIMES.addAll(Read.longSet(this, READ_ITEMS));
 
       /* Configure the ActionBar. */
       ActionBar actionBar = getActionBar();
@@ -111,7 +107,7 @@ class FeedsActivity extends Activity
       navigationList.setOnItemClickListener(new OnNavigationListItemClick(this));
 
       /* This method calls navigationList.getAdapter(). */
-      AsyncNavigationAdapter.newInstance(this, m_applicationFolder, 0);
+      AsyncNavigationAdapter.newInstance(this, 0);
 
       /* Create and hide the fragments that go inside the content frame. */
       FragmentManager manager = getFragmentManager();
@@ -119,7 +115,7 @@ class FeedsActivity extends Activity
 
       for(int i = 0; FRAGMENT_TAGS.length > i; i++)
       {
-         Fragment fragment = getFragment(manager, FRAGMENT_TAGS[i], i);
+         Fragment fragment = getFragment(manager, FRAGMENT_TAGS[i]);
          if(!fragment.isAdded())
          {
             transaction.add(R.id.content_frame, fragment, FRAGMENT_TAGS[i]);
@@ -166,7 +162,7 @@ class FeedsActivity extends Activity
       setServiceIntent(ALARM_SERVICE_STOP);
 
       /* Update the navigation adapter. */
-      AsyncNavigationAdapter.newInstance(this, m_applicationFolder, 0);
+      AsyncNavigationAdapter.newInstance(this, 0);
    }
 
    /* Activity is now running.
@@ -205,7 +201,7 @@ class FeedsActivity extends Activity
    void onDestroy()
    {
       super.onDestroy();
-      Write.longSet(READ_ITEMS, AdapterTags.READ_ITEM_TIMES, m_applicationFolder);
+      Write.longSet(this, READ_ITEMS, AdapterTags.READ_ITEM_TIMES);
    }
 
    /* Option menu methods.
@@ -348,7 +344,7 @@ class FeedsActivity extends Activity
       /* Set the service handler in FeedsActivity so we can check and call it from ServiceUpdate. */
       FragmentManager manager = getFragmentManager();
       ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager_tags);
-      s_serviceHandler = new ServiceHandler(manager, menuItem, m_applicationFolder);
+      s_serviceHandler = new ServiceHandler(manager, menuItem);
 
       Intent intent = new Intent(this, ServiceUpdate.class);
       intent.putExtra("GROUP_NUMBER", viewPager.getCurrentItem());
@@ -356,32 +352,18 @@ class FeedsActivity extends Activity
    }
 
    static
-   String getApplicationFolder(Context context)
-   {
-      /* Check the media state for the desirable state. */
-      String state = Environment.getExternalStorageState();
-      File externalFilesDir = context.getExternalFilesDir(null);
-
-      if(!Environment.MEDIA_MOUNTED.equals(state) || null == externalFilesDir)
-      {
-         return null;
-      }
-      return externalFilesDir.getAbsolutePath() + File.separatorChar;
-   }
-
-   private static
-   Fragment getFragment(FragmentManager manager, String tag, int position)
+   Fragment getFragment(FragmentManager manager, String tag)
    {
       Fragment fragment = manager.findFragmentByTag(tag);
       if(null == fragment)
       {
-         switch(position)
+         switch(tag)
          {
-            case 0:
+            case FEED_TAG:
                return new FragmentFeeds();
-            case 1:
+            case MANAGE_TAG:
                return new ListFragmentManage();
-            case 2:
+            case SETTINGS_TAG:
                return new FragmentSettings();
          }
       }

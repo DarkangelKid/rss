@@ -47,7 +47,6 @@ class DialogEditFeed extends Dialog
    private static final int[] BUTTON_TEXTS = {R.string.dialog_cancel, R.string.dialog_accept};
    private static final int COLOR_UNSELECTED = Color.argb(0, 0, 0, 0);
    private static final int COLOR_SELECTED = Color.parseColor("#ff33b5e5");
-   private final String m_applicationFolder;
    private final Activity m_activity;
    private final int m_position;
 
@@ -57,7 +56,6 @@ class DialogEditFeed extends Dialog
       super(activity, android.R.style.Theme_Holo_Light_Dialog);
       m_activity = activity;
       m_position = position;
-      m_applicationFolder = FeedsActivity.getApplicationFolder(activity);
    }
 
    static
@@ -96,7 +94,7 @@ class DialogEditFeed extends Dialog
       tagEdit.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
 
       EditText[] editTexts = {new EditText(m_activity), new EditText(m_activity), tagEdit};
-      String[][] content = Read.csvFile(Read.INDEX, m_applicationFolder, 'f', 'u', 't');
+      String[][] content = Read.csvFile(getContext(), Read.INDEX, 'f', 'u', 't');
 
       for(int i = 0; 3 > i; i++)
       {
@@ -116,10 +114,13 @@ class DialogEditFeed extends Dialog
       editTexts[1].setImeOptions(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
 
       /* Get what the feed used to be called. */
-      String oldTitle = -1 == m_position ? "" : content[0][m_position];
+      String oldLine = -1 == m_position ? ""
+            : String.format(AsyncCheckFeed.INDEX_FORMAT, content[0][m_position],
+                  content[1][m_position], content[2][m_position]);
+      String oldName = -1 == m_position ? "" : content[0][m_position];
 
       /* Create the button OnClickListeners. */
-      View.OnClickListener positiveButtonClick = new OnClickPositive(this, oldTitle);
+      View.OnClickListener positiveButtonClick = new OnClickPositive(this, oldLine, oldName);
       View.OnClickListener negativeButtonClick = new View.OnClickListener()
       {
          @Override
@@ -178,18 +179,20 @@ class DialogEditFeed extends Dialog
    {
       private final Dialog m_dialog;
       private final String m_oldFeed;
+      private final String m_oldName;
 
-      OnClickPositive(Dialog dialog, String oldFeed)
+      OnClickPositive(Dialog dialog, String oldFeed, String oldName)
       {
          m_dialog = dialog;
          m_oldFeed = oldFeed;
+         m_oldName = oldName;
       }
 
       @Override
       public
       void onClick(View v)
       {
-         AsyncCheckFeed.newInstance(m_activity, m_dialog, m_oldFeed, m_applicationFolder);
+         AsyncCheckFeed.newInstance(m_activity, m_dialog, m_oldFeed, m_oldName);
       }
    }
 }

@@ -27,13 +27,11 @@ import android.widget.ListView;
 class OnPageChangeTags extends SimpleOnPageChangeListener
 {
    private final Activity m_activity;
-   private final String m_applicationFolder;
    private int m_position;
 
-   OnPageChangeTags(Activity activity, String applicationFolder)
+   OnPageChangeTags(Activity activity)
    {
       m_activity = activity;
-      m_applicationFolder = applicationFolder;
    }
 
    @Override
@@ -64,8 +62,7 @@ class OnPageChangeTags extends SimpleOnPageChangeListener
             if(null != listAdapter && 0 == listAdapter.getCount())
             {
                ListView listView = tagFragment.getListView();
-               AsyncReloadTagPage.newInstance(m_position, listView, m_applicationFolder,
-                     0 == m_position);
+               AsyncReloadTagPage.newInstance(m_position, listView);
             }
          }
       }

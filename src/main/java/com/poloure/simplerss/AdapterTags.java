@@ -39,13 +39,11 @@ class AdapterTags extends BaseAdapter
    final List<Long> m_times = new ArrayList<>(0);
    final List<FeedItem> m_feedItems = new ArrayList<>(0);
    private final Context m_context;
-   private final String m_applicationFolder;
    boolean m_isReadingItems = true;
 
-   AdapterTags(Context context, String applicationFolder)
+   AdapterTags(Context context)
    {
       m_context = context;
-      m_applicationFolder = applicationFolder;
    }
 
    @Override
@@ -121,8 +119,7 @@ class AdapterTags extends BaseAdapter
       {
          view.setBitmap(null);
          view.setTag(position);
-         AsyncLoadImage.newInstance(view, m_applicationFolder, item.m_imageName, position,
-               m_context, isRead ? 0.5F : 1.0F);
+         AsyncLoadImage.newInstance(view, item.m_imageName, position, isRead ? 0.5F : 1.0F);
       }
 
       return view;

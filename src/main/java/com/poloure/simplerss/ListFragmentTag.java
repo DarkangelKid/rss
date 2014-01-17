@@ -54,20 +54,15 @@ class ListFragmentTag extends ListFragment
 
       Activity activity = getActivity();
       int position = getArguments().getInt(POSITION_KEY);
-      String applicationFolder = FeedsActivity.getApplicationFolder(activity);
 
-      setListAdapter(new AdapterTags(activity, applicationFolder));
+      setListAdapter(new AdapterTags(activity));
 
       ListView listView = getListView();
-      listView.setOnScrollListener(
-            new OnScrollFeed(activity, applicationFolder, position, listView.getPaddingTop()));
+      listView.setOnScrollListener(new OnScrollFeed(activity, position, listView.getPaddingTop()));
       listView.setDividerHeight(0);
       registerForContextMenu(listView);
 
-      if(0 == position)
-      {
-         AsyncReloadTagPage.newInstance(0, listView, applicationFolder, true);
-      }
+      AsyncReloadTagPage.newInstance(position, listView);
    }
 
    @Override

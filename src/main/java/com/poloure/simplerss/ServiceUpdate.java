@@ -36,13 +36,12 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -58,10 +57,10 @@ import java.util.regex.Pattern;
 public
 class ServiceUpdate extends IntentService
 {
-   static final String ITEM_LIST = "item_list.txt";
-   static final String CONTENT_FILE = "content.txt";
+   static final String ITEM_LIST = "-item_list.txt";
+   static final String CONTENT_FILE = "-content.txt";
+   static final String[] FEED_FILES = {ITEM_LIST, CONTENT_FILE};
 
-   static final String THUMBNAIL_DIR = "thumbnails" + File.separatorChar;
    private static final char ITEM_SEPARATOR = '|';
    private static final int MIN_IMAGE_WIDTH = 64;
    private static final int FEED_ITEM_INITIAL_CAPACITY = 200;
@@ -115,9 +114,10 @@ class ServiceUpdate extends IntentService
    }
 
    private static
-   void writeCollection(String fileName, Iterable<?> content, String fileFolder)
+   void writeCollection(Context context, String fileName, Iterable<?> content)
    {
-      try(BufferedWriter out = new BufferedWriter(new FileWriter(fileFolder + fileName, false)))
+      try(BufferedWriter out = new BufferedWriter(
+            new OutputStreamWriter(context.openFileOutput(fileName, Context.MODE_PRIVATE))))
       {
          for(Object item : content)
          {
@@ -157,33 +157,33 @@ class ServiceUpdate extends IntentService
    }
 
    private static
-   Set<String> fileToSet(String fileName, String fileFolder)
+   Set<String> fileToSet(Context context, String fileName)
    {
       Set<String> set = new LinkedHashSet<>(INITIAL_TAG_SET_SIZE);
-      Collections.addAll(set, Read.file(fileName, fileFolder));
+      Collections.addAll(set, Read.file(context, fileName));
       return set;
    }
 
    private static
-   void getThumbnail(StringBuilder build, String thumbnailDir, String imgLink, Context context)
+   void getThumbnail(StringBuilder build, String imgLink, Context context)
    {
       /* Find out if images are disabled. */
       SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
       boolean imagesDisabled = !preferences.getBoolean("images_enabled", true);
 
       /* Produce the thumbnail path. */
-      String applicationFolder = FeedsActivity.getApplicationFolder(context);
-      String imageName = imgLink.substring(imgLink.lastIndexOf('/') + 1);
-      String thumbnailPath = applicationFolder + thumbnailDir + imageName;
+      String imageFile = imgLink.substring(imgLink.lastIndexOf('/') + 1);
 
-      File imageFile = new File(thumbnailPath);
-      if(imagesDisabled || imageFile.exists())
+      /* If the image exists then it has previously passed the MIN_IMAGE_WIDTH condition. */
+      if(imagesDisabled || Read.fileExists(context, imageFile))
       {
+         appendItem(build, Index.IMAGE, imgLink);
          return;
       }
 
       try(BufferedInputStream input = new BufferedInputStream(new URL(imgLink).openStream());
-          BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(imageFile)))
+          BufferedOutputStream out = new BufferedOutputStream(
+                context.openFileOutput(imageFile, MODE_PRIVATE)))
       {
          Bitmap bitmap = BitmapFactory.decodeStream(input);
 
@@ -208,6 +208,8 @@ class ServiceUpdate extends IntentService
          /* Get the quality from settings. */
          String qualityString = preferences.getString("thumbnail_quality", "75");
          int quality = Integer.parseInt(qualityString);
+         //System.out.println("SAVING: " + imageFile);
+
          bitmap.compress(Bitmap.CompressFormat.WEBP, quality, out);
       }
       catch(IOException e)
@@ -268,7 +270,6 @@ class ServiceUpdate extends IntentService
       wakeLock.acquire();
 
       int page = intent.getIntExtra("GROUP_NUMBER", 0);
-      String applicationFolder = FeedsActivity.getApplicationFolder(this);
 
       /* Make a new paint object so we can break texts. */
       View view = new ViewCustom(this, 0);
@@ -277,47 +278,39 @@ class ServiceUpdate extends IntentService
       List<String> tagList = PagerAdapterFeeds.TAG_LIST;
       if(tagList.isEmpty())
       {
-         Set<String> set = PagerAdapterFeeds.getTagsFromDisk(applicationFolder, this);
+         Set<String> set = PagerAdapterFeeds.getTagsFromDisk(this);
          tagList.addAll(set);
       }
 
       String tag = tagList.get(page);
 
-      String[][] content = Read.csvFile(Read.INDEX, applicationFolder, 'f', 'u', 't');
-
-      String allTag = getString(R.string.all_tag);
-      boolean isAllTag = tag.equals(allTag);
+      String[][] content = Read.csvFile(this, Read.INDEX, 'f', 'u', 't');
 
       /* Download and parse each feed in the index. */
       for(int i = 0; i < content[0].length; i++)
       {
-         /* TODO: tagOne|tagsTwo|etc.contains(gsT) returns true but should be false. */
-         if(isAllTag || content[2][i].contains(tag))
+         if(0 == page ||
+            Arrays.asList(PagerAdapterFeeds.SPLIT_COMMA.split(content[2][i])).contains(tag))
          {
-            /* Create all the folders down to the thumbnail folder. */
-            File folder = new File(applicationFolder + content[0][i] + File.separatorChar +
-                                   THUMBNAIL_DIR);
-            folder.mkdirs();
-
             try
             {
-               parseFeed(content[1][i], content[0][i], applicationFolder);
+               parseFeed(content[1][i], content[0][i]);
+
+               /* Update the Activity. */
+               if(null != FeedsActivity.s_serviceHandler)
+               {
+                  Message message = new Message();
+                  Bundle bundle = new Bundle();
+                  bundle.putInt("page_number", i);
+                  message.setData(bundle);
+                  FeedsActivity.s_serviceHandler.sendMessage(message);
+               }
             }
             catch(IOException | XmlPullParserException e)
             {
                e.printStackTrace();
             }
          }
-      }
-
-      /* If action_bar_menu is running. */
-      if(null != FeedsActivity.s_serviceHandler)
-      {
-         Message message = new Message();
-         Bundle bundle = new Bundle();
-         bundle.putInt("page_number", page);
-         message.setData(bundle);
-         FeedsActivity.s_serviceHandler.sendMessage(message);
       }
 
       wakeLock.release();
@@ -340,7 +333,7 @@ class ServiceUpdate extends IntentService
    }
 
    private static
-   void parseHtmlForImage(Context context, CharSequence html, StringBuilder build, String thumbDir)
+   void parseHtmlForImage(Context context, CharSequence html, StringBuilder build)
    {
       Matcher matcherImg = Patterns.IMG.matcher(html);
 
@@ -358,23 +351,20 @@ class ServiceUpdate extends IntentService
             imgLink = Patterns.APOSTROPHE.matcher(imgLink).replaceAll("");
             imgLink = Patterns.QUOT.matcher(imgLink).replaceAll("");
 
-            getThumbnail(build, thumbDir, imgLink, context);
+            getThumbnail(build, imgLink, context);
          }
       }
    }
 
    private
-   void parseFeed(CharSequence urlString, String feed, String applicationFolder) throws
-         XmlPullParserException, IOException
+   void parseFeed(CharSequence urlString, String feed) throws XmlPullParserException, IOException
    {
-      String feedFolder = feed + File.separatorChar;
-      String contentFileName = feedFolder + CONTENT_FILE;
-      String longFileName = feedFolder + ITEM_LIST;
-      String thumbnailDir = feedFolder + THUMBNAIL_DIR;
+      String contentFile = feed + CONTENT_FILE;
+      String longFile = feed + ITEM_LIST;
 
       /* Load the previously saved items to a map. */
-      Set<String> set = fileToSet(contentFileName, applicationFolder);
-      Set<Long> longSet = Read.longSet(longFileName, applicationFolder);
+      Set<String> set = fileToSet(this, contentFile);
+      Set<Long> longSet = Read.longSet(this, longFile);
 
       int setSize = set.size();
       int longSize = longSet.size();
@@ -438,7 +428,7 @@ class ServiceUpdate extends IntentService
                case Tags.CONTENT:
                case Tags.DESCRIPTION:
                   String content = getContent(parser);
-                  parseHtmlForImage(this, content, builder, thumbnailDir);
+                  parseHtmlForImage(this, content, builder);
                   content = Patterns.CDATA.matcher(content).replaceAll("").trim();
                   builder = appendDesLines(builder, content);
                   break;
@@ -459,7 +449,7 @@ class ServiceUpdate extends IntentService
       }
 
       /* We have finished forming the sets and we can save the new files to disk. */
-      writeCollection(contentFileName, map.values(), applicationFolder);
-      Write.longSet(longFileName, map.keySet(), applicationFolder);
+      writeCollection(this, contentFile, map.values());
+      Write.longSet(this, longFile, map.keySet());
    }
 }

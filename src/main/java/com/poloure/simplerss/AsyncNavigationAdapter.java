@@ -21,7 +21,6 @@ import android.os.AsyncTask;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -41,10 +40,10 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, NavItem[]>
    }
 
    static
-   void newInstance(Activity activity, String applicationFolder, int currentPage)
+   void newInstance(Activity activity, int currentPage)
    {
       AsyncTask<String, Void, NavItem[]> task = new AsyncNavigationAdapter(activity, currentPage);
-      task.executeOnExecutor(THREAD_POOL_EXECUTOR, applicationFolder);
+      task.executeOnExecutor(THREAD_POOL_EXECUTOR);
    }
 
    /* Get the unread counts for the tags. */
@@ -52,11 +51,8 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, NavItem[]>
    protected
    NavItem[] doInBackground(String... applicationFolder)
    {
-      String appFolder = applicationFolder[0];
-      String append = File.separatorChar + ServiceUpdate.ITEM_LIST;
-
       /* Read the index file for an array of feed names and feed tags. */
-      String[][] content = Read.csvFile(Read.INDEX, appFolder, 'f', 't');
+      String[][] content = Read.csvFile(m_activity, Read.INDEX, 'f', 't');
       String[] feedNames = content[0];
       String[] feedTags = content[1];
 
@@ -71,7 +67,7 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, NavItem[]>
       List<Collection<Long>> feedItems = new ArrayList<>(feedTotal);
       for(String feedName : feedNames)
       {
-         feedItems.add(Read.longSet(feedName + append, appFolder));
+         feedItems.add(Read.longSet(m_activity, feedName + ServiceUpdate.ITEM_LIST));
       }
 
       /* Create a temporary collection we will .clear() each iteration of the next for loop. */

@@ -66,8 +66,8 @@ class AdapterNavigationDrawer extends ArrayAdapter<NavItem>
 
          /* This RTL (char) 0x200F allows the unread counter to be aligned to the right. */
          String allTag = m_context.getString(R.string.all_tag);
-         tag = Utilities.isTextRtl(allTag) ? (char) 0x200F + tag + '\n' + (char) 0x200E
-               : (char) 0x200E + tag + '\n' + (char) 0x200F;
+         tag = Utilities.isTextRtl(allTag) ? (char) 0x200F + tag + Write.NEW_LINE + (char) 0x200E
+               : (char) 0x200E + tag + Write.NEW_LINE + (char) 0x200F;
 
          view.setText(tag + (0 == count ? "" : Utilities.getLocaleInt(count)));
       }

@@ -16,11 +16,12 @@
 
 package com.poloure.simplerss;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.view.View;
 import android.widget.ListView;
 
-import java.io.File;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -29,22 +30,18 @@ import java.util.TreeMap;
 class AsyncReloadTagPage extends AsyncTask<Integer, Collection, Void>
 {
    private static final int MIN_DES = 8;
-   private final String m_applicationFolder;
    private final ListView m_listView;
-   private final boolean m_isAllTag;
 
    private
-   AsyncReloadTagPage(ListView listView, String applicationFolder, boolean isAllTag)
+   AsyncReloadTagPage(ListView listView)
    {
       m_listView = listView;
-      m_applicationFolder = applicationFolder;
-      m_isAllTag = isAllTag;
    }
 
    static
-   void newInstance(int pageNumber, ListView listView, String storage, boolean allTag)
+   void newInstance(int pageNumber, ListView listView)
    {
-      AsyncTask<Integer, Collection, Void> task = new AsyncReloadTagPage(listView, storage, allTag);
+      AsyncTask<Integer, Collection, Void> task = new AsyncReloadTagPage(listView);
 
       task.executeOnExecutor(THREAD_POOL_EXECUTOR, pageNumber);
    }
@@ -53,34 +50,21 @@ class AsyncReloadTagPage extends AsyncTask<Integer, Collection, Void>
    protected
    Void doInBackground(Integer... page)
    {
-      int pageNumber = page[0];
-      String tag = PagerAdapterFeeds.TAG_LIST.get(pageNumber);
-
-      String thumbnailDir = File.separatorChar + ServiceUpdate.THUMBNAIL_DIR;
-      String contentFile = File.separatorChar + ServiceUpdate.CONTENT_FILE;
-
-      String[][] index = Read.csvFile(Read.INDEX, m_applicationFolder, 'f', 't');
-      if(0 == index[0].length)
-      {
-         return null;
-      }
+      Context context = m_listView.getContext();
 
       AdapterTags adapterTag = (AdapterTags) m_listView.getAdapter();
       Map<Long, FeedItem> map = new TreeMap<>(Collections.reverseOrder());
 
+      String tag = PagerAdapterFeeds.TAG_LIST.get(page[0]);
+      String[][] index = Read.csvFile(context, Read.INDEX, 'f', 't');
+
       for(int i = 0; i < index[0].length; i++)
       {
-         if(m_isAllTag || index[1][i].contains(tag))
+         if(0 == page[0] ||
+            Arrays.asList(PagerAdapterFeeds.SPLIT_COMMA.split(index[1][i])).contains(tag))
          {
-            String[][] content = Read.csvFile(index[0][i] + contentFile, m_applicationFolder, 't',
-                  'l', 'b', 'i', 'p', 'x', 'y', 'z');
-
-            if(0 == content[0].length)
-            {
-               return null;
-            }
-
-            String feedThumbnailDir = index[0][i] + thumbnailDir;
+            String[][] content = Read.csvFile(context, index[0][i] + ServiceUpdate.CONTENT_FILE,
+                  't', 'l', 'b', 'i', 'p', 'x', 'y', 'z');
 
             for(int j = 0; j < content[0].length; j++)
             {
@@ -89,12 +73,11 @@ class AsyncReloadTagPage extends AsyncTask<Integer, Collection, Void>
                /* Edit the data. */
                if(!content[3][j].isEmpty())
                {
-                  int lastSlash = content[3][j].lastIndexOf(File.separatorChar) + 1;
-                  data.m_imageName = feedThumbnailDir + content[3][j].substring(lastSlash);
+                  int lastSlash = content[3][j].lastIndexOf('/') + 1;
+                  data.m_imageName = content[3][j].substring(lastSlash);
 
                   /* If we have not downloaded the image yet, fake no image. */
-                  File image = new File(m_applicationFolder + data.m_imageName);
-                  if(!image.exists())
+                  if(!Read.fileExists(context, data.m_imageName))
                   {
                      data.m_imageName = "";
                   }
@@ -117,7 +100,6 @@ class AsyncReloadTagPage extends AsyncTask<Integer, Collection, Void>
             }
          }
       }
-
       if(!map.isEmpty())
       {
          publishProgress(map.values(), map.keySet());
