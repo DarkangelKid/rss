@@ -21,6 +21,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ListView;
 
 class OnNavigationListItemClick implements AdapterView.OnItemClickListener
 {
@@ -41,6 +42,10 @@ class OnNavigationListItemClick implements AdapterView.OnItemClickListener
 
       /* Get the the position (of FRAGMENT_TAGS) we should be changing to. */
       int selectedFragment = 2 < position ? 0 : position;
+
+      /* Set the item to be checked. */
+      ListView navigationList = (ListView) m_activity.findViewById(R.id.navigation_list);
+      navigationList.setItemChecked(selectedFragment, true);
 
       /* Switch the content frame fragment. */
       Utilities.switchFragments(m_activity, FeedsActivity.FRAGMENT_TAGS[selectedFragment]);

@@ -25,9 +25,12 @@ import android.support.v4.view.ViewPager;
 import android.text.TextDirectionHeuristics;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Adapter;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
@@ -126,8 +129,11 @@ class Utilities
    View makeProgressBar(Context context)
    {
       int size = getDp(32.0F);
+      FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(size, size);
+      params.gravity = Gravity.CENTER;
+
       ProgressBar progressBar = new ProgressBar(context);
-      progressBar.setLayoutParams(new ViewGroup.LayoutParams(size, size));
+      progressBar.setLayoutParams(params);
 
       return progressBar;
    }
