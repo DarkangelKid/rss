@@ -58,8 +58,8 @@ class ListFragmentTag extends ListFragment
       setListAdapter(new AdapterTags(activity));
 
       ListView listView = getListView();
-      listView.setOnScrollListener(new OnScrollFeed(activity, position, listView.getPaddingTop()));
-      listView.setDividerHeight(0);
+      listView.setOnScrollListener(new OnScrollFeed(activity, listView.getPaddingTop()));
+      //listView.setDividerHeight(0);
       registerForContextMenu(listView);
 
       AsyncReloadTagPage.newInstance(position, listView);

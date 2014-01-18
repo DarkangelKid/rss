@@ -21,10 +21,12 @@ import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.res.Resources;
+import android.support.v4.view.ViewPager;
 import android.text.TextDirectionHeuristics;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -46,26 +48,29 @@ class Utilities
    static final int EIGHT_DP = getDp(8.0F);
 
    static
-   void updateSubtitle(Activity activity, int page)
+   void updateSubtitle(Activity activity)
    {
       ListView navigationList = (ListView) activity.findViewById(R.id.navigation_list);
       ActionBar actionBar = activity.getActionBar();
       if(null != navigationList && null != actionBar)
       {
-         if(-1 == page)
+         String title = actionBar.getTitle().toString();
+         String feedsTitle = activity.getResources().getStringArray(R.array.navigation_titles)[0];
+
+         ViewPager feedPager = (ViewPager) activity.findViewById(R.id.view_pager_tags);
+         Adapter adapter = navigationList.getAdapter();
+
+         /* If the title is not Feeds, set no subtitle. */
+         if(null == feedPager || !title.equals(feedsTitle))
          {
             actionBar.setSubtitle(null);
          }
-         else
+         else if(0 != adapter.getCount() - 3)
          {
-            Adapter adapter = navigationList.getAdapter();
-            if(0 != adapter.getCount() - 3)
-            {
-               String unreadText = activity.getString(R.string.actionbar_subtitle_unread);
-               int count = ((NavItem) adapter.getItem(page)).m_count;
+            String unreadText = activity.getString(R.string.actionbar_subtitle_unread);
+            int count = ((NavItem) adapter.getItem(feedPager.getCurrentItem())).m_count;
 
-               actionBar.setSubtitle(unreadText + ' ' + getLocaleInt(count));
-            }
+            actionBar.setSubtitle(unreadText + ' ' + getLocaleInt(count));
          }
       }
    }
@@ -120,8 +125,9 @@ class Utilities
    static
    View makeProgressBar(Context context)
    {
+      int size = getDp(32.0F);
       ProgressBar progressBar = new ProgressBar(context);
-      setPaddingEqual(progressBar, getDp(7.0F));
+      progressBar.setLayoutParams(new ViewGroup.LayoutParams(size, size));
 
       return progressBar;
    }

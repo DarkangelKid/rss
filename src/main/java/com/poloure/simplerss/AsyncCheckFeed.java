@@ -64,7 +64,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       m_oldFeedName = oldFeedName;
       m_activity = activity;
 
-      Button button = (Button) m_dialog.findViewById(DialogEditFeed.BUTTON_IDS[1]);
+      Button button = (Button) m_dialog.findViewById(R.id.dialog_button_positive);
       button.setText(R.string.dialog_checking);
       button.setEnabled(false);
    }
@@ -115,9 +115,9 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
    String[] doInBackground(Void... nothing)
    {
       /* Get the user's input. */
-      CharSequence inputName = ((TextView) m_dialog.findViewById(DialogEditFeed.IDS[0])).getText();
-      CharSequence inputTags = ((TextView) m_dialog.findViewById(DialogEditFeed.IDS[2])).getText();
-      CharSequence inputUrl = ((TextView) m_dialog.findViewById(DialogEditFeed.IDS[1])).getText();
+      CharSequence inputName = ((TextView) m_dialog.findViewById(R.id.dialog_name)).getText();
+      CharSequence inputUrl = ((TextView) m_dialog.findViewById(R.id.dialog_url)).getText();
+      CharSequence inputTags = ((TextView) m_dialog.findViewById(R.id.dialog_tags)).getText();
 
       inputUrl = null == inputUrl ? "" : inputUrl;
       inputName = null == inputName ? "" : inputName;
@@ -316,7 +316,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
          pagerAdapterFeeds.updateTags(context);
 
          /* Update the NavigationDrawer adapter. */
-         AsyncNavigationAdapter.newInstance(m_activity, -1);
+         AsyncNavigationAdapter.newInstance(m_activity);
 
          /* Get the manage ListView and update it. */
          FragmentManager manager = m_activity.getFragmentManager();
@@ -331,7 +331,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       }
       else
       {
-         Button button = (Button) m_dialog.findViewById(DialogEditFeed.BUTTON_IDS[1]);
+         Button button = (Button) m_dialog.findViewById(R.id.dialog_button_positive);
          button.setText(R.string.dialog_accept);
          button.setEnabled(true);
       }

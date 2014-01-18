@@ -62,7 +62,7 @@ class OnNavigationListItemClick implements AdapterView.OnItemClickListener
       /* If a main title was clicked, set the subtitle accordingly. */
       else
       {
-         Utilities.updateSubtitle(m_activity, 0 == position ? viewPager.getCurrentItem() : -1);
+         Utilities.updateSubtitle(m_activity);
       }
    }
 }

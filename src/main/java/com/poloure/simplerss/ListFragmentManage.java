@@ -106,7 +106,7 @@ class ListFragmentManage extends ListFragment
                PagerAdapterFeeds pagerAdapterFeeds = (PagerAdapterFeeds) feedPager.getAdapter();
 
                pagerAdapterFeeds.updateTags(activity);
-               AsyncNavigationAdapter.newInstance(activity, -1);
+               AsyncNavigationAdapter.newInstance(activity);
                AsyncManage.newInstance(activity, (ArrayAdapter<Editable>) listView.getAdapter());
 
                mode.finish();

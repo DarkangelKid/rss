@@ -85,7 +85,6 @@ class PagerAdapterFeeds extends FragmentPagerAdapter
    public
    String getPageTitle(int position)
    {
-      int size = getCount();
-      return TAG_LIST.toArray(new String[size])[position];
+      return TAG_LIST.get(position);
    }
 }

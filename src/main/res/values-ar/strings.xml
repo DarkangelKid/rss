@@ -14,6 +14,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
+   <!-- For style guide: https://developer.android.com/design/style/writing.html -->
+
 <resources>
 
    <!-- The All tag.-->
@@ -35,12 +37,7 @@
    <string name="dialog_title_add">إضافة موجز</string>
    <string name="dialog_title_edit">تعديل موجز‎</string>
 
-   <!-- Add/Edit feed dialog TextView titles. -->
-   <string name="dialog_feed_name">إسم الموجز‎</string>
-   <string name="dialog_feed_url">رابط الموجز‎</string>
-   <string name="dialog_feed_tag">سمات</string>
-
-   <!-- Add/Edit feed dialog EditText hints. -->
+   <!-- TODO Update these. Add/Edit feed dialog EditText hints. -->
    <string name="dialog_feed_name_hint">إختياري‎</string>
    <string name="dialog_feed_url_hint">example.com/rss</string>
    <string name="dialog_feed_tag_hint">السمة الأولى، السمة الثانية،…‎</string>

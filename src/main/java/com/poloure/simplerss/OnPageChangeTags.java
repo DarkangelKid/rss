@@ -41,7 +41,7 @@ class OnPageChangeTags extends SimpleOnPageChangeListener
       m_position = position;
 
       /* Set the subtitle to the unread count. */
-      Utilities.updateSubtitle(m_activity, position);
+      Utilities.updateSubtitle(m_activity);
    }
 
    @Override

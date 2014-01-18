@@ -107,7 +107,7 @@ class FeedsActivity extends Activity
       navigationList.setOnItemClickListener(new OnNavigationListItemClick(this));
 
       /* This method calls navigationList.getAdapter(). */
-      AsyncNavigationAdapter.newInstance(this, 0);
+      AsyncNavigationAdapter.newInstance(this);
 
       /* Create and hide the fragments that go inside the content frame. */
       FragmentManager manager = getFragmentManager();
@@ -162,7 +162,7 @@ class FeedsActivity extends Activity
       setServiceIntent(ALARM_SERVICE_STOP);
 
       /* Update the navigation adapter. */
-      AsyncNavigationAdapter.newInstance(this, 0);
+      AsyncNavigationAdapter.newInstance(this);
    }
 
    /* Activity is now running.

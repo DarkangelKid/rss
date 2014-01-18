@@ -18,44 +18,23 @@ package com.poloure.simplerss;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
-import android.text.InputType;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.TextView;
 
 class DialogEditFeed extends Dialog
 {
-   static final int[] BUTTON_IDS = {2501, 2502};
-   static final int[] IDS = {2601, 2602, 2603};
-   private static final int[] HINTS = {
-         R.string.dialog_feed_name_hint,
-         R.string.dialog_feed_url_hint,
-         R.string.dialog_feed_tag_hint
-   };
-   private static final int[] TEXTS = {
-         R.string.dialog_feed_name, R.string.dialog_feed_url, R.string.dialog_feed_tag
-   };
-   private static final int[] BUTTON_TEXTS = {R.string.dialog_cancel, R.string.dialog_accept};
-   private static final int COLOR_UNSELECTED = Color.argb(0, 0, 0, 0);
-   private static final int COLOR_SELECTED = Color.parseColor("#ff33b5e5");
    private final Activity m_activity;
-   private final int m_position;
+   private final int m_pos;
 
    private
    DialogEditFeed(Activity activity, int position)
    {
       super(activity, android.R.style.Theme_Holo_Light_Dialog);
       m_activity = activity;
-      m_position = position;
+      m_pos = position;
    }
 
    static
@@ -64,9 +43,8 @@ class DialogEditFeed extends Dialog
       Dialog dialog = new DialogEditFeed(activity, position);
 
       /* Get the text resources and set the title of the dialog. */
-      int titleResource = -1 == position ? R.string.dialog_title_add : R.string.dialog_title_edit;
-      String titleText = activity.getString(titleResource);
-      dialog.setTitle(titleText);
+      int title = -1 == position ? R.string.dialog_title_add : R.string.dialog_title_edit;
+      dialog.setTitle(activity.getString(title));
 
       return dialog;
    }
@@ -76,48 +54,36 @@ class DialogEditFeed extends Dialog
    void onCreate(Bundle savedInstanceState)
    {
       super.onCreate(savedInstanceState);
+      setContentView(R.layout.add_edit_dialog);
 
       /* Get the current tags. */
       int tagListSize = PagerAdapterFeeds.TAG_LIST.size();
       String[] tags = PagerAdapterFeeds.TAG_LIST.toArray(new String[tagListSize]);
-
-      /* Configure the ViewGroup. */
-      LinearLayout layout = new LinearLayout(m_activity);
-      layout.setOrientation(LinearLayout.VERTICAL);
-      layout.setPadding(Utilities.EIGHT_DP, Utilities.EIGHT_DP, Utilities.EIGHT_DP, 0);
-
-      /* Make the tag EditText. */
       int oneLine = android.R.layout.simple_dropdown_item_1line;
-      ArrayAdapter<String> adapter = new ArrayAdapter<>(m_activity, oneLine, tags);
-      MultiAutoCompleteTextView tagEdit = new MultiAutoCompleteTextView(m_activity);
-      tagEdit.setAdapter(adapter);
+
+      /* Configure the MultiAutoCompleteTextView. */
+      MultiAutoCompleteTextView tagEdit = (MultiAutoCompleteTextView) findViewById(
+            R.id.dialog_tags);
+      tagEdit.setAdapter(new ArrayAdapter<>(m_activity, oneLine, tags));
       tagEdit.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
 
-      EditText[] editTexts = {new EditText(m_activity), new EditText(m_activity), tagEdit};
-      String[][] content = Read.csvFile(getContext(), Read.INDEX, 'f', 'u', 't');
+      String oldLine = "";
+      String oldName = "";
 
-      for(int i = 0; 3 > i; i++)
+      /* If this is an edit dialog, set the EditTexts and save the old information. */
+      if(-1 != m_pos)
       {
-         TextView textView = new TextView(m_activity);
-         textView.setText(TEXTS[i]);
+         String[][] content = Read.csvFile(getContext(), Read.INDEX, 'f', 'u', 't');
+         oldName = content[0][m_pos];
+         String oldUrl = content[1][m_pos];
+         String oldTags = content[2][m_pos];
 
-         editTexts[i].setId(IDS[i]);
-         editTexts[i].setSingleLine(true);
-         editTexts[i].setHint(HINTS[i]);
-         editTexts[i].setText(-1 == m_position ? "" : content[i][m_position]);
+         ((TextView) findViewById(R.id.dialog_name)).setText(oldName);
+         ((TextView) findViewById(R.id.dialog_url)).setText(oldUrl);
+         ((TextView) findViewById(R.id.dialog_tags)).setText(oldTags);
 
-         layout.addView(textView);
-         layout.addView(editTexts[i]);
+         oldLine = String.format(AsyncCheckFeed.INDEX_FORMAT, oldName, oldUrl, oldTags);
       }
-
-      editTexts[1].setImeOptions(InputType.TYPE_TEXT_VARIATION_URI);
-      editTexts[1].setImeOptions(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-
-      /* Get what the feed used to be called. */
-      String oldLine = -1 == m_position ? ""
-            : String.format(AsyncCheckFeed.INDEX_FORMAT, content[0][m_position],
-                  content[1][m_position], content[2][m_position]);
-      String oldName = -1 == m_position ? "" : content[0][m_position];
 
       /* Create the button OnClickListeners. */
       View.OnClickListener positiveButtonClick = new OnClickPositive(this, oldLine, oldName);
@@ -131,47 +97,8 @@ class DialogEditFeed extends Dialog
          }
       };
 
-      View.OnClickListener[] onClickListeners = {negativeButtonClick, positiveButtonClick};
-
-      /* Create the buttons. */
-      LinearLayout buttonBar = new LinearLayout(m_activity);
-      buttonBar.setOrientation(LinearLayout.HORIZONTAL);
-      buttonBar.setWeightSum(1.0f);
-      Button[] buttons = new Button[2];
-
-      LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 0.5f);
-
-      /* Set up objects used for the StateListDrawable. */
-      int[] unselected = {android.R.attr.drawable};
-      int[] selected = {android.R.attr.state_pressed};
-      ColorDrawable colorUnselected = new ColorDrawable(COLOR_UNSELECTED);
-      ColorDrawable colorSelected = new ColorDrawable(COLOR_SELECTED);
-
-      for(int i = 0; 2 > i; i++)
-      {
-         buttons[i] = new Button(m_activity);
-         buttons[i].setText(BUTTON_TEXTS[i]);
-         buttons[i].setId(BUTTON_IDS[i]);
-         buttons[i].setLayoutParams(params);
-
-         /* Create the state drawable for each button. */
-         StateListDrawable states = new StateListDrawable();
-         states.addState(unselected, colorUnselected);
-         states.addState(selected, colorSelected);
-
-         buttons[i].setBackground(states);
-         buttons[i].setOnClickListener(onClickListeners[i]);
-         buttonBar.addView(buttons[i]);
-      }
-
-      /* Create the top layout. */
-      LinearLayout topLayout = new LinearLayout(m_activity);
-      topLayout.setOrientation(LinearLayout.VERTICAL);
-      topLayout.addView(layout);
-      topLayout.addView(buttonBar);
-
-      setContentView(topLayout);
+      findViewById(R.id.dialog_button_negative).setOnClickListener(negativeButtonClick);
+      findViewById(R.id.dialog_button_positive).setOnClickListener(positiveButtonClick);
    }
 
    private

@@ -23,13 +23,11 @@ import android.widget.AbsListView;
 class OnScrollFeed implements AbsListView.OnScrollListener
 {
    private final int m_listViewTopPadding;
-   private final int m_page;
    private final Activity m_activity;
 
-   OnScrollFeed(Activity activity, int page, int listViewTopPadding)
+   OnScrollFeed(Activity activity, int listViewTopPadding)
    {
       m_activity = activity;
-      m_page = page;
       m_listViewTopPadding = listViewTopPadding;
    }
 
@@ -53,7 +51,7 @@ class OnScrollFeed implements AbsListView.OnScrollListener
             AdapterTags.READ_ITEM_TIMES.add(time);
          }
 
-         AsyncNavigationAdapter.newInstance(m_activity, m_page);
+         AsyncNavigationAdapter.newInstance(m_activity);
       }
    }
 

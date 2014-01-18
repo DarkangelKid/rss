@@ -31,19 +31,17 @@ import java.util.List;
 class AsyncNavigationAdapter extends AsyncTask<String, Void, NavItem[]>
 {
    private final Activity m_activity;
-   private final int m_currentPage;
 
    private
-   AsyncNavigationAdapter(Activity activity, int currentPage)
+   AsyncNavigationAdapter(Activity activity)
    {
       m_activity = activity;
-      m_currentPage = currentPage;
    }
 
    static
-   void newInstance(Activity activity, int currentPage)
+   void newInstance(Activity activity)
    {
-      AsyncTask<String, Void, NavItem[]> task = new AsyncNavigationAdapter(activity, currentPage);
+      AsyncTask<String, Void, NavItem[]> task = new AsyncNavigationAdapter(activity);
       task.executeOnExecutor(THREAD_POOL_EXECUTOR);
    }
 
@@ -107,6 +105,6 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, NavItem[]>
       adapter.addAll(result);
 
       /* Update the subtitle. */
-      Utilities.updateSubtitle(m_activity, m_currentPage);
+      Utilities.updateSubtitle(m_activity);
    }
 }

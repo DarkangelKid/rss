@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-   <color name="holo_light_selected">#cbcbcb</color>
+   <color name="holo_light_pressed">#d5d5d5</color>
+   <color name="holo_light_checked">#cfe9f3</color>
 </resources>
