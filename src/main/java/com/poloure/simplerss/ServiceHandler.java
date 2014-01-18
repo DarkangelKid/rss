@@ -16,6 +16,7 @@
 
 package com.poloure.simplerss;
 
+import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.ListFragment;
 import android.os.Bundle;
@@ -29,11 +30,13 @@ import android.widget.ArrayAdapter;
 class ServiceHandler extends Handler
 {
    static MenuItem s_refreshItem;
+   private final Activity m_activity;
    private final FragmentManager m_fragmentManager;
 
-   ServiceHandler(FragmentManager fragmentManager, MenuItem refreshItem)
+   ServiceHandler(Activity activity, FragmentManager fragmentManager, MenuItem refreshItem)
    {
       m_fragmentManager = fragmentManager;
+      m_activity = activity;
 
       /* TODO, this is not the same MenuItem when you restart the app. */
       s_refreshItem = refreshItem;
@@ -56,12 +59,15 @@ class ServiceHandler extends Handler
       int page = bundle.getInt("page_number");
 
       /* Refresh the tag page. */
-      ListFragment listFragment = (ListFragment) m_fragmentManager.findFragmentByTag(
-            Utilities.FRAGMENT_ID_PREFIX + page);
-
-      if(null != listFragment)
+      for(int i : new int[]{0, page})
       {
-         AsyncReloadTagPage.newInstance(page, listFragment.getListView());
+         ListFragment listFragment = (ListFragment) m_fragmentManager.findFragmentByTag(
+               Utilities.FRAGMENT_ID_PREFIX + i);
+
+         if(null != listFragment)
+         {
+            AsyncReloadTagPage.newInstance(i, listFragment.getListView());
+         }
       }
 
       /* Update the manage page if we can see it. */
@@ -72,5 +78,8 @@ class ServiceHandler extends Handler
          AsyncManage.newInstance(manageFragment.getActivity(),
                (ArrayAdapter<Editable>) manageFragment.getListAdapter());
       }
+
+      /* Update the navigationDrawer. */
+      AsyncNavigationAdapter.newInstance(m_activity);
    }
 }

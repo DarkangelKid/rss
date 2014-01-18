@@ -30,17 +30,24 @@
    <string name="actionbar_unread">غير مقروء</string>
    <string name="actionbar_refresh">إعادة التحميل‎</string>
 
-   <!-- ActionBar subtitle for unread items. -->
-   <string name="actionbar_subtitle_unread">الغير مقروء:</string>
+   <!-- TODO ActionBar subtitle for unread items. -->
+   <plurals name="actionbar_subtitle_unread">
+      <item quantity="zero">%d unread</item>
+      <item quantity="one">%d unread</item>
+      <item quantity="two">%d unread</item>
+      <item quantity="few">%d unread</item>
+      <item quantity="many">%d unread</item>
+      <item quantity="other">%d unread</item>
+   </plurals>
 
    <!-- Add/Edit feed dialog titles. -->
    <string name="dialog_title_add">إضافة موجز</string>
    <string name="dialog_title_edit">تعديل موجز‎</string>
 
-   <!-- TODO Update these. Add/Edit feed dialog EditText hints. -->
+   <!-- Add/Edit feed dialog EditText hints. -->
    <string name="dialog_feed_name_hint">إختياري‎</string>
    <string name="dialog_feed_url_hint">example.com/rss</string>
-   <string name="dialog_feed_tag_hint">السمة الأولى، السمة الثانية،…‎</string>
+   <string name="dialog_feed_tag_hint">سمات</string>
 
    <!-- Add/Edit feed dialog button texts. -->
    <string name="dialog_cancel">إلغاء‎</string>

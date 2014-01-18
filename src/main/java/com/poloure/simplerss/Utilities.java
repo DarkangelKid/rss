@@ -64,10 +64,12 @@ class Utilities
          }
          else if(0 != adapter.getCount() - 3)
          {
-            String unreadText = activity.getString(R.string.actionbar_subtitle_unread);
             int count = ((NavItem) adapter.getItem(feedPager.getCurrentItem())).m_count;
 
-            actionBar.setSubtitle(unreadText + ' ' + getLocaleInt(count));
+            Resources res = activity.getResources();
+            String countString = res.getQuantityString(R.plurals.actionbar_subtitle_unread, count,
+                  count);
+            actionBar.setSubtitle(0 == count ? null : countString);
          }
       }
    }

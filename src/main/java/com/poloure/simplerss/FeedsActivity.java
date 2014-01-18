@@ -39,7 +39,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Adapter;
 import android.widget.ListView;
 
@@ -350,7 +349,7 @@ class FeedsActivity extends Activity
       /* Set the service handler in FeedsActivity so we can check and call it from ServiceUpdate. */
       FragmentManager manager = getFragmentManager();
       ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager_tags);
-      s_serviceHandler = new ServiceHandler(manager, menuItem);
+      s_serviceHandler = new ServiceHandler(this, manager, menuItem);
 
       Intent intent = new Intent(this, ServiceUpdate.class);
       intent.putExtra("GROUP_NUMBER", viewPager.getCurrentItem());
