@@ -21,9 +21,13 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.View;
 
+import java.text.NumberFormat;
 import java.util.Calendar;
+import java.util.Locale;
 
 class ViewCustom extends View
 {
@@ -35,10 +39,12 @@ class ViewCustom extends View
 
    static
    {
+      DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
       for(int i = 0; 3 > i; i++)
       {
          PAINTS[i] = new Paint(Paint.ANTI_ALIAS_FLAG);
-         PAINTS[i].setTextSize(Utilities.getSp(SIZES[i]));
+         PAINTS[i].setTextSize(
+               TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, SIZES[i], metrics));
          PAINTS[i].setARGB(255, COLORS[i], COLORS[i], COLORS[i]);
       }
    }
@@ -72,7 +78,7 @@ class ViewCustom extends View
       m_height = height;
 
       setLayerType(LAYER_TYPE_HARDWARE, null);
-      Utilities.setPaddingEqual(this, Utilities.EIGHT_DP);
+      setPadding(Utilities.EIGHT_DP, Utilities.EIGHT_DP, Utilities.EIGHT_DP, Utilities.EIGHT_DP);
    }
 
    void setBitmap(Bitmap bitmap)
@@ -90,7 +96,6 @@ class ViewCustom extends View
       float verticalPosition = getPaddingTop() + 20.0F;
 
       /* Draw the title. */
-      //if((char) 0x200F == m_item.m_title.charAt(0))
       if(Utilities.isTextRtl(m_item.m_title))
       {
          PAINTS[0].setTextAlign(Paint.Align.RIGHT);
@@ -174,13 +179,14 @@ class ViewCustom extends View
       /* Format the time. */
       Long[] periods = {timeAgo / 86400000, timeAgo / 3600000 % 24, timeAgo / 60000 % 60};
       String[] timeStrings = context.getResources().getStringArray(R.array.time_initials);
+      NumberFormat format = NumberFormat.getNumberInstance(Locale.getDefault());
 
       StringBuilder builder = new StringBuilder(48);
       for(int i = 0; periods.length > i; i++)
       {
          if(0L != periods[i])
          {
-            builder.append(Utilities.getLocaleLong(periods[i]));
+            builder.append(format.format(periods[i]));
             builder.append(timeStrings[i]);
             builder.append(' ');
          }

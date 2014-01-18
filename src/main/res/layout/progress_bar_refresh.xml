@@ -17,8 +17,10 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
              android:layout_height="match_parent"
              android:layout_width="56dp">
-   <ProgressBar android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_gravity="center"
-                style="?android:indeterminateProgressStyle" />
+
+   <ProgressBar
+      android:layout_width="32dp"
+      android:layout_height="32dp"
+      android:layout_gravity="center"
+      style="?android:indeterminateProgressStyle"/>
 </FrameLayout>

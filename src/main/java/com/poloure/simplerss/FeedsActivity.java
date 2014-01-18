@@ -25,22 +25,28 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.ListFragment;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
+import android.text.Editable;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Adapter;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
+import java.util.List;
 
 public
 class FeedsActivity extends Activity
@@ -49,7 +55,7 @@ class FeedsActivity extends Activity
    private static final int ALARM_SERVICE_START = 1;
    private static final int ALARM_SERVICE_STOP = 0;
    private static final int MINUTE_VALUE = 60000;
-   static Handler s_serviceHandler;
+   private boolean m_stopProgressBar;
    private ActionBarDrawerToggle m_drawerToggle;
    boolean m_showMenuItems = true;
 
@@ -159,6 +165,7 @@ class FeedsActivity extends Activity
       super.onResume();
       m_drawerToggle.syncState();
       setServiceIntent(ALARM_SERVICE_STOP);
+      registerReceiver(Receiver, new IntentFilter(ServiceUpdate.BROADCAST_ACTION));
 
       /* Update the navigation adapter. */
       AsyncNavigationAdapter.newInstance(this);
@@ -183,6 +190,7 @@ class FeedsActivity extends Activity
    void onPause()
    {
       super.onPause();
+      unregisterReceiver(Receiver);
    }
 
    /* Start the alarm service every time the activity is not visible. */
@@ -246,43 +254,78 @@ class FeedsActivity extends Activity
 
       MenuInflater menuInflater = getMenuInflater();
       menuInflater.inflate(R.menu.action_bar_menu, menu);
+      MenuItem item = menu.findItem(R.id.refresh);
 
-      /* Set the refreshItem to spin if the service is running. The handler will stop it. */
-      MenuItem refreshItem = menu.findItem(R.id.refresh);
-
-      if(isServiceRunning())
+      if(m_stopProgressBar)
       {
-         MenuItemCompat.setActionView(refreshItem, R.layout.progress_bar_refresh);
-      }
-      else
-      {
-         MenuItemCompat.setActionView(refreshItem, null);
+         MenuItemCompat.setActionView(item, null);
+         m_stopProgressBar = false;
+         return true;
       }
 
-      /* Update the MenuItem in the ServiceHandler so when the service finishes, the icon changes.*/
-      ServiceHandler.s_refreshItem = refreshItem;
+      /* Set the refresh icon accordingly. */
+      ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+      List<ActivityManager.RunningServiceInfo> info = manager.getRunningServices(Integer.MAX_VALUE);
+
+      for(ActivityManager.RunningServiceInfo service : info)
+      {
+         if(ServiceUpdate.class.getName().equals(service.service.getClassName()))
+         {
+            MenuItemCompat.setActionView(item, R.layout.progress_bar_refresh);
+            return true;
+         }
+      }
+      MenuItemCompat.setActionView(item, null);
+
       return true;
    }
+
+   private final BroadcastReceiver Receiver = new BroadcastReceiver()
+   {
+      @Override
+      public
+      void onReceive(Context context, Intent intent)
+      {
+         int page = intent.getIntExtra("page_number", 0);
+         m_stopProgressBar = intent.getBooleanExtra("is_finished", true);
+
+         /* Refresh the tag page. */
+         for(int i : new int[]{0, page})
+         {
+            ListFragment listFragment = (ListFragment) getFragmentManager().findFragmentByTag(
+                  Utilities.FRAGMENT_ID_PREFIX + i);
+
+            if(null != listFragment)
+            {
+               AsyncReloadTagPage.newInstance(i, listFragment.getListView());
+            }
+         }
+
+         /* Update the manage page if we can see it. */
+         ListFragment manageFragment = (ListFragment) getFragmentManager().findFragmentByTag(
+               FRAGMENT_TAGS[1]);
+         if(null != manageFragment && manageFragment.isVisible())
+         {
+            AsyncManage.newInstance(manageFragment.getActivity(),
+                  (ArrayAdapter<Editable>) manageFragment.getListAdapter());
+         }
+
+         /* Update the navigationDrawer. */
+         Activity activity = (Activity) getWindow().getDecorView().getContext();
+         AsyncNavigationAdapter.newInstance(activity);
+
+         /* Tell the refresh icon to stop spinning if the service has stopped. */
+         if(m_stopProgressBar)
+         {
+            invalidateOptionsMenu();
+         }
+      }
+   };
 
    /* The end of overridden methods.
     *
     *
     */
-
-   private
-   boolean isServiceRunning()
-   {
-      ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-      for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(
-            Integer.MAX_VALUE))
-      {
-         if(ServiceUpdate.class.getName().equals(service.service.getClassName()))
-         {
-            return true;
-         }
-      }
-      return false;
-   }
 
    private
    void setServiceIntent(int state)
@@ -346,10 +389,7 @@ class FeedsActivity extends Activity
    {
       MenuItemCompat.setActionView(menuItem, R.layout.progress_bar_refresh);
 
-      /* Set the service handler in FeedsActivity so we can check and call it from ServiceUpdate. */
-      FragmentManager manager = getFragmentManager();
       ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager_tags);
-      s_serviceHandler = new ServiceHandler(this, manager, menuItem);
 
       Intent intent = new Intent(this, ServiceUpdate.class);
       intent.putExtra("GROUP_NUMBER", viewPager.getCurrentItem());

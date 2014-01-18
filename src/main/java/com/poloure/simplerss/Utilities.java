@@ -18,13 +18,11 @@ package com.poloure.simplerss;
 
 import android.app.ActionBar;
 import android.app.Activity;
-import android.app.FragmentManager;
 import android.content.res.Resources;
 import android.support.v4.view.ViewPager;
 import android.text.TextDirectionHeuristics;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
-import android.view.View;
 import android.widget.Adapter;
 import android.widget.ListView;
 
@@ -41,7 +39,6 @@ import java.util.Locale;
 class Utilities
 {
    static final String FRAGMENT_ID_PREFIX = "android:switcher:" + R.id.view_pager_tags + ':';
-   private static final DisplayMetrics METRICS = Resources.getSystem().getDisplayMetrics();
    static final int EIGHT_DP = getDp(8.0F);
 
    static
@@ -82,30 +79,11 @@ class Utilities
    }
 
    static
-   String getLocaleLong(Long count)
-   {
-      NumberFormat format = NumberFormat.getNumberInstance(Locale.getDefault());
-      return format.format(count);
-   }
-
-   static
    int getDp(float pixels)
    {
       DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
       float floatDp = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, pixels, metrics);
       return Math.round(floatDp);
-   }
-
-   static
-   float getSp(float pixels)
-   {
-      return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, pixels, METRICS);
-   }
-
-   static
-   void setPaddingEqual(View view, int padding)
-   {
-      view.setPadding(padding, padding, padding, padding);
    }
 
    static
@@ -119,22 +97,6 @@ class Utilities
       InputStream inputStream = url.openStream();
       parser.setInput(inputStream, null);
       return parser;
-   }
-
-   static
-   void switchFragments(FeedsActivity activity, String newTag)
-   {
-      /* If the page is our current page, return. */
-      if(activity.m_currentFragment.equals(newTag))
-      {
-         return;
-      }
-      FragmentManager manager = activity.getFragmentManager();
-      manager.beginTransaction()
-             .hide(FeedsActivity.getFragment(manager, activity.m_currentFragment))
-             .show(FeedsActivity.getFragment(manager, newTag))
-             .commit();
-      activity.m_currentFragment = newTag;
    }
 
    static

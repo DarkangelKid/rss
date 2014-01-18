@@ -35,7 +35,7 @@ class AdapterTags extends BaseAdapter
    private static final int TYPE_IMAGE_SANS_DESCRIPTION = 2;
    private static final int TYPE_PLAIN_SANS_DESCRIPTION = 3;
 
-   /* We use indexOf on this Long list so it can not be a set. */
+   /* We use indexOf on this Long List so it can not be a Set. */
    final List<Long> m_times = new ArrayList<>(0);
    final List<FeedItem> m_feedItems = new ArrayList<>(0);
    private final Context m_context;

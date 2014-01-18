@@ -17,6 +17,7 @@
 package com.poloure.simplerss;
 
 import android.app.ActionBar;
+import android.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.view.View;
@@ -48,7 +49,18 @@ class OnNavigationListItemClick implements AdapterView.OnItemClickListener
       navigationList.setItemChecked(selectedFragment, true);
 
       /* Switch the content frame fragment. */
-      Utilities.switchFragments(m_activity, FeedsActivity.FRAGMENT_TAGS[selectedFragment]);
+      String newTag = FeedsActivity.FRAGMENT_TAGS[selectedFragment];
+      if(m_activity.m_currentFragment.equals(newTag))
+      {
+         return;
+      }
+
+      FragmentManager manager = m_activity.getFragmentManager();
+      manager.beginTransaction()
+             .hide(FeedsActivity.getFragment(manager, m_activity.m_currentFragment))
+             .show(FeedsActivity.getFragment(manager, newTag))
+             .commit();
+      m_activity.m_currentFragment = newTag;
 
       /* Update the action bar subtitle. */
       ActionBar actionBar = m_activity.getActionBar();

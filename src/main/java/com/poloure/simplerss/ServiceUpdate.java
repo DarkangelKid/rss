@@ -23,8 +23,6 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Bundle;
-import android.os.Message;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.text.format.Time;
@@ -70,6 +68,8 @@ class ServiceUpdate extends IntentService
    private static final float SCREEN_WIDTH = Resources.getSystem().getDisplayMetrics().widthPixels;
    private static final float USABLE_WIDTH_TEXT = SCREEN_WIDTH - 40.0F;
    private static final int INITIAL_TAG_SET_SIZE = 128;
+
+   public static final String BROADCAST_ACTION = "com.poloure.serviceupdate.handle";
 
    private static
    class Index
@@ -297,14 +297,10 @@ class ServiceUpdate extends IntentService
                parseFeed(content[1][i], content[0][i]);
 
                /* Update the Activity. */
-               if(null != FeedsActivity.s_serviceHandler)
-               {
-                  Message message = new Message();
-                  Bundle bundle = new Bundle();
-                  bundle.putInt("page_number", i);
-                  message.setData(bundle);
-                  FeedsActivity.s_serviceHandler.sendMessage(message);
-               }
+               Intent updateActivityIntent = new Intent(BROADCAST_ACTION);
+               updateActivityIntent.putExtra("page_number", i);
+               updateActivityIntent.putExtra("is_finished", i == content[0].length - 1);
+               sendBroadcast(updateActivityIntent);
             }
             catch(IOException | XmlPullParserException e)
             {
