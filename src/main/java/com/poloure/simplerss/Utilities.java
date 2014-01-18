@@ -19,20 +19,14 @@ package com.poloure.simplerss;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.FragmentManager;
-import android.content.Context;
 import android.content.res.Resources;
 import android.support.v4.view.ViewPager;
 import android.text.TextDirectionHeuristics;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Adapter;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -123,19 +117,6 @@ class Utilities
       InputStream inputStream = url.openStream();
       parser.setInput(inputStream, null);
       return parser;
-   }
-
-   static
-   View makeProgressBar(Context context)
-   {
-      int size = getDp(32.0F);
-      FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(size, size);
-      params.gravity = Gravity.CENTER;
-
-      ProgressBar progressBar = new ProgressBar(context);
-      progressBar.setLayoutParams(params);
-
-      return progressBar;
    }
 
    static

@@ -251,8 +251,14 @@ class FeedsActivity extends Activity
       /* Set the refreshItem to spin if the service is running. The handler will stop it. */
       MenuItem refreshItem = menu.findItem(R.id.refresh);
 
-      View refreshIcon = isServiceRunning() ? Utilities.makeProgressBar(this) : null;
-      MenuItemCompat.setActionView(refreshItem, refreshIcon);
+      if(isServiceRunning())
+      {
+         MenuItemCompat.setActionView(refreshItem, R.layout.progress_bar_refresh);
+      }
+      else
+      {
+         MenuItemCompat.setActionView(refreshItem, null);
+      }
 
       /* Update the MenuItem in the ServiceHandler so when the service finishes, the icon changes.*/
       ServiceHandler.s_refreshItem = refreshItem;
@@ -339,7 +345,7 @@ class FeedsActivity extends Activity
    public
    void onRefreshClick(MenuItem menuItem)
    {
-      MenuItemCompat.setActionView(menuItem, Utilities.makeProgressBar(this));
+      MenuItemCompat.setActionView(menuItem, R.layout.progress_bar_refresh);
 
       /* Set the service handler in FeedsActivity so we can check and call it from ServiceUpdate. */
       FragmentManager manager = getFragmentManager();
