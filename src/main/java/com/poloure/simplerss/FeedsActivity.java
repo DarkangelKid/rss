@@ -38,12 +38,10 @@ import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
-import android.text.Editable;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Adapter;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import java.util.List;
@@ -112,7 +110,7 @@ class FeedsActivity extends Activity
       navigationList.setOnItemClickListener(new OnNavigationListItemClick(this));
 
       /* This method calls navigationList.getAdapter(). */
-      AsyncNavigationAdapter.newInstance(this);
+      AsyncNavigationAdapter.update(this);
 
       /* Create and hide the fragments that go inside the content frame. */
       FragmentManager manager = getFragmentManager();
@@ -147,6 +145,7 @@ class FeedsActivity extends Activity
    void onStart()
    {
       super.onStart();
+      AsyncNewTagAdapters.update(this);
    }
 
    /* Load the saved state from configuration change. */
@@ -168,7 +167,7 @@ class FeedsActivity extends Activity
       registerReceiver(Receiver, new IntentFilter(ServiceUpdate.BROADCAST_ACTION));
 
       /* Update the navigation adapter. */
-      AsyncNavigationAdapter.newInstance(this);
+      AsyncNavigationAdapter.update(this);
    }
 
    /* Activity is now running.
@@ -235,8 +234,9 @@ class FeedsActivity extends Activity
       {
          String title = actionBar.getTitle().toString();
 
-         boolean[] show = titles[0].equals(title) ? new boolean[]{true, true, true}
-               : new boolean[]{titles[1].equals(title), false, false};
+         boolean[] show = titles[0].equals(title) ? new boolean[]{true, true, true} : new boolean[]{
+               titles[1].equals(title), false, false
+         };
 
          for(int i = 0; i < menu.size(); i++)
          {
@@ -286,39 +286,16 @@ class FeedsActivity extends Activity
       public
       void onReceive(Context context, Intent intent)
       {
-         int page = intent.getIntExtra("page_number", 0);
-         m_stopProgressBar = intent.getBooleanExtra("is_finished", true);
+         Activity activity = (Activity) getWindow().getDecorView().getContext();
 
          /* Refresh the tag page. */
-         for(int i : new int[]{0, page})
-         {
-            ListFragment listFragment = (ListFragment) getFragmentManager().findFragmentByTag(
-                  Utilities.FRAGMENT_ID_PREFIX + i);
-
-            if(null != listFragment)
-            {
-               AsyncReloadTagPage.newInstance(i, listFragment.getListView());
-            }
-         }
-
-         /* Update the manage page if we can see it. */
-         ListFragment manageFragment = (ListFragment) getFragmentManager().findFragmentByTag(
-               FRAGMENT_TAGS[1]);
-         if(null != manageFragment && manageFragment.isVisible())
-         {
-            AsyncManage.newInstance(manageFragment.getActivity(),
-                  (ArrayAdapter<Editable>) manageFragment.getListAdapter());
-         }
-
-         /* Update the navigationDrawer. */
-         Activity activity = (Activity) getWindow().getDecorView().getContext();
-         AsyncNavigationAdapter.newInstance(activity);
+         AsyncNewTagAdapters.update(activity);
+         AsyncManageAdapter.update(activity);
+         AsyncNavigationAdapter.update(activity);
 
          /* Tell the refresh icon to stop spinning if the service has stopped. */
-         if(m_stopProgressBar)
-         {
-            invalidateOptionsMenu();
-         }
+         m_stopProgressBar = true;
+         invalidateOptionsMenu();
       }
    };
 
@@ -375,12 +352,11 @@ class FeedsActivity extends Activity
       int currentPage = viewPager.getCurrentItem();
 
       FragmentManager manager = getFragmentManager();
-      ListFragment listFragment = (ListFragment) manager.findFragmentByTag(
-            Utilities.FRAGMENT_ID_PREFIX + currentPage);
+      Fragment fragment = manager.findFragmentByTag(Utilities.FRAGMENT_ID_PREFIX + currentPage);
 
-      if(null != listFragment)
+      if(null != fragment)
       {
-         gotoLatestUnread(listFragment.getListView());
+         gotoLatestUnread(((ListFragment) fragment).getListView());
       }
    }
 

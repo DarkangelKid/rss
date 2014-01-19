@@ -74,8 +74,7 @@ class Read
    {
       List<String> list = new ArrayList<>(32);
 
-      try(BufferedReader in = new BufferedReader(
-            new InputStreamReader(context.openFileInput(fileName))))
+      try(BufferedReader in = new BufferedReader(new InputStreamReader(context.openFileInput(fileName))))
       {
          String line;
          while(null != (line = in.readLine()))
@@ -108,8 +107,7 @@ class Read
    {
       Set<Long> longSet = new LinkedHashSet<>(64);
 
-      try(DataInputStream in = new DataInputStream(
-            new BufferedInputStream(context.openFileInput(fileName))))
+      try(DataInputStream in = new DataInputStream(new BufferedInputStream(context.openFileInput(fileName))))
       {
          while(true)
          {

@@ -53,16 +53,13 @@ class ListFragmentTag extends ListFragment
       super.onActivityCreated(savedInstanceState);
 
       Activity activity = getActivity();
-      int position = getArguments().getInt(POSITION_KEY);
 
       setListAdapter(new AdapterTags(activity));
 
       ListView listView = getListView();
       listView.setOnScrollListener(new OnScrollFeed(activity, listView.getPaddingTop()));
-      //listView.setDividerHeight(0);
+      listView.setDividerHeight(0);
       registerForContextMenu(listView);
-
-      AsyncReloadTagPage.newInstance(position, listView);
    }
 
    @Override
@@ -78,19 +75,16 @@ class ListFragmentTag extends ListFragment
    public
    boolean onContextItemSelected(MenuItem item)
    {
-      AdapterView.AdapterContextMenuInfo info
-            = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+      AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
       String url = ((ViewCustom) info.targetView).m_item.m_urlFull;
       Context context = getActivity();
 
       if(R.id.copy == item.getItemId())
       {
-         ClipboardManager clipboard = (ClipboardManager) context.getSystemService(
-               Context.CLIPBOARD_SERVICE);
+         ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
          clipboard.setPrimaryClip(ClipData.newPlainText("Url", url));
 
-         Toast toast = Toast.makeText(context, getString(R.string.toast_url_copied) + ' ' + url,
-               Toast.LENGTH_SHORT);
+         Toast toast = Toast.makeText(context, getString(R.string.toast_url_copied) + ' ' + url, Toast.LENGTH_SHORT);
          toast.show();
          return true;
       }

@@ -51,7 +51,7 @@ class OnScrollFeed implements AbsListView.OnScrollListener
             AdapterTags.READ_ITEM_TIMES.add(time);
          }
 
-         AsyncNavigationAdapter.newInstance(m_activity);
+         AsyncNavigationAdapter.update(m_activity);
       }
    }
 

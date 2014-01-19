@@ -26,8 +26,7 @@ class OnActionBarDrawerToggle extends ActionBarDrawerToggle
 
    OnActionBarDrawerToggle(FeedsActivity activity, DrawerLayout drawerLayout)
    {
-      super(activity, drawerLayout, R.drawable.ic_drawer, R.string.drawer_open,
-            R.string.drawer_close);
+      super(activity, drawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close);
       m_activity = activity;
    }
 

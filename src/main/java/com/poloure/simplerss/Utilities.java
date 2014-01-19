@@ -64,8 +64,7 @@ class Utilities
             int count = ((NavItem) adapter.getItem(feedPager.getCurrentItem())).m_count;
 
             Resources res = activity.getResources();
-            String countString = res.getQuantityString(R.plurals.actionbar_subtitle_unread, count,
-                  count);
+            String countString = res.getQuantityString(R.plurals.actionbar_subtitle_unread, count, count);
             actionBar.setSubtitle(0 == count ? null : countString);
          }
       }

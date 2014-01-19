@@ -101,8 +101,7 @@ class ServiceUpdate extends IntentService
       static final Pattern WHITESPACE = Pattern.compile("[\\t\\n\\x0B\\f\\r\\|]");
       static final Pattern CDATA = Pattern.compile("\\<.*?\\>");
       static final Pattern IMG = Pattern.compile("(?i)<img([^>]+)/>");
-      static final Pattern SRC = Pattern.compile(
-            "\\s*(?i)src\\s*=\\s*(\"([^\"]*\")|'[^']*'|([^'\">\\s]+))");
+      static final Pattern SRC = Pattern.compile("\\s*(?i)src\\s*=\\s*(\"([^\"]*\")|'[^']*'|([^'\">\\s]+))");
       static final Pattern APOSTROPHE = Pattern.compile("'");
       static final Pattern QUOT = Pattern.compile("\"");
    }
@@ -116,8 +115,7 @@ class ServiceUpdate extends IntentService
    private static
    void writeCollection(Context context, String fileName, Iterable<?> content)
    {
-      try(BufferedWriter out = new BufferedWriter(
-            new OutputStreamWriter(context.openFileOutput(fileName, Context.MODE_PRIVATE))))
+      try(BufferedWriter out = new BufferedWriter(new OutputStreamWriter(context.openFileOutput(fileName, Context.MODE_PRIVATE))))
       {
          for(Object item : content)
          {
@@ -182,8 +180,7 @@ class ServiceUpdate extends IntentService
       }
 
       try(BufferedInputStream input = new BufferedInputStream(new URL(imgLink).openStream());
-          BufferedOutputStream out = new BufferedOutputStream(
-                context.openFileOutput(imageFile, MODE_PRIVATE)))
+            BufferedOutputStream out = new BufferedOutputStream(context.openFileOutput(imageFile, MODE_PRIVATE)))
       {
          Bitmap bitmap = BitmapFactory.decodeStream(input);
 
@@ -208,7 +205,6 @@ class ServiceUpdate extends IntentService
          /* Get the quality from settings. */
          String qualityString = preferences.getString("thumbnail_quality", "75");
          int quality = Integer.parseInt(qualityString);
-         //System.out.println("SAVING: " + imageFile);
 
          bitmap.compress(Bitmap.CompressFormat.WEBP, quality, out);
       }
@@ -244,8 +240,7 @@ class ServiceUpdate extends IntentService
          else
          {
             Calendar calendar = Calendar.getInstance();
-            SimpleDateFormat rssDate = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z",
-                  Locale.ENGLISH);
+            SimpleDateFormat rssDate = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
             Date date = rssDate.parse(content);
             calendar.setTime(date);
             m_timeCurrentItem = calendar.getTimeInMillis();
@@ -275,10 +270,10 @@ class ServiceUpdate extends IntentService
       View view = new ViewCustom(this, 0);
 
       /* Get the tagList (from disk if it is empty). */
-      List<String> tagList = PagerAdapterFeeds.TAG_LIST;
+      List<String> tagList = PagerAdapterTags.TAG_LIST;
       if(tagList.isEmpty())
       {
-         Set<String> set = PagerAdapterFeeds.getTagsFromDisk(this);
+         Set<String> set = PagerAdapterTags.getTagsFromDisk(this);
          tagList.addAll(set);
       }
 
@@ -289,18 +284,11 @@ class ServiceUpdate extends IntentService
       /* Download and parse each feed in the index. */
       for(int i = 0; i < content[0].length; i++)
       {
-         if(0 == page ||
-            Arrays.asList(PagerAdapterFeeds.SPLIT_COMMA.split(content[2][i])).contains(tag))
+         if(0 == page || Arrays.asList(PagerAdapterTags.SPLIT_COMMA.split(content[2][i])).contains(tag))
          {
             try
             {
                parseFeed(content[1][i], content[0][i]);
-
-               /* Update the Activity. */
-               Intent updateActivityIntent = new Intent(BROADCAST_ACTION);
-               updateActivityIntent.putExtra("page_number", i);
-               updateActivityIntent.putExtra("is_finished", i == content[0].length - 1);
-               sendBroadcast(updateActivityIntent);
             }
             catch(IOException | XmlPullParserException e)
             {
@@ -308,6 +296,9 @@ class ServiceUpdate extends IntentService
             }
          }
       }
+
+      /* Update the Activity. */
+      sendBroadcast(new Intent(BROADCAST_ACTION));
 
       wakeLock.release();
       stopSelf();

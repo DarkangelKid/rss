@@ -38,8 +38,7 @@ class Write
       if(0 != lines.length)
       {
          String filePath = Read.INDEX;
-         try(BufferedWriter out = new BufferedWriter(
-               new OutputStreamWriter(context.openFileOutput(filePath, Context.MODE_PRIVATE))))
+         try(BufferedWriter out = new BufferedWriter(new OutputStreamWriter(context.openFileOutput(filePath, Context.MODE_PRIVATE))))
          {
             for(String line : lines)
             {
@@ -62,8 +61,7 @@ class Write
    static
    void longSet(Context context, String fileName, Iterable<Long> longSet)
    {
-      try(DataOutputStream out = new DataOutputStream(
-            new BufferedOutputStream(context.openFileOutput(fileName, Context.MODE_PRIVATE))))
+      try(DataOutputStream out = new DataOutputStream(new BufferedOutputStream(context.openFileOutput(fileName, Context.MODE_PRIVATE))))
       {
          for(long l : longSet)
          {

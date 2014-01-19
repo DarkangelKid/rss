@@ -31,20 +31,31 @@ class FragmentFeeds extends Fragment
    public
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
-      Activity activity = getActivity();
-
-      ViewPager.OnPageChangeListener onTagPageChange = new OnPageChangeTags(activity);
-
-      PagerAdapterFeeds adapter = new PagerAdapterFeeds(activity.getFragmentManager());
-      adapter.updateTags(activity);
+      final Activity activity = getActivity();
 
       /* Inflate and configure the ViewPager. */
-      ViewPager viewPager = (ViewPager) inflater.inflate(R.layout.view_pager_tags, container,
-            false);
-      viewPager.setAdapter(adapter);
-      viewPager.setOffscreenPageLimit(128);
-      viewPager.setOnPageChangeListener(onTagPageChange);
+      ViewPager pager = (ViewPager) inflater.inflate(R.layout.view_pager_tags, container, false);
+      pager.setOffscreenPageLimit(128);
+      pager.setAdapter(new PagerAdapterTags(getFragmentManager()));
+      pager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener()
+      {
+         @Override
+         public
+         void onPageSelected(int position)
+         {
+            /* Set the subtitle to the unread count. */
+            Utilities.updateSubtitle(activity);
+         }
+      });
 
-      return viewPager;
+      return pager;
+   }
+
+   @Override
+   public
+   void onActivityCreated(Bundle savedInstanceState)
+   {
+      super.onActivityCreated(savedInstanceState);
+      PagerAdapterTags.update(getActivity());
    }
 }

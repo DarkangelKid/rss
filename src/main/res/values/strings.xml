@@ -61,7 +61,7 @@
    <!-- Toast notifications. -->
    <string name="toast_url_copied">URL copied:</string>
    <string name="toast_invalid_feed">Can’t find feed</string>
-   <string name="toast_added_feed">Added</string>
+   <string name="toast_added_feed">Added %s</string>
 
    <!-- Manage context action bar icon descriptions. -->
    <string name="manage_select_all">Select all</string>

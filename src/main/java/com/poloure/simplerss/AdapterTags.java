@@ -55,8 +55,7 @@ class AdapterTags extends BaseAdapter
       boolean isImage = !feedItem.m_imageName.isEmpty();
       boolean isDes = !feedItem.m_desLines[0].isEmpty();
 
-      return isImage ? isDes ? TYPE_IMAGE : TYPE_IMAGE_SANS_DESCRIPTION
-            : isDes ? TYPE_PLAIN : TYPE_PLAIN_SANS_DESCRIPTION;
+      return isImage ? isDes ? TYPE_IMAGE : TYPE_IMAGE_SANS_DESCRIPTION : isDes ? TYPE_PLAIN : TYPE_PLAIN_SANS_DESCRIPTION;
    }
 
    @Override
@@ -97,8 +96,7 @@ class AdapterTags extends BaseAdapter
       boolean hasDes = TYPE_PLAIN == viewType || TYPE_IMAGE == viewType;
 
       /* TODO These are pix not Dip. */
-      ViewCustom view = null != convertView ? (ViewCustom) convertView
-            : new ViewCustom(m_context, hasImg ? hasDes ? 564 : 464 : hasDes ? 184 : 94);
+      ViewCustom view = null != convertView ? (ViewCustom) convertView : new ViewCustom(m_context, hasImg ? hasDes ? 564 : 464 : hasDes ? 184 : 94);
 
       /* Set the information. */
       FeedItem item = m_feedItems.get(position);

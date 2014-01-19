@@ -43,8 +43,7 @@ class ViewCustom extends View
       for(int i = 0; 3 > i; i++)
       {
          PAINTS[i] = new Paint(Paint.ANTI_ALIAS_FLAG);
-         PAINTS[i].setTextSize(
-               TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, SIZES[i], metrics));
+         PAINTS[i].setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, SIZES[i], metrics));
          PAINTS[i].setARGB(255, COLORS[i], COLORS[i], COLORS[i]);
       }
    }
@@ -105,8 +104,7 @@ class ViewCustom extends View
 
          /* Draw the time. */
          PAINTS[1].setTextAlign(Paint.Align.LEFT);
-         canvas.drawText(getTime(m_item.m_time, getContext()), getPaddingLeft(), verticalPosition,
-               PAINTS[1]);
+         canvas.drawText(getTime(m_item.m_time, getContext()), getPaddingLeft(), verticalPosition, PAINTS[1]);
          PAINTS[1].setTextAlign(Paint.Align.RIGHT);
 
          verticalPosition += PAINTS[0].getTextSize();
@@ -123,8 +121,7 @@ class ViewCustom extends View
 
          /* Draw the time. */
          PAINTS[1].setTextAlign(Paint.Align.RIGHT);
-         canvas.drawText(getTime(m_item.m_time, getContext()), SCREEN - getPaddingRight(),
-               verticalPosition, PAINTS[1]);
+         canvas.drawText(getTime(m_item.m_time, getContext()), SCREEN - getPaddingRight(), verticalPosition, PAINTS[1]);
          PAINTS[1].setTextAlign(Paint.Align.LEFT);
 
          verticalPosition += PAINTS[0].getTextSize();
@@ -151,8 +148,7 @@ class ViewCustom extends View
       }
       for(int i = 0; 3 > i; i++)
       {
-         canvas.drawText(m_item.m_desLines[i], rtl ? SCREEN - getPaddingRight() : getPaddingLeft(),
-               position, PAINTS[2]);
+         canvas.drawText(m_item.m_desLines[i], rtl ? SCREEN - getPaddingRight() : getPaddingLeft(), position, PAINTS[2]);
          position += PAINTS[2].getTextSize();
       }
       PAINTS[2].setTextAlign(Paint.Align.LEFT);

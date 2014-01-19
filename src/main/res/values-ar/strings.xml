@@ -61,6 +61,7 @@
    <!-- Toast notifications. -->
    <string name="toast_url_copied">تم نسخ الرابط:</string>
    <string name="toast_invalid_feed">رابط غير صحيح</string>
+   <!-- TODO Add %s to this string. -->
    <string name="toast_added_feed">تم الاضافة بنجاح</string>
 
    <!-- Manage context action bar icon descriptions. -->

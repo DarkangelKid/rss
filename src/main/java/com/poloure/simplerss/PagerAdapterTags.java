@@ -16,10 +16,12 @@
 
 package com.poloure.simplerss;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.support.v13.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,23 +31,27 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-class PagerAdapterFeeds extends FragmentPagerAdapter
+class PagerAdapterTags extends FragmentPagerAdapter
 {
    static final Pattern SPLIT_COMMA = Pattern.compile(", ");
    static final List<String> TAG_LIST = new ArrayList<>(0);
 
-   PagerAdapterFeeds(FragmentManager fm)
+   PagerAdapterTags(FragmentManager fm)
    {
       super(fm);
    }
 
-   void updateTags(Context context)
+   static
+   void update(Activity activity)
    {
-      Set<String> tagSet = getTagsFromDisk(context);
-      TAG_LIST.clear();
-      TAG_LIST.addAll(tagSet);
+      ViewPager viewPager = (ViewPager) activity.findViewById(R.id.view_pager_tags);
+      PagerAdapterTags adapter = (PagerAdapterTags) viewPager.getAdapter();
 
-      notifyDataSetChanged();
+      Set<String> tagSet = getTagsFromDisk(activity);
+      adapter.TAG_LIST.clear();
+      adapter.TAG_LIST.addAll(tagSet);
+
+      adapter.notifyDataSetChanged();
    }
 
    static

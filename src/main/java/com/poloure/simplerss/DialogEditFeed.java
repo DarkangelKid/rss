@@ -57,13 +57,12 @@ class DialogEditFeed extends Dialog
       setContentView(R.layout.add_edit_dialog);
 
       /* Get the current tags. */
-      int tagListSize = PagerAdapterFeeds.TAG_LIST.size();
-      String[] tags = PagerAdapterFeeds.TAG_LIST.toArray(new String[tagListSize]);
+      int tagListSize = PagerAdapterTags.TAG_LIST.size();
+      String[] tags = PagerAdapterTags.TAG_LIST.toArray(new String[tagListSize]);
       int oneLine = android.R.layout.simple_dropdown_item_1line;
 
       /* Configure the MultiAutoCompleteTextView. */
-      MultiAutoCompleteTextView tagEdit = (MultiAutoCompleteTextView) findViewById(
-            R.id.dialog_tags);
+      MultiAutoCompleteTextView tagEdit = (MultiAutoCompleteTextView) findViewById(R.id.dialog_tags);
       tagEdit.setAdapter(new ArrayAdapter<>(m_activity, oneLine, tags));
       tagEdit.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
 

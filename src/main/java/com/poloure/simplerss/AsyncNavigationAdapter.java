@@ -39,7 +39,7 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, NavItem[]>
    }
 
    static
-   void newInstance(Activity activity)
+   void update(Activity activity)
    {
       AsyncTask<String, Void, NavItem[]> task = new AsyncNavigationAdapter(activity);
       task.executeOnExecutor(THREAD_POOL_EXECUTOR);
@@ -54,7 +54,7 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, NavItem[]>
       String[][] content = Read.csvFile(m_activity, Read.INDEX, 'f', 't');
 
       /* Get the total number of tags and feeds that exist. */
-      int tagTotal = PagerAdapterFeeds.TAG_LIST.size();
+      int tagTotal = PagerAdapterTags.TAG_LIST.size();
 
       /* Make a NavItem for each tag we will display in the navigation drawer. */
       NavItem[] navItems = new NavItem[tagTotal];
@@ -72,14 +72,13 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, NavItem[]>
       /* For each tag excluding the all tag. */
       for(int i = 0; tagTotal > i; i++)
       {
-         String tag = PagerAdapterFeeds.TAG_LIST.get(i);
+         String tag = PagerAdapterTags.TAG_LIST.get(i);
 
          /* For each feed, if the feed ∈ this tag, add the feed items to the tag collection. */
          for(int j = 0; j < content[0].length; j++)
          {
             /* If the feed's index entry (tag1, tag2, etc) contains this tag or is the all tag. */
-            if(0 == i ||
-               Arrays.asList(PagerAdapterFeeds.SPLIT_COMMA.split(content[1][j])).contains(tag))
+            if(0 == i || Arrays.asList(PagerAdapterTags.SPLIT_COMMA.split(content[1][j])).contains(tag))
             {
                itemsInTag.addAll(feedItems.get(j));
             }

@@ -16,6 +16,9 @@
 
 package com.poloure.simplerss;
 
+import android.app.Activity;
+import android.app.FragmentManager;
+import android.app.ListFragment;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
@@ -30,7 +33,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-class AsyncManage extends AsyncTask<String, Editable[], Void>
+class AsyncManageAdapter extends AsyncTask<String, Editable[], Void>
 {
    private static final AbsoluteSizeSpan TITLE_SIZE = new AbsoluteSizeSpan(14, true);
    private static final StyleSpan SPAN_BOLD = new StyleSpan(Typeface.BOLD);
@@ -38,26 +41,32 @@ class AsyncManage extends AsyncTask<String, Editable[], Void>
    private final Context m_context;
 
    private
-   AsyncManage(Context context, ArrayAdapter<Editable> manageAdapter)
+   AsyncManageAdapter(Context context, ArrayAdapter<Editable> manageAdapter)
    {
       m_context = context;
       m_manageAdapter = manageAdapter;
    }
 
    static
-   void newInstance(Context context, ArrayAdapter<Editable> manageAdapter)
+   void update(Activity activity)
    {
-      AsyncTask<String, Editable[], Void> task = new AsyncManage(context, manageAdapter);
+      String manageTag = FeedsActivity.FRAGMENT_TAGS[1];
+      FragmentManager manager = activity.getFragmentManager();
+      ListFragment fragment = (ListFragment) manager.findFragmentByTag(manageTag);
 
-      task.executeOnExecutor(THREAD_POOL_EXECUTOR);
+      if(null != fragment && fragment.isVisible())
+      {
+         ArrayAdapter<Editable> adapter = (ArrayAdapter<Editable>) fragment.getListAdapter();
+
+         new AsyncManageAdapter(activity, adapter).executeOnExecutor(THREAD_POOL_EXECUTOR);
+      }
    }
 
    private static
    int count(Context context, String fileName)
    {
       int count = 0;
-      try(BufferedReader read = new BufferedReader(
-            new InputStreamReader(context.openFileInput(fileName))))
+      try(BufferedReader read = new BufferedReader(new InputStreamReader(context.openFileInput(fileName))))
       {
          while(null != read.readLine())
          {
@@ -80,11 +89,12 @@ class AsyncManage extends AsyncTask<String, Editable[], Void>
       String[] feedUrls = feedsIndex[1];
       String[] feedTags = feedsIndex[2];
 
-      boolean rtl = Utilities.isTextRtl(PagerAdapterFeeds.TAG_LIST.get(0));
+      boolean rtl = Utilities.isTextRtl(PagerAdapterTags.TAG_LIST.get(0));
       char direction = rtl ? (char) 0x200F : (char) 0x200E;
 
       int size = feedNames.length;
       Editable[] editables = new SpannableStringBuilder[size];
+      int exclusive = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE;
 
       for(int i = 0; i < size; i++)
       {
@@ -103,7 +113,7 @@ class AsyncManage extends AsyncTask<String, Editable[], Void>
 
          /* Make the feed name size 16dip. */
          int titleLength = editable.length();
-         editable.setSpan(TITLE_SIZE, 0, titleLength, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+         editable.setSpan(TITLE_SIZE, 0, titleLength, exclusive);
 
          /* Form the path to the feed_content file. */
          String feedContentFileName = feedNames[i] + ServiceUpdate.CONTENT_FILE;
@@ -119,8 +129,7 @@ class AsyncManage extends AsyncTask<String, Editable[], Void>
          int thirdLinePosition = editable.length();
          editable.append(m_context.getString(R.string.manage_feed_item_count));
          editable.append(' ');
-         editable.setSpan(SPAN_BOLD, thirdLinePosition, editable.length(),
-               Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+         editable.setSpan(SPAN_BOLD, thirdLinePosition, editable.length(), exclusive);
          editable.append(contentSize);
 
          editable.append(" · ");
@@ -128,8 +137,7 @@ class AsyncManage extends AsyncTask<String, Editable[], Void>
          /* Append the tags in bold. */
          int currentPosition = editable.length();
          editable.append(feedTags[i]);
-         editable.setSpan(SPAN_BOLD, currentPosition, editable.length(),
-               Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+         editable.setSpan(SPAN_BOLD, currentPosition, editable.length(), exclusive);
          editables[i] = editable;
       }
       publishProgress(editables);

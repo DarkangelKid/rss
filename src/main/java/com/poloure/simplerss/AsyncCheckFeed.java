@@ -18,14 +18,8 @@ package com.poloure.simplerss;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.ListFragment;
 import android.content.Context;
 import android.os.AsyncTask;
-import android.support.v4.view.ViewPager;
-import android.text.Editable;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -72,8 +66,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
    static
    void newInstance(Activity activity, Dialog dialog, String oldIndexLine, String oldFeedName)
    {
-      AsyncTask<Void, Void, String[]> task = new AsyncCheckFeed(activity, dialog, oldIndexLine,
-            oldFeedName);
+      AsyncTask<Void, Void, String[]> task = new AsyncCheckFeed(activity, dialog, oldIndexLine, oldFeedName);
 
       task.executeOnExecutor(THREAD_POOL_EXECUTOR);
    }
@@ -84,8 +77,8 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       for(String file : ServiceUpdate.FEED_FILES)
       {
          try(FileInputStream in = context.openFileInput(oldName + file);
-             FileOutputStream out = context.openFileOutput(newName + file, Context.MODE_PRIVATE);
-             FileChannel inChannel = in.getChannel())
+               FileOutputStream out = context.openFileOutput(newName + file, Context.MODE_PRIVATE);
+               FileChannel inChannel = in.getChannel())
          {
             inChannel.transferTo(0, inChannel.size(), out.getChannel());
          }
@@ -99,8 +92,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
    private static
    void AppendLineToIndex(Context context, String lineToAppend)
    {
-      try(BufferedWriter out = new BufferedWriter(
-            new OutputStreamWriter(context.openFileOutput(Read.INDEX, Context.MODE_APPEND))))
+      try(BufferedWriter out = new BufferedWriter(new OutputStreamWriter(context.openFileOutput(Read.INDEX, Context.MODE_APPEND))))
       {
          out.write(lineToAppend);
       }
@@ -133,8 +125,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
          if(isValidFeed(urlToCheck))
          {
             /* Did the user enter a feed name? If not, use the feed title found from the check. */
-            String tempTitle = 0 == inputName.length() ? getFeedTitle(urlToCheck)
-                  : inputName.toString();
+            String tempTitle = 0 == inputName.length() ? getFeedTitle(urlToCheck) : inputName.toString();
 
             /* Replace any characters that are not allowed in file names. */
             Matcher matcher = ILLEGAL_FILE_CHARS.matcher(tempTitle);
@@ -292,8 +283,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       if(isFeedValid)
       {
          /* Create the csv. */
-         String newIndexLine = String.format(INDEX_FORMAT, finalTitle, feedUrlFromCheck, finalTag) +
-                               Write.NEW_LINE;
+         String newIndexLine = String.format(INDEX_FORMAT, finalTitle, feedUrlFromCheck, finalTag) + Write.NEW_LINE;
 
          if(isExistingFeed)
          {
@@ -310,23 +300,11 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
             AppendLineToIndex(context, newIndexLine);
          }
 
-         /* Update the PagerAdapter for the tag fragments. */
-         ViewPager feedPager = (ViewPager) m_activity.findViewById(R.id.view_pager_tags);
-         PagerAdapterFeeds pagerAdapterFeeds = (PagerAdapterFeeds) feedPager.getAdapter();
-         pagerAdapterFeeds.updateTags(context);
+         /* Must update the tags first. */
+         PagerAdapterTags.update(m_activity);
+         AsyncNavigationAdapter.update(m_activity);
+         AsyncManageAdapter.update(m_activity);
 
-         /* Update the NavigationDrawer adapter. */
-         AsyncNavigationAdapter.newInstance(m_activity);
-
-         /* Get the manage ListView and update it. */
-         FragmentManager manager = m_activity.getFragmentManager();
-         Fragment fragment = manager.findFragmentByTag(FeedsActivity.FRAGMENT_TAGS[1]);
-
-         if(null != fragment && fragment.isVisible())
-         {
-            AsyncManage.newInstance(context,
-                  (ArrayAdapter<Editable>) ((ListFragment) fragment).getListAdapter());
-         }
          m_dialog.dismiss();
       }
       else
@@ -337,10 +315,14 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       }
 
       /* Show added feed toast notification. */
-      String text = isFeedValid ? context.getString(R.string.toast_added_feed) + ' ' + finalTitle
-            : context.getString(R.string.toast_invalid_feed);
-
-      Toast toast = Toast.makeText(context, text, Toast.LENGTH_SHORT);
-      toast.show();
+      if(isFeedValid)
+      {
+         String text = context.getString(R.string.toast_added_feed, finalTitle);
+         Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
+      }
+      else
+      {
+         Toast.makeText(context, R.string.toast_invalid_feed, Toast.LENGTH_SHORT).show();
+      }
    }
 }

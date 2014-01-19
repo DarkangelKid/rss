@@ -56,10 +56,7 @@ class OnNavigationListItemClick implements AdapterView.OnItemClickListener
       }
 
       FragmentManager manager = m_activity.getFragmentManager();
-      manager.beginTransaction()
-             .hide(FeedsActivity.getFragment(manager, m_activity.m_currentFragment))
-             .show(FeedsActivity.getFragment(manager, newTag))
-             .commit();
+      manager.beginTransaction().hide(FeedsActivity.getFragment(manager, m_activity.m_currentFragment)).show(FeedsActivity.getFragment(manager, newTag)).commit();
       m_activity.m_currentFragment = newTag;
 
       /* Update the action bar subtitle. */
