@@ -44,6 +44,7 @@ import android.view.MenuItem;
 import android.widget.Adapter;
 import android.widget.ListView;
 
+import java.util.Arrays;
 import java.util.List;
 
 public
@@ -226,22 +227,19 @@ class FeedsActivity extends Activity
    public
    boolean onPrepareOptionsMenu(Menu menu)
    {
-      /* If the title is not the feeds title, disable the buttons accordingly. */
-      ActionBar actionBar = getActionBar();
-      String[] titles = getResources().getStringArray(R.array.navigation_titles);
-
-      if(null != actionBar)
+      boolean[] show = new boolean[3];
+      if(m_currentFragment.equals(FRAGMENT_TAGS[0]))
       {
-         String title = actionBar.getTitle().toString();
+         Arrays.fill(show, true);
+      }
+      else if(m_currentFragment.equals(FRAGMENT_TAGS[1]))
+      {
+         show[0] = true;
+      }
 
-         boolean[] show = titles[0].equals(title) ? new boolean[]{true, true, true} : new boolean[]{
-               titles[1].equals(title), false, false
-         };
-
-         for(int i = 0; i < menu.size(); i++)
-         {
-            menu.getItem(i).setEnabled(m_showMenuItems && show[i]);
-         }
+      for(int i = 0; 3 > i; i++)
+      {
+         menu.getItem(i).setEnabled(m_showMenuItems && show[i]);
       }
       return true;
    }
@@ -252,8 +250,7 @@ class FeedsActivity extends Activity
    {
       menu.clear();
 
-      MenuInflater menuInflater = getMenuInflater();
-      menuInflater.inflate(R.menu.action_bar_menu, menu);
+      getMenuInflater().inflate(R.menu.action_bar_menu, menu);
       MenuItem item = menu.findItem(R.id.refresh);
 
       if(m_stopProgressBar)
@@ -293,7 +290,7 @@ class FeedsActivity extends Activity
          AsyncManageAdapter.update(activity);
          AsyncNavigationAdapter.update(activity);
 
-         /* Tell the refresh icon to stop spinning if the service has stopped. */
+         /* Tell the refresh icon to stop spinning. */
          m_stopProgressBar = true;
          invalidateOptionsMenu();
       }
@@ -308,17 +305,15 @@ class FeedsActivity extends Activity
    void setServiceIntent(int state)
    {
       /* Load the ManageFeedsRefresh boolean value from settings. */
-      SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-      boolean refreshDisabled = !preferences.getBoolean("refreshing_enabled", false);
+      SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
 
-      if(refreshDisabled && ALARM_SERVICE_START == state)
+      if(!pref.getBoolean("refreshing_enabled", false) && ALARM_SERVICE_START == state)
       {
          return;
       }
 
       /* Create intent, turn into pending intent, and get the alarm manager. */
       Intent intent = new Intent(this, ServiceUpdate.class);
-      intent.putExtra("GROUP_NUMBER", 0);
 
       PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, 0);
       AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
@@ -326,10 +321,9 @@ class FeedsActivity extends Activity
       /* Depending on the state string, start or stop the service. */
       if(ALARM_SERVICE_START == state)
       {
-         String intervalString = preferences.getString("refresh_interval", "120");
-         int refreshInterval = Integer.parseInt(intervalString);
+         String intervalString = pref.getString("refresh_interval", "120");
 
-         long interval = (long) refreshInterval * MINUTE_VALUE;
+         long interval = Long.parseLong(intervalString) * MINUTE_VALUE;
          long next = System.currentTimeMillis() + interval;
          am.setRepeating(AlarmManager.RTC_WAKEUP, next, interval, pendingIntent);
       }
@@ -349,14 +343,13 @@ class FeedsActivity extends Activity
    void onUnreadClick(MenuItem menuItem)
    {
       ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager_tags);
-      int currentPage = viewPager.getCurrentItem();
 
-      FragmentManager manager = getFragmentManager();
-      Fragment fragment = manager.findFragmentByTag(Utilities.FRAGMENT_ID_PREFIX + currentPage);
+      String tag = Utilities.FRAGMENT_ID_PREFIX + viewPager.getCurrentItem();
+      ListFragment fragment = (ListFragment) getFragmentManager().findFragmentByTag(tag);
 
       if(null != fragment)
       {
-         gotoLatestUnread(((ListFragment) fragment).getListView());
+         gotoLatestUnread(fragment.getListView());
       }
    }
 

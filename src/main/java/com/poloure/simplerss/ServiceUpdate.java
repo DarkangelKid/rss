@@ -273,8 +273,7 @@ class ServiceUpdate extends IntentService
       List<String> tagList = PagerAdapterTags.TAG_LIST;
       if(tagList.isEmpty())
       {
-         Set<String> set = PagerAdapterTags.getTagsFromDisk(this);
-         tagList.addAll(set);
+         tagList.addAll(PagerAdapterTags.getTagsFromDisk(this));
       }
 
       String tag = tagList.get(page);
