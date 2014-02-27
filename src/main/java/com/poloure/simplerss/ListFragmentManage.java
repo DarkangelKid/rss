@@ -94,9 +94,12 @@ class ListFragmentManage extends ListFragment
       {
          if(R.id.select_all == item.getItemId())
          {
-            for(m_count = 0; m_listView.getCount() > m_count; m_count++)
+            for(int i = 0; m_listView.getCount() > i; i++)
             {
-               m_listView.setItemChecked(m_count, true);
+               if(!m_listView.isItemChecked(i))
+               {
+                  m_listView.setItemChecked(i, true);
+               }
             }
             mode.setTitle(Utilities.getLocaleInt(m_count) + ' ' + getString(R.string.managed_selected));
          }
