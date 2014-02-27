@@ -103,14 +103,8 @@ class AdapterTags extends BaseAdapter
       boolean isRead = READ_ITEM_TIMES.contains(item.m_time);
       view.m_item = item;
 
+      /* If we have an image and the item is read, delay the opacity change. */
       view.setAlpha(isRead && !hasImg ? 0.5F : 1.0F);
-
-      /* The logic that tells whether the item is Read or not. */
-      if(parent.isShown() && position + 1 < m_feedItems.size() && m_isReadingItems)
-      {
-         FeedItem nextItem = m_feedItems.get(position + 1);
-         READ_ITEM_TIMES.add(nextItem.m_time);
-      }
 
       /* If the view was an image, load the image. */
       if(hasImg)
@@ -118,6 +112,12 @@ class AdapterTags extends BaseAdapter
          view.setBitmap(null);
          view.setTag(position);
          AsyncLoadImage.newInstance(view, item.m_imageName, position, isRead ? 0.5F : 1.0F);
+      }
+
+      /* Add item as read as soon as getView has run. */
+      if(parent.isShown() && m_isReadingItems)
+      {
+         READ_ITEM_TIMES.add(item.m_time);
       }
 
       return view;

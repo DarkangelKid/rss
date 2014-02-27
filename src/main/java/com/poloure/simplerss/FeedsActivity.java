@@ -39,7 +39,6 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Adapter;
 import android.widget.ListView;
@@ -50,7 +49,7 @@ import java.util.List;
 public
 class FeedsActivity extends Activity
 {
-   private static final String READ_ITEMS = "read_items.txt";
+   static final String READ_ITEMS = "read_items.txt";
    private static final int ALARM_SERVICE_START = 1;
    private static final int ALARM_SERVICE_STOP = 0;
    private static final int MINUTE_VALUE = 60000;
@@ -199,6 +198,7 @@ class FeedsActivity extends Activity
    void onStop()
    {
       super.onStop();
+      Write.longSet(this, READ_ITEMS, AdapterTags.READ_ITEM_TIMES);
       setServiceIntent(ALARM_SERVICE_START);
    }
 
@@ -208,7 +208,6 @@ class FeedsActivity extends Activity
    void onDestroy()
    {
       super.onDestroy();
-      Write.longSet(this, READ_ITEMS, AdapterTags.READ_ITEM_TIMES);
    }
 
    /* Option menu methods.
@@ -277,6 +276,11 @@ class FeedsActivity extends Activity
       return true;
    }
 
+   /* The end of overridden methods.
+    *
+    *
+    */
+
    private final BroadcastReceiver Receiver = new BroadcastReceiver()
    {
       @Override
@@ -295,11 +299,6 @@ class FeedsActivity extends Activity
          invalidateOptionsMenu();
       }
    };
-
-   /* The end of overridden methods.
-    *
-    *
-    */
 
    private
    void setServiceIntent(int state)

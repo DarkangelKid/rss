@@ -83,6 +83,19 @@
    </PreferenceScreen>
 
    <PreferenceScreen
+      android:title="@string/advanced"
+      android:icon="@drawable/ic_action_settings">
+      <com.poloure.simplerss.DialogConfirm
+         android:title="@string/clear_read_history_title"
+         android:summary="@string/clear_read_history_summary"
+         android:key="clear_unread_items"
+         android:dialogTitle="@string/clear_read_items_dialog_title"
+         android:dialogMessage="@string/clear_read_items_dialog_summary"
+         android:negativeButtonText="@string/switch_no"
+         android:positiveButtonText="@string/switch_yes"/>
+   </PreferenceScreen>
+
+   <PreferenceScreen
       android:summary="https://github.com/poloure/rss"
       android:title="@string/source_code"
       android:icon="@drawable/ic_action_about">

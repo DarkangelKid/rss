@@ -104,6 +104,13 @@
    <string name="images_thumbnail_quality">Thumbnail quality (WebP)</string>
    <string name="images_thumbnail_quality_summary">Only affects new downloads</string>
 
+   <!-- Settings advanced. -->
+   <string name="advanced">Advanced</string>
+   <string name="clear_read_history_title">Clear read history</string>
+   <string name="clear_read_history_summary">Set all items to unread</string>
+   <string name="clear_read_items_dialog_title">Clear read history</string>
+   <string name="clear_read_items_dialog_summary">Are you sure you want to clear read history?</string>
+
    <!-- Settings source code. -->
    <string name="source_code">Source code</string>
 
