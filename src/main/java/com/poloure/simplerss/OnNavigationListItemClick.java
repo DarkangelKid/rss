@@ -50,13 +50,16 @@ class OnNavigationListItemClick implements AdapterView.OnItemClickListener
 
       /* Switch the content frame fragment. */
       String newTag = FeedsActivity.FRAGMENT_TAGS[selectedFragment];
-      if(m_activity.m_currentFragment.equals(newTag))
+      if(m_activity.m_currentFragment.equals(newTag) && 3 > position)
       {
          return;
       }
 
       FragmentManager manager = m_activity.getFragmentManager();
-      manager.beginTransaction().hide(FeedsActivity.getFragment(manager, m_activity.m_currentFragment)).show(FeedsActivity.getFragment(manager, newTag)).commit();
+      manager.beginTransaction()
+             .hide(FeedsActivity.getFragment(manager, m_activity.m_currentFragment))
+             .show(FeedsActivity.getFragment(manager, newTag))
+             .commit();
       m_activity.m_currentFragment = newTag;
 
       /* Update the action bar subtitle. */
@@ -67,10 +70,10 @@ class OnNavigationListItemClick implements AdapterView.OnItemClickListener
          actionBar.setTitle(navTitles[selectedFragment]);
       }
 
-      ViewPager viewPager = (ViewPager) m_activity.findViewById(R.id.view_pager_tags);
       /* If a tag was clicked, set the ViewPager position to that tag. */
       if(2 < position)
       {
+         ViewPager viewPager = (ViewPager) m_activity.findViewById(R.id.view_pager_tags);
          viewPager.setCurrentItem(position - 3);
       }
       /* If a main title was clicked, set the subtitle accordingly. */

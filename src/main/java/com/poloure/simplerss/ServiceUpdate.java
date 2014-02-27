@@ -217,10 +217,7 @@ class ServiceUpdate extends IntentService
    private static
    void appendItem(StringBuilder builder, String tag, String content)
    {
-      builder.append(tag);
-      builder.append(ITEM_SEPARATOR);
-      builder.append(content);
-      builder.append(ITEM_SEPARATOR);
+      builder.append(tag).append(ITEM_SEPARATOR).append(content).append(ITEM_SEPARATOR);
    }
 
    private
@@ -283,7 +280,8 @@ class ServiceUpdate extends IntentService
       /* Download and parse each feed in the index. */
       for(int i = 0; i < content[0].length; i++)
       {
-         if(0 == page || Arrays.asList(PagerAdapterTags.SPLIT_COMMA.split(content[2][i])).contains(tag))
+         if(0 == page || Arrays.asList(PagerAdapterTags.SPLIT_COMMA.split(content[2][i]))
+                               .contains(tag))
          {
             try
             {

@@ -78,7 +78,8 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, NavItem[]>
          for(int j = 0; j < content[0].length; j++)
          {
             /* If the feed's index entry (tag1, tag2, etc) contains this tag or is the all tag. */
-            if(0 == i || Arrays.asList(PagerAdapterTags.SPLIT_COMMA.split(content[1][j])).contains(tag))
+            if(0 == i || Arrays.asList(PagerAdapterTags.SPLIT_COMMA.split(content[1][j]))
+                               .contains(tag))
             {
                itemsInTag.addAll(feedItems.get(j));
             }
