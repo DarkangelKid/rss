@@ -28,6 +28,7 @@ import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -68,7 +69,9 @@ class ListFragmentTag extends ListFragment
    {
       super.onCreateContextMenu(menu, v, menuInfo);
       getActivity().getMenuInflater().inflate(R.menu.context_menu, menu);
-      menu.setHeaderTitle("URL");
+      AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+      FeedItem view = (FeedItem) ((AdapterView<ListAdapter>) v).getAdapter().getItem(info.position);
+      menu.setHeaderTitle(view.m_title);
    }
 
    @Override
@@ -76,7 +79,8 @@ class ListFragmentTag extends ListFragment
    boolean onContextItemSelected(MenuItem item)
    {
       AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-      String url = ((ViewCustom) info.targetView).m_item.m_urlFull;
+      FeedItem feedItem = ((ViewCustom) info.targetView).m_item;
+      String url = feedItem.m_urlFull;
       Context context = getActivity();
 
       if(R.id.copy == item.getItemId())
@@ -88,10 +92,11 @@ class ListFragmentTag extends ListFragment
          toast.show();
          return true;
       }
-      else
+      if(R.id.open == item.getItemId())
       {
          context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
          return true;
       }
+      return false;
    }
 }

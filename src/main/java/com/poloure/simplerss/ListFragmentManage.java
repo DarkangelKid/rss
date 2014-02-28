@@ -67,7 +67,7 @@ class ListFragmentManage extends ListFragment
       DialogEditFeed.newInstance(getActivity(), position).show();
    }
 
-   private
+   private static
    class MultiModeListener implements AbsListView.MultiChoiceModeListener
    {
       private final ListView m_listView;
@@ -85,7 +85,7 @@ class ListFragmentManage extends ListFragment
       void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked)
       {
          m_count += checked ? 1 : -1;
-         mode.setTitle(Utilities.getLocaleInt(m_count) + ' ' + getString(R.string.managed_selected));
+         mode.setTitle(Utilities.getLocaleInt(m_count) + ' ' + m_activity.getString(R.string.managed_selected));
       }
 
       @Override
@@ -101,7 +101,7 @@ class ListFragmentManage extends ListFragment
                   m_listView.setItemChecked(i, true);
                }
             }
-            mode.setTitle(Utilities.getLocaleInt(m_count) + ' ' + getString(R.string.managed_selected));
+            mode.setTitle(Utilities.getLocaleInt(m_count) + ' ' + m_activity.getString(R.string.managed_selected));
          }
          else
          {
