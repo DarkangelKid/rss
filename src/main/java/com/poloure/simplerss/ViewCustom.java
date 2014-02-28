@@ -21,8 +21,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.util.DisplayMetrics;
-import android.util.TypedValue;
 import android.view.View;
 
 import java.text.NumberFormat;
@@ -32,25 +30,30 @@ import java.util.Locale;
 class ViewCustom extends View
 {
    static final int IMAGE_HEIGHT = 360;
-   static final Paint[] PAINTS = new Paint[3];
-   private static final int[] COLORS = {0, 90, 50};
-   private static final float[] SIZES = {16.0F, 12.0F, 14.0F};
+   final Paint[] m_paints = new Paint[3];
    private static final int SCREEN = Resources.getSystem().getDisplayMetrics().widthPixels;
-
-   static
-   {
-      DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
-      for(int i = 0; 3 > i; i++)
-      {
-         PAINTS[i] = new Paint(Paint.ANTI_ALIAS_FLAG);
-         PAINTS[i].setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, SIZES[i], metrics));
-         PAINTS[i].setARGB(255, COLORS[i], COLORS[i], COLORS[i]);
-      }
-   }
 
    private Bitmap m_image;
    FeedItem m_item;
    private final int m_height;
+
+   static final int[] FONT_COLORS = {
+         R.color.item_title_color, R.color.item_link_color, R.color.item_description_color,
+   };
+   static final int[] FONT_SIZES = {
+         R.dimen.item_title_size, R.dimen.item_link_size, R.dimen.item_description_size,
+   };
+
+   ViewCustom(Context context, int height)
+   {
+      super(context);
+      m_height = height;
+
+      setLayerType(LAYER_TYPE_HARDWARE, null);
+      setPadding(Utilities.EIGHT_DP, Utilities.EIGHT_DP, Utilities.EIGHT_DP, Utilities.EIGHT_DP);
+
+      initPaints(getResources());
+   }
 
    @Override
    public
@@ -58,9 +61,17 @@ class ViewCustom extends View
    {
       /* If the canvas is meant to draw a bitmap but it is null, draw nothing.
          NOTE: This value must change if the AdapterTags heights are changing. */
+
+      /* TODO: This also needs a better implementation as it fails sometimes. */
       if(200 < getHeight() && null == m_image)
       {
          return;
+      }
+
+      /* If our paints have been cleared from memory, remake them. */
+      if(null == m_paints[0])
+      {
+         initPaints(getResources());
       }
 
       float verticalPosition = drawBase(canvas);
@@ -71,13 +82,21 @@ class ViewCustom extends View
       }
    }
 
-   ViewCustom(Context context, int height)
+   void initPaints(Resources resources)
    {
-      super(context);
-      m_height = height;
+      for(int i = 0; 3 > i; i++)
+      {
+         m_paints[i] = configurePaint(resources, FONT_SIZES[i], FONT_COLORS[i]);
+      }
+   }
 
-      setLayerType(LAYER_TYPE_HARDWARE, null);
-      setPadding(Utilities.EIGHT_DP, Utilities.EIGHT_DP, Utilities.EIGHT_DP, Utilities.EIGHT_DP);
+   static
+   Paint configurePaint(Resources resources, int dimenResource, int colorResource)
+   {
+      Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+      paint.setTextSize(resources.getDimension(dimenResource));
+      paint.setColor(resources.getColor(colorResource));
+      return paint;
    }
 
    void setBitmap(Bitmap bitmap)
@@ -97,39 +116,39 @@ class ViewCustom extends View
       /* Draw the title. */
       if(Utilities.isTextRtl(m_item.m_title))
       {
-         PAINTS[0].setTextAlign(Paint.Align.RIGHT);
-         PAINTS[1].setTextAlign(Paint.Align.RIGHT);
+         m_paints[0].setTextAlign(Paint.Align.RIGHT);
+         m_paints[1].setTextAlign(Paint.Align.RIGHT);
 
-         canvas.drawText(m_item.m_title, SCREEN - getPaddingRight(), verticalPosition, PAINTS[0]);
+         canvas.drawText(m_item.m_title, SCREEN - getPaddingRight(), verticalPosition, m_paints[0]);
 
          /* Draw the time. */
-         PAINTS[1].setTextAlign(Paint.Align.LEFT);
-         canvas.drawText(getTime(m_item.m_time, getContext()), getPaddingLeft(), verticalPosition, PAINTS[1]);
-         PAINTS[1].setTextAlign(Paint.Align.RIGHT);
+         m_paints[1].setTextAlign(Paint.Align.LEFT);
+         canvas.drawText(getTime(m_item.m_time, getContext()), getPaddingLeft(), verticalPosition, m_paints[1]);
+         m_paints[1].setTextAlign(Paint.Align.RIGHT);
 
-         verticalPosition += PAINTS[0].getTextSize();
+         verticalPosition += m_paints[0].getTextSize();
 
-         canvas.drawText(m_item.m_url, SCREEN - getPaddingRight(), verticalPosition, PAINTS[1]);
+         canvas.drawText(m_item.m_url, SCREEN - getPaddingRight(), verticalPosition, m_paints[1]);
 
          /* Reset the paints. */
-         PAINTS[0].setTextAlign(Paint.Align.LEFT);
-         PAINTS[1].setTextAlign(Paint.Align.LEFT);
+         m_paints[0].setTextAlign(Paint.Align.LEFT);
+         m_paints[1].setTextAlign(Paint.Align.LEFT);
       }
       else
       {
-         canvas.drawText(m_item.m_title, getPaddingLeft(), verticalPosition, PAINTS[0]);
+         canvas.drawText(m_item.m_title, getPaddingLeft(), verticalPosition, m_paints[0]);
 
          /* Draw the time. */
-         PAINTS[1].setTextAlign(Paint.Align.RIGHT);
-         canvas.drawText(getTime(m_item.m_time, getContext()), SCREEN - getPaddingRight(), verticalPosition, PAINTS[1]);
-         PAINTS[1].setTextAlign(Paint.Align.LEFT);
+         m_paints[1].setTextAlign(Paint.Align.RIGHT);
+         canvas.drawText(getTime(m_item.m_time, getContext()), SCREEN - getPaddingRight(), verticalPosition, m_paints[1]);
+         m_paints[1].setTextAlign(Paint.Align.LEFT);
 
-         verticalPosition += PAINTS[0].getTextSize();
+         verticalPosition += m_paints[0].getTextSize();
 
-         canvas.drawText(m_item.m_url, getPaddingLeft(), verticalPosition, PAINTS[1]);
+         canvas.drawText(m_item.m_url, getPaddingLeft(), verticalPosition, m_paints[1]);
       }
 
-      return verticalPosition + PAINTS[1].getTextSize();
+      return verticalPosition + m_paints[1].getTextSize();
    }
 
    void drawDes(Canvas canvas, float verticalPosition)
@@ -144,21 +163,21 @@ class ViewCustom extends View
       boolean rtl = Utilities.isTextRtl(m_item.m_desLines[0]);
       if(rtl)
       {
-         PAINTS[2].setTextAlign(Paint.Align.RIGHT);
+         m_paints[2].setTextAlign(Paint.Align.RIGHT);
       }
       for(int i = 0; 3 > i; i++)
       {
-         canvas.drawText(m_item.m_desLines[i], rtl ? SCREEN - getPaddingRight() : getPaddingLeft(), position, PAINTS[2]);
-         position += PAINTS[2].getTextSize();
+         canvas.drawText(m_item.m_desLines[i], rtl ? SCREEN - getPaddingRight() : getPaddingLeft(), position, m_paints[2]);
+         position += m_paints[2].getTextSize();
       }
-      PAINTS[2].setTextAlign(Paint.Align.LEFT);
+      m_paints[2].setTextAlign(Paint.Align.LEFT);
    }
 
    float drawBitmap(Canvas canvas, float verticalPosition)
    {
       if(null != m_image)
       {
-         canvas.drawBitmap(m_image, 0.0F, verticalPosition, PAINTS[0]);
+         canvas.drawBitmap(m_image, 0.0F, verticalPosition, m_paints[0]);
          return verticalPosition + IMAGE_HEIGHT + 32;
       }
       else

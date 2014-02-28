@@ -23,6 +23,7 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Paint;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.text.format.Time;
@@ -63,7 +64,6 @@ class ServiceUpdate extends IntentService
    private static final int MIN_IMAGE_WIDTH = 64;
    private static final int FEED_ITEM_INITIAL_CAPACITY = 200;
    private long m_timeCurrentItem;
-   private static final int TIME_SPACE = Utilities.getDp(80.0F);
 
    private static final float SCREEN_WIDTH = Resources.getSystem().getDisplayMetrics().widthPixels;
    private static final float USABLE_WIDTH_TEXT = SCREEN_WIDTH - 40.0F;
@@ -128,13 +128,15 @@ class ServiceUpdate extends IntentService
       }
    }
 
-   private static
+   private
    StringBuilder appendDesLines(StringBuilder builder, String content)
    {
       String contentCopy = content;
+      Paint paint = ViewCustom.configurePaint(getResources(), R.dimen.item_description_size, R.color.item_description_color);
+
       for(int x = 0; 3 > x; x++)
       {
-         int desChars = ViewCustom.PAINTS[2].breakText(contentCopy, true, USABLE_WIDTH_TEXT, null);
+         int desChars = paint.breakText(contentCopy, true, USABLE_WIDTH_TEXT, null);
          int desSpace = contentCopy.lastIndexOf(' ', desChars);
          desChars = -1 == desSpace ? desChars : desSpace + 1;
 
@@ -145,10 +147,16 @@ class ServiceUpdate extends IntentService
       return builder;
    }
 
-   private static
+   private
    String fitToScreen(String content, int ind, float extra)
    {
-      int chars = ViewCustom.PAINTS[ind].breakText(content, true, USABLE_WIDTH_TEXT - extra, null);
+      /* ind == 0 is the title, ind == 1 is the link. */
+      int size = 0 == ind ? R.dimen.item_title_size : R.dimen.item_link_size;
+      int color = 0 == ind ? R.color.item_title_color : R.color.item_link_color;
+
+      Paint paint = ViewCustom.configurePaint(getResources(), size, color);
+
+      int chars = paint.breakText(content, true, USABLE_WIDTH_TEXT - extra, null);
       int space = content.lastIndexOf(' ', chars);
 
       return content.substring(0, -1 == space ? chars : space);
@@ -407,7 +415,8 @@ class ServiceUpdate extends IntentService
                   appendPublishedTime(builder, getContent(parser), tag);
                   break;
                case Tags.TITLE:
-                  appendItem(builder, Index.TITLE, fitToScreen(getContent(parser), 0, TIME_SPACE));
+                  float timeSpace = getResources().getDimension(R.dimen.reserved_time);
+                  appendItem(builder, Index.TITLE, fitToScreen(getContent(parser), 0, timeSpace));
                   break;
                case Tags.CONTENT:
                case Tags.DESCRIPTION:
