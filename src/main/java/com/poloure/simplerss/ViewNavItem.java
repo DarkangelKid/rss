@@ -102,7 +102,7 @@ class ViewNavItem extends View
          int imageWidth = m_bitmaps[m_image].getWidth();
          canvas.drawBitmap(m_bitmaps[m_image], rtl ? width - paddingStart - imageWidth : paddingStart, Math
                .round(paddingTop), m_paints[0]);
-         hPadding += paddingStart + imageWidth;
+         hPadding = (paddingStart<<1) + imageWidth;
       }
 
       /* Draw the main text. */
