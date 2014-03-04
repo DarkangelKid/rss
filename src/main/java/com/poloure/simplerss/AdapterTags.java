@@ -96,7 +96,7 @@ class AdapterTags extends BaseAdapter
       boolean hasDes = TYPE_PLAIN == viewType || TYPE_IMAGE == viewType;
 
       /* TODO These are pix not Dip. */
-      ViewCustom view = null != convertView ? (ViewCustom) convertView : new ViewCustom(m_context, hasImg ? hasDes ? 564 : 464 : hasDes ? 184 : 94);
+      ViewFeedItem view = null != convertView ? (ViewFeedItem) convertView : new ViewFeedItem(m_context, hasImg ? hasDes ? 564 : 464 : hasDes ? 184 : 94);
 
       /* Set the information. */
       FeedItem item = m_feedItems.get(position);

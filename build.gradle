@@ -26,6 +26,11 @@ android {
         targetCompatibility JavaVersion.VERSION_1_7
     }
 
+    lintOptions {
+        checkReleaseBuilds true
+        abortOnError false
+    }
+
     buildTypes {
         release {
             runProguard true

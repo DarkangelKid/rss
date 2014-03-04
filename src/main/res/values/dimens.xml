@@ -25,4 +25,9 @@
    <!-- Font sizes for navigation texts. -->
    <dimen name="navigation_main">20sp</dimen>
    <dimen name="navigation_tag">16sp</dimen>
+
+   <dimen name="navigation_height">48dp</dimen>
+   <dimen name="navigation_tag_hpadding">16dp</dimen>
+   <dimen name="navigation_image_paddingTop">8dp</dimen>
+   <dimen name="navigation_image_paddingStart">8dp</dimen>
 </resources>

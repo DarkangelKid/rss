@@ -18,7 +18,6 @@ package com.poloure.simplerss;
 
 import android.app.ActionBar;
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -44,7 +43,6 @@ import android.widget.Adapter;
 import android.widget.ListView;
 
 import java.util.Arrays;
-import java.util.List;
 
 public
 class FeedsActivity extends Activity
@@ -92,7 +90,7 @@ class FeedsActivity extends Activity
          actionBar.setDisplayHomeAsUpEnabled(true);
          actionBar.setHomeButtonEnabled(true);
 
-         Drawable appIcon = resources.getDrawable(R.drawable.rss_icon);
+         Drawable appIcon = resources.getDrawable(R.drawable.ic_action_location_broadcast);
          if(null != appIcon)
          {
             appIcon.setAutoMirrored(true);
@@ -243,35 +241,23 @@ class FeedsActivity extends Activity
       return true;
    }
 
+   /* TODO: Needs a method of checking if the service is running. */
    @Override
    public
    boolean onCreateOptionsMenu(Menu menu)
    {
-      menu.clear();
-
-      getMenuInflater().inflate(R.menu.action_bar_menu, menu);
-      MenuItem item = menu.findItem(R.id.refresh);
+      if(0 == menu.size())
+      {
+         getMenuInflater().inflate(R.menu.action_bar_menu, menu);
+      }
 
       if(m_stopProgressBar)
       {
+         MenuItem item = menu.findItem(R.id.refresh);
          MenuItemCompat.setActionView(item, null);
          m_stopProgressBar = false;
          return true;
       }
-
-      /* Set the refresh icon accordingly. */
-      ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-      List<ActivityManager.RunningServiceInfo> info = manager.getRunningServices(Integer.MAX_VALUE);
-
-      for(ActivityManager.RunningServiceInfo service : info)
-      {
-         if(ServiceUpdate.class.getName().equals(service.service.getClassName()))
-         {
-            MenuItemCompat.setActionView(item, R.layout.progress_bar_refresh);
-            return true;
-         }
-      }
-      MenuItemCompat.setActionView(item, null);
 
       return true;
    }

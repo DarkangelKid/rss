@@ -27,7 +27,7 @@ import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-class ViewCustom extends View
+class ViewFeedItem extends View
 {
    static final int IMAGE_HEIGHT = 360;
    final Paint[] m_paints = new Paint[3];
@@ -44,7 +44,7 @@ class ViewCustom extends View
          R.dimen.item_title_size, R.dimen.item_link_size, R.dimen.item_description_size,
    };
 
-   ViewCustom(Context context, int height)
+   ViewFeedItem(Context context, int height)
    {
       super(context);
       m_height = height;
@@ -84,7 +84,7 @@ class ViewCustom extends View
 
    void initPaints(Resources resources)
    {
-      for(int i = 0; 3 > i; i++)
+      for(int i = 0; m_paints.length > i; i++)
       {
          m_paints[i] = configurePaint(resources, FONT_SIZES[i], FONT_COLORS[i]);
       }

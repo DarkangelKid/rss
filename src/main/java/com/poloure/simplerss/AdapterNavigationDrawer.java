@@ -17,18 +17,12 @@
 package com.poloure.simplerss;
 
 import android.content.Context;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.TextView;
 
 class AdapterNavigationDrawer extends ArrayAdapter<NavItem>
 {
-   private static final int[] NAV_ICONS = {
-         R.drawable.action_feeds, R.drawable.action_manage, R.drawable.action_settings,
-   };
-
    private static final int TITLE = 0;
    private static final int TAG = 1;
 
@@ -46,29 +40,13 @@ class AdapterNavigationDrawer extends ArrayAdapter<NavItem>
    public
    View getView(int position, View convertView, ViewGroup parent)
    {
-      int viewType = getItemViewType(position);
-      LayoutInflater inflater = LayoutInflater.from(m_context);
+      int type = getItemViewType(position);
+      ViewNavItem view = null == convertView ? new ViewNavItem(m_context) : (ViewNavItem) convertView;
 
-      int id = TITLE == viewType ? R.layout.navigation_text_view_main : R.layout.navigation_text_view_tag;
+      view.m_text = TITLE == type ? m_navigationTitles[position] : getItem(position - 3).m_title;
+      view.m_count = TITLE == type ? "" : 0 == getItem(position - 3).m_count ? "" : Utilities.getLocaleInt(getItem(position - 3).m_count);
+      view.m_image = TITLE == type ? position : -1;
 
-      TextView view = (TextView) (null == convertView ? inflater.inflate(id, null) : convertView);
-
-      if(TITLE == viewType)
-      {
-         view.setText(m_navigationTitles[position]);
-         view.setCompoundDrawablesRelativeWithIntrinsicBounds(NAV_ICONS[position], 0, 0, 0);
-      }
-      else
-      {
-         int count = getItem(position - 3).m_count;
-         String tag = getItem(position - 3).m_title;
-
-         /* This RTL (char) 0x200F allows the unread counter to be aligned to the right. */
-         String allTag = m_context.getString(R.string.all_tag);
-         tag = Utilities.isTextRtl(allTag) ? (char) 0x200F + tag + Write.NEW_LINE + (char) 0x200E : (char) 0x200E + tag + Write.NEW_LINE + (char) 0x200F;
-
-         view.setText(tag + (0 == count ? "" : Utilities.getLocaleInt(count)));
-      }
       return view;
    }
 

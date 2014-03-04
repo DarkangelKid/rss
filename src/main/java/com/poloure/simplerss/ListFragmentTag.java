@@ -79,7 +79,7 @@ class ListFragmentTag extends ListFragment
    boolean onContextItemSelected(MenuItem item)
    {
       AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-      FeedItem feedItem = ((ViewCustom) info.targetView).m_item;
+      FeedItem feedItem = ((ViewFeedItem) info.targetView).m_item;
       String url = feedItem.m_urlFull;
       Context context = getActivity();
 

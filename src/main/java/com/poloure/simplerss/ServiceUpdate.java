@@ -27,7 +27,6 @@ import android.graphics.Paint;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.text.format.Time;
-import android.view.View;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -132,7 +131,7 @@ class ServiceUpdate extends IntentService
    StringBuilder appendDesLines(StringBuilder builder, String content)
    {
       String contentCopy = content;
-      Paint paint = ViewCustom.configurePaint(getResources(), R.dimen.item_description_size, R.color.item_description_color);
+      Paint paint = ViewFeedItem.configurePaint(getResources(), R.dimen.item_description_size, R.color.item_description_color);
 
       for(int x = 0; 3 > x; x++)
       {
@@ -154,7 +153,7 @@ class ServiceUpdate extends IntentService
       int size = 0 == ind ? R.dimen.item_title_size : R.dimen.item_link_size;
       int color = 0 == ind ? R.color.item_title_color : R.color.item_link_color;
 
-      Paint paint = ViewCustom.configurePaint(getResources(), size, color);
+      Paint paint = ViewFeedItem.configurePaint(getResources(), size, color);
 
       int chars = paint.breakText(content, true, USABLE_WIDTH_TEXT - extra, null);
       int space = content.lastIndexOf(' ', chars);
@@ -206,8 +205,8 @@ class ServiceUpdate extends IntentService
          /* Scale it to the screen width. */
          bitmap = Bitmap.createScaledBitmap(bitmap, Math.round(SCREEN_WIDTH), desiredHeight, false);
 
-         /* Shrink it to IMAGE_HEIGHT if that is more than the scaled height. */
-         int newHeight = Math.min(bitmap.getHeight(), ViewCustom.IMAGE_HEIGHT);
+         /* Shrink it to VIEW_HEIGHT if that is more than the scaled height. */
+         int newHeight = Math.min(bitmap.getHeight(), ViewFeedItem.IMAGE_HEIGHT);
          bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), newHeight);
 
          /* Get the quality from settings. */
@@ -270,9 +269,6 @@ class ServiceUpdate extends IntentService
       wakeLock.acquire();
 
       int page = intent.getIntExtra("GROUP_NUMBER", 0);
-
-      /* Make a new paint object so we can break texts. */
-      View view = new ViewCustom(this, 0);
 
       /* Get the tagList (from disk if it is empty). */
       List<String> tagList = PagerAdapterTags.TAG_LIST;
