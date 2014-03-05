@@ -1,3 +1,19 @@
+/*
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
 package com.poloure.simplerss;
 
 import android.app.ActionBar;
@@ -64,8 +80,8 @@ class NavigationDrawerFragment extends Fragment
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
       m_drawerListView = (ListView) inflater.inflate(R.layout.navigation_drawer, container, false);
-
-      /* The onClickListener for navigation items. */
+      m_drawerListView.setAdapter(new AdapterNavigationDrawer(getActivity()));
+      m_drawerListView.setItemChecked(m_currentSelectedPosition, true);
       m_drawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener()
       {
          @Override
@@ -75,11 +91,17 @@ class NavigationDrawerFragment extends Fragment
             selectItem(position);
          }
       });
+      m_drawerListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener()
+      {
+         @Override
+         public
+         boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id)
+         {
+            /* reorder tags. */
+            return true;
+         }
+      });
 
-      /* This is the ArrayAdapter for the navigation drawer. */
-      Activity activity = getActivity();
-      m_drawerListView.setAdapter(new AdapterNavigationDrawer(activity));
-      m_drawerListView.setItemChecked(m_currentSelectedPosition, true);
       return m_drawerListView;
    }
 

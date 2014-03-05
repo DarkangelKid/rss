@@ -24,7 +24,6 @@ import android.graphics.Paint;
 import android.view.View;
 
 import java.text.NumberFormat;
-import java.util.Calendar;
 import java.util.Locale;
 
 class ViewFeedItem extends View
@@ -36,6 +35,8 @@ class ViewFeedItem extends View
    private Bitmap m_image;
    FeedItem m_item;
    private final int m_height;
+   private final String[] m_timeInitials;
+   private final NumberFormat m_numberFormat;
 
    private static final int[] FONT_COLORS = {
          R.color.item_title_color, R.color.item_link_color, R.color.item_description_color,
@@ -47,12 +48,16 @@ class ViewFeedItem extends View
    ViewFeedItem(Context context, int height)
    {
       super(context);
+      Resources resources = context.getResources();
+
       m_height = height;
+      m_timeInitials = resources.getStringArray(R.array.time_initials);
+      m_numberFormat = NumberFormat.getNumberInstance(Locale.getDefault());
 
       setLayerType(LAYER_TYPE_HARDWARE, null);
       setPadding(Utilities.EIGHT_DP, Utilities.EIGHT_DP, Utilities.EIGHT_DP, Utilities.EIGHT_DP);
 
-      initPaints(getResources());
+      initPaints(resources);
    }
 
    @Override
@@ -112,65 +117,46 @@ class ViewFeedItem extends View
    {
       /* Padding top. */
       float verticalPosition = getPaddingTop() + 20.0F;
+      boolean rtl = Utilities.isTextRtl(m_item.m_title);
 
-      /* Draw the title. */
-      if(Utilities.isTextRtl(m_item.m_title))
+      int startPadding = rtl ? SCREEN - getPaddingStart() : getPaddingStart();
+      int endPadding = rtl ? getPaddingStart() : SCREEN - getPaddingStart();
+
+      Paint.Align start = rtl ? Paint.Align.RIGHT : Paint.Align.LEFT;
+      Paint.Align end = rtl ? Paint.Align.LEFT : Paint.Align.RIGHT;
+
+      /* Draw the time. */
+      m_paints[1].setTextAlign(end);
+      canvas.drawText(getTime(m_item.m_time), endPadding, verticalPosition, m_paints[1]);
+
+      String[] info = {m_item.m_title, m_item.m_url};
+
+      /* Draw the title and the url. */
+      for(int i = 0; 2 > i; i++)
       {
-         m_paints[0].setTextAlign(Paint.Align.RIGHT);
-         m_paints[1].setTextAlign(Paint.Align.RIGHT);
-
-         canvas.drawText(m_item.m_title, SCREEN - getPaddingRight(), verticalPosition, m_paints[0]);
-
-         /* Draw the time. */
-         m_paints[1].setTextAlign(Paint.Align.LEFT);
-         canvas.drawText(getTime(m_item.m_time, getContext()), getPaddingLeft(), verticalPosition, m_paints[1]);
-         m_paints[1].setTextAlign(Paint.Align.RIGHT);
-
-         verticalPosition += m_paints[0].getTextSize();
-
-         canvas.drawText(m_item.m_url, SCREEN - getPaddingRight(), verticalPosition, m_paints[1]);
-
-         /* Reset the paints. */
-         m_paints[0].setTextAlign(Paint.Align.LEFT);
-         m_paints[1].setTextAlign(Paint.Align.LEFT);
-      }
-      else
-      {
-         canvas.drawText(m_item.m_title, getPaddingLeft(), verticalPosition, m_paints[0]);
-
-         /* Draw the time. */
-         m_paints[1].setTextAlign(Paint.Align.RIGHT);
-         canvas.drawText(getTime(m_item.m_time, getContext()), SCREEN - getPaddingRight(), verticalPosition, m_paints[1]);
-         m_paints[1].setTextAlign(Paint.Align.LEFT);
-
-         verticalPosition += m_paints[0].getTextSize();
-
-         canvas.drawText(m_item.m_url, getPaddingLeft(), verticalPosition, m_paints[1]);
+         m_paints[i].setTextAlign(start);
+         canvas.drawText(info[i], startPadding, verticalPosition, m_paints[i]);
+         verticalPosition += m_paints[i].getTextSize();
       }
 
-      return verticalPosition + m_paints[1].getTextSize();
+      return verticalPosition;
    }
 
-   void drawDes(Canvas canvas, float verticalPosition)
+   void drawDes(Canvas canvas, float verticalPos)
    {
-      if(m_item.m_desLines[0].isEmpty())
+      if(!m_item.m_desLines[0].isEmpty())
       {
-         return;
-      }
+         boolean rtl = Utilities.isTextRtl(m_item.m_desLines[0]);
 
-      float position = verticalPosition;
+         m_paints[2].setTextAlign(rtl ? Paint.Align.RIGHT : Paint.Align.LEFT);
+         int horizontalPos = rtl ? SCREEN - getPaddingRight() : getPaddingLeft();
 
-      boolean rtl = Utilities.isTextRtl(m_item.m_desLines[0]);
-      if(rtl)
-      {
-         m_paints[2].setTextAlign(Paint.Align.RIGHT);
+         for(String des : m_item.m_desLines)
+         {
+            canvas.drawText(des, horizontalPos, verticalPos, m_paints[2]);
+            verticalPos += m_paints[2].getTextSize();
+         }
       }
-      for(int i = 0; 3 > i; i++)
-      {
-         canvas.drawText(m_item.m_desLines[i], rtl ? SCREEN - getPaddingRight() : getPaddingLeft(), position, m_paints[2]);
-         position += m_paints[2].getTextSize();
-      }
-      m_paints[2].setTextAlign(Paint.Align.LEFT);
    }
 
    float drawBitmap(Canvas canvas, float verticalPosition)
@@ -186,23 +172,21 @@ class ViewFeedItem extends View
       }
    }
 
-   private static
-   String getTime(long time, Context context)
+   private
+   String getTime(long time)
    {
-      Long timeAgo = Calendar.getInstance().getTimeInMillis() - time;
+      Long timeAgo = System.currentTimeMillis() - time;
 
       /* Format the time. */
       Long[] periods = {timeAgo / 86400000, timeAgo / 3600000 % 24, timeAgo / 60000 % 60};
-      String[] timeStrings = context.getResources().getStringArray(R.array.time_initials);
-      NumberFormat format = NumberFormat.getNumberInstance(Locale.getDefault());
 
       StringBuilder builder = new StringBuilder(48);
       for(int i = 0; periods.length > i; i++)
       {
          if(0L != periods[i])
          {
-            builder.append(format.format(periods[i]));
-            builder.append(timeStrings[i]);
+            builder.append(m_numberFormat.format(periods[i]));
+            builder.append(m_timeInitials[i]);
             builder.append(' ');
          }
       }
