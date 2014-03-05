@@ -16,7 +16,6 @@
 
 package com.poloure.simplerss;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
@@ -31,7 +30,6 @@ class FragmentFeeds extends Fragment
    public
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
-      final Activity activity = getActivity();
 
       /* Inflate and configure the ViewPager. */
       ViewPager pager = (ViewPager) inflater.inflate(R.layout.view_pager_tags, container, false);
@@ -44,7 +42,7 @@ class FragmentFeeds extends Fragment
          void onPageSelected(int position)
          {
             /* Set the subtitle to the unread count. */
-            Utilities.updateSubtitle(activity);
+            Utilities.updateSubtitle(getActivity());
          }
       });
 

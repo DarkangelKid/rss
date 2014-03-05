@@ -61,6 +61,7 @@ class ViewNavItem extends View
 
       m_height = Math.round(resources.getDimension(R.dimen.navigation_height));
       setLayerType(LAYER_TYPE_HARDWARE, null);
+      setBackground(resources.getDrawable(R.drawable.manage_background));
       initPaints(resources);
    }
 

@@ -32,6 +32,6 @@
       android:layout_height="match_parent"
       android:layout_gravity="start"
       tools:context="com.poloure.simplerss.FeedsActivity"
-      android:name="com.poloure.simplerss.NavigationDrawerFragment"/>
+      android:name="com.poloure.simplerss.FragmentNavigationDrawer"/>
 
 </android.support.v4.widget.DrawerLayout>

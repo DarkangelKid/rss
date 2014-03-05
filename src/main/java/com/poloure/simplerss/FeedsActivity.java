@@ -31,7 +31,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -43,7 +42,7 @@ import android.widget.ListView;
 import java.util.Arrays;
 
 public
-class FeedsActivity extends Activity implements NavigationDrawerFragment.NavigationDrawerCallbacks
+class FeedsActivity extends Activity implements FragmentNavigationDrawer.NavigationDrawerCallbacks
 {
    static final String READ_ITEMS = "read_items.txt";
    private static final int ALARM_SERVICE_START = 1;
@@ -53,7 +52,7 @@ class FeedsActivity extends Activity implements NavigationDrawerFragment.Navigat
    boolean m_showMenuItems = true;
 
    private String m_currentFragment;
-   private NavigationDrawerFragment m_navigationDrawerFragment;
+   private FragmentNavigationDrawer m_FragmentNavigationDrawer;
 
    private static final String FEED_TAG = "Feeds";
    private static final String MANAGE_TAG = "Manage";
@@ -79,8 +78,8 @@ class FeedsActivity extends Activity implements NavigationDrawerFragment.Navigat
 
       FragmentManager manager = getFragmentManager();
 
-      m_navigationDrawerFragment = (NavigationDrawerFragment) manager.findFragmentById(R.id.navigation_drawer);
-      m_navigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
+      m_FragmentNavigationDrawer = (FragmentNavigationDrawer) manager.findFragmentById(R.id.navigation_drawer);
+      m_FragmentNavigationDrawer.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
 
       /* This method calls navigationList.getAdapter(). */
       AsyncNavigationAdapter.update(this);
@@ -104,28 +103,12 @@ class FeedsActivity extends Activity implements NavigationDrawerFragment.Navigat
       m_currentFragment = FRAGMENT_TAGS[0];
    }
 
-   /* Called only when the app is coming from onStop() (not visible). */
-   @Override
-   protected
-   void onRestart()
-   {
-      super.onRestart();
-   }
-
    @Override
    protected
    void onStart()
    {
       super.onStart();
       AsyncNewTagAdapters.update(this);
-   }
-
-   /* Load the saved state from configuration change. */
-   @Override
-   protected
-   void onRestoreInstanceState(Bundle savedInstanceState)
-   {
-      super.onRestoreInstanceState(savedInstanceState);
    }
 
    /* Stop the alarm service and reset the time to 0 every time the user sees the activity. */
@@ -146,15 +129,6 @@ class FeedsActivity extends Activity implements NavigationDrawerFragment.Navigat
     * These methods are for any state change post running.
     */
 
-   /* Add information to outState that will be passed to onCreate(Bundle savedStateInstance) &
-    * onRestoreInstanceState(Bundle savedInstanceState). */
-   @Override
-   protected
-   void onSaveInstanceState(Bundle outState)
-   {
-      super.onSaveInstanceState(outState);
-   }
-
    @Override
    protected
    void onPause()
@@ -173,14 +147,6 @@ class FeedsActivity extends Activity implements NavigationDrawerFragment.Navigat
       setServiceIntent(ALARM_SERVICE_START);
    }
 
-   /* Save any data stored in memory to disk before destroyed. */
-   @Override
-   protected
-   void onDestroy()
-   {
-      super.onDestroy();
-   }
-
    /* Option menu methods.
     *
     *
@@ -191,23 +157,26 @@ class FeedsActivity extends Activity implements NavigationDrawerFragment.Navigat
    void onNavigationDrawerItemSelected(int position)
    {
       /* Close the navigation drawer in all cases. */
+      ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager_tags);
       DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
       drawerLayout.closeDrawers();
 
-      /* Get the the position (of FRAGMENT_TAGS) we should be changing to. */
-      int selectedFragment = 2 < position ? 0 : position;
+      int viewPagerPosition = 0 == position ? viewPager.getCurrentItem() : position - 3;
+      int listPosition = 0 == position ? viewPagerPosition + 3 : position;
+      int fragmentPosition = 2 < listPosition ? 0 : position;
 
       /* Set the item to be checked. */
       ListView navigationList = (ListView) findViewById(R.id.navigation_drawer);
-      navigationList.setItemChecked(selectedFragment, true);
+      navigationList.setItemChecked(listPosition, true);
 
-      /* Switch the content frame fragment. */
-      String newTag = FRAGMENT_TAGS[selectedFragment];
+      /* If we are switching fragments, check if we need to. */
+      String newTag = FRAGMENT_TAGS[fragmentPosition];
       if(m_currentFragment.equals(newTag) && 3 > position)
       {
          return;
       }
 
+      /* Switch the content frame fragment. */
       FragmentManager manager = getFragmentManager();
       manager.beginTransaction()
              .hide(getFragment(manager, m_currentFragment))
@@ -220,29 +189,22 @@ class FeedsActivity extends Activity implements NavigationDrawerFragment.Navigat
       if(null != actionBar)
       {
          String[] navTitles = getResources().getStringArray(R.array.navigation_titles);
-         actionBar.setTitle(navTitles[selectedFragment]);
+         actionBar.setTitle(navTitles[fragmentPosition]);
       }
 
       /* If a tag was clicked, set the ViewPager position to that tag. */
-      if(2 < position)
+      if(0 == fragmentPosition)
       {
-         ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager_tags);
-         viewPager.setCurrentItem(position - 3);
+         viewPager.setCurrentItem(viewPagerPosition);
       }
-      /* If a main title was clicked, set the subtitle accordingly. */
-      else
-      {
-         Utilities.updateSubtitle(this);
-      }
+      Utilities.updateSubtitle(this);
    }
 
    @Override
    public
    boolean onOptionsItemSelected(MenuItem item)
    {
-      ActionBarDrawerToggle toggle = m_navigationDrawerFragment.m_drawerToggle;
-
-      return toggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
+      return m_FragmentNavigationDrawer.m_drawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
    }
 
    @Override
@@ -284,7 +246,7 @@ class FeedsActivity extends Activity implements NavigationDrawerFragment.Navigat
          return true;
       }
 
-      return true;
+      return super.onCreateOptionsMenu(menu);
    }
 
    /* The end of overridden methods.
