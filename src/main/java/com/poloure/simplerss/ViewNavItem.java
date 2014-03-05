@@ -21,6 +21,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -29,7 +30,8 @@ import android.view.View;
 class ViewNavItem extends View
 {
    private final Paint[] m_paints = new Paint[2];
-   private static final Bitmap[] m_bitmaps = new Bitmap[3];
+   private static final Bitmap[] m_bitmaps_dark = new Bitmap[3];
+   private static final Bitmap[] m_bitmaps_light = new Bitmap[3];
 
    String m_text = "";
    String m_count = "";
@@ -46,22 +48,31 @@ class ViewNavItem extends View
       super(context);
       Resources resources = context.getResources();
 
-      if(null == m_bitmaps[0])
+      if(null == m_bitmaps_dark[0])
       {
-         int[] drawables = {
+         int[] drawables_dark = {
                R.drawable.ic_action_view_as_list,
                R.drawable.ic_action_storage,
-               R.drawable.ic_action_settings
+               R.drawable.ic_action_settings,
          };
-         for(int i = 0; i < m_bitmaps.length; i++)
+
+
+         int[] drawables_light = {
+               R.drawable.ic_action_view_as_list_light,
+               R.drawable.ic_action_storage_light,
+               R.drawable.ic_action_settings_light,
+         };
+
+         for(int i = 0; i < m_bitmaps_dark.length; i++)
          {
-            m_bitmaps[i] = BitmapFactory.decodeResource(resources, drawables[i]);
+            m_bitmaps_dark[i] = BitmapFactory.decodeResource(resources, drawables_dark[i]);
+            m_bitmaps_light[i] = BitmapFactory.decodeResource(resources, drawables_light[i]);
          }
       }
 
       m_height = Math.round(resources.getDimension(R.dimen.navigation_height));
       setLayerType(LAYER_TYPE_HARDWARE, null);
-      setBackground(resources.getDrawable(R.drawable.manage_background));
+      setBackground(resources.getDrawable(R.drawable.navigation_item_background));
       initPaints(resources);
    }
 
@@ -86,9 +97,11 @@ class ViewNavItem extends View
       int paddingTop = paddingStart;
 
       Paint paint = -1 == m_image ? m_paints[1] : m_paints[0];
-      float verticalPosition = Math.round((m_height + paint.getTextSize()) / 2.0);
+      long verticalPosition = Math.round(m_height / 2.0 - (paint.descent() + paint.ascent()) / 2.0);
 
       boolean rtl = Utilities.isTextRtl(m_text);
+
+      paint.setColor(isActivated() ? Color.WHITE : resources.getColor(R.color.text_navigation_main));
 
       /* Draw the count. */
       if(-1 == m_image)
@@ -102,9 +115,9 @@ class ViewNavItem extends View
       /* Draw the image. */
       if(-1 != m_image)
       {
-         int imageWidth = m_bitmaps[m_image].getWidth();
-         canvas.drawBitmap(m_bitmaps[m_image], rtl ? width - paddingStart - imageWidth : paddingStart, Math
-               .round(paddingTop), m_paints[0]);
+         Bitmap icon = isActivated() ? m_bitmaps_light[m_image] : m_bitmaps_dark[m_image];
+         int imageWidth = icon.getWidth();
+         canvas.drawBitmap(icon, rtl ? width - paddingStart - imageWidth : paddingStart, Math.round(paddingTop), m_paints[0]);
          hPadding = (paddingStart << 1) + imageWidth;
       }
 
@@ -116,16 +129,15 @@ class ViewNavItem extends View
    {
       for(int i = 0; m_paints.length > i; i++)
       {
-         m_paints[i] = configurePaint(resources, FONT_SIZES[i], R.color.text_navigation_main);
+         m_paints[i] = configurePaint(resources, FONT_SIZES[i]);
       }
    }
 
    private static
-   Paint configurePaint(Resources resources, int dimenResource, int colorResource)
+   Paint configurePaint(Resources resources, int dimenResource)
    {
       Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
       paint.setTextSize(resources.getDimension(dimenResource));
-      paint.setColor(resources.getColor(colorResource));
       return paint;
    }
 

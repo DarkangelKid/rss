@@ -14,21 +14,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<resources>
-   <color name="holo_light_pressed">#ffdddddd</color>
-   <color name="holo_light_checked">#ffcfe9f3</color>
-
-   <color name="navigation_pressed">#ffc5c5c5</color>
-   <color name="navigation_checked">#ff33b5e5</color>
-
-   <color name="item_title_color">#ff000000</color>
-   <color name="item_link_color">#ff5a5a5a</color>
-   <color name="item_description_color">#ff323232</color>
-
-   <color name="background_navigation">#ffeeeeee</color>
-   <color name="navigation_separator">#ffdcdcdc</color>
-
-   <color name="text_navigation_main">#58585b</color>
-
-   <color name="text_manage">#ff4d4d4d</color>
-</resources>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+   <item android:drawable="@color/navigation_pressed" android:state_pressed="true"/>
+   <item android:drawable="@color/navigation_checked" android:state_activated="true"/>
+   <item android:drawable="@color/navigation_checked" android:state_checked="true"/>
+   <item android:drawable="@color/navigation_checked" android:state_selected="true"/>
+   <item android:drawable="@android:color/transparent"/>
+</selector>

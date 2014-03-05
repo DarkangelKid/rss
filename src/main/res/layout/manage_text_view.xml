@@ -20,4 +20,4 @@
           android:padding="8dp"
           android:textColor="@color/text_manage"
           android:textSize="12sp"
-          android:background="@drawable/manage_background"/>
+          android:background="@drawable/manage_item_background"/>

@@ -47,13 +47,7 @@ class FragmentNavigationDrawer extends Fragment
    private ListView m_drawerListView;
    private View m_fragmentContainerView;
 
-   private int m_currentSelectedPosition;
    private boolean m_userLearnedDrawer;
-
-   public
-   FragmentNavigationDrawer()
-   {
-   }
 
    @Override
    public

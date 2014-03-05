@@ -22,6 +22,7 @@ import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 
 public
 class FragmentFeeds extends Fragment
@@ -30,7 +31,6 @@ class FragmentFeeds extends Fragment
    public
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
-
       /* Inflate and configure the ViewPager. */
       ViewPager pager = (ViewPager) inflater.inflate(R.layout.view_pager_tags, container, false);
       pager.setOffscreenPageLimit(128);
@@ -41,6 +41,10 @@ class FragmentFeeds extends Fragment
          public
          void onPageSelected(int position)
          {
+            /* Set the item to be checked in the navigation drawer. */
+            ListView navigationList = (ListView) getActivity().findViewById(R.id.navigation_drawer);
+            navigationList.setItemChecked(position + 3, true);
+
             /* Set the subtitle to the unread count. */
             Utilities.updateSubtitle(getActivity());
          }
