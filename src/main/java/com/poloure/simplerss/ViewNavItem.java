@@ -28,7 +28,7 @@ import android.view.View;
 
 class ViewNavItem extends View
 {
-   final Paint[] m_paints = new Paint[2];
+   private final Paint[] m_paints = new Paint[2];
    private static final Bitmap[] m_bitmaps = new Bitmap[3];
 
    String m_text = "";
@@ -37,7 +37,7 @@ class ViewNavItem extends View
 
    private final int m_height;
 
-   static final int[] FONT_SIZES = {
+   private static final int[] FONT_SIZES = {
          R.dimen.navigation_main, R.dimen.navigation_tag,
    };
 
@@ -49,7 +49,9 @@ class ViewNavItem extends View
       if(null == m_bitmaps[0])
       {
          int[] drawables = {
-               R.drawable.action_feeds, R.drawable.action_manage, R.drawable.action_settings
+               R.drawable.ic_action_view_as_list,
+               R.drawable.ic_action_storage,
+               R.drawable.ic_action_settings
          };
          for(int i = 0; i < m_bitmaps.length; i++)
          {
@@ -102,7 +104,7 @@ class ViewNavItem extends View
          int imageWidth = m_bitmaps[m_image].getWidth();
          canvas.drawBitmap(m_bitmaps[m_image], rtl ? width - paddingStart - imageWidth : paddingStart, Math
                .round(paddingTop), m_paints[0]);
-         hPadding = (paddingStart<<1) + imageWidth;
+         hPadding = (paddingStart << 1) + imageWidth;
       }
 
       /* Draw the main text. */
@@ -113,11 +115,11 @@ class ViewNavItem extends View
    {
       for(int i = 0; m_paints.length > i; i++)
       {
-         m_paints[i] = configurePaint(resources, FONT_SIZES[i], android.R.color.white);
+         m_paints[i] = configurePaint(resources, FONT_SIZES[i], R.color.text_navigation_main);
       }
    }
 
-   static
+   private static
    Paint configurePaint(Resources resources, int dimenResource, int colorResource)
    {
       Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);

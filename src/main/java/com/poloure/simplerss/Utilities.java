@@ -44,7 +44,7 @@ class Utilities
    static
    void updateSubtitle(Activity activity)
    {
-      ListView navigationList = (ListView) activity.findViewById(R.id.navigation_list);
+      ListView navigationList = (ListView) activity.findViewById(R.id.navigation_drawer);
       ActionBar actionBar = activity.getActionBar();
       if(null != navigationList && null != actionBar)
       {
@@ -61,11 +61,18 @@ class Utilities
          }
          else if(0 != adapter.getCount() - 3)
          {
-            int count = ((NavItem) adapter.getItem(feedPager.getCurrentItem())).m_count;
-
-            Resources res = activity.getResources();
-            String countString = res.getQuantityString(R.plurals.actionbar_subtitle_unread, count, count);
-            actionBar.setSubtitle(0 == count ? null : countString);
+            String[] tag = (String[]) adapter.getItem(feedPager.getCurrentItem());
+            if(null == tag || 0 == tag.length || tag[1].isEmpty())
+            {
+               actionBar.setSubtitle(null);
+            }
+            else
+            {
+               int count = Integer.parseInt(tag[1]);
+               Resources res = activity.getResources();
+               String countString = res.getQuantityString(R.plurals.actionbar_subtitle_unread, count, count);
+               actionBar.setSubtitle(0 == count ? null : countString);
+            }
          }
       }
    }

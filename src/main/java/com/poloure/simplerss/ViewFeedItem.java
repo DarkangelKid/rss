@@ -30,17 +30,17 @@ import java.util.Locale;
 class ViewFeedItem extends View
 {
    static final int IMAGE_HEIGHT = 360;
-   final Paint[] m_paints = new Paint[3];
+   private final Paint[] m_paints = new Paint[3];
    private static final int SCREEN = Resources.getSystem().getDisplayMetrics().widthPixels;
 
    private Bitmap m_image;
    FeedItem m_item;
    private final int m_height;
 
-   static final int[] FONT_COLORS = {
+   private static final int[] FONT_COLORS = {
          R.color.item_title_color, R.color.item_link_color, R.color.item_description_color,
    };
-   static final int[] FONT_SIZES = {
+   private static final int[] FONT_SIZES = {
          R.dimen.item_title_size, R.dimen.item_link_size, R.dimen.item_description_size,
    };
 

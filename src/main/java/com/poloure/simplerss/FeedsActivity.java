@@ -29,8 +29,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -45,17 +43,17 @@ import android.widget.ListView;
 import java.util.Arrays;
 
 public
-class FeedsActivity extends Activity
+class FeedsActivity extends Activity implements NavigationDrawerFragment.NavigationDrawerCallbacks
 {
    static final String READ_ITEMS = "read_items.txt";
    private static final int ALARM_SERVICE_START = 1;
    private static final int ALARM_SERVICE_STOP = 0;
    private static final int MINUTE_VALUE = 60000;
    private boolean m_stopProgressBar;
-   private ActionBarDrawerToggle m_drawerToggle;
    boolean m_showMenuItems = true;
 
-   String m_currentFragment;
+   private String m_currentFragment;
+   private NavigationDrawerFragment m_navigationDrawerFragment;
 
    private static final String FEED_TAG = "Feeds";
    private static final String MANAGE_TAG = "Manage";
@@ -74,44 +72,20 @@ class FeedsActivity extends Activity
    {
       super.onCreate(savedInstanceState);
 
-      setContentView(R.layout.navigation_drawer_and_content_frame);
+      setContentView(R.layout.activity_main);
 
       /* Load the read items to the AdapterTag class. */
       AdapterTags.READ_ITEM_TIMES.addAll(Read.longSet(this, READ_ITEMS));
 
-      /* Configure the ActionBar. */
-      ActionBar actionBar = getActionBar();
-      if(null != actionBar)
-      {
-         Resources resources = getResources();
-         String[] navigationTitles = resources.getStringArray(R.array.navigation_titles);
+      FragmentManager manager = getFragmentManager();
 
-         actionBar.setTitle(navigationTitles[0]);
-         actionBar.setDisplayHomeAsUpEnabled(true);
-         actionBar.setHomeButtonEnabled(true);
-
-         Drawable appIcon = resources.getDrawable(R.drawable.ic_action_location_broadcast);
-         if(null != appIcon)
-         {
-            appIcon.setAutoMirrored(true);
-            actionBar.setIcon(appIcon);
-         }
-      }
-
-      /* Create the navigation drawer and set all the listeners for it. */
-      DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-      m_drawerToggle = new OnActionBarDrawerToggle(this, drawerLayout);
-      drawerLayout.setDrawerListener(m_drawerToggle);
-
-      ListView navigationList = (ListView) findViewById(R.id.navigation_list);
-      navigationList.setAdapter(new AdapterNavigationDrawer(this));
-      navigationList.setOnItemClickListener(new OnNavigationListItemClick(this));
+      m_navigationDrawerFragment = (NavigationDrawerFragment) manager.findFragmentById(R.id.navigation_drawer);
+      m_navigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
 
       /* This method calls navigationList.getAdapter(). */
       AsyncNavigationAdapter.update(this);
 
       /* Create and hide the fragments that go inside the content frame. */
-      FragmentManager manager = getFragmentManager();
       FragmentTransaction transaction = manager.beginTransaction();
 
       for(int i = 0; FRAGMENT_TAGS.length > i; i++)
@@ -160,7 +134,6 @@ class FeedsActivity extends Activity
    void onResume()
    {
       super.onResume();
-      m_drawerToggle.syncState();
       setServiceIntent(ALARM_SERVICE_STOP);
       registerReceiver(Receiver, new IntentFilter(ServiceUpdate.BROADCAST_ACTION));
 
@@ -215,9 +188,61 @@ class FeedsActivity extends Activity
 
    @Override
    public
+   void onNavigationDrawerItemSelected(int position)
+   {
+      /* Close the navigation drawer in all cases. */
+      DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+      drawerLayout.closeDrawers();
+
+      /* Get the the position (of FRAGMENT_TAGS) we should be changing to. */
+      int selectedFragment = 2 < position ? 0 : position;
+
+      /* Set the item to be checked. */
+      ListView navigationList = (ListView) findViewById(R.id.navigation_drawer);
+      navigationList.setItemChecked(selectedFragment, true);
+
+      /* Switch the content frame fragment. */
+      String newTag = FRAGMENT_TAGS[selectedFragment];
+      if(m_currentFragment.equals(newTag) && 3 > position)
+      {
+         return;
+      }
+
+      FragmentManager manager = getFragmentManager();
+      manager.beginTransaction()
+             .hide(getFragment(manager, m_currentFragment))
+             .show(getFragment(manager, newTag))
+             .commit();
+      m_currentFragment = newTag;
+
+      /* Update the action bar subtitle. */
+      ActionBar actionBar = getActionBar();
+      if(null != actionBar)
+      {
+         String[] navTitles = getResources().getStringArray(R.array.navigation_titles);
+         actionBar.setTitle(navTitles[selectedFragment]);
+      }
+
+      /* If a tag was clicked, set the ViewPager position to that tag. */
+      if(2 < position)
+      {
+         ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager_tags);
+         viewPager.setCurrentItem(position - 3);
+      }
+      /* If a main title was clicked, set the subtitle accordingly. */
+      else
+      {
+         Utilities.updateSubtitle(this);
+      }
+   }
+
+   @Override
+   public
    boolean onOptionsItemSelected(MenuItem item)
    {
-      return m_drawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
+      ActionBarDrawerToggle toggle = m_navigationDrawerFragment.m_drawerToggle;
+
+      return toggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
    }
 
    @Override
@@ -350,7 +375,7 @@ class FeedsActivity extends Activity
       startService(intent);
    }
 
-   static
+   private static
    Fragment getFragment(FragmentManager manager, String tag)
    {
       Fragment fragment = manager.findFragmentByTag(tag);

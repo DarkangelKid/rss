@@ -21,7 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 
-class AdapterNavigationDrawer extends ArrayAdapter<NavItem>
+class AdapterNavigationDrawer extends ArrayAdapter<String[]>
 {
    private static final int TITLE = 0;
    private static final int TAG = 1;
@@ -43,8 +43,8 @@ class AdapterNavigationDrawer extends ArrayAdapter<NavItem>
       int type = getItemViewType(position);
       ViewNavItem view = null == convertView ? new ViewNavItem(m_context) : (ViewNavItem) convertView;
 
-      view.m_text = TITLE == type ? m_navigationTitles[position] : getItem(position - 3).m_title;
-      view.m_count = TITLE == type ? "" : 0 == getItem(position - 3).m_count ? "" : Utilities.getLocaleInt(getItem(position - 3).m_count);
+      view.m_text = TITLE == type ? m_navigationTitles[position] : getItem(position - 3)[0];
+      view.m_count = TITLE == type ? "" : getItem(position - 3)[1];
       view.m_image = TITLE == type ? position : -1;
 
       return view;

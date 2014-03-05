@@ -28,7 +28,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
-class AsyncNavigationAdapter extends AsyncTask<String, Void, NavItem[]>
+class AsyncNavigationAdapter extends AsyncTask<String, Void, String[][]>
 {
    private final Activity m_activity;
 
@@ -41,14 +41,14 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, NavItem[]>
    static
    void update(Activity activity)
    {
-      AsyncTask<String, Void, NavItem[]> task = new AsyncNavigationAdapter(activity);
+      AsyncTask<String, Void, String[][]> task = new AsyncNavigationAdapter(activity);
       task.executeOnExecutor(THREAD_POOL_EXECUTOR);
    }
 
    /* Get the unread counts for the tags. */
    @Override
    protected
-   NavItem[] doInBackground(String... applicationFolder)
+   String[][] doInBackground(String... applicationFolder)
    {
       /* Read the index file for an array of feed names and feed tags. */
       String[][] content = Read.csvFile(m_activity, Read.INDEX, 'f', 't');
@@ -57,7 +57,7 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, NavItem[]>
       int tagTotal = PagerAdapterTags.TAG_LIST.size();
 
       /* Make a NavItem for each tag we will display in the navigation drawer. */
-      NavItem[] navItems = new NavItem[tagTotal];
+      String[][] navItems = new String[tagTotal][2];
 
       /* This is a list of Sets each containing all of the feed's items. */
       List<Collection<Long>> feedItems = new ArrayList<>(content[0].length);
@@ -85,7 +85,10 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, NavItem[]>
             }
          }
          itemsInTag.removeAll(AdapterTags.READ_ITEM_TIMES);
-         navItems[i] = new NavItem(tag, itemsInTag.size());
+
+         int size = itemsInTag.size();
+         navItems[i][0] = tag;
+         navItems[i][1] = 0 == size ? "" : Utilities.getLocaleInt(size);
          itemsInTag.clear();
       }
 
@@ -94,11 +97,11 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, NavItem[]>
 
    @Override
    protected
-   void onPostExecute(NavItem[] result)
+   void onPostExecute(String[][] result)
    {
       /* Set the titles & counts arrays in this file and notify the adapter. */
-      ListView navigationList = (ListView) m_activity.findViewById(R.id.navigation_list);
-      ArrayAdapter<NavItem> adapter = (ArrayAdapter<NavItem>) navigationList.getAdapter();
+      ListView navigationList = (ListView) m_activity.findViewById(R.id.navigation_drawer);
+      ArrayAdapter<String[]> adapter = (ArrayAdapter<String[]>) navigationList.getAdapter();
 
       /* Update the data in the adapter. */
       adapter.clear();

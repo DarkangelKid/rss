@@ -20,14 +20,12 @@
 
    <color name="item_title_color">#ff000000</color>
    <color name="item_link_color">#ff5a5a5a</color>
-   <color name="item_time_color">#ff5a5a5a</color>
    <color name="item_description_color">#ff323232</color>
 
-   <color name="background_navigation">#ff1f1f1f</color>
+   <color name="background_navigation">#ffeeeeee</color>
+   <color name="navigation_separator">#ffdcdcdc</color>
 
-   <color name="text_navigation_main">#ffffffff</color>
-   <color name="text_navigation_title">#ffffffff</color>
-   <color name="text_navigation_tag">#ffffffff</color>
+   <color name="text_navigation_main">#58585b</color>
 
    <color name="text_manage">#ff4d4d4d</color>
 </resources>
