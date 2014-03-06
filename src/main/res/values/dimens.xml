@@ -21,6 +21,8 @@
 
    <dimen name="reserved_time">80sp</dimen>
 
+   <dimen name="max_image_height">160dp</dimen>
+
    <!-- Font sizes for navigation texts. -->
    <dimen name="navigation_main">20sp</dimen>
    <dimen name="navigation_tag">16sp</dimen>

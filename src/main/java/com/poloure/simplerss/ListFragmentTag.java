@@ -22,6 +22,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.ContextMenu;
@@ -59,7 +60,8 @@ class ListFragmentTag extends ListFragment
 
       ListView listView = getListView();
       listView.setOnScrollListener(new OnScrollFeed(activity, listView.getPaddingTop()));
-      listView.setDividerHeight(0);
+      listView.setDivider(new ColorDrawable(getResources().getColor(R.color.item_separator)));
+      listView.setDividerHeight(1);
       registerForContextMenu(listView);
    }
 

@@ -59,5 +59,8 @@ class FragmentFeeds extends Fragment
    {
       super.onActivityCreated(savedInstanceState);
       PagerAdapterTags.update(getActivity());
+
+      ListView navigationList = (ListView) getActivity().findViewById(R.id.navigation_drawer);
+      navigationList.setItemChecked(4, true);
    }
 }

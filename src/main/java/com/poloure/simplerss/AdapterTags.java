@@ -17,6 +17,8 @@
 package com.poloure.simplerss;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Color;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -30,10 +32,10 @@ import java.util.Set;
 class AdapterTags extends BaseAdapter
 {
    static final Set<Long> READ_ITEM_TIMES = Collections.synchronizedSet(new HashSet<Long>(0));
-   private static final int TYPE_PLAIN = 0;
-   private static final int TYPE_IMAGE = 1;
-   private static final int TYPE_IMAGE_SANS_DESCRIPTION = 2;
-   private static final int TYPE_PLAIN_SANS_DESCRIPTION = 3;
+   static final int TYPE_PLAIN = 0;
+   static final int TYPE_IMAGE = 1;
+   static final int TYPE_IMAGE_SANS_DESCRIPTION = 2;
+   static final int TYPE_PLAIN_SANS_DESCRIPTION = 3;
 
    /* We use indexOf on this Long List so it can not be a Set. */
    final List<Long> m_times = new ArrayList<>(0);
@@ -93,18 +95,18 @@ class AdapterTags extends BaseAdapter
       int viewType = getItemViewType(position);
 
       boolean hasImg = TYPE_IMAGE == viewType || TYPE_IMAGE_SANS_DESCRIPTION == viewType;
-      boolean hasDes = TYPE_PLAIN == viewType || TYPE_IMAGE == viewType;
 
-      /* TODO These are pix not Dip. */
-      ViewFeedItem view = null != convertView ? (ViewFeedItem) convertView : new ViewFeedItem(m_context, hasImg ? hasDes ? 564 : 464 : hasDes ? 184 : 94);
+      ViewFeedItem view = null != convertView ? (ViewFeedItem) convertView : new ViewFeedItem(m_context, viewType);
 
       /* Set the information. */
       FeedItem item = m_feedItems.get(position);
       boolean isRead = READ_ITEM_TIMES.contains(item.m_time);
       view.m_item = item;
+      view.hasImage = hasImg;
 
       /* If we have an image and the item is read, delay the opacity change. */
       view.setAlpha(isRead && !hasImg ? 0.5F : 1.0F);
+      view.setBackgroundColor(isRead ? Color.TRANSPARENT : Color.WHITE);
 
       /* If the view was an image, load the image. */
       if(hasImg)

@@ -21,6 +21,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.view.View;
 
 import java.text.NumberFormat;
@@ -28,11 +29,11 @@ import java.util.Locale;
 
 class ViewFeedItem extends View
 {
-   static final int IMAGE_HEIGHT = 360;
    private final Paint[] m_paints = new Paint[3];
    private static final int SCREEN = Resources.getSystem().getDisplayMetrics().widthPixels;
 
    private Bitmap m_image;
+   boolean hasImage;
    FeedItem m_item;
    private final int m_height;
    private final String[] m_timeInitials;
@@ -45,18 +46,36 @@ class ViewFeedItem extends View
          R.dimen.item_title_size, R.dimen.item_link_size, R.dimen.item_description_size,
    };
 
-   ViewFeedItem(Context context, int height)
+   ViewFeedItem(Context context, int type)
    {
       super(context);
       Resources resources = context.getResources();
 
-      m_height = height;
+      float titleSize = resources.getDimension(R.dimen.item_title_size);
+      float linkSize = resources.getDimension(R.dimen.item_link_size);
+      float desSize = resources.getDimension(R.dimen.item_description_size);
+      float imageSize = resources.getDimension(R.dimen.max_image_height);
+
+      /* Calculate the size of the view. */
+      float base = Utilities.EIGHT_DP + titleSize * 2 + linkSize;
+      switch(type)
+      {
+         case AdapterTags.TYPE_PLAIN:
+            base += 3.6 * desSize + Utilities.getDp(4.0F);
+         case AdapterTags.TYPE_PLAIN_SANS_DESCRIPTION:
+            base += Utilities.getDp(4.0F);
+            break;
+         case AdapterTags.TYPE_IMAGE:
+            base += 3.6 * desSize + Utilities.getDp(16.0F);
+         case AdapterTags.TYPE_IMAGE_SANS_DESCRIPTION:
+            base += imageSize;
+      }
+      m_height = Math.round(base);
+
       m_timeInitials = resources.getStringArray(R.array.time_initials);
       m_numberFormat = NumberFormat.getNumberInstance(Locale.getDefault());
 
       setLayerType(LAYER_TYPE_HARDWARE, null);
-      setPadding(Utilities.EIGHT_DP, Utilities.EIGHT_DP, Utilities.EIGHT_DP, Utilities.EIGHT_DP);
-
       initPaints(resources);
    }
 
@@ -64,11 +83,8 @@ class ViewFeedItem extends View
    public
    void onDraw(Canvas canvas)
    {
-      /* If the canvas is meant to draw a bitmap but it is null, draw nothing.
-         NOTE: This value must change if the AdapterTags heights are changing. */
-
-      /* TODO: This also needs a better implementation as it fails sometimes. */
-      if(200 < getHeight() && null == m_image)
+      /* If the canvas is meant to draw a bitmap but it is null, draw nothing. */
+      if(hasImage && null == m_image)
       {
          return;
       }
@@ -92,6 +108,10 @@ class ViewFeedItem extends View
       for(int i = 0; m_paints.length > i; i++)
       {
          m_paints[i] = configurePaint(resources, FONT_SIZES[i], FONT_COLORS[i]);
+         if(2 == i)
+         {
+            m_paints[2].setTypeface(Typeface.create("sans-serif-light", Typeface.NORMAL));
+         }
       }
    }
 
@@ -115,12 +135,11 @@ class ViewFeedItem extends View
 
    float drawBase(Canvas canvas)
    {
-      /* Padding top. */
-      float verticalPosition = getPaddingTop() + 20.0F;
       boolean rtl = Utilities.isTextRtl(m_item.m_title);
+      float verticalPosition =  m_paints[0].getTextSize() + Utilities.EIGHT_DP;
 
-      int startPadding = rtl ? SCREEN - getPaddingStart() : getPaddingStart();
-      int endPadding = rtl ? getPaddingStart() : SCREEN - getPaddingStart();
+      int startPadding = rtl ? SCREEN - Utilities.EIGHT_DP : Utilities.EIGHT_DP;
+      int endPadding = rtl ? Utilities.EIGHT_DP : SCREEN - Utilities.EIGHT_DP;
 
       Paint.Align start = rtl ? Paint.Align.RIGHT : Paint.Align.LEFT;
       Paint.Align end = rtl ? Paint.Align.LEFT : Paint.Align.RIGHT;
@@ -139,7 +158,7 @@ class ViewFeedItem extends View
          verticalPosition += m_paints[i].getTextSize();
       }
 
-      return verticalPosition;
+      return hasImage ? verticalPosition : verticalPosition + Utilities.getDp(4.0F);
    }
 
    void drawDes(Canvas canvas, float verticalPos)
@@ -149,12 +168,12 @@ class ViewFeedItem extends View
          boolean rtl = Utilities.isTextRtl(m_item.m_desLines[0]);
 
          m_paints[2].setTextAlign(rtl ? Paint.Align.RIGHT : Paint.Align.LEFT);
-         int horizontalPos = rtl ? SCREEN - getPaddingRight() : getPaddingLeft();
+         int horizontalPos = rtl ? SCREEN - Utilities.EIGHT_DP : Utilities.EIGHT_DP;
 
          for(String des : m_item.m_desLines)
          {
             canvas.drawText(des, horizontalPos, verticalPos, m_paints[2]);
-            verticalPos += m_paints[2].getTextSize();
+            verticalPos += m_paints[2].getTextSize() * 1.2;
          }
       }
    }
@@ -164,7 +183,7 @@ class ViewFeedItem extends View
       if(null != m_image)
       {
          canvas.drawBitmap(m_image, 0.0F, verticalPosition, m_paints[0]);
-         return verticalPosition + IMAGE_HEIGHT + 32;
+         return verticalPosition + m_image.getHeight() + Utilities.getDp(16.0F);
       }
       else
       {

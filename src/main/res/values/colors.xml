@@ -21,9 +21,10 @@
    <color name="navigation_pressed">#ffc5c5c5</color>
    <color name="navigation_checked">#ff33b5e5</color>
 
-   <color name="item_title_color">#ff000000</color>
-   <color name="item_link_color">#ff5a5a5a</color>
-   <color name="item_description_color">#ff323232</color>
+   <color name="item_title_color">#ff58585b</color>
+   <color name="item_link_color">#ff777777</color>
+   <color name="item_description_color">#ff5a5a5d</color>
+   <color name="item_separator">#ffcbcbcb</color>
 
    <color name="background_navigation">#ffeeeeee</color>
    <color name="navigation_separator">#ffdcdcdc</color>

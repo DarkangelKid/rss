@@ -206,7 +206,8 @@ class ServiceUpdate extends IntentService
          bitmap = Bitmap.createScaledBitmap(bitmap, Math.round(SCREEN_WIDTH), desiredHeight, false);
 
          /* Shrink it to VIEW_HEIGHT if that is more than the scaled height. */
-         int newHeight = Math.min(bitmap.getHeight(), ViewFeedItem.IMAGE_HEIGHT);
+         int maxHeight = Math.round(context.getResources().getDimension(R.dimen.max_image_height));
+         int newHeight = Math.min(bitmap.getHeight(), maxHeight);
          bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), newHeight);
 
          /* Get the quality from settings. */
