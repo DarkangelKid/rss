@@ -29,7 +29,7 @@ import android.view.View;
 
 class ViewNavItem extends View
 {
-   private final Paint[] m_paints = new Paint[2];
+   private static final Paint[] m_paints = new Paint[2];
    private static final Bitmap[] m_bitmaps_dark = new Bitmap[3];
    private static final Bitmap[] m_bitmaps_light = new Bitmap[3];
 
@@ -71,7 +71,6 @@ class ViewNavItem extends View
       }
 
       m_height = Math.round(resources.getDimension(R.dimen.navigation_height));
-      setLayerType(LAYER_TYPE_HARDWARE, null);
       setBackground(resources.getDrawable(R.drawable.navigation_item_background));
       initPaints(resources);
    }
@@ -125,6 +124,7 @@ class ViewNavItem extends View
       canvas.drawText(m_text, rtl ? width - hPadding : hPadding, verticalPosition, paint);
    }
 
+   private static
    void initPaints(Resources resources)
    {
       for(int i = 0; m_paints.length > i; i++)

@@ -29,7 +29,7 @@ import java.util.Locale;
 
 class ViewFeedItem extends View
 {
-   private final Paint[] m_paints = new Paint[3];
+   private static final Paint[] m_paints = new Paint[3];
    private static final int SCREEN = Resources.getSystem().getDisplayMetrics().widthPixels;
 
    private Bitmap m_image;
@@ -66,7 +66,7 @@ class ViewFeedItem extends View
             base += Utilities.getDp(4.0F);
             break;
          case AdapterTags.TYPE_IMAGE:
-            base += 3.6 * desSize + Utilities.getDp(16.0F);
+            base += 3.6 * desSize + Utilities.getDp(20.0F);
          case AdapterTags.TYPE_IMAGE_SANS_DESCRIPTION:
             base += imageSize;
       }
@@ -75,7 +75,6 @@ class ViewFeedItem extends View
       m_timeInitials = resources.getStringArray(R.array.time_initials);
       m_numberFormat = NumberFormat.getNumberInstance(Locale.getDefault());
 
-      setLayerType(LAYER_TYPE_HARDWARE, null);
       initPaints(resources);
    }
 
@@ -89,20 +88,19 @@ class ViewFeedItem extends View
          return;
       }
 
-      /* If our paints have been cleared from memory, remake them. */
-      if(null == m_paints[0])
-      {
-         initPaints(getResources());
-      }
-
       float verticalPosition = drawBase(canvas);
       verticalPosition = drawBitmap(canvas, verticalPosition);
       if(null != m_item.m_desLines && 0 != m_item.m_desLines.length && null != m_item.m_desLines[0])
       {
+         if(hasImage)
+         {
+            verticalPosition += Utilities.getDp(4.0F);
+         }
          drawDes(canvas, verticalPosition);
       }
    }
 
+   private static
    void initPaints(Resources resources)
    {
       for(int i = 0; m_paints.length > i; i++)
@@ -121,6 +119,7 @@ class ViewFeedItem extends View
       Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
       paint.setTextSize(resources.getDimension(dimenResource));
       paint.setColor(resources.getColor(colorResource));
+      paint.setHinting(Paint.HINTING_ON);
       return paint;
    }
 
@@ -136,7 +135,7 @@ class ViewFeedItem extends View
    float drawBase(Canvas canvas)
    {
       boolean rtl = Utilities.isTextRtl(m_item.m_title);
-      float verticalPosition =  m_paints[0].getTextSize() + Utilities.EIGHT_DP;
+      float verticalPosition = m_paints[0].getTextSize() + Utilities.EIGHT_DP;
 
       int startPadding = rtl ? SCREEN - Utilities.EIGHT_DP : Utilities.EIGHT_DP;
       int endPadding = rtl ? Utilities.EIGHT_DP : SCREEN - Utilities.EIGHT_DP;

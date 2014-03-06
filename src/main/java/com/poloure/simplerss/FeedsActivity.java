@@ -77,6 +77,7 @@ class FeedsActivity extends Activity implements FragmentNavigationDrawer.Navigat
       AdapterTags.READ_ITEM_TIMES.addAll(Read.longSet(this, READ_ITEMS));
 
       FragmentManager manager = getFragmentManager();
+      FragmentTransaction transaction = manager.beginTransaction();
 
       m_FragmentNavigationDrawer = (FragmentNavigationDrawer) manager.findFragmentById(R.id.navigation_drawer);
       m_FragmentNavigationDrawer.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
@@ -85,8 +86,6 @@ class FeedsActivity extends Activity implements FragmentNavigationDrawer.Navigat
       AsyncNavigationAdapter.update(this);
 
       /* Create and hide the fragments that go inside the content frame. */
-      FragmentTransaction transaction = manager.beginTransaction();
-
       for(int i = 0; FRAGMENT_TAGS.length > i; i++)
       {
          Fragment fragment = getFragment(manager, FRAGMENT_TAGS[i]);
