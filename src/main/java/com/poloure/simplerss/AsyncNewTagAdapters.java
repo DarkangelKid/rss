@@ -157,7 +157,7 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
 
             boolean notFirstLoad = null != listView && 0 != listView.getCount();
 
-         /* If there are items in the currently viewed page, save the position. */
+            /* If there are items in the currently viewed page, save the position. */
             if(null != adapterTag)
             {
                long timeBefore = 0L;
@@ -192,7 +192,7 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
 
                adapterTag.notifyDataSetChanged();
 
-            /* We now need to find the position of the item with the time timeBefore. */
+               /* We now need to find the position of the item with the time timeBefore. */
                int newPositionOfTop = adapterTag.m_times.indexOf(timeBefore);
                if(-1 == newPositionOfTop)
                {

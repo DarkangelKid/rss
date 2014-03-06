@@ -36,10 +36,11 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Adapter;
 import android.widget.ListView;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public
 class FeedsActivity extends Activity implements FragmentNavigationDrawer.NavigationDrawerCallbacks
@@ -358,15 +359,21 @@ class FeedsActivity extends Activity implements FragmentNavigationDrawer.Navigat
    static
    void gotoLatestUnread(ListView listView)
    {
-      Adapter listAdapter = listView.getAdapter();
-      for(int i = listAdapter.getCount() - 1; 0 <= i; i--)
+      AdapterTags listAdapter = (AdapterTags) listView.getAdapter();
+
+      /* Create a copy of the item times. */
+      List<Long> times = new ArrayList<>(listAdapter.m_times.size());
+      times.addAll(listAdapter.m_times);
+      times.removeAll(AdapterTags.READ_ITEM_TIMES);
+
+      if(times.isEmpty())
       {
-         FeedItem feedItem = (FeedItem) listAdapter.getItem(i);
-         if(!AdapterTags.READ_ITEM_TIMES.contains(feedItem.m_time))
-         {
-            listView.setSelection(i);
-            break;
-         }
+         listView.setSelection(0);
+      }
+      else
+      {
+         int index = listAdapter.m_times.indexOf(times.get(times.size() - 1));
+         listView.setSelection(index);
       }
    }
 }
