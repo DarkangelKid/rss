@@ -180,8 +180,7 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
                   }
                }
 
-         /* Set the adapters to be these new lists and do not read items while updating. */
-
+               /* Set the adapters to be these new lists and do not read items while updating. */
                adapterTag.m_isReadingItems = false;
 
                adapterTag.m_feedItems.clear();

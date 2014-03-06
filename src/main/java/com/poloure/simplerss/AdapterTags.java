@@ -40,7 +40,7 @@ class AdapterTags extends BaseAdapter
    final List<Long> m_times = new ArrayList<>(0);
    final List<FeedItem> m_feedItems = new ArrayList<>(0);
    private final Context m_context;
-   boolean m_isReadingItems = true;
+   boolean m_isReadingItems;
 
    AdapterTags(Context context)
    {
@@ -101,10 +101,10 @@ class AdapterTags extends BaseAdapter
       FeedItem item = m_feedItems.get(position);
       boolean isRead = READ_ITEM_TIMES.contains(item.m_time);
       view.m_item = item;
-      view.hasImage = hasImg;
+      view.m_hasImage = hasImg;
 
       /* If we have an image and the item is read, delay the opacity change. */
-      view.setAlpha(isRead && !hasImg ? 0.5F : 1.0F);
+      view.setAlpha(isRead? 0.5F : 1.0F);
       view.setBackgroundColor(isRead ? Color.TRANSPARENT : Color.WHITE);
 
       /* If the view was an image, load the image. */
@@ -112,11 +112,11 @@ class AdapterTags extends BaseAdapter
       {
          view.setBitmap(null);
          view.setTag(position);
-         AsyncLoadImage.newInstance(view, item.m_imageName, position, isRead ? 0.5F : 1.0F);
+         AsyncLoadImage.newInstance(view, item.m_imageName, position);
       }
 
       /* Add item as read as soon as getView has run. */
-      if(parent.isShown() && m_isReadingItems)
+      if(parent.isShown() && m_isReadingItems && ListFragmentTag.s_hasScrolled)
       {
          READ_ITEM_TIMES.add(item.m_time);
       }

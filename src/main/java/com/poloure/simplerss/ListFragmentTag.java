@@ -28,6 +28,7 @@ import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -37,6 +38,7 @@ public
 class ListFragmentTag extends ListFragment
 {
    private static final String POSITION_KEY = "POSITION";
+   static boolean s_hasScrolled;
 
    static
    ListFragment newInstance(int position)
@@ -54,14 +56,35 @@ class ListFragmentTag extends ListFragment
    {
       super.onActivityCreated(savedInstanceState);
 
-      Activity activity = getActivity();
+      final Activity activity = getActivity();
 
       setListAdapter(new AdapterTags(activity));
 
       ListView listView = getListView();
-      listView.setOnScrollListener(new OnScrollFeed(activity, listView.getPaddingTop()));
       listView.setDivider(new ColorDrawable(getResources().getColor(R.color.item_separator)));
       listView.setDividerHeight(1);
+      listView.setOnScrollListener(new AbsListView.OnScrollListener()
+      {
+         @Override
+         public
+         void onScrollStateChanged(AbsListView view, int scrollState)
+         {
+            if(AbsListView.OnScrollListener.SCROLL_STATE_IDLE == scrollState)
+            {
+               AsyncNavigationAdapter.update(activity);
+            }
+            if(AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL == scrollState)
+            {
+               s_hasScrolled = true;
+            }
+         }
+
+         @Override
+         public
+         void onScroll(AbsListView v, int fir, int visible, int total)
+         {
+         }
+      });
       registerForContextMenu(listView);
    }
 

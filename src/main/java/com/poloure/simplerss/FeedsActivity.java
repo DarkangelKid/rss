@@ -83,8 +83,7 @@ class FeedsActivity extends Activity implements FragmentNavigationDrawer.Navigat
       m_FragmentNavigationDrawer = (FragmentNavigationDrawer) manager.findFragmentById(R.id.navigation_drawer);
       m_FragmentNavigationDrawer.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
 
-      /* This method calls navigationList.getAdapter(). */
-      AsyncNavigationAdapter.update(this);
+      AsyncNewTagAdapters.update(this);
 
       /* Create and hide the fragments that go inside the content frame. */
       for(int i = 0; FRAGMENT_TAGS.length > i; i++)
@@ -102,15 +101,7 @@ class FeedsActivity extends Activity implements FragmentNavigationDrawer.Navigat
       transaction.commit();
       m_currentFragment = FRAGMENT_TAGS[0];
    }
-
-   @Override
-   protected
-   void onStart()
-   {
-      super.onStart();
-      AsyncNewTagAdapters.update(this);
-   }
-
+   
    /* Stop the alarm service and reset the time to 0 every time the user sees the activity. */
    @Override
    protected
@@ -145,6 +136,9 @@ class FeedsActivity extends Activity implements FragmentNavigationDrawer.Navigat
       super.onStop();
       Write.longSet(this, READ_ITEMS, AdapterTags.READ_ITEM_TIMES);
       setServiceIntent(ALARM_SERVICE_START);
+
+      /* This stops the user accidentally reading items when resuming. */
+      ListFragmentTag.s_hasScrolled = false;
    }
 
    /* Option menu methods.

@@ -32,8 +32,8 @@ class ViewFeedItem extends View
    private static final Paint[] m_paints = new Paint[3];
    private static final int SCREEN = Resources.getSystem().getDisplayMetrics().widthPixels;
 
-   private Bitmap m_image;
-   boolean hasImage;
+   Bitmap m_image;
+   boolean m_hasImage;
    FeedItem m_item;
    private final int m_height;
    private final String[] m_timeInitials;
@@ -83,7 +83,7 @@ class ViewFeedItem extends View
    void onDraw(Canvas canvas)
    {
       /* If the canvas is meant to draw a bitmap but it is null, draw nothing. */
-      if(hasImage && null == m_image)
+      if(m_hasImage && null == m_image)
       {
          return;
       }
@@ -92,7 +92,7 @@ class ViewFeedItem extends View
       verticalPosition = drawBitmap(canvas, verticalPosition);
       if(null != m_item.m_desLines && 0 != m_item.m_desLines.length && null != m_item.m_desLines[0])
       {
-         if(hasImage)
+         if(m_hasImage)
          {
             verticalPosition += Utilities.getDp(4.0F);
          }
@@ -157,7 +157,7 @@ class ViewFeedItem extends View
          verticalPosition += m_paints[i].getTextSize();
       }
 
-      return hasImage ? verticalPosition : verticalPosition + Utilities.getDp(4.0F);
+      return m_hasImage ? verticalPosition : verticalPosition + Utilities.getDp(4.0F);
    }
 
    void drawDes(Canvas canvas, float verticalPos)

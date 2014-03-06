@@ -29,25 +29,22 @@ import java.lang.ref.WeakReference;
 
 class AsyncLoadImage extends AsyncTask<String, Void, Bitmap>
 {
-   private static final int IMAGE_FADE_IN_DURATION = 166;
    private final WeakReference<ViewFeedItem> m_view;
    private final int m_viewTag;
-   private final float m_opacity;
    private final Context m_context;
 
    private
-   AsyncLoadImage(ViewFeedItem view, int viewTag, float opacity)
+   AsyncLoadImage(ViewFeedItem view, int viewTag)
    {
       m_context = view.getContext();
       m_view = new WeakReference<>(view);
       m_viewTag = viewTag;
-      m_opacity = opacity;
    }
 
    static
-   void newInstance(ViewFeedItem view, String imageName, int viewTag, float opacity)
+   void newInstance(ViewFeedItem view, String imageName, int viewTag)
    {
-      AsyncTask<String, Void, Bitmap> task = new AsyncLoadImage(view, viewTag, opacity);
+      AsyncTask<String, Void, Bitmap> task = new AsyncLoadImage(view, viewTag);
 
       task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, imageName);
    }
@@ -85,11 +82,7 @@ class AsyncLoadImage extends AsyncTask<String, Void, Bitmap>
       ViewFeedItem view = m_view.get();
       if(null != view && (Integer) view.getTag() == m_viewTag && null != result)
       {
-         AlphaAnimation animation = new AlphaAnimation(0.0F, m_opacity);
-         animation.setDuration(IMAGE_FADE_IN_DURATION);
-         animation.setFillAfter(true);
          view.setBitmap(result);
-         view.setAnimation(animation);
       }
    }
 }
