@@ -19,6 +19,7 @@ package com.poloure.simplerss;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.support.v4.view.ViewPager;
 import android.text.TextDirectionHeuristics;
 import android.util.DisplayMetrics;
@@ -83,12 +84,15 @@ class Utilities
    {
       ListView navigationList = (ListView) activity.findViewById(R.id.navigation_drawer);
       ViewPager feedPager = (ViewPager) activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
-      ActionBar actionBar = activity.getActionBar();
+      ActionBar bar = activity.getActionBar();
 
-      if(null != navigationList && null != actionBar && null != feedPager)
+      if(null != navigationList && null != bar && null != feedPager)
       {
          int position = feedPager.getCurrentItem();
-         actionBar.setTitle(PagerAdapterTags.TAG_LIST.get(position));
+         Drawable drawable = activity.getResources().getDrawable(R.drawable.ic_action_labels);
+         drawable.setAutoMirrored(true);
+         bar.setIcon(drawable);
+         bar.setTitle(PagerAdapterTags.TAG_LIST.get(position));
       }
    }
 
@@ -96,6 +100,12 @@ class Utilities
    void updateTitle(Activity activity, int position)
    {
       String[] titles = activity.getResources().getStringArray(R.array.navigation_titles);
+      ActionBar bar = activity.getActionBar();
+      Drawable drawable = activity.getResources()
+                                  .getDrawable(0 == position ? R.drawable.ic_action_storage : R.drawable.ic_action_settings);
+      drawable.setAutoMirrored(true);
+      bar.setIcon(drawable);
+      bar.setIcon(0 == position ? R.drawable.ic_action_storage : R.drawable.ic_action_settings);
       activity.getActionBar().setTitle(titles[position]);
    }
 
