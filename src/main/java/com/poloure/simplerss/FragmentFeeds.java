@@ -27,15 +27,20 @@ import android.widget.ListView;
 public
 class FragmentFeeds extends Fragment
 {
+   static final int VIEW_PAGER_ID = 786534126;
+   private ViewPager m_pager;
+
    @Override
    public
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
+      super.onCreateView(inflater, container, savedInstanceState);
+
       /* Inflate and configure the ViewPager. */
-      ViewPager pager = (ViewPager) inflater.inflate(R.layout.view_pager_tags, container, false);
-      pager.setOffscreenPageLimit(128);
-      pager.setAdapter(new PagerAdapterTags(getFragmentManager()));
-      pager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener()
+      m_pager = new ViewPager(getActivity());
+      m_pager.setId(VIEW_PAGER_ID);
+      m_pager.setOffscreenPageLimit(128);
+      m_pager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener()
       {
          @Override
          public
@@ -50,7 +55,7 @@ class FragmentFeeds extends Fragment
          }
       });
 
-      return pager;
+      return m_pager;
    }
 
    @Override
@@ -58,9 +63,10 @@ class FragmentFeeds extends Fragment
    void onActivityCreated(Bundle savedInstanceState)
    {
       super.onActivityCreated(savedInstanceState);
-      PagerAdapterTags.update(getActivity());
+
+      m_pager.setAdapter(new PagerAdapterTags(getFragmentManager(), getActivity()));
 
       ListView navigationList = (ListView) getActivity().findViewById(R.id.navigation_drawer);
-      navigationList.setItemChecked(4, true);
+      navigationList.setItemChecked(3, true);
    }
 }

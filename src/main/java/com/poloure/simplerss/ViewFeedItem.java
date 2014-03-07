@@ -32,7 +32,7 @@ class ViewFeedItem extends View
    private static final Paint[] m_paints = new Paint[3];
    private static final int SCREEN = Resources.getSystem().getDisplayMetrics().widthPixels;
 
-   Bitmap m_image;
+   private Bitmap m_image;
    boolean m_hasImage;
    FeedItem m_item;
    private final int m_height;

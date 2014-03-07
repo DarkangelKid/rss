@@ -17,8 +17,6 @@
 package com.poloure.simplerss;
 
 import android.app.Activity;
-import android.app.FragmentManager;
-import android.app.ListFragment;
 import android.os.AsyncTask;
 import android.support.v4.view.ViewPager;
 import android.view.View;
@@ -54,7 +52,7 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
    {
       String[] tags = PagerAdapterTags.TAG_LIST.toArray(new String[PagerAdapterTags.TAG_LIST.size()]);
 
-      @SuppressWarnings("unchecked") TreeMap<Long, FeedItem>[] maps = new TreeMap[tags.length];
+      TreeMap<Long, FeedItem>[] maps = new TreeMap[tags.length];
       for(int i = 0; tags.length > i; i++)
       {
          maps[i] = new TreeMap<>(Collections.reverseOrder());
@@ -139,30 +137,26 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
    protected
    void onPostExecute(TreeMap<Long, FeedItem>[] maps)
    {
-      ViewPager pager = (ViewPager) m_activity.findViewById(R.id.view_pager_tags);
-      PagerAdapterTags adapter = (PagerAdapterTags) pager.getAdapter();
+      ViewPager pager = (ViewPager) m_activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
+      int pageCount = pager.getAdapter().getCount();
 
-      FragmentManager manager = m_activity.getFragmentManager();
-
-      for(int i = 0; adapter.getCount() > i; i++)
+      for(int i = 0; pageCount > i; i++)
       {
          /* Get the tag page. */
-         String tag = Utilities.FRAGMENT_ID_PREFIX + i;
-         ListFragment tagFragment = (ListFragment) manager.findFragmentByTag(tag);
+         ListView listView = (ListView) m_activity.findViewById(20000 + i);
 
-         if(null != tagFragment)
+         if(null != listView)
          {
-            AdapterTags adapterTag = (AdapterTags) tagFragment.getListAdapter();
-            ListView listView = tagFragment.getListView();
+            AdapterTags adapterTag = (AdapterTags) listView.getAdapter();
 
-            boolean notFirstLoad = null != listView && 0 != listView.getCount();
+            boolean firstLoad = null == listView || 0 == listView.getCount();
 
             /* If there are items in the currently viewed page, save the position. */
             if(null != adapterTag)
             {
                long timeBefore = 0L;
                int top = 0;
-               if(notFirstLoad && i == pager.getCurrentItem())
+               if(!firstLoad && i == pager.getCurrentItem())
                {
                /* Get the time of the top item. */
                   int topVisibleItem = listView.getFirstVisiblePosition();

@@ -37,6 +37,18 @@ import android.widget.ListView;
 public
 class FragmentNavigationDrawer extends Fragment
 {
+   static
+   class ItemLongClickListener implements AdapterView.OnItemLongClickListener
+   {
+      @Override
+      public
+      boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id)
+      {
+         /* reorder tags. */
+         return true;
+      }
+   }
+
    private static final String PREF_USER_LEARNED_DRAWER = "navigation_drawer_learned";
 
    /* m_Callbacks is the activity. */
@@ -44,7 +56,6 @@ class FragmentNavigationDrawer extends Fragment
    ActionBarDrawerToggle m_drawerToggle;
 
    private DrawerLayout m_drawerLayout;
-   private ListView m_drawerListView;
    private View m_fragmentContainerView;
 
    private boolean m_userLearnedDrawer;
@@ -64,9 +75,9 @@ class FragmentNavigationDrawer extends Fragment
    public
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
-      m_drawerListView = (ListView) inflater.inflate(R.layout.navigation_drawer, container, false);
-      m_drawerListView.setAdapter(new AdapterNavigationDrawer(getActivity()));
-      m_drawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener()
+      ListView listView = (ListView) inflater.inflate(R.layout.navigation_drawer, container, false);
+      listView.setAdapter(new AdapterNavigationDrawer(getActivity()));
+      listView.setOnItemClickListener(new AdapterView.OnItemClickListener()
       {
          @Override
          public
@@ -82,18 +93,9 @@ class FragmentNavigationDrawer extends Fragment
             }
          }
       });
-      m_drawerListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener()
-      {
-         @Override
-         public
-         boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id)
-         {
-            /* reorder tags. */
-            return true;
-         }
-      });
+      listView.setOnItemLongClickListener(new ItemLongClickListener());
 
-      return m_drawerListView;
+      return listView;
    }
 
    void setUp(int fragmentId, DrawerLayout drawerLayout)

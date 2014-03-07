@@ -38,7 +38,7 @@ import java.util.Locale;
 
 class Utilities
 {
-   static final String FRAGMENT_ID_PREFIX = "android:switcher:" + R.id.view_pager_tags + ':';
+   static final String FRAGMENT_ID_PREFIX = "android:switcher:" + FragmentFeeds.VIEW_PAGER_ID + ':';
    static final int EIGHT_DP = getDp(8.0F);
 
    static
@@ -51,7 +51,7 @@ class Utilities
          String title = actionBar.getTitle().toString();
          String feedsTitle = activity.getResources().getStringArray(R.array.navigation_titles)[0];
 
-         ViewPager feedPager = (ViewPager) activity.findViewById(R.id.view_pager_tags);
+         ViewPager feedPager = (ViewPager) activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
          Adapter adapter = navigationList.getAdapter();
 
          /* If the title is not Feeds, set no subtitle. */

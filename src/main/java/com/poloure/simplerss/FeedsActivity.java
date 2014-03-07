@@ -83,8 +83,6 @@ class FeedsActivity extends Activity implements FragmentNavigationDrawer.Navigat
       m_FragmentNavigationDrawer = (FragmentNavigationDrawer) manager.findFragmentById(R.id.navigation_drawer);
       m_FragmentNavigationDrawer.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
 
-      AsyncNewTagAdapters.update(this);
-
       /* Create and hide the fragments that go inside the content frame. */
       for(int i = 0; FRAGMENT_TAGS.length > i; i++)
       {
@@ -101,7 +99,7 @@ class FeedsActivity extends Activity implements FragmentNavigationDrawer.Navigat
       transaction.commit();
       m_currentFragment = FRAGMENT_TAGS[0];
    }
-   
+
    /* Stop the alarm service and reset the time to 0 every time the user sees the activity. */
    @Override
    protected
@@ -126,6 +124,10 @@ class FeedsActivity extends Activity implements FragmentNavigationDrawer.Navigat
    {
       super.onPause();
       unregisterReceiver(Receiver);
+
+      /* This stops the user accidentally reading items when resuming. */
+      ListFragmentTag.s_hasScrolled = false;
+      ListFragmentTag.s_firstLoad = true;
    }
 
    /* Start the alarm service every time the activity is not visible. */
@@ -136,9 +138,6 @@ class FeedsActivity extends Activity implements FragmentNavigationDrawer.Navigat
       super.onStop();
       Write.longSet(this, READ_ITEMS, AdapterTags.READ_ITEM_TIMES);
       setServiceIntent(ALARM_SERVICE_START);
-
-      /* This stops the user accidentally reading items when resuming. */
-      ListFragmentTag.s_hasScrolled = false;
    }
 
    /* Option menu methods.
@@ -151,7 +150,7 @@ class FeedsActivity extends Activity implements FragmentNavigationDrawer.Navigat
    void onNavigationDrawerItemSelected(int position)
    {
       /* Close the navigation drawer in all cases. */
-      ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager_tags);
+      ViewPager viewPager = (ViewPager) findViewById(FragmentFeeds.VIEW_PAGER_ID);
       DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
       drawerLayout.closeDrawers();
 
@@ -308,14 +307,12 @@ class FeedsActivity extends Activity implements FragmentNavigationDrawer.Navigat
    public
    void onUnreadClick(MenuItem menuItem)
    {
-      ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager_tags);
+      ViewPager viewPager = (ViewPager) findViewById(FragmentFeeds.VIEW_PAGER_ID);
+      ListView listView = (ListView) findViewById(20000 + viewPager.getCurrentItem());
 
-      String tag = Utilities.FRAGMENT_ID_PREFIX + viewPager.getCurrentItem();
-      ListFragment fragment = (ListFragment) getFragmentManager().findFragmentByTag(tag);
-
-      if(null != fragment)
+      if(null != listView)
       {
-         gotoLatestUnread(fragment.getListView());
+         gotoLatestUnread(listView);
       }
    }
 
@@ -324,7 +321,7 @@ class FeedsActivity extends Activity implements FragmentNavigationDrawer.Navigat
    {
       MenuItemCompat.setActionView(menuItem, R.layout.progress_bar_refresh);
 
-      ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager_tags);
+      ViewPager viewPager = (ViewPager) findViewById(FragmentFeeds.VIEW_PAGER_ID);
 
       Intent intent = new Intent(this, ServiceUpdate.class);
       intent.putExtra("GROUP_NUMBER", viewPager.getCurrentItem());

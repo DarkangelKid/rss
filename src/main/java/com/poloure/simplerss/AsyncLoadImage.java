@@ -21,7 +21,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.view.View;
-import android.view.animation.AlphaAnimation;
 
 import java.io.FileInputStream;
 import java.io.IOException;

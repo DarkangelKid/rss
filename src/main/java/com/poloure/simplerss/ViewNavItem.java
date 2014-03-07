@@ -93,7 +93,7 @@ class ViewNavItem extends View
 
       int hPadding = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16.0F, metrics));
       int paddingStart = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8.0F, metrics));
-      int paddingTop = paddingStart;
+      int paddingTop = Utilities.EIGHT_DP;
 
       Paint paint = -1 == m_image ? m_paints[1] : m_paints[0];
       long verticalPosition = Math.round(m_height / 2.0 - (paint.descent() + paint.ascent()) / 2.0);

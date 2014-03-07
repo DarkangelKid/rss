@@ -104,7 +104,7 @@ class AdapterTags extends BaseAdapter
       view.m_hasImage = hasImg;
 
       /* If we have an image and the item is read, delay the opacity change. */
-      view.setAlpha(isRead? 0.5F : 1.0F);
+      view.setAlpha(isRead ? 0.5F : 1.0F);
       view.setBackgroundColor(isRead ? Color.TRANSPARENT : Color.WHITE);
 
       /* If the view was an image, load the image. */

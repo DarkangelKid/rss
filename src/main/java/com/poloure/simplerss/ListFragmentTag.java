@@ -17,7 +17,7 @@
 package com.poloure.simplerss;
 
 import android.app.Activity;
-import android.app.ListFragment;
+import android.app.Fragment;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -26,8 +26,10 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.ContextMenu;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
@@ -35,35 +37,35 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 public
-class ListFragmentTag extends ListFragment
+class ListFragmentTag extends Fragment
 {
    private static final String POSITION_KEY = "POSITION";
    static boolean s_hasScrolled;
+   ListView m_listView;
+   static boolean s_firstLoad = true;
 
    static
-   ListFragment newInstance(int position)
+   Fragment newInstance(int position)
    {
-      ListFragment listFragment = new ListFragmentTag();
+      Fragment fragment = new ListFragmentTag();
       Bundle bundle = new Bundle();
       bundle.putInt(POSITION_KEY, position);
-      listFragment.setArguments(bundle);
-      return listFragment;
+      fragment.setArguments(bundle);
+      return fragment;
    }
 
    @Override
    public
-   void onActivityCreated(Bundle savedInstanceState)
+   View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
-      super.onActivityCreated(savedInstanceState);
-
       final Activity activity = getActivity();
 
-      setListAdapter(new AdapterTags(activity));
+      m_listView = new ListView(activity);
 
-      ListView listView = getListView();
-      listView.setDivider(new ColorDrawable(getResources().getColor(R.color.item_separator)));
-      listView.setDividerHeight(1);
-      listView.setOnScrollListener(new AbsListView.OnScrollListener()
+      m_listView.setId(20000 + getArguments().getInt(POSITION_KEY));
+      m_listView.setDivider(new ColorDrawable(getResources().getColor(R.color.item_separator)));
+      m_listView.setDividerHeight(1);
+      m_listView.setOnScrollListener(new AbsListView.OnScrollListener()
       {
          @Override
          public
@@ -73,9 +75,23 @@ class ListFragmentTag extends ListFragment
             {
                AsyncNavigationAdapter.update(activity);
             }
-            if(AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL == scrollState)
+            if(!s_hasScrolled && AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL == scrollState)
             {
                s_hasScrolled = true;
+
+               AdapterTags adapter = (AdapterTags) m_listView.getAdapter();
+               int first = m_listView.getFirstVisiblePosition();
+               int last = m_listView.getLastVisiblePosition();
+
+               for(int i = 0; last - first >= i; i++)
+               {
+                  View view1 = m_listView.getChildAt(i);
+                  if(null != view1 && view1.isShown())
+                  {
+                     FeedItem item = (FeedItem) adapter.getItem(first + i);
+                     AdapterTags.READ_ITEM_TIMES.add(item.m_time);
+                  }
+               }
             }
          }
 
@@ -85,7 +101,23 @@ class ListFragmentTag extends ListFragment
          {
          }
       });
-      registerForContextMenu(listView);
+      registerForContextMenu(m_listView);
+
+      return m_listView;
+   }
+
+   @Override
+   public
+   void onActivityCreated(Bundle savedInstanceState)
+   {
+      super.onActivityCreated(savedInstanceState);
+
+      m_listView.setAdapter(new AdapterTags(getActivity()));
+      if(s_firstLoad)
+      {
+         AsyncNewTagAdapters.update(getActivity());
+         s_firstLoad = false;
+      }
    }
 
    @Override
@@ -93,6 +125,7 @@ class ListFragmentTag extends ListFragment
    void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo)
    {
       super.onCreateContextMenu(menu, v, menuInfo);
+
       getActivity().getMenuInflater().inflate(R.menu.context_menu, menu);
       AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
       FeedItem view = (FeedItem) ((AdapterView<ListAdapter>) v).getAdapter().getItem(info.position);
