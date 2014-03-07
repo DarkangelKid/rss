@@ -43,8 +43,8 @@ class AdapterNavigationDrawer extends ArrayAdapter<String[]>
       int type = getItemViewType(position);
       ViewNavItem view = null == convertView ? new ViewNavItem(m_context) : (ViewNavItem) convertView;
 
-      view.m_text = TITLE == type ? m_navigationTitles[position] : getItem(position - 3)[0];
-      view.m_count = TITLE == type ? "" : getItem(position - 3)[1];
+      view.m_text = TITLE == type ? m_navigationTitles[position] : getItem(position - 2)[0];
+      view.m_count = TITLE == type ? "" : getItem(position - 2)[1];
       view.m_image = TITLE == type ? position : -1;
 
       return view;
@@ -55,14 +55,14 @@ class AdapterNavigationDrawer extends ArrayAdapter<String[]>
    int getCount()
    {
       /* Because we have the extra three views that are not tags. */
-      return super.getCount() + 3;
+      return super.getCount() + 2;
    }
 
    @Override
    public
    int getItemViewType(int position)
    {
-      return 3 > position ? TITLE : TAG;
+      return 2 > position ? TITLE : TAG;
    }
 
    @Override

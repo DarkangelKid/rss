@@ -16,7 +16,6 @@
 
 <resources>
    <string-array name="navigation_titles">
-      <item>Feeds</item>
       <item>Manage</item>
       <item>Settings</item>
    </string-array>

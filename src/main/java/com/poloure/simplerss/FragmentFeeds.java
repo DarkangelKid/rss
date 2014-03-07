@@ -48,9 +48,10 @@ class FragmentFeeds extends Fragment
          {
             /* Set the item to be checked in the navigation drawer. */
             ListView navigationList = (ListView) getActivity().findViewById(R.id.navigation_drawer);
-            navigationList.setItemChecked(position + 3, true);
+            navigationList.setItemChecked(position + 2, true);
 
             /* Set the subtitle to the unread count. */
+            Utilities.updateTitle(getActivity());
             Utilities.updateSubtitle(getActivity());
          }
       });
@@ -67,6 +68,8 @@ class FragmentFeeds extends Fragment
       m_pager.setAdapter(new PagerAdapterTags(getFragmentManager(), getActivity()));
 
       ListView navigationList = (ListView) getActivity().findViewById(R.id.navigation_drawer);
-      navigationList.setItemChecked(3, true);
+      navigationList.setItemChecked(2, true);
+      Utilities.updateTitle(getActivity());
+      Utilities.updateSubtitle(getActivity());
    }
 }

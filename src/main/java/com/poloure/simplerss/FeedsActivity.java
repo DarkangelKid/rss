@@ -16,13 +16,11 @@
 
 package com.poloure.simplerss;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.app.ListFragment;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -154,41 +152,34 @@ class FeedsActivity extends Activity implements FragmentNavigationDrawer.Navigat
       DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
       drawerLayout.closeDrawers();
 
-      int viewPagerPosition = 0 == position ? viewPager.getCurrentItem() : position - 3;
-      int listPosition = 0 == position ? viewPagerPosition + 3 : position;
-      int fragmentPosition = 2 < listPosition ? 0 : position;
+      int fragmentTag = 1 < position ? 0 : position + 1;
+
+      /* If we are switching fragments, check if we need to. */
+      String newTag = FRAGMENT_TAGS[fragmentTag];
+      if(!m_currentFragment.equals(newTag))
+      {
+         /* Switch the content frame fragment. */
+         FragmentManager manager = getFragmentManager();
+         manager.beginTransaction()
+                .hide(getFragment(manager, m_currentFragment))
+                .show(getFragment(manager, newTag))
+                .commit();
+         m_currentFragment = newTag;
+      }
 
       /* Set the item to be checked. */
       ListView navigationList = (ListView) findViewById(R.id.navigation_drawer);
-      navigationList.setItemChecked(listPosition, true);
-
-      /* If we are switching fragments, check if we need to. */
-      String newTag = FRAGMENT_TAGS[fragmentPosition];
-      if(m_currentFragment.equals(newTag) && 3 > position)
-      {
-         return;
-      }
-
-      /* Switch the content frame fragment. */
-      FragmentManager manager = getFragmentManager();
-      manager.beginTransaction()
-             .hide(getFragment(manager, m_currentFragment))
-             .show(getFragment(manager, newTag))
-             .commit();
-      m_currentFragment = newTag;
-
-      /* Update the action bar subtitle. */
-      ActionBar actionBar = getActionBar();
-      if(null != actionBar)
-      {
-         String[] navTitles = getResources().getStringArray(R.array.navigation_titles);
-         actionBar.setTitle(navTitles[fragmentPosition]);
-      }
+      navigationList.setItemChecked(position, true);
 
       /* If a tag was clicked, set the ViewPager position to that tag. */
-      if(0 == fragmentPosition)
+      if(1 < position)
       {
-         viewPager.setCurrentItem(viewPagerPosition);
+         viewPager.setCurrentItem(position - 2);
+         Utilities.updateTitle(this);
+      }
+      else
+      {
+         Utilities.updateTitle(this, position);
       }
       Utilities.updateSubtitle(this);
    }

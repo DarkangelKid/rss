@@ -31,6 +31,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -41,7 +42,7 @@ class ListFragmentTag extends Fragment
 {
    private static final String POSITION_KEY = "POSITION";
    static boolean s_hasScrolled;
-   ListView m_listView;
+   private ListView m_listView;
    static boolean s_firstLoad = true;
 
    static
@@ -79,7 +80,7 @@ class ListFragmentTag extends Fragment
             {
                s_hasScrolled = true;
 
-               AdapterTags adapter = (AdapterTags) m_listView.getAdapter();
+               Adapter adapter = m_listView.getAdapter();
                int first = m_listView.getFirstVisiblePosition();
                int last = m_listView.getLastVisiblePosition();
 

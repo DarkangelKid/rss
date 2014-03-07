@@ -19,11 +19,9 @@ package com.poloure.simplerss;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.app.ListFragment;
 import android.content.Context;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.view.View;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,20 +50,17 @@ class PagerAdapterTags extends FragmentPagerAdapter
    static
    void update(Activity activity)
    {
-      ViewPager pager = (ViewPager) activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
-      update(activity, pager);
+      update(activity, (ViewPager) activity.findViewById(FragmentFeeds.VIEW_PAGER_ID));
    }
 
-   static
+   private static
    void update(Activity activity, ViewPager pager)
    {
-      PagerAdapterTags adapter = (PagerAdapterTags) pager.getAdapter();
-
       Set<String> tagSet = getTagsFromDisk(activity);
       TAG_LIST.clear();
       TAG_LIST.addAll(tagSet);
 
-      adapter.notifyDataSetChanged();
+      pager.getAdapter().notifyDataSetChanged();
    }
 
    static

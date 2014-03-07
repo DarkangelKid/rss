@@ -37,7 +37,7 @@ import android.widget.ListView;
 public
 class FragmentNavigationDrawer extends Fragment
 {
-   static
+   private static
    class ItemLongClickListener implements AdapterView.OnItemLongClickListener
    {
       @Override
@@ -111,14 +111,12 @@ class FragmentNavigationDrawer extends Fragment
       ActionBar actionBar = activity.getActionBar();
       Resources resources = getResources();
 
-      String[] navigationTitles = resources.getStringArray(R.array.navigation_titles);
       Drawable appIcon = resources.getDrawable(R.drawable.ic_action_location_broadcast);
       Drawable indicator = resources.getDrawable(R.drawable.ic_drawer);
 
       appIcon.setAutoMirrored(true);
       indicator.setAutoMirrored(true);
 
-      actionBar.setTitle(navigationTitles[0]);
       actionBar.setDisplayHomeAsUpEnabled(true);
       actionBar.setHomeButtonEnabled(true);
       actionBar.setHomeAsUpIndicator(indicator);

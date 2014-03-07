@@ -38,7 +38,6 @@ import java.util.Locale;
 
 class Utilities
 {
-   static final String FRAGMENT_ID_PREFIX = "android:switcher:" + FragmentFeeds.VIEW_PAGER_ID + ':';
    static final int EIGHT_DP = getDp(8.0F);
 
    static
@@ -49,17 +48,19 @@ class Utilities
       if(null != navigationList && null != actionBar)
       {
          String title = actionBar.getTitle().toString();
-         String feedsTitle = activity.getResources().getStringArray(R.array.navigation_titles)[0];
+         String manageTitle = activity.getResources().getStringArray(R.array.navigation_titles)[0];
+         String settingsTitle = activity.getResources()
+                                        .getStringArray(R.array.navigation_titles)[1];
 
          ViewPager feedPager = (ViewPager) activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
          Adapter adapter = navigationList.getAdapter();
 
          /* If the title is not Feeds, set no subtitle. */
-         if(null == feedPager || !title.equals(feedsTitle))
+         if(null == feedPager || title.equals(manageTitle) || title.equals(settingsTitle))
          {
             actionBar.setSubtitle(null);
          }
-         else if(0 != adapter.getCount() - 3)
+         else if(0 != adapter.getCount() - 2)
          {
             String[] tag = (String[]) adapter.getItem(feedPager.getCurrentItem());
             if(null == tag || 0 == tag.length || tag[1].isEmpty())
@@ -75,6 +76,27 @@ class Utilities
             }
          }
       }
+   }
+
+   static
+   void updateTitle(Activity activity)
+   {
+      ListView navigationList = (ListView) activity.findViewById(R.id.navigation_drawer);
+      ViewPager feedPager = (ViewPager) activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
+      ActionBar actionBar = activity.getActionBar();
+
+      if(null != navigationList && null != actionBar && null != feedPager)
+      {
+         int position = feedPager.getCurrentItem();
+         actionBar.setTitle(PagerAdapterTags.TAG_LIST.get(position));
+      }
+   }
+
+   static
+   void updateTitle(Activity activity, int position)
+   {
+      String[] titles = activity.getResources().getStringArray(R.array.navigation_titles);
+      activity.getActionBar().setTitle(titles[position]);
    }
 
    static

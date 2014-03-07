@@ -30,8 +30,8 @@ import android.view.View;
 class ViewNavItem extends View
 {
    private static final Paint[] m_paints = new Paint[2];
-   private static final Bitmap[] m_bitmaps_dark = new Bitmap[3];
-   private static final Bitmap[] m_bitmaps_light = new Bitmap[3];
+   private static final Bitmap[] m_bitmaps_dark = new Bitmap[2];
+   private static final Bitmap[] m_bitmaps_light = new Bitmap[2];
 
    String m_text = "";
    String m_count = "";
@@ -51,16 +51,12 @@ class ViewNavItem extends View
       if(null == m_bitmaps_dark[0])
       {
          int[] drawables_dark = {
-               R.drawable.ic_action_view_as_list,
-               R.drawable.ic_action_storage,
-               R.drawable.ic_action_settings,
+               R.drawable.ic_action_storage, R.drawable.ic_action_settings,
          };
 
 
          int[] drawables_light = {
-               R.drawable.ic_action_view_as_list_light,
-               R.drawable.ic_action_storage_light,
-               R.drawable.ic_action_settings_light,
+               R.drawable.ic_action_storage_light, R.drawable.ic_action_settings_light,
          };
 
          for(int i = 0; i < m_bitmaps_dark.length; i++)
@@ -93,7 +89,6 @@ class ViewNavItem extends View
 
       int hPadding = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16.0F, metrics));
       int paddingStart = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8.0F, metrics));
-      int paddingTop = Utilities.EIGHT_DP;
 
       Paint paint = -1 == m_image ? m_paints[1] : m_paints[0];
       long verticalPosition = Math.round(m_height / 2.0 - (paint.descent() + paint.ascent()) / 2.0);
@@ -116,6 +111,7 @@ class ViewNavItem extends View
       {
          Bitmap icon = isActivated() ? m_bitmaps_light[m_image] : m_bitmaps_dark[m_image];
          int imageWidth = icon.getWidth();
+         int paddingTop = Utilities.EIGHT_DP;
          canvas.drawBitmap(icon, rtl ? width - paddingStart - imageWidth : paddingStart, Math.round(paddingTop), m_paints[0]);
          hPadding = (paddingStart << 1) + imageWidth;
       }

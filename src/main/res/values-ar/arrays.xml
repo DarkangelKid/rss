@@ -17,7 +17,6 @@
 <resources>
 
    <string-array name="navigation_titles">
-      <item>تلقيمات‎</item>
       <item>تنظيم</item>
       <item>إعدادات</item>
    </string-array>
