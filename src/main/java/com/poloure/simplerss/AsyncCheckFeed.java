@@ -149,9 +149,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
          }
       }
 
-      String tags = formatUserTagsInput(inputTags);
-
-      return new String[]{url, title, tags};
+      return new String[]{url, title, formatUserTagsInput(inputTags)};
    }
 
    private static

@@ -84,17 +84,7 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
             FeedItem data = new FeedItem();
 
             /* Edit the data. */
-            if(!content[3][j].isEmpty())
-            {
-               int lastSlash = content[3][j].lastIndexOf('/') + 1;
-               data.m_imageName = content[3][j].substring(lastSlash);
-
-               /* If we have not downloaded the image yet, fake no image. */
-               if(!Read.fileExists(m_activity, data.m_imageName))
-               {
-                  data.m_imageName = "";
-               }
-            }
+            data.m_imageName = getImageName(m_activity, content[3][j]);
 
             for(int k = 0; 3 > k; k++)
             {
@@ -105,6 +95,7 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
             data.m_urlFull = content[1][j];
             data.m_url = content[2][j];
 
+            /* Put the item in each map that the feed is tagged with. */
             for(int k : indices)
             {
                maps[k].put(data.m_time, data);
@@ -113,6 +104,20 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
       }
 
       return maps;
+   }
+
+   private static
+   String getImageName(Activity activity, String imageUrl)
+   {
+      if(imageUrl.isEmpty())
+      {
+         return "";
+      }
+
+      String name = imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
+
+      return !Read.fileExists(activity, name) ? "" : name;
+
    }
 
    private static

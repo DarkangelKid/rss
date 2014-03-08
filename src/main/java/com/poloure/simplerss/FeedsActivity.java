@@ -41,7 +41,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public
-class FeedsActivity extends Activity implements FragmentNavigationDrawer.NavigationDrawerCallbacks
+class FeedsActivity extends Activity
 {
    static final String READ_ITEMS = "read_items.txt";
    private static final int ALARM_SERVICE_START = 1;
@@ -50,7 +50,7 @@ class FeedsActivity extends Activity implements FragmentNavigationDrawer.Navigat
    private boolean m_stopProgressBar;
    boolean m_showMenuItems = true;
 
-   private String m_currentFragment;
+   String m_currentFragment;
    private FragmentNavigationDrawer m_FragmentNavigationDrawer;
 
    private static final String FEED_TAG = "Feeds";
@@ -79,7 +79,7 @@ class FeedsActivity extends Activity implements FragmentNavigationDrawer.Navigat
       FragmentTransaction transaction = manager.beginTransaction();
 
       m_FragmentNavigationDrawer = (FragmentNavigationDrawer) manager.findFragmentById(R.id.navigation_drawer);
-      m_FragmentNavigationDrawer.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
+      m_FragmentNavigationDrawer.setUp((DrawerLayout) findViewById(R.id.drawer_layout));
 
       /* Create and hide the fragments that go inside the content frame. */
       for(int i = 0; FRAGMENT_TAGS.length > i; i++)
@@ -94,6 +94,7 @@ class FeedsActivity extends Activity implements FragmentNavigationDrawer.Navigat
             transaction.hide(fragment);
          }
       }
+
       transaction.commit();
       m_currentFragment = FRAGMENT_TAGS[0];
    }
@@ -142,47 +143,6 @@ class FeedsActivity extends Activity implements FragmentNavigationDrawer.Navigat
     *
     *
     */
-
-   @Override
-   public
-   void onNavigationDrawerItemSelected(int position)
-   {
-      /* Close the navigation drawer in all cases. */
-      ViewPager viewPager = (ViewPager) findViewById(FragmentFeeds.VIEW_PAGER_ID);
-      DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-      drawerLayout.closeDrawers();
-
-      int fragmentTag = 1 < position ? 0 : position + 1;
-
-      /* If we are switching fragments, check if we need to. */
-      String newTag = FRAGMENT_TAGS[fragmentTag];
-      if(!m_currentFragment.equals(newTag))
-      {
-         /* Switch the content frame fragment. */
-         FragmentManager manager = getFragmentManager();
-         manager.beginTransaction()
-                .hide(getFragment(manager, m_currentFragment))
-                .show(getFragment(manager, newTag))
-                .commit();
-         m_currentFragment = newTag;
-      }
-
-      /* Set the item to be checked. */
-      ListView navigationList = (ListView) findViewById(R.id.navigation_drawer);
-      navigationList.setItemChecked(position, true);
-
-      /* If a tag was clicked, set the ViewPager position to that tag. */
-      if(1 < position)
-      {
-         viewPager.setCurrentItem(position - 2);
-         Utilities.updateTitle(this);
-      }
-      else
-      {
-         Utilities.updateTitle(this, position);
-      }
-      Utilities.updateSubtitle(this);
-   }
 
    @Override
    public
@@ -319,7 +279,7 @@ class FeedsActivity extends Activity implements FragmentNavigationDrawer.Navigat
       startService(intent);
    }
 
-   private static
+   static
    Fragment getFragment(FragmentManager manager, String tag)
    {
       Fragment fragment = manager.findFragmentByTag(tag);

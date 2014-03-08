@@ -35,6 +35,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.text.NumberFormat;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 class Utilities
@@ -46,18 +48,18 @@ class Utilities
    {
       ListView navigationList = (ListView) activity.findViewById(R.id.navigation_drawer);
       ActionBar actionBar = activity.getActionBar();
+      Resources res = activity.getResources();
+
       if(null != navigationList && null != actionBar)
       {
+         List<String> titles = Arrays.asList(res.getStringArray(R.array.navigation_titles));
          String title = actionBar.getTitle().toString();
-         String manageTitle = activity.getResources().getStringArray(R.array.navigation_titles)[0];
-         String settingsTitle = activity.getResources()
-                                        .getStringArray(R.array.navigation_titles)[1];
 
          ViewPager feedPager = (ViewPager) activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
          Adapter adapter = navigationList.getAdapter();
 
          /* If the title is not Feeds, set no subtitle. */
-         if(null == feedPager || title.equals(manageTitle) || title.equals(settingsTitle))
+         if(null == feedPager || titles.contains(title))
          {
             actionBar.setSubtitle(null);
          }
@@ -71,7 +73,6 @@ class Utilities
             else
             {
                int count = Integer.parseInt(tag[1]);
-               Resources res = activity.getResources();
                String countString = res.getQuantityString(R.plurals.actionbar_subtitle_unread, count, count);
                actionBar.setSubtitle(0 == count ? null : countString);
             }
@@ -94,19 +95,6 @@ class Utilities
          bar.setIcon(drawable);
          bar.setTitle(PagerAdapterTags.TAG_LIST.get(position));
       }
-   }
-
-   static
-   void updateTitle(Activity activity, int position)
-   {
-      String[] titles = activity.getResources().getStringArray(R.array.navigation_titles);
-      ActionBar bar = activity.getActionBar();
-      Drawable drawable = activity.getResources()
-                                  .getDrawable(0 == position ? R.drawable.ic_action_storage : R.drawable.ic_action_settings);
-      drawable.setAutoMirrored(true);
-      bar.setIcon(drawable);
-      bar.setIcon(0 == position ? R.drawable.ic_action_storage : R.drawable.ic_action_settings);
-      activity.getActionBar().setTitle(titles[position]);
    }
 
    static

@@ -19,6 +19,7 @@ package com.poloure.simplerss;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -26,11 +27,13 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
@@ -38,7 +41,7 @@ public
 class FragmentNavigationDrawer extends Fragment
 {
    private static
-   class ItemLongClickListener implements AdapterView.OnItemLongClickListener
+   class OnNavigationItemLongClick implements AdapterView.OnItemLongClickListener
    {
       @Override
       public
@@ -51,14 +54,9 @@ class FragmentNavigationDrawer extends Fragment
 
    private static final String PREF_USER_LEARNED_DRAWER = "navigation_drawer_learned";
 
-   /* m_Callbacks is the activity. */
-   private NavigationDrawerCallbacks m_Callbacks;
    ActionBarDrawerToggle m_drawerToggle;
 
-   private DrawerLayout m_drawerLayout;
-   private View m_fragmentContainerView;
-
-   private boolean m_userLearnedDrawer;
+   boolean m_userLearnedDrawer;
 
    @Override
    public
@@ -77,35 +75,17 @@ class FragmentNavigationDrawer extends Fragment
    {
       ListView listView = (ListView) inflater.inflate(R.layout.navigation_drawer, container, false);
       listView.setAdapter(new AdapterNavigationDrawer(getActivity()));
-      listView.setOnItemClickListener(new AdapterView.OnItemClickListener()
-      {
-         @Override
-         public
-         void onItemClick(AdapterView<?> parent, View view, int position, long id)
-         {
-            if(null != m_drawerLayout)
-            {
-               m_drawerLayout.closeDrawer(m_fragmentContainerView);
-            }
-            if(null != m_Callbacks)
-            {
-               m_Callbacks.onNavigationDrawerItemSelected(position);
-            }
-         }
-      });
-      listView.setOnItemLongClickListener(new ItemLongClickListener());
+      listView.setOnItemClickListener(new OnNavigationItemClick(getActivity()));
+      listView.setOnItemLongClickListener(new OnNavigationItemLongClick());
 
       return listView;
    }
 
-   void setUp(int fragmentId, DrawerLayout drawerLayout)
+   void setUp(DrawerLayout drawerLayout)
    {
       final FeedsActivity activity = (FeedsActivity) getActivity();
 
-      m_fragmentContainerView = activity.findViewById(fragmentId);
-      m_drawerLayout = drawerLayout;
-
-      m_drawerLayout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.START);
+      drawerLayout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.START);
 
       /* Set up the action bar. */
       ActionBar actionBar = activity.getActionBar();
@@ -122,7 +102,7 @@ class FragmentNavigationDrawer extends Fragment
       actionBar.setHomeAsUpIndicator(indicator);
       actionBar.setIcon(appIcon);
 
-      m_drawerToggle = new ActionBarDrawerToggle(getActivity(), m_drawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
+      m_drawerToggle = new ActionBarDrawerToggle(getActivity(), drawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
       {
          @Override
          public
@@ -152,10 +132,10 @@ class FragmentNavigationDrawer extends Fragment
       /* Open the drawer if the user has never opened it manually before. */
       if(!m_userLearnedDrawer)
       {
-         m_drawerLayout.openDrawer(m_fragmentContainerView);
+         drawerLayout.openDrawer(R.id.navigation_drawer);
       }
 
-      m_drawerLayout.post(new Runnable()
+      drawerLayout.post(new Runnable()
       {
          @Override
          public
@@ -164,24 +144,7 @@ class FragmentNavigationDrawer extends Fragment
             m_drawerToggle.syncState();
          }
       });
-
-      m_drawerLayout.setDrawerListener(m_drawerToggle);
-   }
-
-   @Override
-   public
-   void onAttach(Activity activity)
-   {
-      super.onAttach(activity);
-      m_Callbacks = (NavigationDrawerCallbacks) activity;
-   }
-
-   @Override
-   public
-   void onDetach()
-   {
-      super.onDetach();
-      m_Callbacks = null;
+      drawerLayout.setDrawerListener(m_drawerToggle);
    }
 
    @Override
@@ -192,10 +155,69 @@ class FragmentNavigationDrawer extends Fragment
       m_drawerToggle.onConfigurationChanged(newConfig);
    }
 
-   public
-   interface NavigationDrawerCallbacks
+   private static
+   class OnNavigationItemClick implements AdapterView.OnItemClickListener
    {
-      /* Called when an item in the navigation drawer is selected. */
-      void onNavigationDrawerItemSelected(int position);
+      private final FeedsActivity m_activity;
+      private final FragmentManager m_manager;
+      private final ActionBar m_bar;
+      private final String[] m_titles;
+      private final Drawable[] m_icons = new Drawable[2];
+
+      OnNavigationItemClick(Activity activity)
+      {
+         m_activity = (FeedsActivity) activity;
+         m_manager = activity.getFragmentManager();
+         m_bar = activity.getActionBar();
+
+         Resources resources = activity.getResources();
+
+         m_titles = resources.getStringArray(R.array.navigation_titles);
+
+         m_icons[0] = resources.getDrawable(R.drawable.ic_action_storage);
+         m_icons[1] = resources.getDrawable(R.drawable.ic_action_settings);
+
+         m_icons[0].setAutoMirrored(true);
+         m_icons[1].setAutoMirrored(true);
+      }
+
+      @Override
+      public
+      void onItemClick(AdapterView<?> parent, View view, int position, long id)
+      {
+         /* Close the navigation drawer in all cases. */
+         ((DrawerLayout) parent.getParent()).closeDrawers();
+
+         int fragmentTag = 1 < position ? 0 : position + 1;
+
+         /* If we are switching fragments, check if we need to. */
+         String newTag = FeedsActivity.FRAGMENT_TAGS[fragmentTag];
+         if(!m_activity.m_currentFragment.equals(newTag))
+         {
+            /* Switch the content frame fragment. */
+            m_manager.beginTransaction()
+                   .hide(FeedsActivity.getFragment(m_manager, m_activity.m_currentFragment))
+                   .show(FeedsActivity.getFragment(m_manager, newTag))
+                   .commit();
+            m_activity.m_currentFragment = newTag;
+         }
+
+         /* Set the item to be checked. */
+         ((AbsListView) parent).setItemChecked(position, true);
+
+         /* If a tag was clicked, set the ViewPager position to that tag. */
+         if(1 < position)
+         {
+            ViewPager pager = (ViewPager) m_activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
+            pager.setCurrentItem(position - 2);
+         }
+         else
+         {
+            /* Change the icon and title of the ActionBar. */
+            m_bar.setIcon(m_icons[position]);
+            m_bar.setTitle(m_titles[position]);
+            m_bar.setSubtitle(null);
+         }
+      }
    }
 }
