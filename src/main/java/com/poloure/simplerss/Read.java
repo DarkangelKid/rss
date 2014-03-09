@@ -72,19 +72,29 @@ class Read
    static
    String[] file(Context context, String fileName)
    {
-      List<String> list = new ArrayList<>(32);
+      List<String> list = new ArrayList<String>(32);
 
-      try(BufferedReader in = new BufferedReader(new InputStreamReader(context.openFileInput(fileName))))
+      try
       {
-         String line;
-         while(null != (line = in.readLine()))
+         BufferedReader in = new BufferedReader(new InputStreamReader(context.openFileInput(fileName)));
+         try
          {
-            list.add(line);
+            String line;
+            while(null != (line = in.readLine()))
+            {
+               list.add(line);
+            }
+         }
+         finally
+         {
+            if(null != in)
+            {
+               in.close();
+            }
          }
       }
       catch(IOException ignored)
       {
-         return new String[0];
       }
       return list.toArray(new String[list.size()]);
    }
@@ -92,8 +102,19 @@ class Read
    static
    boolean fileExists(Context context, String fileName)
    {
-      try(FileInputStream in = context.openFileInput(fileName))
+      try
       {
+         FileInputStream in = context.openFileInput(fileName);
+         try
+         {
+         }
+         finally
+         {
+            if(null != in)
+            {
+               in.close();
+            }
+         }
       }
       catch(IOException ignored)
       {
@@ -105,22 +126,32 @@ class Read
    static
    Set<Long> longSet(Context context, String fileName)
    {
-      Set<Long> longSet = new LinkedHashSet<>(64);
+      Set<Long> longSet = new LinkedHashSet<Long>(64);
 
-      try(DataInputStream in = new DataInputStream(new BufferedInputStream(context.openFileInput(fileName))))
+      try
       {
-         while(true)
+         DataInputStream in = new DataInputStream(new BufferedInputStream(context.openFileInput(fileName)));
+         try
          {
-            long lon = in.readLong();
-            longSet.add(lon);
+            while(true)
+            {
+               long lon = in.readLong();
+               longSet.add(lon);
+            }
+         }
+         catch(EOFException ignored)
+         {
+         }
+         finally
+         {
+            if(null != in)
+            {
+               in.close();
+            }
          }
       }
-      catch(EOFException ignored)
+      catch(IOException ignored)
       {
-      }
-      catch(IOException e)
-      {
-         e.printStackTrace();
       }
       return longSet;
    }

@@ -60,7 +60,7 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, String[][]>
       String[][] navItems = new String[tagTotal][2];
 
       /* This is a list of Sets each containing all of the feed's items. */
-      List<Collection<Long>> feedItems = new ArrayList<>(content[0].length);
+      List<Collection<Long>> feedItems = new ArrayList<Collection<Long>>(content[0].length);
       for(String feedName : content[0])
       {
          feedItems.add(Read.longSet(m_activity, feedName + ServiceUpdate.ITEM_LIST));

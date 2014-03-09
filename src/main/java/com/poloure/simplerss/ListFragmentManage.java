@@ -19,6 +19,7 @@ package com.poloure.simplerss;
 import android.app.Activity;
 import android.app.ListFragment;
 import android.os.Bundle;
+import android.text.Editable;
 import android.util.SparseBooleanArray;
 import android.view.ActionMode;
 import android.view.Menu;
@@ -41,7 +42,7 @@ class ListFragmentManage extends ListFragment
       Activity activity = getActivity();
       ListView listView = getListView();
 
-      setListAdapter(new ArrayAdapter<>(activity, R.layout.manage_text_view));
+      setListAdapter(new ArrayAdapter<Editable>(activity, R.layout.manage_text_view));
 
       registerForContextMenu(listView);
       listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);

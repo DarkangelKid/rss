@@ -30,6 +30,7 @@ import android.text.style.StyleSpan;
 import android.widget.ArrayAdapter;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
@@ -66,11 +67,22 @@ class AsyncManageAdapter extends AsyncTask<String, Editable[], Void>
    int count(Context context, String fileName)
    {
       int count = 0;
-      try(BufferedReader read = new BufferedReader(new InputStreamReader(context.openFileInput(fileName))))
+      try
       {
-         while(null != read.readLine())
+         BufferedReader read = new BufferedReader(new InputStreamReader(context.openFileInput(fileName)));
+         try
          {
-            count++;
+            while(null != read.readLine())
+            {
+               count++;
+            }
+         }
+         finally
+         {
+            if(null != read)
+            {
+               read.close();
+            }
          }
       }
       catch(IOException ignored)

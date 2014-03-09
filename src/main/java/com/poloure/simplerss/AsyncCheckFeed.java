@@ -28,7 +28,9 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.BufferedWriter;
+import java.io.Closeable;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -76,11 +78,26 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
    {
       for(String file : ServiceUpdate.FEED_FILES)
       {
-         try(FileInputStream in = context.openFileInput(oldName + file);
-               FileOutputStream out = context.openFileOutput(newName + file, Context.MODE_PRIVATE);
-               FileChannel inChannel = in.getChannel())
+         try
          {
-            inChannel.transferTo(0, inChannel.size(), out.getChannel());
+            FileInputStream in = context.openFileInput(oldName + file);
+            FileOutputStream out = context.openFileOutput(newName + file, Context.MODE_PRIVATE);
+            FileChannel inChannel = in.getChannel();
+            Closeable[] closeables = {in, out, inChannel};
+            try
+            {
+               inChannel.transferTo(0, inChannel.size(), out.getChannel());
+            }
+            finally
+            {
+               for(Closeable closeable : closeables)
+               {
+                  if(null != closeable)
+                  {
+                     closeable.close();
+                  }
+               }
+            }
          }
          catch(IOException ignored)
          {
@@ -92,9 +109,21 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
    private static
    void AppendLineToIndex(Context context, String lineToAppend)
    {
-      try(BufferedWriter out = new BufferedWriter(new OutputStreamWriter(context.openFileOutput(Read.INDEX, Context.MODE_APPEND))))
+      try
       {
-         out.write(lineToAppend);
+
+         BufferedWriter out = new BufferedWriter(new OutputStreamWriter(context.openFileOutput(Read.INDEX, Context.MODE_APPEND)));
+         try
+         {
+            out.write(lineToAppend);
+         }
+         finally
+         {
+            if(null != out)
+            {
+               out.close();
+            }
+         }
       }
       catch(IOException e)
       {
@@ -176,7 +205,11 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
          }
          while(feedTitle.isEmpty() && XmlPullParser.END_DOCUMENT != eventType);
       }
-      catch(IOException | XmlPullParserException ignored)
+      catch(IOException ignored)
+      {
+         feedTitle = "No Title - " + System.currentTimeMillis();
+      }
+      catch(XmlPullParserException ignored)
       {
          feedTitle = "No Title - " + System.currentTimeMillis();
       }
@@ -202,7 +235,10 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
             }
          }
       }
-      catch(IOException | XmlPullParserException ignored)
+      catch(IOException ignored)
+      {
+      }
+      catch(XmlPullParserException ignored)
       {
       }
       return isValid;

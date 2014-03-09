@@ -23,6 +23,7 @@ import android.os.AsyncTask;
 import android.view.View;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 
@@ -36,7 +37,7 @@ class AsyncLoadImage extends AsyncTask<String, Void, Bitmap>
    AsyncLoadImage(ViewFeedItem view, int viewTag)
    {
       m_context = view.getContext();
-      m_view = new WeakReference<>(view);
+      m_view = new WeakReference<ViewFeedItem>(view);
       m_viewTag = viewTag;
    }
 
@@ -59,9 +60,24 @@ class AsyncLoadImage extends AsyncTask<String, Void, Bitmap>
          return null;
       }
 
-      try(FileInputStream in = m_context.openFileInput(params[0]))
+      try
       {
-         return BitmapFactory.decodeStream(in);
+         FileInputStream in = m_context.openFileInput(params[0]);
+         try
+         {
+            return BitmapFactory.decodeStream(in);
+         }
+         finally
+         {
+            if(null != in)
+            {
+               in.close();
+            }
+         }
+      }
+      catch(FileNotFoundException ignored)
+      {
+         return null;
       }
       catch(IOException ignored)
       {

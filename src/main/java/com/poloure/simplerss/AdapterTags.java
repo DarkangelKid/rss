@@ -38,8 +38,8 @@ class AdapterTags extends BaseAdapter
    private static final float READ_OPACITY = 0.5F;
 
    /* We use indexOf on this Long List so it can not be a Set. */
-   final List<Long> m_times = new ArrayList<>(0);
-   final List<FeedItem> m_feedItems = new ArrayList<>(0);
+   final List<Long> m_times = new ArrayList<Long>(0);
+   final List<FeedItem> m_feedItems = new ArrayList<FeedItem>(0);
    private final Context m_context;
    boolean m_isReadingItems;
 

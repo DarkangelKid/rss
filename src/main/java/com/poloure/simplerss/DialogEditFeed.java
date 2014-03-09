@@ -63,7 +63,7 @@ class DialogEditFeed extends Dialog
 
       /* Configure the MultiAutoCompleteTextView. */
       MultiAutoCompleteTextView tagEdit = (MultiAutoCompleteTextView) findViewById(R.id.dialog_tags);
-      tagEdit.setAdapter(new ArrayAdapter<>(m_activity, oneLine, tags));
+      tagEdit.setAdapter(new ArrayAdapter<String>(m_activity, oneLine, tags));
       tagEdit.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
 
       String oldLine = "";

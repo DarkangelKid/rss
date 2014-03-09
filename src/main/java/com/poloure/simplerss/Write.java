@@ -37,18 +37,28 @@ class Write
       String[] lines = Read.file(context, Read.INDEX);
       if(0 != lines.length)
       {
-         String filePath = Read.INDEX;
-         try(BufferedWriter out = new BufferedWriter(new OutputStreamWriter(context.openFileOutput(filePath, Context.MODE_PRIVATE))))
+         try
          {
-            for(String line : lines)
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(context.openFileOutput(Read.INDEX, Context.MODE_PRIVATE)));
+            try
             {
-               if(!line.equals(stringSearch))
+               for(String line : lines)
                {
-                  out.write(line + NEW_LINE);
+                  if(!line.equals(stringSearch))
+                  {
+                     out.write(line + NEW_LINE);
+                  }
+                  else if(MODE_REPLACE == mode)
+                  {
+                     out.write(replacementLine);
+                  }
                }
-               else if(MODE_REPLACE == mode)
+            }
+            finally
+            {
+               if(null != out)
                {
-                  out.write(replacementLine);
+                  out.close();
                }
             }
          }
@@ -61,11 +71,22 @@ class Write
    static
    void longSet(Context context, String fileName, Iterable<Long> longSet)
    {
-      try(DataOutputStream out = new DataOutputStream(new BufferedOutputStream(context.openFileOutput(fileName, Context.MODE_PRIVATE))))
+      try
       {
-         for(long l : longSet)
+         DataOutputStream out = new DataOutputStream(new BufferedOutputStream(context.openFileOutput(fileName, Context.MODE_PRIVATE)));
+         try
          {
-            out.writeLong(l);
+            for(long l : longSet)
+            {
+               out.writeLong(l);
+            }
+         }
+         finally
+         {
+            if(null != out)
+            {
+               out.close();
+            }
          }
       }
       catch(IOException e)

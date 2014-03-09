@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
 class PagerAdapterTags extends FragmentPagerAdapter
 {
    static final Pattern SPLIT_COMMA = Pattern.compile(", ");
-   static final List<String> TAG_LIST = new ArrayList<>(0);
+   static final List<String> TAG_LIST = new ArrayList<String>(0);
 
    PagerAdapterTags(FragmentManager fm, Activity activity)
    {

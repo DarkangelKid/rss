@@ -285,13 +285,16 @@ class FeedsActivity extends Activity
       Fragment fragment = manager.findFragmentByTag(tag);
       if(null == fragment)
       {
-         switch(tag)
+         if(tag.equals(FEED_TAG))
          {
-            case FEED_TAG:
-               return new FragmentFeeds();
-            case MANAGE_TAG:
-               return new ListFragmentManage();
-            case SETTINGS_TAG:
+            return new FragmentFeeds();
+         }
+         if(tag.equals(MANAGE_TAG))
+         {
+            return new ListFragmentManage();
+         }
+         if(tag.equals(SETTINGS_TAG))
+         {
                return new FragmentSettings();
          }
       }
@@ -304,7 +307,7 @@ class FeedsActivity extends Activity
       AdapterTags listAdapter = (AdapterTags) listView.getAdapter();
 
       /* Create a copy of the item times. */
-      List<Long> times = new ArrayList<>(listAdapter.m_times.size());
+      List<Long> times = new ArrayList<Long>(listAdapter.m_times.size());
       times.addAll(listAdapter.m_times);
       times.removeAll(AdapterTags.READ_ITEM_TIMES);
 
