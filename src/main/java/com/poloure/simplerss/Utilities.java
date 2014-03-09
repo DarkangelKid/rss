@@ -91,7 +91,7 @@ class Utilities
       {
          int position = feedPager.getCurrentItem();
          Drawable drawable = activity.getResources().getDrawable(R.drawable.ic_action_labels);
-         drawable.setAutoMirrored(true);
+         //drawable.setAutoMirrored(true);
          bar.setIcon(drawable);
          bar.setTitle(PagerAdapterTags.TAG_LIST.get(position));
       }
@@ -128,6 +128,7 @@ class Utilities
    static
    boolean isTextRtl(CharSequence c)
    {
-      return TextDirectionHeuristics.FIRSTSTRONG_LTR.isRtl(c, 0, c.length() - 1);
+      /* TODO */
+      return false; //TextDirectionHeuristics.FIRSTSTRONG_LTR.isRtl(c, 0, c.length() - 1);
    }
 }

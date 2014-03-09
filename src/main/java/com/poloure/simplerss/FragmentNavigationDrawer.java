@@ -94,12 +94,12 @@ class FragmentNavigationDrawer extends Fragment
       Drawable appIcon = resources.getDrawable(R.drawable.ic_action_location_broadcast);
       Drawable indicator = resources.getDrawable(R.drawable.ic_drawer);
 
-      appIcon.setAutoMirrored(true);
-      indicator.setAutoMirrored(true);
+      //appIcon.setAutoMirrored(true);
+      //indicator.setAutoMirrored(true);
 
       actionBar.setDisplayHomeAsUpEnabled(true);
       actionBar.setHomeButtonEnabled(true);
-      actionBar.setHomeAsUpIndicator(indicator);
+      //actionBar.setHomeAsUpIndicator(indicator);
       actionBar.setIcon(appIcon);
 
       m_drawerToggle = new ActionBarDrawerToggle(getActivity(), drawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
