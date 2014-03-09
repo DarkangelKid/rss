@@ -27,6 +27,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Gravity;
@@ -85,14 +86,15 @@ class FragmentNavigationDrawer extends Fragment
    {
       final FeedsActivity activity = (FeedsActivity) getActivity();
 
-      drawerLayout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.START);
+      drawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
 
       /* Set up the action bar. */
       ActionBar actionBar = activity.getActionBar();
       Resources resources = getResources();
 
       Drawable appIcon = resources.getDrawable(R.drawable.ic_action_location_broadcast);
-      Drawable indicator = resources.getDrawable(R.drawable.ic_drawer);
+      /* TODO */
+      //Drawable indicator = resources.getDrawable(R.drawable.ic_drawer);
 
       //appIcon.setAutoMirrored(true);
       //indicator.setAutoMirrored(true);
@@ -132,7 +134,7 @@ class FragmentNavigationDrawer extends Fragment
       /* Open the drawer if the user has never opened it manually before. */
       if(!m_userLearnedDrawer)
       {
-         drawerLayout.openDrawer(R.id.navigation_drawer);
+         //drawerLayout.openDrawer(R.id.navigation_drawer);
       }
 
       drawerLayout.post(new Runnable()
@@ -177,8 +179,8 @@ class FragmentNavigationDrawer extends Fragment
          m_icons[0] = resources.getDrawable(R.drawable.ic_action_storage);
          m_icons[1] = resources.getDrawable(R.drawable.ic_action_settings);
 
-         m_icons[0].setAutoMirrored(true);
-         m_icons[1].setAutoMirrored(true);
+         //m_icons[0].setAutoMirrored(true);
+         //m_icons[1].setAutoMirrored(true);
       }
 
       @Override
