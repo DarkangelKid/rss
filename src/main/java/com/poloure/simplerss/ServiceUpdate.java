@@ -34,7 +34,6 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.URL;
@@ -113,8 +112,7 @@ class ServiceUpdate extends IntentService
    }
 
    private static
-   void writeCollection(Context context, String fileName, Iterable<?> content) throws
-         FileNotFoundException, IOException
+   void writeCollection(Context context, String fileName, Iterable<?> content) throws IOException
    {
       BufferedWriter out = new BufferedWriter(new OutputStreamWriter(context.openFileOutput(fileName, Context.MODE_PRIVATE)));
       try
@@ -332,7 +330,9 @@ class ServiceUpdate extends IntentService
       }
 
       /* Update the Activity. */
-      sendBroadcast(new Intent(BROADCAST_ACTION));
+      Intent broadcast = new Intent(BROADCAST_ACTION);
+      broadcast.getIntExtra("PAGE_NUMBER", page);
+      sendBroadcast(broadcast);
 
       wakeLock.release();
       stopSelf();

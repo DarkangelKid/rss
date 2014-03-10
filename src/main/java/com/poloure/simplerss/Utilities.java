@@ -20,8 +20,9 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v4.text.TextDirectionHeuristicsCompat;
 import android.support.v4.view.ViewPager;
-import android.text.TextDirectionHeuristics;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.widget.Adapter;
@@ -55,7 +56,7 @@ class Utilities
          List<String> titles = Arrays.asList(res.getStringArray(R.array.navigation_titles));
          String title = actionBar.getTitle().toString();
 
-         ViewPager feedPager = (ViewPager) activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
+         ViewPager feedPager = (ViewPager) activity.findViewById(R.id.viewpager);
          Adapter adapter = navigationList.getAdapter();
 
          /* If the title is not Feeds, set no subtitle. */
@@ -84,14 +85,14 @@ class Utilities
    void updateTitle(Activity activity)
    {
       ListView navigationList = (ListView) activity.findViewById(R.id.navigation_drawer);
-      ViewPager feedPager = (ViewPager) activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
+      ViewPager feedPager = (ViewPager) activity.findViewById(R.id.viewpager);
       ActionBar bar = activity.getActionBar();
 
       if(null != navigationList && null != bar && null != feedPager)
       {
          int position = feedPager.getCurrentItem();
          Drawable drawable = activity.getResources().getDrawable(R.drawable.ic_action_labels);
-         //drawable.setAutoMirrored(true);
+         DrawableCompat.setAutoMirrored(drawable, true);
          bar.setIcon(drawable);
          bar.setTitle(PagerAdapterTags.TAG_LIST.get(position));
       }
@@ -128,7 +129,6 @@ class Utilities
    static
    boolean isTextRtl(CharSequence c)
    {
-      /* TODO */
-      return false; //TextDirectionHeuristics.FIRSTSTRONG_LTR.isRtl(c, 0, c.length() - 1);
+      return TextDirectionHeuristicsCompat.FIRSTSTRONG_LTR.isRtl(c, 0, c.length() - 1);
    }
 }

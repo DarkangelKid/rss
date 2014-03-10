@@ -142,7 +142,7 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
    protected
    void onPostExecute(TreeMap<Long, FeedItem>[] maps)
    {
-      ViewPager pager = (ViewPager) m_activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
+      ViewPager pager = (ViewPager) m_activity.findViewById(R.id.viewpager);
       int pageCount = pager.getAdapter().getCount();
 
       for(int i = 0; pageCount > i; i++)
@@ -163,20 +163,12 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
                int top = 0;
                if(!firstLoad && i == pager.getCurrentItem())
                {
-               /* Get the time of the top item. */
+                  /* Get the time of the top item. */
                   int topVisibleItem = listView.getFirstVisiblePosition();
                   timeBefore = adapterTag.m_feedItems.get(topVisibleItem).m_time;
 
                   View v = listView.getChildAt(0);
                   top = null == v ? 0 : v.getTop();
-                  if(0 != top && null != listView.getChildAt(1))
-                  {
-                     View childAt = listView.getChildAt(1);
-                     if(null != childAt)
-                     {
-                        top = childAt.getTop();
-                     }
-                  }
                }
 
                /* Set the adapters to be these new lists and do not read items while updating. */
@@ -198,7 +190,7 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
                }
                else
                {
-                  listView.setSelectionFromTop(newPositionOfTop + 1, top - listView.getPaddingTop());
+                  listView.setSelectionFromTop(newPositionOfTop, top - listView.getPaddingTop());
                }
                adapterTag.m_isReadingItems = true;
             }

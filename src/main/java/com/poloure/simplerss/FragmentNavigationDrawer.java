@@ -24,13 +24,14 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -93,16 +94,20 @@ class FragmentNavigationDrawer extends Fragment
       Resources resources = getResources();
 
       Drawable appIcon = resources.getDrawable(R.drawable.ic_action_location_broadcast);
-      /* TODO */
-      //Drawable indicator = resources.getDrawable(R.drawable.ic_drawer);
 
-      //appIcon.setAutoMirrored(true);
-      //indicator.setAutoMirrored(true);
+      DrawableCompat.setAutoMirrored(appIcon, true);
 
-      actionBar.setDisplayHomeAsUpEnabled(true);
       actionBar.setHomeButtonEnabled(true);
-      //actionBar.setHomeAsUpIndicator(indicator);
+      actionBar.setDisplayHomeAsUpEnabled(true);
       actionBar.setIcon(appIcon);
+
+      /* If the version is above API 18, flip the icon in RTL layouts. */
+      if(Build.VERSION_CODES.JELLY_BEAN_MR2 > Build.VERSION.SDK_INT)
+      {
+         Drawable indicator = resources.getDrawable(R.drawable.ic_drawer);
+         DrawableCompat.setAutoMirrored(indicator, true);
+         actionBar.setHomeAsUpIndicator(indicator);
+      }
 
       m_drawerToggle = new ActionBarDrawerToggle(getActivity(), drawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
       {
@@ -134,6 +139,7 @@ class FragmentNavigationDrawer extends Fragment
       /* Open the drawer if the user has never opened it manually before. */
       if(!m_userLearnedDrawer)
       {
+         /* TODO */
          //drawerLayout.openDrawer(R.id.navigation_drawer);
       }
 
@@ -179,8 +185,8 @@ class FragmentNavigationDrawer extends Fragment
          m_icons[0] = resources.getDrawable(R.drawable.ic_action_storage);
          m_icons[1] = resources.getDrawable(R.drawable.ic_action_settings);
 
-         //m_icons[0].setAutoMirrored(true);
-         //m_icons[1].setAutoMirrored(true);
+         DrawableCompat.setAutoMirrored(m_icons[0], true);
+         DrawableCompat.setAutoMirrored(m_icons[1], true);
       }
 
       @Override
@@ -198,9 +204,9 @@ class FragmentNavigationDrawer extends Fragment
          {
             /* Switch the content frame fragment. */
             m_manager.beginTransaction()
-                   .hide(FeedsActivity.getFragment(m_manager, m_activity.m_currentFragment))
-                   .show(FeedsActivity.getFragment(m_manager, newTag))
-                   .commit();
+                     .hide(FeedsActivity.getFragment(m_manager, m_activity.m_currentFragment))
+                     .show(FeedsActivity.getFragment(m_manager, newTag))
+                     .commit();
             m_activity.m_currentFragment = newTag;
          }
 
@@ -210,7 +216,7 @@ class FragmentNavigationDrawer extends Fragment
          /* If a tag was clicked, set the ViewPager position to that tag. */
          if(1 < position)
          {
-            ViewPager pager = (ViewPager) m_activity.findViewById(FragmentFeeds.VIEW_PAGER_ID);
+            ViewPager pager = (ViewPager) m_activity.findViewById(R.id.viewpager);
             pager.setCurrentItem(position - 2);
          }
          else

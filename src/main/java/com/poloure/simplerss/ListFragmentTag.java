@@ -62,7 +62,6 @@ class ListFragmentTag extends Fragment
       final Activity activity = getActivity();
 
       m_listView = new ListView(activity);
-
       m_listView.setId(20000 + getArguments().getInt(POSITION_KEY));
       m_listView.setDivider(new ColorDrawable(getResources().getColor(R.color.item_separator)));
       m_listView.setDividerHeight(1);

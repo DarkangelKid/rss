@@ -16,7 +16,9 @@
 
 package com.poloure.simplerss;
 
+import android.app.Activity;
 import android.app.Fragment;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
@@ -24,10 +26,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
+import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
+import uk.co.senab.actionbarpulltorefresh.library.Options;
+import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
+import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
+
 public
 class FragmentFeeds extends Fragment
 {
-   static final int VIEW_PAGER_ID = 786534126;
    private ViewPager m_pager;
 
    @Override
@@ -36,9 +42,28 @@ class FragmentFeeds extends Fragment
    {
       super.onCreateView(inflater, container, savedInstanceState);
 
+      PullToRefreshLayout layout = (PullToRefreshLayout) inflater.inflate(R.layout.viewpager, null, false);
+      final Activity activity = getActivity();
+      m_pager = (ViewPager) layout.findViewById(R.id.viewpager);
+
+      ActionBarPullToRefresh.from(activity)
+                            .allChildrenArePullable()
+                            .options(Options.create().scrollDistance(.5f).build())
+                            .useViewDelegate(ViewPager.class, new ViewPagerDelegate())
+                            .listener(new OnRefreshListener()
+                            {
+                               @Override
+                               public
+                               void onRefreshStarted(View view)
+                               {
+                                  Intent intent = new Intent(activity, ServiceUpdate.class);
+                                  intent.putExtra("GROUP_NUMBER", m_pager.getCurrentItem());
+                                  activity.startService(intent);
+                               }
+                            })
+                            .setup(layout);
+
       /* Inflate and configure the ViewPager. */
-      m_pager = new ViewPager(getActivity());
-      m_pager.setId(VIEW_PAGER_ID);
       m_pager.setOffscreenPageLimit(128);
       m_pager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener()
       {
@@ -56,7 +81,7 @@ class FragmentFeeds extends Fragment
          }
       });
 
-      return m_pager;
+      return layout;
    }
 
    @Override

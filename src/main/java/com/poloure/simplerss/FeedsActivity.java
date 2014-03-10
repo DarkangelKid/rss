@@ -29,7 +29,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Menu;
@@ -40,6 +39,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
+
 public
 class FeedsActivity extends Activity
 {
@@ -47,7 +48,6 @@ class FeedsActivity extends Activity
    private static final int ALARM_SERVICE_START = 1;
    private static final int ALARM_SERVICE_STOP = 0;
    private static final int MINUTE_VALUE = 60000;
-   private boolean m_stopProgressBar;
    boolean m_showMenuItems = true;
 
    String m_currentFragment;
@@ -155,7 +155,7 @@ class FeedsActivity extends Activity
    public
    boolean onPrepareOptionsMenu(Menu menu)
    {
-      boolean[] show = new boolean[3];
+      boolean[] show = new boolean[2];
       if(m_currentFragment.equals(FRAGMENT_TAGS[0]))
       {
          Arrays.fill(show, true);
@@ -165,7 +165,7 @@ class FeedsActivity extends Activity
          show[0] = true;
       }
 
-      for(int i = 0; 3 > i; i++)
+      for(int i = 0; menu.size() > i; i++)
       {
          menu.getItem(i).setEnabled(m_showMenuItems && show[i]);
       }
@@ -180,14 +180,6 @@ class FeedsActivity extends Activity
       if(0 == menu.size())
       {
          getMenuInflater().inflate(R.menu.action_bar_menu, menu);
-      }
-
-      if(m_stopProgressBar)
-      {
-         MenuItem item = menu.findItem(R.id.refresh);
-         MenuItemCompat.setActionView(item, null);
-         m_stopProgressBar = false;
-         return true;
       }
 
       return super.onCreateOptionsMenu(menu);
@@ -211,9 +203,7 @@ class FeedsActivity extends Activity
          AsyncManageAdapter.update(activity);
          AsyncNavigationAdapter.update(activity);
 
-         /* Tell the refresh icon to stop spinning. */
-         m_stopProgressBar = true;
-         invalidateOptionsMenu();
+         ((PullToRefreshLayout) findViewById(R.id.ptr_layout)).setRefreshComplete();
       }
    };
 
@@ -258,25 +248,13 @@ class FeedsActivity extends Activity
    public
    void onUnreadClick(MenuItem menuItem)
    {
-      ViewPager viewPager = (ViewPager) findViewById(FragmentFeeds.VIEW_PAGER_ID);
+      ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
       ListView listView = (ListView) findViewById(20000 + viewPager.getCurrentItem());
 
       if(null != listView)
       {
          gotoLatestUnread(listView);
       }
-   }
-
-   public
-   void onRefreshClick(MenuItem menuItem)
-   {
-      MenuItemCompat.setActionView(menuItem, R.layout.progress_bar_refresh);
-
-      ViewPager viewPager = (ViewPager) findViewById(FragmentFeeds.VIEW_PAGER_ID);
-
-      Intent intent = new Intent(this, ServiceUpdate.class);
-      intent.putExtra("GROUP_NUMBER", viewPager.getCurrentItem());
-      startService(intent);
    }
 
    static
@@ -295,7 +273,7 @@ class FeedsActivity extends Activity
          }
          if(tag.equals(SETTINGS_TAG))
          {
-               return new FragmentSettings();
+            return new FragmentSettings();
          }
       }
       return fragment;

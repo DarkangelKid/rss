@@ -14,16 +14,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<menu
-   xmlns:android="http://schemas.android.com/apk/res/android">
-   <item
-      android:title="@string/actionbar_add"
-      android:icon="@drawable/ic_action_new_dimmable"
-      android:onClick="onAddClick"
-      android:showAsAction="ifRoom"/>
-   <item
-      android:title="@string/actionbar_unread"
-      android:icon="@drawable/ic_action_time_dimmable"
-      android:onClick="onUnreadClick"
-      android:showAsAction="ifRoom"/>
-</menu>
+<uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout
+   xmlns:android="http://schemas.android.com/apk/res/android"
+   android:id="@+id/ptr_layout"
+   android:layout_width="match_parent"
+   android:layout_height="match_parent">
+   <android.support.v4.view.ViewPager
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:id="@+id/viewpager"/>
+</uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout>

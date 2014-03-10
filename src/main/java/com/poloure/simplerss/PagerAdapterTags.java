@@ -50,7 +50,7 @@ class PagerAdapterTags extends FragmentPagerAdapter
    static
    void update(Activity activity)
    {
-      update(activity, (ViewPager) activity.findViewById(FragmentFeeds.VIEW_PAGER_ID));
+      update(activity, (ViewPager) activity.findViewById(R.id.viewpager));
    }
 
    private static
