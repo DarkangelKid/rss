@@ -1,22 +1,23 @@
 SimpleRss
 ===
 
-News Aggregator for Android 4.4+.
+News Aggregator for Android 4.0+.
 
-While I do not recommend using the 4.0+ version in the apk folder, it is there just in case anyone really wants to try it. I plan to release 4.0+ versions at significant milestones. The features of java 7 keep the source code a lot neater.
+You can find the latest signed APK in the apk folder.
 
-Permissions:
+Permissions
+===
 ```
    <uses-permission android:name="android.permission.INTERNET"/>
 ```
+
 INTERNET - This is to download rss feeds and images from the feeds.
-   
+
 ```
    <uses-permission android:name="android.permission.WAKE_LOCK"/>
 ```
-WAKE_LOCK - This is to update feeds when the app is closed mid update and when scheduled to update (in settings).
 
-You can find the latest signed APK in the apk folder.
+WAKE_LOCK - This is to update feeds when the app is closed mid update and when scheduled to update (in settings).
 
 Building
 ===
