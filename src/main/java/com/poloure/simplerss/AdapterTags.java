@@ -97,29 +97,38 @@ class AdapterTags extends BaseAdapter
       boolean hasImg = TYPE_IMAGE == viewType || TYPE_IMAGE_SANS_DESCRIPTION == viewType;
 
       ViewFeedItem view = null != convertView ? (ViewFeedItem) convertView : new ViewFeedItem(m_context, viewType);
-
-      /* Set the information. */
       FeedItem item = m_feedItems.get(position);
-      boolean isRead = READ_ITEM_TIMES.contains(item.m_time);
-      view.m_item = item;
-      view.m_hasImage = hasImg;
 
-      /* If we have an image and the item is read, delay the opacity change. */
+      /* Apply the read effect. */
+      boolean isRead = READ_ITEM_TIMES.contains(item.m_time);
       view.setAlpha(isRead ? READ_OPACITY : 1.0F);
       view.setBackgroundColor(isRead ? Color.TRANSPARENT : Color.WHITE);
+
+      /* Add item as read. */
+      if(parent.isShown() && m_isReadingItems && ListFragmentTag.s_hasScrolled)
+      {
+         READ_ITEM_TIMES.add(item.m_time);
+      }
+
+      /* If the recycled view is the view we want, keep it. */
+      if(null != convertView)
+      {
+         if(item.m_time.equals(view.m_item.m_time))
+         {
+            return view;
+         }
+      }
+
+      /* Set the information. */
+      view.m_item = item;
+      view.m_hasImage = hasImg;
 
       /* If the view was an image, load the image. */
       if(hasImg)
       {
          view.setBitmap(null);
-         view.setTag(position);
-         AsyncLoadImage.newInstance(view, item.m_imageName, position);
-      }
-
-      /* Add item as read as soon as getView has run. */
-      if(parent.isShown() && m_isReadingItems && ListFragmentTag.s_hasScrolled)
-      {
-         READ_ITEM_TIMES.add(item.m_time);
+         view.setTag(item.m_time);
+         AsyncLoadImage.newInstance(view, item.m_imageName, item.m_time);
       }
 
       return view;

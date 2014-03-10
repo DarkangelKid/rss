@@ -30,11 +30,11 @@ import java.lang.ref.WeakReference;
 class AsyncLoadImage extends AsyncTask<String, Void, Bitmap>
 {
    private final WeakReference<ViewFeedItem> m_view;
-   private final int m_viewTag;
+   private final long m_viewTag;
    private final Context m_context;
 
    private
-   AsyncLoadImage(ViewFeedItem view, int viewTag)
+   AsyncLoadImage(ViewFeedItem view, long viewTag)
    {
       m_context = view.getContext();
       m_view = new WeakReference<ViewFeedItem>(view);
@@ -42,7 +42,7 @@ class AsyncLoadImage extends AsyncTask<String, Void, Bitmap>
    }
 
    static
-   void newInstance(ViewFeedItem view, String imageName, int viewTag)
+   void newInstance(ViewFeedItem view, String imageName, long viewTag)
    {
       AsyncTask<String, Void, Bitmap> task = new AsyncLoadImage(view, viewTag);
 
@@ -95,7 +95,7 @@ class AsyncLoadImage extends AsyncTask<String, Void, Bitmap>
       }
 
       ViewFeedItem view = m_view.get();
-      if(null != view && (Integer) view.getTag() == m_viewTag && null != result)
+      if(null != view && view.getTag().equals(m_viewTag) && null != result)
       {
          view.setBitmap(result);
       }
