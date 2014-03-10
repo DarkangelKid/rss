@@ -72,6 +72,7 @@ class FragmentFeeds extends Fragment
          void onPageSelected(int position)
          {
             /* Set the item to be checked in the navigation drawer. */
+            /* TODO This is called twice (setItemChecked) when clicking from the drawer. */
             ListView navigationList = (ListView) getActivity().findViewById(R.id.navigation_drawer);
             navigationList.setItemChecked(position + 2, true);
 

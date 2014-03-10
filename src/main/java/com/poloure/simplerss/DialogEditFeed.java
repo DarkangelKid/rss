@@ -26,8 +26,9 @@ import android.widget.TextView;
 
 class DialogEditFeed extends Dialog
 {
-   final Activity m_activity;
-   private final int m_pos;
+   private final Activity m_activity;
+   final int m_pos;
+   String m_oldUid = "";
 
    private
    DialogEditFeed(Activity activity, int position)
@@ -72,13 +73,14 @@ class DialogEditFeed extends Dialog
       if(-1 != m_pos)
       {
          String[][] content = Read.csvFile(getContext(), Read.INDEX, 'i', 'u', 't');
+         m_oldUid = content[0][m_pos];
          String oldUrl = content[1][m_pos];
          String oldTags = content[2][m_pos];
 
          ((TextView) findViewById(R.id.dialog_url)).setText(oldUrl);
          ((TextView) findViewById(R.id.dialog_tags)).setText(oldTags);
 
-         oldLine = String.format(AsyncCheckFeed.INDEX_FORMAT, content[0][m_pos], oldUrl, oldTags);
+         oldLine = String.format(AsyncCheckFeed.INDEX_FORMAT, m_oldUid, oldUrl, oldTags);
       }
 
       final String oldIndex = oldLine;
@@ -100,7 +102,7 @@ class DialogEditFeed extends Dialog
          public
          void onClick(View v)
          {
-            AsyncCheckFeed.newInstance(m_activity, dialog, oldIndex);
+            AsyncCheckFeed.newInstance(m_activity, dialog, oldIndex, -1 == m_pos ? "" : m_oldUid);
          }
       });
    }

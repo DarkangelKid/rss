@@ -217,6 +217,14 @@ class FragmentNavigationDrawer extends Fragment
          if(1 < position)
          {
             ViewPager pager = (ViewPager) m_activity.findViewById(R.id.viewpager);
+
+            /* Does not call the onPageChangeListener if the page is the same as before. */
+            if(position - 2 == pager.getCurrentItem())
+            {
+               /* Set the subtitle to the unread count. */
+               Utilities.updateTitle(m_activity);
+               Utilities.updateSubtitle(m_activity);
+            }
             pager.setCurrentItem(position - 2);
          }
          else

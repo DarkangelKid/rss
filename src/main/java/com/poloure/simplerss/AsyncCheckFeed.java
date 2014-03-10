@@ -41,14 +41,16 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
    private static final Pattern SPLIT_SPACE = Pattern.compile(" ");
    private static final Pattern SPLIT_COMMA = Pattern.compile(",");
    private final Dialog m_dialog;
+   private final String m_oldUid;
    private final String m_oldIndexLine;
    private final Activity m_activity;
 
    private
-   AsyncCheckFeed(Activity activity, Dialog dialog, String oldIndexLine)
+   AsyncCheckFeed(Activity activity, Dialog dialog, String oldIndexLine, String oldUid)
    {
       m_dialog = dialog;
       m_oldIndexLine = oldIndexLine;
+      m_oldUid = oldUid;
       m_activity = activity;
 
       Button button = (Button) m_dialog.findViewById(R.id.dialog_button_positive);
@@ -57,9 +59,9 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
    }
 
    static
-   void newInstance(Activity activity, Dialog dialog, String oldIndexLine)
+   void newInstance(Activity activity, Dialog dialog, String oldIndexLine, String oldUid)
    {
-      AsyncTask<Void, Void, String[]> task = new AsyncCheckFeed(activity, dialog, oldIndexLine);
+      AsyncTask<Void, Void, String[]> task = new AsyncCheckFeed(activity, dialog, oldIndexLine, oldUid);
 
       task.executeOnExecutor(THREAD_POOL_EXECUTOR);
    }
@@ -230,7 +232,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       if(isFeedValid)
       {
          /* Create the csv. */
-         String newIndexLine = String.format(INDEX_FORMAT, uid, url, tags) + Write.NEW_LINE;
+         String newIndexLine = String.format(INDEX_FORMAT, uid.isEmpty() ? m_oldUid : uid, url, tags) + Write.NEW_LINE;
 
          if(isExistingFeed)
          {
