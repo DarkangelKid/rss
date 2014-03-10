@@ -46,6 +46,9 @@ class DialogConfirm extends DialogPreference
 
          /* We should then refresh the navigation drawer for the unread counts. */
          AsyncNavigationAdapter.update(m_activity);
+
+         /* TODO more efficient just to reload get views but invalidate is not working. */
+         AsyncNewTagAdapters.update(m_activity);
       }
    }
 }
