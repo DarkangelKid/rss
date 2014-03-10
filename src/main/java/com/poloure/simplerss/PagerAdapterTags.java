@@ -50,12 +50,7 @@ class PagerAdapterTags extends FragmentPagerAdapter
    static
    void update(Activity activity)
    {
-      update(activity, (ViewPager) activity.findViewById(R.id.viewpager));
-   }
-
-   private static
-   void update(Activity activity, ViewPager pager)
-   {
+      ViewPager pager = (ViewPager) activity.findViewById(R.id.viewpager);
       Set<String> tagSet = getTagsFromDisk(activity);
       TAG_LIST.clear();
       TAG_LIST.addAll(tagSet);
@@ -66,16 +61,15 @@ class PagerAdapterTags extends FragmentPagerAdapter
    static
    Set<String> getTagsFromDisk(Context context)
    {
-      Set<String> tagSet = Collections.synchronizedSet(new LinkedHashSet<String>(0));
-      String[] tagArray = Read.csvFile(context, Read.INDEX, 't')[0];
-
       /* Get the all tag from resources. */
       String allTag = context.getString(R.string.all_tag);
 
       /* Make the allTag the first tag. */
+      Set<String> tagSet = Collections.synchronizedSet(new LinkedHashSet<String>(0));
       tagSet.add(allTag);
 
-      for(String tag : tagArray)
+      String[] tags = Read.csvFile(context, Read.INDEX, 't')[0];
+      for(String tag : tags)
       {
          tagSet.addAll(Arrays.asList(SPLIT_COMMA.split(tag)));
       }

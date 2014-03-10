@@ -51,7 +51,7 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, String[][]>
    String[][] doInBackground(String... applicationFolder)
    {
       /* Read the index file for an array of feed names and feed tags. */
-      String[][] content = Read.csvFile(m_activity, Read.INDEX, 'f', 't');
+      String[][] content = Read.csvFile(m_activity, Read.INDEX, 'i', 't');
 
       /* Get the total number of tags and feeds that exist. */
       int tagTotal = PagerAdapterTags.TAG_LIST.size();
@@ -61,9 +61,9 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, String[][]>
 
       /* This is a list of Sets each containing all of the feed's items. */
       List<Collection<Long>> feedItems = new ArrayList<Collection<Long>>(content[0].length);
-      for(String feedName : content[0])
+      for(String feedUid : content[0])
       {
-         feedItems.add(Read.longSet(m_activity, feedName + ServiceUpdate.ITEM_LIST));
+         feedItems.add(Read.longSet(m_activity, feedUid + ServiceUpdate.ITEM_LIST));
       }
 
       /* Create a temporary collection we will .clear() each iteration of the next for loop. */

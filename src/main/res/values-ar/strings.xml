@@ -28,7 +28,6 @@
    <!-- ActionBar icon descriptions. -->
    <string name="actionbar_add">اضافة</string>
    <string name="actionbar_unread">غير مقروء</string>
-   <string name="actionbar_refresh">إعادة التحميل‎</string>
 
    <!-- TODO ActionBar subtitle for unread items. -->
    <plurals name="actionbar_subtitle_unread">
@@ -45,7 +44,6 @@
    <string name="dialog_title_edit">تعديل موجز‎</string>
 
    <!-- Add/Edit feed dialog EditText hints. -->
-   <string name="dialog_feed_name_hint">إختياري‎</string>
    <string name="dialog_feed_url_hint">example.com/rss</string>
    <string name="dialog_feed_tag_hint">سمات</string>
 
@@ -67,9 +65,6 @@
    <!-- Manage context action bar icon descriptions. -->
    <string name="manage_item_clear_content">مسح محتوى الصفحات</string>
    <string name="manage_item_delete">مسح الصفحات‎</string>
-
-   <!-- Manage feed item count. -->
-   <string name="manage_feed_item_count">مدخلات:</string>
 
    <!-- Settings general strings. -->
    <string name="switch_off">إبقاف</string>

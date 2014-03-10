@@ -20,31 +20,23 @@ import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.ListFragment;
 import android.content.Context;
-import android.graphics.Typeface;
 import android.os.AsyncTask;
-import android.text.Editable;
-import android.text.SpannableStringBuilder;
-import android.text.Spanned;
-import android.text.style.AbsoluteSizeSpan;
-import android.text.style.StyleSpan;
-import android.widget.ArrayAdapter;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 
-class AsyncManageAdapter extends AsyncTask<String, Editable[], Void>
+class AsyncManageAdapter extends AsyncTask<String, String[][], Void>
 {
-   private static final AbsoluteSizeSpan TITLE_SIZE = new AbsoluteSizeSpan(14, true);
-   private static final StyleSpan SPAN_BOLD = new StyleSpan(Typeface.BOLD);
-   private final ArrayAdapter<Editable> m_manageAdapter;
+   private final AdapterManage m_adapterManage;
    private final Context m_context;
 
    private
-   AsyncManageAdapter(Context context, ArrayAdapter<Editable> manageAdapter)
+   AsyncManageAdapter(Context context, AdapterManage adapterManage)
    {
       m_context = context;
-      m_manageAdapter = manageAdapter;
+      m_adapterManage = adapterManage;
    }
 
    static
@@ -56,7 +48,7 @@ class AsyncManageAdapter extends AsyncTask<String, Editable[], Void>
 
       if(null != fragment && fragment.isVisible())
       {
-         ArrayAdapter<Editable> adapter = (ArrayAdapter<Editable>) fragment.getListAdapter();
+         AdapterManage adapter = (AdapterManage) fragment.getListAdapter();
 
          new AsyncManageAdapter(activity, adapter).executeOnExecutor(THREAD_POOL_EXECUTOR);
       }
@@ -95,71 +87,28 @@ class AsyncManageAdapter extends AsyncTask<String, Editable[], Void>
    Void doInBackground(String... applicationFolder)
    {
       /* Read the index file for names, urls, and tags. */
-      String[][] feedsIndex = Read.csvFile(m_context, Read.INDEX, 'f', 'u', 't');
-      String[] feedNames = feedsIndex[0];
-      String[] feedUrls = feedsIndex[1];
-      String[] feedTags = feedsIndex[2];
+      String[][] feedsIndex = Read.csvFile(m_context, Read.INDEX, 'i', 'u', 't');
+      int size = feedsIndex[0].length;
 
-      boolean rtl = Utilities.isTextRtl(PagerAdapterTags.TAG_LIST.get(0));
-      char direction = rtl ? (char) 0x200F : (char) 0x200E;
-
-      int size = feedNames.length;
-      Editable[] editables = new SpannableStringBuilder[size];
-      int exclusive = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE;
+      String[][] strings = new String[size][3];
 
       for(int i = 0; i < size; i++)
       {
-         /* New object here because we make it a reference in the array. */
-         Editable editable = new SpannableStringBuilder();
-
-         /* Append the feed name. */
-         /* If this is a RTL language but the feed name is LTR, make it RTL.
-            The first char must always be a LTR/RTL char for the app to work. */
-         if(direction != feedNames[i].charAt(0))
-         {
-            editable.append(direction);
-         }
-         editable.append(feedNames[i]);
-         editable.append(Write.NEW_LINE);
-
-         /* Make the feed name size 16dip. */
-         int titleLength = editable.length();
-         editable.setSpan(TITLE_SIZE, 0, titleLength, exclusive);
-
-         /* Form the path to the feed_content file. */
-         String feedContentFileName = feedNames[i] + ServiceUpdate.CONTENT_FILE;
-         int feedContentSize = count(m_context, feedContentFileName);
-         String contentSize = Utilities.getLocaleInt(feedContentSize);
-
          /* Append the url to the next line. */
-         editable.append(direction);
-         editable.append(feedUrls[i]);
-         editable.append(Write.NEW_LINE);
-
-         /* Append an bold "Items :" text. */
-         int thirdLinePosition = editable.length();
-         editable.append(m_context.getString(R.string.manage_feed_item_count));
-         editable.append(' ');
-         editable.setSpan(SPAN_BOLD, thirdLinePosition, editable.length(), exclusive);
-         editable.append(contentSize);
-
-         editable.append(" · ");
-
-         /* Append the tags in bold. */
-         int currentPosition = editable.length();
-         editable.append(feedTags[i]);
-         editable.setSpan(SPAN_BOLD, currentPosition, editable.length(), exclusive);
-         editables[i] = editable;
+         strings[i][0] = Utilities.getLocaleInt(count(m_context, feedsIndex[0][i] + ServiceUpdate.CONTENT_FILE));
+         strings[i][1] = feedsIndex[1][i];
+         strings[i][2] = feedsIndex[2][i];
       }
-      publishProgress(editables);
+      publishProgress(strings);
       return null;
    }
 
    @Override
    protected
-   void onProgressUpdate(Editable[]... values)
+   void onProgressUpdate(String[][]... values)
    {
-      m_manageAdapter.clear();
-      m_manageAdapter.addAll(values[0]);
+      m_adapterManage.m_manageItems.clear();
+      m_adapterManage.m_manageItems.addAll(Arrays.asList(values[0]));
+      m_adapterManage.notifyDataSetChanged();
    }
 }

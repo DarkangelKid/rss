@@ -14,10 +14,45 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:padding="8dp"
-          android:textColor="@color/text_manage"
-          android:textSize="12sp"
-          android:background="@drawable/manage_item_background"/>
+<RelativeLayout
+   xmlns:android="http://schemas.android.com/apk/res/android"
+   android:layout_height="48dp"
+   android:layout_width="match_parent"
+   android:background="@drawable/manage_item_background">
+
+   <TextView
+      android:id="@+id/manage_count"
+      android:layout_width="wrap_content"
+      android:layout_height="match_parent"
+      android:layout_alignParentEnd="true"
+      android:layout_centerVertical="true"
+      android:gravity="center_vertical"
+      android:paddingStart="24dp"
+      android:paddingEnd="24dp"
+      android:textColor="@color/item_link_color"
+      android:textSize="18sp"/>
+
+   <TextView
+      android:id="@+id/manage_url"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_toStartOf="@id/manage_count"
+      android:paddingStart="16dp"
+      android:paddingBottom="4dp"
+      android:paddingTop="8dp"
+      android:fontFamily="sans-serif-light"
+      android:textColor="@color/item_title_color"
+      android:textSize="16sp"/>
+
+   <TextView
+      android:id="@+id/manage_tags"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_toStartOf="@id/manage_count"
+      android:layout_below="@id/manage_url"
+      android:paddingStart="16dp"
+      android:paddingTop="2dp"
+      android:paddingBottom="8dp"
+      android:textColor="@color/item_description_color"
+      android:textSize="12sp"/>
+</RelativeLayout>

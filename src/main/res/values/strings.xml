@@ -28,7 +28,6 @@
    <!-- ActionBar icon descriptions. -->
    <string name="actionbar_add">Add</string>
    <string name="actionbar_unread">Unread</string>
-   <string name="actionbar_refresh">Refresh</string>
 
    <!-- ActionBar subtitle for unread items. -->
    <plurals name="actionbar_subtitle_unread">
@@ -45,7 +44,6 @@
    <string name="dialog_title_edit">Edit feed</string>
 
    <!-- Add/Edit feed dialog EditText hints. -->
-   <string name="dialog_feed_name_hint">Name (optional)</string>
    <string name="dialog_feed_url_hint">Url</string>
    <string name="dialog_feed_tag_hint">Tags</string>
 
@@ -68,9 +66,6 @@
    <string name="managed_selected">selected</string>
    <string name="manage_item_clear_content">Delete content</string>
    <string name="manage_item_delete">Delete feed</string>
-
-   <!-- Manage feed item count. -->
-   <string name="manage_feed_item_count">Items:</string>
 
    <!-- Settings general strings. -->
    <string name="switch_off">Off</string>

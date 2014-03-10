@@ -28,15 +28,6 @@
       <EditText
          android:layout_width="match_parent"
          android:layout_height="wrap_content"
-         android:id="@+id/dialog_name"
-         android:hint="@string/dialog_feed_name_hint"
-         android:paddingBottom="8dp"
-         android:singleLine="true"
-         android:inputType="textCapSentences"/>
-
-      <EditText
-         android:layout_width="match_parent"
-         android:layout_height="wrap_content"
          android:id="@+id/dialog_url"
          android:inputType="textUri|textNoSuggestions"
          android:hint="@string/dialog_feed_url_hint"

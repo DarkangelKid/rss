@@ -306,7 +306,7 @@ class ServiceUpdate extends IntentService
 
       String tag = tagList.get(page);
 
-      String[][] content = Read.csvFile(this, Read.INDEX, 'f', 'u', 't');
+      String[][] content = Read.csvFile(this, Read.INDEX, 'i', 'u', 't');
 
       /* Download and parse each feed in the index. */
       for(int i = 0; i < content[0].length; i++)
@@ -382,10 +382,10 @@ class ServiceUpdate extends IntentService
    }
 
    private
-   void parseFeed(CharSequence urlString, String feed) throws XmlPullParserException, IOException
+   void parseFeed(CharSequence urlString, String uid) throws XmlPullParserException, IOException
    {
-      String contentFile = feed + CONTENT_FILE;
-      String longFile = feed + ITEM_LIST;
+      String contentFile = uid + CONTENT_FILE;
+      String longFile = uid + ITEM_LIST;
 
       /* Load the previously saved items to a map. */
       Set<String> set = fileToSet(this, contentFile);

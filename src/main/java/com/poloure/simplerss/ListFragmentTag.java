@@ -42,7 +42,7 @@ class ListFragmentTag extends Fragment
 {
    private static final String POSITION_KEY = "POSITION";
    static boolean s_hasScrolled;
-   private ListView m_listView;
+   ListView m_listView;
    static boolean s_firstLoad = true;
 
    static

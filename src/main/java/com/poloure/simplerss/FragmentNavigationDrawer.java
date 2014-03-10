@@ -42,7 +42,7 @@ import android.widget.ListView;
 public
 class FragmentNavigationDrawer extends Fragment
 {
-   private static
+   static
    class OnNavigationItemLongClick implements AdapterView.OnItemLongClickListener
    {
       @Override
@@ -54,7 +54,7 @@ class FragmentNavigationDrawer extends Fragment
       }
    }
 
-   private static final String PREF_USER_LEARNED_DRAWER = "navigation_drawer_learned";
+   static final String PREF_USER_LEARNED_DRAWER = "navigation_drawer_learned";
 
    ActionBarDrawerToggle m_drawerToggle;
 

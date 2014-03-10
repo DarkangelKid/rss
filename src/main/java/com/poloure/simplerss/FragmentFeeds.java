@@ -34,7 +34,7 @@ import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 public
 class FragmentFeeds extends Fragment
 {
-   private ViewPager m_pager;
+   ViewPager m_pager;
 
    @Override
    public
@@ -48,7 +48,7 @@ class FragmentFeeds extends Fragment
 
       ActionBarPullToRefresh.from(activity)
                             .allChildrenArePullable()
-                            .options(Options.create().scrollDistance(.5f).build())
+                            .options(Options.create().scrollDistance(0.5F).build())
                             .useViewDelegate(ViewPager.class, new ViewPagerDelegate())
                             .listener(new OnRefreshListener()
                             {

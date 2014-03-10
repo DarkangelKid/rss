@@ -19,7 +19,6 @@ package com.poloure.simplerss;
 import android.app.Activity;
 import android.app.ListFragment;
 import android.os.Bundle;
-import android.text.Editable;
 import android.util.SparseBooleanArray;
 import android.view.ActionMode;
 import android.view.Menu;
@@ -27,7 +26,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 public
@@ -42,7 +40,7 @@ class ListFragmentManage extends ListFragment
       Activity activity = getActivity();
       ListView listView = getListView();
 
-      setListAdapter(new ArrayAdapter<Editable>(activity, R.layout.manage_text_view));
+      setListAdapter(new AdapterManage(activity));
 
       registerForContextMenu(listView);
       listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
@@ -107,7 +105,7 @@ class ListFragmentManage extends ListFragment
          else
          {
             /* Read this once so that the positions are the same. */
-            String[][] content = Read.csvFile(m_activity, Read.INDEX, 'f', 'u', 't');
+            String[][] content = Read.csvFile(m_activity, Read.INDEX, 'i', 'u', 't');
 
             SparseBooleanArray checked = m_listView.getCheckedItemPositions();
             for(int i = 0; checked.size() > i; i++)
@@ -116,8 +114,8 @@ class ListFragmentManage extends ListFragment
                {
                   int position = checked.keyAt(i);
 
-                  String feedName = content[0][position];
-                  String oldLine = String.format(AsyncCheckFeed.INDEX_FORMAT, feedName, content[1][position], content[2][position]);
+                  String feedUid = content[0][position];
+                  String oldLine = String.format(AsyncCheckFeed.INDEX_FORMAT, feedUid, content[1][position], content[2][position]);
 
                   switch(item.getItemId())
                   {
@@ -126,7 +124,7 @@ class ListFragmentManage extends ListFragment
                      case R.id.delete_content:
                         for(String file : ServiceUpdate.FEED_FILES)
                         {
-                           m_activity.deleteFile(feedName + file);
+                           m_activity.deleteFile(feedUid + file);
                         }
                   }
                }

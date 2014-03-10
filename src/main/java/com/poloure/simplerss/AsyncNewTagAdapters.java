@@ -58,7 +58,7 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
          maps[i] = new TreeMap<Long, FeedItem>(Collections.reverseOrder());
       }
 
-      String[][] index = Read.csvFile(m_activity, Read.INDEX, 'f', 't');
+      String[][] index = Read.csvFile(m_activity, Read.INDEX, 'i', 't');
       Collection<Integer> indices = new ArrayList<Integer>(8);
 
       /* For each feed. */
@@ -116,7 +116,7 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
 
       String name = imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
 
-      return !Read.fileExists(activity, name) ? "" : name;
+      return Read.fileExists(activity, name) ? name : "";
 
    }
 

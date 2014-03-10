@@ -26,7 +26,7 @@ import android.widget.TextView;
 
 class DialogEditFeed extends Dialog
 {
-   private final Activity m_activity;
+   final Activity m_activity;
    private final int m_pos;
 
    private
@@ -67,26 +67,25 @@ class DialogEditFeed extends Dialog
       tagEdit.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
 
       String oldLine = "";
-      String oldName = "";
 
       /* If this is an edit dialog, set the EditTexts and save the old information. */
       if(-1 != m_pos)
       {
-         String[][] content = Read.csvFile(getContext(), Read.INDEX, 'f', 'u', 't');
-         oldName = content[0][m_pos];
+         String[][] content = Read.csvFile(getContext(), Read.INDEX, 'i', 'u', 't');
          String oldUrl = content[1][m_pos];
          String oldTags = content[2][m_pos];
 
-         ((TextView) findViewById(R.id.dialog_name)).setText(oldName);
          ((TextView) findViewById(R.id.dialog_url)).setText(oldUrl);
          ((TextView) findViewById(R.id.dialog_tags)).setText(oldTags);
 
-         oldLine = String.format(AsyncCheckFeed.INDEX_FORMAT, oldName, oldUrl, oldTags);
+         oldLine = String.format(AsyncCheckFeed.INDEX_FORMAT, content[0][m_pos], oldUrl, oldTags);
       }
 
-      /* Create the button OnClickListeners. */
-      View.OnClickListener positiveButtonClick = new OnClickPositive(this, oldLine, oldName);
-      View.OnClickListener negativeButtonClick = new View.OnClickListener()
+      final String oldIndex = oldLine;
+      final Dialog dialog = this;
+
+      /* Set the click listeners. */
+      findViewById(R.id.dialog_button_negative).setOnClickListener(new View.OnClickListener()
       {
          @Override
          public
@@ -94,31 +93,15 @@ class DialogEditFeed extends Dialog
          {
             dismiss();
          }
-      };
-
-      findViewById(R.id.dialog_button_negative).setOnClickListener(negativeButtonClick);
-      findViewById(R.id.dialog_button_positive).setOnClickListener(positiveButtonClick);
-   }
-
-   private
-   class OnClickPositive implements View.OnClickListener
-   {
-      private final Dialog m_dialog;
-      private final String m_oldFeed;
-      private final String m_oldName;
-
-      OnClickPositive(Dialog dialog, String oldFeed, String oldName)
+      });
+      findViewById(R.id.dialog_button_positive).setOnClickListener(new View.OnClickListener()
       {
-         m_dialog = dialog;
-         m_oldFeed = oldFeed;
-         m_oldName = oldName;
-      }
-
-      @Override
-      public
-      void onClick(View v)
-      {
-         AsyncCheckFeed.newInstance(m_activity, m_dialog, m_oldFeed, m_oldName);
-      }
+         @Override
+         public
+         void onClick(View v)
+         {
+            AsyncCheckFeed.newInstance(m_activity, dialog, oldIndex);
+         }
+      });
    }
 }
