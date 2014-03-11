@@ -25,7 +25,9 @@ import android.os.AsyncTask;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.NumberFormat;
 import java.util.Arrays;
+import java.util.Locale;
 
 class AsyncManageAdapter extends AsyncTask<String, String[][], Void>
 {
@@ -90,12 +92,13 @@ class AsyncManageAdapter extends AsyncTask<String, String[][], Void>
       String[][] feedsIndex = Read.csvFile(m_context, Read.INDEX, 'i', 'u', 't');
       int size = feedsIndex[0].length;
 
+      NumberFormat format = NumberFormat.getNumberInstance(Locale.getDefault());
       String[][] strings = new String[size][3];
 
       for(int i = 0; i < size; i++)
       {
          /* Append the url to the next line. */
-         strings[i][0] = Utilities.getLocaleInt(count(m_context, feedsIndex[0][i] + ServiceUpdate.CONTENT_FILE));
+         strings[i][0] = format.format(count(m_context, feedsIndex[0][i] + ServiceUpdate.CONTENT_FILE));
          strings[i][1] = feedsIndex[1][i];
          strings[i][2] = feedsIndex[2][i];
       }

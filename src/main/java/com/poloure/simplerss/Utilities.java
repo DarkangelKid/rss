@@ -43,6 +43,7 @@ import java.util.Locale;
 class Utilities
 {
    static final int EIGHT_DP = getDp(8.0F);
+   static final NumberFormat NUMBER_FORMAT = NumberFormat.getNumberInstance(Locale.getDefault());
 
    static
    void updateSubtitle(Activity activity)
@@ -96,13 +97,6 @@ class Utilities
          bar.setIcon(drawable);
          bar.setTitle(PagerAdapterTags.TAG_LIST.get(position));
       }
-   }
-
-   static
-   String getLocaleInt(Integer count)
-   {
-      NumberFormat format = NumberFormat.getNumberInstance(Locale.getDefault());
-      return format.format(count);
    }
 
    static

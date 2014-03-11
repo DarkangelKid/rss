@@ -88,7 +88,7 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, String[][]>
 
          int size = itemsInTag.size();
          navItems[i][0] = tag;
-         navItems[i][1] = 0 == size ? "" : Utilities.getLocaleInt(size);
+         navItems[i][1] = 0 == size ? "" : Utilities.NUMBER_FORMAT.format(size);
          itemsInTag.clear();
       }
 
