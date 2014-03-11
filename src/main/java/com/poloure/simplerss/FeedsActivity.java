@@ -198,8 +198,10 @@ class FeedsActivity extends Activity
       {
          Activity activity = (Activity) getWindow().getDecorView().getContext();
 
-         /* Refresh the tag page. */
          AsyncNewTagAdapters.update(activity);
+
+         /* Manage adapter is updated every time it is shown but in case the user switched to the
+            manage fragment mid refresh. */
          AsyncManageAdapter.update(activity);
          AsyncNavigationAdapter.update(activity);
 

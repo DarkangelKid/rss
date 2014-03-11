@@ -37,7 +37,7 @@ class ViewFeedItem extends View
    FeedItem m_item;
    private final int m_height;
    private final String[] m_timeInitials;
-   private final NumberFormat m_numberFormat;
+   private static final NumberFormat TIME_FORMAT = NumberFormat.getNumberInstance(Locale.getDefault());
 
    private static final int[] FONT_COLORS = {
          R.color.item_title_color, R.color.item_link_color, R.color.item_description_color,
@@ -73,7 +73,6 @@ class ViewFeedItem extends View
       m_height = Math.round(base);
 
       m_timeInitials = resources.getStringArray(R.array.time_initials);
-      m_numberFormat = NumberFormat.getNumberInstance(Locale.getDefault());
 
       initPaints(resources);
    }
@@ -196,14 +195,29 @@ class ViewFeedItem extends View
       Long timeAgo = System.currentTimeMillis() - time;
 
       /* Format the time. */
-      Long[] periods = {timeAgo / 86400000, timeAgo / 3600000 % 24, timeAgo / 60000 % 60};
+      Long[] periods = {
+            timeAgo / 31556952000L,
+            timeAgo / 604800000 % 365,
+            timeAgo / 3600000 % 24,
+            timeAgo / 60000 % 60,
+      };
 
       StringBuilder builder = new StringBuilder(48);
-      for(int i = 0; periods.length > i; i++)
+
+      /* Display the two highest non zero values. */
+      int start = 0;
+      while(0L == periods[start])
+      {
+         start++;
+      }
+
+      int end = Math.min(start + 2, periods.length);
+
+      for(int i = start; end > i; i++)
       {
          if(0L != periods[i])
          {
-            builder.append(m_numberFormat.format(periods[i]));
+            builder.append(TIME_FORMAT.format(periods[i]));
             builder.append(m_timeInitials[i]);
             builder.append(' ');
          }
