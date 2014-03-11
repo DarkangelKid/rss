@@ -37,7 +37,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.HeaderViewListAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 public
 class FragmentNavigationDrawer extends Fragment
@@ -79,7 +81,23 @@ class FragmentNavigationDrawer extends Fragment
       listView.setAdapter(new AdapterNavigationDrawer(getActivity()));
       listView.setOnItemClickListener(new OnNavigationItemClick(getActivity()));
       listView.setOnItemLongClickListener(new OnNavigationItemLongClick());
+      listView.setHeaderDividersEnabled(false);
 
+      String[] navTitles = getResources().getStringArray(R.array.navigation_titles);
+
+      for(int i = 0; i < navTitles.length; i++)
+      {
+         ViewNavItem item = new ViewNavItem(getActivity());
+         item.m_text = navTitles[i];
+         item.m_count = "";
+         item.m_image = i;
+         listView.addHeaderView(item);
+      }
+
+      TextView divider = (TextView) inflater.inflate(R.layout.navigation_divider, container, false);
+      divider.setText(R.string.tags);
+
+      listView.addHeaderView(divider, null, false);
       return listView;
    }
 
@@ -196,7 +214,15 @@ class FragmentNavigationDrawer extends Fragment
          /* Close the navigation drawer in all cases. */
          ((DrawerLayout) parent.getParent()).closeDrawers();
 
-         int fragmentTag = 1 < position ? 0 : position + 1;
+         /* If a divider. */
+         if(2 == position)
+         {
+            return;
+         }
+
+         int offset = ((HeaderViewListAdapter) parent.getAdapter()).getHeadersCount();
+
+         int fragmentTag = offset <= position ? 0 : position + 1;
 
          /* If we are switching fragments, check if we need to. */
          String newTag = FeedsActivity.FRAGMENT_TAGS[fragmentTag];
@@ -219,13 +245,13 @@ class FragmentNavigationDrawer extends Fragment
             ViewPager pager = (ViewPager) m_activity.findViewById(R.id.viewpager);
 
             /* Does not call the onPageChangeListener if the page is the same as before. */
-            if(position - 2 == pager.getCurrentItem())
+            if(position - offset == pager.getCurrentItem())
             {
                /* Set the subtitle to the unread count. */
                Utilities.updateTitle(m_activity);
                Utilities.updateSubtitle(m_activity);
             }
-            pager.setCurrentItem(position - 2);
+            pager.setCurrentItem(position - offset);
          }
          else
          {

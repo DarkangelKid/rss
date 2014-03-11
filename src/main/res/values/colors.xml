@@ -28,6 +28,7 @@
 
    <color name="background_navigation">#ffeeeeee</color>
    <color name="navigation_separator">#ffdcdcdc</color>
+   <color name="navigation_large_divider">#ffbebebe</color>
 
    <color name="text_navigation_main">#58585b</color>
 

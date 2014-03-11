@@ -14,19 +14,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<resources>
-   <dimen name="item_title_size">16sp</dimen>
-   <dimen name="item_link_size">12sp</dimen>
-   <dimen name="item_description_size">14sp</dimen>
-
-   <dimen name="reserved_time">80sp</dimen>
-
-   <dimen name="max_image_height">160dp</dimen>
-
-   <!-- Font sizes for navigation texts. -->
-   <dimen name="navigation_main">18sp</dimen>
-   <dimen name="navigation_tag">16sp</dimen>
-   <dimen name="navigation_height">48dp</dimen>
-
-   <dimen name="navigation_width">240dp</dimen>
-</resources>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+       android:shape="rectangle">
+   <size
+      android:width="@dimen/navigation_width"
+      android:height="2dp"/>
+   <solid
+      android:color="@color/navigation_large_divider"/>
+</shape>

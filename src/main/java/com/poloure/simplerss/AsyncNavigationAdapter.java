@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.os.AsyncTask;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.WrapperListAdapter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -101,7 +102,8 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, String[][]>
    {
       /* Set the titles & counts arrays in this file and notify the adapter. */
       ListView navigationList = (ListView) m_activity.findViewById(R.id.navigation_drawer);
-      ArrayAdapter<String[]> adapter = (ArrayAdapter<String[]>) navigationList.getAdapter();
+      ArrayAdapter<String[]> adapter = (ArrayAdapter<String[]>) ((WrapperListAdapter) navigationList
+            .getAdapter()).getWrappedAdapter();
 
       /* Update the data in the adapter. */
       adapter.clear();

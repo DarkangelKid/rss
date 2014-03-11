@@ -28,7 +28,7 @@
 
    <fragment
       android:id="@+id/navigation_drawer"
-      android:layout_width="240dp"
+      android:layout_width="@dimen/navigation_width"
       android:layout_height="match_parent"
       android:layout_gravity="start"
       tools:context="com.poloure.simplerss.FeedsActivity"

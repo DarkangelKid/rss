@@ -23,52 +23,22 @@ import android.widget.ArrayAdapter;
 
 class AdapterNavigationDrawer extends ArrayAdapter<String[]>
 {
-   private static final int TITLE = 0;
-   private static final int TAG = 1;
-
-   private final String[] m_navigationTitles;
-   private final Context m_context;
-
    AdapterNavigationDrawer(Context context)
    {
       super(context, android.R.id.list);
-      m_navigationTitles = context.getResources().getStringArray(R.array.navigation_titles);
-      m_context = context;
    }
 
    @Override
    public
    View getView(int position, View convertView, ViewGroup parent)
    {
-      int type = getItemViewType(position);
-      ViewNavItem view = null == convertView ? new ViewNavItem(m_context) : (ViewNavItem) convertView;
+      ViewNavItem view = null == convertView ? new ViewNavItem(parent.getContext()) : (ViewNavItem) convertView;
 
-      view.m_text = TITLE == type ? m_navigationTitles[position] : getItem(position - 2)[0];
-      view.m_count = TITLE == type ? "" : getItem(position - 2)[1];
-      view.m_image = TITLE == type ? position : -1;
+      view.m_text = getItem(position)[0];
+      view.m_count = getItem(position)[1];
+      view.m_image = -1;
 
       return view;
    }
 
-   @Override
-   public
-   int getCount()
-   {
-      /* Because we have the extra three views that are not tags. */
-      return super.getCount() + 2;
-   }
-
-   @Override
-   public
-   int getItemViewType(int position)
-   {
-      return 2 > position ? TITLE : TAG;
-   }
-
-   @Override
-   public
-   int getViewTypeCount()
-   {
-      return 2;
-   }
 }

@@ -20,6 +20,7 @@
 
    <!-- The All tag.-->
    <string name="all_tag">All</string>
+   <string name="tags">TAGS</string>
 
    <!-- Navigation drawer toggle accessibility descriptions.-->
    <string name="drawer_open">Open navigation drawer</string>
