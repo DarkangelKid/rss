@@ -26,7 +26,7 @@ import android.widget.TextView;
 
 class DialogEditFeed extends Dialog
 {
-   private final Activity m_activity;
+   final Activity m_activity;
    final int m_pos;
    String m_oldUid = "";
 

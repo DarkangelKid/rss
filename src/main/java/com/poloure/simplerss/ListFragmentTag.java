@@ -22,6 +22,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -65,6 +66,7 @@ class ListFragmentTag extends Fragment
       m_listView.setId(20000 + getArguments().getInt(POSITION_KEY));
       m_listView.setDivider(new ColorDrawable(getResources().getColor(R.color.item_separator)));
       m_listView.setDividerHeight(1);
+      m_listView.setSelector(new ColorDrawable(Color.TRANSPARENT));
       m_listView.setOnScrollListener(new AbsListView.OnScrollListener()
       {
          @Override

@@ -18,11 +18,6 @@
    xmlns:android="http://schemas.android.com/apk/res/android">
 
    <PreferenceScreen
-      android:title="@string/appearance"
-      android:icon="@drawable/ic_action_brightness_medium">
-   </PreferenceScreen>
-
-   <PreferenceScreen
       android:title="@string/notifications"
       android:icon="@drawable/ic_action_chat">
       <SwitchPreference
@@ -55,11 +50,6 @@
          android:key="refresh_interval"
          android:summary="@string/automatic_refreshing_interval_summary"
          android:title="@string/automatic_refreshing_interval"/>
-   </PreferenceScreen>
-
-   <PreferenceScreen
-      android:title="@string/storage"
-      android:icon="@drawable/ic_action_sd_storage">
    </PreferenceScreen>
 
    <PreferenceScreen

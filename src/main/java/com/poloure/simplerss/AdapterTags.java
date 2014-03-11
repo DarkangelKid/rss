@@ -17,7 +17,6 @@
 package com.poloure.simplerss;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -102,7 +101,7 @@ class AdapterTags extends BaseAdapter
       /* Apply the read effect. */
       boolean isRead = READ_ITEM_TIMES.contains(item.m_time);
       view.setAlpha(isRead ? READ_OPACITY : 1.0F);
-      view.setBackgroundColor(isRead ? Color.TRANSPARENT : Color.WHITE);
+      view.setBackgroundResource(isRead ? R.drawable.selector_transparent : R.drawable.selector_white);
 
       /* Add item as read. */
       if(parent.isShown() && m_isReadingItems && ListFragmentTag.s_hasScrolled)

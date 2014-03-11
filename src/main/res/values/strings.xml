@@ -75,9 +75,6 @@
    <string name="switch_no">No</string>
    <string name="switch_yes">Yes</string>
 
-   <!-- Settings appearance strings. -->
-   <string name="appearance">Appearance</string>
-
    <!-- Settings notification strings. -->
    <string name="notifications">Notifications</string>
    <string name="notifications_disabled">Notifications are disabled</string>
@@ -90,9 +87,6 @@
 
    <string name="automatic_refreshing_interval">Refresh interval</string>
    <string name="automatic_refreshing_interval_summary">Time between two consecutive refreshes</string>
-
-   <!-- Settings storage strings. -->
-   <string name="storage">Storage</string>
 
    <!-- Settings images strings. -->
    <string name="images">Images</string>
