@@ -21,7 +21,6 @@
           android:paddingTop="8dp"
           android:paddingStart="16dp"
           android:paddingEnd="16dp"
-          android:paddingBottom="3dp"
           android:textAlignment="gravity"
           android:textColor="@color/text_navigation_main"
           android:textSize="14sp"

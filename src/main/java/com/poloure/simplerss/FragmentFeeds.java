@@ -24,6 +24,7 @@ import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.HeaderViewListAdapter;
 import android.widget.ListView;
 
 import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
@@ -73,8 +74,10 @@ class FragmentFeeds extends Fragment
          {
             /* Set the item to be checked in the navigation drawer. */
             /* TODO This is called twice (setItemChecked) when clicking from the drawer. */
-            ListView navigationList = (ListView) getActivity().findViewById(R.id.navigation_drawer);
-            navigationList.setItemChecked(position + 2, true);
+
+            ListView list = (ListView) getActivity().findViewById(R.id.navigation_drawer);
+            int headers = ((HeaderViewListAdapter) list.getAdapter()).getHeadersCount();
+            list.setItemChecked(position + headers, true);
 
             /* Set the subtitle to the unread count. */
             Utilities.updateTitle(getActivity());
@@ -93,8 +96,10 @@ class FragmentFeeds extends Fragment
 
       m_pager.setAdapter(new PagerAdapterTags(getFragmentManager(), getActivity()));
 
-      ListView navigationList = (ListView) getActivity().findViewById(R.id.navigation_drawer);
-      navigationList.setItemChecked(2, true);
+      ListView list = (ListView) getActivity().findViewById(R.id.navigation_drawer);
+      int headers = ((HeaderViewListAdapter) list.getAdapter()).getHeadersCount();
+
+      list.setItemChecked(headers, true);
       Utilities.updateTitle(getActivity());
       Utilities.updateSubtitle(getActivity());
    }

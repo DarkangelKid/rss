@@ -27,6 +27,7 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.widget.Adapter;
 import android.widget.ListView;
+import android.widget.WrapperListAdapter;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -36,8 +37,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.text.NumberFormat;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 
 class Utilities
@@ -54,18 +53,12 @@ class Utilities
 
       if(null != navigationList && null != actionBar)
       {
-         List<String> titles = Arrays.asList(res.getStringArray(R.array.navigation_titles));
-         String title = actionBar.getTitle().toString();
-
          ViewPager feedPager = (ViewPager) activity.findViewById(R.id.viewpager);
-         Adapter adapter = navigationList.getAdapter();
 
-         /* If the title is not Feeds, set no subtitle. */
-         if(null == feedPager || titles.contains(title))
-         {
-            actionBar.setSubtitle(null);
-         }
-         else if(0 != adapter.getCount() - 2)
+         WrapperListAdapter headerAdapter = (WrapperListAdapter) navigationList.getAdapter();
+         Adapter adapter = headerAdapter.getWrappedAdapter();
+
+         if(!adapter.isEmpty())
          {
             String[] tag = (String[]) adapter.getItem(feedPager.getCurrentItem());
             if(null == tag || 0 == tag.length || tag[1].isEmpty())

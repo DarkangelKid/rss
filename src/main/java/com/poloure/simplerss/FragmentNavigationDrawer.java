@@ -209,23 +209,22 @@ class FragmentNavigationDrawer extends Fragment
 
       @Override
       public
-      void onItemClick(AdapterView<?> parent, View view, int position, long id)
+      void onItemClick(AdapterView<?> parent, View view, int absolutePos, long id)
       {
          /* Close the navigation drawer in all cases. */
          ((DrawerLayout) parent.getParent()).closeDrawers();
+         ((AbsListView) parent).setItemChecked(absolutePos, true);
 
-         /* If a divider. */
-         if(2 == position)
-         {
-            return;
-         }
+         HeaderViewListAdapter wrapperAdapter = (HeaderViewListAdapter) parent.getAdapter();
 
-         int offset = ((HeaderViewListAdapter) parent.getAdapter()).getHeadersCount();
+         /* Includes the disabled divider. */
+         int offset = wrapperAdapter.getHeadersCount();
+         int tagPos = absolutePos - offset;
 
-         int fragmentTag = offset <= position ? 0 : position + 1;
+         int fragmentTagPos = 0 <= tagPos ? 0 : absolutePos + 1;
 
          /* If we are switching fragments, check if we need to. */
-         String newTag = FeedsActivity.FRAGMENT_TAGS[fragmentTag];
+         String newTag = FeedsActivity.FRAGMENT_TAGS[fragmentTagPos];
          if(!m_activity.m_currentFragment.equals(newTag))
          {
             /* Switch the content frame fragment. */
@@ -236,28 +235,25 @@ class FragmentNavigationDrawer extends Fragment
             m_activity.m_currentFragment = newTag;
          }
 
-         /* Set the item to be checked. */
-         ((AbsListView) parent).setItemChecked(position, true);
-
          /* If a tag was clicked, set the ViewPager position to that tag. */
-         if(1 < position)
+         if(0 <= tagPos)
          {
             ViewPager pager = (ViewPager) m_activity.findViewById(R.id.viewpager);
 
             /* Does not call the onPageChangeListener if the page is the same as before. */
-            if(position - offset == pager.getCurrentItem())
+            if(tagPos == pager.getCurrentItem())
             {
                /* Set the subtitle to the unread count. */
                Utilities.updateTitle(m_activity);
                Utilities.updateSubtitle(m_activity);
             }
-            pager.setCurrentItem(position - offset);
+            pager.setCurrentItem(tagPos);
          }
          else
          {
             /* Change the icon and title of the ActionBar. */
-            m_bar.setIcon(m_icons[position]);
-            m_bar.setTitle(m_titles[position]);
+            m_bar.setIcon(m_icons[absolutePos]);
+            m_bar.setTitle(m_titles[absolutePos]);
             m_bar.setSubtitle(null);
          }
       }

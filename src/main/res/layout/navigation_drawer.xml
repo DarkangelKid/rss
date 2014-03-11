@@ -15,10 +15,10 @@
 -->
 
 <ListView xmlns:android="http://schemas.android.com/apk/res/android"
-   android:layout_width="match_parent"
-   android:layout_height="match_parent"
-   android:choiceMode="singleChoice"
-   android:background="@color/background_navigation"
-   android:divider="@color/navigation_separator"
-   android:dividerHeight="1px"
-   android:scrollbars="none"/>
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:choiceMode="singleChoice"
+          android:background="@color/background_navigation"
+          android:divider="@color/navigation_separator"
+          android:dividerHeight="1px"
+          android:scrollbars="none"/>
