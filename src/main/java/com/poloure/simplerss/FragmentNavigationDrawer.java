@@ -78,7 +78,6 @@ class FragmentNavigationDrawer extends Fragment
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
       ListView listView = (ListView) inflater.inflate(R.layout.navigation_drawer, container, false);
-      listView.setAdapter(new AdapterNavigationDrawer(getActivity()));
       listView.setOnItemClickListener(new OnNavigationItemClick(getActivity()));
       listView.setOnItemLongClickListener(new OnNavigationItemLongClick());
       listView.setHeaderDividersEnabled(false);
@@ -98,6 +97,8 @@ class FragmentNavigationDrawer extends Fragment
       divider.setText(R.string.tags);
 
       listView.addHeaderView(divider, null, false);
+      listView.setAdapter(new AdapterNavigationDrawer(getActivity()));
+
       return listView;
    }
 
