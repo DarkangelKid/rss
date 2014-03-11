@@ -206,7 +206,7 @@ class ViewFeedItem extends View
 
       /* Display the two highest non zero values. */
       int start = 0;
-      while(0L == periods[start])
+      while(periods.length > start && 0L == periods[start])
       {
          start++;
       }

@@ -34,7 +34,7 @@ class AdapterTags extends BaseAdapter
    static final int TYPE_IMAGE = 1;
    static final int TYPE_IMAGE_SANS_DESCRIPTION = 2;
    static final int TYPE_PLAIN_SANS_DESCRIPTION = 3;
-   private static final float READ_OPACITY = 0.5F;
+   static final float READ_OPACITY = 0.5F;
 
    /* We use indexOf on this Long List so it can not be a Set. */
    final List<Long> m_times = new ArrayList<Long>(0);
@@ -102,12 +102,6 @@ class AdapterTags extends BaseAdapter
       boolean isRead = READ_ITEM_TIMES.contains(item.m_time);
       view.setAlpha(isRead ? READ_OPACITY : 1.0F);
       view.setBackgroundResource(isRead ? R.drawable.selector_transparent : R.drawable.selector_white);
-
-      /* Add item as read. */
-      if(parent.isShown() && m_isReadingItems && ListFragmentTag.s_hasScrolled)
-      {
-         READ_ITEM_TIMES.add(item.m_time);
-      }
 
       /* If the recycled view is the view we want, keep it. */
       if(null != convertView)

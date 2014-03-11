@@ -42,7 +42,6 @@ public
 class ListFragmentTag extends Fragment
 {
    private static final String POSITION_KEY = "POSITION";
-   static boolean s_hasScrolled;
    ListView m_listView;
    static boolean s_firstLoad = true;
 
@@ -69,31 +68,33 @@ class ListFragmentTag extends Fragment
       m_listView.setSelector(new ColorDrawable(Color.TRANSPARENT));
       m_listView.setOnScrollListener(new AbsListView.OnScrollListener()
       {
+         private static final int TOUCH = AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL;
+         private static final int IDLE = AbsListView.OnScrollListener.SCROLL_STATE_IDLE;
+
          @Override
          public
          void onScrollStateChanged(AbsListView view, int scrollState)
          {
-            if(AbsListView.OnScrollListener.SCROLL_STATE_IDLE == scrollState)
+            if(TOUCH == scrollState || IDLE == scrollState)
             {
-               AsyncNavigationAdapter.update(activity);
-            }
-            if(!s_hasScrolled && AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL == scrollState)
-            {
-               s_hasScrolled = true;
-
-               Adapter adapter = m_listView.getAdapter();
-               int first = m_listView.getFirstVisiblePosition();
-               int last = m_listView.getLastVisiblePosition();
+               Adapter adapter = view.getAdapter();
+               int first = view.getFirstVisiblePosition();
+               int last = view.getLastVisiblePosition();
 
                for(int i = 0; last - first >= i; i++)
                {
-                  View view1 = m_listView.getChildAt(i);
-                  if(null != view1 && view1.isShown())
+                  View viewItem = view.getChildAt(i);
+
+                  if(null != viewItem && viewItem.isShown() && 0 <= viewItem.getTop())
                   {
                      FeedItem item = (FeedItem) adapter.getItem(first + i);
                      AdapterTags.READ_ITEM_TIMES.add(item.m_time);
                   }
                }
+            }
+            if(IDLE == scrollState)
+            {
+               AsyncNavigationAdapter.update(activity);
             }
          }
 
@@ -128,7 +129,10 @@ class ListFragmentTag extends Fragment
    {
       super.onCreateContextMenu(menu, v, menuInfo);
 
+      /* Inflate the context menu from the xml file. */
       getActivity().getMenuInflater().inflate(R.menu.context_menu, menu);
+
+      /* Set the title of the context menu to the feed item's title. */
       AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
       FeedItem view = (FeedItem) ((AdapterView<ListAdapter>) v).getAdapter().getItem(info.position);
       menu.setHeaderTitle(view.m_title);
@@ -138,9 +142,11 @@ class ListFragmentTag extends Fragment
    public
    boolean onContextItemSelected(MenuItem item)
    {
+      /* Get the feed url from the FeedItem. */
       AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
       FeedItem feedItem = ((ViewFeedItem) info.targetView).m_item;
       String url = feedItem.m_urlFull;
+
       Context context = getActivity();
 
       if(R.id.copy == item.getItemId())

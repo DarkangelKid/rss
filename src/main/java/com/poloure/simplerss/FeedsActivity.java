@@ -125,7 +125,6 @@ class FeedsActivity extends Activity
       unregisterReceiver(Receiver);
 
       /* This stops the user accidentally reading items when resuming. */
-      ListFragmentTag.s_hasScrolled = false;
       ListFragmentTag.s_firstLoad = true;
    }
 
