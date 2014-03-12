@@ -29,14 +29,12 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
@@ -54,8 +52,8 @@ class FeedsActivity extends Activity
    private FragmentNavigationDrawer m_FragmentNavigationDrawer;
 
    static final String FEED_TAG = "Feeds";
-   private static final String MANAGE_TAG = "Manage";
-   private static final String SETTINGS_TAG = "Settings";
+   static final String MANAGE_TAG = "Manage";
+   static final String SETTINGS_TAG = "Settings";
    static final String[] FRAGMENT_TAGS = {FEED_TAG, MANAGE_TAG, SETTINGS_TAG};
 
    /* Start of ordered state changes of the Activity.
@@ -154,20 +152,12 @@ class FeedsActivity extends Activity
    public
    boolean onPrepareOptionsMenu(Menu menu)
    {
-      boolean[] show = new boolean[2];
-      if(m_currentFragment.equals(FRAGMENT_TAGS[0]))
-      {
-         Arrays.fill(show, true);
-      }
-      else if(m_currentFragment.equals(FRAGMENT_TAGS[1]))
-      {
-         show[0] = true;
-      }
+      boolean feed = m_currentFragment.equals(FEED_TAG);
+      boolean manage = m_currentFragment.equals(MANAGE_TAG);
 
-      for(int i = 0; menu.size() > i; i++)
-      {
-         menu.getItem(i).setEnabled(m_showMenuItems && show[i]);
-      }
+      menu.getItem(0).setEnabled(m_showMenuItems && (feed || manage));
+      menu.getItem(1).setEnabled(m_showMenuItems && feed);
+
       return true;
    }
 
@@ -249,8 +239,7 @@ class FeedsActivity extends Activity
    public
    void onUnreadClick(MenuItem menuItem)
    {
-      ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
-      ListView listView = (ListView) findViewById(20000 + viewPager.getCurrentItem());
+      ListView listView = Utilities.getCurrentTagListView(this);
 
       if(null != listView)
       {

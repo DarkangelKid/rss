@@ -58,17 +58,20 @@ class Utilities
          WrapperListAdapter headerAdapter = (WrapperListAdapter) navigationList.getAdapter();
          Adapter navigationAdapter = headerAdapter.getWrappedAdapter();
 
-         String[] navigationItem = (String[]) navigationAdapter.getItem(pager.getCurrentItem());
+         if(null != pager)
+         {
+            String[] navigationItem = (String[]) navigationAdapter.getItem(pager.getCurrentItem());
 
-         if(null != navigationItem && 0 != navigationItem.length && !navigationItem[1].isEmpty())
-         {
-            int count = Integer.parseInt(navigationItem[1]);
-            String countString = res.getQuantityString(R.plurals.actionbar_subtitle_unread, count, count);
-            bar.setSubtitle(0 == count ? null : countString);
-         }
-         else
-         {
-            bar.setSubtitle(null);
+            if(null != navigationItem && 0 != navigationItem.length && !navigationItem[1].isEmpty())
+            {
+               int count = Integer.parseInt(navigationItem[1]);
+               String countString = res.getQuantityString(R.plurals.actionbar_subtitle_unread, count, count);
+               bar.setSubtitle(0 == count ? null : countString);
+            }
+            else
+            {
+               bar.setSubtitle(null);
+            }
          }
       }
    }
@@ -89,6 +92,19 @@ class Utilities
          bar.setTitle(PagerAdapterTags.TAG_LIST.get(position));
       }
       updateSubtitle(activity);
+   }
+
+   static
+   ListView getCurrentTagListView(Activity activity)
+   {
+      int currentPage = ((ViewPager) activity.findViewById(R.id.viewpager)).getCurrentItem();
+      return getTagListView(activity, currentPage);
+   }
+
+   static
+   ListView getTagListView(Activity activity, int page)
+   {
+      return (ListView) activity.findViewById(ListFragmentTag.LIST_VIEW_ID_BASE + page);
    }
 
    static

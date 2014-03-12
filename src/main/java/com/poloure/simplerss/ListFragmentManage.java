@@ -73,6 +73,7 @@ class ListFragmentManage extends ListFragment
       private final Activity m_activity;
       private int m_count;
 
+      private
       MultiModeListener(ListView listView, Activity activity)
       {
          m_listView = listView;

@@ -44,7 +44,7 @@ import android.widget.TextView;
 public
 class FragmentNavigationDrawer extends Fragment
 {
-   static
+   private static
    class OnNavigationItemLongClick implements AdapterView.OnItemLongClickListener
    {
       @Override
@@ -56,11 +56,11 @@ class FragmentNavigationDrawer extends Fragment
       }
    }
 
-   static final String PREF_USER_LEARNED_DRAWER = "navigation_drawer_learned";
+   private static final String PREF_USER_LEARNED_DRAWER = "navigation_drawer_learned";
 
    ActionBarDrawerToggle m_drawerToggle;
 
-   boolean m_userLearnedDrawer;
+   private boolean m_userLearnedDrawer;
 
    @Override
    public
@@ -191,6 +191,7 @@ class FragmentNavigationDrawer extends Fragment
       private final String[] m_titles;
       private final Drawable[] m_icons = new Drawable[2];
 
+      private
       OnNavigationItemClick(Activity activity)
       {
          m_activity = (FeedsActivity) activity;

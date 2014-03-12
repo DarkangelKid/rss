@@ -148,7 +148,7 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
       for(int i = 0; pageCount > i; i++)
       {
          /* Get the tag page. */
-         ListView listView = (ListView) m_activity.findViewById(20000 + i);
+         ListView listView = Utilities.getTagListView(m_activity, i);
 
          if(null != listView)
          {

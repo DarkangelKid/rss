@@ -18,9 +18,11 @@ package com.poloure.simplerss;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.TextView;
 
@@ -29,6 +31,7 @@ class DialogEditFeed extends Dialog
    final Activity m_activity;
    final int m_pos;
    String m_oldUid = "";
+   AsyncTask<Void, Void, String[]> m_task;
 
    private
    DialogEditFeed(Activity activity, int position)
@@ -86,23 +89,40 @@ class DialogEditFeed extends Dialog
       final String oldIndex = oldLine;
       final Dialog dialog = this;
 
+      Button buttonNegative = (Button) findViewById(R.id.dialog_button_negative);
+      final Button buttonPositive = (Button) findViewById(R.id.dialog_button_positive);
+
       /* Set the click listeners. */
-      findViewById(R.id.dialog_button_negative).setOnClickListener(new View.OnClickListener()
+      buttonNegative.setOnClickListener(new View.OnClickListener()
       {
          @Override
          public
          void onClick(View v)
          {
-            dismiss();
+            /* If the positive button says checking... */
+            if(buttonPositive.getText().equals(m_activity.getString(R.string.dialog_checking)))
+            {
+               /* Cancel the Async task. */
+               if(null != m_task)
+               {
+                  m_task.cancel(true);
+                  buttonPositive.setText(R.string.dialog_accept);
+                  buttonPositive.setEnabled(true);
+               }
+            }
+            else
+            {
+               dismiss();
+            }
          }
       });
-      findViewById(R.id.dialog_button_positive).setOnClickListener(new View.OnClickListener()
+      buttonPositive.setOnClickListener(new View.OnClickListener()
       {
          @Override
          public
          void onClick(View v)
          {
-            AsyncCheckFeed.newInstance(m_activity, dialog, oldIndex, -1 == m_pos ? "" : m_oldUid);
+            m_task = AsyncCheckFeed.newInstance(m_activity, dialog, oldIndex, -1 == m_pos ? "" : m_oldUid);
          }
       });
    }

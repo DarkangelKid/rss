@@ -59,11 +59,12 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
    }
 
    static
-   void newInstance(Activity activity, Dialog dialog, String oldIndexLine, String oldUid)
+   AsyncTask<Void, Void, String[]> newInstance(Activity activity, Dialog dialog, String oldIndexLine, String oldUid)
    {
       AsyncTask<Void, Void, String[]> task = new AsyncCheckFeed(activity, dialog, oldIndexLine, oldUid);
 
-      task.executeOnExecutor(THREAD_POOL_EXECUTOR);
+      task.executeOnExecutor(SERIAL_EXECUTOR);
+      return task;
    }
 
    /* Function should be safe, returns false if fails. */
@@ -95,6 +96,10 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
    protected
    String[] doInBackground(Void... nothing)
    {
+      if(isCancelled())
+      {
+         return null;
+      }
       /* Get the user's input. */
       CharSequence inputUrl = ((TextView) m_dialog.findViewById(R.id.dialog_url)).getText();
       CharSequence inputTags = ((TextView) m_dialog.findViewById(R.id.dialog_tags)).getText();
@@ -109,6 +114,10 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
 
       for(CharSequence urlToCheck : urlCheckList)
       {
+         if(isCancelled())
+         {
+            return null;
+         }
          if(isValidFeed(urlToCheck))
          {
             List<String> urls = Arrays.asList(Read.csvFile(m_activity, Read.INDEX, 'u')[0]);
@@ -217,6 +226,11 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
    protected
    void onPostExecute(String[] result)
    {
+      if(isCancelled())
+      {
+         return;
+      }
+
       String url = result[0];
       String uid = result[1];
       String tags = result[2];

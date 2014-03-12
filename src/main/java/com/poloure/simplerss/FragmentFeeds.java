@@ -35,7 +35,7 @@ import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 public
 class FragmentFeeds extends Fragment
 {
-   ViewPager m_pager;
+   private ViewPager m_pager;
 
    @Override
    public
@@ -73,7 +73,6 @@ class FragmentFeeds extends Fragment
          void onPageSelected(int position)
          {
             /* Set the item to be checked in the navigation drawer. */
-            /* TODO This is called twice (setItemChecked) when clicking from the drawer. */
 
             ListView list = (ListView) getActivity().findViewById(R.id.navigation_drawer);
             int headers = ((HeaderViewListAdapter) list.getAdapter()).getHeadersCount();

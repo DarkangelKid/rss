@@ -42,8 +42,9 @@ public
 class ListFragmentTag extends Fragment
 {
    private static final String POSITION_KEY = "POSITION";
-   ListView m_listView;
+   private ListView m_listView;
    static boolean s_firstLoad = true;
+   static final int LIST_VIEW_ID_BASE = 20000;
 
    static
    Fragment newInstance(int position)
@@ -62,7 +63,7 @@ class ListFragmentTag extends Fragment
       final Activity activity = getActivity();
 
       m_listView = new ListView(activity);
-      m_listView.setId(20000 + getArguments().getInt(POSITION_KEY));
+      m_listView.setId(LIST_VIEW_ID_BASE + getArguments().getInt(POSITION_KEY));
       m_listView.setDivider(new ColorDrawable(getResources().getColor(R.color.item_separator)));
       m_listView.setDividerHeight(1);
       m_listView.setSelector(new ColorDrawable(Color.TRANSPARENT));

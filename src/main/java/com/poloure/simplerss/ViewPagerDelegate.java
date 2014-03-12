@@ -17,7 +17,6 @@
 package com.poloure.simplerss;
 
 import android.app.Activity;
-import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.widget.AbsListView;
 
@@ -32,10 +31,8 @@ class ViewPagerDelegate implements ViewDelegate
    {
       boolean ready = false;
 
-      /* First we check whether we're scrolled to the top */
-      ViewPager viewPager = (ViewPager) view;
-      int page = viewPager.getCurrentItem();
-      AbsListView absListView = (AbsListView) ((Activity) view.getContext()).findViewById(20000 + page);
+      /* First we check whether we're scrolled to the top of current page. */
+      AbsListView absListView = Utilities.getCurrentTagListView((Activity) view.getContext());
 
       if(0 == absListView.getCount())
       {
