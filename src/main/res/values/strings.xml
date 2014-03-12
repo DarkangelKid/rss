@@ -18,6 +18,8 @@
 
 <resources>
 
+   <string name="application_name">Simple Rss</string>
+
    <!-- The All tag.-->
    <string name="all_tag">All</string>
    <string name="tags">TAGS</string>

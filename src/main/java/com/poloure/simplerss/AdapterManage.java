@@ -43,6 +43,7 @@ class AdapterManage extends BaseAdapter
    public
    int getCount()
    {
+
       return m_manageItems.size();
    }
 

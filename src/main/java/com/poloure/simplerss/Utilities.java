@@ -48,35 +48,33 @@ class Utilities
    void updateSubtitle(Activity activity)
    {
       ListView navigationList = (ListView) activity.findViewById(R.id.navigation_drawer);
-      ActionBar actionBar = activity.getActionBar();
+      ActionBar bar = activity.getActionBar();
       Resources res = activity.getResources();
 
-      if(null != navigationList && null != actionBar)
+      if(null != navigationList && null != bar)
       {
-         ViewPager feedPager = (ViewPager) activity.findViewById(R.id.viewpager);
+         ViewPager pager = (ViewPager) activity.findViewById(R.id.viewpager);
 
          WrapperListAdapter headerAdapter = (WrapperListAdapter) navigationList.getAdapter();
-         Adapter adapter = headerAdapter.getWrappedAdapter();
+         Adapter navigationAdapter = headerAdapter.getWrappedAdapter();
 
-         if(!adapter.isEmpty())
+         String[] navigationItem = (String[]) navigationAdapter.getItem(pager.getCurrentItem());
+
+         if(null != navigationItem && 0 != navigationItem.length && !navigationItem[1].isEmpty())
          {
-            String[] tag = (String[]) adapter.getItem(feedPager.getCurrentItem());
-            if(null == tag || 0 == tag.length || tag[1].isEmpty())
-            {
-               actionBar.setSubtitle(null);
-            }
-            else
-            {
-               int count = Integer.parseInt(tag[1]);
-               String countString = res.getQuantityString(R.plurals.actionbar_subtitle_unread, count, count);
-               actionBar.setSubtitle(0 == count ? null : countString);
-            }
+            int count = Integer.parseInt(navigationItem[1]);
+            String countString = res.getQuantityString(R.plurals.actionbar_subtitle_unread, count, count);
+            bar.setSubtitle(0 == count ? null : countString);
+         }
+         else
+         {
+            bar.setSubtitle(null);
          }
       }
    }
 
    static
-   void updateTitle(Activity activity)
+   void updateTagTitle(Activity activity)
    {
       ListView navigationList = (ListView) activity.findViewById(R.id.navigation_drawer);
       ViewPager feedPager = (ViewPager) activity.findViewById(R.id.viewpager);
@@ -90,6 +88,7 @@ class Utilities
          bar.setIcon(drawable);
          bar.setTitle(PagerAdapterTags.TAG_LIST.get(position));
       }
+      updateSubtitle(activity);
    }
 
    static

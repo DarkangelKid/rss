@@ -19,8 +19,8 @@ package com.poloure.simplerss;
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.widget.ArrayAdapter;
+import android.widget.HeaderViewListAdapter;
 import android.widget.ListView;
-import android.widget.WrapperListAdapter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,12 +31,12 @@ import java.util.List;
 
 class AsyncNavigationAdapter extends AsyncTask<String, Void, String[][]>
 {
-   private final Activity m_activity;
+   private final FeedsActivity m_activity;
 
    private
    AsyncNavigationAdapter(Activity activity)
    {
-      m_activity = activity;
+      m_activity = (FeedsActivity) activity;
    }
 
    static
@@ -102,14 +102,23 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, String[][]>
    {
       /* Set the titles & counts arrays in this file and notify the adapter. */
       ListView navigationList = (ListView) m_activity.findViewById(R.id.navigation_drawer);
-      ArrayAdapter<String[]> adapter = (ArrayAdapter<String[]>) ((WrapperListAdapter) navigationList
-            .getAdapter()).getWrappedAdapter();
+      HeaderViewListAdapter wrapperAdapter = (HeaderViewListAdapter) navigationList.getAdapter();
+      ArrayAdapter<String[]> adapter = (ArrayAdapter<String[]>) wrapperAdapter.getWrappedAdapter();
 
       /* Update the data in the adapter. */
       adapter.clear();
       adapter.addAll(result);
 
       /* Update the subtitle. */
-      Utilities.updateSubtitle(m_activity);
+      if(m_activity.m_currentFragment.equals(FeedsActivity.FEED_TAG))
+      {
+         if(m_activity.getActionBar()
+                      .getTitle()
+                      .equals(m_activity.getString(R.string.application_name)))
+         {
+            Utilities.updateTagTitle(m_activity);
+         }
+         Utilities.updateSubtitle(m_activity);
+      }
    }
 }

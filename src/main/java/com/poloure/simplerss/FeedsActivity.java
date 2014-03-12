@@ -53,7 +53,7 @@ class FeedsActivity extends Activity
    String m_currentFragment;
    private FragmentNavigationDrawer m_FragmentNavigationDrawer;
 
-   private static final String FEED_TAG = "Feeds";
+   static final String FEED_TAG = "Feeds";
    private static final String MANAGE_TAG = "Manage";
    private static final String SETTINGS_TAG = "Settings";
    static final String[] FRAGMENT_TAGS = {FEED_TAG, MANAGE_TAG, SETTINGS_TAG};
@@ -74,6 +74,7 @@ class FeedsActivity extends Activity
 
       /* Load the read items to the AdapterTag class. */
       AdapterTags.READ_ITEM_TIMES.addAll(Read.longSet(this, READ_ITEMS));
+      m_currentFragment = FRAGMENT_TAGS[0];
 
       FragmentManager manager = getFragmentManager();
       FragmentTransaction transaction = manager.beginTransaction();
@@ -96,7 +97,6 @@ class FeedsActivity extends Activity
       }
 
       transaction.commit();
-      m_currentFragment = FRAGMENT_TAGS[0];
    }
 
    /* Stop the alarm service and reset the time to 0 every time the user sees the activity. */

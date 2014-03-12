@@ -31,14 +31,14 @@ import java.util.Locale;
 
 class AsyncManageAdapter extends AsyncTask<String, String[][], Void>
 {
-   private final AdapterManage m_adapterManage;
+   private final ListFragment m_listFragment;
    private final Context m_context;
 
    private
-   AsyncManageAdapter(Context context, AdapterManage adapterManage)
+   AsyncManageAdapter(Context context, ListFragment listFragment)
    {
       m_context = context;
-      m_adapterManage = adapterManage;
+      m_listFragment = listFragment;
    }
 
    static
@@ -50,9 +50,7 @@ class AsyncManageAdapter extends AsyncTask<String, String[][], Void>
 
       if(null != fragment && fragment.isVisible())
       {
-         AdapterManage adapter = (AdapterManage) fragment.getListAdapter();
-
-         new AsyncManageAdapter(activity, adapter).executeOnExecutor(THREAD_POOL_EXECUTOR);
+         new AsyncManageAdapter(activity, fragment).executeOnExecutor(THREAD_POOL_EXECUTOR);
       }
    }
 
@@ -110,8 +108,10 @@ class AsyncManageAdapter extends AsyncTask<String, String[][], Void>
    protected
    void onProgressUpdate(String[][]... values)
    {
-      m_adapterManage.m_manageItems.clear();
-      m_adapterManage.m_manageItems.addAll(Arrays.asList(values[0]));
-      m_adapterManage.notifyDataSetChanged();
+      AdapterManage adapterManage = new AdapterManage(m_context);
+      m_listFragment.setListAdapter(adapterManage);
+
+      adapterManage.m_manageItems.addAll(Arrays.asList(values[0]));
+      adapterManage.notifyDataSetChanged();
    }
 }

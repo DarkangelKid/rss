@@ -121,7 +121,7 @@ class FragmentNavigationDrawer extends Fragment
       actionBar.setIcon(appIcon);
 
       /* If the version is above API 18, flip the icon in RTL layouts. */
-      if(Build.VERSION_CODES.JELLY_BEAN_MR2 > Build.VERSION.SDK_INT)
+      if(Build.VERSION_CODES.JELLY_BEAN_MR2 <= Build.VERSION.SDK_INT)
       {
          Drawable indicator = resources.getDrawable(R.drawable.ic_drawer);
          DrawableCompat.setAutoMirrored(indicator, true);
@@ -245,8 +245,7 @@ class FragmentNavigationDrawer extends Fragment
             if(tagPos == pager.getCurrentItem())
             {
                /* Set the subtitle to the unread count. */
-               Utilities.updateTitle(m_activity);
-               Utilities.updateSubtitle(m_activity);
+               Utilities.updateTagTitle(m_activity);
             }
             pager.setCurrentItem(tagPos);
          }

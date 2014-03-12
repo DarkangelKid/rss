@@ -27,11 +27,11 @@
       android:allowBackup="true"
       android:hardwareAccelerated="true"
       android:icon="@drawable/rss_icon"
-      android:label="Simple RSS"
+      android:label="@string/application_name"
       android:supportsRtl="true">
       <activity
          android:name=".FeedsActivity"
-         android:label="Simple RSS"
+         android:label="@string/application_name"
          android:theme="@android:style/Theme.Holo.Light">
          <intent-filter>
             <action android:name="android.intent.action.MAIN"/>

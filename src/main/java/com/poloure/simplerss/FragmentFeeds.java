@@ -80,8 +80,7 @@ class FragmentFeeds extends Fragment
             list.setItemChecked(position + headers, true);
 
             /* Set the subtitle to the unread count. */
-            Utilities.updateTitle(getActivity());
-            Utilities.updateSubtitle(getActivity());
+            Utilities.updateTagTitle(getActivity());
          }
       });
 
@@ -100,7 +99,5 @@ class FragmentFeeds extends Fragment
       int headers = ((HeaderViewListAdapter) list.getAdapter()).getHeadersCount();
 
       list.setItemChecked(headers, true);
-      Utilities.updateTitle(getActivity());
-      Utilities.updateSubtitle(getActivity());
    }
 }
