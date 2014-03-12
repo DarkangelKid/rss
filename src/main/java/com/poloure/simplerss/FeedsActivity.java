@@ -28,16 +28,24 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
+import uk.co.senab.actionbarpulltorefresh.library.Options;
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
+import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
 public
 class FeedsActivity extends Activity
@@ -247,6 +255,7 @@ class FeedsActivity extends Activity
       }
    }
 
+   /* Large section that declares the three main fragments. */
    static
    Fragment getFragment(FragmentManager manager, String tag)
    {
@@ -255,7 +264,69 @@ class FeedsActivity extends Activity
       {
          if(tag.equals(FEED_TAG))
          {
-            return new FragmentFeeds();
+            return new Fragment()
+            {
+               private static final float PULL_DISTANCE = 0.5F;
+
+               @Override
+               public
+               View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+               {
+                  super.onCreateView(inflater, container, savedInstanceState);
+
+                  PullToRefreshLayout layout = (PullToRefreshLayout) inflater.inflate(R.layout.viewpager, null, false);
+                  final Activity activity = getActivity();
+
+                  final ViewPager pager = (ViewPager) layout.findViewById(R.id.viewpager);
+
+                  ActionBarPullToRefresh.from(activity)
+                        .allChildrenArePullable()
+                        .options(Options.create().scrollDistance(PULL_DISTANCE).build())
+                        .useViewDelegate(ViewPager.class, new ViewPagerDelegate())
+                        .listener(new OnRefreshListener()
+                        {
+                           @Override
+                           public
+                           void onRefreshStarted(View view)
+                           {
+                              Intent intent = new Intent(activity, ServiceUpdate.class);
+                              intent.putExtra("GROUP_NUMBER", pager.getCurrentItem());
+                              activity.startService(intent);
+                           }
+                        })
+                        .setup(layout);
+
+                  /* Inflate and configure the ViewPager. */
+                  pager.setOffscreenPageLimit(128);
+                  pager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener()
+                  {
+                     @Override
+                     public
+                     void onPageSelected(int position)
+                     {
+                        /* Set the item to be checked in the navigation drawer. */
+                        Utilities.setNavigationTagSelection(activity, position);
+
+                        /* Set the subtitle to the unread count. */
+                        Utilities.updateTagTitle(activity);
+                     }
+                  });
+                  return layout;
+               }
+
+               @Override
+               public
+               void onActivityCreated(Bundle savedInstanceState)
+               {
+                  super.onActivityCreated(savedInstanceState);
+
+                  ViewPager pager = (ViewPager) getView().findViewById(R.id.viewpager);
+                  Activity activity = getActivity();
+
+                  pager.setAdapter(new PagerAdapterTags(getFragmentManager(), activity));
+                  Utilities.setNavigationTagSelection(activity, 0);
+               }
+            };
          }
          if(tag.equals(MANAGE_TAG))
          {
@@ -263,7 +334,16 @@ class FeedsActivity extends Activity
          }
          if(tag.equals(SETTINGS_TAG))
          {
-            return new FragmentSettings();
+            return new PreferenceFragment()
+            {
+               @Override
+               public
+               void onCreate(Bundle savedInstanceState)
+               {
+                  super.onCreate(savedInstanceState);
+                  addPreferencesFromResource(R.xml.preferences);
+               }
+            };
          }
       }
       return fragment;
@@ -275,8 +355,7 @@ class FeedsActivity extends Activity
       AdapterTags listAdapter = (AdapterTags) listView.getAdapter();
 
       /* Create a copy of the item times. */
-      List<Long> times = new ArrayList<Long>(listAdapter.m_times.size());
-      times.addAll(listAdapter.m_times);
+      List<Long> times = new ArrayList<Long>(listAdapter.m_times);
       times.removeAll(AdapterTags.READ_ITEM_TIMES);
 
       if(times.isEmpty())

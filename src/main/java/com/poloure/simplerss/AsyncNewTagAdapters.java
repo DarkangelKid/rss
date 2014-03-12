@@ -147,54 +147,55 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
 
       for(int i = 0; pageCount > i; i++)
       {
-         /* Get the tag page. */
+         /* Get the tag page and skip ListViews that are null. */
          ListView listView = Utilities.getTagListView(m_activity, i);
-
-         if(null != listView)
+         while(null == listView)
          {
-            AdapterTags adapterTag = (AdapterTags) listView.getAdapter();
+            if(i == pageCount) return;
 
-            boolean firstLoad = null == listView || 0 == listView.getCount();
+            listView = Utilities.getTagListView(m_activity, i);
+         }
+
+         AdapterTags adapterTag = (AdapterTags) listView.getAdapter();
+
+         boolean firstLoad = null == listView || 0 == listView.getCount();
 
             /* If there are items in the currently viewed page, save the position. */
-            if(null != adapterTag)
+         if(null != adapterTag)
+         {
+            long timeBefore = 0L;
+            int top = 0;
+            if(!firstLoad && i == pager.getCurrentItem())
             {
-               long timeBefore = 0L;
-               int top = 0;
-               if(!firstLoad && i == pager.getCurrentItem())
-               {
                   /* Get the time of the top item. */
-                  int topVisibleItem = listView.getFirstVisiblePosition();
-                  timeBefore = adapterTag.m_feedItems.get(topVisibleItem).m_time;
+               int topVisibleItem = listView.getFirstVisiblePosition();
+               timeBefore = adapterTag.m_feedItems.get(topVisibleItem).m_time;
 
-                  View v = listView.getChildAt(0);
-                  top = null == v ? 0 : v.getTop();
-               }
-
-               /* Set the adapters to be these new lists and do not read items while updating. */
-               adapterTag.m_isReadingItems = false;
-
-               adapterTag.m_feedItems.clear();
-               adapterTag.m_times.clear();
-
-               adapterTag.m_feedItems.addAll(maps[i].values());
-               adapterTag.m_times.addAll(maps[i].keySet());
-
-               adapterTag.notifyDataSetChanged();
-
-               /* We now need to find the position of the item with the time timeBefore. */
-               int newPositionOfTop = adapterTag.m_times.indexOf(timeBefore);
-               if(-1 == newPositionOfTop)
-               {
-                  FeedsActivity.gotoLatestUnread(listView);
-               }
-               else
-               {
-                  listView.setSelectionFromTop(newPositionOfTop, top - listView.getPaddingTop());
-               }
-               adapterTag.m_isReadingItems = true;
+               View v = listView.getChildAt(0);
+               top = null == v ? 0 : v.getTop();
             }
+
+            /* Set the adapters to be these new lists and do not read items while updating. */
+            adapterTag.m_isReadingItems = false;
+
+            Utilities.replaceAll(adapterTag.m_feedItems, maps[i].values());
+            Utilities.replaceAll(adapterTag.m_times, maps[i].keySet());
+
+            adapterTag.notifyDataSetChanged();
+
+            /* We now need to find the position of the item with the time timeBefore. */
+            int newPositionOfTop = adapterTag.m_times.indexOf(timeBefore);
+            if(-1 == newPositionOfTop)
+            {
+               FeedsActivity.gotoLatestUnread(listView);
+            }
+            else
+            {
+               listView.setSelectionFromTop(newPositionOfTop, top - listView.getPaddingTop());
+            }
+            adapterTag.m_isReadingItems = true;
          }
+         ((View) listView.getParent()).setVisibility(View.VISIBLE);
       }
    }
 }

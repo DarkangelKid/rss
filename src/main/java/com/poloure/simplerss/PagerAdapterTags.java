@@ -25,6 +25,7 @@ import android.support.v4.view.ViewPager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -40,26 +41,20 @@ class PagerAdapterTags extends FragmentPagerAdapter
    {
       super(fm);
 
-      Set<String> tagSet = getTagsFromDisk(activity);
-      TAG_LIST.clear();
-      TAG_LIST.addAll(tagSet);
-
+      Utilities.replaceAll(TAG_LIST, getTagsFromDisk(activity));
       notifyDataSetChanged();
    }
 
    static
    void update(Activity activity)
    {
-      ViewPager pager = (ViewPager) activity.findViewById(R.id.viewpager);
-      Set<String> tagSet = getTagsFromDisk(activity);
-      TAG_LIST.clear();
-      TAG_LIST.addAll(tagSet);
+      Utilities.replaceAll(TAG_LIST, getTagsFromDisk(activity));
 
-      pager.getAdapter().notifyDataSetChanged();
+      ((ViewPager) activity.findViewById(R.id.viewpager)).getAdapter().notifyDataSetChanged();
    }
 
    static
-   Set<String> getTagsFromDisk(Context context)
+   Collection<String> getTagsFromDisk(Context context)
    {
       /* Get the all tag from resources. */
       String allTag = context.getString(R.string.all_tag);

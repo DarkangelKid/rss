@@ -19,6 +19,7 @@
 <resources>
 
    <string name="application_name">Simple Rss</string>
+   <string name="empty_list_view">Pull down to refresh tag</string>
 
    <!-- The All tag.-->
    <string name="all_tag">All</string>

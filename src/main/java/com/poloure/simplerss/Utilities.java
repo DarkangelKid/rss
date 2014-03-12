@@ -26,6 +26,7 @@ import android.support.v4.view.ViewPager;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.widget.Adapter;
+import android.widget.HeaderViewListAdapter;
 import android.widget.ListView;
 import android.widget.WrapperListAdapter;
 
@@ -37,6 +38,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.text.NumberFormat;
+import java.util.Collection;
 import java.util.Locale;
 
 class Utilities
@@ -95,6 +97,14 @@ class Utilities
    }
 
    static
+   void setNavigationTagSelection(Activity activity, int position)
+   {
+      ListView list = (ListView) activity.findViewById(R.id.navigation_drawer);
+      int headers = ((HeaderViewListAdapter) list.getAdapter()).getHeadersCount();
+      list.setItemChecked(position + headers, true);
+   }
+
+   static
    ListView getCurrentTagListView(Activity activity)
    {
       int currentPage = ((ViewPager) activity.findViewById(R.id.viewpager)).getCurrentItem();
@@ -105,6 +115,13 @@ class Utilities
    ListView getTagListView(Activity activity, int page)
    {
       return (ListView) activity.findViewById(ListFragmentTag.LIST_VIEW_ID_BASE + page);
+   }
+
+   static
+   void replaceAll(Collection a, Collection b)
+   {
+      a.clear();
+      a.addAll(b);
    }
 
    static

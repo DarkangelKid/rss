@@ -214,7 +214,7 @@ class ServiceUpdate extends IntentService
 
             /* Shrink it to VIEW_HEIGHT if that is more than the scaled height. */
             int maxHeight = Math.round(context.getResources()
-                                              .getDimension(R.dimen.max_image_height));
+                  .getDimension(R.dimen.max_image_height));
             int newHeight = Math.min(bitmap.getHeight(), maxHeight);
             bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), newHeight);
 
@@ -312,7 +312,7 @@ class ServiceUpdate extends IntentService
       for(int i = 0; i < content[0].length; i++)
       {
          if(0 == page || Arrays.asList(PagerAdapterTags.SPLIT_COMMA.split(content[2][i]))
-                               .contains(tag))
+               .contains(tag))
          {
             try
             {

@@ -231,9 +231,9 @@ class FragmentNavigationDrawer extends Fragment
          {
             /* Switch the content frame fragment. */
             m_manager.beginTransaction()
-                     .hide(FeedsActivity.getFragment(m_manager, m_activity.m_currentFragment))
-                     .show(FeedsActivity.getFragment(m_manager, newTag))
-                     .commit();
+                  .hide(FeedsActivity.getFragment(m_manager, m_activity.m_currentFragment))
+                  .show(FeedsActivity.getFragment(m_manager, newTag))
+                  .commit();
             m_activity.m_currentFragment = newTag;
          }
 

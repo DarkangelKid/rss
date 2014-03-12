@@ -28,10 +28,10 @@ import android.widget.TextView;
 
 class DialogEditFeed extends Dialog
 {
-   final Activity m_activity;
-   final int m_pos;
-   String m_oldUid = "";
-   AsyncTask<Void, Void, String[]> m_task;
+   private final Activity m_activity;
+   private final int m_pos;
+   private String m_oldUid = "";
+   private AsyncTask<Void, Void, String[]> m_task;
 
    private
    DialogEditFeed(Activity activity, int position)

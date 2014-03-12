@@ -22,8 +22,6 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.ContextMenu;
@@ -36,6 +34,7 @@ import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 public
@@ -62,11 +61,10 @@ class ListFragmentTag extends Fragment
    {
       final Activity activity = getActivity();
 
-      m_listView = new ListView(activity);
+      RelativeLayout layout = (RelativeLayout) inflater.inflate(R.layout.list_view_tag, null, false);
+      m_listView = (ListView) layout.findViewById(R.id.list_view);
+
       m_listView.setId(LIST_VIEW_ID_BASE + getArguments().getInt(POSITION_KEY));
-      m_listView.setDivider(new ColorDrawable(getResources().getColor(R.color.item_separator)));
-      m_listView.setDividerHeight(1);
-      m_listView.setSelector(new ColorDrawable(Color.TRANSPARENT));
       m_listView.setOnScrollListener(new AbsListView.OnScrollListener()
       {
          private static final int TOUCH = AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL;
@@ -107,7 +105,7 @@ class ListFragmentTag extends Fragment
       });
       registerForContextMenu(m_listView);
 
-      return m_listView;
+      return layout;
    }
 
    @Override
@@ -117,6 +115,7 @@ class ListFragmentTag extends Fragment
       super.onActivityCreated(savedInstanceState);
 
       m_listView.setAdapter(new AdapterTags(getActivity()));
+      m_listView.setEmptyView(((View) m_listView.getParent()).findViewById(R.id.empty));
       if(s_firstLoad)
       {
          AsyncNewTagAdapters.update(getActivity());
