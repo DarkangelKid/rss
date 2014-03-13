@@ -18,6 +18,8 @@ package com.poloure.simplerss;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.ListFragment;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -147,22 +149,47 @@ class ListFragmentTag extends Fragment
       FeedItem feedItem = ((ViewFeedItem) info.targetView).m_item;
       String url = feedItem.m_url;
 
-      Context context = getActivity();
+      Activity activity = getActivity();
 
-      if(R.id.copy == item.getItemId())
+      switch(item.getItemId())
       {
-         ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-         clipboard.setPrimaryClip(ClipData.newPlainText("Url", url));
+         case R.id.copy:
+            ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
+            clipboard.setPrimaryClip(ClipData.newPlainText("Url", url));
 
-         Toast toast = Toast.makeText(context, getString(R.string.toast_url_copied) + ' ' + url, Toast.LENGTH_SHORT);
-         toast.show();
-         return true;
+            Toast.makeText(activity, getString(R.string.toast_url_copied) + ' ' + url, Toast.LENGTH_SHORT)
+                  .show();
+            return true;
+
+         case R.id.open:
+            activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+            return true;
+
+         case R.id.favourite:
+            addToFavourites(activity, feedItem);
+            return true;
+
+         default:
+            return false;
       }
-      if(R.id.open == item.getItemId())
-      {
-         context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
-         return true;
-      }
-      return false;
+   }
+
+   static
+   AdapterFavourites getFavouritesAdapter(Activity activity)
+   {
+      FragmentManager manager = activity.getFragmentManager();
+      ListFragment fragment = (ListFragment) manager.findFragmentByTag(FeedsActivity.FAVOURITES_TAG);
+      return (AdapterFavourites) fragment.getListAdapter();
+   }
+
+   private static
+   void addToFavourites(Activity activity, FeedItem item)
+   {
+      AdapterFavourites adapter = getFavouritesAdapter(activity);
+      adapter.m_feedItems.add(item);
+      adapter.notifyDataSetChanged();
+
+      Toast.makeText(activity, activity.getString(R.string.toast_added_feed, item.m_title), Toast.LENGTH_SHORT)
+            .show();
    }
 }

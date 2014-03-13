@@ -56,5 +56,4 @@ class FeedItem implements Serializable
       m_desLines = (String[]) in.readObject();
       m_time = in.readLong();
    }
-
 }

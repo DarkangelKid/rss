@@ -157,6 +157,7 @@ class FeedsActivity extends Activity
       super.onStop();
       Write.object(this, READ_ITEMS, AdapterTags.READ_ITEM_TIMES);
       Write.object(this, Read.INDEX, s_index);
+      Write.object(this, Read.FAVOURITES, ListFragmentTag.getFavouritesAdapter(this).m_feedItems);
       setServiceIntent(ALARM_SERVICE_START);
    }
 

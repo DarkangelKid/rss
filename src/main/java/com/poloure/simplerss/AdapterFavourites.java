@@ -21,8 +21,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 class AdapterFavourites extends BaseAdapter
 {
@@ -31,20 +31,24 @@ class AdapterFavourites extends BaseAdapter
    private static final int TYPE_IMAGE_SANS_DESCRIPTION = 2;
    private static final int TYPE_PLAIN_SANS_DESCRIPTION = 3;
 
-   /* We use indexOf on this Long List so it can not be a Set. */
-   final List<FeedItem> m_feedItems = new ArrayList<FeedItem>(0);
+   Set<FeedItem> m_feedItems = new LinkedHashSet<FeedItem>(0);
    private final Context m_context;
 
    AdapterFavourites(Context context)
    {
       m_context = context;
+      LinkedHashSet<FeedItem> list = (LinkedHashSet<FeedItem>) Read.object(context, Read.FAVOURITES);
+      if(null != list)
+      {
+         m_feedItems = new LinkedHashSet<FeedItem>(list);
+      }
    }
 
    @Override
    public
    int getItemViewType(int position)
    {
-      FeedItem feedItem = m_feedItems.get(position);
+      FeedItem feedItem = m_feedItems.toArray(new FeedItem[m_feedItems.size()])[position];
 
       boolean isImage = !feedItem.m_imageLink.isEmpty();
       boolean isDes = !feedItem.m_desLines[0].isEmpty();
@@ -70,7 +74,7 @@ class AdapterFavourites extends BaseAdapter
    public
    Object getItem(int position)
    {
-      return m_feedItems.get(position);
+      return m_feedItems.toArray(new FeedItem[m_feedItems.size()])[position];
    }
 
    @Override
@@ -89,7 +93,7 @@ class AdapterFavourites extends BaseAdapter
       boolean hasImg = TYPE_IMAGE == viewType || TYPE_IMAGE_SANS_DESCRIPTION == viewType;
 
       ViewFeedItem view = null != convertView ? (ViewFeedItem) convertView : new ViewFeedItem(m_context, viewType);
-      FeedItem item = m_feedItems.get(position);
+      FeedItem item = m_feedItems.toArray(new FeedItem[m_feedItems.size()])[position];
 
       /* If the recycled view is the view we want, keep it. */
       if(null != convertView)
@@ -110,7 +114,7 @@ class AdapterFavourites extends BaseAdapter
       {
          view.setBitmap(null);
          view.setTag(item.m_time);
-         AsyncLoadImage.newInstance(view, item.m_imageLink, item.m_time);
+         AsyncLoadImage.newInstance(view, item.m_imageName, item.m_time);
       }
 
       return view;

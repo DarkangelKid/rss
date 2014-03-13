@@ -71,7 +71,9 @@ class ListFragmentFavourites extends ListFragment
       public
       boolean onActionItemClicked(ActionMode mode, MenuItem item)
       {
-         if(R.id.select_all == item.getItemId())
+         int itemId = item.getItemId();
+
+         if(R.id.select_all == itemId)
          {
             for(int i = 0; m_listView.getCount() > i; i++)
             {
@@ -84,22 +86,23 @@ class ListFragmentFavourites extends ListFragment
          }
          else
          {
+            AdapterFavourites adapter = (AdapterFavourites) m_listView.getAdapter();
+
             SparseBooleanArray checked = m_listView.getCheckedItemPositions();
-            for(int i = 0; checked.size() > i; i++)
+            for(int i = checked.size() - 1; 0 <= i; i--)
             {
                if(checked.valueAt(i))
                {
                   int position = checked.keyAt(i);
 
-                  switch(item.getItemId())
+                  if(R.id.delete_feed == itemId)
                   {
-                     case R.id.delete_feed:
-                     case R.id.delete_content:
+                     adapter.m_feedItems.remove(position);
                   }
                }
             }
-
             mode.finish();
+            adapter.notifyDataSetChanged();
          }
          return true;
       }
@@ -113,6 +116,7 @@ class ListFragmentFavourites extends ListFragment
          if(null != inflater)
          {
             inflater.inflate(R.menu.context_manage, menu);
+            menu.findItem(R.id.delete_content).setVisible(false);
             return true;
          }
          return false;

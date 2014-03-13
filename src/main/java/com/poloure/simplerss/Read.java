@@ -27,6 +27,7 @@ import java.io.StreamCorruptedException;
 class Read
 {
    static final String INDEX = "index.txt";
+   static final String FAVOURITES = "favourites.txt";
 
    static
    Object object(Context context, String fileName)

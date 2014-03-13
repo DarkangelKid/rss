@@ -16,5 +16,8 @@
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
    <item android:drawable="@color/holo_light_pressed" android:state_pressed="true"/>
+   <item android:drawable="@color/holo_light_checked" android:state_activated="true"/>
+   <item android:drawable="@color/holo_light_checked" android:state_checked="true"/>
+   <item android:drawable="@color/holo_light_checked" android:state_selected="true"/>
    <item android:drawable="@android:color/white"/>
 </selector>
