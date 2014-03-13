@@ -88,8 +88,10 @@ class ListFragmentFavourites extends ListFragment
          {
             AdapterFavourites adapter = (AdapterFavourites) m_listView.getAdapter();
 
+            FeedItem[] items = adapter.m_feedItems.toArray(new FeedItem[adapter.m_feedItems.size()]);
+
             SparseBooleanArray checked = m_listView.getCheckedItemPositions();
-            for(int i = checked.size() - 1; 0 <= i; i--)
+            for(int i = 0; checked.size() > i; i++)
             {
                if(checked.valueAt(i))
                {
@@ -97,14 +99,13 @@ class ListFragmentFavourites extends ListFragment
 
                   if(R.id.delete_feed == itemId)
                   {
-                     adapter.m_feedItems.remove(position);
+                     adapter.m_feedItems.remove(items[position]);
                   }
                }
             }
             mode.finish();
             adapter.notifyDataSetChanged();
-         }
-         return true;
+         } return true;
       }
 
       /* true - the action mode should be created, false - entering this mode should be aborted. */
