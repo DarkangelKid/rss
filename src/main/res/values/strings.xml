@@ -30,8 +30,9 @@
    <string name="drawer_close">Close navigation drawer</string>
 
    <!-- ActionBar icon descriptions. -->
-   <string name="actionbar_add">Add</string>
-   <string name="actionbar_unread">Unread</string>
+   <string name="ic_action_add">Add</string>
+   <string name="ic_action_unread">Unread</string>
+   <string name="ic_action_share">Share</string>
 
    <!-- ActionBar subtitle for unread items. -->
    <plurals name="actionbar_subtitle_unread">

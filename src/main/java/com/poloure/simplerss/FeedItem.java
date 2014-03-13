@@ -23,14 +23,15 @@ import java.io.Serializable;
 
 class FeedItem implements Serializable
 {
-   private static final long serialVersionUID = 2L;
+   private static final long serialVersionUID = 3L;
 
    String m_title = "";
    String m_imageLink = "";
    String m_imageName = "";
    String m_urlTrimmed = "";
    String m_url = "";
-   String[] m_desLines = {"n", "n", "n"};
+   String m_content = "";
+   String[] m_desLines = {"", "", ""};
    Long m_time = 0L;
 
    private
@@ -41,6 +42,7 @@ class FeedItem implements Serializable
       out.writeUTF(m_imageName);
       out.writeUTF(m_urlTrimmed);
       out.writeUTF(m_url);
+      out.writeUTF(m_content);
       out.writeObject(m_desLines);
       out.writeLong(m_time);
    }
@@ -53,6 +55,7 @@ class FeedItem implements Serializable
       m_imageName = in.readUTF();
       m_urlTrimmed = in.readUTF();
       m_url = in.readUTF();
+      m_content = in.readUTF();
       m_desLines = (String[]) in.readObject();
       m_time = in.readLong();
    }

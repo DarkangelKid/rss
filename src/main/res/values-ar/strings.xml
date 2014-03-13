@@ -26,8 +26,8 @@
    <string name="drawer_close">غلق القائمة الرئيسية‎</string>
 
    <!-- ActionBar icon descriptions. -->
-   <string name="actionbar_add">اضافة</string>
-   <string name="actionbar_unread">غير مقروء</string>
+   <string name="ic_action_add">اضافة</string>
+   <string name="ic_action_unread">غير مقروء</string>
 
    <!-- TODO ActionBar subtitle for unread items. -->
    <plurals name="actionbar_subtitle_unread">

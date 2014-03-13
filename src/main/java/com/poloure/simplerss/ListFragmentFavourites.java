@@ -36,13 +36,14 @@ class ListFragmentFavourites extends ListFragment
    {
       super.onActivityCreated(savedInstanceState);
 
-      Activity activity = getActivity();
+      FeedsActivity activity = (FeedsActivity) getActivity();
       ListView listView = getListView();
 
       setListAdapter(new AdapterFavourites(activity));
 
       registerForContextMenu(listView);
       listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
+      listView.setOnItemClickListener(new OnItemClickWebView(activity));
       listView.setMultiChoiceModeListener(new MultiModeListener(listView, activity));
    }
 

@@ -24,7 +24,6 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -62,7 +61,7 @@ class FragmentNavigationDrawer extends Fragment
 
    static final String PREF_USER_LEARNED_DRAWER = "navigation_drawer_learned";
 
-   ActionBarDrawerToggle m_drawerToggle;
+   static ActionBarDrawerToggle s_drawerToggle;
 
    boolean m_userLearnedDrawer;
 
@@ -114,25 +113,11 @@ class FragmentNavigationDrawer extends Fragment
 
       /* Set up the action bar. */
       ActionBar actionBar = activity.getActionBar();
-      Resources resources = getResources();
-
-      Drawable appIcon = resources.getDrawable(R.drawable.ic_action_location_broadcast);
-
-      DrawableCompat.setAutoMirrored(appIcon, true);
 
       actionBar.setHomeButtonEnabled(true);
       actionBar.setDisplayHomeAsUpEnabled(true);
-      actionBar.setIcon(appIcon);
 
-      /* If the version is above API 18, flip the icon in RTL layouts. */
-      if(Build.VERSION_CODES.JELLY_BEAN_MR2 <= Build.VERSION.SDK_INT)
-      {
-         Drawable indicator = resources.getDrawable(R.drawable.ic_drawer);
-         DrawableCompat.setAutoMirrored(indicator, true);
-         actionBar.setHomeAsUpIndicator(indicator);
-      }
-
-      m_drawerToggle = new ActionBarDrawerToggle(getActivity(), drawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
+      s_drawerToggle = new ActionBarDrawerToggle(getActivity(), drawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
       {
          @Override
          public
@@ -172,10 +157,10 @@ class FragmentNavigationDrawer extends Fragment
          public
          void run()
          {
-            m_drawerToggle.syncState();
+            s_drawerToggle.syncState();
          }
       });
-      drawerLayout.setDrawerListener(m_drawerToggle);
+      drawerLayout.setDrawerListener(s_drawerToggle);
    }
 
    @Override
@@ -183,7 +168,7 @@ class FragmentNavigationDrawer extends Fragment
    void onConfigurationChanged(Configuration newConfig)
    {
       super.onConfigurationChanged(newConfig);
-      m_drawerToggle.onConfigurationChanged(newConfig);
+      s_drawerToggle.onConfigurationChanged(newConfig);
    }
 
    private static

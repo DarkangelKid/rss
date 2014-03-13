@@ -17,13 +17,17 @@
 <menu
    xmlns:android="http://schemas.android.com/apk/res/android">
    <item
-      android:title="@string/actionbar_add"
+      android:title="@string/ic_action_add"
       android:icon="@drawable/ic_action_new_dimmable"
       android:onClick="onAddClick"
       android:showAsAction="ifRoom"/>
    <item
-      android:title="@string/actionbar_unread"
+      android:title="@string/ic_action_unread"
       android:icon="@drawable/ic_action_time_dimmable"
       android:onClick="onUnreadClick"
+      android:showAsAction="ifRoom"/>
+   <item
+      android:title="@string/ic_action_share"
+      android:icon="@drawable/ic_action_share"
       android:showAsAction="ifRoom"/>
 </menu>

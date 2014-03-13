@@ -31,6 +31,9 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewFragment;
 import android.widget.AbsListView;
 import android.widget.Adapter;
 import android.widget.AdapterView;
@@ -42,6 +45,7 @@ import android.widget.Toast;
 public
 class ListFragmentTag extends Fragment
 {
+
    private static final String POSITION_KEY = "POSITION";
    private ListView m_listView;
    static boolean s_firstLoad = true;
@@ -61,12 +65,13 @@ class ListFragmentTag extends Fragment
    public
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
-      final Activity activity = getActivity();
+      final FeedsActivity activity = (FeedsActivity) getActivity();
 
       RelativeLayout layout = (RelativeLayout) inflater.inflate(R.layout.list_view_tag, null, false);
       m_listView = (ListView) layout.findViewById(R.id.list_view);
 
       m_listView.setId(LIST_VIEW_ID_BASE + getArguments().getInt(POSITION_KEY));
+      m_listView.setOnItemClickListener(new OnItemClickWebView(activity));
       m_listView.setOnScrollListener(new AbsListView.OnScrollListener()
       {
          private static final int TOUCH = AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL;
@@ -121,8 +126,24 @@ class ListFragmentTag extends Fragment
       if(s_firstLoad)
       {
          AsyncNewTagAdapters.update(getActivity());
+
+         FragmentManager manager = getActivity().getFragmentManager();
+         Fragment webFragment = manager.findFragmentByTag(FeedsActivity.WEB_TAG);
+
+         WebView webView = ((WebViewFragment) webFragment).getWebView();
+         webView.setInitialScale(120);
+         webView.getSettings().setBuiltInZoomControls(true);
+         webView.getSettings().setDisplayZoomControls(false);
+         webView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
          s_firstLoad = false;
       }
+   }
+
+   @Override
+   public boolean onOptionsItemSelected(MenuItem menuItem)
+   {
+      getActivity().onBackPressed();
+      return true;
    }
 
    @Override

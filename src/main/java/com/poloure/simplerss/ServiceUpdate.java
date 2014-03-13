@@ -418,6 +418,8 @@ class ServiceUpdate extends IntentService
             else if(tag.equals(Tags.CONTENT) || tag.equals(Tags.DESCRIPTION))
             {
                String content = getContent(parser);
+               feedItem.m_content = content;
+
                parseHtmlForImage(this, content, feedItem);
                content = Patterns.CDATA.matcher(content).replaceAll("").trim();
                appendDesLines(resources, feedItem, content);

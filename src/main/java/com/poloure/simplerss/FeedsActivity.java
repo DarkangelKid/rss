@@ -16,6 +16,7 @@
 
 package com.poloure.simplerss;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.Fragment;
@@ -27,9 +28,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.view.LayoutInflater;
@@ -37,6 +40,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebViewFragment;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -62,6 +66,7 @@ class FeedsActivity extends Activity
 
    static List<IndexItem> s_index;
 
+   static final String WEB_TAG = "Web";
    static final String FEED_TAG = "Feeds";
    static final String FAVOURITES_TAG = "Favourites";
    static final String MANAGE_TAG = "Manage";
@@ -117,6 +122,9 @@ class FeedsActivity extends Activity
             transaction.hide(fragment);
          }
       }
+      Fragment webFragment = getFragment(manager, WEB_TAG);
+      transaction.add(R.id.content_frame, webFragment, WEB_TAG);
+      transaction.hide(webFragment);
       transaction.commit();
    }
 
@@ -130,7 +138,10 @@ class FeedsActivity extends Activity
       registerReceiver(Receiver, new IntentFilter(ServiceUpdate.BROADCAST_ACTION));
 
       /* Update the navigation adapter. */
-      AsyncNavigationAdapter.update(this);
+      if(!isWebViewVisible())
+      {
+         AsyncNavigationAdapter.update(this);
+      }
    }
 
    /* Activity is now running.
@@ -170,13 +181,26 @@ class FeedsActivity extends Activity
    public
    boolean onOptionsItemSelected(MenuItem item)
    {
-      return m_FragmentNavigationDrawer.m_drawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
+      if(android.R.id.home == item.getItemId() && isWebViewVisible())
+      {
+         onBackPressed();
+         return true;
+      }
+      return m_FragmentNavigationDrawer.s_drawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
    }
 
    @Override
    public
    boolean onPrepareOptionsMenu(Menu menu)
    {
+      CharSequence title = getActionBar().getTitle();
+
+      boolean visible = null != title && !title.toString().contains(".");
+
+      menu.getItem(0).setVisible(visible);
+      menu.getItem(1).setVisible(visible);
+      menu.getItem(2).setVisible(!visible);
+
       boolean feed = m_currentFragment.equals(FEED_TAG);
       boolean manage = m_currentFragment.equals(MANAGE_TAG);
 
@@ -253,6 +277,45 @@ class FeedsActivity extends Activity
       {
          am.cancel(pendingIntent);
       }
+   }
+
+   @Override
+   public
+   void onBackPressed()
+   {
+      super.onBackPressed();
+
+      if(isWebViewVisible())
+      {
+         ActionBar bar = getActionBar();
+
+         boolean isFavourites = m_currentFragment.equals(FAVOURITES_TAG);
+         if(isFavourites)
+         {
+            bar.setTitle(getResources().getStringArray(R.array.navigation_titles)[0]);
+            bar.setSubtitle(null);
+         }
+         else
+         {
+            Utilities.updateTagTitle(this);
+            Utilities.updateSubtitle(this);
+         }
+
+         int res = isFavourites ? R.drawable.ic_action_important : R.drawable.ic_action_labels;
+         Drawable icon = getResources().getDrawable(res);
+         DrawableCompat.setAutoMirrored(icon, true);
+
+         bar.setIcon(icon);
+
+         FragmentNavigationDrawer.s_drawerToggle.setDrawerIndicatorEnabled(true);
+         invalidateOptionsMenu();
+      }
+   }
+
+   boolean isWebViewVisible()
+   {
+      CharSequence title = getActionBar().getTitle();
+      return null != title && title.toString().contains(".");
    }
 
    public
@@ -365,6 +428,10 @@ class FeedsActivity extends Activity
                   addPreferencesFromResource(R.xml.preferences);
                }
             };
+         }
+         if(tag.equals(WEB_TAG))
+         {
+            return new WebViewFragment();
          }
       }
       return fragment;
