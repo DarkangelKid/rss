@@ -162,31 +162,34 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, IndexItem>
       /* For each tag. */
       for(String tag : tags)
       {
-         tagBuilder.setLength(0);
-
-         /* In case the tag is multiple words. */
-         String[] words = SPLIT_SPACE.split(tag);
-
-         /* The input tag is all lowercase. */
-         for(String word : words)
+         if(!tag.trim().isEmpty())
          {
-            if(!word.isEmpty())
+            tagBuilder.setLength(0);
+
+            /* In case the tag is multiple words. */
+            String[] words = SPLIT_SPACE.split(tag);
+
+            /* The input tag is all lowercase. */
+            for(String word : words)
             {
-               char firstLetter = word.charAt(0);
-               char firstLetterUpper = Character.toUpperCase(firstLetter);
+               if(!word.isEmpty())
+               {
+                  char firstLetter = word.charAt(0);
+                  char firstLetterUpper = Character.toUpperCase(firstLetter);
 
-               String restOfWord = word.substring(1);
+                  String restOfWord = word.substring(1);
 
-               tagBuilder.append(firstLetterUpper);
-               tagBuilder.append(restOfWord);
-               tagBuilder.append(' ');
+                  tagBuilder.append(firstLetterUpper);
+                  tagBuilder.append(restOfWord);
+                  tagBuilder.append(' ');
+               }
             }
-         }
-         /* Delete the last space. */
-         int builderLength = tagBuilder.length();
-         tagBuilder.deleteCharAt(builderLength - 1);
+            /* Delete the last space. */
+            int builderLength = tagBuilder.length();
+            tagBuilder.deleteCharAt(builderLength - 1);
 
-         tagList.add(tagBuilder.toString());
+            tagList.add(tagBuilder.toString());
+         }
       }
 
       return tagList.toArray(new String[tagList.size()]);
