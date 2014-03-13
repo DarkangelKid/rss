@@ -31,8 +31,8 @@ import android.view.View;
 class ViewNavItem extends View
 {
    private static final Paint[] m_paints = new Paint[2];
-   private static final Bitmap[] m_bitmaps_dark = new Bitmap[2];
-   private static final Bitmap[] m_bitmaps_light = new Bitmap[2];
+   private static final Bitmap[] m_bitmaps_dark = new Bitmap[3];
+   private static final Bitmap[] m_bitmaps_light = new Bitmap[3];
 
    String m_text = "";
    String m_count = "";
@@ -52,11 +52,15 @@ class ViewNavItem extends View
       if(null == m_bitmaps_dark[0])
       {
          int[] drawables_dark = {
-               R.drawable.ic_action_storage, R.drawable.ic_action_settings,
+               R.drawable.ic_action_important,
+               R.drawable.ic_action_storage,
+               R.drawable.ic_action_settings,
          };
 
          int[] drawables_light = {
-               R.drawable.ic_action_storage_light, R.drawable.ic_action_settings_light,
+               R.drawable.ic_action_important_light,
+               R.drawable.ic_action_storage_light,
+               R.drawable.ic_action_settings_light,
          };
 
          for(int i = 0; i < m_bitmaps_dark.length; i++)

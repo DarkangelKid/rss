@@ -21,40 +21,35 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-class FeedItem implements Serializable
+class IndexItem implements Serializable
 {
-   private static final long serialVersionUID = 2L;
+   private static final long serialVersionUID = 200L;
 
-   String m_title = "";
-   String m_imageLink = "";
-   String m_imageName = "";
-   String m_urlTrimmed = "";
-   String m_url = "";
-   String[] m_desLines = {"n", "n", "n"};
-   Long m_time = 0L;
+   long m_uid;
+   String m_url;
+   String[] m_tags;
+
+   IndexItem(long id, String url, String... tags)
+   {
+      m_uid = id;
+      m_url = url;
+      m_tags = tags;
+   }
 
    private
    void writeObject(ObjectOutputStream out) throws IOException
    {
-      out.writeUTF(m_title);
-      out.writeUTF(m_imageLink);
-      out.writeUTF(m_imageName);
-      out.writeUTF(m_urlTrimmed);
+      out.writeLong(m_uid);
       out.writeUTF(m_url);
-      out.writeObject(m_desLines);
-      out.writeLong(m_time);
+      out.writeObject(m_tags);
    }
 
    private
    void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException
    {
-      m_title = in.readUTF();
-      m_imageLink = in.readUTF();
-      m_imageName = in.readUTF();
-      m_urlTrimmed = in.readUTF();
+      m_uid = in.readLong();
       m_url = in.readUTF();
-      m_desLines = (String[]) in.readObject();
-      m_time = in.readLong();
+      m_tags = (String[]) in.readObject();
    }
 
 }

@@ -24,12 +24,11 @@ import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.AbsListView;
 import android.widget.ListView;
 
 public
-class ListFragmentManage extends ListFragment
+class ListFragmentFavourites extends ListFragment
 {
    @Override
    public
@@ -40,30 +39,11 @@ class ListFragmentManage extends ListFragment
       Activity activity = getActivity();
       ListView listView = getListView();
 
-      setListAdapter(new AdapterManage(activity));
+      setListAdapter(new AdapterFavourites(activity));
 
       registerForContextMenu(listView);
       listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
       listView.setMultiChoiceModeListener(new MultiModeListener(listView, activity));
-   }
-
-   /* Called when the fragment is shown. */
-   @Override
-   public
-   void onHiddenChanged(boolean hidden)
-   {
-      super.onHiddenChanged(hidden);
-      if(!hidden)
-      {
-         AsyncManageAdapter.update(getActivity());
-      }
-   }
-
-   @Override
-   public
-   void onListItemClick(ListView l, View v, int position, long id)
-   {
-      DialogEditFeed.newInstance(getActivity(), position).show();
    }
 
    private static
@@ -104,7 +84,6 @@ class ListFragmentManage extends ListFragment
          }
          else
          {
-            /* Read this once so that the positions are the same. */
             SparseBooleanArray checked = m_listView.getCheckedItemPositions();
             for(int i = 0; checked.size() > i; i++)
             {
@@ -112,26 +91,13 @@ class ListFragmentManage extends ListFragment
                {
                   int position = checked.keyAt(i);
 
-                  IndexItem indexItem = FeedsActivity.s_index.get(position);
-
                   switch(item.getItemId())
                   {
                      case R.id.delete_feed:
-                        FeedsActivity.s_index.remove(indexItem);
                      case R.id.delete_content:
-                        for(String file : ServiceUpdate.FEED_FILES)
-                        {
-                           m_activity.deleteFile(indexItem.m_uid + file);
-                        }
                   }
                }
             }
-
-            /* Tags first, then manage, then pages, the unread counts. */
-            PagerAdapterTags.update(m_activity);
-            AsyncManageAdapter.update(m_activity);
-            AsyncNewTagAdapters.update(m_activity);
-            AsyncNavigationAdapter.update(m_activity);
 
             mode.finish();
          }

@@ -146,7 +146,7 @@ class ViewFeedItem extends View
       m_paints[1].setTextAlign(end);
       canvas.drawText(getTime(m_item.m_time), endPadding, verticalPosition, m_paints[1]);
 
-      String[] info = {m_item.m_title, m_item.m_url};
+      String[] info = {m_item.m_title, m_item.m_urlTrimmed};
 
       /* Draw the title and the url. */
       for(int i = 0; 2 > i; i++)

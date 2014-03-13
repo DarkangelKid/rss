@@ -22,26 +22,20 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-class AdapterTags extends BaseAdapter
+class AdapterFavourites extends BaseAdapter
 {
-   static final Set<Long> READ_ITEM_TIMES = Collections.synchronizedSet(new HashSet<Long>(0));
-   static final int TYPE_PLAIN = 0;
-   static final int TYPE_IMAGE = 1;
-   static final int TYPE_IMAGE_SANS_DESCRIPTION = 2;
-   static final int TYPE_PLAIN_SANS_DESCRIPTION = 3;
-   private static final float READ_OPACITY = 0.5F;
+   private static final int TYPE_PLAIN = 0;
+   private static final int TYPE_IMAGE = 1;
+   private static final int TYPE_IMAGE_SANS_DESCRIPTION = 2;
+   private static final int TYPE_PLAIN_SANS_DESCRIPTION = 3;
 
-   /* We use indexOf on this Long List so it can not be a Set. */ List<Long> m_times = new ArrayList<Long>(0);
-   List<FeedItem> m_feedItems = new ArrayList<FeedItem>(0);
+   /* We use indexOf on this Long List so it can not be a Set. */
+   final List<FeedItem> m_feedItems = new ArrayList<FeedItem>(0);
    private final Context m_context;
-   boolean m_isReadingItems;
 
-   AdapterTags(Context context)
+   AdapterFavourites(Context context)
    {
       m_context = context;
    }
@@ -97,11 +91,6 @@ class AdapterTags extends BaseAdapter
       ViewFeedItem view = null != convertView ? (ViewFeedItem) convertView : new ViewFeedItem(m_context, viewType);
       FeedItem item = m_feedItems.get(position);
 
-      /* Apply the read effect. */
-      boolean isRead = READ_ITEM_TIMES.contains(item.m_time);
-      view.setAlpha(isRead ? READ_OPACITY : 1.0F);
-      view.setBackgroundResource(isRead ? R.drawable.selector_transparent : R.drawable.selector_white);
-
       /* If the recycled view is the view we want, keep it. */
       if(null != convertView)
       {
@@ -111,7 +100,8 @@ class AdapterTags extends BaseAdapter
          }
       }
 
-      /* Set the information. */
+      view.setAlpha(1.0F);
+      view.setBackgroundResource(R.drawable.selector_white);
       view.m_item = item;
       view.m_hasImage = hasImg;
 
@@ -120,7 +110,7 @@ class AdapterTags extends BaseAdapter
       {
          view.setBitmap(null);
          view.setTag(item.m_time);
-         AsyncLoadImage.newInstance(view, item.m_imageName, item.m_time);
+         AsyncLoadImage.newInstance(view, item.m_imageLink, item.m_time);
       }
 
       return view;

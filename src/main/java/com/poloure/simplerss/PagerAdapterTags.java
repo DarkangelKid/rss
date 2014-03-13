@@ -30,26 +30,23 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 class PagerAdapterTags extends FragmentPagerAdapter
 {
-   static final Pattern SPLIT_COMMA = Pattern.compile(", ");
-   static final List<String> TAG_LIST = new ArrayList<String>(0);
+   static List<String> s_tagList = new ArrayList<String>(0);
 
    PagerAdapterTags(FragmentManager fm, Activity activity)
    {
       super(fm);
 
-      Utilities.replaceAll(TAG_LIST, getTagsFromDisk(activity));
+      s_tagList = new ArrayList<String>(getTagsFromDisk(activity));
       notifyDataSetChanged();
    }
 
    static
    void update(Activity activity)
    {
-      Utilities.replaceAll(TAG_LIST, getTagsFromDisk(activity));
-
+      s_tagList = new ArrayList<String>(getTagsFromDisk(activity));
       ((ViewPager) activity.findViewById(R.id.viewpager)).getAdapter().notifyDataSetChanged();
    }
 
@@ -63,10 +60,10 @@ class PagerAdapterTags extends FragmentPagerAdapter
       Set<String> tagSet = Collections.synchronizedSet(new LinkedHashSet<String>(0));
       tagSet.add(allTag);
 
-      String[] tags = Read.csvFile(context, Read.INDEX, 't')[0];
-      for(String tag : tags)
+      List<IndexItem> indexItems = FeedsActivity.s_index;
+      for(IndexItem indexItem : indexItems)
       {
-         tagSet.addAll(Arrays.asList(SPLIT_COMMA.split(tag)));
+         tagSet.addAll(Arrays.asList(indexItem.m_tags));
       }
       return tagSet;
    }
@@ -82,13 +79,13 @@ class PagerAdapterTags extends FragmentPagerAdapter
    public
    int getCount()
    {
-      return TAG_LIST.size();
+      return s_tagList.size();
    }
 
    @Override
    public
    String getPageTitle(int position)
    {
-      return TAG_LIST.get(position);
+      return s_tagList.get(position);
    }
 }

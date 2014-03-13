@@ -28,10 +28,9 @@ import android.widget.TextView;
 
 class DialogEditFeed extends Dialog
 {
-   private final Activity m_activity;
-   private final int m_pos;
-   private String m_oldUid = "";
-   private AsyncTask<Void, Void, String[]> m_task;
+   final Activity m_activity;
+   final int m_pos;
+   AsyncTask<Void, Void, IndexItem> m_task;
 
    private
    DialogEditFeed(Activity activity, int position)
@@ -61,8 +60,8 @@ class DialogEditFeed extends Dialog
       setContentView(R.layout.add_edit_dialog);
 
       /* Get the current tags. */
-      int tagListSize = PagerAdapterTags.TAG_LIST.size();
-      String[] tags = PagerAdapterTags.TAG_LIST.toArray(new String[tagListSize]);
+      int tagListSize = PagerAdapterTags.s_tagList.size();
+      String[] tags = PagerAdapterTags.s_tagList.toArray(new String[tagListSize]);
       int oneLine = android.R.layout.simple_dropdown_item_1line;
 
       /* Configure the MultiAutoCompleteTextView. */
@@ -70,23 +69,21 @@ class DialogEditFeed extends Dialog
       tagEdit.setAdapter(new ArrayAdapter<String>(m_activity, oneLine, tags));
       tagEdit.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
 
-      String oldLine = "";
+      final IndexItem oldItem;
 
       /* If this is an edit dialog, set the EditTexts and save the old information. */
       if(-1 != m_pos)
       {
-         String[][] content = Read.csvFile(getContext(), Read.INDEX, 'i', 'u', 't');
-         m_oldUid = content[0][m_pos];
-         String oldUrl = content[1][m_pos];
-         String oldTags = content[2][m_pos];
+         oldItem = FeedsActivity.s_index.get(m_pos);
 
-         ((TextView) findViewById(R.id.dialog_url)).setText(oldUrl);
-         ((TextView) findViewById(R.id.dialog_tags)).setText(oldTags);
-
-         oldLine = String.format(AsyncCheckFeed.INDEX_FORMAT, m_oldUid, oldUrl, oldTags);
+         ((TextView) findViewById(R.id.dialog_url)).setText(oldItem.m_url);
+         ((TextView) findViewById(R.id.dialog_tags)).setText(Utilities.formatTags(oldItem.m_tags));
+      }
+      else
+      {
+         oldItem = null;
       }
 
-      final String oldIndex = oldLine;
       final Dialog dialog = this;
 
       Button buttonNegative = (Button) findViewById(R.id.dialog_button_negative);
@@ -122,7 +119,7 @@ class DialogEditFeed extends Dialog
          public
          void onClick(View v)
          {
-            m_task = AsyncCheckFeed.newInstance(m_activity, dialog, oldIndex, -1 == m_pos ? "" : m_oldUid);
+            m_task = AsyncCheckFeed.newInstance(m_activity, dialog, oldItem);
          }
       });
    }

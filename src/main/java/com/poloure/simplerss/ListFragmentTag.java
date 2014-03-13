@@ -145,7 +145,7 @@ class ListFragmentTag extends Fragment
       /* Get the feed url from the FeedItem. */
       AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
       FeedItem feedItem = ((ViewFeedItem) info.targetView).m_item;
-      String url = feedItem.m_urlFull;
+      String url = feedItem.m_url;
 
       Context context = getActivity();
 

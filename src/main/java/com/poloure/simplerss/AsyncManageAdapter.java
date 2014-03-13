@@ -22,11 +22,10 @@ import android.app.ListFragment;
 import android.content.Context;
 import android.os.AsyncTask;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.text.NumberFormat;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 
 class AsyncManageAdapter extends AsyncTask<String, String[][], Void>
@@ -56,29 +55,8 @@ class AsyncManageAdapter extends AsyncTask<String, String[][], Void>
    private static
    int count(Context context, String fileName)
    {
-      int count = 0;
-      try
-      {
-         BufferedReader read = new BufferedReader(new InputStreamReader(context.openFileInput(fileName)));
-         try
-         {
-            while(null != read.readLine())
-            {
-               count++;
-            }
-         }
-         finally
-         {
-            if(null != read)
-            {
-               read.close();
-            }
-         }
-      }
-      catch(IOException ignored)
-      {
-      }
-      return count;
+      Collection<Long> set = (Collection<Long>) Read.object(context, fileName);
+      return null == set ? 0 : set.size();
    }
 
    @Override
@@ -86,18 +64,17 @@ class AsyncManageAdapter extends AsyncTask<String, String[][], Void>
    Void doInBackground(String... applicationFolder)
    {
       /* Read the index file for names, urls, and tags. */
-      String[][] feedsIndex = Read.csvFile(m_context, Read.INDEX, 'i', 'u', 't');
-      int size = feedsIndex[0].length;
-
       NumberFormat format = NumberFormat.getNumberInstance(Locale.getDefault());
-      String[][] strings = new String[size][3];
+      List<IndexItem> indexItems = FeedsActivity.s_index;
+      String[][] strings = new String[indexItems.size()][3];
 
-      for(int i = 0; i < size; i++)
+      for(int i = 0; i < indexItems.size(); i++)
       {
          /* Append the url to the next line. */
-         strings[i][0] = format.format(count(m_context, feedsIndex[0][i] + ServiceUpdate.CONTENT_FILE));
-         strings[i][1] = feedsIndex[1][i];
-         strings[i][2] = feedsIndex[2][i];
+         IndexItem item = indexItems.get(i);
+         strings[i][0] = format.format(count(m_context, item.m_uid + ServiceUpdate.ITEM_LIST));
+         strings[i][1] = item.m_url;
+         strings[i][2] = Utilities.formatTags(item.m_tags);
       }
       publishProgress(strings);
       return null;

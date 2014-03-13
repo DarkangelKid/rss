@@ -17,6 +17,7 @@
 <resources>
 
    <string-array name="navigation_titles">
+      <item>Favourites</item>
       <item>تنظيم</item>
       <item>إعدادات</item>
    </string-array>

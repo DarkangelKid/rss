@@ -38,7 +38,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.text.NumberFormat;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.Locale;
 
 class Utilities
@@ -91,7 +91,7 @@ class Utilities
          Drawable drawable = activity.getResources().getDrawable(R.drawable.ic_action_labels);
          DrawableCompat.setAutoMirrored(drawable, true);
          bar.setIcon(drawable);
-         bar.setTitle(PagerAdapterTags.TAG_LIST.get(position));
+         bar.setTitle(PagerAdapterTags.s_tagList.get(position));
       }
       updateSubtitle(activity);
    }
@@ -118,10 +118,10 @@ class Utilities
    }
 
    static
-   void replaceAll(Collection a, Collection b)
+   String formatTags(String... tags)
    {
-      a.clear();
-      a.addAll(b);
+      String tagsWithBraces = Arrays.toString(tags);
+      return tagsWithBraces.substring(1, tagsWithBraces.length() - 1);
    }
 
    static

@@ -57,6 +57,7 @@
    <string name="dialog_checking">Checking…</string>
 
    <!-- Long click feed item context menu. -->
+   <string name="feed_item_context_favourite">Favourite</string>
    <string name="feed_item_context_open">Open</string>
    <string name="feed_item_context_copy">Copy</string>
 

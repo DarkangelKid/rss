@@ -40,6 +40,7 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
@@ -59,10 +60,13 @@ class FeedsActivity extends Activity
    String m_currentFragment;
    private FragmentNavigationDrawer m_FragmentNavigationDrawer;
 
+   static List<IndexItem> s_index;
+
    static final String FEED_TAG = "Feeds";
+   static final String FAVOURITES_TAG = "Favourites";
    static final String MANAGE_TAG = "Manage";
    static final String SETTINGS_TAG = "Settings";
-   static final String[] FRAGMENT_TAGS = {FEED_TAG, MANAGE_TAG, SETTINGS_TAG};
+   static final String[] FRAGMENT_TAGS = {FAVOURITES_TAG, MANAGE_TAG, SETTINGS_TAG, FEED_TAG};
 
    /* Start of ordered state changes of the Activity.
     *
@@ -78,9 +82,21 @@ class FeedsActivity extends Activity
 
       setContentView(R.layout.activity_main);
 
+      /* Load the index. */
+      s_index = (List<IndexItem>) Read.object(this, Read.INDEX);
+      if(null == s_index)
+      {
+         s_index = new ArrayList<IndexItem>(0);
+      }
+
       /* Load the read items to the AdapterTag class. */
-      AdapterTags.READ_ITEM_TIMES.addAll(Read.longSet(this, READ_ITEMS));
-      m_currentFragment = FRAGMENT_TAGS[0];
+      Collection<Long> set = (Collection<Long>) Read.object(this, READ_ITEMS);
+      if(null != set)
+      {
+         AdapterTags.READ_ITEM_TIMES.addAll(set);
+      }
+
+      m_currentFragment = FEED_TAG;
 
       FragmentManager manager = getFragmentManager();
       FragmentTransaction transaction = manager.beginTransaction();
@@ -96,12 +112,11 @@ class FeedsActivity extends Activity
          {
             transaction.add(R.id.content_frame, fragment, FRAGMENT_TAGS[i]);
          }
-         if(0 != i && !fragment.isHidden())
+         if(3 != i && !fragment.isHidden())
          {
             transaction.hide(fragment);
          }
       }
-
       transaction.commit();
    }
 
@@ -140,7 +155,8 @@ class FeedsActivity extends Activity
    void onStop()
    {
       super.onStop();
-      Write.longSet(this, READ_ITEMS, AdapterTags.READ_ITEM_TIMES);
+      Write.object(this, READ_ITEMS, AdapterTags.READ_ITEM_TIMES);
+      Write.object(this, Read.INDEX, s_index);
       setServiceIntent(ALARM_SERVICE_START);
    }
 
@@ -327,6 +343,10 @@ class FeedsActivity extends Activity
                   Utilities.setNavigationTagSelection(activity, 0);
                }
             };
+         }
+         if(tag.equals(FAVOURITES_TAG))
+         {
+            return new ListFragmentFavourites();
          }
          if(tag.equals(MANAGE_TAG))
          {

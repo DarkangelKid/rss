@@ -27,30 +27,25 @@ import android.widget.Toast;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
+class AsyncCheckFeed extends AsyncTask<Void, Void, IndexItem>
 {
    /* Formats */
-   static final String INDEX_FORMAT = "|i|%s|u|%s|t|%s|";
    private static final Pattern SPLIT_SPACE = Pattern.compile(" ");
    private static final Pattern SPLIT_COMMA = Pattern.compile(",");
    private final Dialog m_dialog;
-   private final String m_oldUid;
-   private final String m_oldIndexLine;
+   private final IndexItem m_oldIndexItem;
    private final Activity m_activity;
 
    private
-   AsyncCheckFeed(Activity activity, Dialog dialog, String oldIndexLine, String oldUid)
+   AsyncCheckFeed(Activity activity, Dialog dialog, IndexItem oldIndexItem)
    {
       m_dialog = dialog;
-      m_oldIndexLine = oldIndexLine;
-      m_oldUid = oldUid;
+      m_oldIndexItem = oldIndexItem;
       m_activity = activity;
 
       Button button = (Button) m_dialog.findViewById(R.id.dialog_button_positive);
@@ -59,42 +54,17 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
    }
 
    static
-   AsyncTask<Void, Void, String[]> newInstance(Activity activity, Dialog dialog, String oldIndexLine, String oldUid)
+   AsyncTask<Void, Void, IndexItem> newInstance(Activity activity, Dialog dialog, IndexItem oldIndexItem)
    {
-      AsyncTask<Void, Void, String[]> task = new AsyncCheckFeed(activity, dialog, oldIndexLine, oldUid);
+      AsyncTask<Void, Void, IndexItem> task = new AsyncCheckFeed(activity, dialog, oldIndexItem);
 
       task.executeOnExecutor(SERIAL_EXECUTOR);
       return task;
    }
 
-   /* Function should be safe, returns false if fails. */
-   private static
-   void AppendLineToIndex(Context context, String lineToAppend)
-   {
-      try
-      {
-         BufferedWriter out = new BufferedWriter(new OutputStreamWriter(context.openFileOutput(Read.INDEX, Context.MODE_APPEND)));
-         try
-         {
-            out.write(lineToAppend);
-         }
-         finally
-         {
-            if(null != out)
-            {
-               out.close();
-            }
-         }
-      }
-      catch(IOException e)
-      {
-         e.printStackTrace();
-      }
-   }
-
    @Override
    protected
-   String[] doInBackground(Void... nothing)
+   IndexItem doInBackground(Void... nothing)
    {
       if(isCancelled())
       {
@@ -110,7 +80,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
       CharSequence[] urlCheckList = {inputUrl, "https://" + inputUrl, "http://" + inputUrl};
 
       String url = "";
-      String uid = "";
+      long uid = 0L;
 
       for(CharSequence urlToCheck : urlCheckList)
       {
@@ -120,20 +90,26 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
          }
          if(isValidFeed(urlToCheck))
          {
-            List<String> urls = Arrays.asList(Read.csvFile(m_activity, Read.INDEX, 'u')[0]);
-
-            /* Make sure this url is not already in the index. */
-            if(!urls.contains(urlToCheck.toString()))
+            /* Check to see if this url is new .*/
+            boolean newFeed = true;
+            for(IndexItem indexItem : FeedsActivity.s_index)
             {
-               /* This is not really in a loop so this is the only time this line runs. */
-               uid = Long.toString(System.currentTimeMillis());
+               if(indexItem.m_url.equals(urlToCheck.toString()))
+               {
+                  newFeed = false;
+                  break;
+               }
+            }
+
+            if(newFeed)
+            {
+               uid = System.currentTimeMillis();
             }
             url = urlToCheck.toString();
             break;
          }
       }
-
-      return new String[]{url, uid, formatUserTagsInput(inputTags)};
+      return new IndexItem(uid, url, formatUserTagsInput(inputTags));
    }
 
    private static
@@ -165,25 +141,29 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
    }
 
    private
-   String formatUserTagsInput(CharSequence userInputTags)
+   String[] formatUserTagsInput(CharSequence userInputTags)
    {
       String inputTags = userInputTags.toString();
       String allTag = m_activity.getString(R.string.all_tag);
 
       if(inputTags.isEmpty())
       {
-         return allTag;
+         return new String[]{allTag};
       }
+
+      List<String> tagList = new ArrayList<String>(8);
 
       String lowerTags = inputTags.toLowerCase();
 
       /* + 10 in case the user did not put spaces after the commas. */
-      StringBuilder tagBuilder = new StringBuilder(lowerTags.length() + 10);
+      StringBuilder tagBuilder = new StringBuilder(lowerTags.length());
       String[] tags = SPLIT_COMMA.split(lowerTags);
 
       /* For each tag. */
       for(String tag : tags)
       {
+         tagBuilder.setLength(0);
+
          /* In case the tag is multiple words. */
          String[] words = SPLIT_SPACE.split(tag);
 
@@ -206,56 +186,35 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
          int builderLength = tagBuilder.length();
          tagBuilder.deleteCharAt(builderLength - 1);
 
-         tagBuilder.append(", ");
+         tagList.add(tagBuilder.toString());
       }
 
-      /* Delete the last space. */
-      int builderLength = tagBuilder.length();
-      tagBuilder.setLength(builderLength - 1);
-
-      /* Remove all trailing commas. */
-      while(',' == tagBuilder.charAt(tagBuilder.length() - 1))
-      {
-         tagBuilder.setLength(tagBuilder.length() - 1);
-      }
-
-      return tagBuilder.toString();
+      return tagList.toArray(new String[tagList.size()]);
    }
 
    @Override
    protected
-   void onPostExecute(String[] result)
+   void onPostExecute(IndexItem newIndexItem)
    {
       if(isCancelled())
       {
          return;
       }
 
-      String url = result[0];
-      String uid = result[1];
-      String tags = result[2];
-
-      /* Valid feed if we set url. */
-      boolean isFeedValid = !url.isEmpty();
-
-      /* Existing feed if uid is empty. */
-      boolean isExistingFeed = uid.isEmpty();
-
       Context context = m_dialog.getContext();
 
-      if(isFeedValid)
+      if(!newIndexItem.m_url.isEmpty())
       {
          /* Create the csv. */
-         String newIndexLine = String.format(INDEX_FORMAT, uid.isEmpty() ? m_oldUid : uid, url, tags) + Write.NEW_LINE;
+         int oldPos = FeedsActivity.s_index.indexOf(m_oldIndexItem);
 
-         if(isExistingFeed)
+         if(-1 == oldPos)
          {
-            Write.editIndexLine(context, m_oldIndexLine, Write.MODE_REPLACE, newIndexLine);
+            FeedsActivity.s_index.add(newIndexItem);
          }
          else
          {
-            /* Save the feed to the index. */
-            AppendLineToIndex(context, newIndexLine);
+            FeedsActivity.s_index.set(oldPos, newIndexItem);
          }
 
          /* Must update the tags first. */
@@ -263,7 +222,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, String[]>
          AsyncNavigationAdapter.update(m_activity);
          AsyncManageAdapter.update(m_activity);
 
-         String text = context.getString(R.string.toast_added_feed, url);
+         String text = context.getString(R.string.toast_added_feed, newIndexItem.m_url);
          Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
 
          m_dialog.dismiss();

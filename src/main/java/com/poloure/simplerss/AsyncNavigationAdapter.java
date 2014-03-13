@@ -51,20 +51,21 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, String[][]>
    protected
    String[][] doInBackground(String... applicationFolder)
    {
-      /* Read the index file for an array of feed names and feed tags. */
-      String[][] content = Read.csvFile(m_activity, Read.INDEX, 'i', 't');
-
       /* Get the total number of tags and feeds that exist. */
-      int tagTotal = PagerAdapterTags.TAG_LIST.size();
+      int tagTotal = PagerAdapterTags.s_tagList.size();
 
       /* Make a NavItem for each tag we will display in the navigation drawer. */
       String[][] navItems = new String[tagTotal][2];
 
+      /* Number of feeds. */
+      int feedCount = FeedsActivity.s_index.size();
+
       /* This is a list of Sets each containing all of the feed's items. */
-      List<Collection<Long>> feedItems = new ArrayList<Collection<Long>>(content[0].length);
-      for(String feedUid : content[0])
+      List<Collection<Long>> feedItems = new ArrayList<Collection<Long>>(feedCount);
+      for(IndexItem indexItem : FeedsActivity.s_index)
       {
-         feedItems.add(Read.longSet(m_activity, feedUid + ServiceUpdate.ITEM_LIST));
+         Collection<Long> set = (Collection<Long>) Read.object(m_activity, indexItem.m_uid + ServiceUpdate.ITEM_LIST);
+         feedItems.add(null == set ? new HashSet<Long>(0) : set);
       }
 
       /* Create a temporary collection we will .clear() each iteration of the next for loop. */
@@ -73,14 +74,13 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, String[][]>
       /* For each tag excluding the all tag. */
       for(int i = 0; tagTotal > i; i++)
       {
-         String tag = PagerAdapterTags.TAG_LIST.get(i);
+         String tag = PagerAdapterTags.s_tagList.get(i);
 
          /* For each feed, if the feed ∈ this tag, add the feed items to the tag collection. */
-         for(int j = 0; j < content[0].length; j++)
+         for(int j = 0; j < feedCount; j++)
          {
             /* If the feed's index entry (tag1, tag2, etc) contains this tag or is the all tag. */
-            if(0 == i || Arrays.asList(PagerAdapterTags.SPLIT_COMMA.split(content[1][j]))
-                  .contains(tag))
+            if(0 == i || Arrays.asList(FeedsActivity.s_index.get(j).m_tags).contains(tag))
             {
                itemsInTag.addAll(feedItems.get(j));
             }

@@ -47,6 +47,10 @@ class FragmentNavigationDrawer extends Fragment
    private static
    class OnNavigationItemLongClick implements AdapterView.OnItemLongClickListener
    {
+      OnNavigationItemLongClick()
+      {
+      }
+
       @Override
       public
       boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id)
@@ -56,11 +60,11 @@ class FragmentNavigationDrawer extends Fragment
       }
    }
 
-   private static final String PREF_USER_LEARNED_DRAWER = "navigation_drawer_learned";
+   static final String PREF_USER_LEARNED_DRAWER = "navigation_drawer_learned";
 
    ActionBarDrawerToggle m_drawerToggle;
 
-   private boolean m_userLearnedDrawer;
+   boolean m_userLearnedDrawer;
 
    @Override
    public
@@ -189,9 +193,14 @@ class FragmentNavigationDrawer extends Fragment
       private final FragmentManager m_manager;
       private final ActionBar m_bar;
       private final String[] m_titles;
-      private final Drawable[] m_icons = new Drawable[2];
+      private final Drawable[] m_icons = new Drawable[3];
 
-      private
+      private static final int[] drawables = {
+            R.drawable.ic_action_important,
+            R.drawable.ic_action_storage,
+            R.drawable.ic_action_settings,
+      };
+
       OnNavigationItemClick(Activity activity)
       {
          m_activity = (FeedsActivity) activity;
@@ -202,11 +211,11 @@ class FragmentNavigationDrawer extends Fragment
 
          m_titles = resources.getStringArray(R.array.navigation_titles);
 
-         m_icons[0] = resources.getDrawable(R.drawable.ic_action_storage);
-         m_icons[1] = resources.getDrawable(R.drawable.ic_action_settings);
-
-         DrawableCompat.setAutoMirrored(m_icons[0], true);
-         DrawableCompat.setAutoMirrored(m_icons[1], true);
+         for(int i = 0; m_icons.length > i; i++)
+         {
+            m_icons[i] = resources.getDrawable(drawables[i]);
+            DrawableCompat.setAutoMirrored(m_icons[i], true);
+         }
       }
 
       @Override
@@ -223,10 +232,8 @@ class FragmentNavigationDrawer extends Fragment
          int offset = wrapperAdapter.getHeadersCount();
          int tagPos = absolutePos - offset;
 
-         int fragmentTagPos = 0 <= tagPos ? 0 : absolutePos + 1;
-
          /* If we are switching fragments, check if we need to. */
-         String newTag = FeedsActivity.FRAGMENT_TAGS[fragmentTagPos];
+         String newTag = FeedsActivity.FRAGMENT_TAGS[Math.min(3, absolutePos)];
          if(!m_activity.m_currentFragment.equals(newTag))
          {
             /* Switch the content frame fragment. */

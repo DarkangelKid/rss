@@ -19,71 +19,24 @@ package com.poloure.simplerss;
 import android.content.Context;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.EOFException;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.StreamCorruptedException;
 
 class Read
 {
    static final String INDEX = "index.txt";
-   private static final String ITEM_SEPARATOR = "\\|";
 
    static
-   String[][] csvFile(Context context, String fileName, char... type)
+   Object object(Context context, String fileName)
    {
-      String[] lines = file(context, fileName);
-      int lineCount = lines.length;
-
-      String[][] out = new String[type.length][lineCount];
-      String typeString = new String(type);
-
-      /* Fill the arrays with empty strings. */
-      for(String[] array : out)
-      {
-         Arrays.fill(array, "");
-      }
-
-      for(int i = 0; i < lineCount; i++)
-      {
-         String[] lineContent = lines[i].split(ITEM_SEPARATOR);
-
-         /* Replace any elements that we have in the line. */
-         for(int j = 1; j < lineContent.length - 1; j += 2)
-         {
-            int index = typeString.indexOf(lineContent[j].charAt(0));
-            if(-1 != index && !lineContent[j + 1].isEmpty())
-            {
-               out[index][i] = lineContent[j + 1];
-            }
-         }
-      }
-      return out;
-   }
-
-   /* This function will return a zero length array on error. */
-   static
-   String[] file(Context context, String fileName)
-   {
-      List<String> list = new ArrayList<String>(32);
-
       try
       {
-         BufferedReader in = new BufferedReader(new InputStreamReader(context.openFileInput(fileName)));
+         ObjectInput in = new ObjectInputStream(new BufferedInputStream(context.openFileInput(fileName)));
          try
          {
-            String line;
-            while(null != (line = in.readLine()))
-            {
-               list.add(line);
-            }
+            return in.readObject();
          }
          finally
          {
@@ -93,66 +46,18 @@ class Read
             }
          }
       }
-      catch(IOException ignored)
+      catch(ClassNotFoundException e)
       {
+         e.printStackTrace();
       }
-      return list.toArray(new String[list.size()]);
-   }
-
-   static
-   boolean fileExists(Context context, String fileName)
-   {
-      try
+      catch(StreamCorruptedException e)
       {
-         FileInputStream in = context.openFileInput(fileName);
-         try
-         {
-         }
-         finally
-         {
-            if(null != in)
-            {
-               in.close();
-            }
-         }
+         e.printStackTrace();
       }
-      catch(IOException ignored)
+      catch(IOException e)
       {
-         return false;
+         e.printStackTrace();
       }
-      return true;
-   }
-
-   static
-   Set<Long> longSet(Context context, String fileName)
-   {
-      Set<Long> longSet = new LinkedHashSet<Long>(64);
-
-      try
-      {
-         DataInputStream in = new DataInputStream(new BufferedInputStream(context.openFileInput(fileName)));
-         try
-         {
-            while(true)
-            {
-               long lon = in.readLong();
-               longSet.add(lon);
-            }
-         }
-         catch(EOFException ignored)
-         {
-         }
-         finally
-         {
-            if(null != in)
-            {
-               in.close();
-            }
-         }
-      }
-      catch(IOException ignored)
-      {
-      }
-      return longSet;
+      return null;
    }
 }

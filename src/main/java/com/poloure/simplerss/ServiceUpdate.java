@@ -33,9 +33,8 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedWriter;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -43,7 +42,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -59,27 +58,12 @@ class ServiceUpdate extends IntentService
    static final String CONTENT_FILE = "-content.txt";
    static final String[] FEED_FILES = {ITEM_LIST, CONTENT_FILE};
 
-   private static final char ITEM_SEPARATOR = '|';
    private static final int MIN_IMAGE_WIDTH = 64;
-   private static final int FEED_ITEM_INITIAL_CAPACITY = 200;
-   private long m_timeCurrentItem;
 
    private static final float SCREEN_WIDTH = Resources.getSystem().getDisplayMetrics().widthPixels;
    private static final float USABLE_WIDTH_TEXT = SCREEN_WIDTH - 40.0F;
-   private static final int INITIAL_TAG_SET_SIZE = 128;
 
    public static final String BROADCAST_ACTION = "com.poloure.serviceupdate.handle";
-
-   private static
-   class Index
-   {
-      static final String IMAGE = "image";
-      static final String TITLE = "title";
-      static final String TIME = "pubDate";
-      static final String LINK = "link";
-      static final String LINK_TRIMMED = "blink";
-      static final String[] DES = {"x", "y", "z"};
-   }
 
    private static
    class Tags
@@ -112,30 +96,10 @@ class ServiceUpdate extends IntentService
    }
 
    private static
-   void writeCollection(Context context, String fileName, Iterable<?> content) throws IOException
-   {
-      BufferedWriter out = new BufferedWriter(new OutputStreamWriter(context.openFileOutput(fileName, Context.MODE_PRIVATE)));
-      try
-      {
-         for(Object item : content)
-         {
-            out.write(item + Write.NEW_LINE);
-         }
-      }
-      finally
-      {
-         if(null != out)
-         {
-            out.close();
-         }
-      }
-   }
-
-   private
-   StringBuilder appendDesLines(StringBuilder builder, String content)
+   void appendDesLines(Resources resources, FeedItem feedItem, String content)
    {
       String contentCopy = content;
-      Paint paint = ViewFeedItem.configurePaint(getResources(), R.dimen.item_description_size, R.color.item_description_color);
+      Paint paint = ViewFeedItem.configurePaint(resources, R.dimen.item_description_size, R.color.item_description_color);
 
       for(int x = 0; 3 > x; x++)
       {
@@ -143,21 +107,20 @@ class ServiceUpdate extends IntentService
          int desSpace = contentCopy.lastIndexOf(' ', desChars);
          desChars = -1 == desSpace ? desChars : desSpace + 1;
 
-         appendItem(builder, Index.DES[x], contentCopy.substring(0, desChars));
+         feedItem.m_desLines[x] = contentCopy.substring(0, desChars);
 
          contentCopy = contentCopy.substring(desChars);
       }
-      return builder;
    }
 
-   private
-   String fitToScreen(String content, int ind, float extra)
+   private static
+   String fitToScreen(Resources resources, String content, int ind, float extra)
    {
       /* ind == 0 is the title, ind == 1 is the link. */
       int size = 0 == ind ? R.dimen.item_title_size : R.dimen.item_link_size;
       int color = 0 == ind ? R.color.item_title_color : R.color.item_link_color;
 
-      Paint paint = ViewFeedItem.configurePaint(getResources(), size, color);
+      Paint paint = ViewFeedItem.configurePaint(resources, size, color);
 
       int chars = paint.breakText(content, true, USABLE_WIDTH_TEXT - extra, null);
       int space = content.lastIndexOf(' ', chars);
@@ -166,33 +129,26 @@ class ServiceUpdate extends IntentService
    }
 
    private static
-   Set<String> fileToSet(Context context, String fileName)
-   {
-      Set<String> set = new LinkedHashSet<String>(INITIAL_TAG_SET_SIZE);
-      Collections.addAll(set, Read.file(context, fileName));
-      return set;
-   }
-
-   private static
-   void getThumbnail(StringBuilder build, String imgLink, Context context)
+   void getThumbnail(FeedItem item, String imageLink, Context context)
    {
       /* Find out if images are disabled. */
       SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
       boolean imagesDisabled = !preferences.getBoolean("images_enabled", true);
 
       /* Produce the thumbnail path. */
-      String imageFile = imgLink.substring(imgLink.lastIndexOf('/') + 1);
+      String imageFile = imageLink.substring(imageLink.lastIndexOf('/') + 1);
 
       /* If the image exists then it has previously passed the MIN_IMAGE_WIDTH condition. */
-      if(imagesDisabled || Read.fileExists(context, imageFile))
+      if(imagesDisabled || fileExists(context, imageFile))
       {
-         appendItem(build, Index.IMAGE, imgLink);
+         item.m_imageLink = imageLink;
+         item.m_imageName = imageFile;
          return;
       }
 
       try
       {
-         BufferedInputStream input = new BufferedInputStream(new URL(imgLink).openStream());
+         BufferedInputStream input = new BufferedInputStream(new URL(imageLink).openStream());
          BufferedOutputStream out = new BufferedOutputStream(context.openFileOutput(imageFile, MODE_PRIVATE));
          try
          {
@@ -204,7 +160,8 @@ class ServiceUpdate extends IntentService
                return;
             }
 
-            appendItem(build, Index.IMAGE, imgLink);
+            item.m_imageLink = imageLink;
+            item.m_imageName = imageFile;
 
             float scale = bitmap.getWidth() / SCREEN_WIDTH;
             int desiredHeight = Math.round(bitmap.getHeight() / scale);
@@ -243,23 +200,16 @@ class ServiceUpdate extends IntentService
    }
 
    private static
-   void appendItem(StringBuilder builder, String tag, String content)
-   {
-      builder.append(tag).append(ITEM_SEPARATOR).append(content).append(ITEM_SEPARATOR);
-   }
-
-   private
-   void appendPublishedTime(StringBuilder builder, String content, String tag)
+   void appendPublishedTime(FeedItem feedItem, String content, String tag)
    {
       Time time = new Time();
-
       try
       {
          /* <published> - It is an atom feed it will be one of four RFC3339 formats. */
          if(Tags.PUBLISHED.equals(tag))
          {
             time.parse3339(content);
-            m_timeCurrentItem = time.toMillis(true);
+            feedItem.m_time = time.toMillis(true);
          }
          /* <pubDate> - It follows the rss 2.0 specification for rfc882. */
          else
@@ -268,23 +218,45 @@ class ServiceUpdate extends IntentService
             SimpleDateFormat rssDate = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
             Date date = rssDate.parse(content);
             calendar.setTime(date);
-            m_timeCurrentItem = calendar.getTimeInMillis();
+            feedItem.m_time = calendar.getTimeInMillis();
          }
       }
       catch(ParseException ignored)
       {
          System.out.println("BUG : Could not parse: " + content);
          time.setToNow();
-         m_timeCurrentItem = time.toMillis(true);
+         feedItem.m_time = time.toMillis(true);
       }
       catch(RuntimeException ignored)
       {
          System.out.println("BUG : Could not parse: " + content);
          time.setToNow();
-         m_timeCurrentItem = time.toMillis(true);
+         feedItem.m_time = time.toMillis(true);
       }
+   }
 
-      appendItem(builder, Index.TIME, Long.toString(m_timeCurrentItem));
+   static
+   boolean fileExists(Context context, String fileName)
+   {
+      try
+      {
+         FileInputStream in = context.openFileInput(fileName);
+         try
+         {
+         }
+         finally
+         {
+            if(null != in)
+            {
+               in.close();
+            }
+         }
+      }
+      catch(IOException ignored)
+      {
+         return false;
+      }
+      return true;
    }
 
    @Override
@@ -298,7 +270,7 @@ class ServiceUpdate extends IntentService
       int page = intent.getIntExtra("GROUP_NUMBER", 0);
 
       /* Get the tagList (from disk if it is empty). */
-      List<String> tagList = PagerAdapterTags.TAG_LIST;
+      List<String> tagList = PagerAdapterTags.s_tagList;
       if(tagList.isEmpty())
       {
          tagList.addAll(PagerAdapterTags.getTagsFromDisk(this));
@@ -306,17 +278,14 @@ class ServiceUpdate extends IntentService
 
       String tag = tagList.get(page);
 
-      String[][] content = Read.csvFile(this, Read.INDEX, 'i', 'u', 't');
-
       /* Download and parse each feed in the index. */
-      for(int i = 0; i < content[0].length; i++)
+      for(IndexItem indexItem : FeedsActivity.s_index)
       {
-         if(0 == page || Arrays.asList(PagerAdapterTags.SPLIT_COMMA.split(content[2][i]))
-               .contains(tag))
+         if(0 == page || Arrays.asList(indexItem.m_tags).contains(tag))
          {
             try
             {
-               parseFeed(content[1][i], content[0][i]);
+               parseFeed(indexItem.m_url, indexItem.m_uid);
             }
             catch(IOException e)
             {
@@ -358,7 +327,7 @@ class ServiceUpdate extends IntentService
    }
 
    private static
-   void parseHtmlForImage(Context context, CharSequence html, StringBuilder build)
+   void parseHtmlForImage(Context context, CharSequence html, FeedItem feedItem)
    {
       Matcher matcherImg = Patterns.IMG.matcher(html);
 
@@ -376,37 +345,34 @@ class ServiceUpdate extends IntentService
             imgLink = Patterns.APOSTROPHE.matcher(imgLink).replaceAll("");
             imgLink = Patterns.QUOT.matcher(imgLink).replaceAll("");
 
-            getThumbnail(build, imgLink, context);
+            getThumbnail(feedItem, imgLink, context);
          }
       }
    }
 
    private
-   void parseFeed(CharSequence urlString, String uid) throws XmlPullParserException, IOException
+   void parseFeed(CharSequence urlString, long uid) throws XmlPullParserException, IOException
    {
       String contentFile = uid + CONTENT_FILE;
       String longFile = uid + ITEM_LIST;
 
       /* Load the previously saved items to a map. */
-      Set<String> set = fileToSet(this, contentFile);
-      Set<Long> longSet = Read.longSet(this, longFile);
+      Set<Long> tempSet = (Set<Long>) Read.object(this, longFile);
+      Set<Long> longSet = null == tempSet ? new HashSet<Long>(0) : tempSet;
 
-      int setSize = set.size();
-      int longSize = longSet.size();
+      Map<Long, FeedItem> map = new TreeMap<Long, FeedItem>(Collections.reverseOrder());
 
-      String[] lines = set.toArray(new String[setSize]);
-      Long[] longs = longSet.toArray(new Long[longSize]);
-
-      Map<Long, String> map = new TreeMap<Long, String>(Collections.reverseOrder());
-
-      for(int i = 0; i < setSize; i++)
+      Map<Long, FeedItem> tempMap = (Map<Long, FeedItem>) Read.object(this, contentFile);
+      if(null != tempMap)
       {
-         map.put(longs[i], lines[i]);
+         map.putAll(tempMap);
       }
 
+      /* Read a Map<Long, FeedItem> = TreeMap from file. */
       XmlPullParser parser = Utilities.createXmlParser(urlString);
-
-      StringBuilder builder = new StringBuilder(FEED_ITEM_INITIAL_CAPACITY);
+      FeedItem feedItem = new FeedItem();
+      Resources resources = getResources();
+      float timeSpace = getResources().getDimension(R.dimen.reserved_time);
 
       /* Skip everything in the xml file until we arrive at an 'entry' or 'item' open tag. */
       int eventType;
@@ -429,9 +395,7 @@ class ServiceUpdate extends IntentService
 
             if(tag.equals(Tags.ENTRY) || tag.equals(Tags.ITEM))
             {
-               builder.setLength(0);
-               builder.append(ITEM_SEPARATOR);
-               m_timeCurrentItem = 0L;
+               feedItem = new FeedItem();
             }
             else if(tag.equals(Tags.LINK))
             {
@@ -440,34 +404,33 @@ class ServiceUpdate extends IntentService
                {
                   link = getContent(parser);
                }
-               appendItem(builder, Index.LINK, link);
-               appendItem(builder, Index.LINK_TRIMMED, fitToScreen(link, 1, 0.0F));
+               feedItem.m_url = link;
+               feedItem.m_urlTrimmed = fitToScreen(resources, link, 1, 0.0F);
             }
             else if(tag.equals(Tags.PUBLISHED) || tag.equals(Tags.PUB_DATE))
             {
-               appendPublishedTime(builder, getContent(parser), tag);
+               appendPublishedTime(feedItem, getContent(parser), tag);
             }
             else if(tag.equals(Tags.TITLE))
             {
-               float timeSpace = getResources().getDimension(R.dimen.reserved_time);
-               appendItem(builder, Index.TITLE, fitToScreen(getContent(parser), 0, timeSpace));
+               feedItem.m_title = fitToScreen(resources, getContent(parser), 0, timeSpace);
             }
             else if(tag.equals(Tags.CONTENT) || tag.equals(Tags.DESCRIPTION))
             {
                String content = getContent(parser);
-               parseHtmlForImage(this, content, builder);
+               parseHtmlForImage(this, content, feedItem);
                content = Patterns.CDATA.matcher(content).replaceAll("").trim();
-               builder = appendDesLines(builder, content);
+               appendDesLines(resources, feedItem, content);
             }
          }
          else if(XmlPullParser.END_TAG == eventType)
          {
             String tag = parser.getName();
-            boolean newItem = !longSet.contains(m_timeCurrentItem);
+            boolean newItem = !longSet.contains(feedItem.m_time);
 
             if(Tags.ENTRY.equals(tag) || Tags.ITEM.equals(tag) && newItem)
             {
-               map.put(m_timeCurrentItem, builder.toString());
+               map.put(feedItem.m_time, feedItem);
             }
          }
          parser.next();
@@ -475,7 +438,10 @@ class ServiceUpdate extends IntentService
       }
 
       /* We have finished forming the sets and we can save the new files to disk. */
-      writeCollection(this, contentFile, map.values());
-      Write.longSet(this, longFile, map.keySet());
+      Write.object(this, contentFile, map);
+
+      /* Write the item list of longs. */
+      Set<Long> set = new HashSet<Long>(map.keySet());
+      Write.object(this, longFile, set);
    }
 }

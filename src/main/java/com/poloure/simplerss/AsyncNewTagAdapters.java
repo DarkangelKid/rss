@@ -27,11 +27,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
 class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[]>
 {
-   private static final int MIN_DES = 8;
    private final Activity m_activity;
 
    private
@@ -50,7 +50,7 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
    protected
    TreeMap<Long, FeedItem>[] doInBackground(Void... nothing)
    {
-      String[] tags = PagerAdapterTags.TAG_LIST.toArray(new String[PagerAdapterTags.TAG_LIST.size()]);
+      String[] tags = PagerAdapterTags.s_tagList.toArray(new String[PagerAdapterTags.s_tagList.size()]);
 
       TreeMap<Long, FeedItem>[] maps = new TreeMap[tags.length];
       for(int i = 0; tags.length > i; i++)
@@ -58,16 +58,13 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
          maps[i] = new TreeMap<Long, FeedItem>(Collections.reverseOrder());
       }
 
-      String[][] index = Read.csvFile(m_activity, Read.INDEX, 'i', 't');
       Collection<Integer> indices = new ArrayList<Integer>(8);
 
       /* For each feed. */
-      for(int i = 0; i < index[0].length; i++)
+      for(IndexItem indexItem : FeedsActivity.s_index)
       {
-         String[][] content = Read.csvFile(m_activity, index[0][i] + ServiceUpdate.CONTENT_FILE, 't', 'l', 'b', 'i', 'p', 'x', 'y', 'z');
-
          /* Get a list of tags that this feed belongs to. */
-         List<String> feedsTags = Arrays.asList(PagerAdapterTags.SPLIT_COMMA.split(index[1][i]));
+         List<String> feedsTags = Arrays.asList(indexItem.m_tags);
 
          /* Make an array of indices that these items will be added to in maps[index]. */
          indices.clear();
@@ -79,63 +76,18 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
             }
          }
 
-         for(int j = 0; j < content[0].length; j++)
+         /* Load the data from file. */
+         Map<Long, FeedItem> tempMap = (Map<Long, FeedItem>) Read.object(m_activity, indexItem.m_uid + ServiceUpdate.CONTENT_FILE);
+         if(null != tempMap)
          {
-            FeedItem data = new FeedItem();
-
-            /* Edit the data. */
-            data.m_imageName = getImageName(m_activity, content[3][j]);
-
-            for(int k = 0; 3 > k; k++)
-            {
-               data.m_desLines[k] = MIN_DES > content[5][j].length() ? "" : content[k + 5][j];
-            }
-            data.m_time = fastParseLong(content[4][j]);
-            data.m_title = content[0][j];
-            data.m_urlFull = content[1][j];
-            data.m_url = content[2][j];
-
             /* Put the item in each map that the feed is tagged with. */
             for(int k : indices)
             {
-               maps[k].put(data.m_time, data);
+               maps[k].putAll(tempMap);
             }
          }
       }
-
       return maps;
-   }
-
-   private static
-   String getImageName(Activity activity, String imageUrl)
-   {
-      if(imageUrl.isEmpty())
-      {
-         return "";
-      }
-
-      String name = imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
-
-      return Read.fileExists(activity, name) ? name : "";
-
-   }
-
-   private static
-   long fastParseLong(String s)
-   {
-      if(null == s)
-      {
-         return 0L;
-      }
-      char[] chars = s.toCharArray();
-      long num = 0L;
-
-      for(char c : chars)
-      {
-         int value = c - 48;
-         num = num * 10L + value;
-      }
-      return num;
    }
 
    @Override
@@ -177,10 +129,8 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
 
             /* Set the adapters to be these new lists and do not read items while updating. */
             adapterTag.m_isReadingItems = false;
-
-            Utilities.replaceAll(adapterTag.m_feedItems, maps[i].values());
-            Utilities.replaceAll(adapterTag.m_times, maps[i].keySet());
-
+            adapterTag.m_feedItems = new ArrayList<FeedItem>(maps[i].values());
+            adapterTag.m_times = new ArrayList<Long>(maps[i].keySet());
             adapterTag.notifyDataSetChanged();
 
             /* We now need to find the position of the item with the time timeBefore. */

@@ -19,67 +19,21 @@ package com.poloure.simplerss;
 import android.content.Context;
 
 import java.io.BufferedOutputStream;
-import java.io.BufferedWriter;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 
 class Write
 {
-   static final int MODE_REMOVE = 1;
-   static final int MODE_REPLACE = 2;
-   static final String NEW_LINE = System.getProperty("line.separator");
-
    static
-   void editIndexLine(Context context, CharSequence stringSearch, int mode, String replacementLine)
-   {
-      /* Read the file to an array, if the file does not exist, return. */
-      String[] lines = Read.file(context, Read.INDEX);
-      if(0 != lines.length)
-      {
-         try
-         {
-            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(context.openFileOutput(Read.INDEX, Context.MODE_PRIVATE)));
-            try
-            {
-               for(String line : lines)
-               {
-                  if(!line.equals(stringSearch))
-                  {
-                     out.write(line + NEW_LINE);
-                  }
-                  else if(MODE_REPLACE == mode)
-                  {
-                     out.write(replacementLine);
-                  }
-               }
-            }
-            finally
-            {
-               if(null != out)
-               {
-                  out.close();
-               }
-            }
-         }
-         catch(IOException ignored)
-         {
-         }
-      }
-   }
-
-   static
-   void longSet(Context context, String fileName, Iterable<Long> longSet)
+   void object(Context context, String fileName, Object object)
    {
       try
       {
-         DataOutputStream out = new DataOutputStream(new BufferedOutputStream(context.openFileOutput(fileName, Context.MODE_PRIVATE)));
+         ObjectOutput out = new ObjectOutputStream(new BufferedOutputStream(context.openFileOutput(fileName, Context.MODE_PRIVATE)));
          try
          {
-            for(long l : longSet)
-            {
-               out.writeLong(l);
-            }
+            out.writeObject(object);
          }
          finally
          {
