@@ -8,13 +8,14 @@ You can find the latest APK signed by me in the apk folder.
 Screenshots
 ===
 
-![ScreenShot](screenshots/thumbnails/one_preview.png)
-![ScreenShot](screenshots/thumbnails/two_preview.png)
-![ScreenShot](screenshots/thumbnails/three_preview.png)
+[![ScreenShot](screenshots/thumbnails/one_preview.png)](screenshots/one.png)
+[![ScreenShot](screenshots/thumbnails/two_preview.png)](screenshots/two.png)
+[![ScreenShot](screenshots/thumbnails/three_preview.png)](screenshots/three.png)
 
-![ScreenShot](screenshots/thumbnails/four_preview.png)
-![ScreenShot](screenshots/thumbnails/five_preview.png)
-![ScreenShot](screenshots/thumbnails/six_preview.png)
+[![ScreenShot](screenshots/thumbnails/four_preview.png)](screenshots/four.png)
+[![ScreenShot](screenshots/thumbnails/five_preview.png)](screenshots/five.png)
+[![ScreenShot](screenshots/thumbnails/six_preview.png)](screenshots/six.png)
+
 
 Permissions
 ===
