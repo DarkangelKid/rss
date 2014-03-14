@@ -39,7 +39,6 @@ class AdapterTags extends BaseAdapter
    /* We use indexOf on this Long List so it can not be a Set. */ List<Long> m_times = new ArrayList<Long>(0);
    List<FeedItem> m_feedItems = new ArrayList<FeedItem>(0);
    private final Context m_context;
-   boolean m_isReadingItems;
 
    AdapterTags(Context context)
    {

@@ -70,14 +70,6 @@
    <string name="switch_off">إبقاف</string>
    <string name="switch_on">تشغيل</string>
 
-   <string name="switch_no">لا</string>
-   <string name="switch_yes">نعم</string>
-
-   <!-- Settings notification strings. -->
-   <string name="notifications">الإشعارات</string>
-   <string name="notifications_disabled">توقيف الإشعارات</string>
-   <string name="notifications_enabled">تشغيل الإشعارات</string>
-
    <!-- Settings automatic Refreshing strings. -->
    <string name="automatic_refreshing">تحديث تلقائي</string>
    <string name="automatic_refreshing_disabled">تعطيل التحديث التلقائي</string>

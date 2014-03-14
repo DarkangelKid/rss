@@ -18,19 +18,6 @@
    xmlns:android="http://schemas.android.com/apk/res/android">
 
    <PreferenceScreen
-      android:title="@string/notifications"
-      android:icon="@drawable/ic_action_chat">
-      <SwitchPreference
-         android:defaultValue="true"
-         android:key="notifications_enabled"
-         android:summaryOff="@string/notifications_disabled"
-         android:summaryOn="@string/notifications_enabled"
-         android:switchTextOff="@string/switch_off"
-         android:switchTextOn="@string/switch_on"
-         android:title="@string/notifications"/>
-   </PreferenceScreen>
-
-   <PreferenceScreen
       android:title="@string/automatic_refreshing"
       android:icon="@drawable/ic_action_refresh">
       <SwitchPreference
@@ -58,8 +45,8 @@
       <SwitchPreference
          android:defaultValue="true"
          android:key="images_enabled"
-         android:switchTextOff="@string/switch_no"
-         android:switchTextOn="@string/switch_yes"
+         android:switchTextOff="@android:string/no"
+         android:switchTextOn="@android:string/yes"
          android:title="@string/images_download"/>
       <ListPreference
          android:defaultValue="75"
@@ -81,8 +68,8 @@
          android:key="clear_unread_items"
          android:dialogTitle="@string/clear_read_items_dialog_title"
          android:dialogMessage="@string/clear_read_items_dialog_summary"
-         android:negativeButtonText="@string/switch_no"
-         android:positiveButtonText="@string/switch_yes"/>
+         android:negativeButtonText="@android:string/no"
+         android:positiveButtonText="@android:string/yes"/>
    </PreferenceScreen>
 
    <PreferenceScreen

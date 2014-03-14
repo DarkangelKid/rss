@@ -1,7 +1,7 @@
 Download
 ===
 
-Recommended version: [SimpleRss-0.20.2.apk](https://raw.github.com/poloure/rss/master/apk/SimpleRss-0.20.2.apk)
+Recommended version: [SimpleRss-0.20.3.apk](https://raw.github.com/poloure/rss/master/apk/SimpleRss-0.20.3.apk)
 
 Screenshots
 ===

@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
@@ -61,9 +62,10 @@ class ServiceUpdate extends IntentService
    private static final int MIN_IMAGE_WIDTH = 64;
 
    private static final float SCREEN_WIDTH = Resources.getSystem().getDisplayMetrics().widthPixels;
-   private static final float USABLE_WIDTH_TEXT = SCREEN_WIDTH - 40.0F;
+   private static final float USABLE_WIDTH_TEXT = SCREEN_WIDTH - (Utilities.EIGHT_DP << 1);
 
    public static final String BROADCAST_ACTION = "com.poloure.serviceupdate.handle";
+   static final String NEWLINE = System.getProperty("line.separator");
 
    private static
    class Tags
@@ -81,7 +83,7 @@ class ServiceUpdate extends IntentService
    private static
    class Patterns
    {
-      static final Pattern WHITESPACE = Pattern.compile("[\\t\\n\\x0B\\f\\r\\|]");
+      static final Pattern LINE = Pattern.compile(NEWLINE);
       static final Pattern CDATA = Pattern.compile("\\<.*?\\>");
       static final Pattern IMG = Pattern.compile("(?i)<img([^>]+)/>");
       static final Pattern SRC = Pattern.compile("\\s*(?i)src\\s*=\\s*(\"([^\"]*\")|'[^']*'|([^'\">\\s]+))");
@@ -96,20 +98,56 @@ class ServiceUpdate extends IntentService
    }
 
    private static
-   void appendDesLines(Resources resources, FeedItem feedItem, String content)
+   void setDesLines(Resources resources, FeedItem feedItem, CharSequence content)
    {
-      String contentCopy = content;
       Paint paint = ViewFeedItem.configurePaint(resources, R.dimen.item_description_size, R.color.item_description_color);
+
+      List<String> lines = new ArrayList<String>(Arrays.asList(Patterns.LINE.split(content)));
+
+      int j = 0;
 
       for(int x = 0; 3 > x; x++)
       {
-         int desChars = paint.breakText(contentCopy, true, USABLE_WIDTH_TEXT, null);
-         int desSpace = contentCopy.lastIndexOf(' ', desChars);
-         desChars = -1 == desSpace ? desChars : desSpace + 1;
+         /* Skip any empty lines. */
+         while(null != lines && j < lines.size() && lines.get(j).trim().isEmpty())
+         {
+            j++;
+         }
+         if(j == lines.size())
+         {
+            break;
+         }
 
-         feedItem.m_desLines[x] = contentCopy.substring(0, desChars);
+         String currentLine = lines.get(j).trim();
 
-         contentCopy = contentCopy.substring(desChars);
+         int index = paint.breakText(currentLine, true, USABLE_WIDTH_TEXT, null);
+
+         if(currentLine.length() == index)
+         {
+            feedItem.m_desLines[x] = currentLine;
+         }
+         else
+         {
+            /* Break at the closest ' ' - 1 (some padding). */
+            int space = currentLine.lastIndexOf(' ', index - 1);
+
+            /* TODO if no space add a hyphen. */
+            index = -1 == space ? index : space;
+
+            feedItem.m_desLines[x] = currentLine.substring(0, index);
+
+            /* Add the remaining to the next line. */
+            if(j + 1 < lines.size())
+            {
+               lines.set(j + 1, currentLine.substring(index) + lines.get(j + 1));
+            }
+            else
+            {
+               lines.add(currentLine.substring(index));
+            }
+         }
+
+         j++;
       }
    }
 
@@ -200,7 +238,7 @@ class ServiceUpdate extends IntentService
    }
 
    private static
-   void appendPublishedTime(FeedItem feedItem, String content, String tag)
+   void setPublishedTime(FeedItem feedItem, String content, String tag)
    {
       Time time = new Time();
       try
@@ -323,7 +361,7 @@ class ServiceUpdate extends IntentService
          return "";
       }
       String content = parser.getText();
-      return null == content ? "" : Patterns.WHITESPACE.matcher(content).replaceAll(" ");
+      return null == content ? "" : content;
    }
 
    private static
@@ -409,11 +447,11 @@ class ServiceUpdate extends IntentService
             }
             else if(tag.equals(Tags.PUBLISHED) || tag.equals(Tags.PUB_DATE))
             {
-               appendPublishedTime(feedItem, getContent(parser), tag);
+               setPublishedTime(feedItem, getContent(parser), tag);
             }
             else if(tag.equals(Tags.TITLE))
             {
-               feedItem.m_title = fitToScreen(resources, getContent(parser), 0, timeSpace);
+               feedItem.m_title = fitToScreen(resources, getContent(parser).trim(), 0, timeSpace);
             }
             else if(tag.equals(Tags.CONTENT) || tag.equals(Tags.DESCRIPTION))
             {
@@ -422,7 +460,7 @@ class ServiceUpdate extends IntentService
 
                parseHtmlForImage(this, content, feedItem);
                content = Patterns.CDATA.matcher(content).replaceAll("").trim();
-               appendDesLines(resources, feedItem, content);
+               setDesLines(resources, feedItem, content);
             }
          }
          else if(XmlPullParser.END_TAG == eventType)

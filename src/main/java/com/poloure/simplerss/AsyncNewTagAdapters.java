@@ -103,7 +103,10 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
          ListView listView = Utilities.getTagListView(m_activity, i);
          while(null == listView)
          {
-            if(i == pageCount) return;
+            if(i == pageCount)
+            {
+               return;
+            }
 
             listView = Utilities.getTagListView(m_activity, i);
          }
@@ -128,7 +131,6 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
             }
 
             /* Set the adapters to be these new lists and do not read items while updating. */
-            adapterTag.m_isReadingItems = false;
             adapterTag.m_feedItems = new ArrayList<FeedItem>(maps[i].values());
             adapterTag.m_times = new ArrayList<Long>(maps[i].keySet());
             adapterTag.notifyDataSetChanged();
@@ -143,7 +145,6 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
             {
                listView.setSelectionFromTop(newPositionOfTop, top - listView.getPaddingTop());
             }
-            adapterTag.m_isReadingItems = true;
          }
          ((View) listView.getParent()).setVisibility(View.VISIBLE);
       }

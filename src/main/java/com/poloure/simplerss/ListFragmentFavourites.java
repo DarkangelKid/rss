@@ -106,7 +106,8 @@ class ListFragmentFavourites extends ListFragment
             }
             mode.finish();
             adapter.notifyDataSetChanged();
-         } return true;
+         }
+         return true;
       }
 
       /* true - the action mode should be created, false - entering this mode should be aborted. */

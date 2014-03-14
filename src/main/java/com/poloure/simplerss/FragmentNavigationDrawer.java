@@ -59,6 +59,17 @@ class FragmentNavigationDrawer extends Fragment
       }
    }
 
+   private static
+   class SyncPost implements Runnable
+   {
+      @Override
+      public
+      void run()
+      {
+         s_drawerToggle.syncState();
+      }
+   }
+
    static final String PREF_USER_LEARNED_DRAWER = "navigation_drawer_learned";
 
    static ActionBarDrawerToggle s_drawerToggle;
@@ -151,15 +162,7 @@ class FragmentNavigationDrawer extends Fragment
          //drawerLayout.openDrawer(R.id.navigation_drawer);
       }
 
-      drawerLayout.post(new Runnable()
-      {
-         @Override
-         public
-         void run()
-         {
-            s_drawerToggle.syncState();
-         }
-      });
+      drawerLayout.post(new SyncPost());
       drawerLayout.setDrawerListener(s_drawerToggle);
    }
 

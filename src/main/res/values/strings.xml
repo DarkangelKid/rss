@@ -77,14 +77,6 @@
    <string name="switch_off">Off</string>
    <string name="switch_on">On</string>
 
-   <string name="switch_no">No</string>
-   <string name="switch_yes">Yes</string>
-
-   <!-- Settings notification strings. -->
-   <string name="notifications">Notifications</string>
-   <string name="notifications_disabled">Notifications are disabled</string>
-   <string name="notifications_enabled">Notifications are enabled</string>
-
    <!-- Settings automatic Refreshing strings. -->
    <string name="automatic_refreshing">Automatic refreshing</string>
    <string name="automatic_refreshing_disabled">Automatic refreshing is disabled</string>
