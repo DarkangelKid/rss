@@ -207,7 +207,7 @@ class FeedsActivity extends Activity
       menu.getItem(0).setEnabled(m_showMenuItems && (feed || manage));
       menu.getItem(1).setEnabled(m_showMenuItems && feed);
 
-      return true;
+      return super.onPrepareOptionsMenu(menu);
    }
 
    /* TODO: Needs a method of checking if the service is running. */
