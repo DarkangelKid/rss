@@ -45,7 +45,6 @@ import android.widget.Toast;
 public
 class ListFragmentTag extends Fragment
 {
-
    private static final String POSITION_KEY = "POSITION";
    private ListView m_listView;
    static boolean s_firstLoad = true;
@@ -140,7 +139,8 @@ class ListFragmentTag extends Fragment
    }
 
    @Override
-   public boolean onOptionsItemSelected(MenuItem menuItem)
+   public
+   boolean onOptionsItemSelected(MenuItem menuItem)
    {
       getActivity().onBackPressed();
       return true;

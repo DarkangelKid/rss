@@ -8,14 +8,14 @@ You can find the latest signed APK in the apk folder.
 Screenshots
 ===
 
-![ScreenShot](/screenshots/one.jpg)
-![ScreenShot](/screenshots/two.jpg)
+![ScreenShot](https://raw.github.com/poloure/rss/master/screenshots/one.jpg)
+![ScreenShot](https://raw.github.com/poloure/rss/master/screenshots/two.jpg)
 
-![ScreenShot](/screenshots/three.jpg)
-![ScreenShot](/screenshots/four.jpg)
+![ScreenShot](https://raw.github.com/poloure/rss/master/screenshots/three.jpg)
+![ScreenShot](https://raw.github.com/poloure/rss/master/screenshots/four.jpg)
 
-![ScreenShot](/screenshots/five.jpg)
-![ScreenShot](/screenshots/six.jpg)
+![ScreenShot](https://raw.github.com/poloure/rss/master/screenshots/five.jpg)
+![ScreenShot](https://raw.github.com/poloure/rss/master/screenshots/six.jpg)
 
 Permissions
 ===
