@@ -8,14 +8,14 @@ You can find the latest signed APK in the apk folder.
 Screenshots
 ===
 
-![ScreenShot](screenshots/one.jpg)
-![ScreenShot](screenshots/two.jpg)
+![ScreenShot](screenshots/one.png)
+![ScreenShot](screenshots/two.png)
 
-![ScreenShot](screenshots/three.jpg)
-![ScreenShot](screenshots/four.jpg)
+![ScreenShot](screenshots/three.png)
+![ScreenShot](screenshots/four.png)
 
-![ScreenShot](screenshots/five.jpg)
-![ScreenShot](screenshots/six.jpg)
+![ScreenShot](screenshots/five.png)
+![ScreenShot](screenshots/six.png)
 
 Permissions
 ===
