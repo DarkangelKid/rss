@@ -3,19 +3,19 @@ SimpleRss
 
 News Aggregator for Android 4.0+.
 
-You can find the latest signed APK in the apk folder.
+You can find the latest APK signed by me in the apk folder.
 
 Screenshots
 ===
 
-![ScreenShot](screenshots/one.png)
-![ScreenShot](screenshots/two.png)
+![ScreenShot](screenshots/thumbnails/one_preview.png)
+![ScreenShot](screenshots/thumbnails/two_preview.png)
 
-![ScreenShot](screenshots/three.png)
-![ScreenShot](screenshots/four.png)
+![ScreenShot](screenshots/thumbnails/three_preview.png)
+![ScreenShot](screenshots/thumbnails/four_preview.png)
 
-![ScreenShot](screenshots/five.png)
-![ScreenShot](screenshots/six.png)
+![ScreenShot](screenshots/thumbnails/five_preview.png)
+![ScreenShot](screenshots/thumbnails/six_preview.png)
 
 Permissions
 ===
