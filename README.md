@@ -10,10 +10,9 @@ Screenshots
 
 ![ScreenShot](screenshots/thumbnails/one_preview.png)
 ![ScreenShot](screenshots/thumbnails/two_preview.png)
-
 ![ScreenShot](screenshots/thumbnails/three_preview.png)
-![ScreenShot](screenshots/thumbnails/four_preview.png)
 
+![ScreenShot](screenshots/thumbnails/four_preview.png)
 ![ScreenShot](screenshots/thumbnails/five_preview.png)
 ![ScreenShot](screenshots/thumbnails/six_preview.png)
 
