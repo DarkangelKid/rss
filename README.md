@@ -1,19 +1,18 @@
-SimpleRss
+Download
 ===
 
-News Aggregator for Android 4.0+.
-
-You can find the latest APK signed by me in the apk folder.
+Recommended version: [SimpleRss-0.20.2.apk](https://raw.github.com/poloure/rss/master/apk/SimpleRss-0.20.2.apk)
 
 Screenshots
 ===
 
+Click for full size images.
+
 [![ScreenShot](screenshots/thumbnails/one_preview.png)](https://raw.github.com/poloure/rss/master/screenshots/one.png)
 [![ScreenShot](screenshots/thumbnails/two_preview.png)](https://raw.github.com/poloure/rss/master/screenshots/two.png)
-
 [![ScreenShot](screenshots/thumbnails/three_preview.png)](https://raw.github.com/poloure/rss/master/screenshots/three.png)
-[![ScreenShot](screenshots/thumbnails/four_preview.png)](https://raw.github.com/poloure/rss/master/screenshots/four.png)
 
+[![ScreenShot](screenshots/thumbnails/four_preview.png)](https://raw.github.com/poloure/rss/master/screenshots/four.png)
 [![ScreenShot](screenshots/thumbnails/five_preview.png)](https://raw.github.com/poloure/rss/master/screenshots/five.png)
 [![ScreenShot](screenshots/thumbnails/six_preview.png)](https://raw.github.com/poloure/rss/master/screenshots/six.png)
 
