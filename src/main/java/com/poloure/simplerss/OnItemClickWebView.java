@@ -18,7 +18,6 @@ package com.poloure.simplerss;
 
 import android.app.ActionBar;
 import android.app.Fragment;
-import android.app.FragmentManager;
 import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewFragment;
@@ -37,17 +36,12 @@ class OnItemClickWebView implements AdapterView.OnItemClickListener
    public
    void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
    {
-      FragmentManager manager = m_activity.getFragmentManager();
-      Fragment webFragment = manager.findFragmentByTag(FeedsActivity.WEB_TAG);
+      Fragment fragment = FragmentUtils.getFragment(m_activity, FeedsActivity.WEB_TAG);
 
-      WebView webView = ((WebViewFragment) webFragment).getWebView();
+      WebView webView = ((WebViewFragment) fragment).getWebView();
       webView.loadData(((ViewFeedItem) view).m_item.m_content, "text/html; charset=UTF-8", null);
 
-      manager.beginTransaction()
-            .show(webFragment)
-            .hide(manager.findFragmentByTag(m_activity.m_currentFragment))
-            .addToBackStack(FeedsActivity.WEB_TAG)
-            .commit();
+      FragmentUtils.switchToFragment(m_activity, FeedsActivity.WEB_TAG, true);
 
       /* Form the better url. */
       String url = ((ViewFeedItem) view).m_item.m_url;
@@ -58,7 +52,7 @@ class OnItemClickWebView implements AdapterView.OnItemClickListener
       bar.setTitle(url.substring(-1 == index ? 0 : index + 2).replace("www.", ""));
       bar.setSubtitle(null);
       bar.setIcon(R.drawable.ic_action_web_site);
-      FragmentNavigationDrawer.s_drawerToggle.setDrawerIndicatorEnabled(false);
+      m_activity.m_FragmentDrawer.m_drawerToggle.setDrawerIndicatorEnabled(false);
 
       m_activity.invalidateOptionsMenu();
    }

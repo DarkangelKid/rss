@@ -16,7 +16,6 @@
 
 package com.poloure.simplerss;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.preference.DialogPreference;
@@ -25,13 +24,13 @@ import android.util.AttributeSet;
 public
 class DialogConfirm extends DialogPreference
 {
-   private final Activity m_activity;
+   private final FeedsActivity m_activity;
 
    public
    DialogConfirm(Context context, AttributeSet attrs)
    {
       super(context, attrs, android.R.style.Theme_Holo_Light_Dialog);
-      m_activity = (Activity) context;
+      m_activity = (FeedsActivity) context;
    }
 
    @Override

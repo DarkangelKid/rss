@@ -58,11 +58,11 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, String[][]>
       String[][] navItems = new String[tagTotal][2];
 
       /* Number of feeds. */
-      int feedCount = FeedsActivity.s_index.size();
+      int feedCount = m_activity.m_index.size();
 
       /* This is a list of Sets each containing all of the feed's items. */
       List<Collection<Long>> feedItems = new ArrayList<Collection<Long>>(feedCount);
-      for(IndexItem indexItem : FeedsActivity.s_index)
+      for(IndexItem indexItem : m_activity.m_index)
       {
          Collection<Long> set = (Collection<Long>) Read.object(m_activity, indexItem.m_uid + ServiceUpdate.ITEM_LIST);
          feedItems.add(null == set ? new HashSet<Long>(0) : set);
@@ -80,7 +80,7 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, String[][]>
          for(int j = 0; j < feedCount; j++)
          {
             /* If the feed's index entry (tag1, tag2, etc) contains this tag or is the all tag. */
-            if(0 == i || Arrays.asList(FeedsActivity.s_index.get(j).m_tags).contains(tag))
+            if(0 == i || Arrays.asList(m_activity.m_index.get(j).m_tags).contains(tag))
             {
                itemsInTag.addAll(feedItems.get(j));
             }
@@ -110,15 +110,15 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, String[][]>
       adapter.addAll(result);
 
       /* Update the subtitle. */
-      if(m_activity.m_currentFragment.equals(FeedsActivity.FEED_TAG))
+      if(m_activity.m_currentTag.equals(FeedsActivity.FEED_TAG))
       {
          if(m_activity.getActionBar()
                .getTitle()
                .equals(m_activity.getString(R.string.application_name)))
          {
-            Utilities.updateTagTitle(m_activity);
+            //Utilities.updateTagTitle(m_activity);
          }
-         Utilities.updateSubtitle(m_activity);
+         //m_activity.getActionBar().setSubtitle(Utilities.makeTagSubtitle(m_activity));
       }
    }
 }

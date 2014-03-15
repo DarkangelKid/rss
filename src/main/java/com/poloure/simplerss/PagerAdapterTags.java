@@ -16,7 +16,6 @@
 
 package com.poloure.simplerss;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
@@ -25,7 +24,6 @@ import android.support.v4.view.ViewPager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -35,23 +33,23 @@ class PagerAdapterTags extends FragmentPagerAdapter
 {
    static List<String> s_tagList = new ArrayList<String>(0);
 
-   PagerAdapterTags(FragmentManager fm, Activity activity)
+   PagerAdapterTags(FragmentManager fm, Context context, Iterable<IndexItem> indexItems)
    {
       super(fm);
 
-      s_tagList = new ArrayList<String>(getTagsFromDisk(activity));
+      s_tagList = getTagsFromIndex(context, indexItems);
       notifyDataSetChanged();
    }
 
    static
-   void update(Activity activity)
+   void update(FeedsActivity activity)
    {
-      s_tagList = new ArrayList<String>(getTagsFromDisk(activity));
+      s_tagList = getTagsFromIndex(activity, activity.m_index);
       ((ViewPager) activity.findViewById(R.id.viewpager)).getAdapter().notifyDataSetChanged();
    }
 
    static
-   Collection<String> getTagsFromDisk(Context context)
+   List<String> getTagsFromIndex(Context context, Iterable<IndexItem> indexItems)
    {
       /* Get the all tag from resources. */
       String allTag = context.getString(R.string.all_tag);
@@ -60,12 +58,12 @@ class PagerAdapterTags extends FragmentPagerAdapter
       Set<String> tagSet = Collections.synchronizedSet(new LinkedHashSet<String>(0));
       tagSet.add(allTag);
 
-      List<IndexItem> indexItems = FeedsActivity.s_index;
       for(IndexItem indexItem : indexItems)
       {
          tagSet.addAll(Arrays.asList(indexItem.m_tags));
       }
-      return tagSet;
+
+      return new ArrayList<String>(tagSet);
    }
 
    @Override

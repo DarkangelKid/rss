@@ -16,7 +16,6 @@
 
 package com.poloure.simplerss;
 
-import android.app.Activity;
 import android.os.AsyncTask;
 import android.support.v4.view.ViewPager;
 import android.view.View;
@@ -32,16 +31,16 @@ import java.util.TreeMap;
 
 class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[]>
 {
-   private final Activity m_activity;
+   private final FeedsActivity m_activity;
 
    private
-   AsyncNewTagAdapters(Activity activity)
+   AsyncNewTagAdapters(FeedsActivity activity)
    {
       m_activity = activity;
    }
 
    static
-   void update(Activity activity)
+   void update(FeedsActivity activity)
    {
       new AsyncNewTagAdapters(activity).executeOnExecutor(THREAD_POOL_EXECUTOR);
    }
@@ -61,7 +60,7 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
       Collection<Integer> indices = new ArrayList<Integer>(8);
 
       /* For each feed. */
-      for(IndexItem indexItem : FeedsActivity.s_index)
+      for(IndexItem indexItem : m_activity.m_index)
       {
          /* Get a list of tags that this feed belongs to. */
          List<String> feedsTags = Arrays.asList(indexItem.m_tags);

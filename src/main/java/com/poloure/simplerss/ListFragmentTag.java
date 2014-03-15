@@ -46,8 +46,7 @@ public
 class ListFragmentTag extends Fragment
 {
    private static final String POSITION_KEY = "POSITION";
-   private ListView m_listView;
-   static boolean s_firstLoad = true;
+   ListView m_listView;
    static final int LIST_VIEW_ID_BASE = 20000;
 
    static
@@ -122,20 +121,17 @@ class ListFragmentTag extends Fragment
 
       m_listView.setAdapter(new AdapterTags(getActivity()));
       m_listView.setEmptyView(((View) m_listView.getParent()).findViewById(R.id.empty));
-      if(s_firstLoad)
-      {
-         AsyncNewTagAdapters.update(getActivity());
 
-         FragmentManager manager = getActivity().getFragmentManager();
-         Fragment webFragment = manager.findFragmentByTag(FeedsActivity.WEB_TAG);
+      AsyncNewTagAdapters.update((FeedsActivity) getActivity());
 
-         WebView webView = ((WebViewFragment) webFragment).getWebView();
-         webView.setInitialScale(120);
-         webView.getSettings().setBuiltInZoomControls(true);
-         webView.getSettings().setDisplayZoomControls(false);
-         webView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
-         s_firstLoad = false;
-      }
+      FragmentManager manager = getActivity().getFragmentManager();
+      Fragment webFragment = manager.findFragmentByTag(FeedsActivity.WEB_TAG);
+
+      WebView webView = ((WebViewFragment) webFragment).getWebView();
+      webView.setInitialScale(120);
+      webView.getSettings().setBuiltInZoomControls(true);
+      webView.getSettings().setDisplayZoomControls(false);
+      webView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
    }
 
    @Override

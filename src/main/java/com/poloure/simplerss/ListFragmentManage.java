@@ -16,14 +16,8 @@
 
 package com.poloure.simplerss;
 
-import android.app.Activity;
 import android.app.ListFragment;
 import android.os.Bundle;
-import android.util.SparseBooleanArray;
-import android.view.ActionMode;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.ListView;
@@ -37,7 +31,7 @@ class ListFragmentManage extends ListFragment
    {
       super.onActivityCreated(savedInstanceState);
 
-      Activity activity = getActivity();
+      FeedsActivity activity = (FeedsActivity) getActivity();
       ListView listView = getListView();
 
       setListAdapter(new AdapterManage(activity));
@@ -47,7 +41,6 @@ class ListFragmentManage extends ListFragment
       listView.setMultiChoiceModeListener(new MultiModeListener(listView, activity));
    }
 
-   /* Called when the fragment is shown. */
    @Override
    public
    void onHiddenChanged(boolean hidden)
@@ -55,7 +48,7 @@ class ListFragmentManage extends ListFragment
       super.onHiddenChanged(hidden);
       if(!hidden)
       {
-         AsyncManageAdapter.update(getActivity());
+         AsyncManageAdapter.update((FeedsActivity) getActivity());
       }
    }
 
@@ -63,110 +56,6 @@ class ListFragmentManage extends ListFragment
    public
    void onListItemClick(ListView l, View v, int position, long id)
    {
-      DialogEditFeed.newInstance(getActivity(), position).show();
-   }
-
-   private static
-   class MultiModeListener implements AbsListView.MultiChoiceModeListener
-   {
-      private final ListView m_listView;
-      private final Activity m_activity;
-      private int m_count;
-
-      MultiModeListener(ListView listView, Activity activity)
-      {
-         m_listView = listView;
-         m_activity = activity;
-      }
-
-      @Override
-      public
-      void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked)
-      {
-         m_count += checked ? 1 : -1;
-         mode.setTitle(Utilities.NUMBER_FORMAT.format(m_count) + ' ' + m_activity.getString(R.string.managed_selected));
-      }
-
-      @Override
-      public
-      boolean onActionItemClicked(ActionMode mode, MenuItem item)
-      {
-         if(R.id.select_all == item.getItemId())
-         {
-            for(int i = 0; m_listView.getCount() > i; i++)
-            {
-               if(!m_listView.isItemChecked(i))
-               {
-                  m_listView.setItemChecked(i, true);
-               }
-            }
-            mode.setTitle(Utilities.NUMBER_FORMAT.format(m_count) + ' ' + m_activity.getString(R.string.managed_selected));
-         }
-         else
-         {
-            /* Read this once so that the positions are the same. */
-            SparseBooleanArray checked = m_listView.getCheckedItemPositions();
-            for(int i = 0; checked.size() > i; i++)
-            {
-               if(checked.valueAt(i))
-               {
-                  int position = checked.keyAt(i);
-
-                  IndexItem indexItem = FeedsActivity.s_index.get(position);
-
-                  switch(item.getItemId())
-                  {
-                     case R.id.delete_feed:
-                        FeedsActivity.s_index.remove(indexItem);
-                     case R.id.delete_content:
-                        for(String file : ServiceUpdate.FEED_FILES)
-                        {
-                           m_activity.deleteFile(indexItem.m_uid + file);
-                        }
-                  }
-               }
-            }
-
-            /* Tags first, then manage, then pages, the unread counts. */
-            PagerAdapterTags.update(m_activity);
-            AsyncManageAdapter.update(m_activity);
-            AsyncNewTagAdapters.update(m_activity);
-            AsyncNavigationAdapter.update(m_activity);
-
-            mode.finish();
-         }
-         return true;
-      }
-
-      /* true - the action mode should be created, false - entering this mode should be aborted. */
-      @Override
-      public
-      boolean onCreateActionMode(ActionMode mode, Menu menu)
-      {
-         MenuInflater inflater = mode.getMenuInflater();
-         if(null != inflater)
-         {
-            inflater.inflate(R.menu.context_manage, menu);
-            return true;
-         }
-         return false;
-      }
-
-      @Override
-      public
-      void onDestroyActionMode(ActionMode mode)
-      {
-         m_count = 0;
-      }
-
-      /* Called to refresh an action mode's action menu whenever it is invalidated.
-       * true if the menu or action mode was updated, false otherwise.
-       */
-      @Override
-      public
-      boolean onPrepareActionMode(ActionMode mode, Menu menu)
-      {
-         return false;
-      }
+      DialogEditFeed.newInstance((FeedsActivity) getActivity(), position).show();
    }
 }

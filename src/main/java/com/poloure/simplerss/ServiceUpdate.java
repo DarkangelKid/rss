@@ -273,7 +273,7 @@ class ServiceUpdate extends IntentService
       }
    }
 
-   static
+   private static
    boolean fileExists(Context context, String fileName)
    {
       try
@@ -306,18 +306,15 @@ class ServiceUpdate extends IntentService
       wakeLock.acquire();
 
       int page = intent.getIntExtra("GROUP_NUMBER", 0);
+      List<IndexItem> indexItems = Utilities.loadIndexList(this);
 
       /* Get the tagList (from disk if it is empty). */
-      List<String> tagList = PagerAdapterTags.s_tagList;
-      if(tagList.isEmpty())
-      {
-         tagList.addAll(PagerAdapterTags.getTagsFromDisk(this));
-      }
+      List<String> tagList = PagerAdapterTags.getTagsFromIndex(this, indexItems);
 
       String tag = tagList.get(page);
 
       /* Download and parse each feed in the index. */
-      for(IndexItem indexItem : FeedsActivity.s_index)
+      for(IndexItem indexItem : indexItems)
       {
          if(0 == page || Arrays.asList(indexItem.m_tags).contains(tag))
          {

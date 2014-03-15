@@ -18,17 +18,15 @@ package com.poloure.simplerss;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.drawable.Drawable;
-import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.text.TextDirectionHeuristicsCompat;
 import android.support.v4.view.ViewPager;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
-import android.widget.Adapter;
+import android.widget.ArrayAdapter;
 import android.widget.HeaderViewListAdapter;
 import android.widget.ListView;
-import android.widget.WrapperListAdapter;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -38,71 +36,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 class Utilities
 {
    static final int EIGHT_DP = getDp(8.0F);
    static final NumberFormat NUMBER_FORMAT = NumberFormat.getNumberInstance(Locale.getDefault());
-
-   static
-   void updateSubtitle(Activity activity)
-   {
-      ListView navigationList = (ListView) activity.findViewById(R.id.navigation_drawer);
-      ActionBar bar = activity.getActionBar();
-      Resources res = activity.getResources();
-
-      if(null != navigationList && null != bar)
-      {
-         ViewPager pager = (ViewPager) activity.findViewById(R.id.viewpager);
-
-         WrapperListAdapter headerAdapter = (WrapperListAdapter) navigationList.getAdapter();
-         Adapter navigationAdapter = headerAdapter.getWrappedAdapter();
-
-         if(null != pager)
-         {
-            String[] navigationItem = (String[]) navigationAdapter.getItem(pager.getCurrentItem());
-
-            if(null != navigationItem && 0 != navigationItem.length && !navigationItem[1].isEmpty())
-            {
-               int count = Integer.parseInt(navigationItem[1]);
-               String countString = res.getQuantityString(R.plurals.actionbar_subtitle_unread, count, count);
-               bar.setSubtitle(0 == count ? null : countString);
-            }
-            else
-            {
-               bar.setSubtitle(null);
-            }
-         }
-      }
-   }
-
-   static
-   void updateTagTitle(Activity activity)
-   {
-      ListView navigationList = (ListView) activity.findViewById(R.id.navigation_drawer);
-      ViewPager feedPager = (ViewPager) activity.findViewById(R.id.viewpager);
-      ActionBar bar = activity.getActionBar();
-
-      if(null != navigationList && null != bar && null != feedPager)
-      {
-         int position = feedPager.getCurrentItem();
-         Drawable drawable = activity.getResources().getDrawable(R.drawable.ic_action_labels);
-         DrawableCompat.setAutoMirrored(drawable, true);
-         bar.setIcon(drawable);
-         bar.setTitle(PagerAdapterTags.s_tagList.get(position));
-      }
-      updateSubtitle(activity);
-   }
-
-   static
-   void setNavigationTagSelection(Activity activity, int position)
-   {
-      ListView list = (ListView) activity.findViewById(R.id.navigation_drawer);
-      int headers = ((HeaderViewListAdapter) list.getAdapter()).getHeadersCount();
-      list.setItemChecked(position + headers, true);
-   }
 
    static
    ListView getCurrentTagListView(Activity activity)
@@ -125,6 +70,76 @@ class Utilities
    }
 
    static
+   void setTitlesAndDrawerAndPage(FeedsActivity activity, String fragmentTag, int absolutePos)
+   {
+      ActionBar bar = activity.getActionBar();
+      Resources resources = activity.getResources();
+      String[] navTitles = resources.getStringArray(R.array.navigation_titles);
+      ViewPager pager = (ViewPager) activity.findViewById(R.id.viewpager);
+
+      ListView list = (ListView) activity.findViewById(R.id.navigation_drawer);
+      HeaderViewListAdapter headerAdapter = (HeaderViewListAdapter) list.getAdapter();
+      int headers = headerAdapter.getHeadersCount();
+      int listPosition = -10 == absolutePos ? pager.getCurrentItem() + headers : absolutePos;
+      int viewPagerPos = -10 == absolutePos ? pager.getCurrentItem() : absolutePos - headers;
+
+      /* Check the drawer item. */
+
+      String title = PagerAdapterTags.s_tagList.get(0);
+      String subTitle = null;
+      int imageRes = 0;
+
+      if(FeedsActivity.FAVOURITES_TAG.equals(fragmentTag))
+      {
+         listPosition = 0;
+         title = navTitles[0];
+         imageRes = R.drawable.ic_action_important;
+      }
+      else if(FeedsActivity.MANAGE_TAG.equals(fragmentTag))
+      {
+         listPosition = 1;
+         title = navTitles[1];
+         imageRes = R.drawable.ic_action_storage;
+      }
+      else if(FeedsActivity.SETTINGS_TAG.equals(fragmentTag))
+      {
+         listPosition = 2;
+         title = navTitles[2];
+         imageRes = R.drawable.ic_action_settings;
+      }
+      else if(FeedsActivity.FEED_TAG.equals(fragmentTag))
+      {
+         ArrayAdapter<String[]> adapter = (ArrayAdapter<String[]>) headerAdapter.getWrappedAdapter();
+
+         if(null != adapter && 0 < adapter.getCount())
+         {
+            String[] item = adapter.getItem(viewPagerPos);
+            title = item[0];
+            int count = null == item[1] || item[1].isEmpty() ? 0 : Integer.parseInt(item[1]);
+            String countString = activity.getResources()
+                  .getQuantityString(R.plurals.actionbar_subtitle_unread, count, count);
+            subTitle = 0 == count ? null : countString;
+         }
+         imageRes = R.drawable.ic_action_labels;
+      }
+      bar.setTitle(title);
+      bar.setSubtitle(subTitle);
+      bar.setIcon(imageRes);
+
+      list.setItemChecked(listPosition, true);
+
+      /* If we must change the view pager page. */
+      if(0 <= viewPagerPos)
+      {
+         /* Switch the view pager page if different. */
+         if(pager.getCurrentItem() != viewPagerPos)
+         {
+            pager.setCurrentItem(viewPagerPos);
+         }
+      }
+   }
+
+   static
    int getDp(float pixels)
    {
       DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
@@ -143,6 +158,20 @@ class Utilities
       InputStream inputStream = url.openStream();
       parser.setInput(inputStream, null);
       return parser;
+   }
+
+   static
+   List<IndexItem> loadIndexList(Context context)
+   {
+      List<IndexItem> list = (List<IndexItem>) Read.object(context, Read.INDEX);
+      return null == list ? new ArrayList<IndexItem>(0) : list;
+   }
+
+   static
+   Collection<Long> loadReadItems(Context context)
+   {
+      Set<Long> set = (Set<Long>) Read.object(context, FeedsActivity.READ_ITEMS);
+      return null == set ? new HashSet<Long>(0) : set;
    }
 
    static

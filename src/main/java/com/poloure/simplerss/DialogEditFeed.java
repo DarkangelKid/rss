@@ -16,7 +16,6 @@
 
 package com.poloure.simplerss;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -28,12 +27,12 @@ import android.widget.TextView;
 
 class DialogEditFeed extends Dialog
 {
-   final Activity m_activity;
+   final FeedsActivity m_activity;
    final int m_pos;
    AsyncTask<Void, Void, IndexItem> m_task;
 
    private
-   DialogEditFeed(Activity activity, int position)
+   DialogEditFeed(FeedsActivity activity, int position)
    {
       super(activity, android.R.style.Theme_Holo_Light_Dialog);
       m_activity = activity;
@@ -41,7 +40,7 @@ class DialogEditFeed extends Dialog
    }
 
    static
-   Dialog newInstance(Activity activity, int position)
+   Dialog newInstance(FeedsActivity activity, int position)
    {
       Dialog dialog = new DialogEditFeed(activity, position);
 
@@ -74,7 +73,7 @@ class DialogEditFeed extends Dialog
       /* If this is an edit dialog, set the EditTexts and save the old information. */
       if(-1 != m_pos)
       {
-         oldItem = FeedsActivity.s_index.get(m_pos);
+         oldItem = m_activity.m_index.get(m_pos);
 
          ((TextView) findViewById(R.id.dialog_url)).setText(oldItem.m_url);
          ((TextView) findViewById(R.id.dialog_tags)).setText(Utilities.formatTags(oldItem.m_tags));

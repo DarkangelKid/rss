@@ -19,7 +19,6 @@ package com.poloure.simplerss;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
-import android.app.FragmentManager;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -29,14 +28,11 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.GravityCompat;
-import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.HeaderViewListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -59,20 +55,24 @@ class FragmentNavigationDrawer extends Fragment
       }
    }
 
-   private static
+   private
    class SyncPost implements Runnable
    {
+      SyncPost()
+      {
+      }
+
       @Override
       public
       void run()
       {
-         s_drawerToggle.syncState();
+         m_drawerToggle.syncState();
       }
    }
 
    static final String PREF_USER_LEARNED_DRAWER = "navigation_drawer_learned";
 
-   static ActionBarDrawerToggle s_drawerToggle;
+   ActionBarDrawerToggle m_drawerToggle;
 
    boolean m_userLearnedDrawer;
 
@@ -128,7 +128,7 @@ class FragmentNavigationDrawer extends Fragment
       actionBar.setHomeButtonEnabled(true);
       actionBar.setDisplayHomeAsUpEnabled(true);
 
-      s_drawerToggle = new ActionBarDrawerToggle(getActivity(), drawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
+      m_drawerToggle = new ActionBarDrawerToggle(getActivity(), drawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
       {
          @Override
          public
@@ -163,7 +163,7 @@ class FragmentNavigationDrawer extends Fragment
       }
 
       drawerLayout.post(new SyncPost());
-      drawerLayout.setDrawerListener(s_drawerToggle);
+      drawerLayout.setDrawerListener(m_drawerToggle);
    }
 
    @Override
@@ -171,16 +171,13 @@ class FragmentNavigationDrawer extends Fragment
    void onConfigurationChanged(Configuration newConfig)
    {
       super.onConfigurationChanged(newConfig);
-      s_drawerToggle.onConfigurationChanged(newConfig);
+      m_drawerToggle.onConfigurationChanged(newConfig);
    }
 
    private static
    class OnNavigationItemClick implements AdapterView.OnItemClickListener
    {
       private final FeedsActivity m_activity;
-      private final FragmentManager m_manager;
-      private final ActionBar m_bar;
-      private final String[] m_titles;
       private final Drawable[] m_icons = new Drawable[3];
 
       private static final int[] drawables = {
@@ -192,12 +189,8 @@ class FragmentNavigationDrawer extends Fragment
       OnNavigationItemClick(Activity activity)
       {
          m_activity = (FeedsActivity) activity;
-         m_manager = activity.getFragmentManager();
-         m_bar = activity.getActionBar();
 
          Resources resources = activity.getResources();
-
-         m_titles = resources.getStringArray(R.array.navigation_titles);
 
          for(int i = 0; m_icons.length > i; i++)
          {
@@ -212,46 +205,13 @@ class FragmentNavigationDrawer extends Fragment
       {
          /* Close the navigation drawer in all cases. */
          ((DrawerLayout) parent.getParent()).closeDrawers();
-         ((AbsListView) parent).setItemChecked(absolutePos, true);
 
-         HeaderViewListAdapter wrapperAdapter = (HeaderViewListAdapter) parent.getAdapter();
-
-         /* Includes the disabled divider. */
-         int offset = wrapperAdapter.getHeadersCount();
-         int tagPos = absolutePos - offset;
-
-         /* If we are switching fragments, check if we need to. */
-         String newTag = FeedsActivity.FRAGMENT_TAGS[Math.min(3, absolutePos)];
-         if(!m_activity.m_currentFragment.equals(newTag))
-         {
-            /* Switch the content frame fragment. */
-            m_manager.beginTransaction()
-                  .hide(FeedsActivity.getFragment(m_manager, m_activity.m_currentFragment))
-                  .show(FeedsActivity.getFragment(m_manager, newTag))
-                  .commit();
-            m_activity.m_currentFragment = newTag;
-         }
+         /* Switch the content frame fragment. */
+         String fragmentTag = FeedsActivity.FRAGMENT_TAGS[Math.min(3, absolutePos)];
+         FragmentUtils.switchToFragment(m_activity, fragmentTag, false);
 
          /* If a tag was clicked, set the ViewPager position to that tag. */
-         if(0 <= tagPos)
-         {
-            ViewPager pager = (ViewPager) m_activity.findViewById(R.id.viewpager);
-
-            /* Does not call the onPageChangeListener if the page is the same as before. */
-            if(tagPos == pager.getCurrentItem())
-            {
-               /* Set the subtitle to the unread count. */
-               Utilities.updateTagTitle(m_activity);
-            }
-            pager.setCurrentItem(tagPos);
-         }
-         else
-         {
-            /* Change the icon and title of the ActionBar. */
-            m_bar.setIcon(m_icons[absolutePos]);
-            m_bar.setTitle(m_titles[absolutePos]);
-            m_bar.setSubtitle(null);
-         }
+         Utilities.setTitlesAndDrawerAndPage(m_activity, fragmentTag, absolutePos);
       }
    }
 }

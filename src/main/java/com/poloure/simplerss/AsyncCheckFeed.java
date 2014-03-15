@@ -16,7 +16,6 @@
 
 package com.poloure.simplerss;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.AsyncTask;
@@ -39,10 +38,10 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, IndexItem>
    private static final Pattern SPLIT_COMMA = Pattern.compile(",");
    private final Dialog m_dialog;
    private final IndexItem m_oldIndexItem;
-   private final Activity m_activity;
+   private final FeedsActivity m_activity;
 
    private
-   AsyncCheckFeed(Activity activity, Dialog dialog, IndexItem oldIndexItem)
+   AsyncCheckFeed(FeedsActivity activity, Dialog dialog, IndexItem oldIndexItem)
    {
       m_dialog = dialog;
       m_oldIndexItem = oldIndexItem;
@@ -54,7 +53,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, IndexItem>
    }
 
    static
-   AsyncTask<Void, Void, IndexItem> newInstance(Activity activity, Dialog dialog, IndexItem oldIndexItem)
+   AsyncTask<Void, Void, IndexItem> newInstance(FeedsActivity activity, Dialog dialog, IndexItem oldIndexItem)
    {
       AsyncTask<Void, Void, IndexItem> task = new AsyncCheckFeed(activity, dialog, oldIndexItem);
 
@@ -92,7 +91,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, IndexItem>
          {
             /* Check to see if this url is new .*/
             boolean newFeed = true;
-            for(IndexItem indexItem : FeedsActivity.s_index)
+            for(IndexItem indexItem : m_activity.m_index)
             {
                if(indexItem.m_url.equals(urlToCheck.toString()))
                {
@@ -209,15 +208,15 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, IndexItem>
       if(!newIndexItem.m_url.isEmpty())
       {
          /* Create the csv. */
-         int oldPos = FeedsActivity.s_index.indexOf(m_oldIndexItem);
+         int oldPos = m_activity.m_index.indexOf(m_oldIndexItem);
 
          if(-1 == oldPos)
          {
-            FeedsActivity.s_index.add(newIndexItem);
+            m_activity.m_index.add(newIndexItem);
          }
          else
          {
-            FeedsActivity.s_index.set(oldPos, newIndexItem);
+            m_activity.m_index.set(oldPos, newIndexItem);
          }
 
          /* Must update the tags first. */

@@ -16,7 +16,6 @@
 
 package com.poloure.simplerss;
 
-import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.ListFragment;
 import android.content.Context;
@@ -31,17 +30,17 @@ import java.util.Locale;
 class AsyncManageAdapter extends AsyncTask<String, String[][], Void>
 {
    private final ListFragment m_listFragment;
-   private final Context m_context;
+   private final FeedsActivity m_activity;
 
    private
-   AsyncManageAdapter(Context context, ListFragment listFragment)
+   AsyncManageAdapter(FeedsActivity activity, ListFragment listFragment)
    {
-      m_context = context;
+      m_activity = activity;
       m_listFragment = listFragment;
    }
 
    static
-   void update(Activity activity)
+   void update(FeedsActivity activity)
    {
       FragmentManager manager = activity.getFragmentManager();
       ListFragment fragment = (ListFragment) manager.findFragmentByTag(FeedsActivity.MANAGE_TAG);
@@ -65,14 +64,14 @@ class AsyncManageAdapter extends AsyncTask<String, String[][], Void>
    {
       /* Read the index file for names, urls, and tags. */
       NumberFormat format = NumberFormat.getNumberInstance(Locale.getDefault());
-      List<IndexItem> indexItems = FeedsActivity.s_index;
+      List<IndexItem> indexItems = m_activity.m_index;
       String[][] strings = new String[indexItems.size()][3];
 
       for(int i = 0; i < indexItems.size(); i++)
       {
          /* Append the url to the next line. */
          IndexItem item = indexItems.get(i);
-         strings[i][0] = format.format(count(m_context, item.m_uid + ServiceUpdate.ITEM_LIST));
+         strings[i][0] = format.format(count(m_activity, item.m_uid + ServiceUpdate.ITEM_LIST));
          strings[i][1] = item.m_url;
          strings[i][2] = Utilities.formatTags(item.m_tags);
       }
@@ -84,7 +83,7 @@ class AsyncManageAdapter extends AsyncTask<String, String[][], Void>
    protected
    void onProgressUpdate(String[][]... values)
    {
-      AdapterManage adapterManage = new AdapterManage(m_context);
+      AdapterManage adapterManage = new AdapterManage(m_activity);
       m_listFragment.setListAdapter(adapterManage);
 
       adapterManage.m_manageItems.addAll(Arrays.asList(values[0]));

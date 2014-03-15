@@ -16,41 +16,27 @@
 
 package com.poloure.simplerss;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlarmManager;
-import android.app.Fragment;
 import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.support.v4.graphics.drawable.DrawableCompat;
-import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.webkit.WebViewFragment;
 import android.widget.ListView;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
-import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
-import uk.co.senab.actionbarpulltorefresh.library.Options;
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
-import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
 public
 class FeedsActivity extends Activity
@@ -61,10 +47,12 @@ class FeedsActivity extends Activity
    private static final int MINUTE_VALUE = 60000;
    boolean m_showMenuItems = true;
 
-   String m_currentFragment;
-   private FragmentNavigationDrawer m_FragmentNavigationDrawer;
+   String m_previousTag;
+   String m_currentTag;
 
-   static List<IndexItem> s_index;
+   FragmentNavigationDrawer m_FragmentDrawer;
+
+   List<IndexItem> m_index;
 
    static final String WEB_TAG = "Web";
    static final String FEED_TAG = "Feeds";
@@ -73,10 +61,17 @@ class FeedsActivity extends Activity
    static final String SETTINGS_TAG = "Settings";
    static final String[] FRAGMENT_TAGS = {FAVOURITES_TAG, MANAGE_TAG, SETTINGS_TAG, FEED_TAG};
 
-   /* Start of ordered state changes of the Activity.
-    *
-    *
-    */
+   static
+   class SettingsFragment extends PreferenceFragment
+   {
+      @Override
+      public
+      void onCreate(Bundle savedInstanceState)
+      {
+         super.onCreate(savedInstanceState);
+         addPreferencesFromResource(R.xml.preferences);
+      }
+   }
 
    /* Called only when no remnants of the Activity exist. */
    @Override
@@ -88,44 +83,20 @@ class FeedsActivity extends Activity
       setContentView(R.layout.activity_main);
 
       /* Load the index. */
-      s_index = (List<IndexItem>) Read.object(this, Read.INDEX);
-      if(null == s_index)
-      {
-         s_index = new ArrayList<IndexItem>(0);
-      }
+      m_index = Utilities.loadIndexList(this);
 
-      /* Load the read items to the AdapterTag class. */
-      Collection<Long> set = (Collection<Long>) Read.object(this, READ_ITEMS);
-      if(null != set)
-      {
-         AdapterTags.READ_ITEM_TIMES.addAll(set);
-      }
+      /* Load the read items to the tags Adapter. */
+      AdapterTags.READ_ITEM_TIMES.addAll(Utilities.loadReadItems(this));
 
-      m_currentFragment = FEED_TAG;
+      m_currentTag = FEED_TAG;
 
       FragmentManager manager = getFragmentManager();
-      FragmentTransaction transaction = manager.beginTransaction();
 
-      m_FragmentNavigationDrawer = (FragmentNavigationDrawer) manager.findFragmentById(R.id.navigation_drawer);
-      m_FragmentNavigationDrawer.setUp((DrawerLayout) findViewById(R.id.drawer_layout));
+      m_FragmentDrawer = (FragmentNavigationDrawer) manager.findFragmentById(R.id.navigation_drawer);
+      m_FragmentDrawer.setUp((DrawerLayout) findViewById(R.id.drawer_layout));
 
       /* Create and hide the fragments that go inside the content frame. */
-      for(int i = 0; FRAGMENT_TAGS.length > i; i++)
-      {
-         Fragment fragment = getFragment(manager, FRAGMENT_TAGS[i]);
-         if(!fragment.isAdded())
-         {
-            transaction.add(R.id.content_frame, fragment, FRAGMENT_TAGS[i]);
-         }
-         if(3 != i && !fragment.isHidden())
-         {
-            transaction.hide(fragment);
-         }
-      }
-      Fragment webFragment = getFragment(manager, WEB_TAG);
-      transaction.add(R.id.content_frame, webFragment, WEB_TAG);
-      transaction.hide(webFragment);
-      transaction.commit();
+      FragmentUtils.addAllFragments(this);
    }
 
    /* Stop the alarm service and reset the time to 0 every time the user sees the activity. */
@@ -137,17 +108,12 @@ class FeedsActivity extends Activity
       setServiceIntent(ALARM_SERVICE_STOP);
       registerReceiver(Receiver, new IntentFilter(ServiceUpdate.BROADCAST_ACTION));
 
-      /* Update the navigation adapter. */
-      if(!isWebViewVisible())
+      /* Update the navigation adapter. This updates the subtitle and title. */
+      if(!m_currentTag.equals(WEB_TAG))
       {
          AsyncNavigationAdapter.update(this);
       }
    }
-
-   /* Activity is now running.
-    *
-    * These methods are for any state change post running.
-    */
 
    @Override
    protected
@@ -155,9 +121,6 @@ class FeedsActivity extends Activity
    {
       super.onPause();
       unregisterReceiver(Receiver);
-
-      /* This stops the user accidentally reading items when resuming. */
-      ListFragmentTag.s_firstLoad = true;
    }
 
    /* Start the alarm service every time the activity is not visible. */
@@ -167,45 +130,34 @@ class FeedsActivity extends Activity
    {
       super.onStop();
       Write.object(this, READ_ITEMS, AdapterTags.READ_ITEM_TIMES);
-      Write.object(this, Read.INDEX, s_index);
+      Write.object(this, Read.INDEX, m_index);
       Write.object(this, Read.FAVOURITES, ListFragmentTag.getFavouritesAdapter(this).m_feedItems);
       setServiceIntent(ALARM_SERVICE_START);
    }
-
-   /* Option menu methods.
-    *
-    *
-    */
 
    @Override
    public
    boolean onOptionsItemSelected(MenuItem item)
    {
-      if(android.R.id.home == item.getItemId() && isWebViewVisible())
+      if(android.R.id.home == item.getItemId() && m_currentTag.equals(WEB_TAG))
       {
          onBackPressed();
          return true;
       }
-      return m_FragmentNavigationDrawer.s_drawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
+      return m_FragmentDrawer.m_drawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
    }
 
    @Override
    public
    boolean onPrepareOptionsMenu(Menu menu)
    {
-      CharSequence title = getActionBar().getTitle();
+      boolean web = m_currentTag.equals(WEB_TAG);
+      boolean feed = m_currentTag.equals(FEED_TAG);
+      boolean manage = m_currentTag.equals(MANAGE_TAG);
 
-      boolean visible = null != title && !title.toString().contains(".");
-
-      menu.getItem(0).setVisible(visible);
-      menu.getItem(1).setVisible(visible);
-      menu.getItem(2).setVisible(!visible);
-
-      boolean feed = m_currentFragment.equals(FEED_TAG);
-      boolean manage = m_currentFragment.equals(MANAGE_TAG);
-
-      menu.getItem(0).setEnabled(m_showMenuItems && (feed || manage));
-      menu.getItem(1).setEnabled(m_showMenuItems && feed);
+      menu.getItem(0).setVisible(!web).setEnabled(m_showMenuItems && (feed || manage));
+      menu.getItem(1).setVisible(!web).setEnabled(m_showMenuItems && feed);
+      menu.getItem(2).setVisible(web);
 
       return super.onPrepareOptionsMenu(menu);
    }
@@ -223,18 +175,13 @@ class FeedsActivity extends Activity
       return super.onCreateOptionsMenu(menu);
    }
 
-   /* The end of overridden methods.
-    *
-    *
-    */
-
    private final BroadcastReceiver Receiver = new BroadcastReceiver()
    {
       @Override
       public
       void onReceive(Context context, Intent intent)
       {
-         Activity activity = (Activity) getWindow().getDecorView().getContext();
+         FeedsActivity activity = (FeedsActivity) getWindow().getDecorView().getContext();
 
          AsyncNewTagAdapters.update(activity);
 
@@ -285,37 +232,17 @@ class FeedsActivity extends Activity
    {
       super.onBackPressed();
 
-      if(isWebViewVisible())
+      if(m_currentTag.equals(WEB_TAG))
       {
-         ActionBar bar = getActionBar();
+         Utilities.setTitlesAndDrawerAndPage(this, m_previousTag, -10);
 
-         boolean isFavourites = m_currentFragment.equals(FAVOURITES_TAG);
-         if(isFavourites)
-         {
-            bar.setTitle(getResources().getStringArray(R.array.navigation_titles)[0]);
-            bar.setSubtitle(null);
-         }
-         else
-         {
-            Utilities.updateTagTitle(this);
-            Utilities.updateSubtitle(this);
-         }
+         /* Switch back to our old tag. */
+         m_currentTag = m_previousTag;
+         m_previousTag = WEB_TAG;
 
-         int res = isFavourites ? R.drawable.ic_action_important : R.drawable.ic_action_labels;
-         Drawable icon = getResources().getDrawable(res);
-         DrawableCompat.setAutoMirrored(icon, true);
-
-         bar.setIcon(icon);
-
-         FragmentNavigationDrawer.s_drawerToggle.setDrawerIndicatorEnabled(true);
+         m_FragmentDrawer.m_drawerToggle.setDrawerIndicatorEnabled(true);
          invalidateOptionsMenu();
       }
-   }
-
-   boolean isWebViewVisible()
-   {
-      CharSequence title = getActionBar().getTitle();
-      return null != title && title.toString().contains(".");
    }
 
    public
@@ -333,108 +260,6 @@ class FeedsActivity extends Activity
       {
          gotoLatestUnread(listView);
       }
-   }
-
-   /* Large section that declares the three main fragments. */
-   static
-   Fragment getFragment(FragmentManager manager, String tag)
-   {
-      Fragment fragment = manager.findFragmentByTag(tag);
-      if(null == fragment)
-      {
-         if(tag.equals(FEED_TAG))
-         {
-            return new Fragment()
-            {
-               private static final float PULL_DISTANCE = 0.5F;
-
-               @Override
-               public
-               View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
-               {
-                  super.onCreateView(inflater, container, savedInstanceState);
-
-                  PullToRefreshLayout layout = (PullToRefreshLayout) inflater.inflate(R.layout.viewpager, null, false);
-                  final Activity activity = getActivity();
-
-                  final ViewPager pager = (ViewPager) layout.findViewById(R.id.viewpager);
-
-                  ActionBarPullToRefresh.from(activity)
-                        .allChildrenArePullable()
-                        .options(Options.create().scrollDistance(PULL_DISTANCE).build())
-                        .useViewDelegate(ViewPager.class, new ViewPagerDelegate())
-                        .listener(new OnRefreshListener()
-                        {
-                           @Override
-                           public
-                           void onRefreshStarted(View view)
-                           {
-                              Intent intent = new Intent(activity, ServiceUpdate.class);
-                              intent.putExtra("GROUP_NUMBER", pager.getCurrentItem());
-                              activity.startService(intent);
-                           }
-                        })
-                        .setup(layout);
-
-                  /* Inflate and configure the ViewPager. */
-                  pager.setOffscreenPageLimit(128);
-                  pager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener()
-                  {
-                     @Override
-                     public
-                     void onPageSelected(int position)
-                     {
-                        /* Set the item to be checked in the navigation drawer. */
-                        Utilities.setNavigationTagSelection(activity, position);
-
-                        /* Set the subtitle to the unread count. */
-                        Utilities.updateTagTitle(activity);
-                     }
-                  });
-                  return layout;
-               }
-
-               @Override
-               public
-               void onActivityCreated(Bundle savedInstanceState)
-               {
-                  super.onActivityCreated(savedInstanceState);
-
-                  ViewPager pager = (ViewPager) getView().findViewById(R.id.viewpager);
-                  Activity activity = getActivity();
-
-                  pager.setAdapter(new PagerAdapterTags(getFragmentManager(), activity));
-                  Utilities.setNavigationTagSelection(activity, 0);
-               }
-            };
-         }
-         if(tag.equals(FAVOURITES_TAG))
-         {
-            return new ListFragmentFavourites();
-         }
-         if(tag.equals(MANAGE_TAG))
-         {
-            return new ListFragmentManage();
-         }
-         if(tag.equals(SETTINGS_TAG))
-         {
-            return new PreferenceFragment()
-            {
-               @Override
-               public
-               void onCreate(Bundle savedInstanceState)
-               {
-                  super.onCreate(savedInstanceState);
-                  addPreferencesFromResource(R.xml.preferences);
-               }
-            };
-         }
-         if(tag.equals(WEB_TAG))
-         {
-            return new WebViewFragment();
-         }
-      }
-      return fragment;
    }
 
    static
