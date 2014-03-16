@@ -227,6 +227,9 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, IndexItem>
          String text = context.getString(R.string.toast_added_feed, newIndexItem.m_url);
          Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
 
+         /* Save the index file to disk so the ServiceUpdate can load it. */
+         Write.object(m_activity, Read.INDEX, m_activity.m_index);
+
          m_dialog.dismiss();
       }
       else
