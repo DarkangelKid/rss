@@ -34,4 +34,12 @@
       <item name="android:textColor">#ff0099cc</item>
    </style>
 
+   <style name="TextAppearance.FeedsActivity.Widget.ActionBar.Title" parent="android:TextAppearance.Holo.Widget.ActionBar.Title">
+      <item name="android:textColor">@color/item_title_color</item>
+   </style>
+
+   <style name="TextAppearance.FeedsActivity.Widget.ActionBar.SubTitle" parent="android:TextAppearance.Holo.Widget.ActionBar.Subtitle">
+      <item name="android:textColor">@color/item_description_color</item>
+   </style>
+
 </resources>
