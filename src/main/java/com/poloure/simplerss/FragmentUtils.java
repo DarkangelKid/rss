@@ -34,7 +34,7 @@ class FragmentUtils
       add(manager, trans, new ListFragmentManage(), FeedsActivity.MANAGE_TAG);
       add(manager, trans, new ListFragmentFavourites(), FeedsActivity.FAVOURITES_TAG);
       add(manager, trans, new WebViewFragment(), FeedsActivity.WEB_TAG);
-      add(manager, trans, new FeedsActivity.SettingsFragment(), FeedsActivity.SETTINGS_TAG);
+      add(manager, trans, new FragmentSettings(), FeedsActivity.SETTINGS_TAG);
 
       trans.commit();
    }

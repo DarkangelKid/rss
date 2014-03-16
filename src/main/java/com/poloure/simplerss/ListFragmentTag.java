@@ -92,7 +92,12 @@ class ListFragmentTag extends Fragment
                   if(null != viewItem && viewItem.isShown() && 0 <= viewItem.getTop())
                   {
                      FeedItem item = (FeedItem) adapter.getItem(first + i);
-                     AdapterTags.READ_ITEM_TIMES.add(item.m_time);
+                     boolean existed = AdapterTags.READ_ITEM_TIMES.add(item.m_time);
+
+                     if(!existed)
+                     {
+                        /* TODO -1 from the subtitle. */
+                     }
                   }
                }
             }

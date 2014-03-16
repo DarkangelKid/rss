@@ -33,6 +33,7 @@
    <color name="text_navigation_main">#58585b</color>
 
    <color name="transparent">#00000000</color>
+   <color name="action_bar">#ffdddddd</color>
 
    <drawable name="divider_tag_list">@color/item_separator</drawable>
    <drawable name="transparent">@color/transparent</drawable>

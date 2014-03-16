@@ -32,7 +32,7 @@
       <activity
          android:name=".FeedsActivity"
          android:label="@string/application_name"
-         android:theme="@android:style/Theme.Holo.Light">
+         android:theme="@style/Theme.FeedsActivity">
          <intent-filter>
             <action android:name="android.intent.action.MAIN"/>
             <category android:name="android.intent.category.LAUNCHER"/>

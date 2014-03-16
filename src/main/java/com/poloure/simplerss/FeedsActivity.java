@@ -26,11 +26,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.Window;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -61,18 +61,6 @@ class FeedsActivity extends Activity
    static final String SETTINGS_TAG = "Settings";
    static final String[] FRAGMENT_TAGS = {FAVOURITES_TAG, MANAGE_TAG, SETTINGS_TAG, FEED_TAG};
 
-   static
-   class SettingsFragment extends PreferenceFragment
-   {
-      @Override
-      public
-      void onCreate(Bundle savedInstanceState)
-      {
-         super.onCreate(savedInstanceState);
-         addPreferencesFromResource(R.xml.preferences);
-      }
-   }
-
    /* Called only when no remnants of the Activity exist. */
    @Override
    public
@@ -87,6 +75,7 @@ class FeedsActivity extends Activity
 
       /* Load the read items to the tags Adapter. */
       AdapterTags.READ_ITEM_TIMES.addAll(Utilities.loadReadItems(this));
+      setProgressBarVisibility(true);
 
       m_currentTag = FEED_TAG;
 
@@ -94,6 +83,9 @@ class FeedsActivity extends Activity
 
       m_FragmentDrawer = (FragmentNavigationDrawer) manager.findFragmentById(R.id.navigation_drawer);
       m_FragmentDrawer.setUp((DrawerLayout) findViewById(R.id.drawer_layout));
+
+      // create our manager instance after the content view is set
+      Utilities.setTopOffset(this, R.id.content_frame);
 
       /* Create and hide the fragments that go inside the content frame. */
       FragmentUtils.addAllFragments(this);

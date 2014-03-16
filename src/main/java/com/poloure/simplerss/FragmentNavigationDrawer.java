@@ -21,12 +21,9 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.content.res.Resources;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.view.LayoutInflater;
@@ -95,6 +92,7 @@ class FragmentNavigationDrawer extends Fragment
       listView.setOnItemClickListener(new OnNavigationItemClick(getActivity()));
       listView.setOnItemLongClickListener(new OnNavigationItemLongClick());
       listView.setHeaderDividersEnabled(false);
+      Utilities.setTopOffset(getActivity(), listView);
 
       String[] navTitles = getResources().getStringArray(R.array.navigation_titles);
 
@@ -178,25 +176,10 @@ class FragmentNavigationDrawer extends Fragment
    class OnNavigationItemClick implements AdapterView.OnItemClickListener
    {
       private final FeedsActivity m_activity;
-      private final Drawable[] m_icons = new Drawable[3];
-
-      private static final int[] drawables = {
-            R.drawable.ic_action_important,
-            R.drawable.ic_action_storage,
-            R.drawable.ic_action_settings,
-      };
 
       OnNavigationItemClick(Activity activity)
       {
          m_activity = (FeedsActivity) activity;
-
-         Resources resources = activity.getResources();
-
-         for(int i = 0; m_icons.length > i; i++)
-         {
-            m_icons[i] = resources.getDrawable(drawables[i]);
-            DrawableCompat.setAutoMirrored(m_icons[i], true);
-         }
       }
 
       @Override

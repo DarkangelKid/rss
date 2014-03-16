@@ -112,13 +112,7 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, String[][]>
       /* Update the subtitle. */
       if(m_activity.m_currentTag.equals(FeedsActivity.FEED_TAG))
       {
-         if(m_activity.getActionBar()
-               .getTitle()
-               .equals(m_activity.getString(R.string.application_name)))
-         {
-            //Utilities.updateTagTitle(m_activity);
-         }
-         //m_activity.getActionBar().setSubtitle(Utilities.makeTagSubtitle(m_activity));
+         Utilities.setTitlesAndDrawerAndPage(m_activity, FeedsActivity.FEED_TAG, -10);
       }
    }
 }
