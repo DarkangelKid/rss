@@ -149,6 +149,13 @@ class ViewNavItem extends View
    }
 
    @Override
+   public
+   boolean hasOverlappingRendering()
+   {
+      return false;
+   }
+
+   @Override
    protected
    void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
    {

@@ -40,5 +40,4 @@ class AdapterNavigationDrawer extends ArrayAdapter<String[]>
 
       return view;
    }
-
 }
