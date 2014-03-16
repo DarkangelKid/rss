@@ -17,13 +17,10 @@ android {
     buildToolsVersion '19.0.3'
 
     defaultConfig {
+        versionCode 26
+        versionName "0.22.1"
         minSdkVersion 14
         targetSdkVersion 19
-    }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_6
-        targetCompatibility JavaVersion.VERSION_1_6
     }
 
     lintOptions {
@@ -34,6 +31,7 @@ android {
     buildTypes {
         release {
             runProguard true
+            proguardFile getDefaultProguardFile('proguard-android-optimize.txt')
             zipAlign true
         }
     }

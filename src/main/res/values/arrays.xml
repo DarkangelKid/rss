@@ -60,6 +60,7 @@
       <item>85</item>
       <item>95</item>
    </string-array>
+   -array>
 
    <string-array name="time_initials">
       <item>y</item>

@@ -19,6 +19,7 @@ package com.poloure.simplerss;
 import android.os.AsyncTask;
 import android.support.v4.view.ViewPager;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -147,5 +148,10 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
          }
          ((View) listView.getParent()).setVisibility(View.VISIBLE);
       }
+
+      pager.setVisibility(View.VISIBLE);
+      AlphaAnimation animation = new AlphaAnimation(0.0F, 1.0F);
+      animation.setDuration(300);
+      pager.startAnimation(animation);
    }
 }

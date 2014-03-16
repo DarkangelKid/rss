@@ -23,7 +23,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.os.Build;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
@@ -71,14 +70,7 @@ class ViewNavItem extends View
       }
 
       m_height = Math.round(resources.getDimension(R.dimen.navigation_height));
-      if(Build.VERSION_CODES.JELLY_BEAN > Build.VERSION.SDK_INT)
-      {
-         setBackgroundDrawable(resources.getDrawable(R.drawable.navigation_item_background));
-      }
-      else
-      {
-         setBackground(resources.getDrawable(R.drawable.navigation_item_background));
-      }
+      setBackgroundResource(R.drawable.navigation_item_background);
       initPaints(resources);
    }
 
