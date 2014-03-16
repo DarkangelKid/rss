@@ -86,7 +86,6 @@ class AsyncManageAdapter extends AsyncTask<String, String[][], Void>
       AdapterManage adapterManage = new AdapterManage(m_activity);
       m_listFragment.setListAdapter(adapterManage);
 
-      adapterManage.m_manageItems.addAll(Arrays.asList(values[0]));
-      adapterManage.notifyDataSetChanged();
+      adapterManage.addAll(Arrays.asList(values[0]));
    }
 }

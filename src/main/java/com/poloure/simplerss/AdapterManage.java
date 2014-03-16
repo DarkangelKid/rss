@@ -20,45 +20,18 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.List;
-
-class AdapterManage extends BaseAdapter
+class AdapterManage extends ArrayAdapter<String[]>
 {
-   final List<String[]> m_manageItems = new ArrayList<String[]>(0);
-   private final Context m_context;
    private TextView m_count;
    private TextView m_url;
    private TextView m_tags;
 
    AdapterManage(Context context)
    {
-      m_context = context;
-   }
-
-   @Override
-   public
-   int getCount()
-   {
-
-      return m_manageItems.size();
-   }
-
-   @Override
-   public
-   Object getItem(int position)
-   {
-      return m_manageItems.get(position);
-   }
-
-   @Override
-   public
-   long getItemId(int position)
-   {
-      return position;
+      super(context, android.R.id.list);
    }
 
    @Override
@@ -68,13 +41,14 @@ class AdapterManage extends BaseAdapter
       View layout = convertView;
       if(null == layout)
       {
-         layout = LayoutInflater.from(m_context).inflate(R.layout.manage_text_view, null, false);
+         layout = LayoutInflater.from(parent.getContext())
+               .inflate(R.layout.manage_text_view, null, false);
          m_count = (TextView) layout.findViewById(R.id.manage_count);
          m_url = (TextView) layout.findViewById(R.id.manage_url);
          m_tags = (TextView) layout.findViewById(R.id.manage_tags);
       }
 
-      String[] item = (String[]) getItem(position);
+      String[] item = getItem(position);
       m_count.setText(item[0]);
       m_url.setText(item[1]);
       m_tags.setText(item[2]);
