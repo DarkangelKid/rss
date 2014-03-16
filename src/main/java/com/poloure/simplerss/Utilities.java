@@ -25,6 +25,7 @@ import android.support.v4.view.ViewPager;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.widget.ArrayAdapter;
 import android.widget.HeaderViewListAdapter;
 import android.widget.ListView;
@@ -149,15 +150,18 @@ class Utilities
    static
    void setTopOffset(Activity activity, View view)
    {
-      Resources resources = activity.getResources();
-      TypedValue value = new TypedValue();
+      if(!ViewConfiguration.get(activity).hasPermanentMenuKey())
+      {
+         Resources resources = activity.getResources();
+         TypedValue value = new TypedValue();
 
-      activity.getTheme().resolveAttribute(android.R.attr.actionBarSize, value, true);
-      int actionBar = activity.getResources().getDimensionPixelSize(value.resourceId);
-      int resourceId = resources.getIdentifier("status_bar_height", "dimen", "android");
-      int statusBar = resources.getDimensionPixelSize(resourceId);
+         activity.getTheme().resolveAttribute(android.R.attr.actionBarSize, value, true);
+         int actionBar = activity.getResources().getDimensionPixelSize(value.resourceId);
+         int resourceId = resources.getIdentifier("status_bar_height", "dimen", "android");
+         int statusBar = resources.getDimensionPixelSize(resourceId);
 
-      view.setPadding(0, actionBar + statusBar, 0, 0);
+         view.setPadding(0, actionBar + statusBar, 0, 0);
+      }
    }
 
    static
