@@ -18,6 +18,7 @@
 
    <style name="Theme.FeedsActivity" parent="android:Theme.Holo.Light">
       <item name="ptrHeaderStyle">@style/Widget.Custom.PtrHeader</item>
+      <item name="android:actionBarStyle">@style/Widget.FeedsActivity.ActionBar</item>
    </style>
 
    <style name="Widget.Custom.PtrHeader" parent="android:Widget">
@@ -27,6 +28,14 @@
       <!-- The strings to be displayed at the various states -->
       <item name="ptrPullText">Swipe down to refresh</item>
       <item name="ptrRefreshingText">Checking for items</item>
+   </style>
+
+   <style name="Widget.FeedsActivity.ActionBar" parent="android:Widget.Holo.Light.ActionBar">
+      <item name="android:background">@color/action_bar</item>
+      <item name="android:icon">@drawable/ic_action_labels</item>
+      <item name="android:title">@string/all_tag</item>
+      <item name="android:titleTextStyle">@style/TextAppearance.FeedsActivity.Widget.ActionBar.Title</item>
+      <item name="android:subtitleTextStyle">@style/TextAppearance.FeedsActivity.Widget.ActionBar.SubTitle</item>
    </style>
 
    <style name="TextAppearance.Custom.PtrHeader.Title" parent="android:TextAppearance.Small">
