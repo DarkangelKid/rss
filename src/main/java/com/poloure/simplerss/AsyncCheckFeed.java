@@ -61,6 +61,34 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, IndexItem>
       return task;
    }
 
+   private static
+   boolean isValidFeed(CharSequence urlString)
+   {
+      boolean isValid = false;
+      try
+      {
+         XmlPullParser parser = Utilities.createXmlParser(urlString.toString());
+
+         parser.next();
+         int eventType = parser.getEventType();
+         if(XmlPullParser.START_TAG == eventType)
+         {
+            String tag = parser.getName();
+            if("rss".equals(tag) || "feed".equals(tag))
+            {
+               isValid = true;
+            }
+         }
+      }
+      catch(IOException ignored)
+      {
+      }
+      catch(XmlPullParserException ignored)
+      {
+      }
+      return isValid;
+   }
+
    @Override
    protected
    IndexItem doInBackground(Void... nothing)
@@ -109,34 +137,6 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, IndexItem>
          }
       }
       return new IndexItem(uid, url, formatUserTagsInput(inputTags));
-   }
-
-   private static
-   boolean isValidFeed(CharSequence urlString)
-   {
-      boolean isValid = false;
-      try
-      {
-         XmlPullParser parser = Utilities.createXmlParser(urlString.toString());
-
-         parser.next();
-         int eventType = parser.getEventType();
-         if(XmlPullParser.START_TAG == eventType)
-         {
-            String tag = parser.getName();
-            if("rss".equals(tag) || "feed".equals(tag))
-            {
-               isValid = true;
-            }
-         }
-      }
-      catch(IOException ignored)
-      {
-      }
-      catch(XmlPullParserException ignored)
-      {
-      }
-      return isValid;
    }
 
    private

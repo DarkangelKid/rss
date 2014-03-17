@@ -22,7 +22,10 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Typeface;
+import android.view.Display;
+import android.view.Surface;
 import android.view.View;
+import android.view.WindowManager;
 
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -31,20 +34,18 @@ class ViewFeedItem extends View
 {
    private static final Paint[] m_paints = new Paint[3];
    private static final int SCREEN = Resources.getSystem().getDisplayMetrics().widthPixels;
-
-   private Bitmap m_image;
-   boolean m_hasImage;
-   FeedItem m_item;
-   private final int m_height;
-   private final String[] m_timeInitials;
    private static final NumberFormat TIME_FORMAT = NumberFormat.getNumberInstance(Locale.getDefault());
-
    private static final int[] FONT_COLORS = {
          R.color.item_title_color, R.color.item_link_color, R.color.item_description_color,
    };
    private static final int[] FONT_SIZES = {
          R.dimen.item_title_size, R.dimen.item_link_size, R.dimen.item_description_size,
    };
+   private final int m_height;
+   private final String[] m_timeInitials;
+   boolean m_hasImage;
+   FeedItem m_item;
+   private Bitmap m_image;
 
    ViewFeedItem(Context context, int type)
    {
@@ -77,28 +78,6 @@ class ViewFeedItem extends View
       initPaints(resources);
    }
 
-   @Override
-   public
-   void onDraw(Canvas canvas)
-   {
-      /* If the canvas is meant to draw a bitmap but it is null, draw nothing. */
-      if(m_hasImage && null == m_image)
-      {
-         return;
-      }
-
-      float verticalPosition = drawBase(canvas);
-      verticalPosition = drawBitmap(canvas, verticalPosition);
-      if(null != m_item.m_desLines && 0 != m_item.m_desLines.length && null != m_item.m_desLines[0])
-      {
-         if(m_hasImage)
-         {
-            verticalPosition += Utilities.getDp(4.0F);
-         }
-         drawDes(canvas, verticalPosition);
-      }
-   }
-
    private static
    void initPaints(Resources resources)
    {
@@ -120,6 +99,28 @@ class ViewFeedItem extends View
       paint.setColor(resources.getColor(colorResource));
       paint.setHinting(Paint.HINTING_ON);
       return paint;
+   }
+
+   @Override
+   public
+   void onDraw(Canvas canvas)
+   {
+      /* If the canvas is meant to draw a bitmap but it is null, draw nothing. */
+      if(m_hasImage && null == m_image)
+      {
+         return;
+      }
+
+      float verticalPosition = drawBase(canvas);
+      verticalPosition = drawBitmap(canvas, verticalPosition);
+      if(null != m_item.m_desLines && 0 != m_item.m_desLines.length && null != m_item.m_desLines[0])
+      {
+         if(m_hasImage)
+         {
+            verticalPosition += Utilities.getDp(4.0F);
+         }
+         drawDes(canvas, verticalPosition);
+      }
    }
 
    void setBitmap(Bitmap bitmap)
@@ -237,6 +238,18 @@ class ViewFeedItem extends View
    protected
    void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
    {
-      setMeasuredDimension(widthMeasureSpec, m_height);
+      Display display = ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+      int orientation = display.getRotation();
+      switch(orientation)
+      {
+         case Surface.ROTATION_0:
+         case Surface.ROTATION_180:
+            setMeasuredDimension(Resources.getSystem().getDisplayMetrics().widthPixels, m_height);
+            break;
+         case Surface.ROTATION_90:
+         case Surface.ROTATION_270:
+            //noinspection SuspiciousNameCombination
+            setMeasuredDimension(Resources.getSystem().getDisplayMetrics().heightPixels, m_height);
+      }
    }
 }

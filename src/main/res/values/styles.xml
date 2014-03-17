@@ -26,16 +26,20 @@
       <item name="ptrHeaderTitleTextAppearance">@style/TextAppearance.Custom.PtrHeader.Title</item>
 
       <!-- The strings to be displayed at the various states -->
-      <item name="ptrPullText">Swipe down to refresh</item>
-      <item name="ptrRefreshingText">Checking for items</item>
+      <item name="ptrPullText">@string/pull_label</item>
+      <item name="ptrRefreshingText">@string/refreshing_text</item>
    </style>
 
    <style name="Widget.FeedsActivity.ActionBar" parent="android:Widget.Holo.Light.ActionBar">
       <item name="android:background">@color/action_bar</item>
       <item name="android:icon">@drawable/ic_action_labels</item>
       <item name="android:title">@string/all_tag</item>
-      <item name="android:titleTextStyle">@style/TextAppearance.FeedsActivity.Widget.ActionBar.Title</item>
-      <item name="android:subtitleTextStyle">@style/TextAppearance.FeedsActivity.Widget.ActionBar.SubTitle</item>
+      <item name="android:titleTextStyle">
+         @style/TextAppearance.FeedsActivity.Widget.ActionBar.Title
+      </item>
+      <item name="android:subtitleTextStyle">
+         @style/TextAppearance.FeedsActivity.Widget.ActionBar.SubTitle
+      </item>
    </style>
 
    <style name="TextAppearance.Custom.PtrHeader.Title" parent="android:TextAppearance.Small">

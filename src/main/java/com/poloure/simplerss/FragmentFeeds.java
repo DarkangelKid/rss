@@ -32,6 +32,27 @@ import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 public
 class FragmentFeeds extends Fragment
 {
+   private static
+   class RefreshListener implements OnRefreshListener
+   {
+      private final FeedsActivity m_activity;
+
+      RefreshListener(FeedsActivity activity)
+      {
+         m_activity = activity;
+      }
+
+      @Override
+      public
+      void onRefreshStarted(View view)
+      {
+         ViewPager pager = (ViewPager) m_activity.findViewById(R.id.viewpager);
+         Intent intent = new Intent(m_activity, ServiceUpdate.class);
+         intent.putExtra("GROUP_NUMBER", pager.getCurrentItem());
+         m_activity.startService(intent);
+      }
+   }
+
    private static final float PULL_DISTANCE = 0.5F;
    ViewPager m_viewPager;
 
@@ -61,7 +82,7 @@ class FragmentFeeds extends Fragment
          public
          void onPageSelected(int position)
          {
-            Utilities.setTitlesAndDrawerAndPage(activity, FeedsActivity.FEED_TAG, -10);
+            Utilities.setTitlesAndDrawerAndPage(activity, R.id.fragment_feeds, -10);
          }
       });
       return layout;
@@ -76,27 +97,6 @@ class FragmentFeeds extends Fragment
       FeedsActivity activity = (FeedsActivity) getActivity();
 
       m_viewPager.setAdapter(new PagerAdapterTags(getFragmentManager(), activity, activity.m_index));
-      Utilities.setTitlesAndDrawerAndPage(activity, FeedsActivity.FEED_TAG, -10);
-   }
-
-   private static
-   class RefreshListener implements OnRefreshListener
-   {
-      private final FeedsActivity m_activity;
-
-      RefreshListener(FeedsActivity activity)
-      {
-         m_activity = activity;
-      }
-
-      @Override
-      public
-      void onRefreshStarted(View view)
-      {
-         ViewPager pager = (ViewPager) m_activity.findViewById(R.id.viewpager);
-         Intent intent = new Intent(m_activity, ServiceUpdate.class);
-         intent.putExtra("GROUP_NUMBER", pager.getCurrentItem());
-         m_activity.startService(intent);
-      }
+      Utilities.setTitlesAndDrawerAndPage(activity, R.id.fragment_feeds, -10);
    }
 }

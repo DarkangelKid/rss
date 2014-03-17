@@ -17,18 +17,18 @@
 <menu
    xmlns:android="http://schemas.android.com/apk/res/android">
    <item
-      android:title="@string/manage_select_all"
       android:id="@+id/select_all"
       android:icon="@drawable/ic_action_select_all"
-      android:showAsAction="ifRoom"/>
+      android:showAsAction="ifRoom"
+      android:title="@string/manage_select_all"/>
    <item
-      android:title="@string/manage_item_clear_content"
       android:id="@+id/delete_content"
       android:icon="@drawable/ic_action_cut"
-      android:showAsAction="ifRoom"/>
+      android:showAsAction="ifRoom"
+      android:title="@string/manage_item_clear_content"/>
    <item
-      android:title="@string/manage_item_delete"
       android:id="@+id/delete_feed"
       android:icon="@drawable/ic_action_discard"
-      android:showAsAction="ifRoom"/>
+      android:showAsAction="ifRoom"
+      android:title="@string/manage_item_delete"/>
 </menu>

@@ -23,19 +23,19 @@
       android:id="@+id/list_view"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      android:dividerHeight="1px"
       android:divider="@drawable/divider_tag_list"
+      android:dividerHeight="1px"
       android:listSelector="@drawable/transparent"/>
 
    <TextView
       android:id="@+id/empty"
-      android:text="@string/empty_list_view"
-      android:visibility="gone"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:layout_centerInParent="true"
-      android:padding="24dp"
       android:gravity="center"
+      android:padding="24dp"
+      android:text="@string/empty_list_view"
       android:textColor="@color/item_title_color"
-      android:textSize="18sp"/>
+      android:textSize="18sp"
+      android:visibility="gone"/>
 </RelativeLayout>

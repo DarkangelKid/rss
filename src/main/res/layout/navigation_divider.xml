@@ -14,15 +14,16 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-          android:id="@+id/navigation_title"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:paddingTop="8dp"
-          android:paddingStart="16dp"
-          android:paddingEnd="16dp"
-          android:textAlignment="gravity"
-          android:textColor="@color/text_navigation_main"
-          android:textSize="14sp"
-          android:textStyle="bold"
-          android:drawableBottom="@drawable/navigation_divider"/>
+<TextView
+   android:id="@+id/navigation_title"
+   xmlns:android="http://schemas.android.com/apk/res/android"
+   android:layout_width="match_parent"
+   android:layout_height="wrap_content"
+   android:drawableBottom="@drawable/navigation_divider"
+   android:paddingEnd="16dp"
+   android:paddingStart="16dp"
+   android:paddingTop="8dp"
+   android:textAlignment="gravity"
+   android:textColor="@color/text_navigation_main"
+   android:textSize="14sp"
+   android:textStyle="bold"/>

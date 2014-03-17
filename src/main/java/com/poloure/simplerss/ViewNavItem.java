@@ -32,16 +32,13 @@ class ViewNavItem extends View
    private static final Paint[] m_paints = new Paint[2];
    private static final Bitmap[] m_bitmaps_dark = new Bitmap[3];
    private static final Bitmap[] m_bitmaps_light = new Bitmap[3];
-
-   String m_text = "";
-   String m_count = "";
-   int m_image = -1;
-
-   private final int m_height;
-
    private static final int[] FONT_SIZES = {
          R.dimen.navigation_main, R.dimen.navigation_tag,
    };
+   private final int m_height;
+   String m_text = "";
+   String m_count = "";
+   int m_image = -1;
 
    ViewNavItem(Context context)
    {
@@ -72,6 +69,23 @@ class ViewNavItem extends View
       m_height = Math.round(resources.getDimension(R.dimen.navigation_height));
       setBackgroundResource(R.drawable.navigation_item_background);
       initPaints(resources);
+   }
+
+   private static
+   void initPaints(Resources resources)
+   {
+      for(int i = 0; m_paints.length > i; i++)
+      {
+         m_paints[i] = configurePaint(resources, FONT_SIZES[i]);
+      }
+   }
+
+   private static
+   Paint configurePaint(Resources resources, int dimenResource)
+   {
+      Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+      paint.setTextSize(resources.getDimension(dimenResource));
+      return paint;
    }
 
    @Override
@@ -121,23 +135,6 @@ class ViewNavItem extends View
 
       /* Draw the main text. */
       canvas.drawText(m_text, rtl ? width - hPadding : hPadding, verticalPosition, paint);
-   }
-
-   private static
-   void initPaints(Resources resources)
-   {
-      for(int i = 0; m_paints.length > i; i++)
-      {
-         m_paints[i] = configurePaint(resources, FONT_SIZES[i]);
-      }
-   }
-
-   private static
-   Paint configurePaint(Resources resources, int dimenResource)
-   {
-      Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-      paint.setTextSize(resources.getDimension(dimenResource));
-      return paint;
    }
 
    @Override

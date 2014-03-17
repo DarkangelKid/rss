@@ -101,7 +101,7 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, String[][]>
    void onPostExecute(String[][] result)
    {
       /* Set the titles & counts arrays in this file and notify the adapter. */
-      ListView navigationList = (ListView) m_activity.findViewById(R.id.navigation_drawer);
+      ListView navigationList = (ListView) m_activity.findViewById(R.id.fragment_navigation_drawer);
       WrapperListAdapter wrapperAdapter = (WrapperListAdapter) navigationList.getAdapter();
       ArrayAdapter<String[]> adapter = (ArrayAdapter<String[]>) wrapperAdapter.getWrappedAdapter();
 
@@ -110,9 +110,9 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, String[][]>
       adapter.addAll(result);
 
       /* Update the subtitle. */
-      if(m_activity.m_currentTag.equals(FeedsActivity.FEED_TAG))
+      if(R.id.fragment_feeds == m_activity.m_currentFragmentId)
       {
-         Utilities.setTitlesAndDrawerAndPage(m_activity, FeedsActivity.FEED_TAG, -10);
+         Utilities.setTitlesAndDrawerAndPage(m_activity, R.id.fragment_feeds, -10);
       }
    }
 }

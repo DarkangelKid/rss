@@ -43,7 +43,7 @@ class AsyncManageAdapter extends AsyncTask<String, String[][], Void>
    void update(FeedsActivity activity)
    {
       FragmentManager manager = activity.getFragmentManager();
-      ListFragment fragment = (ListFragment) manager.findFragmentByTag(FeedsActivity.MANAGE_TAG);
+      ListFragment fragment = (ListFragment) manager.findFragmentById(R.id.fragment_manage);
 
       if(null != fragment && fragment.isVisible())
       {

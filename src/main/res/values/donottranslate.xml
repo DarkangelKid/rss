@@ -14,21 +14,26 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<menu
-   xmlns:android="http://schemas.android.com/apk/res/android">
-   <item
-      android:icon="@drawable/ic_action_new_dimmable"
-      android:onClick="onAddClick"
-      android:showAsAction="ifRoom"
-      android:title="@string/ic_action_add"/>
-   <item
-      android:icon="@drawable/ic_action_time_dimmable"
-      android:onClick="onUnreadClick"
-      android:showAsAction="ifRoom"
-      android:title="@string/ic_action_unread"/>
-   <item
-      android:id="@+id/share"
-      android:icon="@drawable/ic_action_share"
-      android:showAsAction="ifRoom"
-      android:title="@string/ic_action_share"/>
-</menu>
+<resources>
+
+   <string-array name="refresh_interval_values">
+      <item>30</item>
+      <item>60</item>
+      <item>120</item>
+      <item>240</item>
+      <item>480</item>
+      <item>720</item>
+      <item>1440</item>
+   </string-array>
+
+   <string-array name="thumbnail_quality_values">
+      <item>20</item>
+      <item>35</item>
+      <item>55</item>
+      <item>65</item>
+      <item>75</item>
+      <item>85</item>
+      <item>95</item>
+   </string-array>
+
+</resources>

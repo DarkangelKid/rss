@@ -24,8 +24,6 @@ import android.support.v4.text.TextDirectionHeuristicsCompat;
 import android.support.v4.view.ViewPager;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
-import android.view.View;
-import android.view.ViewConfiguration;
 import android.widget.ArrayAdapter;
 import android.widget.HeaderViewListAdapter;
 import android.widget.ListView;
@@ -40,11 +38,8 @@ import java.net.URL;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 class Utilities
 {
@@ -72,44 +67,45 @@ class Utilities
    }
 
    static
-   void setTitlesAndDrawerAndPage(FeedsActivity activity, String fragmentTag, int absolutePos)
+   void setTitlesAndDrawerAndPage(FeedsActivity activity, int fragmentId, int absolutePos)
    {
       ActionBar bar = activity.getActionBar();
       Resources resources = activity.getResources();
       String[] navTitles = resources.getStringArray(R.array.navigation_titles);
       ViewPager pager = (ViewPager) activity.findViewById(R.id.viewpager);
 
-      ListView list = (ListView) activity.findViewById(R.id.navigation_drawer);
+      FragmentUtils.switchToFragment(activity, fragmentId, false);
+
+      ListView list = (ListView) activity.findViewById(R.id.fragment_navigation_drawer);
       HeaderViewListAdapter headerAdapter = (HeaderViewListAdapter) list.getAdapter();
       int headers = headerAdapter.getHeadersCount();
       int listPosition = -10 == absolutePos ? pager.getCurrentItem() + headers : absolutePos;
       int viewPagerPos = -10 == absolutePos ? pager.getCurrentItem() : absolutePos - headers;
 
       /* Check the drawer item. */
-
       String title = PagerAdapterTags.s_tagList.get(0);
       String subTitle = null;
       int imageRes = 0;
 
-      if(FeedsActivity.FAVOURITES_TAG.equals(fragmentTag))
+      if(R.id.fragment_favourites == fragmentId)
       {
          listPosition = 0;
          title = navTitles[0];
          imageRes = R.drawable.ic_action_important;
       }
-      else if(FeedsActivity.MANAGE_TAG.equals(fragmentTag))
+      else if(R.id.fragment_manage == fragmentId)
       {
          listPosition = 1;
          title = navTitles[1];
          imageRes = R.drawable.ic_action_storage;
       }
-      else if(FeedsActivity.SETTINGS_TAG.equals(fragmentTag))
+      else if(R.id.fragment_settings == fragmentId)
       {
          listPosition = 2;
          title = navTitles[2];
          imageRes = R.drawable.ic_action_settings;
       }
-      else if(FeedsActivity.FEED_TAG.equals(fragmentTag))
+      else if(R.id.fragment_feeds == fragmentId)
       {
          ArrayAdapter<String[]> adapter = (ArrayAdapter<String[]>) headerAdapter.getWrappedAdapter();
 
@@ -142,29 +138,6 @@ class Utilities
    }
 
    static
-   void setTopOffset(Activity activity, int viewId)
-   {
-      setTopOffset(activity, activity.findViewById(viewId));
-   }
-
-   static
-   void setTopOffset(Activity activity, View view)
-   {
-      if(!ViewConfiguration.get(activity).hasPermanentMenuKey())
-      {
-         Resources resources = activity.getResources();
-         TypedValue value = new TypedValue();
-
-         activity.getTheme().resolveAttribute(android.R.attr.actionBarSize, value, true);
-         int actionBar = activity.getResources().getDimensionPixelSize(value.resourceId);
-         int resourceId = resources.getIdentifier("status_bar_height", "dimen", "android");
-         int statusBar = resources.getDimensionPixelSize(resourceId);
-
-         view.setPadding(0, actionBar + statusBar, 0, 0);
-      }
-   }
-
-   static
    int getDp(float pixels)
    {
       DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
@@ -190,13 +163,6 @@ class Utilities
    {
       List<IndexItem> list = (List<IndexItem>) Read.object(context, Read.INDEX);
       return null == list ? new ArrayList<IndexItem>(0) : list;
-   }
-
-   static
-   Collection<Long> loadReadItems(Context context)
-   {
-      Set<Long> set = (Set<Long>) Read.object(context, FeedsActivity.READ_ITEMS);
-      return null == set ? new HashSet<Long>(0) : set;
    }
 
    static

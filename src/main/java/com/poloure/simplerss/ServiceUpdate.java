@@ -55,17 +55,7 @@ import java.util.regex.Pattern;
 public
 class ServiceUpdate extends IntentService
 {
-   static final String ITEM_LIST = "-item_list.txt";
-   static final String CONTENT_FILE = "-content.txt";
-   static final String[] FEED_FILES = {ITEM_LIST, CONTENT_FILE};
-
-   private static final int MIN_IMAGE_WIDTH = 64;
-
-   private static final float SCREEN_WIDTH = Resources.getSystem().getDisplayMetrics().widthPixels;
-   private static final float USABLE_WIDTH_TEXT = SCREEN_WIDTH - (Utilities.EIGHT_DP << 1);
-
    public static final String BROADCAST_ACTION = "com.poloure.serviceupdate.handle";
-   static final String NEWLINE = System.getProperty("line.separator");
 
    private static
    class Tags
@@ -83,13 +73,22 @@ class ServiceUpdate extends IntentService
    private static
    class Patterns
    {
-      static final Pattern LINE = Pattern.compile(NEWLINE);
       static final Pattern CDATA = Pattern.compile("\\<.*?\\>");
-      static final Pattern IMG = Pattern.compile("(?i)<img([^>]+)/>");
+      static final Pattern IMG = Pattern.compile("(?i)<img([^>]+)/>");      static final Pattern LINE = Pattern.compile(NEWLINE);
       static final Pattern SRC = Pattern.compile("\\s*(?i)src\\s*=\\s*(\"([^\"]*\")|'[^']*'|([^'\">\\s]+))");
       static final Pattern APOSTROPHE = Pattern.compile("'");
       static final Pattern QUOT = Pattern.compile("\"");
+
+
    }
+
+   static final String ITEM_LIST = "-item_list.txt";
+   static final String CONTENT_FILE = "-content.txt";
+   static final String[] FEED_FILES = {ITEM_LIST, CONTENT_FILE};
+   static final String NEWLINE = System.getProperty("line.separator");
+   private static final int MIN_IMAGE_WIDTH = 64;
+   private static final float SCREEN_WIDTH = Resources.getSystem().getDisplayMetrics().widthPixels;
+   private static final float USABLE_WIDTH_TEXT = SCREEN_WIDTH - (Utilities.EIGHT_DP << 1);
 
    public
    ServiceUpdate()
@@ -297,6 +296,49 @@ class ServiceUpdate extends IntentService
       return true;
    }
 
+   private static
+   String getContent(XmlPullParser parser)
+   {
+      try
+      {
+         parser.next();
+      }
+      catch(XmlPullParserException ignored)
+      {
+         return "";
+      }
+      catch(IOException ignored)
+      {
+         return "";
+      }
+      String content = parser.getText();
+      return null == content ? "" : content;
+   }
+
+   private static
+   void parseHtmlForImage(Context context, CharSequence html, FeedItem feedItem)
+   {
+      Matcher matcherImg = Patterns.IMG.matcher(html);
+
+      if(matcherImg.find())
+      {
+         String src = matcherImg.group(1);
+         Matcher matcherHref = Patterns.SRC.matcher(src);
+
+         if(matcherHref.find())
+         {
+            /* If we get here, we have an image to download and save. */
+            String imgLink = matcherHref.group(1);
+
+            /* Get rid of any apostrophes and quotation marks in the link. */
+            imgLink = Patterns.APOSTROPHE.matcher(imgLink).replaceAll("");
+            imgLink = Patterns.QUOT.matcher(imgLink).replaceAll("");
+
+            getThumbnail(feedItem, imgLink, context);
+         }
+      }
+   }
+
    @Override
    protected
    void onHandleIntent(Intent intent)
@@ -340,49 +382,6 @@ class ServiceUpdate extends IntentService
 
       wakeLock.release();
       stopSelf();
-   }
-
-   private static
-   String getContent(XmlPullParser parser)
-   {
-      try
-      {
-         parser.next();
-      }
-      catch(XmlPullParserException ignored)
-      {
-         return "";
-      }
-      catch(IOException ignored)
-      {
-         return "";
-      }
-      String content = parser.getText();
-      return null == content ? "" : content;
-   }
-
-   private static
-   void parseHtmlForImage(Context context, CharSequence html, FeedItem feedItem)
-   {
-      Matcher matcherImg = Patterns.IMG.matcher(html);
-
-      if(matcherImg.find())
-      {
-         String src = matcherImg.group(1);
-         Matcher matcherHref = Patterns.SRC.matcher(src);
-
-         if(matcherHref.find())
-         {
-            /* If we get here, we have an image to download and save. */
-            String imgLink = matcherHref.group(1);
-
-            /* Get rid of any apostrophes and quotation marks in the link. */
-            imgLink = Patterns.APOSTROPHE.matcher(imgLink).replaceAll("");
-            imgLink = Patterns.QUOT.matcher(imgLink).replaceAll("");
-
-            getThumbnail(feedItem, imgLink, context);
-         }
-      }
    }
 
    private

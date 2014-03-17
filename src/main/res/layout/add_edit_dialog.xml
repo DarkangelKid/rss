@@ -26,49 +26,49 @@
       android:padding="8dp">
 
       <EditText
+         android:id="@+id/dialog_url"
          android:layout_width="match_parent"
          android:layout_height="wrap_content"
-         android:id="@+id/dialog_url"
-         android:inputType="textUri|textNoSuggestions"
-         android:hint="@string/dialog_feed_url_hint"
-         android:paddingTop="8dp"
-         android:paddingBottom="8dp"
-         android:singleLine="true"
+         android:drawablePadding="8dp"
          android:drawableStart="@drawable/ic_action_web_site"
-         android:drawablePadding="8dp"/>
+         android:hint="@string/dialog_feed_url_hint"
+         android:inputType="textUri|textNoSuggestions"
+         android:paddingBottom="8dp"
+         android:paddingTop="8dp"
+         android:singleLine="true"/>
 
       <MultiAutoCompleteTextView
+         android:id="@+id/dialog_tags"
          android:layout_width="match_parent"
          android:layout_height="wrap_content"
-         android:id="@+id/dialog_tags"
-         android:hint="@string/dialog_feed_tag_hint"
-         android:paddingTop="8dp"
-         android:singleLine="true"
-         android:inputType="textCapWords|textNoSuggestions"
+         android:drawablePadding="8dp"
          android:drawableStart="@drawable/ic_action_labels"
-         android:drawablePadding="8dp"/>
+         android:hint="@string/dialog_feed_tag_hint"
+         android:inputType="textCapWords|textNoSuggestions"
+         android:paddingTop="8dp"
+         android:singleLine="true"/>
    </LinearLayout>
 
    <LinearLayout
+      style="?android:attr/buttonBarStyle"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      style="?android:attr/buttonBarStyle">
+      android:layout_height="wrap_content">
 
       <Button
-         android:layout_width="0px"
-         android:layout_height="wrap_content"
-         android:layout_weight="0.5"
          android:id="@+id/dialog_button_negative"
-         android:text="@string/dialog_cancel"
-         style="?android:attr/buttonBarButtonStyle"/>
-
-      <Button
+         style="?android:attr/buttonBarButtonStyle"
          android:layout_width="0px"
          android:layout_height="wrap_content"
          android:layout_weight="0.5"
+         android:text="@string/dialog_cancel"/>
+
+      <Button
          android:id="@+id/dialog_button_positive"
-         android:text="@string/dialog_accept"
-         style="?android:attr/buttonBarButtonStyle"/>
+         style="?android:attr/buttonBarButtonStyle"
+         android:layout_width="0px"
+         android:layout_height="wrap_content"
+         android:layout_weight="0.5"
+         android:text="@string/dialog_accept"/>
    </LinearLayout>
 
 </LinearLayout>

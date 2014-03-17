@@ -16,7 +16,7 @@
 
 <!-- For style guide: https://developer.android.com/design/style/writing.html -->
 
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="en">
 
    <string name="application_name">Simple Rss</string>
    <string name="empty_list_view">Pull down to refresh tag</string>
@@ -43,6 +43,10 @@
       <item quantity="many">%d unread</item>
       <item quantity="other">%d unread</item>
    </plurals>
+
+   <!-- Pull to Refresh text. -->
+   <string name="pull_label">Swipe down to refresh</string>
+   <string name="refreshing_text">Checking for items</string>
 
    <!-- Add/Edit feed dialog titles. -->
    <string name="dialog_title_add">Add feed</string>

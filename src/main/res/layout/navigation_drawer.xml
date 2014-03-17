@@ -14,12 +14,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<ListView xmlns:android="http://schemas.android.com/apk/res/android"
-          android:id="@+id/navigation_list"
-          android:layout_width="match_parent"
-          android:layout_height="match_parent"
-          android:choiceMode="singleChoice"
-          android:background="@color/background_navigation"
-          android:divider="@color/navigation_separator"
-          android:dividerHeight="1px"
-          android:scrollbars="none"/>
+<ListView
+   android:id="@+id/navigation_list"
+   xmlns:android="http://schemas.android.com/apk/res/android"
+   android:layout_width="match_parent"
+   android:layout_height="match_parent"
+   android:background="@color/background_navigation"
+   android:choiceMode="singleChoice"
+   android:divider="@color/navigation_separator"
+   android:dividerHeight="1px"
+   android:scrollbars="none"/>

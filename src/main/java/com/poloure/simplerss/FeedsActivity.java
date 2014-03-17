@@ -19,21 +19,30 @@ package com.poloure.simplerss;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.widget.DrawerLayout;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewConfiguration;
 import android.widget.ListView;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
 
@@ -44,21 +53,74 @@ class FeedsActivity extends Activity
    private static final int ALARM_SERVICE_START = 1;
    private static final int ALARM_SERVICE_STOP = 0;
    private static final int MINUTE_VALUE = 60000;
+   private final BroadcastReceiver Receiver = new BroadcastReceiver()
+   {
+      @Override
+      public
+      void onReceive(Context context, Intent intent)
+      {
+         FeedsActivity activity = (FeedsActivity) getWindow().getDecorView().getContext();
+
+         AsyncNewTagAdapters.update(activity);
+
+         /* Manage adapter is updated every time it is shown but in case the user switched to the
+            manage fragment mid refresh. */
+         AsyncManageAdapter.update(activity);
+         AsyncNavigationAdapter.update(activity);
+
+         ((PullToRefreshLayout) activity.findViewById(R.id.viewpager).getParent()).setRefreshComplete();
+      }
+   };
    boolean m_showMenuItems = true;
-
-   String m_previousTag;
-   String m_currentTag;
-
+   int m_previousFragmentId;
+   int m_currentFragmentId;
    FragmentNavigationDrawer m_FragmentDrawer;
-
    List<IndexItem> m_index;
 
-   static final String WEB_TAG = "Web";
-   static final String FEED_TAG = "Feeds";
-   static final String FAVOURITES_TAG = "Favourites";
-   static final String MANAGE_TAG = "Manage";
-   static final String SETTINGS_TAG = "Settings";
-   static final String[] FRAGMENT_TAGS = {FAVOURITES_TAG, MANAGE_TAG, SETTINGS_TAG, FEED_TAG};
+   static
+   Collection<Long> loadReadItems(Context context)
+   {
+      Set<Long> set = (Set<Long>) Read.object(context, READ_ITEMS);
+      return null == set ? new HashSet<Long>(0) : set;
+   }
+
+   static
+   void setTopOffset(Activity activity)
+   {
+      if(!ViewConfiguration.get(activity)
+            .hasPermanentMenuKey() && Build.VERSION_CODES.KITKAT <= Build.VERSION.SDK_INT)
+      {
+         Resources resources = activity.getResources();
+         TypedValue value = new TypedValue();
+
+         activity.getTheme().resolveAttribute(android.R.attr.actionBarSize, value, true);
+         int actionBar = activity.getResources().getDimensionPixelSize(value.resourceId);
+         int resourceId = resources.getIdentifier("status_bar_height", "dimen", "android");
+         int statusBar = resources.getDimensionPixelSize(resourceId);
+
+         activity.findViewById(android.R.id.content).setPadding(0, actionBar + statusBar, 0, 0);
+      }
+   }
+
+   static
+   void gotoLatestUnread(ListView listView)
+   {
+      AdapterTags listAdapter = (AdapterTags) listView.getAdapter();
+
+      /* Create a copy of the item times. */
+      List<Long> times = new ArrayList<Long>(listAdapter.m_times);
+      times.removeAll(AdapterTags.READ_ITEM_TIMES);
+
+      if(times.isEmpty())
+      {
+         listView.setSelection(0);
+      }
+      else
+      {
+         int index = listAdapter.m_times.indexOf(times.get(times.size() - 1));
+         listView.setSelection(index);
+      }
+   }
 
    /* Called only when no remnants of the Activity exist. */
    @Override
@@ -71,23 +133,30 @@ class FeedsActivity extends Activity
 
       /* Load the index. */
       m_index = Utilities.loadIndexList(this);
+      m_currentFragmentId = R.id.fragment_feeds;
 
       /* Load the read items to the tags Adapter. */
-      AdapterTags.READ_ITEM_TIMES.addAll(Utilities.loadReadItems(this));
-      setProgressBarVisibility(true);
-
-      m_currentTag = FEED_TAG;
+      AdapterTags.READ_ITEM_TIMES.addAll(loadReadItems(this));
 
       FragmentManager manager = getFragmentManager();
+      DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
-      m_FragmentDrawer = (FragmentNavigationDrawer) manager.findFragmentById(R.id.navigation_drawer);
-      m_FragmentDrawer.setUp((DrawerLayout) findViewById(R.id.drawer_layout));
+      m_FragmentDrawer = (FragmentNavigationDrawer) manager.findFragmentById(R.id.fragment_navigation_drawer);
+      m_FragmentDrawer.setUp(drawerLayout);
 
-      // create our manager instance after the content view is set
-      Utilities.setTopOffset(this, R.id.content_frame);
+      setTopOffset(this);
 
-      /* Create and hide the fragments that go inside the content frame. */
-      FragmentUtils.addAllFragments(this);
+      if(null == savedInstanceState)
+      {
+         /* Create and hide the fragments that go inside the content frame. */
+         FragmentTransaction trans = manager.beginTransaction();
+
+         trans.hide(manager.findFragmentById(R.id.fragment_favourites))
+               .hide(manager.findFragmentById(R.id.fragment_settings))
+               .hide(manager.findFragmentById(R.id.fragment_manage))
+               .hide(manager.findFragmentById(R.id.fragment_web))
+               .commit();
+      }
    }
 
    /* Stop the alarm service and reset the time to 0 every time the user sees the activity. */
@@ -100,7 +169,7 @@ class FeedsActivity extends Activity
       registerReceiver(Receiver, new IntentFilter(ServiceUpdate.BROADCAST_ACTION));
 
       /* Update the navigation adapter. This updates the subtitle and title. */
-      if(!m_currentTag.equals(WEB_TAG))
+      if(R.id.fragment_web != m_currentFragmentId)
       {
          AsyncNavigationAdapter.update(this);
       }
@@ -128,9 +197,31 @@ class FeedsActivity extends Activity
 
    @Override
    public
+   void onConfigurationChanged(Configuration newConfig)
+   {
+      super.onConfigurationChanged(newConfig);
+
+      FragmentManager manager = getFragmentManager();
+      FragmentTransaction trans = manager.beginTransaction();
+
+      if(600 <= newConfig.screenWidthDp && Configuration.ORIENTATION_LANDSCAPE == newConfig.orientation)
+      {
+         trans.show(manager.findFragmentById(R.id.fragment_web)).commit();
+      }
+      else if(R.id.fragment_web != m_currentFragmentId && Configuration.ORIENTATION_PORTRAIT == newConfig.orientation)
+      {
+         trans.hide(manager.findFragmentById(R.id.fragment_web));
+      }
+
+      /* Update the padding of the content view. */
+      setTopOffset(this);
+   }
+
+   @Override
+   public
    boolean onOptionsItemSelected(MenuItem item)
    {
-      if(android.R.id.home == item.getItemId() && m_currentTag.equals(WEB_TAG))
+      if(android.R.id.home == item.getItemId() && R.id.fragment_web == m_currentFragmentId)
       {
          onBackPressed();
          return true;
@@ -142,9 +233,9 @@ class FeedsActivity extends Activity
    public
    boolean onPrepareOptionsMenu(Menu menu)
    {
-      boolean web = m_currentTag.equals(WEB_TAG);
-      boolean feed = m_currentTag.equals(FEED_TAG);
-      boolean manage = m_currentTag.equals(MANAGE_TAG);
+      boolean web = R.id.fragment_web == m_currentFragmentId;
+      boolean feed = R.id.fragment_feeds == m_currentFragmentId;
+      boolean manage = R.id.fragment_manage == m_currentFragmentId;
 
       menu.getItem(0).setVisible(!web).setEnabled(m_showMenuItems && (feed || manage));
       menu.getItem(1).setVisible(!web).setEnabled(m_showMenuItems && feed);
@@ -165,25 +256,6 @@ class FeedsActivity extends Activity
 
       return super.onCreateOptionsMenu(menu);
    }
-
-   private final BroadcastReceiver Receiver = new BroadcastReceiver()
-   {
-      @Override
-      public
-      void onReceive(Context context, Intent intent)
-      {
-         FeedsActivity activity = (FeedsActivity) getWindow().getDecorView().getContext();
-
-         AsyncNewTagAdapters.update(activity);
-
-         /* Manage adapter is updated every time it is shown but in case the user switched to the
-            manage fragment mid refresh. */
-         AsyncManageAdapter.update(activity);
-         AsyncNavigationAdapter.update(activity);
-
-         ((PullToRefreshLayout) findViewById(R.id.ptr_layout)).setRefreshComplete();
-      }
-   };
 
    private
    void setServiceIntent(int state)
@@ -223,13 +295,13 @@ class FeedsActivity extends Activity
    {
       super.onBackPressed();
 
-      if(m_currentTag.equals(WEB_TAG))
+      if(R.id.fragment_web == m_currentFragmentId)
       {
-         Utilities.setTitlesAndDrawerAndPage(this, m_previousTag, -10);
+         Utilities.setTitlesAndDrawerAndPage(this, m_previousFragmentId, -10);
 
          /* Switch back to our old tag. */
-         m_currentTag = m_previousTag;
-         m_previousTag = WEB_TAG;
+         m_currentFragmentId = m_previousFragmentId;
+         m_previousFragmentId = R.id.fragment_web;
 
          m_FragmentDrawer.m_drawerToggle.setDrawerIndicatorEnabled(true);
          invalidateOptionsMenu();
@@ -250,26 +322,6 @@ class FeedsActivity extends Activity
       if(null != listView)
       {
          gotoLatestUnread(listView);
-      }
-   }
-
-   static
-   void gotoLatestUnread(ListView listView)
-   {
-      AdapterTags listAdapter = (AdapterTags) listView.getAdapter();
-
-      /* Create a copy of the item times. */
-      List<Long> times = new ArrayList<Long>(listAdapter.m_times);
-      times.removeAll(AdapterTags.READ_ITEM_TIMES);
-
-      if(times.isEmpty())
-      {
-         listView.setSelection(0);
-      }
-      else
-      {
-         int index = listAdapter.m_times.indexOf(times.get(times.size() - 1));
-         listView.setSelection(index);
       }
    }
 }

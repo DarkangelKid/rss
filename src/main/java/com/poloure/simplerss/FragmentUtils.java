@@ -16,66 +16,32 @@
 
 package com.poloure.simplerss;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.webkit.WebViewFragment;
 
 class FragmentUtils
 {
    static
-   void addAllFragments(Activity activity)
+   void switchToFragment(FeedsActivity activity, int nextId, boolean addToBackStack)
    {
-      FragmentManager manager = activity.getFragmentManager();
-      FragmentTransaction trans = manager.beginTransaction();
-
-      add(manager, trans, new FragmentFeeds(), FeedsActivity.FEED_TAG);
-      add(manager, trans, new ListFragmentManage(), FeedsActivity.MANAGE_TAG);
-      add(manager, trans, new ListFragmentFavourites(), FeedsActivity.FAVOURITES_TAG);
-      add(manager, trans, new WebViewFragment(), FeedsActivity.WEB_TAG);
-      add(manager, trans, new FragmentSettings(), FeedsActivity.SETTINGS_TAG);
-
-      trans.commit();
-   }
-
-   static
-   void switchToFragment(FeedsActivity activity, String nextTag, boolean addToBackStack)
-   {
-      if(!activity.m_currentTag.equals(nextTag))
+      if(activity.m_currentFragmentId != nextId)
       {
-         FragmentTransaction transaction = activity.getFragmentManager().beginTransaction();
+         FragmentManager manager = activity.getFragmentManager();
+         FragmentTransaction transaction = manager.beginTransaction();
 
-         transaction.hide(getFragment(activity, activity.m_currentTag))
-               .show(getFragment(activity, nextTag));
+         Fragment currentFragment = manager.findFragmentById(activity.m_currentFragmentId);
+         Fragment nextFragment = manager.findFragmentById(nextId);
+
+         transaction.hide(currentFragment).show(nextFragment);
          if(addToBackStack)
          {
             transaction.addToBackStack(null);
          }
          transaction.commit();
-         activity.m_previousTag = activity.m_currentTag;
-         activity.m_currentTag = nextTag;
+
+         activity.m_previousFragmentId = activity.m_currentFragmentId;
+         activity.m_currentFragmentId = nextId;
       }
-   }
-
-   static
-   void add(FragmentManager manager, FragmentTransaction transaction, Fragment fragment, String tag)
-   {
-      Fragment fragmentByTag = manager.findFragmentByTag(tag);
-
-      if(null == fragmentByTag)
-      {
-         transaction.add(R.id.content_frame, fragment, tag);
-         if(!tag.equals(FeedsActivity.FEED_TAG))
-         {
-            transaction.hide(fragment);
-         }
-      }
-   }
-
-   static
-   Fragment getFragment(Activity activity, String tag)
-   {
-      return activity.getFragmentManager().findFragmentByTag(tag);
    }
 }

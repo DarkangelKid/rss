@@ -29,6 +29,7 @@
       android:supportsRtl="true">
       <activity
          android:name=".FeedsActivity"
+         android:configChanges="orientation|screenSize"
          android:label="@string/application_name"
          android:theme="@style/Theme.FeedsActivity">
          <intent-filter>

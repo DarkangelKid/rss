@@ -14,7 +14,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="en">
+
    <string-array name="navigation_titles">
       <item>Favourites</item>
       <item>Manage</item>
@@ -31,16 +32,6 @@
       <item>1 day</item>
    </string-array>
 
-   <string-array name="refresh_interval_values">
-      <item>30</item>
-      <item>60</item>
-      <item>120</item>
-      <item>240</item>
-      <item>480</item>
-      <item>720</item>
-      <item>1440</item>
-   </string-array>
-
    <string-array name="thumbnail_quality">
       <item>Objectionable</item>
       <item>Questionable</item>
@@ -50,17 +41,6 @@
       <item>Indistinguishable</item>
       <item>Impeccable</item>
    </string-array>
-
-   <string-array name="thumbnail_quality_values">
-      <item>20</item>
-      <item>35</item>
-      <item>55</item>
-      <item>65</item>
-      <item>75</item>
-      <item>85</item>
-      <item>95</item>
-   </string-array>
-   -array>
 
    <string-array name="time_initials">
       <item>y</item>

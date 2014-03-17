@@ -35,10 +35,9 @@ class AdapterTags extends BaseAdapter
    static final int TYPE_IMAGE_SANS_DESCRIPTION = 2;
    static final int TYPE_PLAIN_SANS_DESCRIPTION = 3;
    private static final float READ_OPACITY = 0.5F;
-
+   private final Context m_context;
    /* We use indexOf on this Long List so it can not be a Set. */ List<Long> m_times = new ArrayList<Long>(0);
    List<FeedItem> m_feedItems = new ArrayList<FeedItem>(0);
-   private final Context m_context;
 
    AdapterTags(Context context)
    {

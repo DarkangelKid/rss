@@ -45,9 +45,9 @@ import android.widget.Toast;
 public
 class ListFragmentTag extends Fragment
 {
+   static final int LIST_VIEW_ID_BASE = 20000;
    private static final String POSITION_KEY = "POSITION";
    ListView m_listView;
-   static final int LIST_VIEW_ID_BASE = 20000;
 
    static
    Fragment newInstance(int position)
@@ -57,6 +57,25 @@ class ListFragmentTag extends Fragment
       bundle.putInt(POSITION_KEY, position);
       fragment.setArguments(bundle);
       return fragment;
+   }
+
+   static
+   AdapterFavourites getFavouritesAdapter(Activity activity)
+   {
+      FragmentManager manager = activity.getFragmentManager();
+      ListFragment fragment = (ListFragment) manager.findFragmentById(R.id.fragment_favourites);
+      return (AdapterFavourites) fragment.getListAdapter();
+   }
+
+   private static
+   void addToFavourites(Activity activity, FeedItem item)
+   {
+      AdapterFavourites adapter = getFavouritesAdapter(activity);
+      adapter.m_feedItems.add(item);
+      adapter.notifyDataSetChanged();
+
+      Toast.makeText(activity, activity.getString(R.string.toast_added_feed, item.m_title), Toast.LENGTH_SHORT)
+            .show();
    }
 
    @Override
@@ -130,7 +149,7 @@ class ListFragmentTag extends Fragment
       AsyncNewTagAdapters.update((FeedsActivity) getActivity());
 
       FragmentManager manager = getActivity().getFragmentManager();
-      Fragment webFragment = manager.findFragmentByTag(FeedsActivity.WEB_TAG);
+      Fragment webFragment = manager.findFragmentById(R.id.fragment_web);
 
       WebView webView = ((WebViewFragment) webFragment).getWebView();
       webView.setInitialScale(120);
@@ -194,24 +213,5 @@ class ListFragmentTag extends Fragment
          default:
             return false;
       }
-   }
-
-   static
-   AdapterFavourites getFavouritesAdapter(Activity activity)
-   {
-      FragmentManager manager = activity.getFragmentManager();
-      ListFragment fragment = (ListFragment) manager.findFragmentByTag(FeedsActivity.FAVOURITES_TAG);
-      return (AdapterFavourites) fragment.getListAdapter();
-   }
-
-   private static
-   void addToFavourites(Activity activity, FeedItem item)
-   {
-      AdapterFavourites adapter = getFavouritesAdapter(activity);
-      adapter.m_feedItems.add(item);
-      adapter.notifyDataSetChanged();
-
-      Toast.makeText(activity, activity.getString(R.string.toast_added_feed, item.m_title), Toast.LENGTH_SHORT)
-            .show();
    }
 }

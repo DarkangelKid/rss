@@ -30,9 +30,8 @@ class AdapterFavourites extends BaseAdapter
    private static final int TYPE_IMAGE = 1;
    private static final int TYPE_IMAGE_SANS_DESCRIPTION = 2;
    private static final int TYPE_PLAIN_SANS_DESCRIPTION = 3;
-
-   Set<FeedItem> m_feedItems = new LinkedHashSet<FeedItem>(0);
    private final Context m_context;
+   Set<FeedItem> m_feedItems = new LinkedHashSet<FeedItem>(0);
 
    AdapterFavourites(Context context)
    {

@@ -52,18 +52,44 @@ class FragmentNavigationDrawer extends Fragment
       }
    }
 
-   private
-   class SyncPost implements Runnable
+   private static
+   class OnNavigationItemClick implements AdapterView.OnItemClickListener
    {
-      SyncPost()
+      private final FeedsActivity m_activity;
+
+      OnNavigationItemClick(Activity activity)
       {
+         m_activity = (FeedsActivity) activity;
       }
 
       @Override
       public
-      void run()
+      void onItemClick(AdapterView<?> parent, View view, int absolutePos, long id)
       {
-         m_drawerToggle.syncState();
+         /* Close the navigation drawer in all cases. */
+         ((DrawerLayout) parent.getParent()).closeDrawers();
+
+         int fragmentId;
+
+         if(0 == absolutePos)
+         {
+            fragmentId = R.id.fragment_favourites;
+         }
+         else if(1 == absolutePos)
+         {
+            fragmentId = R.id.fragment_manage;
+         }
+         else if(2 == absolutePos)
+         {
+            fragmentId = R.id.fragment_settings;
+         }
+         else
+         {
+            fragmentId = R.id.fragment_feeds;
+         }
+
+         /* If a tag was clicked, set the ViewPager position to that tag. */
+         Utilities.setTitlesAndDrawerAndPage(m_activity, fragmentId, absolutePos);
       }
    }
 
@@ -92,7 +118,6 @@ class FragmentNavigationDrawer extends Fragment
       listView.setOnItemClickListener(new OnNavigationItemClick(getActivity()));
       listView.setOnItemLongClickListener(new OnNavigationItemLongClick());
       listView.setHeaderDividersEnabled(false);
-      Utilities.setTopOffset(getActivity(), listView);
 
       String[] navTitles = getResources().getStringArray(R.array.navigation_titles);
 
@@ -172,29 +197,18 @@ class FragmentNavigationDrawer extends Fragment
       m_drawerToggle.onConfigurationChanged(newConfig);
    }
 
-   private static
-   class OnNavigationItemClick implements AdapterView.OnItemClickListener
+   private
+   class SyncPost implements Runnable
    {
-      private final FeedsActivity m_activity;
-
-      OnNavigationItemClick(Activity activity)
+      SyncPost()
       {
-         m_activity = (FeedsActivity) activity;
       }
 
       @Override
       public
-      void onItemClick(AdapterView<?> parent, View view, int absolutePos, long id)
+      void run()
       {
-         /* Close the navigation drawer in all cases. */
-         ((DrawerLayout) parent.getParent()).closeDrawers();
-
-         /* Switch the content frame fragment. */
-         String fragmentTag = FeedsActivity.FRAGMENT_TAGS[Math.min(3, absolutePos)];
-         FragmentUtils.switchToFragment(m_activity, fragmentTag, false);
-
-         /* If a tag was clicked, set the ViewPager position to that tag. */
-         Utilities.setTitlesAndDrawerAndPage(m_activity, fragmentTag, absolutePos);
+         m_drawerToggle.syncState();
       }
    }
 }
