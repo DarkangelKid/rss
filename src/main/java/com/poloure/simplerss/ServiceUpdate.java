@@ -74,12 +74,11 @@ class ServiceUpdate extends IntentService
    class Patterns
    {
       static final Pattern CDATA = Pattern.compile("\\<.*?\\>");
-      static final Pattern IMG = Pattern.compile("(?i)<img([^>]+)/>");      static final Pattern LINE = Pattern.compile(NEWLINE);
+      static final Pattern IMG = Pattern.compile("(?i)<img([^>]+)/>");
       static final Pattern SRC = Pattern.compile("\\s*(?i)src\\s*=\\s*(\"([^\"]*\")|'[^']*'|([^'\">\\s]+))");
+      static final Pattern LINE = Pattern.compile(NEWLINE);
       static final Pattern APOSTROPHE = Pattern.compile("'");
       static final Pattern QUOT = Pattern.compile("\"");
-
-
    }
 
    static final String ITEM_LIST = "-item_list.txt";

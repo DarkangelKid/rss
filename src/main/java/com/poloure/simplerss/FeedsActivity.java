@@ -17,6 +17,7 @@
 package com.poloure.simplerss;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -68,7 +69,8 @@ class FeedsActivity extends Activity
          AsyncManageAdapter.update(activity);
          AsyncNavigationAdapter.update(activity);
 
-         ((PullToRefreshLayout) activity.findViewById(R.id.viewpager).getParent()).setRefreshComplete();
+         ((PullToRefreshLayout) activity.findViewById(R.id.viewpager)
+               .getParent()).setRefreshComplete();
       }
    };
    boolean m_showMenuItems = true;
@@ -173,6 +175,27 @@ class FeedsActivity extends Activity
       {
          AsyncNavigationAdapter.update(this);
       }
+
+
+      PullToRefreshLayout layout = (PullToRefreshLayout) findViewById(R.id.viewpager).getParent();
+      if(!layout.isRefreshing() && isServiceRunning())
+      {
+         ((PullToRefreshLayout) findViewById(R.id.viewpager).getParent()).setRefreshing(true);
+      }
+   }
+
+   private
+   boolean isServiceRunning()
+   {
+      ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+      for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE))
+      {
+         if(ServiceUpdate.class.getName().equals(service.service.getClassName()))
+         {
+            return true;
+         }
+      }
+      return false;
    }
 
    @Override
