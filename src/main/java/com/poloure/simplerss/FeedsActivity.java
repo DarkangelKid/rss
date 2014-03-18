@@ -29,6 +29,7 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.widget.DrawerLayout;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.Menu;
@@ -340,6 +341,7 @@ class FeedsActivity extends Activity
          Utilities.setTitlesAndDrawerAndPage(null, -10);
 
          s_drawerToggle.setDrawerIndicatorEnabled(true);
+         s_drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
          invalidateOptionsMenu();
       }
       else

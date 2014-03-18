@@ -16,6 +16,7 @@
 
 package com.poloure.simplerss;
 
+import android.support.v4.widget.DrawerLayout;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.AdapterView;
@@ -30,6 +31,9 @@ class OnItemClickWebView implements AdapterView.OnItemClickListener
    {
       WebView webView = s_fragmentWeb.getWebView();
       webView.loadData(((ViewFeedItem) view).m_item.m_content, "text/html; charset=UTF-8", null);
+
+      /* Read the item. */
+      AdapterTags.READ_ITEM_TIMES.add(((ViewFeedItem) view).m_item.m_time);
 
       if(!FeedsActivity.usingTwoPaneLayout(s_activity))
       {
@@ -46,6 +50,7 @@ class OnItemClickWebView implements AdapterView.OnItemClickListener
          s_actionBar.setSubtitle(null);
          s_actionBar.setIcon(R.drawable.ic_action_web_site);
          s_drawerToggle.setDrawerIndicatorEnabled(false);
+         s_drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 
          s_activity.invalidateOptionsMenu();
       }
