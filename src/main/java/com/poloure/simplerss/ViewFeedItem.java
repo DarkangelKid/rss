@@ -233,8 +233,12 @@ class ViewFeedItem extends View
             builder.append(' ');
          }
       }
-      builder.deleteCharAt(builder.length() - 1);
-      return builder.toString();
+      if(builder.length() > 0)
+      {
+         builder.deleteCharAt(builder.length() - 1);
+         return builder.toString();
+      }
+      else return "";
    }
 
    @Override
