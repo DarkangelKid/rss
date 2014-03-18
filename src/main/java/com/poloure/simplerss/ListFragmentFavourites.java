@@ -37,7 +37,7 @@ class ListFragmentFavourites extends ListFragment
 
       registerForContextMenu(listView);
       listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
-      listView.setOnItemClickListener(new OnItemClickWebView(activity));
+      listView.setOnItemClickListener(new OnItemClickWebView());
       listView.setMultiChoiceModeListener(new MultiModeListener(listView, activity));
    }
 }

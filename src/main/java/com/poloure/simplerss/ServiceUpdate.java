@@ -27,6 +27,7 @@ import android.graphics.Paint;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.text.format.Time;
+import android.util.DisplayMetrics;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -41,6 +42,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -49,6 +51,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -76,18 +80,21 @@ class ServiceUpdate extends IntentService
       static final Pattern CDATA = Pattern.compile("\\<.*?\\>");
       static final Pattern IMG = Pattern.compile("(?i)<img([^>]+)/>");
       static final Pattern SRC = Pattern.compile("\\s*(?i)src\\s*=\\s*(\"([^\"]*\")|'[^']*'|([^'\">\\s]+))");
-      static final Pattern LINE = Pattern.compile(NEWLINE);
-      static final Pattern APOSTROPHE = Pattern.compile("'");
+      static final Pattern APOSTROPHE = Pattern.compile("'");      static final Pattern LINE = Pattern.compile(NEWLINE);
       static final Pattern QUOT = Pattern.compile("\"");
+
    }
 
    static final String ITEM_LIST = "-item_list.txt";
    static final String CONTENT_FILE = "-content.txt";
    static final String[] FEED_FILES = {ITEM_LIST, CONTENT_FILE};
-   static final String NEWLINE = System.getProperty("line.separator");
+   private static final String NEWLINE = System.getProperty("line.separator");
    private static final int MIN_IMAGE_WIDTH = 64;
-   private static final float SCREEN_WIDTH = Resources.getSystem().getDisplayMetrics().widthPixels;
-   private static final float USABLE_WIDTH_TEXT = SCREEN_WIDTH - (Utilities.EIGHT_DP << 1);
+   private static final float FAKE_WIDTH = Math.min(Resources.getSystem()
+         .getDisplayMetrics().widthPixels, Resources.getSystem().getDisplayMetrics().heightPixels);
+   private static final float USABLE_WIDTH_TEXT = FAKE_WIDTH - (Constants.s_eightDp << 1);
+
+   private static final Logger LOGGER = Logger.getLogger(RssLogger.class.getName());
 
    public
    ServiceUpdate()
@@ -199,11 +206,14 @@ class ServiceUpdate extends IntentService
             item.m_imageLink = imageLink;
             item.m_imageName = imageFile;
 
-            float scale = bitmap.getWidth() / SCREEN_WIDTH;
+            DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+            float width = Math.min(metrics.widthPixels, metrics.heightPixels);
+
+            float scale = bitmap.getWidth() / width;
             int desiredHeight = Math.round(bitmap.getHeight() / scale);
 
             /* Scale it to the screen width. */
-            bitmap = Bitmap.createScaledBitmap(bitmap, Math.round(SCREEN_WIDTH), desiredHeight, false);
+            bitmap = Bitmap.createScaledBitmap(bitmap, Math.round(width), desiredHeight, false);
 
             /* Shrink it to VIEW_HEIGHT if that is more than the scaled height. */
             int maxHeight = Math.round(context.getResources()
@@ -259,13 +269,13 @@ class ServiceUpdate extends IntentService
       }
       catch(ParseException ignored)
       {
-         System.out.println("BUG : Could not parse: " + content);
+         LOGGER.log(Level.WARNING, "Could not parse time of: " + content);
          time.setToNow();
          feedItem.m_time = time.toMillis(true);
       }
       catch(RuntimeException ignored)
       {
-         System.out.println("BUG : Could not parse: " + content);
+         LOGGER.log(Level.WARNING, "Could not parse time of: " + content);
          time.setToNow();
          feedItem.m_time = time.toMillis(true);
       }
@@ -346,8 +356,9 @@ class ServiceUpdate extends IntentService
       PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SIMPLERSS");
       wakeLock.acquire();
 
-      int page = intent.getIntExtra("GROUP_NUMBER", 0);
-      List<IndexItem> indexItems = Utilities.loadIndexList(this);
+      int page = intent.getIntExtra(FragmentFeeds.EXTRA_PAGE_NAME, 0);
+      ObjectIO reader = new ObjectIO(this, FeedsActivity.INDEX);
+      Iterable<IndexItem> indexItems = (List<IndexItem>) reader.readCollection(ArrayList.class);
 
       /* Get the tagList (from disk if it is empty). */
       List<String> tagList = PagerAdapterTags.getTagsFromIndex(this, indexItems);
@@ -390,18 +401,17 @@ class ServiceUpdate extends IntentService
       String longFile = uid + ITEM_LIST;
 
       /* Load the previously saved items to a map. */
-      Set<Long> tempSet = (Set<Long>) Read.object(this, longFile);
-      Set<Long> longSet = null == tempSet ? new HashSet<Long>(0) : tempSet;
+      ObjectIO longFileReader = new ObjectIO(this, longFile);
+      Collection<Long> longSet = longFileReader.readCollection(HashSet.class);
 
       Map<Long, FeedItem> map = new TreeMap<Long, FeedItem>(Collections.reverseOrder());
 
-      Map<Long, FeedItem> tempMap = (Map<Long, FeedItem>) Read.object(this, contentFile);
-      if(null != tempMap)
-      {
-         map.putAll(tempMap);
-      }
+      ObjectIO reader = new ObjectIO(this, contentFile);
+      Map<Long, FeedItem> tempMap = (Map<Long, FeedItem>) reader.readMap(TreeMap.class);
 
-      /* Read a Map<Long, FeedItem> = TreeMap from file. */
+      map.putAll(tempMap);
+
+      /* ObjectIO a Map<Long, FeedItem> = TreeMap from file. */
       XmlPullParser parser = Utilities.createXmlParser(urlString);
       FeedItem feedItem = new FeedItem();
       Resources resources = getResources();
@@ -473,10 +483,12 @@ class ServiceUpdate extends IntentService
       }
 
       /* We have finished forming the sets and we can save the new files to disk. */
-      Write.object(this, contentFile, map);
+      ObjectIO out = new ObjectIO(this, contentFile);
+      out.write(map);
 
       /* Write the item list of longs. */
       Set<Long> set = new HashSet<Long>(map.keySet());
-      Write.object(this, longFile, set);
+      out.setNewFileName(longFile);
+      out.write(set);
    }
 }

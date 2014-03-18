@@ -25,6 +25,7 @@ import android.widget.TextView;
 
 class AdapterManage extends ArrayAdapter<String[]>
 {
+   private final LayoutInflater m_inflater;
    private TextView m_count;
    private TextView m_url;
    private TextView m_tags;
@@ -32,6 +33,7 @@ class AdapterManage extends ArrayAdapter<String[]>
    AdapterManage(Context context)
    {
       super(context, android.R.id.list);
+      m_inflater = LayoutInflater.from(context);
    }
 
    @Override
@@ -41,8 +43,7 @@ class AdapterManage extends ArrayAdapter<String[]>
       View layout = convertView;
       if(null == layout)
       {
-         layout = LayoutInflater.from(parent.getContext())
-               .inflate(R.layout.manage_text_view, null, false);
+         layout = m_inflater.inflate(R.layout.manage_text_view, null, false);
          m_count = (TextView) layout.findViewById(R.id.manage_count);
          m_url = (TextView) layout.findViewById(R.id.manage_url);
          m_tags = (TextView) layout.findViewById(R.id.manage_tags);

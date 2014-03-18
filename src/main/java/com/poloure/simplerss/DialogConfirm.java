@@ -44,7 +44,7 @@ class DialogConfirm extends DialogPreference
          m_activity.deleteFile(FeedsActivity.READ_ITEMS);
 
          /* We should then refresh the navigation drawer for the unread counts. */
-         AsyncNavigationAdapter.update(m_activity);
+         AsyncNavigationAdapter.run(m_activity);
 
          /* TODO more efficient just to reload get views but invalidate is not working. */
          AsyncNewTagAdapters.update(m_activity);

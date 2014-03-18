@@ -48,7 +48,7 @@ class ListFragmentManage extends ListFragment
       super.onHiddenChanged(hidden);
       if(!hidden)
       {
-         AsyncManageAdapter.update((FeedsActivity) getActivity());
+         AsyncManageAdapter.run((FeedsActivity) getActivity());
       }
    }
 

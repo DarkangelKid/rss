@@ -17,7 +17,6 @@
 package com.poloure.simplerss;
 
 import android.app.ActionBar;
-import android.app.Activity;
 import android.app.Fragment;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -32,6 +31,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import static com.poloure.simplerss.Constants.*;
 
 public
 class FragmentNavigationDrawer extends Fragment
@@ -55,49 +56,41 @@ class FragmentNavigationDrawer extends Fragment
    private static
    class OnNavigationItemClick implements AdapterView.OnItemClickListener
    {
-      private final FeedsActivity m_activity;
-
-      OnNavigationItemClick(Activity activity)
-      {
-         m_activity = (FeedsActivity) activity;
-      }
-
       @Override
       public
       void onItemClick(AdapterView<?> parent, View view, int absolutePos, long id)
       {
          /* Close the navigation drawer in all cases. */
-         ((DrawerLayout) parent.getParent()).closeDrawers();
+         s_drawerLayout.closeDrawers();
 
-         int fragmentId;
+         Fragment fragment;
 
          if(0 == absolutePos)
          {
-            fragmentId = R.id.fragment_favourites;
+            fragment = s_fragmentFavourites;
          }
          else if(1 == absolutePos)
          {
-            fragmentId = R.id.fragment_manage;
+            fragment = s_fragmentManage;
          }
          else if(2 == absolutePos)
          {
-            fragmentId = R.id.fragment_settings;
+            fragment = s_fragmentSettings;
          }
          else
          {
-            fragmentId = R.id.fragment_feeds;
+            fragment = s_fragmentFeeds;
          }
 
          /* If a tag was clicked, set the ViewPager position to that tag. */
-         Utilities.setTitlesAndDrawerAndPage(m_activity, fragmentId, absolutePos);
+         Utilities.setTitlesAndDrawerAndPage(fragment, absolutePos);
       }
    }
 
-   static final String PREF_USER_LEARNED_DRAWER = "navigation_drawer_learned";
+   private static final String PREF_USER_LEARNED_DRAWER = "navigation_drawer_learned";
 
-   ActionBarDrawerToggle m_drawerToggle;
-
-   boolean m_userLearnedDrawer;
+   private boolean m_userLearnedDrawer;
+   ListView m_listView;
 
    @Override
    public
@@ -114,10 +107,10 @@ class FragmentNavigationDrawer extends Fragment
    public
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
-      ListView listView = (ListView) inflater.inflate(R.layout.navigation_drawer, container, false);
-      listView.setOnItemClickListener(new OnNavigationItemClick(getActivity()));
-      listView.setOnItemLongClickListener(new OnNavigationItemLongClick());
-      listView.setHeaderDividersEnabled(false);
+      m_listView = (ListView) inflater.inflate(R.layout.navigation_drawer, container, false);
+      m_listView.setOnItemClickListener(new OnNavigationItemClick());
+      m_listView.setOnItemLongClickListener(new OnNavigationItemLongClick());
+      m_listView.setHeaderDividersEnabled(false);
 
       String[] navTitles = getResources().getStringArray(R.array.navigation_titles);
 
@@ -127,16 +120,16 @@ class FragmentNavigationDrawer extends Fragment
          item.m_text = navTitles[i];
          item.m_count = "";
          item.m_image = i;
-         listView.addHeaderView(item);
+         m_listView.addHeaderView(item);
       }
 
       TextView divider = (TextView) inflater.inflate(R.layout.navigation_divider, container, false);
       divider.setText(R.string.tags);
 
-      listView.addHeaderView(divider, null, false);
-      listView.setAdapter(new AdapterNavigationDrawer(getActivity()));
+      m_listView.addHeaderView(divider, null, false);
+      m_listView.setAdapter(new AdapterNavigationDrawer(getActivity()));
 
-      return listView;
+      return m_listView;
    }
 
    void setUp(DrawerLayout drawerLayout)
@@ -151,7 +144,7 @@ class FragmentNavigationDrawer extends Fragment
       actionBar.setHomeButtonEnabled(true);
       actionBar.setDisplayHomeAsUpEnabled(true);
 
-      m_drawerToggle = new ActionBarDrawerToggle(getActivity(), drawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
+      s_drawerToggle = new ActionBarDrawerToggle(getActivity(), drawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close)
       {
          @Override
          public
@@ -186,7 +179,7 @@ class FragmentNavigationDrawer extends Fragment
       }
 
       drawerLayout.post(new SyncPost());
-      drawerLayout.setDrawerListener(m_drawerToggle);
+      drawerLayout.setDrawerListener(s_drawerToggle);
    }
 
    @Override
@@ -194,7 +187,7 @@ class FragmentNavigationDrawer extends Fragment
    void onConfigurationChanged(Configuration newConfig)
    {
       super.onConfigurationChanged(newConfig);
-      m_drawerToggle.onConfigurationChanged(newConfig);
+      s_drawerToggle.onConfigurationChanged(newConfig);
    }
 
    private
@@ -208,7 +201,7 @@ class FragmentNavigationDrawer extends Fragment
       public
       void run()
       {
-         m_drawerToggle.syncState();
+         s_drawerToggle.syncState();
       }
    }
 }

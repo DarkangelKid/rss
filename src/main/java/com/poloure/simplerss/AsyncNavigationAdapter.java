@@ -40,7 +40,7 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, String[][]>
    }
 
    static
-   void update(Activity activity)
+   void run(Activity activity)
    {
       AsyncTask<String, Void, String[][]> task = new AsyncNavigationAdapter(activity);
       task.executeOnExecutor(THREAD_POOL_EXECUTOR);
@@ -62,10 +62,12 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, String[][]>
 
       /* This is a list of Sets each containing all of the feed's items. */
       List<Collection<Long>> feedItems = new ArrayList<Collection<Long>>(feedCount);
+
       for(IndexItem indexItem : m_activity.m_index)
       {
-         Collection<Long> set = (Collection<Long>) Read.object(m_activity, indexItem.m_uid + ServiceUpdate.ITEM_LIST);
-         feedItems.add(null == set ? new HashSet<Long>(0) : set);
+         ObjectIO reader = new ObjectIO(m_activity, indexItem.m_uid + ServiceUpdate.ITEM_LIST);
+         Collection<Long> set = reader.readCollection(HashSet.class);
+         feedItems.add(set);
       }
 
       /* Create a temporary collection we will .clear() each iteration of the next for loop. */
@@ -110,9 +112,9 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, String[][]>
       adapter.addAll(result);
 
       /* Update the subtitle. */
-      if(R.id.fragment_feeds == m_activity.m_currentFragmentId)
+      if(Constants.s_fragmentFeeds.isVisible())
       {
-         Utilities.setTitlesAndDrawerAndPage(m_activity, R.id.fragment_feeds, -10);
+         Utilities.setTitlesAndDrawerAndPage(null, -10);
       }
    }
 }

@@ -45,7 +45,6 @@ class AsyncLoadImage extends AsyncTask<String, Void, Bitmap>
    void newInstance(ViewFeedItem view, String imageName, long viewTag)
    {
       AsyncTask<String, Void, Bitmap> task = new AsyncLoadImage(view, viewTag);
-
       task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, imageName);
    }
 
@@ -95,9 +94,13 @@ class AsyncLoadImage extends AsyncTask<String, Void, Bitmap>
       }
 
       ViewFeedItem view = m_view.get();
-      if(null != view && view.getTag().equals(m_viewTag) && null != result)
+      if(null != view)
       {
-         view.setBitmap(result);
+         Object viewTag = view.getTag();
+         if(viewTag.equals(m_viewTag) && null != result)
+         {
+            view.setBitmap(result);
+         }
       }
    }
 }

@@ -18,12 +18,10 @@ package com.poloure.simplerss;
 
 import android.app.FragmentManager;
 import android.app.ListFragment;
-import android.content.Context;
 import android.os.AsyncTask;
 
 import java.text.NumberFormat;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
@@ -40,29 +38,23 @@ class AsyncManageAdapter extends AsyncTask<String, String[][], Void>
    }
 
    static
-   void update(FeedsActivity activity)
+   void run(FeedsActivity activity)
    {
       FragmentManager manager = activity.getFragmentManager();
       ListFragment fragment = (ListFragment) manager.findFragmentById(R.id.fragment_manage);
 
       if(null != fragment && fragment.isVisible())
       {
-         new AsyncManageAdapter(activity, fragment).executeOnExecutor(THREAD_POOL_EXECUTOR);
+         AsyncManageAdapter task = new AsyncManageAdapter(activity, fragment);
+         task.executeOnExecutor(THREAD_POOL_EXECUTOR);
       }
-   }
-
-   private static
-   int count(Context context, String fileName)
-   {
-      Collection<Long> set = (Collection<Long>) Read.object(context, fileName);
-      return null == set ? 0 : set.size();
    }
 
    @Override
    protected
    Void doInBackground(String... applicationFolder)
    {
-      /* Read the index file for names, urls, and tags. */
+      /* ObjectIO the index file for names, urls, and tags. */
       NumberFormat format = NumberFormat.getNumberInstance(Locale.getDefault());
       List<IndexItem> indexItems = m_activity.m_index;
       String[][] strings = new String[indexItems.size()][3];
@@ -71,7 +63,11 @@ class AsyncManageAdapter extends AsyncTask<String, String[][], Void>
       {
          /* Append the url to the next line. */
          IndexItem item = indexItems.get(i);
-         strings[i][0] = format.format(count(m_activity, item.m_uid + ServiceUpdate.ITEM_LIST));
+
+         ObjectIO reader = new ObjectIO(m_activity, item.m_uid + ServiceUpdate.ITEM_LIST);
+         int itemCount = reader.getElementCount();
+
+         strings[i][0] = format.format(itemCount);
          strings[i][1] = item.m_url;
          strings[i][2] = Utilities.formatTags(item.m_tags);
       }

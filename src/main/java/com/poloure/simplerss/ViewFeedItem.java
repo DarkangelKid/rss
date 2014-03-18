@@ -22,6 +22,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Typeface;
+import android.util.TypedValue;
 import android.view.Display;
 import android.view.Surface;
 import android.view.View;
@@ -29,6 +30,8 @@ import android.view.WindowManager;
 
 import java.text.NumberFormat;
 import java.util.Locale;
+
+import static com.poloure.simplerss.Constants.s_displayMetrics;
 
 class ViewFeedItem extends View
 {
@@ -58,16 +61,16 @@ class ViewFeedItem extends View
       float imageSize = resources.getDimension(R.dimen.max_image_height);
 
       /* Calculate the size of the view. */
-      float base = Utilities.EIGHT_DP + titleSize * 2 + linkSize;
+      float base = Constants.s_eightDp + titleSize * 2 + linkSize;
       switch(type)
       {
          case AdapterTags.TYPE_PLAIN:
-            base += 3.6 * desSize + Utilities.getDp(4.0F);
+            base += (float) (3.6 * desSize + getDp(4.0F));
          case AdapterTags.TYPE_PLAIN_SANS_DESCRIPTION:
-            base += Utilities.getDp(4.0F);
+            base += getDp(4.0F);
             break;
          case AdapterTags.TYPE_IMAGE:
-            base += 3.6 * desSize + Utilities.getDp(20.0F);
+            base += (float) (3.6 * desSize + getDp(20.0F));
          case AdapterTags.TYPE_IMAGE_SANS_DESCRIPTION:
             base += imageSize;
       }
@@ -101,6 +104,13 @@ class ViewFeedItem extends View
       return paint;
    }
 
+   static
+   int getDp(float pixels)
+   {
+      float floatDp = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, pixels, s_displayMetrics);
+      return Math.round(floatDp);
+   }
+
    @Override
    public
    void onDraw(Canvas canvas)
@@ -117,7 +127,7 @@ class ViewFeedItem extends View
       {
          if(m_hasImage)
          {
-            verticalPosition += Utilities.getDp(4.0F);
+            verticalPosition += getDp(4.0F);
          }
          drawDes(canvas, verticalPosition);
       }
@@ -135,10 +145,10 @@ class ViewFeedItem extends View
    float drawBase(Canvas canvas)
    {
       boolean rtl = Utilities.isTextRtl(m_item.m_title);
-      float verticalPosition = m_paints[0].getTextSize() + Utilities.EIGHT_DP;
+      float verticalPosition = m_paints[0].getTextSize() + Constants.s_eightDp;
 
-      int startPadding = rtl ? SCREEN - Utilities.EIGHT_DP : Utilities.EIGHT_DP;
-      int endPadding = rtl ? Utilities.EIGHT_DP : SCREEN - Utilities.EIGHT_DP;
+      int startPadding = rtl ? SCREEN - Constants.s_eightDp : Constants.s_eightDp;
+      int endPadding = rtl ? Constants.s_eightDp : SCREEN - Constants.s_eightDp;
 
       Paint.Align start = rtl ? Paint.Align.RIGHT : Paint.Align.LEFT;
       Paint.Align end = rtl ? Paint.Align.LEFT : Paint.Align.RIGHT;
@@ -157,7 +167,7 @@ class ViewFeedItem extends View
          verticalPosition += m_paints[i].getTextSize();
       }
 
-      return m_hasImage ? verticalPosition : verticalPosition + Utilities.getDp(4.0F);
+      return m_hasImage ? verticalPosition : verticalPosition + getDp(4.0F);
    }
 
    void drawDes(Canvas canvas, float verticalPos)
@@ -167,12 +177,12 @@ class ViewFeedItem extends View
          boolean rtl = Utilities.isTextRtl(m_item.m_desLines[0]);
 
          m_paints[2].setTextAlign(rtl ? Paint.Align.RIGHT : Paint.Align.LEFT);
-         int horizontalPos = rtl ? SCREEN - Utilities.EIGHT_DP : Utilities.EIGHT_DP;
+         int horizontalPos = rtl ? SCREEN - Constants.s_eightDp : Constants.s_eightDp;
 
          for(String des : m_item.m_desLines)
          {
             canvas.drawText(des, horizontalPos, verticalPos, m_paints[2]);
-            verticalPos += m_paints[2].getTextSize() * 1.2;
+            verticalPos += (float) (m_paints[2].getTextSize() * 1.2);
          }
       }
    }
@@ -182,11 +192,11 @@ class ViewFeedItem extends View
       if(null != m_image)
       {
          canvas.drawBitmap(m_image, 0.0F, verticalPosition, m_paints[0]);
-         return verticalPosition + m_image.getHeight() + Utilities.getDp(16.0F);
+         return verticalPosition + m_image.getHeight() + getDp(16.0F);
       }
       else
       {
-         return verticalPosition + Utilities.getDp(4.0F);
+         return verticalPosition + getDp(4.0F);
       }
    }
 

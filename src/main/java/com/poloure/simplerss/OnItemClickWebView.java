@@ -16,62 +16,38 @@
 
 package com.poloure.simplerss;
 
-import android.app.ActionBar;
-import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.util.DisplayMetrics;
-import android.view.Display;
 import android.view.View;
 import android.webkit.WebView;
-import android.webkit.WebViewFragment;
 import android.widget.AdapterView;
+
+import static com.poloure.simplerss.Constants.*;
 
 class OnItemClickWebView implements AdapterView.OnItemClickListener
 {
-   private final FeedsActivity m_activity;
-
-   OnItemClickWebView(FeedsActivity activity)
-   {
-      m_activity = activity;
-   }
-
-   static
-   boolean usingTwoPaneLayout(Activity activity)
-   {
-      Display display = activity.getWindowManager().getDefaultDisplay();
-      DisplayMetrics outMetrics = new DisplayMetrics();
-      display.getMetrics(outMetrics);
-      float density = activity.getResources().getDisplayMetrics().density;
-      return outMetrics.widthPixels / density >= 600;
-   }
-
    @Override
    public
    void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
    {
-      FragmentManager manager = m_activity.getFragmentManager();
-      Fragment fragment = manager.findFragmentById(R.id.fragment_web);
-
-      WebView webView = ((WebViewFragment) fragment).getWebView();
+      WebView webView = s_fragmentWeb.getWebView();
       webView.loadData(((ViewFeedItem) view).m_item.m_content, "text/html; charset=UTF-8", null);
 
-      if(!usingTwoPaneLayout(m_activity))
+      if(!FeedsActivity.usingTwoPaneLayout(s_activity))
       {
-         FragmentUtils.switchToFragment(m_activity, R.id.fragment_web, true);
+         Utilities.switchToFragment(s_fragmentWeb, true);
 
          /* Form the better url. */
          String url = ((ViewFeedItem) view).m_item.m_url;
          int index = url.indexOf('/');
+         String urlWithoutHttp = url.substring(-1 == index ? 0 : index + 2);
+         String urlWithoutWww = urlWithoutHttp.replace("www.", "");
 
          /* Configure the actionbar. */
-         ActionBar bar = m_activity.getActionBar();
-         bar.setTitle(url.substring(-1 == index ? 0 : index + 2).replace("www.", ""));
-         bar.setSubtitle(null);
-         bar.setIcon(R.drawable.ic_action_web_site);
-         m_activity.m_FragmentDrawer.m_drawerToggle.setDrawerIndicatorEnabled(false);
+         s_actionBar.setTitle(urlWithoutWww);
+         s_actionBar.setSubtitle(null);
+         s_actionBar.setIcon(R.drawable.ic_action_web_site);
+         s_drawerToggle.setDrawerIndicatorEnabled(false);
 
-         m_activity.invalidateOptionsMenu();
+         s_activity.invalidateOptionsMenu();
       }
    }
 }

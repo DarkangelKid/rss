@@ -42,17 +42,16 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-public
-class ListFragmentTag extends Fragment
+class FragmentTag extends Fragment
 {
-   static final int LIST_VIEW_ID_BASE = 20000;
+   private static final int LIST_VIEW_ID_BASE = 20000;
    private static final String POSITION_KEY = "POSITION";
    ListView m_listView;
 
    static
    Fragment newInstance(int position)
    {
-      Fragment fragment = new ListFragmentTag();
+      Fragment fragment = new FragmentTag();
       Bundle bundle = new Bundle();
       bundle.putInt(POSITION_KEY, position);
       fragment.setArguments(bundle);
@@ -88,7 +87,7 @@ class ListFragmentTag extends Fragment
       m_listView = (ListView) layout.findViewById(R.id.list_view);
 
       m_listView.setId(LIST_VIEW_ID_BASE + getArguments().getInt(POSITION_KEY));
-      m_listView.setOnItemClickListener(new OnItemClickWebView(activity));
+      m_listView.setOnItemClickListener(new OnItemClickWebView());
       m_listView.setOnScrollListener(new AbsListView.OnScrollListener()
       {
          private static final int TOUCH = AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL;
@@ -122,7 +121,7 @@ class ListFragmentTag extends Fragment
             }
             if(IDLE == scrollState)
             {
-               AsyncNavigationAdapter.update(activity);
+               AsyncNavigationAdapter.run(activity);
             }
          }
 

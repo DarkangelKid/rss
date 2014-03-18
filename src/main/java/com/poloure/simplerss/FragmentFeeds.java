@@ -16,6 +16,7 @@
 
 package com.poloure.simplerss;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
@@ -23,11 +24,14 @@ import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 
 import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
 import uk.co.senab.actionbarpulltorefresh.library.Options;
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
+
+import static com.poloure.simplerss.Constants.*;
 
 public
 class FragmentFeeds extends Fragment
@@ -46,15 +50,27 @@ class FragmentFeeds extends Fragment
       public
       void onRefreshStarted(View view)
       {
-         ViewPager pager = (ViewPager) m_activity.findViewById(R.id.viewpager);
          Intent intent = new Intent(m_activity, ServiceUpdate.class);
-         intent.putExtra("GROUP_NUMBER", pager.getCurrentItem());
+         intent.putExtra(EXTRA_PAGE_NAME, s_viewPager.getCurrentItem());
          m_activity.startService(intent);
       }
    }
-
+   static final String EXTRA_PAGE_NAME = "GROUP_NUMBER";
    private static final float PULL_DISTANCE = 0.5F;
-   ViewPager m_viewPager;
+
+   ListView getCurrentTagListView()
+   {
+      int currentPage = s_viewPager.getCurrentItem();
+      return getTagListView(getActivity(), currentPage);
+   }
+
+   static
+   ListView getTagListView(Activity activity, int page)
+   {
+      String tag = "android:switcher:" + R.id.viewpager + ':' + page;
+      FragmentTag fragment = (FragmentTag) s_fragmentManager.findFragmentByTag(tag);
+      return fragment.m_listView;
+   }
 
    @Override
    public
@@ -63,26 +79,25 @@ class FragmentFeeds extends Fragment
       super.onCreateView(inflater, container, savedInstanceState);
 
       PullToRefreshLayout layout = (PullToRefreshLayout) inflater.inflate(R.layout.viewpager, null, false);
-      final FeedsActivity activity = (FeedsActivity) getActivity();
 
-      m_viewPager = (ViewPager) layout.findViewById(R.id.viewpager);
+      s_viewPager = (ViewPager) layout.findViewById(R.id.viewpager);
 
-      ActionBarPullToRefresh.from(activity)
+      ActionBarPullToRefresh.from(getActivity())
             .allChildrenArePullable()
             .options(Options.create().scrollDistance(PULL_DISTANCE).build())
             .useViewDelegate(ViewPager.class, new ViewPagerDelegate())
-            .listener(new RefreshListener(activity))
+            .listener(new RefreshListener((FeedsActivity) getActivity()))
             .setup(layout);
 
       /* Inflate and configure the ViewPager. */
-      m_viewPager.setOffscreenPageLimit(128);
-      m_viewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener()
+      s_viewPager.setOffscreenPageLimit(128);
+      s_viewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener()
       {
          @Override
          public
          void onPageSelected(int position)
          {
-            Utilities.setTitlesAndDrawerAndPage(activity, R.id.fragment_feeds, -10);
+            Utilities.setTitlesAndDrawerAndPage(null, -10);
          }
       });
       return layout;
@@ -94,9 +109,7 @@ class FragmentFeeds extends Fragment
    {
       super.onActivityCreated(savedInstanceState);
 
-      FeedsActivity activity = (FeedsActivity) getActivity();
-
-      m_viewPager.setAdapter(new PagerAdapterTags(getFragmentManager(), activity, activity.m_index));
-      Utilities.setTitlesAndDrawerAndPage(activity, R.id.fragment_feeds, -10);
+      s_viewPager.setAdapter(new PagerAdapterTags(s_fragmentManager, s_activity, s_activity.m_index));
+      Utilities.setTitlesAndDrawerAndPage(null, -10);
    }
 }

@@ -16,13 +16,13 @@
 
 package com.poloure.simplerss;
 
-import android.app.Activity;
 import android.view.View;
 import android.widget.AbsListView;
 
 import uk.co.senab.actionbarpulltorefresh.library.viewdelegates.ViewDelegate;
 
-public
+import static com.poloure.simplerss.Constants.*;
+
 class ViewPagerDelegate implements ViewDelegate
 {
    @Override
@@ -32,26 +32,29 @@ class ViewPagerDelegate implements ViewDelegate
       boolean ready = false;
 
       /* First we check whether we're scrolled to the top of current page. */
-      AbsListView absListView = Utilities.getCurrentTagListView((Activity) view.getContext());
+      if(null != s_fragmentFeeds)
+      {
+         AbsListView absListView = s_fragmentFeeds.getCurrentTagListView();
 
-      if(0 == absListView.getCount())
-      {
-         ready = true;
-      }
-      else if(0 == absListView.getFirstVisiblePosition())
-      {
-         View firstVisibleChild = absListView.getChildAt(0);
-         ready = null != firstVisibleChild && 0 <= firstVisibleChild.getTop();
-      }
-
-      if(ready && absListView.isFastScrollEnabled() && absListView.isFastScrollAlwaysVisible())
-      {
-         switch(absListView.getVerticalScrollbarPosition())
+         if(0 == absListView.getCount())
          {
-            case View.SCROLLBAR_POSITION_LEFT:
-               return x > absListView.getVerticalScrollbarWidth();
-            case View.SCROLLBAR_POSITION_RIGHT:
-               return x < absListView.getRight() - absListView.getVerticalScrollbarWidth();
+            ready = true;
+         }
+         else if(0 == absListView.getFirstVisiblePosition())
+         {
+            View firstVisibleChild = absListView.getChildAt(0);
+            ready = null != firstVisibleChild && 0 <= firstVisibleChild.getTop();
+         }
+
+         if(ready && absListView.isFastScrollEnabled() && absListView.isFastScrollAlwaysVisible())
+         {
+            switch(absListView.getVerticalScrollbarPosition())
+            {
+               case View.SCROLLBAR_POSITION_LEFT:
+                  return x > absListView.getVerticalScrollbarWidth();
+               case View.SCROLLBAR_POSITION_RIGHT:
+                  return x < absListView.getRight() - absListView.getVerticalScrollbarWidth();
+            }
          }
       }
 

@@ -16,36 +16,18 @@
 
 package com.poloure.simplerss;
 
-import android.content.Context;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import java.io.BufferedOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
-
-class Write
+class RssLogger
 {
+   static final String READ_CLASS_NOT_FOUND = "Tried to read a unknown class: ";
+
    static
-   void object(Context context, String fileName, Object object)
+   void setup()
    {
-      try
-      {
-         ObjectOutput out = new ObjectOutputStream(new BufferedOutputStream(context.openFileOutput(fileName, Context.MODE_PRIVATE)));
-         try
-         {
-            out.writeObject(object);
-         }
-         finally
-         {
-            if(null != out)
-            {
-               out.close();
-            }
-         }
-      }
-      catch(IOException e)
-      {
-         e.printStackTrace();
-      }
+      // Get the global logger to configure it
+      Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+      logger.setLevel(Level.INFO);
    }
 }

@@ -65,7 +65,7 @@ class MultiModeListener implements AbsListView.MultiChoiceModeListener
       {
          SparseBooleanArray checked = m_listView.getCheckedItemPositions();
 
-         boolean favourite = R.id.fragment_favourites == m_activity.m_currentFragmentId;
+         boolean favourite = Constants.s_fragmentFavourites.isVisible();
          AdapterFavourites adapter = null;
          FeedItem[] items = null;
 
@@ -106,10 +106,10 @@ class MultiModeListener implements AbsListView.MultiChoiceModeListener
          else
          {
             /* Tags first, then manage, then pages, the unread counts. */
-            PagerAdapterTags.update(m_activity);
-            AsyncManageAdapter.update(m_activity);
+            PagerAdapterTags.run(m_activity);
+            AsyncManageAdapter.run(m_activity);
             AsyncNewTagAdapters.update(m_activity);
-            AsyncNavigationAdapter.update(m_activity);
+            AsyncNavigationAdapter.run(m_activity);
          }
          mode.finish();
       }
@@ -126,7 +126,7 @@ class MultiModeListener implements AbsListView.MultiChoiceModeListener
       {
          inflater.inflate(R.menu.context_manage, menu);
 
-         boolean manage = R.id.fragment_manage == m_activity.m_currentFragmentId;
+         boolean manage = Constants.s_fragmentManage.isVisible();
          menu.findItem(R.id.delete_content).setVisible(manage);
          return true;
       }

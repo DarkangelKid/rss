@@ -19,8 +19,6 @@ package com.poloure.simplerss;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -28,14 +26,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.widget.DrawerLayout;
 import android.util.TypedValue;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.Surface;
 import android.view.ViewConfiguration;
 import android.widget.ListView;
 
@@ -43,64 +41,54 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
+import static com.poloure.simplerss.Constants.*;
 
 public
 class FeedsActivity extends Activity
 {
    static final String READ_ITEMS = "read_items.txt";
+   static final String INDEX = "index.txt";
+   static final String FAVOURITES = "favourites.txt";
    private static final int ALARM_SERVICE_START = 1;
    private static final int ALARM_SERVICE_STOP = 0;
    private static final int MINUTE_VALUE = 60000;
-   private final BroadcastReceiver Receiver = new BroadcastReceiver()
+   private final BroadcastReceiver m_broadcastReceiver = new BroadcastReceiver()
    {
       @Override
       public
       void onReceive(Context context, Intent intent)
       {
-         FeedsActivity activity = (FeedsActivity) getWindow().getDecorView().getContext();
+         if(null != s_activity)
+         {
+            AsyncNewTagAdapters.update(s_activity);
 
-         AsyncNewTagAdapters.update(activity);
-
-         /* Manage adapter is updated every time it is shown but in case the user switched to the
+            /* Manage adapter is updated every time it is shown but in case the user switched to the
             manage fragment mid refresh. */
-         AsyncManageAdapter.update(activity);
-         AsyncNavigationAdapter.update(activity);
+            AsyncManageAdapter.run(s_activity);
+            AsyncNavigationAdapter.run(s_activity);
 
-         ((PullToRefreshLayout) activity.findViewById(R.id.viewpager)
-               .getParent()).setRefreshComplete();
+            s_pullToRefreshLayout.setRefreshComplete();
+         }
       }
    };
    boolean m_showMenuItems = true;
-   int m_previousFragmentId;
-   int m_currentFragmentId;
-   FragmentNavigationDrawer m_FragmentDrawer;
    List<IndexItem> m_index;
 
-   static
-   Collection<Long> loadReadItems(Context context)
-   {
-      Set<Long> set = (Set<Long>) Read.object(context, READ_ITEMS);
-      return null == set ? new HashSet<Long>(0) : set;
-   }
-
-   static
+   private static
    void setTopOffset(Activity activity)
    {
       if(!ViewConfiguration.get(activity)
             .hasPermanentMenuKey() && Build.VERSION_CODES.KITKAT <= Build.VERSION.SDK_INT)
       {
-         Resources resources = activity.getResources();
          TypedValue value = new TypedValue();
 
          activity.getTheme().resolveAttribute(android.R.attr.actionBarSize, value, true);
-         int actionBar = activity.getResources().getDimensionPixelSize(value.resourceId);
-         int resourceId = resources.getIdentifier("status_bar_height", "dimen", "android");
-         int statusBar = resources.getDimensionPixelSize(resourceId);
+         int actionBar = s_resources.getDimensionPixelSize(value.resourceId);
+         int resourceId = s_resources.getIdentifier("status_bar_height", "dimen", "android");
+         int statusBar = s_resources.getDimensionPixelSize(resourceId);
 
-         activity.findViewById(android.R.id.content).setPadding(0, actionBar + statusBar, 0, 0);
+         findView(android.R.id.content).setPadding(0, actionBar + statusBar, 0, 0);
       }
    }
 
@@ -110,7 +98,7 @@ class FeedsActivity extends Activity
       AdapterTags listAdapter = (AdapterTags) listView.getAdapter();
 
       /* Create a copy of the item times. */
-      List<Long> times = new ArrayList<Long>(listAdapter.m_times);
+      List<Long> times = new ArrayList<Long>(listAdapter.m_itemTimes);
       times.removeAll(AdapterTags.READ_ITEM_TIMES);
 
       if(times.isEmpty())
@@ -119,9 +107,23 @@ class FeedsActivity extends Activity
       }
       else
       {
-         int index = listAdapter.m_times.indexOf(times.get(times.size() - 1));
+         int index = listAdapter.m_itemTimes.indexOf(times.get(times.size() - 1));
          listView.setSelection(index);
       }
+   }
+
+   static
+   boolean usingTwoPaneLayout(Activity activity)
+   {
+      return 600 <= s_displayMetrics.widthPixels / s_displayMetrics.density && isHorizontal(activity);
+   }
+
+   private static
+   boolean isHorizontal(Activity activity)
+   {
+      Display display = s_windowManager.getDefaultDisplay();
+      int rotation = display.getRotation();
+      return Surface.ROTATION_90 == rotation || Surface.ROTATION_270 == rotation;
    }
 
    /* Called only when no remnants of the Activity exist. */
@@ -133,32 +135,41 @@ class FeedsActivity extends Activity
 
       setContentView(R.layout.activity_main);
 
+      saveInitialConstants(this);
+
+      RssLogger.setup();
+
       /* Load the index. */
-      m_index = Utilities.loadIndexList(this);
-      m_currentFragmentId = R.id.fragment_feeds;
+      ObjectIO indexReader = new ObjectIO(this, INDEX);
+      m_index = (List<IndexItem>) indexReader.readCollection(ArrayList.class);
 
       /* Load the read items to the tags Adapter. */
-      AdapterTags.READ_ITEM_TIMES.addAll(loadReadItems(this));
+      ObjectIO readItemReader = new ObjectIO(this, READ_ITEMS);
+      Collection<Long> set = (HashSet<Long>) readItemReader.readCollection(HashSet.class);
+      AdapterTags.READ_ITEM_TIMES.addAll(set);
 
-      FragmentManager manager = getFragmentManager();
-      DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-
-      m_FragmentDrawer = (FragmentNavigationDrawer) manager.findFragmentById(R.id.fragment_navigation_drawer);
-      m_FragmentDrawer.setUp(drawerLayout);
+      s_fragmentDrawer.setUp(s_drawerLayout);
 
       setTopOffset(this);
 
       if(null == savedInstanceState)
       {
          /* Create and hide the fragments that go inside the content frame. */
-         FragmentTransaction trans = manager.beginTransaction();
+         if(!usingTwoPaneLayout(this))
+         {
+            hideFragments(s_fragmentWeb);
+         }
 
-         trans.hide(manager.findFragmentById(R.id.fragment_favourites))
-               .hide(manager.findFragmentById(R.id.fragment_settings))
-               .hide(manager.findFragmentById(R.id.fragment_manage))
-               .hide(manager.findFragmentById(R.id.fragment_web))
-               .commit();
+         hideFragments(s_fragmentFavourites, s_fragmentManage, s_fragmentSettings);
       }
+   }
+
+   @Override
+   protected
+   void onPostCreate(Bundle savedInstanceState)
+   {
+      super.onPostCreate(savedInstanceState);
+      saveViews();
    }
 
    /* Stop the alarm service and reset the time to 0 every time the user sees the activity. */
@@ -168,19 +179,17 @@ class FeedsActivity extends Activity
    {
       super.onResume();
       setServiceIntent(ALARM_SERVICE_STOP);
-      registerReceiver(Receiver, new IntentFilter(ServiceUpdate.BROADCAST_ACTION));
+      registerReceiver(m_broadcastReceiver, new IntentFilter(ServiceUpdate.BROADCAST_ACTION));
 
       /* Update the navigation adapter. This updates the subtitle and title. */
-      if(R.id.fragment_web != m_currentFragmentId)
+      if(s_fragmentWeb.isHidden())
       {
-         AsyncNavigationAdapter.update(this);
+         AsyncNavigationAdapter.run(this);
       }
 
-
-      PullToRefreshLayout layout = (PullToRefreshLayout) findViewById(R.id.viewpager).getParent();
-      if(!layout.isRefreshing() && isServiceRunning())
+      if(!s_pullToRefreshLayout.isRefreshing() && isServiceRunning())
       {
-         ((PullToRefreshLayout) findViewById(R.id.viewpager).getParent()).setRefreshing(true);
+         s_pullToRefreshLayout.setRefreshing(true);
       }
    }
 
@@ -203,7 +212,7 @@ class FeedsActivity extends Activity
    void onPause()
    {
       super.onPause();
-      unregisterReceiver(Receiver);
+      unregisterReceiver(m_broadcastReceiver);
    }
 
    /* Start the alarm service every time the activity is not visible. */
@@ -212,9 +221,19 @@ class FeedsActivity extends Activity
    void onStop()
    {
       super.onStop();
-      Write.object(this, READ_ITEMS, AdapterTags.READ_ITEM_TIMES);
-      Write.object(this, Read.INDEX, m_index);
-      Write.object(this, Read.FAVOURITES, ListFragmentTag.getFavouritesAdapter(this).m_feedItems);
+
+      /* Write the read items set to file. */
+      ObjectIO out = new ObjectIO(this, READ_ITEMS);
+      out.write(AdapterTags.READ_ITEM_TIMES);
+
+      /* Write the index file to disk. */
+      out.setNewFileName(INDEX);
+      out.write(m_index);
+
+      /* Write the favourites list to file. */
+      out.setNewFileName(FAVOURITES);
+      out.write(FragmentTag.getFavouritesAdapter(this).m_feedItems);
+
       setServiceIntent(ALARM_SERVICE_START);
    }
 
@@ -224,16 +243,13 @@ class FeedsActivity extends Activity
    {
       super.onConfigurationChanged(newConfig);
 
-      FragmentManager manager = getFragmentManager();
-      FragmentTransaction trans = manager.beginTransaction();
-
       if(600 <= newConfig.screenWidthDp && Configuration.ORIENTATION_LANDSCAPE == newConfig.orientation)
       {
-         trans.show(manager.findFragmentById(R.id.fragment_web)).commit();
+         showFragments(s_fragmentWeb);
       }
-      else if(R.id.fragment_web != m_currentFragmentId && Configuration.ORIENTATION_PORTRAIT == newConfig.orientation)
+      else if(600 <= newConfig.screenWidthDp && Configuration.ORIENTATION_PORTRAIT == newConfig.orientation)
       {
-         trans.hide(manager.findFragmentById(R.id.fragment_web));
+         hideFragments(s_fragmentWeb);
       }
 
       /* Update the padding of the content view. */
@@ -244,21 +260,21 @@ class FeedsActivity extends Activity
    public
    boolean onOptionsItemSelected(MenuItem item)
    {
-      if(android.R.id.home == item.getItemId() && R.id.fragment_web == m_currentFragmentId)
+      if(android.R.id.home == item.getItemId() && s_fragmentWeb.isVisible())
       {
          onBackPressed();
          return true;
       }
-      return m_FragmentDrawer.m_drawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
+      return s_drawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
    }
 
    @Override
    public
    boolean onPrepareOptionsMenu(Menu menu)
    {
-      boolean web = R.id.fragment_web == m_currentFragmentId;
-      boolean feed = R.id.fragment_feeds == m_currentFragmentId;
-      boolean manage = R.id.fragment_manage == m_currentFragmentId;
+      boolean web = s_fragmentWeb.isVisible();
+      boolean feed = s_fragmentFeeds.isVisible();
+      boolean manage = s_fragmentManage.isVisible();
 
       menu.getItem(0).setVisible(!web).setEnabled(m_showMenuItems && (feed || manage));
       menu.getItem(1).setVisible(!web).setEnabled(m_showMenuItems && feed);
@@ -316,18 +332,19 @@ class FeedsActivity extends Activity
    public
    void onBackPressed()
    {
-      super.onBackPressed();
-
-      if(R.id.fragment_web == m_currentFragmentId)
+      if(s_fragmentWeb.isVisible() && !usingTwoPaneLayout(this))
       {
-         Utilities.setTitlesAndDrawerAndPage(this, m_previousFragmentId, -10);
+         super.onBackPressed();
 
-         /* Switch back to our old tag. */
-         m_currentFragmentId = m_previousFragmentId;
-         m_previousFragmentId = R.id.fragment_web;
+         s_fragmentManager.executePendingTransactions();
+         Utilities.setTitlesAndDrawerAndPage(null, -10);
 
-         m_FragmentDrawer.m_drawerToggle.setDrawerIndicatorEnabled(true);
+         s_drawerToggle.setDrawerIndicatorEnabled(true);
          invalidateOptionsMenu();
+      }
+      else
+      {
+         super.onBackPressed();
       }
    }
 
@@ -340,11 +357,13 @@ class FeedsActivity extends Activity
    public
    void onUnreadClick(MenuItem menuItem)
    {
-      ListView listView = Utilities.getCurrentTagListView(this);
-
-      if(null != listView)
+      if(null != s_fragmentFeeds)
       {
-         gotoLatestUnread(listView);
+         ListView listView = s_fragmentFeeds.getCurrentTagListView();
+         if(null != listView)
+         {
+            gotoLatestUnread(listView);
+         }
       }
    }
 }

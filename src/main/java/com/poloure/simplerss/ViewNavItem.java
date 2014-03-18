@@ -47,13 +47,13 @@ class ViewNavItem extends View
 
       if(null == m_bitmaps_dark[0])
       {
-         int[] drawables_dark = {
+         int[] drawablesDark = {
                R.drawable.ic_action_important,
                R.drawable.ic_action_storage,
                R.drawable.ic_action_settings,
          };
 
-         int[] drawables_light = {
+         int[] drawablesLight = {
                R.drawable.ic_action_important_light,
                R.drawable.ic_action_storage_light,
                R.drawable.ic_action_settings_light,
@@ -61,8 +61,8 @@ class ViewNavItem extends View
 
          for(int i = 0; i < m_bitmaps_dark.length; i++)
          {
-            m_bitmaps_dark[i] = BitmapFactory.decodeResource(resources, drawables_dark[i]);
-            m_bitmaps_light[i] = BitmapFactory.decodeResource(resources, drawables_light[i]);
+            m_bitmaps_dark[i] = BitmapFactory.decodeResource(resources, drawablesDark[i]);
+            m_bitmaps_light[i] = BitmapFactory.decodeResource(resources, drawablesLight[i]);
          }
       }
 
@@ -128,7 +128,7 @@ class ViewNavItem extends View
       {
          Bitmap icon = isActivated() ? m_bitmaps_light[m_image] : m_bitmaps_dark[m_image];
          int imageWidth = icon.getWidth();
-         int paddingTop = Utilities.EIGHT_DP;
+         int paddingTop = Constants.s_eightDp;
          canvas.drawBitmap(icon, rtl ? width - paddingStart - imageWidth : paddingStart, Math.round(paddingTop), m_paints[0]);
          hPadding = (paddingStart << 1) + imageWidth;
       }

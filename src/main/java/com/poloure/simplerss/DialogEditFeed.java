@@ -27,9 +27,9 @@ import android.widget.TextView;
 
 class DialogEditFeed extends Dialog
 {
-   final FeedsActivity m_activity;
-   final int m_pos;
-   AsyncTask<Void, Void, IndexItem> m_task;
+   private final FeedsActivity m_activity;
+   private final int m_pos;
+   private AsyncTask<Void, Void, IndexItem> m_task;
 
    private
    DialogEditFeed(FeedsActivity activity, int position)

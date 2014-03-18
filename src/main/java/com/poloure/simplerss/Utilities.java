@@ -16,13 +16,9 @@
 
 package com.poloure.simplerss;
 
-import android.app.ActionBar;
-import android.app.Activity;
-import android.content.Context;
-import android.content.res.Resources;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.support.v4.text.TextDirectionHeuristicsCompat;
-import android.support.v4.view.ViewPager;
-import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.widget.ArrayAdapter;
 import android.widget.HeaderViewListAdapter;
@@ -36,28 +32,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
+
+import static com.poloure.simplerss.Constants.*;
 
 class Utilities
 {
-   static final int EIGHT_DP = getDp(8.0F);
    static final NumberFormat NUMBER_FORMAT = NumberFormat.getNumberInstance(Locale.getDefault());
-
-   static
-   ListView getCurrentTagListView(Activity activity)
-   {
-      int currentPage = ((ViewPager) activity.findViewById(R.id.viewpager)).getCurrentItem();
-      return getTagListView(activity, currentPage);
-   }
-
-   static
-   ListView getTagListView(Activity activity, int page)
-   {
-      return (ListView) activity.findViewById(ListFragmentTag.LIST_VIEW_ID_BASE + page);
-   }
 
    static
    String formatTags(String... tags)
@@ -67,45 +49,47 @@ class Utilities
    }
 
    static
-   void setTitlesAndDrawerAndPage(FeedsActivity activity, int fragmentId, int absolutePos)
+   void setTitlesAndDrawerAndPage(Fragment fragment, int absolutePos)
    {
-      ActionBar bar = activity.getActionBar();
-      Resources resources = activity.getResources();
-      String[] navTitles = resources.getStringArray(R.array.navigation_titles);
-      ViewPager pager = (ViewPager) activity.findViewById(R.id.viewpager);
+      String[] navTitles = s_resources.getStringArray(R.array.navigation_titles);
 
-      FragmentUtils.switchToFragment(activity, fragmentId, false);
+      if(null != fragment)
+      {
+         switchToFragment(fragment, false);
+         s_fragmentManager.executePendingTransactions();
+      }
 
-      ListView list = (ListView) activity.findViewById(R.id.fragment_navigation_drawer);
+      ListView list = s_fragmentDrawer.m_listView;
       HeaderViewListAdapter headerAdapter = (HeaderViewListAdapter) list.getAdapter();
       int headers = headerAdapter.getHeadersCount();
-      int listPosition = -10 == absolutePos ? pager.getCurrentItem() + headers : absolutePos;
-      int viewPagerPos = -10 == absolutePos ? pager.getCurrentItem() : absolutePos - headers;
+
+      int listPosition = -10 == absolutePos ? s_viewPager.getCurrentItem() + headers : absolutePos;
+      int viewPagerPos = -10 == absolutePos ? s_viewPager.getCurrentItem() : absolutePos - headers;
 
       /* Check the drawer item. */
       String title = PagerAdapterTags.s_tagList.get(0);
       String subTitle = null;
       int imageRes = 0;
 
-      if(R.id.fragment_favourites == fragmentId)
+      if(s_fragmentFavourites.isVisible())
       {
          listPosition = 0;
          title = navTitles[0];
          imageRes = R.drawable.ic_action_important;
       }
-      else if(R.id.fragment_manage == fragmentId)
+      else if(s_fragmentManage.isVisible())
       {
          listPosition = 1;
          title = navTitles[1];
          imageRes = R.drawable.ic_action_storage;
       }
-      else if(R.id.fragment_settings == fragmentId)
+      else if(s_fragmentSettings.isVisible())
       {
          listPosition = 2;
          title = navTitles[2];
          imageRes = R.drawable.ic_action_settings;
       }
-      else if(R.id.fragment_feeds == fragmentId)
+      else if(s_fragmentFeeds.isVisible())
       {
          ArrayAdapter<String[]> adapter = (ArrayAdapter<String[]>) headerAdapter.getWrappedAdapter();
 
@@ -114,15 +98,14 @@ class Utilities
             String[] item = adapter.getItem(viewPagerPos);
             title = item[0];
             int count = null == item[1] || item[1].isEmpty() ? 0 : Integer.parseInt(item[1]);
-            String countString = activity.getResources()
-                  .getQuantityString(R.plurals.actionbar_subtitle_unread, count, count);
+            String countString = s_resources.getQuantityString(R.plurals.actionbar_subtitle_unread, count, count);
             subTitle = 0 == count ? null : countString;
          }
          imageRes = R.drawable.ic_action_labels;
       }
-      bar.setTitle(title);
-      bar.setSubtitle(subTitle);
-      bar.setIcon(imageRes);
+      s_actionBar.setTitle(title);
+      s_actionBar.setSubtitle(subTitle);
+      s_actionBar.setIcon(imageRes);
 
       list.setItemChecked(listPosition, true);
 
@@ -130,19 +113,11 @@ class Utilities
       if(0 <= viewPagerPos)
       {
          /* Switch the view pager page if different. */
-         if(pager.getCurrentItem() != viewPagerPos)
+         if(s_viewPager.getCurrentItem() != viewPagerPos)
          {
-            pager.setCurrentItem(viewPagerPos);
+            s_viewPager.setCurrentItem(viewPagerPos);
          }
       }
-   }
-
-   static
-   int getDp(float pixels)
-   {
-      DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
-      float floatDp = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, pixels, metrics);
-      return Math.round(floatDp);
    }
 
    static
@@ -159,15 +134,37 @@ class Utilities
    }
 
    static
-   List<IndexItem> loadIndexList(Context context)
-   {
-      List<IndexItem> list = (List<IndexItem>) Read.object(context, Read.INDEX);
-      return null == list ? new ArrayList<IndexItem>(0) : list;
-   }
-
-   static
    boolean isTextRtl(CharSequence c)
    {
       return TextDirectionHeuristicsCompat.FIRSTSTRONG_LTR.isRtl(c, 0, c.length() - 1);
+   }
+
+   static
+   void switchToFragment(Fragment fragment, boolean addToBackStack)
+   {
+      if(fragment.isHidden())
+      {
+         Fragment[] fragments = {
+               s_fragmentFavourites,
+               s_fragmentManage,
+               s_fragmentFeeds,
+               s_fragmentSettings
+         };
+         FragmentTransaction transaction = s_fragmentManager.beginTransaction();
+
+         for(Fragment frag : fragments)
+         {
+            if(frag.isVisible())
+            {
+               transaction.hide(frag);
+            }
+         }
+         transaction.show(fragment);
+         if(addToBackStack)
+         {
+            transaction.addToBackStack(null);
+         }
+         transaction.commit();
+      }
    }
 }

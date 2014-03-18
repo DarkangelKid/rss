@@ -17,6 +17,7 @@
 package com.poloure.simplerss;
 
 import android.os.AsyncTask;
+import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -28,6 +29,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[]>
@@ -77,14 +79,13 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
          }
 
          /* Load the data from file. */
-         Map<Long, FeedItem> tempMap = (Map<Long, FeedItem>) Read.object(m_activity, indexItem.m_uid + ServiceUpdate.CONTENT_FILE);
-         if(null != tempMap)
+         ObjectIO reader = new ObjectIO(m_activity, indexItem.m_uid + ServiceUpdate.CONTENT_FILE);
+         Map<Long, FeedItem> tempMap = (Map<Long, FeedItem>) reader.readMap(TreeMap.class);
+
+         /* Put the item in each map that the feed is tagged with. */
+         for(int k : indices)
          {
-            /* Put the item in each map that the feed is tagged with. */
-            for(int k : indices)
-            {
-               maps[k].putAll(tempMap);
-            }
+            maps[k].putAll(tempMap);
          }
       }
       return maps;
@@ -92,24 +93,16 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
 
    @Override
    protected
-   void onPostExecute(TreeMap<Long, FeedItem>[] maps)
+   void onPostExecute(TreeMap<Long, FeedItem>[] result)
    {
       ViewPager pager = (ViewPager) m_activity.findViewById(R.id.viewpager);
-      int pageCount = pager.getAdapter().getCount();
+      PagerAdapter pagerAdapter = pager.getAdapter();
+      int pageCount = pagerAdapter.getCount();
 
       for(int i = 0; pageCount > i; i++)
       {
          /* Get the tag page and skip ListViews that are null. */
-         ListView listView = Utilities.getTagListView(m_activity, i);
-         while(null == listView)
-         {
-            if(i == pageCount)
-            {
-               return;
-            }
-
-            listView = Utilities.getTagListView(m_activity, i);
-         }
+         ListView listView = FragmentFeeds.getTagListView(m_activity, i);
 
          AdapterTags adapterTag = (AdapterTags) listView.getAdapter();
 
@@ -130,13 +123,21 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
                top = null == v ? 0 : v.getTop();
             }
 
-            /* Set the adapters to be these new lists and do not read items while updating. */
-            adapterTag.m_feedItems = new ArrayList<FeedItem>(maps[i].values());
-            adapterTag.m_times = new ArrayList<Long>(maps[i].keySet());
+            /* Update the feedItems in the adapter. */
+            Collection<FeedItem> feedItems = result[i].values();
+            adapterTag.m_feedItems.clear();
+            adapterTag.m_feedItems.addAll(feedItems);
+
+            /* Update the feedItem time set in the adapter. */
+            Set<Long> feedTimes = result[i].keySet();
+            adapterTag.m_itemTimes.clear();
+            adapterTag.m_itemTimes.addAll(feedTimes);
+
+            /* Notify the adapter that items have changed. */
             adapterTag.notifyDataSetChanged();
 
             /* We now need to find the position of the item with the time timeBefore. */
-            int newPositionOfTop = adapterTag.m_times.indexOf(timeBefore);
+            int newPositionOfTop = adapterTag.m_itemTimes.indexOf(timeBefore);
             if(-1 == newPositionOfTop)
             {
                FeedsActivity.gotoLatestUnread(listView);

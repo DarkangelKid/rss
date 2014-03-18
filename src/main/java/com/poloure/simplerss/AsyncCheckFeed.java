@@ -29,6 +29,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 class AsyncCheckFeed extends AsyncTask<Void, Void, IndexItem>
@@ -152,7 +153,8 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, IndexItem>
 
       List<String> tagList = new ArrayList<String>(8);
 
-      String lowerTags = inputTags.toLowerCase();
+      Locale locale = Locale.getDefault();
+      String lowerTags = inputTags.toLowerCase(locale);
 
       /* + 10 in case the user did not put spaces after the commas. */
       StringBuilder tagBuilder = new StringBuilder(lowerTags.length());
@@ -161,7 +163,8 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, IndexItem>
       /* For each tag. */
       for(String tag : tags)
       {
-         if(!tag.trim().isEmpty())
+         String tagTrimmed = tag.trim();
+         if(!tagTrimmed.isEmpty())
          {
             tagBuilder.setLength(0);
 
@@ -196,7 +199,7 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, IndexItem>
 
    @Override
    protected
-   void onPostExecute(IndexItem newIndexItem)
+   void onPostExecute(IndexItem result)
    {
       if(isCancelled())
       {
@@ -205,40 +208,43 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, IndexItem>
 
       Context context = m_dialog.getContext();
 
-      if(!newIndexItem.m_url.isEmpty())
+      if(result.m_url.isEmpty())
+      {
+         Button button = (Button) m_dialog.findViewById(R.id.dialog_button_positive);
+         button.setText(R.string.dialog_accept);
+         button.setEnabled(true);
+
+         Toast toast = Toast.makeText(context, R.string.toast_invalid_feed, Toast.LENGTH_SHORT);
+         toast.show();
+      }
+      else
       {
          /* Create the csv. */
          int oldPos = m_activity.m_index.indexOf(m_oldIndexItem);
 
          if(-1 == oldPos)
          {
-            m_activity.m_index.add(newIndexItem);
+            m_activity.m_index.add(result);
          }
          else
          {
-            m_activity.m_index.set(oldPos, newIndexItem);
+            m_activity.m_index.set(oldPos, result);
          }
 
          /* Must update the tags first. */
-         PagerAdapterTags.update(m_activity);
-         AsyncNavigationAdapter.update(m_activity);
-         AsyncManageAdapter.update(m_activity);
+         PagerAdapterTags.run(m_activity);
+         AsyncNavigationAdapter.run(m_activity);
+         AsyncManageAdapter.run(m_activity);
 
-         String text = context.getString(R.string.toast_added_feed, newIndexItem.m_url);
-         Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
+         String text = context.getString(R.string.toast_added_feed, result.m_url);
+         Toast toast = Toast.makeText(context, text, Toast.LENGTH_SHORT);
+         toast.show();
 
          /* Save the index file to disk so the ServiceUpdate can load it. */
-         Write.object(m_activity, Read.INDEX, m_activity.m_index);
+         ObjectIO out = new ObjectIO(m_activity, FeedsActivity.INDEX);
+         out.write(m_activity.m_index);
 
          m_dialog.dismiss();
-      }
-      else
-      {
-         Button button = (Button) m_dialog.findViewById(R.id.dialog_button_positive);
-         button.setText(R.string.dialog_accept);
-         button.setEnabled(true);
-
-         Toast.makeText(context, R.string.toast_invalid_feed, Toast.LENGTH_SHORT).show();
       }
    }
 }

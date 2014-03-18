@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -36,11 +37,8 @@ class AdapterFavourites extends BaseAdapter
    AdapterFavourites(Context context)
    {
       m_context = context;
-      LinkedHashSet<FeedItem> list = (LinkedHashSet<FeedItem>) Read.object(context, Read.FAVOURITES);
-      if(null != list)
-      {
-         m_feedItems = new LinkedHashSet<FeedItem>(list);
-      }
+      ObjectIO reader = new ObjectIO(context, FeedsActivity.FAVOURITES);
+      m_feedItems = (Set<FeedItem>) reader.readCollection(HashSet.class);
    }
 
    @Override

@@ -20,7 +20,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.support.v13.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
+import android.support.v4.view.PagerAdapter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,6 +28,8 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
+import static com.poloure.simplerss.Constants.*;
 
 class PagerAdapterTags extends FragmentPagerAdapter
 {
@@ -42,10 +44,11 @@ class PagerAdapterTags extends FragmentPagerAdapter
    }
 
    static
-   void update(FeedsActivity activity)
+   void run(FeedsActivity activity)
    {
       s_tagList = getTagsFromIndex(activity, activity.m_index);
-      ((ViewPager) activity.findViewById(R.id.viewpager)).getAdapter().notifyDataSetChanged();
+      PagerAdapter adapter = s_viewPager.getAdapter();
+      adapter.notifyDataSetChanged();
    }
 
    static
@@ -70,7 +73,7 @@ class PagerAdapterTags extends FragmentPagerAdapter
    public
    Fragment getItem(int position)
    {
-      return ListFragmentTag.newInstance(position);
+      return FragmentTag.newInstance(position);
    }
 
    @Override
