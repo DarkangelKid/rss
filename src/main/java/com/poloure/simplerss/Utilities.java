@@ -103,7 +103,7 @@ class Utilities
       /* Check the drawer item. */
       String title = PagerAdapterTags.s_tagList.get(0);
       String subTitle = null;
-      int imageRes = 0;
+      int imageRes = R.drawable.ic_action_labels;
 
       if(s_fragmentFavourites.isVisible())
       {
@@ -123,7 +123,7 @@ class Utilities
          title = navTitles[2];
          imageRes = R.drawable.ic_action_settings;
       }
-      else if(s_fragmentFeeds.isVisible())
+      else/* if(s_fragmentFeeds.isVisible())*/
       {
          ArrayAdapter<String[]> adapter = (ArrayAdapter<String[]>) headerAdapter.getWrappedAdapter();
 
@@ -135,7 +135,6 @@ class Utilities
             String countString = s_resources.getQuantityString(R.plurals.actionbar_subtitle_unread, count, count);
             subTitle = 0 == count ? null : countString;
          }
-         imageRes = R.drawable.ic_action_labels;
       }
       s_actionBar.setTitle(title);
       s_actionBar.setSubtitle(subTitle);

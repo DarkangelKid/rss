@@ -110,7 +110,7 @@
    <string name="source_code">Source code</string>
 
    <!-- Save image results -->
-   <string name="image_downloaded_success">Download image to Pictures/%s</string>
+   <string name="image_downloaded_success">Downloaded image to Pictures/%s</string>
    <string name="image_downloaded_failed">Image download failed</string>
 
 </resources>
