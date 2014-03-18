@@ -156,12 +156,14 @@ class FeedsActivity extends Activity
       if(null == savedInstanceState)
       {
          /* Create and hide the fragments that go inside the content frame. */
+         //showFragments(s_fragmentFeeds, s_fragmentWeb);
          if(!usingTwoPaneLayout(this))
          {
             hideFragments(s_fragmentWeb);
          }
 
          hideFragments(s_fragmentFavourites, s_fragmentManage, s_fragmentSettings);
+         s_fragmentManager.executePendingTransactions();
       }
    }
 
@@ -273,7 +275,7 @@ class FeedsActivity extends Activity
    public
    boolean onPrepareOptionsMenu(Menu menu)
    {
-      boolean web = s_fragmentWeb.isVisible();
+      boolean web = s_fragmentWeb.isVisible() && !usingTwoPaneLayout(this);
       boolean feed = s_fragmentFeeds.isVisible();
       boolean manage = s_fragmentManage.isVisible();
 

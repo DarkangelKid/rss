@@ -42,6 +42,7 @@ class OnItemClickWebView implements AdapterView.OnItemClickListener
       if(!FeedsActivity.usingTwoPaneLayout(s_activity))
       {
          Utilities.switchToFragment(s_fragmentWeb, true);
+         s_fragmentManager.executePendingTransactions();
 
          /* Form the better url. */
          String url = ((ViewFeedItem) view).m_item.m_url;
