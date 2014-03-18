@@ -29,7 +29,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import static com.poloure.simplerss.Constants.*;
+import static com.poloure.simplerss.Constants.s_viewPager;
 
 class PagerAdapterTags extends FragmentPagerAdapter
 {
@@ -67,6 +67,14 @@ class PagerAdapterTags extends FragmentPagerAdapter
       }
 
       return new ArrayList<String>(tagSet);
+   }
+
+   @Override
+   public
+   int getItemPosition(Object object)
+   {
+      int pos = s_tagList.indexOf(object);
+      return pos == -1 ? PagerAdapter.POSITION_NONE : pos;
    }
 
    @Override

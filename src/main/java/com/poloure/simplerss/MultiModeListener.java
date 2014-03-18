@@ -80,6 +80,7 @@ class MultiModeListener implements AbsListView.MultiChoiceModeListener
             if(checked.valueAt(i))
             {
                int position = checked.keyAt(i);
+               IndexItem indexItem = m_activity.m_index.get(position);
 
                switch(itemId)
                {
@@ -89,11 +90,11 @@ class MultiModeListener implements AbsListView.MultiChoiceModeListener
                         adapter.m_feedItems.remove(items[position]);
                         break;
                      }
-                     m_activity.m_index.remove(m_activity.m_index.get(position));
+                     m_activity.m_index.remove(indexItem);
                   case R.id.delete_content:
                      for(String file : ServiceUpdate.FEED_FILES)
                      {
-                        m_activity.deleteFile(m_activity.m_index.get(position).m_uid + file);
+                        m_activity.deleteFile(indexItem.m_uid + file);
                      }
                }
             }
