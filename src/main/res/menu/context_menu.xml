@@ -20,6 +20,9 @@
       android:id="@+id/favourite"
       android:title="@string/feed_item_context_favourite"/>
    <item
+      android:id="@+id/save_image"
+      android:title="@string/feed_item_context_save_image"/>
+   <item
       android:id="@+id/open"
       android:title="@string/feed_item_context_open"/>
    <item

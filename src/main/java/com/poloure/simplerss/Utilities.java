@@ -18,8 +18,9 @@ package com.poloure.simplerss;
 
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.content.Context;
+import android.os.Environment;
 import android.support.v4.text.TextDirectionHeuristicsCompat;
-import android.util.TypedValue;
 import android.widget.ArrayAdapter;
 import android.widget.HeaderViewListAdapter;
 import android.widget.ListView;
@@ -28,6 +29,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -35,7 +37,15 @@ import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Locale;
 
-import static com.poloure.simplerss.Constants.*;
+import static com.poloure.simplerss.Constants.s_actionBar;
+import static com.poloure.simplerss.Constants.s_fragmentDrawer;
+import static com.poloure.simplerss.Constants.s_fragmentFavourites;
+import static com.poloure.simplerss.Constants.s_fragmentFeeds;
+import static com.poloure.simplerss.Constants.s_fragmentManage;
+import static com.poloure.simplerss.Constants.s_fragmentManager;
+import static com.poloure.simplerss.Constants.s_fragmentSettings;
+import static com.poloure.simplerss.Constants.s_resources;
+import static com.poloure.simplerss.Constants.s_viewPager;
 
 class Utilities
 {
@@ -46,6 +56,30 @@ class Utilities
    {
       String tagsWithBraces = Arrays.toString(tags);
       return tagsWithBraces.substring(1, tagsWithBraces.length() - 1);
+   }
+
+   static
+   boolean isExternalStorageWritable()
+   {
+      String state = Environment.getExternalStorageState();
+      if(Environment.MEDIA_MOUNTED.equals(state))
+      {
+         return true;
+      }
+      return false;
+   }
+
+   static
+   File getPicturesFolder(Context context)
+   {
+      // Get the directory for the user's public pictures directory.
+      File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), context
+            .getString(R.string.application_name));
+      if(!file.mkdirs())
+      {
+         /* TODO LOGGER can not create directory. */
+      }
+      return file;
    }
 
    static
@@ -145,10 +179,7 @@ class Utilities
       if(fragment.isHidden())
       {
          Fragment[] fragments = {
-               s_fragmentFavourites,
-               s_fragmentManage,
-               s_fragmentFeeds,
-               s_fragmentSettings
+               s_fragmentFavourites, s_fragmentManage, s_fragmentFeeds, s_fragmentSettings
          };
          FragmentTransaction transaction = s_fragmentManager.beginTransaction();
 

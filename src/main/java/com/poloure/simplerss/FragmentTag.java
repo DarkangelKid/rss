@@ -25,6 +25,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -41,6 +42,18 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.TreeMap;
+import java.util.concurrent.Executor;
 
 class FragmentTag extends Fragment
 {
@@ -171,8 +184,13 @@ class FragmentTag extends Fragment
    {
       super.onCreateContextMenu(menu, v, menuInfo);
 
+      boolean hasImage = ((ViewFeedItem) ((AdapterView.AdapterContextMenuInfo) menuInfo).targetView).m_hasImage;
+
       /* Inflate the context menu from the xml file. */
       getActivity().getMenuInflater().inflate(R.menu.context_menu, menu);
+
+      /* Show the 'Save image' option only when the view has an image. */
+      menu.findItem(R.id.save_image).setVisible(hasImage);
 
       /* Set the title of the context menu to the feed item's title. */
       AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
@@ -209,8 +227,87 @@ class FragmentTag extends Fragment
             addToFavourites(activity, feedItem);
             return true;
 
+         case R.id.save_image:
+            downloadImage(activity, feedItem.m_imageLink, feedItem.m_imageName);
+
          default:
             return false;
+      }
+   }
+
+   static
+   void downloadImage(final Activity activity, final String imageUrl, final String imageName)
+   {
+      if(null != imageUrl && !imageUrl.isEmpty())
+      {
+         new AsyncTask<Void, Void, Boolean>()
+         {
+            @Override
+            public
+            Boolean doInBackground(Void... stuff)
+            {
+               try
+               {
+                  File pictureFolder = Utilities.getPicturesFolder(activity);
+                  File file = new File(pictureFolder, imageName);
+
+                  InputStream inputStream = new URL(imageUrl).openStream();
+                  BufferedInputStream in = new BufferedInputStream(inputStream);
+
+                  FileOutputStream fos = new FileOutputStream(file);
+                  BufferedOutputStream out = new BufferedOutputStream(fos);
+                  try
+                  {
+                     byte[] buf = new byte[1024];
+                     int offset;
+                     while((offset = in.read(buf)) > 0)
+                     {
+                        out.write(buf, 0, offset);
+                     }
+                  }
+                  finally
+                  {
+                     in.close();
+                     out.close();
+                  }
+               }
+               catch(MalformedURLException e)
+               {
+                  e.printStackTrace();
+                  return false;
+               }
+               catch(FileNotFoundException e)
+               {
+                  e.printStackTrace();
+                  return false;
+               }
+               catch(IOException e)
+               {
+                  e.printStackTrace();
+                  return false;
+               }
+               return true;
+            }
+
+            @Override
+            public
+            void onPostExecute(Boolean result)
+            {
+               if(result)
+               {
+                  String appName = activity.getString(R.string.application_name);
+                  String success = activity.getString(R.string.image_downloaded_success, appName);
+                  Toast toast = Toast.makeText(activity, success, Toast.LENGTH_SHORT);
+                  toast.show();
+               }
+               else
+               {
+                  String failed = activity.getString(R.string.image_downloaded_failed);
+                  Toast toast = Toast.makeText(activity, failed, Toast.LENGTH_SHORT);
+                  toast.show();
+               }
+            }
+         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
       }
    }
 }
