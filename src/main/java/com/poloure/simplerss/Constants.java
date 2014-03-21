@@ -16,17 +16,22 @@
 
 package com.poloure.simplerss;
 
+import android.annotation.TargetApi;
 import android.app.ActionBar;
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.res.Resources;
+import android.os.Build;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewConfiguration;
+import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.WebViewFragment;
 
@@ -115,5 +120,33 @@ class Constants
          transaction.show(fragment);
       }
       transaction.commit();
+   }
+
+   @TargetApi(Build.VERSION_CODES.KITKAT)
+   static
+   void setTopOffset(Activity activity)
+   {
+      setTopOffset(activity, findView(android.R.id.content));
+   }
+
+   @TargetApi(Build.VERSION_CODES.KITKAT)
+   static
+   void setTopOffset(Activity activity, View view)
+   {
+      if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
+      {
+         if(!ViewConfiguration.get(activity).hasPermanentMenuKey())
+         {
+            TypedValue value = new TypedValue();
+
+            Resources.Theme theme = activity.getTheme();
+            theme.resolveAttribute(android.R.attr.actionBarSize, value, true);
+            int actionBar = s_resources.getDimensionPixelSize(value.resourceId);
+            int resourceId = s_resources.getIdentifier("status_bar_height", "dimen", "android");
+            int statusBar = s_resources.getDimensionPixelSize(resourceId);
+
+            view.setPadding(0, actionBar + statusBar, 0, 0);
+         }
+      }
    }
 }

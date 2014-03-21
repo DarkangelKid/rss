@@ -72,8 +72,6 @@
 
    <!-- Settings automatic Refreshing strings. -->
    <string name="automatic_refreshing">تحديث تلقائي</string>
-   <string name="automatic_refreshing_disabled">تعطيل التحديث التلقائي</string>
-   <string name="automatic_refreshing_enabled">تشغيل التحديث التلقائي</string>
 
    <string name="automatic_refreshing_interval">تحديث كل:</string>
    <string name="automatic_refreshing_interval_summary">الفاصل بين كل تحديث</string>

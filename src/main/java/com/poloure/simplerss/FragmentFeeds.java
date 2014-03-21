@@ -78,7 +78,7 @@ class FragmentFeeds extends Fragment
    {
       super.onCreateView(inflater, container, savedInstanceState);
 
-      PullToRefreshLayout layout = (PullToRefreshLayout) inflater.inflate(R.layout.viewpager, null, false);
+      PullToRefreshLayout layout = (PullToRefreshLayout) inflater.inflate(R.layout.viewpager, container, false);
 
       s_viewPager = (ViewPager) layout.findViewById(R.id.viewpager);
 

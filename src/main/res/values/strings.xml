@@ -87,8 +87,6 @@
 
    <!-- Settings automatic Refreshing strings. -->
    <string name="automatic_refreshing">Automatic refreshing</string>
-   <string name="automatic_refreshing_disabled">Automatic refreshing is disabled</string>
-   <string name="automatic_refreshing_enabled">Automatic refreshing is enabled</string>
 
    <string name="automatic_refreshing_interval">Refresh interval</string>
    <string name="automatic_refreshing_interval_summary">Time between two consecutive refreshes</string>

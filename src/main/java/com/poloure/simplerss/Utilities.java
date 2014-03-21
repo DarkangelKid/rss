@@ -16,11 +16,17 @@
 
 package com.poloure.simplerss;
 
+import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
+import android.os.Build;
 import android.os.Environment;
 import android.support.v4.text.TextDirectionHeuristicsCompat;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.HeaderViewListAdapter;
 import android.widget.ListView;
@@ -37,15 +43,7 @@ import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Locale;
 
-import static com.poloure.simplerss.Constants.s_actionBar;
-import static com.poloure.simplerss.Constants.s_fragmentDrawer;
-import static com.poloure.simplerss.Constants.s_fragmentFavourites;
-import static com.poloure.simplerss.Constants.s_fragmentFeeds;
-import static com.poloure.simplerss.Constants.s_fragmentManage;
-import static com.poloure.simplerss.Constants.s_fragmentManager;
-import static com.poloure.simplerss.Constants.s_fragmentSettings;
-import static com.poloure.simplerss.Constants.s_resources;
-import static com.poloure.simplerss.Constants.s_viewPager;
+import static com.poloure.simplerss.Constants.*;
 
 class Utilities
 {

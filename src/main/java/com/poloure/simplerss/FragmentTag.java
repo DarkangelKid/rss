@@ -29,6 +29,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -96,7 +97,7 @@ class FragmentTag extends Fragment
    {
       final FeedsActivity activity = (FeedsActivity) getActivity();
 
-      RelativeLayout layout = (RelativeLayout) inflater.inflate(R.layout.list_view_tag, null, false);
+      RelativeLayout layout = (RelativeLayout) inflater.inflate(R.layout.list_view_tag, container, false);
       m_listView = (ListView) layout.findViewById(R.id.list_view);
 
       m_listView.setId(LIST_VIEW_ID_BASE + getArguments().getInt(POSITION_KEY));
@@ -187,7 +188,9 @@ class FragmentTag extends Fragment
       boolean hasImage = ((ViewFeedItem) ((AdapterView.AdapterContextMenuInfo) menuInfo).targetView).m_hasImage;
 
       /* Inflate the context menu from the xml file. */
-      getActivity().getMenuInflater().inflate(R.menu.context_menu, menu);
+      Activity activity = getActivity();
+      MenuInflater inflater = activity.getMenuInflater();
+      inflater.inflate(R.menu.context_menu, menu);
 
       /* Show the 'Save image' option only when the view has an image. */
       menu.findItem(R.id.save_image).setVisible(hasImage);
@@ -215,8 +218,8 @@ class FragmentTag extends Fragment
             ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
             clipboard.setPrimaryClip(ClipData.newPlainText("Url", url));
 
-            Toast.makeText(activity, getString(R.string.toast_url_copied) + ' ' + url, Toast.LENGTH_SHORT)
-                  .show();
+            Toast toast = Toast.makeText(activity, getString(R.string.toast_url_copied) + ' ' + url, Toast.LENGTH_SHORT);
+            toast.show();
             return true;
 
          case R.id.open:

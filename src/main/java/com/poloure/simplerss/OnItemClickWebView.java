@@ -36,8 +36,12 @@ class OnItemClickWebView implements AdapterView.OnItemClickListener
       AdapterTags.READ_ITEM_TIMES.add(((ViewFeedItem) view).m_item.m_time);
       AsyncNavigationAdapter.run(s_activity);
 
-      view.setAlpha(AdapterTags.READ_OPACITY);
-      view.setBackgroundResource(R.drawable.selector_transparent);
+      /* Only apply read effect if it is not in the favourites fragment. */
+      if(s_fragmentFeeds.isVisible())
+      {
+         view.setAlpha(AdapterTags.READ_OPACITY);
+         view.setBackgroundResource(R.drawable.selector_transparent);
+      }
 
       if(!FeedsActivity.usingTwoPaneLayout(s_activity))
       {

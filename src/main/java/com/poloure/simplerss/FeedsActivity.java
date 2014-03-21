@@ -26,16 +26,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.widget.DrawerLayout;
-import android.util.TypedValue;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Surface;
-import android.view.ViewConfiguration;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -75,23 +72,6 @@ class FeedsActivity extends Activity
    };
    boolean m_showMenuItems = true;
    List<IndexItem> m_index;
-
-   private static
-   void setTopOffset(Activity activity)
-   {
-      if(!ViewConfiguration.get(activity)
-            .hasPermanentMenuKey() && Build.VERSION_CODES.KITKAT <= Build.VERSION.SDK_INT)
-      {
-         TypedValue value = new TypedValue();
-
-         activity.getTheme().resolveAttribute(android.R.attr.actionBarSize, value, true);
-         int actionBar = s_resources.getDimensionPixelSize(value.resourceId);
-         int resourceId = s_resources.getIdentifier("status_bar_height", "dimen", "android");
-         int statusBar = s_resources.getDimensionPixelSize(resourceId);
-
-         findView(android.R.id.content).setPadding(0, actionBar + statusBar, 0, 0);
-      }
-   }
 
    static
    void gotoLatestUnread(ListView listView)
@@ -156,7 +136,6 @@ class FeedsActivity extends Activity
       if(null == savedInstanceState)
       {
          /* Create and hide the fragments that go inside the content frame. */
-         //showFragments(s_fragmentFeeds, s_fragmentWeb);
          if(!usingTwoPaneLayout(this))
          {
             hideFragments(s_fragmentWeb);

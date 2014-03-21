@@ -19,12 +19,11 @@
 
    <PreferenceScreen
       android:icon="@drawable/ic_action_refresh"
-      android:title="@string/automatic_refreshing">
+      android:title="@string/automatic_refreshing"
+      android:key="ONE">
       <SwitchPreference
          android:defaultValue="true"
          android:key="refreshing_enabled"
-         android:summaryOff="@string/automatic_refreshing_disabled"
-         android:summaryOn="@string/automatic_refreshing_enabled"
          android:switchTextOff="@string/switch_off"
          android:switchTextOn="@string/switch_on"
          android:title="@string/automatic_refreshing"/>
@@ -41,7 +40,8 @@
 
    <PreferenceScreen
       android:icon="@drawable/ic_action_picture"
-      android:title="@string/images">
+      android:title="@string/images"
+      android:key="TWO">
       <SwitchPreference
          android:defaultValue="true"
          android:key="images_enabled"
@@ -61,10 +61,8 @@
 
    <PreferenceScreen
       android:icon="@drawable/ic_action_settings"
-      android:title="@string/advanced">
-      <SwitchPreference
-         android:defaultValue="true"
-         android:key="fake"/>
+      android:title="@string/advanced"
+      android:key="THREE">
       <com.poloure.simplerss.DialogConfirm
          android:dialogMessage="@string/clear_read_items_dialog_summary"
          android:dialogTitle="@string/clear_read_items_dialog_title"
