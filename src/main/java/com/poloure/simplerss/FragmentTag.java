@@ -27,6 +27,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -39,9 +40,10 @@ import android.webkit.WebViewFragment;
 import android.widget.AbsListView;
 import android.widget.Adapter;
 import android.widget.AdapterView;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedInputStream;
@@ -53,14 +55,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.TreeMap;
-import java.util.concurrent.Executor;
 
-class FragmentTag extends Fragment
+import static com.poloure.simplerss.Constants.s_actionBar;
+import static com.poloure.simplerss.Constants.s_activity;
+import static com.poloure.simplerss.Constants.s_drawerLayout;
+import static com.poloure.simplerss.Constants.s_drawerToggle;
+import static com.poloure.simplerss.Constants.s_fragmentFeeds;
+import static com.poloure.simplerss.Constants.s_fragmentManager;
+import static com.poloure.simplerss.Constants.s_fragmentWeb;
+
+class FragmentTag extends ListFragment
 {
    private static final int LIST_VIEW_ID_BASE = 20000;
    private static final String POSITION_KEY = "POSITION";
-   ListView m_listView;
 
    static
    Fragment newInstance(int position)
@@ -93,16 +100,31 @@ class FragmentTag extends Fragment
 
    @Override
    public
+   void onListItemClick(ListView l, View v, int position, long id)
+   {
+      Utilities.showWebFragment(v);
+   }
+
+   @Override
+   public
    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
    {
-      final FeedsActivity activity = (FeedsActivity) getActivity();
+      LinearLayout view = (LinearLayout) inflater.inflate(R.layout.list_view, container, false);
+      TextView emptyView = (TextView) view.findViewById(android.R.id.empty);
+      emptyView.setText(R.string.empty_tag_list_view);
+      return view;
+   }
 
-      RelativeLayout layout = (RelativeLayout) inflater.inflate(R.layout.list_view_tag, container, false);
-      m_listView = (ListView) layout.findViewById(R.id.list_view);
+   @Override
+   public
+   void onActivityCreated(Bundle savedInstanceState)
+   {
+      super.onActivityCreated(savedInstanceState);
 
-      m_listView.setId(LIST_VIEW_ID_BASE + getArguments().getInt(POSITION_KEY));
-      m_listView.setOnItemClickListener(new OnItemClickWebView());
-      m_listView.setOnScrollListener(new AbsListView.OnScrollListener()
+      ListView listView = getListView();
+
+      listView.setId(LIST_VIEW_ID_BASE + getArguments().getInt(POSITION_KEY));
+      listView.setOnScrollListener(new AbsListView.OnScrollListener()
       {
          private static final int TOUCH = AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL;
          private static final int IDLE = AbsListView.OnScrollListener.SCROLL_STATE_IDLE;
@@ -135,7 +157,7 @@ class FragmentTag extends Fragment
             }
             if(IDLE == scrollState)
             {
-               AsyncNavigationAdapter.run(activity);
+               AsyncNavigationAdapter.run(getActivity());
             }
          }
 
@@ -145,19 +167,9 @@ class FragmentTag extends Fragment
          {
          }
       });
-      registerForContextMenu(m_listView);
 
-      return layout;
-   }
-
-   @Override
-   public
-   void onActivityCreated(Bundle savedInstanceState)
-   {
-      super.onActivityCreated(savedInstanceState);
-
-      m_listView.setAdapter(new AdapterTags(getActivity()));
-      m_listView.setEmptyView(((View) m_listView.getParent()).findViewById(R.id.empty));
+      registerForContextMenu(listView);
+      setListAdapter(new AdapterTags(getActivity()));
 
       AsyncNewTagAdapters.update((FeedsActivity) getActivity());
 

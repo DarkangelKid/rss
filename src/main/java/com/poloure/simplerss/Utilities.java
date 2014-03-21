@@ -24,9 +24,11 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Environment;
 import android.support.v4.text.TextDirectionHeuristicsCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.webkit.WebView;
 import android.widget.ArrayAdapter;
 import android.widget.HeaderViewListAdapter;
 import android.widget.ListView;
@@ -78,6 +80,45 @@ class Utilities
          /* TODO LOGGER can not create directory. */
       }
       return file;
+   }
+
+   static
+   void showWebFragment(View view)
+   {
+      WebView webView = s_fragmentWeb.getWebView();
+      webView.loadData(((ViewFeedItem) view).m_item.m_content, "text/html; charset=UTF-8", null);
+
+      /* Read the item. */
+      AdapterTags.READ_ITEM_TIMES.add(((ViewFeedItem) view).m_item.m_time);
+      AsyncNavigationAdapter.run(s_activity);
+
+      /* Only apply read effect if it is not in the favourites fragment. */
+      if(s_fragmentFeeds.isVisible())
+      {
+         view.setAlpha(AdapterTags.READ_OPACITY);
+         view.setBackgroundResource(R.drawable.selector_transparent);
+      }
+
+      if(!FeedsActivity.usingTwoPaneLayout(s_activity))
+      {
+         Utilities.switchToFragment(s_fragmentWeb, true);
+         s_fragmentManager.executePendingTransactions();
+
+         /* Form the better url. */
+         String url = ((ViewFeedItem) view).m_item.m_url;
+         int index = url.indexOf('/');
+         String urlWithoutHttp = url.substring(-1 == index ? 0 : index + 2);
+         String urlWithoutWww = urlWithoutHttp.replace("www.", "");
+
+         /* Configure the actionbar. */
+         s_actionBar.setTitle(urlWithoutWww);
+         s_actionBar.setSubtitle(null);
+         s_actionBar.setIcon(R.drawable.ic_action_web_site);
+         s_drawerToggle.setDrawerIndicatorEnabled(false);
+         s_drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+
+         s_activity.invalidateOptionsMenu();
+      }
    }
 
    static

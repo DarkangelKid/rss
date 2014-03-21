@@ -18,12 +18,33 @@ package com.poloure.simplerss;
 
 import android.app.ListFragment;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 public
 class ListFragmentFavourites extends ListFragment
 {
+   @Override
+   public
+   void onListItemClick(ListView l, View v, int position, long id)
+   {
+      Utilities.showWebFragment(v);
+   }
+
+   @Override
+   public
+   View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+   {
+      View view = inflater.inflate(R.layout.list_view, container, false);
+      TextView emptyView = (TextView) view.findViewById(android.R.id.empty);
+      emptyView.setText(R.string.empty_favourites_list_view);
+      return view;
+   }
+
    @Override
    public
    void onActivityCreated(Bundle savedInstanceState)
@@ -37,7 +58,6 @@ class ListFragmentFavourites extends ListFragment
 
       registerForContextMenu(listView);
       listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
-      listView.setOnItemClickListener(new OnItemClickWebView());
       listView.setMultiChoiceModeListener(new MultiModeListener(listView, activity));
    }
 }

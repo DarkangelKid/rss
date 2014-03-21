@@ -1,9 +1,9 @@
 Download
 ===
 
-Recommended version: [rss-0.24.6.apk](https://raw.github.com/poloure/rss/master/apk/rss-0.24.6.apk)
+Recommended version: [rss-0.24.7.apk](https://raw.github.com/poloure/rss/master/apk/rss-0.24.7.apk)
 
-Development version: [rss-0.24.6.apk](https://raw.github.com/poloure/rss/master/apk/rss-0.24.6.apk)
+Development version: [rss-0.24.7.apk](https://raw.github.com/poloure/rss/master/apk/rss-0.24.7.apk)
 
 Screenshots
 ===

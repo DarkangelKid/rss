@@ -193,10 +193,6 @@ class FragmentNavigationDrawer extends Fragment
    private
    class SyncPost implements Runnable
    {
-      SyncPost()
-      {
-      }
-
       @Override
       public
       void run()

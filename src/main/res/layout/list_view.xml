@@ -14,28 +14,27 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:visibility="invisible">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical">
 
    <ListView
-      android:id="@+id/list_view"
+      android:id="@id/android:list"
       android:layout_width="wrap_content"
-      android:layout_height="match_parent"
+      android:layout_height="0dp"
+      android:layout_weight="1"
       android:divider="@drawable/divider_tag_list"
       android:dividerHeight="1px"
       android:listSelector="@drawable/transparent"/>
 
    <TextView
-      android:id="@+id/empty"
+      android:id="@id/android:empty"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      android:layout_centerInParent="true"
+      android:layout_gravity="center"
       android:gravity="center"
       android:padding="24dp"
-      android:text="@string/empty_list_view"
       android:textColor="@color/item_title_color"
-      android:textSize="18sp"
-      android:visibility="gone"/>
-</RelativeLayout>
+      android:textSize="18sp"/>
+</LinearLayout>

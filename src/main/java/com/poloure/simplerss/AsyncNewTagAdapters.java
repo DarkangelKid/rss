@@ -102,7 +102,7 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
       for(int i = 0; pageCount > i; i++)
       {
          /* Get the tag page and skip ListViews that are null. */
-         ListView listView = FragmentFeeds.getTagListView(m_activity, i);
+         ListView listView = FragmentFeeds.getTagListView(i);
 
          AdapterTags adapterTag = (AdapterTags) listView.getAdapter();
 
