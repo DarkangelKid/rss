@@ -104,7 +104,7 @@ class ViewFeedItem extends View
       return paint;
    }
 
-   static
+   private static
    int getDp(float pixels)
    {
       float floatDp = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, pixels, s_displayMetrics);
@@ -233,7 +233,7 @@ class ViewFeedItem extends View
             builder.append(' ');
          }
       }
-      if(builder.length() > 0)
+      if(0 < builder.length())
       {
          builder.deleteCharAt(builder.length() - 1);
          return builder.toString();

@@ -33,6 +33,7 @@ import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Surface;
+import android.webkit.WebView;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -94,13 +95,13 @@ class FeedsActivity extends Activity
    }
 
    static
-   boolean usingTwoPaneLayout(Activity activity)
+   boolean usingTwoPaneLayout()
    {
-      return 600 <= s_displayMetrics.widthPixels / s_displayMetrics.density && isHorizontal(activity);
+      return 600 <= s_displayMetrics.widthPixels / s_displayMetrics.density && isHorizontal();
    }
 
    private static
-   boolean isHorizontal(Activity activity)
+   boolean isHorizontal()
    {
       Display display = s_windowManager.getDefaultDisplay();
       int rotation = display.getRotation();
@@ -136,7 +137,7 @@ class FeedsActivity extends Activity
       if(null == savedInstanceState)
       {
          /* Create and hide the fragments that go inside the content frame. */
-         if(!usingTwoPaneLayout(this))
+         if(!usingTwoPaneLayout())
          {
             hideFragments(s_fragmentWeb);
          }
@@ -254,7 +255,7 @@ class FeedsActivity extends Activity
    public
    boolean onPrepareOptionsMenu(Menu menu)
    {
-      boolean web = s_fragmentWeb.isVisible() && !usingTwoPaneLayout(this);
+      boolean web = s_fragmentWeb.isVisible() && !usingTwoPaneLayout();
       boolean feed = s_fragmentFeeds.isVisible();
       boolean manage = s_fragmentManage.isVisible();
 
@@ -314,7 +315,7 @@ class FeedsActivity extends Activity
    public
    void onBackPressed()
    {
-      if(s_fragmentWeb.isVisible() && !usingTwoPaneLayout(this))
+      if(s_fragmentWeb.isVisible() && !usingTwoPaneLayout())
       {
          super.onBackPressed();
 
@@ -324,6 +325,10 @@ class FeedsActivity extends Activity
          s_drawerToggle.setDrawerIndicatorEnabled(true);
          s_drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
          invalidateOptionsMenu();
+
+         /* Reset the WebView for the next item. */
+         WebView webView = s_fragmentWeb.getWebView();
+         webView.loadUrl("about:blank");
       }
       else
       {

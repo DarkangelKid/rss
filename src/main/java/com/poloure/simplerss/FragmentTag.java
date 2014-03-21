@@ -27,16 +27,12 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.widget.DrawerLayout;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewFragment;
 import android.widget.AbsListView;
 import android.widget.Adapter;
 import android.widget.AdapterView;
@@ -55,14 +51,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-
-import static com.poloure.simplerss.Constants.s_actionBar;
-import static com.poloure.simplerss.Constants.s_activity;
-import static com.poloure.simplerss.Constants.s_drawerLayout;
-import static com.poloure.simplerss.Constants.s_drawerToggle;
-import static com.poloure.simplerss.Constants.s_fragmentFeeds;
-import static com.poloure.simplerss.Constants.s_fragmentManager;
-import static com.poloure.simplerss.Constants.s_fragmentWeb;
 
 class FragmentTag extends ListFragment
 {
@@ -172,15 +160,6 @@ class FragmentTag extends ListFragment
       setListAdapter(new AdapterTags(getActivity()));
 
       AsyncNewTagAdapters.update((FeedsActivity) getActivity());
-
-      FragmentManager manager = getActivity().getFragmentManager();
-      Fragment webFragment = manager.findFragmentById(R.id.fragment_web);
-
-      WebView webView = ((WebViewFragment) webFragment).getWebView();
-      webView.setInitialScale(120);
-      webView.getSettings().setBuiltInZoomControls(true);
-      webView.getSettings().setDisplayZoomControls(false);
-      webView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
    }
 
    @Override
@@ -250,7 +229,7 @@ class FragmentTag extends ListFragment
       }
    }
 
-   static
+   private static
    void downloadImage(final Activity activity, final String imageUrl, final String imageName)
    {
       if(null != imageUrl && !imageUrl.isEmpty())
@@ -275,7 +254,7 @@ class FragmentTag extends ListFragment
                   {
                      byte[] buf = new byte[1024];
                      int offset;
-                     while((offset = in.read(buf)) > 0)
+                     while(0 < (offset = in.read(buf)))
                      {
                         out.write(buf, 0, offset);
                      }

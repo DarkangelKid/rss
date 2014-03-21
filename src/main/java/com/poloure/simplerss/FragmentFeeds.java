@@ -23,6 +23,8 @@ import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 import android.widget.ListView;
 
 import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
@@ -54,6 +56,18 @@ class FragmentFeeds extends Fragment
          m_activity.startService(intent);
       }
    }
+
+   static
+   class OnPageChangeListener extends ViewPager.SimpleOnPageChangeListener
+   {
+      @Override
+      public
+      void onPageSelected(int position)
+      {
+         Utilities.setTitlesAndDrawerAndPage(null, -10);
+      }
+   }
+
    static final String EXTRA_PAGE_NAME = "GROUP_NUMBER";
    private static final float PULL_DISTANCE = 0.5F;
 
@@ -90,15 +104,7 @@ class FragmentFeeds extends Fragment
 
       /* Inflate and configure the ViewPager. */
       s_viewPager.setOffscreenPageLimit(128);
-      s_viewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener()
-      {
-         @Override
-         public
-         void onPageSelected(int position)
-         {
-            Utilities.setTitlesAndDrawerAndPage(null, -10);
-         }
-      });
+      s_viewPager.setOnPageChangeListener(new OnPageChangeListener());
       return layout;
    }
 
@@ -110,5 +116,11 @@ class FragmentFeeds extends Fragment
 
       s_viewPager.setAdapter(new PagerAdapterTags(s_fragmentManager, s_activity, s_activity.m_index));
       Utilities.setTitlesAndDrawerAndPage(null, -10);
+
+      WebView webView = s_fragmentWeb.getWebView();
+      WebSettings settings = webView.getSettings();
+      settings.setBuiltInZoomControls(true);
+      settings.setDisplayZoomControls(false);
+      settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
    }
 }

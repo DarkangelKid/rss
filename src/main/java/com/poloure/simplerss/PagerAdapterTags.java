@@ -74,7 +74,7 @@ class PagerAdapterTags extends FragmentPagerAdapter
    int getItemPosition(Object object)
    {
       int pos = s_tagList.indexOf(object);
-      return pos == -1 ? PagerAdapter.POSITION_NONE : pos;
+      return -1 == pos ? PagerAdapter.POSITION_NONE : pos;
    }
 
    @Override

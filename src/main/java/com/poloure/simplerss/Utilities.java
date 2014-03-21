@@ -16,18 +16,13 @@
 
 package com.poloure.simplerss;
 
-import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
-import android.os.Build;
 import android.os.Environment;
 import android.support.v4.text.TextDirectionHeuristicsCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.webkit.WebView;
 import android.widget.ArrayAdapter;
 import android.widget.HeaderViewListAdapter;
@@ -62,11 +57,7 @@ class Utilities
    boolean isExternalStorageWritable()
    {
       String state = Environment.getExternalStorageState();
-      if(Environment.MEDIA_MOUNTED.equals(state))
-      {
-         return true;
-      }
-      return false;
+      return Environment.MEDIA_MOUNTED.equals(state);
    }
 
    static
@@ -99,9 +90,9 @@ class Utilities
          view.setBackgroundResource(R.drawable.selector_transparent);
       }
 
-      if(!FeedsActivity.usingTwoPaneLayout(s_activity))
+      if(!FeedsActivity.usingTwoPaneLayout())
       {
-         Utilities.switchToFragment(s_fragmentWeb, true);
+         switchToFragment(s_fragmentWeb, true);
          s_fragmentManager.executePendingTransactions();
 
          /* Form the better url. */
@@ -211,7 +202,7 @@ class Utilities
       return TextDirectionHeuristicsCompat.FIRSTSTRONG_LTR.isRtl(c, 0, c.length() - 1);
    }
 
-   static
+   private static
    void switchToFragment(Fragment fragment, boolean addToBackStack)
    {
       if(fragment.isHidden())

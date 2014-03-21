@@ -190,7 +190,7 @@ class FragmentNavigationDrawer extends Fragment
       s_drawerToggle.onConfigurationChanged(newConfig);
    }
 
-   private
+   private static
    class SyncPost implements Runnable
    {
       @Override

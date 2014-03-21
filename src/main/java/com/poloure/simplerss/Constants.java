@@ -31,7 +31,6 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.WebViewFragment;
 
@@ -85,7 +84,7 @@ class Constants
    void saveViews()
    {
       s_viewPager = (ViewPager) findView(R.id.viewpager);
-      s_pullToRefreshLayout = (PullToRefreshLayout) s_viewPager.getParent();;
+      s_pullToRefreshLayout = (PullToRefreshLayout) s_viewPager.getParent();
    }
 
    private static
@@ -133,7 +132,7 @@ class Constants
    static
    void setTopOffset(Activity activity, View view)
    {
-      if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
+      if(Build.VERSION_CODES.KITKAT <= Build.VERSION.SDK_INT)
       {
          if(!ViewConfiguration.get(activity).hasPermanentMenuKey())
          {

@@ -55,6 +55,7 @@ class FragmentSettings extends PreferenceFragment
          m_preferenceScreen = preferenceScreen;
       }
 
+      @Override
       public
       boolean onPreferenceClick(Preference preference)
       {
