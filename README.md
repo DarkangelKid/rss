@@ -1,9 +1,9 @@
 Download
 ===
 
-Recommended version: [rss-0.24.8.apk](https://raw.github.com/poloure/rss/master/apk/rss-0.24.8.apk)
+You can find Simple RSS on the [F-Droid repository](https://f-droid.org/).
 
-Development version: [rss-0.24.8.apk](https://raw.github.com/poloure/rss/master/apk/rss-0.24.8.apk)
+Or if you prefer to not use the F-Droid client, you can [download](https://f-droid.org/repository/browse/?fdfilter=simple%20rss&fdid=com.poloure.simplerss) the apk from their repository.
 
 Screenshots
 ===
@@ -25,13 +25,20 @@ Permissions
    <uses-permission android:name="android.permission.INTERNET"/>
 ```
 
-INTERNET - This is to download rss feeds and images from the feeds.
+INTERNET - To download RSS feeds and images from the feeds.
 
 ```
    <uses-permission android:name="android.permission.WAKE_LOCK"/>
 ```
 
-WAKE_LOCK - This is to update feeds when the app is closed mid update and when scheduled to update (in settings).
+WAKE_LOCK - To update feeds when the app is closed mid update and when scheduled to update (can be completely disabled
+in settings).
+
+```
+      <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+```
+
+WRITE_EXTERNAL_STORAGE - Only used when user clicks save image (to external storage).
 
 Building
 ===
