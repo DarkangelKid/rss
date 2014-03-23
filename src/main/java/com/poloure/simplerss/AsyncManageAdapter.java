@@ -59,7 +59,7 @@ class AsyncManageAdapter extends AsyncTask<String, String[][], Void>
       List<IndexItem> indexItems = m_activity.m_index;
       String[][] strings = new String[indexItems.size()][3];
 
-      for(int i = 0; i < indexItems.size(); i++)
+      for(int i = 0; i < indexItems.size(); ++i)
       {
          /* Append the url to the next line. */
          IndexItem item = indexItems.get(i);

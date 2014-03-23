@@ -61,7 +61,7 @@ class ViewNavItem extends View
 
          for(int i = 0; i < m_bitmaps_dark.length; i++)
          {
-            m_bitmaps_dark[i] = BitmapFactory.decodeResource(resources, drawablesDark[i]);
+            m_bitmaps_dark[i]  = BitmapFactory.decodeResource(resources, drawablesDark[i]);
             m_bitmaps_light[i] = BitmapFactory.decodeResource(resources, drawablesLight[i]);
          }
       }

@@ -41,7 +41,7 @@ class AdapterManage extends ArrayAdapter<String[]>
    View getView(int position, View convertView, ViewGroup parent)
    {
       View layout = convertView;
-      if(null == layout)
+      if(layout == null)
       {
          layout = m_inflater.inflate(R.layout.manage_text_view, null, false);
          m_count = (TextView) layout.findViewById(R.id.manage_count);

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<!-- For style guide: https://developer.android.com/design/style/writing.html -->
+
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="en">
+
+   <string name="application_name">Simple Rss</string>
+
+   <string name="empty_tag_list_view">Glisser vers le bas pour rafraichir l\'étiquette</string>
+   <string name="empty_manage_list_view">Appuyer sur le bouton ajouter pour ajouter un flux</string>
+   <string name="empty_favourites_list_view">Faites un appui long sur un flux et selectionner \'favouri\' pour ajouter un favori</string>
+
+   <!-- The All tag.-->
+   <string name="all_tag">Tout</string>
+   <string name="tags">ÉTIQUETTES</string>
+
+   <!-- Navigation drawer toggle accessibility descriptions.-->
+   <string name="drawer_open">Ouvrir le panneau de navigation</string>
+   <string name="drawer_close">Fermer le panneau de navigation</string>
+
+   <!-- ActionBar icon descriptions. -->
+   <string name="ic_action_add">Ajouter</string>
+   <string name="ic_action_unread">Non lu</string>
+   <string name="ic_action_share">Partager</string>
+
+   <!-- ActionBar subtitle for unread items. -->
+   <plurals name="actionbar_subtitle_unread">
+      <item quantity="zero">%d non lu</item>
+      <item quantity="one">%d non lu</item>
+      <item quantity="two">%d non lus</item>
+      <item quantity="few">%d non lus</item>
+      <item quantity="many">%d non lus</item>
+      <item quantity="other">%d non lus</item>
+   </plurals>
+
+   <!-- Pull to Refresh text. -->
+   <string name="pull_label">Glisser vers le bas pour rafraichir</string>
+   <string name="refreshing_text">Recherche d\'articles</string>
+
+   <!-- Add/Edit feed dialog titles. -->
+   <string name="dialog_title_add">Ajouter un flux</string>
+   <string name="dialog_title_edit">Editer le flux</string>
+
+   <!-- Add/Edit feed dialog EditText hints. -->
+   <string name="dialog_feed_url_hint">Url</string>
+   <string name="dialog_feed_tag_hint">Étiquette</string>
+
+   <!-- Add/Edit feed dialog button texts. -->
+   <string name="dialog_cancel">Annuler</string>
+   <string name="dialog_accept">Accepter</string>
+   <string name="dialog_checking">Vérification…</string>
+
+   <!-- Long click feed item context menu. -->
+   <string name="feed_item_context_favourite">Favori</string>
+   <string name="feed_item_context_save_image">Sauvegarder l\'image</string>
+   <string name="feed_item_context_open">Ouvrir</string>
+   <string name="feed_item_context_copy">Copier</string>
+
+   <!-- Toast notifications. -->
+   <string name="toast_url_copied">URL copié :</string>
+   <string name="toast_invalid_feed">Impossible de trouver le flux</string>
+   <string name="toast_added_feed">Ajouté %s</string>
+
+   <!-- Manage context action bar icon descriptions. -->
+   <string name="manage_select_all">Selectionner tout</string>
+   <string name="managed_selected">selectionné</string>
+   <string name="manage_item_clear_content">Supprimer le contenu</string>
+   <string name="manage_item_delete">Supprimer le flux</string>
+
+   <!-- Settings general strings. -->
+   <string name="switch_off">Éteindre</string>
+   <string name="switch_on">Allumer</string>
+
+   <string name="no">Non</string>
+   <string name="yes">Oui</string>
+
+   <!-- Settings automatic Refreshing strings. -->
+   <string name="automatic_refreshing">Rafraichissement automatique</string>
+
+   <string name="automatic_refreshing_interval">Intervalle de rafraichissement</string>
+   <string name="automatic_refreshing_interval_summary">Temps entre 2 rafraichissement successifs</string>
+
+   <!-- Settings images strings. -->
+   <string name="images">Images</string>
+   <string name="images_download">Télécharger des images</string>
+   <string name="images_thumbnail_quality">Qualité des miniatures (WebP)</string>
+   <string name="images_thumbnail_quality_summary">Affecte seulement les nouveaux téléchargements</string>
+
+   <!-- Settings advanced. -->
+   <string name="advanced">Avancé</string>
+   <string name="clear_read_history_title">Effacer l\'historique lu</string>
+   <string name="clear_read_history_summary">Marquer tout comme non lu</string>
+   <string name="clear_read_items_dialog_title">Effacer l\'historique lu</string>
+   <string name="clear_read_items_dialog_summary">Êtes vous sur de vouloir effacer l\'historique lu ?</string>
+
+   <!-- Settings source code. -->
+   <string name="source_code">Code source</string>
+
+   <!-- Save image results -->
+   <string name="image_downloaded_success">Image téléchargée de Images/%s</string>
+   <string name="image_downloaded_failed">Échec du téléchargement de l\'image</string>
+
+</resources>
