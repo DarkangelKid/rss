@@ -27,99 +27,99 @@ import android.widget.TextView;
 
 class DialogEditFeed extends Dialog
 {
-   private final FeedsActivity m_activity;
-   private final int m_pos;
-   private AsyncTask<Void, Void, IndexItem> m_task;
+    private final FeedsActivity m_activity;
+    private final int m_pos;
+    private AsyncTask<Void, Void, IndexItem> m_task;
 
-   private
-   DialogEditFeed(FeedsActivity activity, int position)
-   {
-      super(activity, android.R.style.Theme_Holo_Light_Dialog);
-      m_activity = activity;
-      m_pos = position;
-   }
+    private
+    DialogEditFeed(FeedsActivity activity, int position)
+    {
+        super(activity, android.R.style.Theme_Holo_Light_Dialog);
+        m_activity = activity;
+        m_pos = position;
+    }
 
-   static
-   Dialog newInstance(FeedsActivity activity, int position)
-   {
-      Dialog dialog = new DialogEditFeed(activity, position);
+    static
+    Dialog newInstance(FeedsActivity activity, int position)
+    {
+        Dialog dialog = new DialogEditFeed(activity, position);
 
       /* Get the text resources and set the title of the dialog. */
-      int title = -1 == position ? R.string.dialog_title_add : R.string.dialog_title_edit;
-      dialog.setTitle(activity.getString(title));
+        int title = -1 == position ? R.string.dialog_title_add : R.string.dialog_title_edit;
+        dialog.setTitle(activity.getString(title));
 
-      return dialog;
-   }
+        return dialog;
+    }
 
-   @Override
-   protected
-   void onCreate(Bundle savedInstanceState)
-   {
-      super.onCreate(savedInstanceState);
-      setContentView(R.layout.add_edit_dialog);
+    @Override
+    protected
+    void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.add_edit_dialog);
 
       /* Get the current tags. */
-      int tagListSize = PagerAdapterTags.s_tagList.size();
-      String[] tags = PagerAdapterTags.s_tagList.toArray(new String[tagListSize]);
-      int oneLine = android.R.layout.simple_dropdown_item_1line;
+        int tagListSize = PagerAdapterTags.s_tagList.size();
+        String[] tags = PagerAdapterTags.s_tagList.toArray(new String[tagListSize]);
+        int oneLine = android.R.layout.simple_dropdown_item_1line;
 
       /* Configure the MultiAutoCompleteTextView. */
-      MultiAutoCompleteTextView tagEdit = (MultiAutoCompleteTextView) findViewById(R.id.dialog_tags);
-      tagEdit.setAdapter(new ArrayAdapter<String>(m_activity, oneLine, tags));
-      tagEdit.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
+        MultiAutoCompleteTextView tagEdit = (MultiAutoCompleteTextView) findViewById(R.id.dialog_tags);
+        tagEdit.setAdapter(new ArrayAdapter<String>(m_activity, oneLine, tags));
+        tagEdit.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
 
-      final IndexItem oldItem;
+        final IndexItem oldItem;
 
       /* If this is an edit dialog, set the EditTexts and save the old information. */
-      if(-1 != m_pos)
-      {
-         oldItem = m_activity.m_index.get(m_pos);
+        if(-1 != m_pos)
+        {
+            oldItem = m_activity.m_index.get(m_pos);
 
-         ((TextView) findViewById(R.id.dialog_url)).setText(oldItem.m_url);
-         ((TextView) findViewById(R.id.dialog_tags)).setText(Utilities.formatTags(oldItem.m_tags));
-      }
-      else
-      {
-         oldItem = null;
-      }
+            ((TextView) findViewById(R.id.dialog_url)).setText(oldItem.m_url);
+            ((TextView) findViewById(R.id.dialog_tags)).setText(Utilities.formatTags(oldItem.m_tags));
+        }
+        else
+        {
+            oldItem = null;
+        }
 
-      final Dialog dialog = this;
+        final Dialog dialog = this;
 
-      Button buttonNegative = (Button) findViewById(R.id.dialog_button_negative);
-      final Button buttonPositive = (Button) findViewById(R.id.dialog_button_positive);
+        Button buttonNegative = (Button) findViewById(R.id.dialog_button_negative);
+        final Button buttonPositive = (Button) findViewById(R.id.dialog_button_positive);
 
       /* Set the click listeners. */
-      buttonNegative.setOnClickListener(new View.OnClickListener()
-      {
-         @Override
-         public
-         void onClick(View v)
-         {
+        buttonNegative.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public
+            void onClick(View v)
+            {
             /* If the positive button says checking... */
-            if(buttonPositive.getText().equals(m_activity.getString(R.string.dialog_checking)))
-            {
+                if(buttonPositive.getText().equals(m_activity.getString(R.string.dialog_checking)))
+                {
                /* Cancel the Async task. */
-               if(null != m_task)
-               {
-                  m_task.cancel(true);
-                  buttonPositive.setText(R.string.dialog_accept);
-                  buttonPositive.setEnabled(true);
-               }
+                    if(null != m_task)
+                    {
+                        m_task.cancel(true);
+                        buttonPositive.setText(R.string.dialog_accept);
+                        buttonPositive.setEnabled(true);
+                    }
+                }
+                else
+                {
+                    dismiss();
+                }
             }
-            else
+        });
+        buttonPositive.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public
+            void onClick(View v)
             {
-               dismiss();
+                m_task = AsyncCheckFeed.newInstance(m_activity, dialog, oldItem);
             }
-         }
-      });
-      buttonPositive.setOnClickListener(new View.OnClickListener()
-      {
-         @Override
-         public
-         void onClick(View v)
-         {
-            m_task = AsyncCheckFeed.newInstance(m_activity, dialog, oldItem);
-         }
-      });
-   }
+        });
+    }
 }

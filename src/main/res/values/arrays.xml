@@ -16,37 +16,37 @@
 
 <resources xmlns:tools="http://schemas.android.com/tools" tools:locale="en">
 
-   <string-array name="navigation_titles">
-      <item>Favourites</item>
-      <item>Manage</item>
-      <item>Settings</item>
-   </string-array>
+    <string-array name="navigation_titles">
+        <item>Favourites</item>
+        <item>Manage</item>
+        <item>Settings</item>
+    </string-array>
 
-   <string-array name="refresh_interval_titles">
-      <item>30 minutes</item>
-      <item>1 hour</item>
-      <item>2 hours</item>
-      <item>4 hours</item>
-      <item>8 hours</item>
-      <item>12 hours</item>
-      <item>1 day</item>
-   </string-array>
+    <string-array name="refresh_interval_titles">
+        <item>30 minutes</item>
+        <item>1 hour</item>
+        <item>2 hours</item>
+        <item>4 hours</item>
+        <item>8 hours</item>
+        <item>12 hours</item>
+        <item>1 day</item>
+    </string-array>
 
-   <string-array name="thumbnail_quality">
-      <item>Objectionable</item>
-      <item>Questionable</item>
-      <item>Acceptable</item>
-      <item>Noticeable</item>
-      <item>Comparable</item>
-      <item>Indistinguishable</item>
-      <item>Impeccable</item>
-   </string-array>
+    <string-array name="thumbnail_quality">
+        <item>Objectionable</item>
+        <item>Questionable</item>
+        <item>Acceptable</item>
+        <item>Noticeable</item>
+        <item>Comparable</item>
+        <item>Indistinguishable</item>
+        <item>Impeccable</item>
+    </string-array>
 
-   <string-array name="time_initials">
-      <item>y</item>
-      <item>d</item>
-      <item>h</item>
-      <item>m</item>
-   </string-array>
+    <string-array name="time_initials">
+        <item>y</item>
+        <item>d</item>
+        <item>h</item>
+        <item>m</item>
+    </string-array>
 
 </resources>

@@ -24,30 +24,30 @@ import android.util.AttributeSet;
 public
 class DialogConfirm extends DialogPreference
 {
-   private final FeedsActivity m_activity;
+    private final FeedsActivity m_activity;
 
-   public
-   DialogConfirm(Context context, AttributeSet attrs)
-   {
-      super(context, attrs, android.R.style.Theme_Holo_Light_Dialog);
-      m_activity = (FeedsActivity) context;
-   }
+    public
+    DialogConfirm(Context context, AttributeSet attrs)
+    {
+        super(context, attrs, android.R.style.Theme_Holo_Light_Dialog);
+        m_activity = (FeedsActivity) context;
+    }
 
-   @Override
-   public
-   void onClick(DialogInterface dialog, int which)
-   {
-      if(DialogInterface.BUTTON_POSITIVE == which)
-      {
+    @Override
+    public
+    void onClick(DialogInterface dialog, int which)
+    {
+        if(DialogInterface.BUTTON_POSITIVE == which)
+        {
          /* Reset the read item collection in memory. */
-         AdapterTags.READ_ITEM_TIMES.clear();
-         m_activity.deleteFile(FeedsActivity.READ_ITEMS);
+            AdapterTags.READ_ITEM_TIMES.clear();
+            m_activity.deleteFile(FeedsActivity.READ_ITEMS);
 
          /* We should then refresh the navigation drawer for the unread counts. */
-         AsyncNavigationAdapter.run(m_activity);
+            AsyncNavigationAdapter.run(m_activity);
 
          /* TODO more efficient just to reload get views but invalidate is not working. */
-         AsyncNewTagAdapters.update(m_activity);
-      }
-   }
+            AsyncNewTagAdapters.update(m_activity);
+        }
+    }
 }

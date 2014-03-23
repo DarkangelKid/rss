@@ -15,46 +15,46 @@
 -->
 
 <android.support.v4.widget.DrawerLayout
-   android:id="@+id/drawer_layout"
-   xmlns:android="http://schemas.android.com/apk/res/android"
-   android:layout_width="match_parent"
-   android:layout_height="match_parent">
+    android:id="@+id/drawer_layout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-   <fragment
-      android:id="@+id/fragment_feeds"
-      android:name="com.poloure.simplerss.FragmentFeeds"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"/>
+    <fragment
+        android:id="@+id/fragment_feeds"
+        android:name="com.poloure.simplerss.FragmentFeeds"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
-   <fragment
-      android:id="@+id/fragment_manage"
-      android:name="com.poloure.simplerss.ListFragmentManage"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"/>
+    <fragment
+        android:id="@+id/fragment_manage"
+        android:name="com.poloure.simplerss.ListFragmentManage"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
-   <fragment
-      android:id="@+id/fragment_settings"
-      android:name="com.poloure.simplerss.FragmentSettings"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"/>
+    <fragment
+        android:id="@+id/fragment_settings"
+        android:name="com.poloure.simplerss.FragmentSettings"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
-   <fragment
-      android:id="@+id/fragment_web"
-      android:name="android.webkit.WebViewFragment"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"/>
+    <fragment
+        android:id="@+id/fragment_web"
+        android:name="android.webkit.WebViewFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
-   <fragment
-      android:id="@+id/fragment_favourites"
-      android:name="com.poloure.simplerss.ListFragmentFavourites"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"/>
+    <fragment
+        android:id="@+id/fragment_favourites"
+        android:name="com.poloure.simplerss.ListFragmentFavourites"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
-   <fragment
-      android:id="@+id/fragment_navigation_drawer"
-      android:name="com.poloure.simplerss.FragmentNavigationDrawer"
-      android:layout_width="@dimen/navigation_width"
-      android:layout_height="match_parent"
-      android:layout_gravity="start"/>
+    <fragment
+        android:id="@+id/fragment_navigation_drawer"
+        android:name="com.poloure.simplerss.FragmentNavigationDrawer"
+        android:layout_width="@dimen/navigation_width"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"/>
 
 </android.support.v4.widget.DrawerLayout>

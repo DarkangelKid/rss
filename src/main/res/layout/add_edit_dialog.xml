@@ -19,57 +19,57 @@
               android:layout_height="match_parent"
               android:orientation="vertical">
 
-   <LinearLayout
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:orientation="vertical"
-      android:padding="8dp">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="8dp">
 
-      <EditText
-         android:id="@+id/dialog_url"
-         android:layout_width="match_parent"
-         android:layout_height="wrap_content"
-         android:drawablePadding="8dp"
-         android:drawableStart="@drawable/ic_action_web_site"
-         android:hint="@string/dialog_feed_url_hint"
-         android:inputType="textUri|textNoSuggestions"
-         android:paddingBottom="8dp"
-         android:paddingTop="8dp"
-         android:singleLine="true"/>
+        <EditText
+            android:id="@+id/dialog_url"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawablePadding="8dp"
+            android:drawableStart="@drawable/ic_action_web_site"
+            android:hint="@string/dialog_feed_url_hint"
+            android:inputType="textUri|textNoSuggestions"
+            android:paddingBottom="8dp"
+            android:paddingTop="8dp"
+            android:singleLine="true"/>
 
-      <MultiAutoCompleteTextView
-         android:id="@+id/dialog_tags"
-         android:layout_width="match_parent"
-         android:layout_height="wrap_content"
-         android:drawablePadding="8dp"
-         android:drawableStart="@drawable/ic_action_labels"
-         android:hint="@string/dialog_feed_tag_hint"
-         android:inputType="textCapWords|textNoSuggestions"
-         android:paddingTop="8dp"
-         android:singleLine="true"/>
-   </LinearLayout>
+        <MultiAutoCompleteTextView
+            android:id="@+id/dialog_tags"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawablePadding="8dp"
+            android:drawableStart="@drawable/ic_action_labels"
+            android:hint="@string/dialog_feed_tag_hint"
+            android:inputType="textCapWords|textNoSuggestions"
+            android:paddingTop="8dp"
+            android:singleLine="true"/>
+    </LinearLayout>
 
-   <LinearLayout
-      style="?android:attr/buttonBarStyle"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content">
+    <LinearLayout
+        style="?android:attr/buttonBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-      <Button
-         android:id="@+id/dialog_button_negative"
-         style="?android:attr/buttonBarButtonStyle"
-         android:layout_width="0px"
-         android:layout_height="wrap_content"
-         android:layout_weight="0.5"
-         android:text="@string/dialog_cancel"/>
+        <Button
+            android:id="@+id/dialog_button_negative"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:text="@string/dialog_cancel"/>
 
-      <Button
-         android:id="@+id/dialog_button_positive"
-         style="?android:attr/buttonBarButtonStyle"
-         android:layout_width="0px"
-         android:layout_height="wrap_content"
-         android:layout_weight="0.5"
-         android:text="@string/dialog_accept"/>
-   </LinearLayout>
+        <Button
+            android:id="@+id/dialog_button_positive"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:text="@string/dialog_accept"/>
+    </LinearLayout>
 
 </LinearLayout>
 

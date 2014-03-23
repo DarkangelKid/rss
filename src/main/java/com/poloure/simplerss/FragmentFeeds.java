@@ -37,90 +37,91 @@ import static com.poloure.simplerss.Constants.*;
 public
 class FragmentFeeds extends Fragment
 {
-   private static
-   class RefreshListener implements OnRefreshListener
-   {
-      private final FeedsActivity m_activity;
+    private static
+    class RefreshListener implements OnRefreshListener
+    {
+        private final FeedsActivity m_activity;
 
-      RefreshListener(FeedsActivity activity)
-      {
-         m_activity = activity;
-      }
+        RefreshListener(FeedsActivity activity)
+        {
+            m_activity = activity;
+        }
 
-      @Override
-      public
-      void onRefreshStarted(View view)
-      {
-         Intent intent = new Intent(m_activity, ServiceUpdate.class);
-         intent.putExtra(EXTRA_PAGE_NAME, s_viewPager.getCurrentItem());
-         m_activity.startService(intent);
-      }
-   }
+        @Override
+        public
+        void onRefreshStarted(View view)
+        {
+            Intent intent = new Intent(m_activity, ServiceUpdate.class);
+            intent.putExtra(EXTRA_PAGE_NAME, s_viewPager.getCurrentItem());
+            m_activity.startService(intent);
+        }
+    }
 
-   static
-   class OnPageChangeListener extends ViewPager.SimpleOnPageChangeListener
-   {
-      @Override
-      public
-      void onPageSelected(int position)
-      {
-         Utilities.setTitlesAndDrawerAndPage(null, -10);
-      }
-   }
+    static final String EXTRA_PAGE_NAME = "GROUP_NUMBER";
+    private static final float PULL_DISTANCE = 0.5F;
 
-   static final String EXTRA_PAGE_NAME = "GROUP_NUMBER";
-   private static final float PULL_DISTANCE = 0.5F;
+    static
+    ListView getCurrentTagListView()
+    {
+        int currentPage = s_viewPager.getCurrentItem();
+        return getTagListView(currentPage);
+    }
 
-   ListView getCurrentTagListView()
-   {
-      int currentPage = s_viewPager.getCurrentItem();
-      return getTagListView(currentPage);
-   }
+    static
+    ListView getTagListView(int page)
+    {
+        String tag = "android:switcher:" + R.id.viewpager + ':' + page;
+        FragmentTag fragment = (FragmentTag) s_fragmentManager.findFragmentByTag(tag);
+        return fragment.getListView();
+    }
 
-   static
-   ListView getTagListView(int page)
-   {
-      String tag = "android:switcher:" + R.id.viewpager + ':' + page;
-      FragmentTag fragment = (FragmentTag) s_fragmentManager.findFragmentByTag(tag);
-      return fragment.getListView();
-   }
+    @Override
+    public
+    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+    {
+        super.onCreateView(inflater, container, savedInstanceState);
 
-   @Override
-   public
-   View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
-   {
-      super.onCreateView(inflater, container, savedInstanceState);
+        PullToRefreshLayout layout = (PullToRefreshLayout) inflater.inflate(R.layout.viewpager, container, false);
 
-      PullToRefreshLayout layout = (PullToRefreshLayout) inflater.inflate(R.layout.viewpager, container, false);
+        s_viewPager = (ViewPager) layout.findViewById(R.id.viewpager);
 
-      s_viewPager = (ViewPager) layout.findViewById(R.id.viewpager);
-
-      ActionBarPullToRefresh.from(getActivity())
-            .allChildrenArePullable()
-            .options(Options.create().scrollDistance(PULL_DISTANCE).build())
-            .useViewDelegate(ViewPager.class, new ViewPagerDelegate())
-            .listener(new RefreshListener((FeedsActivity) getActivity()))
-            .setup(layout);
+        ActionBarPullToRefresh.from(getActivity())
+                .allChildrenArePullable()
+                .options(Options.create().scrollDistance(PULL_DISTANCE).build())
+                .useViewDelegate(ViewPager.class, new ViewPagerDelegate())
+                .listener(new RefreshListener((FeedsActivity) getActivity()))
+                .setup(layout);
 
       /* Inflate and configure the ViewPager. */
-      s_viewPager.setOffscreenPageLimit(128);
-      s_viewPager.setOnPageChangeListener(new OnPageChangeListener());
-      return layout;
-   }
+        s_viewPager.setOffscreenPageLimit(128);
+        s_viewPager.setOnPageChangeListener(new OnPageChangeListener());
+        return layout;
+    }
 
-   @Override
-   public
-   void onActivityCreated(Bundle savedInstanceState)
-   {
-      super.onActivityCreated(savedInstanceState);
+    @Override
+    public
+    void onActivityCreated(Bundle savedInstanceState)
+    {
+        super.onActivityCreated(savedInstanceState);
 
-      s_viewPager.setAdapter(new PagerAdapterTags(s_fragmentManager, s_activity, s_activity.m_index));
-      Utilities.setTitlesAndDrawerAndPage(null, -10);
+        s_viewPager.setAdapter(new PagerAdapterTags(s_fragmentManager, s_activity, s_activity.m_index));
+        Utilities.setTitlesAndDrawerAndPage(null, -10);
 
-      WebView webView = s_fragmentWeb.getWebView();
-      WebSettings settings = webView.getSettings();
-      settings.setBuiltInZoomControls(true);
-      settings.setDisplayZoomControls(false);
-      settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
-   }
+        WebView webView = s_fragmentWeb.getWebView();
+        WebSettings settings = webView.getSettings();
+        settings.setBuiltInZoomControls(true);
+        settings.setDisplayZoomControls(false);
+        settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+    }
+
+    static
+    class OnPageChangeListener extends ViewPager.SimpleOnPageChangeListener
+    {
+        @Override
+        public
+        void onPageSelected(int position)
+        {
+            Utilities.setTitlesAndDrawerAndPage(null, -10);
+        }
+    }
 }

@@ -18,100 +18,100 @@
 
 <resources xmlns:tools="http://schemas.android.com/tools" tools:locale="en">
 
-   <string name="application_name">Simple Rss</string>
+    <string name="application_name">Simple Rss</string>
 
-   <string name="empty_tag_list_view">Pull down to refresh tag</string>
-   <string name="empty_manage_list_view">Press the add button to add a feed</string>
-   <string name="empty_favourites_list_view">Long press a feed item and select \'favourite\' to add a favourite</string>
+    <string name="empty_tag_list_view">Pull down to refresh tag</string>
+    <string name="empty_manage_list_view">Press the add button to add a feed</string>
+    <string name="empty_favourites_list_view">Long press a feed item and select \'favourite\' to add a favourite</string>
 
-   <!-- The All tag.-->
-   <string name="all_tag">All</string>
-   <string name="tags">TAGS</string>
+    <!-- The All tag.-->
+    <string name="all_tag">All</string>
+    <string name="tags">TAGS</string>
 
-   <!-- Navigation drawer toggle accessibility descriptions.-->
-   <string name="drawer_open">Open navigation drawer</string>
-   <string name="drawer_close">Close navigation drawer</string>
+    <!-- Navigation drawer toggle accessibility descriptions.-->
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
 
-   <!-- ActionBar icon descriptions. -->
-   <string name="ic_action_add">Add</string>
-   <string name="ic_action_unread">Unread</string>
-   <string name="ic_action_share">Share</string>
+    <!-- ActionBar icon descriptions. -->
+    <string name="ic_action_add">Add</string>
+    <string name="ic_action_unread">Unread</string>
+    <string name="ic_action_share">Share</string>
 
-   <!-- ActionBar subtitle for unread items. -->
-   <plurals name="actionbar_subtitle_unread">
-      <item quantity="zero">%d unread</item>
-      <item quantity="one">%d unread</item>
-      <item quantity="two">%d unread</item>
-      <item quantity="few">%d unread</item>
-      <item quantity="many">%d unread</item>
-      <item quantity="other">%d unread</item>
-   </plurals>
+    <!-- ActionBar subtitle for unread items. -->
+    <plurals name="actionbar_subtitle_unread">
+        <item quantity="zero">%d unread</item>
+        <item quantity="one">%d unread</item>
+        <item quantity="two">%d unread</item>
+        <item quantity="few">%d unread</item>
+        <item quantity="many">%d unread</item>
+        <item quantity="other">%d unread</item>
+    </plurals>
 
-   <!-- Pull to Refresh text. -->
-   <string name="pull_label">Swipe down to refresh</string>
-   <string name="refreshing_text">Checking for items</string>
+    <!-- Pull to Refresh text. -->
+    <string name="pull_label">Swipe down to refresh</string>
+    <string name="refreshing_text">Checking for items</string>
 
-   <!-- Add/Edit feed dialog titles. -->
-   <string name="dialog_title_add">Add feed</string>
-   <string name="dialog_title_edit">Edit feed</string>
+    <!-- Add/Edit feed dialog titles. -->
+    <string name="dialog_title_add">Add feed</string>
+    <string name="dialog_title_edit">Edit feed</string>
 
-   <!-- Add/Edit feed dialog EditText hints. -->
-   <string name="dialog_feed_url_hint">Url</string>
-   <string name="dialog_feed_tag_hint">Tags</string>
+    <!-- Add/Edit feed dialog EditText hints. -->
+    <string name="dialog_feed_url_hint">Url</string>
+    <string name="dialog_feed_tag_hint">Tags</string>
 
-   <!-- Add/Edit feed dialog button texts. -->
-   <string name="dialog_cancel">Cancel</string>
-   <string name="dialog_accept">Accept</string>
-   <string name="dialog_checking">Checking…</string>
+    <!-- Add/Edit feed dialog button texts. -->
+    <string name="dialog_cancel">Cancel</string>
+    <string name="dialog_accept">Accept</string>
+    <string name="dialog_checking">Checking…</string>
 
-   <!-- Long click feed item context menu. -->
-   <string name="feed_item_context_favourite">Favourite</string>
-   <string name="feed_item_context_save_image">Save Image</string>
-   <string name="feed_item_context_open">Open</string>
-   <string name="feed_item_context_copy">Copy</string>
+    <!-- Long click feed item context menu. -->
+    <string name="feed_item_context_favourite">Favourite</string>
+    <string name="feed_item_context_save_image">Save Image</string>
+    <string name="feed_item_context_open">Open</string>
+    <string name="feed_item_context_copy">Copy</string>
 
-   <!-- Toast notifications. -->
-   <string name="toast_url_copied">URL copied:</string>
-   <string name="toast_invalid_feed">Can’t find feed</string>
-   <string name="toast_added_feed">Added %s</string>
+    <!-- Toast notifications. -->
+    <string name="toast_url_copied">URL copied:</string>
+    <string name="toast_invalid_feed">Can’t find feed</string>
+    <string name="toast_added_feed">Added %s</string>
 
-   <!-- Manage context action bar icon descriptions. -->
-   <string name="manage_select_all">Select all</string>
-   <string name="managed_selected">selected</string>
-   <string name="manage_item_clear_content">Delete content</string>
-   <string name="manage_item_delete">Delete feed</string>
+    <!-- Manage context action bar icon descriptions. -->
+    <string name="manage_select_all">Select all</string>
+    <string name="managed_selected">selected</string>
+    <string name="manage_item_clear_content">Delete content</string>
+    <string name="manage_item_delete">Delete feed</string>
 
-   <!-- Settings general strings. -->
-   <string name="switch_off">Off</string>
-   <string name="switch_on">On</string>
+    <!-- Settings general strings. -->
+    <string name="switch_off">Off</string>
+    <string name="switch_on">On</string>
 
-   <string name="no">No</string>
-   <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="yes">Yes</string>
 
-   <!-- Settings automatic Refreshing strings. -->
-   <string name="automatic_refreshing">Automatic refreshing</string>
+    <!-- Settings automatic Refreshing strings. -->
+    <string name="automatic_refreshing">Automatic refreshing</string>
 
-   <string name="automatic_refreshing_interval">Refresh interval</string>
-   <string name="automatic_refreshing_interval_summary">Time between two consecutive refreshes</string>
+    <string name="automatic_refreshing_interval">Refresh interval</string>
+    <string name="automatic_refreshing_interval_summary">Time between two consecutive refreshes</string>
 
-   <!-- Settings images strings. -->
-   <string name="images">Images</string>
-   <string name="images_download">Download images</string>
-   <string name="images_thumbnail_quality">Thumbnail quality (WebP)</string>
-   <string name="images_thumbnail_quality_summary">Only affects new downloads</string>
+    <!-- Settings images strings. -->
+    <string name="images">Images</string>
+    <string name="images_download">Download images</string>
+    <string name="images_thumbnail_quality">Thumbnail quality (WebP)</string>
+    <string name="images_thumbnail_quality_summary">Only affects new downloads</string>
 
-   <!-- Settings advanced. -->
-   <string name="advanced">Advanced</string>
-   <string name="clear_read_history_title">Clear read history</string>
-   <string name="clear_read_history_summary">Set all items to unread</string>
-   <string name="clear_read_items_dialog_title">Clear read history</string>
-   <string name="clear_read_items_dialog_summary">Are you sure you want to clear read history?</string>
+    <!-- Settings advanced. -->
+    <string name="advanced">Advanced</string>
+    <string name="clear_read_history_title">Clear read history</string>
+    <string name="clear_read_history_summary">Set all items to unread</string>
+    <string name="clear_read_items_dialog_title">Clear read history</string>
+    <string name="clear_read_items_dialog_summary">Are you sure you want to clear read history?</string>
 
-   <!-- Settings source code. -->
-   <string name="source_code">Source code</string>
+    <!-- Settings source code. -->
+    <string name="source_code">Source code</string>
 
-   <!-- Save image results -->
-   <string name="image_downloaded_success">Downloaded image to Pictures/%s</string>
-   <string name="image_downloaded_failed">Image download failed</string>
+    <!-- Save image results -->
+    <string name="image_downloaded_success">Downloaded image to Pictures/%s</string>
+    <string name="image_downloaded_failed">Image download failed</string>
 
 </resources>

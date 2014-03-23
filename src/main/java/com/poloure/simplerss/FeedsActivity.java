@@ -34,7 +34,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Surface;
 import android.webkit.WebView;
-import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -46,312 +45,279 @@ import static com.poloure.simplerss.Constants.*;
 public
 class FeedsActivity extends Activity
 {
-   static final String READ_ITEMS = "read_items.txt";
-   static final String INDEX = "index.txt";
-   static final String FAVOURITES = "favourites.txt";
-   private static final int ALARM_SERVICE_START = 1;
-   private static final int ALARM_SERVICE_STOP = 0;
-   private static final int MINUTE_VALUE = 60000;
-   private final BroadcastReceiver m_broadcastReceiver = new BroadcastReceiver()
-   {
-      @Override
-      public
-      void onReceive(Context context, Intent intent)
-      {
-         if(null != s_activity)
-         {
-            AsyncNewTagAdapters.update(s_activity);
+    static final String READ_ITEMS = "read_items.txt";
+    static final String INDEX = "index.txt";
+    static final String FAVOURITES = "favourites.txt";
+    private static final int ALARM_SERVICE_START = 1;
+    private static final int ALARM_SERVICE_STOP = 0;
+    private static final int MINUTE_VALUE = 60000;
+    private final BroadcastReceiver m_broadcastReceiver = new BroadcastReceiver()
+    {
+        @Override
+        public
+        void onReceive(Context context, Intent intent)
+        {
+            if(null != s_activity)
+            {
+                AsyncNewTagAdapters.update(s_activity);
 
             /* Manage adapter is updated every time it is shown but in case the user switched to the
             manage fragment mid refresh. */
-            AsyncManageAdapter.run(s_activity);
-            AsyncNavigationAdapter.run(s_activity);
+                AsyncManageAdapter.run(s_activity);
+                AsyncNavigationAdapter.run(s_activity);
 
-            s_pullToRefreshLayout.setRefreshComplete();
-         }
-      }
-   };
-   boolean m_showMenuItems = true;
-   List<IndexItem> m_index;
+                s_pullToRefreshLayout.setRefreshComplete();
+            }
+        }
+    };
+    boolean m_showMenuItems = true;
+    List<IndexItem> m_index;
 
-   static
-   void gotoLatestUnread(ListView listView)
-   {
-      AdapterTags listAdapter = (AdapterTags) listView.getAdapter();
+    /* Called only when no remnants of the Activity exist. */
+    @Override
+    public
+    void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
 
-      /* Create a copy of the item times. */
-      List<Long> times = new ArrayList<Long>(listAdapter.m_itemTimes);
-      times.removeAll(AdapterTags.READ_ITEM_TIMES);
+        setContentView(R.layout.activity_main);
 
-      if(times.isEmpty())
-      {
-         listView.setSelection(0);
-      }
-      else
-      {
-         int index = listAdapter.m_itemTimes.indexOf(times.get(times.size() - 1));
-         listView.setSelection(index);
-      }
-   }
+        saveInitialConstants(this);
 
-   static
-   boolean usingTwoPaneLayout()
-   {
-      return 600 <= s_displayMetrics.widthPixels / s_displayMetrics.density && isHorizontal();
-   }
+        RssLogger.setup();
 
-   private static
-   boolean isHorizontal()
-   {
-      Display display = s_windowManager.getDefaultDisplay();
-      int rotation = display.getRotation();
-      return Surface.ROTATION_90 == rotation || Surface.ROTATION_270 == rotation;
-   }
+        /* Load the index. */
+        ObjectIO indexReader = new ObjectIO(this, INDEX);
+        m_index = (List<IndexItem>) indexReader.readCollection(ArrayList.class);
 
-   /* Called only when no remnants of the Activity exist. */
-   @Override
-   public
-   void onCreate(Bundle savedInstanceState)
-   {
-      super.onCreate(savedInstanceState);
+        /* Load the read items to the tags Adapter. */
+        ObjectIO readItemReader = new ObjectIO(this, READ_ITEMS);
+        Collection<Long> set = (HashSet<Long>) readItemReader.readCollection(HashSet.class);
+        AdapterTags.READ_ITEM_TIMES.addAll(set);
 
-      setContentView(R.layout.activity_main);
+        s_fragmentDrawer.setUp(s_drawerLayout);
 
-      saveInitialConstants(this);
+        setTopOffset(this);
 
-      RssLogger.setup();
+        if(null == savedInstanceState)
+        {
+            /* Create and hide the fragments that go inside the content frame. */
+            if(!usingTwoPaneLayout())
+            {
+                hideFragments(s_fragmentWeb);
+            }
 
-      /* Load the index. */
-      ObjectIO indexReader = new ObjectIO(this, INDEX);
-      m_index = (List<IndexItem>) indexReader.readCollection(ArrayList.class);
+            hideFragments(s_fragmentFavourites, s_fragmentManage, s_fragmentSettings);
+            s_fragmentManager.executePendingTransactions();
+        }
+    }
 
-      /* Load the read items to the tags Adapter. */
-      ObjectIO readItemReader = new ObjectIO(this, READ_ITEMS);
-      Collection<Long> set = (HashSet<Long>) readItemReader.readCollection(HashSet.class);
-      AdapterTags.READ_ITEM_TIMES.addAll(set);
+    static
+    boolean usingTwoPaneLayout()
+    {
+        return 600 <= s_displayMetrics.widthPixels / s_displayMetrics.density && isHorizontal();
+    }
 
-      s_fragmentDrawer.setUp(s_drawerLayout);
+    private static
+    boolean isHorizontal()
+    {
+        Display display = s_windowManager.getDefaultDisplay();
+        int rotation = display.getRotation();
+        return Surface.ROTATION_90 == rotation || Surface.ROTATION_270 == rotation;
+    }
 
-      setTopOffset(this);
+    @Override
+    protected
+    void onPostCreate(Bundle savedInstanceState)
+    {
+        super.onPostCreate(savedInstanceState);
+        saveViews();
+    }
 
-      if(null == savedInstanceState)
-      {
-         /* Create and hide the fragments that go inside the content frame. */
-         if(!usingTwoPaneLayout())
-         {
-            hideFragments(s_fragmentWeb);
-         }
-
-         hideFragments(s_fragmentFavourites, s_fragmentManage, s_fragmentSettings);
-         s_fragmentManager.executePendingTransactions();
-      }
-   }
-
-   @Override
-   protected
-   void onPostCreate(Bundle savedInstanceState)
-   {
-      super.onPostCreate(savedInstanceState);
-      saveViews();
-   }
-
-   /* Stop the alarm service and reset the time to 0 every time the user sees the activity. */
-   @Override
-   protected
-   void onResume()
-   {
-      super.onResume();
-      setServiceIntent(ALARM_SERVICE_STOP);
-      registerReceiver(m_broadcastReceiver, new IntentFilter(ServiceUpdate.BROADCAST_ACTION));
+    /* Stop the alarm service and reset the time to 0 every time the user sees the activity. */
+    @Override
+    protected
+    void onResume()
+    {
+        super.onResume();
+        setServiceIntent(ALARM_SERVICE_STOP);
+        registerReceiver(m_broadcastReceiver, new IntentFilter(ServiceUpdate.BROADCAST_ACTION));
 
       /* Update the navigation adapter. This updates the subtitle and title. */
-      if(s_fragmentWeb.isHidden())
-      {
-         AsyncNavigationAdapter.run(this);
-      }
+        if(s_fragmentWeb.isHidden())
+        {
+            AsyncNavigationAdapter.run(this);
+        }
 
-      if(!s_pullToRefreshLayout.isRefreshing() && isServiceRunning())
-      {
-         s_pullToRefreshLayout.setRefreshing(true);
-      }
-   }
+        if(!s_pullToRefreshLayout.isRefreshing() && isServiceRunning())
+        {
+            s_pullToRefreshLayout.setRefreshing(true);
+        }
+    }
 
-   private
-   boolean isServiceRunning()
-   {
-      ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-      for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE))
-      {
-         if(ServiceUpdate.class.getName().equals(service.service.getClassName()))
-         {
-            return true;
-         }
-      }
-      return false;
-   }
+    @Override
+    protected
+    void onPause()
+    {
+        super.onPause();
+        unregisterReceiver(m_broadcastReceiver);
+    }
 
-   @Override
-   protected
-   void onPause()
-   {
-      super.onPause();
-      unregisterReceiver(m_broadcastReceiver);
-   }
-
-   /* Start the alarm service every time the activity is not visible. */
-   @Override
-   protected
-   void onStop()
-   {
-      super.onStop();
+    /* Start the alarm service every time the activity is not visible. */
+    @Override
+    protected
+    void onStop()
+    {
+        super.onStop();
 
       /* Write the read items set to file. */
-      ObjectIO out = new ObjectIO(this, READ_ITEMS);
-      out.write(AdapterTags.READ_ITEM_TIMES);
+        ObjectIO out = new ObjectIO(this, READ_ITEMS);
+        out.write(AdapterTags.READ_ITEM_TIMES);
 
       /* Write the index file to disk. */
-      out.setNewFileName(INDEX);
-      out.write(m_index);
+        out.setNewFileName(INDEX);
+        out.write(m_index);
 
       /* Write the favourites list to file. */
-      out.setNewFileName(FAVOURITES);
-      out.write(FragmentTag.getFavouritesAdapter(this).m_feedItems);
+        out.setNewFileName(FAVOURITES);
+        out.write(FragmentTag.getFavouritesAdapter(this).m_feedItems);
 
-      setServiceIntent(ALARM_SERVICE_START);
-   }
+        setServiceIntent(ALARM_SERVICE_START);
+    }
 
-   @Override
-   public
-   void onConfigurationChanged(Configuration newConfig)
-   {
-      super.onConfigurationChanged(newConfig);
+    @Override
+    public
+    void onConfigurationChanged(Configuration newConfig)
+    {
+        super.onConfigurationChanged(newConfig);
 
-      if(600 <= newConfig.screenWidthDp && Configuration.ORIENTATION_LANDSCAPE == newConfig.orientation)
-      {
-         showFragments(s_fragmentWeb);
-      }
-      else if(600 <= newConfig.screenWidthDp && Configuration.ORIENTATION_PORTRAIT == newConfig.orientation)
-      {
-         hideFragments(s_fragmentWeb);
-      }
+        if(600 <= newConfig.screenWidthDp && Configuration.ORIENTATION_LANDSCAPE == newConfig.orientation)
+        {
+            showFragments(s_fragmentWeb);
+        }
+        else if(600 <= newConfig.screenWidthDp && Configuration.ORIENTATION_PORTRAIT == newConfig.orientation)
+        {
+            hideFragments(s_fragmentWeb);
+        }
 
       /* Update the padding of the content view. */
-      setTopOffset(this);
-   }
+        setTopOffset(this);
+    }
 
-   @Override
-   public
-   boolean onOptionsItemSelected(MenuItem item)
-   {
-      if(android.R.id.home == item.getItemId() && s_fragmentWeb.isVisible())
-      {
-         onBackPressed();
-         return true;
-      }
-      return s_drawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
-   }
+    @Override
+    public
+    void onBackPressed()
+    {
+        if(s_fragmentWeb.isVisible() && !usingTwoPaneLayout())
+        {
+            super.onBackPressed();
 
-   @Override
-   public
-   boolean onPrepareOptionsMenu(Menu menu)
-   {
-      boolean web = s_fragmentWeb.isVisible() && !usingTwoPaneLayout();
-      boolean feed = s_fragmentFeeds.isVisible();
-      boolean manage = s_fragmentManage.isVisible();
+            s_fragmentManager.executePendingTransactions();
+            Utilities.setTitlesAndDrawerAndPage(null, -10);
 
-      menu.getItem(0).setVisible(!web).setEnabled(m_showMenuItems && (feed || manage));
-      menu.getItem(1).setVisible(!web).setEnabled(m_showMenuItems && feed);
-      menu.getItem(2).setVisible(web);
-
-      return super.onPrepareOptionsMenu(menu);
-   }
-
-   /* TODO: Needs a method of checking if the service is running. */
-   @Override
-   public
-   boolean onCreateOptionsMenu(Menu menu)
-   {
-      if(0 == menu.size())
-      {
-         getMenuInflater().inflate(R.menu.action_bar_menu, menu);
-      }
-
-      return super.onCreateOptionsMenu(menu);
-   }
-
-   private
-   void setServiceIntent(int state)
-   {
-      /* Load the ManageFeedsRefresh boolean value from settings. */
-      SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-
-      if(!pref.getBoolean("refreshing_enabled", false) && ALARM_SERVICE_START == state)
-      {
-         return;
-      }
-
-      /* Create intent, turn into pending intent, and get the alarm manager. */
-      Intent intent = new Intent(this, ServiceUpdate.class);
-
-      PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, 0);
-      AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
-
-      /* Depending on the state string, start or stop the service. */
-      if(ALARM_SERVICE_START == state)
-      {
-         String intervalString = pref.getString("refresh_interval", "120");
-
-         long interval = Long.parseLong(intervalString) * MINUTE_VALUE;
-         long next = System.currentTimeMillis() + interval;
-         am.setRepeating(AlarmManager.RTC_WAKEUP, next, interval, pendingIntent);
-      }
-      else if(ALARM_SERVICE_STOP == state)
-      {
-         am.cancel(pendingIntent);
-      }
-   }
-
-   @Override
-   public
-   void onBackPressed()
-   {
-      if(s_fragmentWeb.isVisible() && !usingTwoPaneLayout())
-      {
-         super.onBackPressed();
-
-         s_fragmentManager.executePendingTransactions();
-         Utilities.setTitlesAndDrawerAndPage(null, -10);
-
-         s_drawerToggle.setDrawerIndicatorEnabled(true);
-         s_drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-         invalidateOptionsMenu();
+            s_drawerToggle.setDrawerIndicatorEnabled(true);
+            s_drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+            invalidateOptionsMenu();
 
          /* Reset the WebView for the next item. */
-         WebView webView = s_fragmentWeb.getWebView();
-         webView.loadUrl("about:blank");
-      }
-      else
-      {
-         super.onBackPressed();
-      }
-   }
+            WebView webView = s_fragmentWeb.getWebView();
+            webView.loadUrl("about:blank");
+        }
+        else
+        {
+            super.onBackPressed();
+        }
+    }
 
-   public
-   void onAddClick(MenuItem menuItem)
-   {
-      DialogEditFeed.newInstance(this, -1).show();
-   }
+    /* TODO: Needs a method of checking if the service is running. */
+    @Override
+    public
+    boolean onCreateOptionsMenu(Menu menu)
+    {
+        if(0 == menu.size())
+        {
+            getMenuInflater().inflate(R.menu.action_bar_menu, menu);
+        }
 
-   public
-   void onUnreadClick(MenuItem menuItem)
-   {
-      if(null != s_fragmentFeeds)
-      {
-         ListView listView = s_fragmentFeeds.getCurrentTagListView();
-         if(null != listView)
-         {
-            gotoLatestUnread(listView);
-         }
-      }
-   }
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public
+    boolean onPrepareOptionsMenu(Menu menu)
+    {
+        boolean web = s_fragmentWeb.isVisible() && !usingTwoPaneLayout();
+        boolean feed = s_fragmentFeeds.isVisible();
+        boolean manage = s_fragmentManage.isVisible();
+
+        menu.getItem(0).setVisible(!web).setEnabled(m_showMenuItems && (feed || manage));
+        menu.getItem(1).setVisible(!web).setEnabled(m_showMenuItems && feed);
+        menu.getItem(2).setVisible(web);
+
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public
+    boolean onOptionsItemSelected(MenuItem item)
+    {
+        if(android.R.id.home == item.getItemId() && s_fragmentWeb.isVisible())
+        {
+            onBackPressed();
+            return true;
+        }
+        return s_drawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
+    }
+
+    private
+    void setServiceIntent(int state)
+    {
+      /* Load the ManageFeedsRefresh boolean value from settings. */
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+
+        if(!pref.getBoolean("refreshing_enabled", false) && ALARM_SERVICE_START == state)
+        {
+            return;
+        }
+
+      /* Create intent, turn into pending intent, and get the alarm manager. */
+        Intent intent = new Intent(this, ServiceUpdate.class);
+
+        PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, 0);
+        AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+
+      /* Depending on the state string, start or stop the service. */
+        if(ALARM_SERVICE_START == state)
+        {
+            String intervalString = pref.getString("refresh_interval", "120");
+
+            long interval = Long.parseLong(intervalString) * MINUTE_VALUE;
+            long next = System.currentTimeMillis() + interval;
+            am.setRepeating(AlarmManager.RTC_WAKEUP, next, interval, pendingIntent);
+        }
+        else if(ALARM_SERVICE_STOP == state)
+        {
+            am.cancel(pendingIntent);
+        }
+    }
+
+    private
+    boolean isServiceRunning()
+    {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE))
+        {
+            if(ServiceUpdate.class.getName().equals(service.service.getClassName()))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public
+    void onAddClick(MenuItem menuItem)
+    {
+        DialogEditFeed.newInstance(this, -1).show();
+    }
 }

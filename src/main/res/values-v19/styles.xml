@@ -16,10 +16,10 @@
 
 <resources>
 
-   <style name="Theme.FeedsActivity" parent="android:Theme.Holo.Light">
-      <item name="ptrHeaderStyle">@style/Widget.Custom.PtrHeader</item>
-      <item name="android:actionBarStyle">@style/Widget.FeedsActivity.ActionBar</item>
-      <item name="android:windowTranslucentNavigation">true</item>
-   </style>
+    <style name="Theme.FeedsActivity" parent="android:Theme.Holo.Light">
+        <item name="ptrHeaderStyle">@style/Widget.Custom.PtrHeader</item>
+        <item name="android:actionBarStyle">@style/Widget.FeedsActivity.ActionBar</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+    </style>
 
 </resources>

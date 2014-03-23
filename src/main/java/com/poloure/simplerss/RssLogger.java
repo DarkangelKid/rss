@@ -21,13 +21,13 @@ import java.util.logging.Logger;
 
 class RssLogger
 {
-   static final String READ_CLASS_NOT_FOUND = "Tried to read a unknown class: ";
+    static final String READ_CLASS_NOT_FOUND = "Tried to read a unknown class: ";
 
-   static
-   void setup()
-   {
-      // Get the global logger to configure it
-      Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-      logger.setLevel(Level.INFO);
-   }
+    static
+    void setup()
+    {
+        // Get the global logger to configure it
+        Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+        logger.setLevel(Level.INFO);
+    }
 }

@@ -27,94 +27,98 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+public
 class AdapterTags extends BaseAdapter
 {
-   static final Set<Long> READ_ITEM_TIMES = Collections.synchronizedSet(new HashSet<Long>(0));
-   static final int TYPE_PLAIN = 0;
-   static final int TYPE_IMAGE = 1;
-   static final int TYPE_IMAGE_SANS_DESCRIPTION = 2;
-   static final int TYPE_PLAIN_SANS_DESCRIPTION = 3;
-   static final float READ_OPACITY = 0.5F;
-   private final Context m_context;
-   /* We use indexOf on this Long List so it can not be a Set. */
-   final List<Long> m_itemTimes = new ArrayList<Long>(0);
-   final List<FeedItem> m_feedItems = new ArrayList<FeedItem>(0);
+    static final Set<Long> READ_ITEM_TIMES = Collections.synchronizedSet(new HashSet<Long>(0));
+    static final int TYPE_PLAIN = 0;
+    static final int TYPE_IMAGE = 1;
+    static final int TYPE_IMAGE_SANS_DESCRIPTION = 2;
+    static final int TYPE_PLAIN_SANS_DESCRIPTION = 3;
+    static final float READ_OPACITY = 0.5F;
+    /* We use indexOf on this Long List so it can not be a Set. */
+    public final List<Long> m_itemTimes = new ArrayList<Long>(0);
+    final List<FeedItem> m_feedItems = new ArrayList<FeedItem>(0);
+    private final Context m_context;
 
-   AdapterTags(Context context)
-   {
-      m_context = context;
-   }
+    public
+    AdapterTags(Context context)
+    {
+        m_context = context;
+    }
 
-   @Override
-   public
-   int getItemViewType(int position)
-   {
-      FeedItem feedItem = m_feedItems.get(position);
+    @Override
+    public
+    int getCount()
+    {
+        return m_feedItems.size();
+    }
 
-      boolean isImage = !feedItem.m_imageLink.isEmpty();
-      boolean isDes = !feedItem.m_desLines[0].isEmpty();
+    @Override
+    public
+    Object getItem(int position)
+    {
+        return m_feedItems.get(position);
+    }
 
-      return isImage ? isDes ? TYPE_IMAGE : TYPE_IMAGE_SANS_DESCRIPTION : isDes ? TYPE_PLAIN : TYPE_PLAIN_SANS_DESCRIPTION;
-   }
+    @Override
+    public
+    long getItemId(int position)
+    {
+        return position;
+    }
 
-   @Override
-   public
-   int getCount()
-   {
-      return m_feedItems.size();
-   }
+    @Override
+    public
+    View getView(int position, View convertView, ViewGroup parent)
+    {
+        int viewType = getItemViewType(position);
 
-   @Override
-   public
-   int getViewTypeCount()
-   {
-      return 4;
-   }
-
-   @Override
-   public
-   Object getItem(int position)
-   {
-      return m_feedItems.get(position);
-   }
-
-   @Override
-   public
-   long getItemId(int position)
-   {
-      return position;
-   }
-
-   @Override
-   public
-   View getView(int position, View convertView, ViewGroup parent)
-   {
-      int viewType = getItemViewType(position);
-
-      ViewFeedItem view = null != convertView ? (ViewFeedItem) convertView : new ViewFeedItem(m_context, viewType);
-      FeedItem item = m_feedItems.get(position);
+        ViewFeedItem view = null != convertView ? (ViewFeedItem) convertView : new ViewFeedItem(m_context, viewType);
+        FeedItem item = m_feedItems.get(position);
 
       /* Apply the read effect. */
-      boolean isRead = READ_ITEM_TIMES.contains(item.m_time);
-      view.setAlpha(isRead ? READ_OPACITY : 1.0F);
-      view.setBackgroundResource(isRead ? R.drawable.selector_transparent : R.drawable.selector_white);
+        boolean isRead = READ_ITEM_TIMES.contains(item.m_time);
+        view.setAlpha(isRead ? READ_OPACITY : 1.0F);
+        view.setBackgroundResource(isRead ? R.drawable.selector_transparent : R.drawable.selector_white);
 
       /* If the recycled view is the view we want, keep it. */
-      if(convertView != null && item.m_time.equals(view.m_item.m_time))
-    	  return view;
+        if(null != convertView && item.m_time.equals(view.m_item.m_time))
+        {
+            return view;
+        }
 
       /* Set the information. */
-      view.m_item = item;
-      view.m_hasImage = TYPE_IMAGE == viewType || TYPE_IMAGE_SANS_DESCRIPTION == viewType;
+        view.m_item = item;
+        view.m_hasImage = TYPE_IMAGE == viewType || TYPE_IMAGE_SANS_DESCRIPTION == viewType;
 
       /* If the view was an image, load the image. */
-      if(view.m_hasImage)
-      {
-         view.setBitmap(null);
-         view.setTag(item.m_time);
-         AsyncLoadImage.newInstance(view, item.m_imageName, item.m_time);
-      }
+        if(view.m_hasImage)
+        {
+            view.setBitmap(null);
+            view.setTag(item.m_time);
+            AsyncLoadImage.newInstance(view, item.m_imageName, item.m_time);
+        }
 
-      return view;
-   }
+        return view;
+    }
+
+    @Override
+    public
+    int getItemViewType(int position)
+    {
+        FeedItem feedItem = m_feedItems.get(position);
+
+        boolean isImage = !feedItem.m_imageLink.isEmpty();
+        boolean isDes = !feedItem.m_desLines[0].isEmpty();
+
+        return isImage ? isDes ? TYPE_IMAGE : TYPE_IMAGE_SANS_DESCRIPTION : isDes ? TYPE_PLAIN : TYPE_PLAIN_SANS_DESCRIPTION;
+    }
+
+    @Override
+    public
+    int getViewTypeCount()
+    {
+        return 4;
+    }
 }

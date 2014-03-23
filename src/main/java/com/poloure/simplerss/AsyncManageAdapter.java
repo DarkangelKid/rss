@@ -27,61 +27,61 @@ import java.util.Locale;
 
 class AsyncManageAdapter extends AsyncTask<String, String[][], Void>
 {
-   private final ListFragment m_listFragment;
-   private final FeedsActivity m_activity;
+    private final ListFragment m_listFragment;
+    private final FeedsActivity m_activity;
 
-   private
-   AsyncManageAdapter(FeedsActivity activity, ListFragment listFragment)
-   {
-      m_activity = activity;
-      m_listFragment = listFragment;
-   }
+    private
+    AsyncManageAdapter(FeedsActivity activity, ListFragment listFragment)
+    {
+        m_activity = activity;
+        m_listFragment = listFragment;
+    }
 
-   static
-   void run(FeedsActivity activity)
-   {
-      FragmentManager manager = activity.getFragmentManager();
-      ListFragment fragment = (ListFragment) manager.findFragmentById(R.id.fragment_manage);
+    static
+    void run(FeedsActivity activity)
+    {
+        FragmentManager manager = activity.getFragmentManager();
+        ListFragment fragment = (ListFragment) manager.findFragmentById(R.id.fragment_manage);
 
-      if(null != fragment && fragment.isVisible())
-      {
-         AsyncManageAdapter task = new AsyncManageAdapter(activity, fragment);
-         task.executeOnExecutor(THREAD_POOL_EXECUTOR);
-      }
-   }
+        if(null != fragment && fragment.isVisible())
+        {
+            AsyncManageAdapter task = new AsyncManageAdapter(activity, fragment);
+            task.executeOnExecutor(THREAD_POOL_EXECUTOR);
+        }
+    }
 
-   @Override
-   protected
-   Void doInBackground(String... applicationFolder)
-   {
+    @Override
+    protected
+    Void doInBackground(String... applicationFolder)
+    {
       /* ObjectIO the index file for names, urls, and tags. */
-      NumberFormat format = NumberFormat.getNumberInstance(Locale.getDefault());
-      List<IndexItem> indexItems = m_activity.m_index;
-      String[][] strings = new String[indexItems.size()][3];
+        NumberFormat format = NumberFormat.getNumberInstance(Locale.getDefault());
+        List<IndexItem> indexItems = m_activity.m_index;
+        String[][] strings = new String[indexItems.size()][3];
 
-      for(int i = 0; i < indexItems.size(); ++i)
-      {
+        for(int i = 0; i < indexItems.size(); ++i)
+        {
          /* Append the url to the next line. */
-         IndexItem item = indexItems.get(i);
+            IndexItem item = indexItems.get(i);
 
-         ObjectIO reader = new ObjectIO(m_activity, item.m_uid + ServiceUpdate.ITEM_LIST);
-         int itemCount = reader.getElementCount();
+            ObjectIO reader = new ObjectIO(m_activity, item.m_uid + ServiceUpdate.ITEM_LIST);
+            int itemCount = reader.getElementCount();
 
-         strings[i][0] = format.format(itemCount);
-         strings[i][1] = item.m_url;
-         strings[i][2] = Utilities.formatTags(item.m_tags);
-      }
-      publishProgress(strings);
-      return null;
-   }
+            strings[i][0] = format.format(itemCount);
+            strings[i][1] = item.m_url;
+            strings[i][2] = Utilities.formatTags(item.m_tags);
+        }
+        publishProgress(strings);
+        return null;
+    }
 
-   @Override
-   protected
-   void onProgressUpdate(String[][]... values)
-   {
-      AdapterManage adapterManage = new AdapterManage(m_activity);
-      m_listFragment.setListAdapter(adapterManage);
+    @Override
+    protected
+    void onProgressUpdate(String[][]... values)
+    {
+        AdapterManage adapterManage = new AdapterManage(m_activity);
+        m_listFragment.setListAdapter(adapterManage);
 
-      adapterManage.addAll(Arrays.asList(values[0]));
-   }
+        adapterManage.addAll(Arrays.asList(values[0]));
+    }
 }

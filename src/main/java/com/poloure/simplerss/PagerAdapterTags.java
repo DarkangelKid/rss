@@ -29,72 +29,72 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import static com.poloure.simplerss.Constants.s_viewPager;
+import static com.poloure.simplerss.Constants.*;
 
 class PagerAdapterTags extends FragmentPagerAdapter
 {
-   static List<String> s_tagList = new ArrayList<String>(0);
+    static List<String> s_tagList = new ArrayList<String>(0);
 
-   PagerAdapterTags(FragmentManager fm, Context context, Iterable<IndexItem> indexItems)
-   {
-      super(fm);
+    PagerAdapterTags(FragmentManager fm, Context context, Iterable<IndexItem> indexItems)
+    {
+        super(fm);
 
-      s_tagList = getTagsFromIndex(context, indexItems);
-      notifyDataSetChanged();
-   }
+        s_tagList = getTagsFromIndex(context, indexItems);
+        notifyDataSetChanged();
+    }
 
-   static
-   void run(FeedsActivity activity)
-   {
-      s_tagList = getTagsFromIndex(activity, activity.m_index);
-      PagerAdapter adapter = s_viewPager.getAdapter();
-      adapter.notifyDataSetChanged();
-   }
-
-   static
-   List<String> getTagsFromIndex(Context context, Iterable<IndexItem> indexItems)
-   {
+    static
+    List<String> getTagsFromIndex(Context context, Iterable<IndexItem> indexItems)
+    {
       /* Get the all tag from resources. */
-      String allTag = context.getString(R.string.all_tag);
+        String allTag = context.getString(R.string.all_tag);
 
       /* Make the allTag the first tag. */
-      Set<String> tagSet = Collections.synchronizedSet(new LinkedHashSet<String>(0));
-      tagSet.add(allTag);
+        Set<String> tagSet = Collections.synchronizedSet(new LinkedHashSet<String>(0));
+        tagSet.add(allTag);
 
-      for(IndexItem indexItem : indexItems)
-      {
-         tagSet.addAll(Arrays.asList(indexItem.m_tags));
-      }
+        for(IndexItem indexItem : indexItems)
+        {
+            tagSet.addAll(Arrays.asList(indexItem.m_tags));
+        }
 
-      return new ArrayList<String>(tagSet);
-   }
+        return new ArrayList<String>(tagSet);
+    }
 
-   @Override
-   public
-   int getItemPosition(Object object)
-   {
-      int pos = s_tagList.indexOf(object);
-      return -1 == pos ? PagerAdapter.POSITION_NONE : pos;
-   }
+    static
+    void run(FeedsActivity activity)
+    {
+        s_tagList = getTagsFromIndex(activity, activity.m_index);
+        PagerAdapter adapter = s_viewPager.getAdapter();
+        adapter.notifyDataSetChanged();
+    }
 
-   @Override
-   public
-   Fragment getItem(int position)
-   {
-      return FragmentTag.newInstance(position);
-   }
+    @Override
+    public
+    Fragment getItem(int position)
+    {
+        return FragmentTag.newInstance(position);
+    }
 
-   @Override
-   public
-   int getCount()
-   {
-      return s_tagList.size();
-   }
+    @Override
+    public
+    int getCount()
+    {
+        return s_tagList.size();
+    }
 
-   @Override
-   public
-   String getPageTitle(int position)
-   {
-      return s_tagList.get(position);
-   }
+    @Override
+    public
+    int getItemPosition(Object object)
+    {
+        int pos = s_tagList.indexOf(object);
+        return -1 == pos ? PagerAdapter.POSITION_NONE : pos;
+    }
+
+    @Override
+    public
+    String getPageTitle(int position)
+    {
+        return s_tagList.get(position);
+    }
 }

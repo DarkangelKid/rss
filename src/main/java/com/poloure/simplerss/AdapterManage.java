@@ -25,35 +25,35 @@ import android.widget.TextView;
 
 class AdapterManage extends ArrayAdapter<String[]>
 {
-   private final LayoutInflater m_inflater;
-   private TextView m_count;
-   private TextView m_url;
-   private TextView m_tags;
+    private final LayoutInflater m_inflater;
+    private TextView m_count;
+    private TextView m_url;
+    private TextView m_tags;
 
-   AdapterManage(Context context)
-   {
-      super(context, android.R.id.list);
-      m_inflater = LayoutInflater.from(context);
-   }
+    AdapterManage(Context context)
+    {
+        super(context, android.R.id.list);
+        m_inflater = LayoutInflater.from(context);
+    }
 
-   @Override
-   public
-   View getView(int position, View convertView, ViewGroup parent)
-   {
-      View layout = convertView;
-      if(layout == null)
-      {
-         layout = m_inflater.inflate(R.layout.manage_text_view, null, false);
-         m_count = (TextView) layout.findViewById(R.id.manage_count);
-         m_url = (TextView) layout.findViewById(R.id.manage_url);
-         m_tags = (TextView) layout.findViewById(R.id.manage_tags);
-      }
+    @Override
+    public
+    View getView(int position, View convertView, ViewGroup parent)
+    {
+        View layout = convertView;
+        if(null == layout)
+        {
+            layout = m_inflater.inflate(R.layout.manage_text_view, null, false);
+            m_count = (TextView) layout.findViewById(R.id.manage_count);
+            m_url = (TextView) layout.findViewById(R.id.manage_url);
+            m_tags = (TextView) layout.findViewById(R.id.manage_tags);
+        }
 
-      String[] item = getItem(position);
-      m_count.setText(item[0]);
-      m_url.setText(item[1]);
-      m_tags.setText(item[2]);
+        String[] item = getItem(position);
+        m_count.setText(item[0]);
+        m_url.setText(item[1]);
+        m_tags.setText(item[2]);
 
-      return layout;
-   }
+        return layout;
+    }
 }

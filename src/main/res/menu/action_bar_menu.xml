@@ -15,20 +15,20 @@
 -->
 
 <menu
-   xmlns:android="http://schemas.android.com/apk/res/android">
-   <item
-      android:icon="@drawable/ic_action_new_dimmable"
-      android:onClick="onAddClick"
-      android:showAsAction="ifRoom"
-      android:title="@string/ic_action_add"/>
-   <item
-      android:icon="@drawable/ic_action_time_dimmable"
-      android:onClick="onUnreadClick"
-      android:showAsAction="ifRoom"
-      android:title="@string/ic_action_unread"/>
-   <item
-      android:id="@+id/share"
-      android:icon="@drawable/ic_action_share"
-      android:showAsAction="ifRoom"
-      android:title="@string/ic_action_share"/>
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:icon="@drawable/ic_action_new_dimmable"
+        android:onClick="onAddClick"
+        android:showAsAction="ifRoom"
+        android:title="@string/ic_action_add"/>
+    <item
+        android:id="@+id/jump_to_unread"
+        android:icon="@drawable/ic_action_time_dimmable"
+        android:showAsAction="ifRoom"
+        android:title="@string/ic_action_unread"/>
+    <item
+        android:id="@+id/share"
+        android:icon="@drawable/ic_action_share"
+        android:showAsAction="ifRoom"
+        android:title="@string/ic_action_share"/>
 </menu>

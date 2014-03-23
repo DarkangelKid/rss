@@ -23,21 +23,21 @@ import android.widget.ArrayAdapter;
 
 class AdapterNavigationDrawer extends ArrayAdapter<String[]>
 {
-   AdapterNavigationDrawer(Context context)
-   {
-      super(context, android.R.id.list);
-   }
+    AdapterNavigationDrawer(Context context)
+    {
+        super(context, android.R.id.list);
+    }
 
-   @Override
-   public
-   View getView(int position, View convertView, ViewGroup parent)
-   {
-      ViewNavItem view = null == convertView ? new ViewNavItem(parent.getContext()) : (ViewNavItem) convertView;
+    @Override
+    public
+    View getView(int position, View convertView, ViewGroup parent)
+    {
+        ViewNavItem view = null == convertView ? new ViewNavItem(parent.getContext()) : (ViewNavItem) convertView;
 
-      view.m_text = getItem(position)[0];
-      view.m_count = getItem(position)[1];
-      view.m_image = -1;
+        view.m_text = getItem(position)[0];
+        view.m_count = getItem(position)[1];
+        view.m_image = -1;
 
-      return view;
-   }
+        return view;
+    }
 }

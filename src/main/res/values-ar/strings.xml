@@ -18,71 +18,71 @@
 
 <resources>
 
-   <!-- The All tag.-->
-   <string name="all_tag">كل</string>
+    <!-- The All tag.-->
+    <string name="all_tag">كل</string>
 
-   <!-- Navigation drawer toggle accessibility descriptions.-->
-   <string name="drawer_open">فتح القائمة الرئيسية</string>
-   <string name="drawer_close">غلق القائمة الرئيسية‎</string>
+    <!-- Navigation drawer toggle accessibility descriptions.-->
+    <string name="drawer_open">فتح القائمة الرئيسية</string>
+    <string name="drawer_close">غلق القائمة الرئيسية‎</string>
 
-   <!-- ActionBar icon descriptions. -->
-   <string name="ic_action_add">اضافة</string>
-   <string name="ic_action_unread">غير مقروء</string>
+    <!-- ActionBar icon descriptions. -->
+    <string name="ic_action_add">اضافة</string>
+    <string name="ic_action_unread">غير مقروء</string>
 
-   <!-- TODO ActionBar subtitle for unread items. -->
-   <plurals name="actionbar_subtitle_unread">
-      <item quantity="zero">%d unread</item>
-      <item quantity="one">%d unread</item>
-      <item quantity="two">%d unread</item>
-      <item quantity="few">%d unread</item>
-      <item quantity="many">%d unread</item>
-      <item quantity="other">%d unread</item>
-   </plurals>
+    <!-- TODO ActionBar subtitle for unread items. -->
+    <plurals name="actionbar_subtitle_unread">
+        <item quantity="zero">%d unread</item>
+        <item quantity="one">%d unread</item>
+        <item quantity="two">%d unread</item>
+        <item quantity="few">%d unread</item>
+        <item quantity="many">%d unread</item>
+        <item quantity="other">%d unread</item>
+    </plurals>
 
-   <!-- Add/Edit feed dialog titles. -->
-   <string name="dialog_title_add">إضافة موجز</string>
-   <string name="dialog_title_edit">تعديل موجز‎</string>
+    <!-- Add/Edit feed dialog titles. -->
+    <string name="dialog_title_add">إضافة موجز</string>
+    <string name="dialog_title_edit">تعديل موجز‎</string>
 
-   <!-- Add/Edit feed dialog EditText hints. -->
-   <string name="dialog_feed_url_hint">example.com/rss</string>
-   <string name="dialog_feed_tag_hint">سمات</string>
+    <!-- Add/Edit feed dialog EditText hints. -->
+    <string name="dialog_feed_url_hint">example.com/rss</string>
+    <string name="dialog_feed_tag_hint">سمات</string>
 
-   <!-- Add/Edit feed dialog button texts. -->
-   <string name="dialog_cancel">إلغاء‎</string>
-   <string name="dialog_accept">قبول</string>
-   <string name="dialog_checking">يتم الفحص…</string>
+    <!-- Add/Edit feed dialog button texts. -->
+    <string name="dialog_cancel">إلغاء‎</string>
+    <string name="dialog_accept">قبول</string>
+    <string name="dialog_checking">يتم الفحص…</string>
 
-   <!-- Long click feed item context menu. -->
-   <string name="feed_item_context_open">فتح</string>
-   <string name="feed_item_context_copy">نسخ</string>
+    <!-- Long click feed item context menu. -->
+    <string name="feed_item_context_open">فتح</string>
+    <string name="feed_item_context_copy">نسخ</string>
 
-   <!-- Toast notifications. -->
-   <string name="toast_url_copied">تم نسخ الرابط:</string>
-   <string name="toast_invalid_feed">رابط غير صحيح</string>
-   <!-- TODO Add %s to this string. -->
-   <string name="toast_added_feed">تم الاضافة بنجاح</string>
+    <!-- Toast notifications. -->
+    <string name="toast_url_copied">تم نسخ الرابط:</string>
+    <string name="toast_invalid_feed">رابط غير صحيح</string>
+    <!-- TODO Add %s to this string. -->
+    <string name="toast_added_feed">تم الاضافة بنجاح</string>
 
-   <!-- Manage context action bar icon descriptions. -->
-   <string name="manage_item_clear_content">مسح محتوى الصفحات</string>
-   <string name="manage_item_delete">مسح الصفحات‎</string>
+    <!-- Manage context action bar icon descriptions. -->
+    <string name="manage_item_clear_content">مسح محتوى الصفحات</string>
+    <string name="manage_item_delete">مسح الصفحات‎</string>
 
-   <!-- Settings general strings. -->
-   <string name="switch_off">إبقاف</string>
-   <string name="switch_on">تشغيل</string>
+    <!-- Settings general strings. -->
+    <string name="switch_off">إبقاف</string>
+    <string name="switch_on">تشغيل</string>
 
-   <!-- Settings automatic Refreshing strings. -->
-   <string name="automatic_refreshing">تحديث تلقائي</string>
+    <!-- Settings automatic Refreshing strings. -->
+    <string name="automatic_refreshing">تحديث تلقائي</string>
 
-   <string name="automatic_refreshing_interval">تحديث كل:</string>
-   <string name="automatic_refreshing_interval_summary">الفاصل بين كل تحديث</string>
+    <string name="automatic_refreshing_interval">تحديث كل:</string>
+    <string name="automatic_refreshing_interval_summary">الفاصل بين كل تحديث</string>
 
-   <!-- Settings images strings. -->
-   <string name="images">صور</string>
-   <string name="images_download">حفظ الصور</string>
-   <string name="images_thumbnail_quality">(WebP) جودة الصورة المصغرة</string>
-   <string name="images_thumbnail_quality_summary">يؤثر على التنزيلات الجديدة فقط</string>
+    <!-- Settings images strings. -->
+    <string name="images">صور</string>
+    <string name="images_download">حفظ الصور</string>
+    <string name="images_thumbnail_quality">(WebP) جودة الصورة المصغرة</string>
+    <string name="images_thumbnail_quality_summary">يؤثر على التنزيلات الجديدة فقط</string>
 
-   <!-- Settings source code. -->
-   <string name="source_code">شفرة المصدر</string>
+    <!-- Settings source code. -->
+    <string name="source_code">شفرة المصدر</string>
 
 </resources>

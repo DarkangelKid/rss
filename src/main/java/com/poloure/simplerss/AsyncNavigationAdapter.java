@@ -31,90 +31,90 @@ import java.util.List;
 
 class AsyncNavigationAdapter extends AsyncTask<String, Void, String[][]>
 {
-   private final FeedsActivity m_activity;
+    private final FeedsActivity m_activity;
 
-   private
-   AsyncNavigationAdapter(Activity activity)
-   {
-      m_activity = (FeedsActivity) activity;
-   }
+    private
+    AsyncNavigationAdapter(Activity activity)
+    {
+        m_activity = (FeedsActivity) activity;
+    }
 
-   static
-   void run(Activity activity)
-   {
-      AsyncTask<String, Void, String[][]> task = new AsyncNavigationAdapter(activity);
-      task.executeOnExecutor(THREAD_POOL_EXECUTOR);
-   }
+    static
+    void run(Activity activity)
+    {
+        AsyncTask<String, Void, String[][]> task = new AsyncNavigationAdapter(activity);
+        task.executeOnExecutor(THREAD_POOL_EXECUTOR);
+    }
 
-   /* Get the unread counts for the tags. */
-   @Override
-   protected
-   String[][] doInBackground(String... applicationFolder)
-   {
+    /* Get the unread counts for the tags. */
+    @Override
+    protected
+    String[][] doInBackground(String... applicationFolder)
+    {
       /* Get the total number of tags and feeds that exist. */
-      int tagTotal = PagerAdapterTags.s_tagList.size();
+        int tagTotal = PagerAdapterTags.s_tagList.size();
 
       /* Make a NavItem for each tag we will display in the navigation drawer. */
-      String[][] navItems = new String[tagTotal][2];
+        String[][] navItems = new String[tagTotal][2];
 
       /* Number of feeds. */
-      int feedCount = m_activity.m_index.size();
+        int feedCount = m_activity.m_index.size();
 
       /* This is a list of Sets each containing all of the feed's items. */
-      List<Collection<Long>> feedItems = new ArrayList<Collection<Long>>(feedCount);
+        List<Collection<Long>> feedItems = new ArrayList<Collection<Long>>(feedCount);
 
-      for(IndexItem indexItem : m_activity.m_index)
-      {
-         ObjectIO reader = new ObjectIO(m_activity, indexItem.m_uid + ServiceUpdate.ITEM_LIST);
-         Collection<Long> set = reader.readCollection(HashSet.class);
-         feedItems.add(set);
-      }
+        for(IndexItem indexItem : m_activity.m_index)
+        {
+            ObjectIO reader = new ObjectIO(m_activity, indexItem.m_uid + ServiceUpdate.ITEM_LIST);
+            Collection<Long> set = reader.readCollection(HashSet.class);
+            feedItems.add(set);
+        }
 
       /* Create a temporary collection we will .clear() each iteration of the next for loop. */
-      Collection<Long> itemsInTag = Collections.synchronizedCollection(new HashSet<Long>(0));
+        Collection<Long> itemsInTag = Collections.synchronizedCollection(new HashSet<Long>(0));
 
       /* For each tag excluding the all tag. */
-      for(int i = 0; tagTotal > i; i++)
-      {
-         String tag = PagerAdapterTags.s_tagList.get(i);
+        for(int i = 0; tagTotal > i; i++)
+        {
+            String tag = PagerAdapterTags.s_tagList.get(i);
 
          /* For each feed, if the feed ∈ this tag, add the feed items to the tag collection. */
-         for(int j = 0; j < feedCount; j++)
-         {
-            /* If the feed's index entry (tag1, tag2, etc) contains this tag or is the all tag. */
-            if(0 == i || Arrays.asList(m_activity.m_index.get(j).m_tags).contains(tag))
+            for(int j = 0; j < feedCount; j++)
             {
-               itemsInTag.addAll(feedItems.get(j));
+            /* If the feed's index entry (tag1, tag2, etc) contains this tag or is the all tag. */
+                if(0 == i || Arrays.asList(m_activity.m_index.get(j).m_tags).contains(tag))
+                {
+                    itemsInTag.addAll(feedItems.get(j));
+                }
             }
-         }
-         itemsInTag.removeAll(AdapterTags.READ_ITEM_TIMES);
+            itemsInTag.removeAll(AdapterTags.READ_ITEM_TIMES);
 
-         int size = itemsInTag.size();
-         navItems[i][0] = tag;
-         navItems[i][1] = 0 == size ? "" : Utilities.NUMBER_FORMAT.format(size);
-         itemsInTag.clear();
-      }
+            int size = itemsInTag.size();
+            navItems[i][0] = tag;
+            navItems[i][1] = 0 == size ? "" : Utilities.NUMBER_FORMAT.format(size);
+            itemsInTag.clear();
+        }
 
-      return navItems;
-   }
+        return navItems;
+    }
 
-   @Override
-   protected
-   void onPostExecute(String[][] result)
-   {
+    @Override
+    protected
+    void onPostExecute(String[][] result)
+    {
       /* Set the titles & counts arrays in this file and notify the adapter. */
-      ListView navigationList = (ListView) m_activity.findViewById(R.id.fragment_navigation_drawer);
-      WrapperListAdapter wrapperAdapter = (WrapperListAdapter) navigationList.getAdapter();
-      ArrayAdapter<String[]> adapter = (ArrayAdapter<String[]>) wrapperAdapter.getWrappedAdapter();
+        ListView navigationList = (ListView) m_activity.findViewById(R.id.fragment_navigation_drawer);
+        WrapperListAdapter wrapperAdapter = (WrapperListAdapter) navigationList.getAdapter();
+        ArrayAdapter<String[]> adapter = (ArrayAdapter<String[]>) wrapperAdapter.getWrappedAdapter();
 
       /* Update the data in the adapter. */
-      adapter.clear();
-      adapter.addAll(result);
+        adapter.clear();
+        adapter.addAll(result);
 
       /* Update the subtitle. */
-      if(Constants.s_fragmentFeeds.isVisible())
-      {
-         Utilities.setTitlesAndDrawerAndPage(null, -10);
-      }
-   }
+        if(Constants.s_fragmentFeeds.isVisible())
+        {
+            Utilities.setTitlesAndDrawerAndPage(null, -10);
+        }
+    }
 }

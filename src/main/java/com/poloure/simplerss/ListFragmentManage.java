@@ -28,47 +28,47 @@ import android.widget.TextView;
 public
 class ListFragmentManage extends ListFragment
 {
-   @Override
-   public
-   View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
-   {
-      View view = inflater.inflate(R.layout.list_view, container, false);
-      TextView emptyView = (TextView) view.findViewById(android.R.id.empty);
-      emptyView.setText(R.string.empty_manage_list_view);
-      return view;
-   }
+    @Override
+    public
+    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+    {
+        View view = inflater.inflate(R.layout.list_view, container, false);
+        TextView emptyView = (TextView) view.findViewById(android.R.id.empty);
+        emptyView.setText(R.string.empty_manage_list_view);
+        return view;
+    }
 
-   @Override
-   public
-   void onActivityCreated(Bundle savedInstanceState)
-   {
-      super.onActivityCreated(savedInstanceState);
+    @Override
+    public
+    void onListItemClick(ListView l, View v, int position, long id)
+    {
+        DialogEditFeed.newInstance((FeedsActivity) getActivity(), position).show();
+    }
 
-      FeedsActivity activity = (FeedsActivity) getActivity();
-      ListView listView = getListView();
+    @Override
+    public
+    void onHiddenChanged(boolean hidden)
+    {
+        super.onHiddenChanged(hidden);
+        if(!hidden)
+        {
+            AsyncManageAdapter.run((FeedsActivity) getActivity());
+        }
+    }
 
-      setListAdapter(new AdapterManage(activity));
+    @Override
+    public
+    void onActivityCreated(Bundle savedInstanceState)
+    {
+        super.onActivityCreated(savedInstanceState);
 
-      registerForContextMenu(listView);
-      listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
-      listView.setMultiChoiceModeListener(new MultiModeListener(listView, activity));
-   }
+        FeedsActivity activity = (FeedsActivity) getActivity();
+        ListView listView = getListView();
 
-   @Override
-   public
-   void onHiddenChanged(boolean hidden)
-   {
-      super.onHiddenChanged(hidden);
-      if(!hidden)
-      {
-         AsyncManageAdapter.run((FeedsActivity) getActivity());
-      }
-   }
+        setListAdapter(new AdapterManage(activity));
 
-   @Override
-   public
-   void onListItemClick(ListView l, View v, int position, long id)
-   {
-      DialogEditFeed.newInstance((FeedsActivity) getActivity(), position).show();
-   }
+        registerForContextMenu(listView);
+        listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
+        listView.setMultiChoiceModeListener(new MultiModeListener(listView, activity));
+    }
 }

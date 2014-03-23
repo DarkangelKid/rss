@@ -29,125 +29,125 @@ import android.view.View;
 
 class ViewNavItem extends View
 {
-   private static final Paint[] m_paints = new Paint[2];
-   private static final Bitmap[] m_bitmaps_dark = new Bitmap[3];
-   private static final Bitmap[] m_bitmaps_light = new Bitmap[3];
-   private static final int[] FONT_SIZES = {
-         R.dimen.navigation_main, R.dimen.navigation_tag,
-   };
-   private final int m_height;
-   String m_text = "";
-   String m_count = "";
-   int m_image = -1;
+    private static final Paint[] m_paints = new Paint[2];
+    private static final Bitmap[] m_bitmaps_dark = new Bitmap[3];
+    private static final Bitmap[] m_bitmaps_light = new Bitmap[3];
+    private static final int[] FONT_SIZES = {
+            R.dimen.navigation_main, R.dimen.navigation_tag,
+    };
+    private final int m_height;
+    String m_text = "";
+    String m_count = "";
+    int m_image = -1;
 
-   ViewNavItem(Context context)
-   {
-      super(context);
-      Resources resources = context.getResources();
+    ViewNavItem(Context context)
+    {
+        super(context);
+        Resources resources = context.getResources();
 
-      if(null == m_bitmaps_dark[0])
-      {
-         int[] drawablesDark = {
-               R.drawable.ic_action_important,
-               R.drawable.ic_action_storage,
-               R.drawable.ic_action_settings,
-         };
+        if(null == m_bitmaps_dark[0])
+        {
+            int[] drawablesDark = {
+                    R.drawable.ic_action_important,
+                    R.drawable.ic_action_storage,
+                    R.drawable.ic_action_settings,
+            };
 
-         int[] drawablesLight = {
-               R.drawable.ic_action_important_light,
-               R.drawable.ic_action_storage_light,
-               R.drawable.ic_action_settings_light,
-         };
+            int[] drawablesLight = {
+                    R.drawable.ic_action_important_light,
+                    R.drawable.ic_action_storage_light,
+                    R.drawable.ic_action_settings_light,
+            };
 
-         for(int i = 0; i < m_bitmaps_dark.length; i++)
-         {
-            m_bitmaps_dark[i]  = BitmapFactory.decodeResource(resources, drawablesDark[i]);
-            m_bitmaps_light[i] = BitmapFactory.decodeResource(resources, drawablesLight[i]);
-         }
-      }
+            for(int i = 0; i < m_bitmaps_dark.length; i++)
+            {
+                m_bitmaps_dark[i] = BitmapFactory.decodeResource(resources, drawablesDark[i]);
+                m_bitmaps_light[i] = BitmapFactory.decodeResource(resources, drawablesLight[i]);
+            }
+        }
 
-      m_height = Math.round(resources.getDimension(R.dimen.navigation_height));
-      setBackgroundResource(R.drawable.navigation_item_background);
-      initPaints(resources);
-   }
+        m_height = Math.round(resources.getDimension(R.dimen.navigation_height));
+        setBackgroundResource(R.drawable.navigation_item_background);
+        initPaints(resources);
+    }
 
-   private static
-   void initPaints(Resources resources)
-   {
-      for(int i = 0; m_paints.length > i; i++)
-      {
-         m_paints[i] = configurePaint(resources, FONT_SIZES[i]);
-      }
-   }
+    private static
+    void initPaints(Resources resources)
+    {
+        for(int i = 0; m_paints.length > i; i++)
+        {
+            m_paints[i] = configurePaint(resources, FONT_SIZES[i]);
+        }
+    }
 
-   private static
-   Paint configurePaint(Resources resources, int dimenResource)
-   {
-      Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-      paint.setTextSize(resources.getDimension(dimenResource));
-      return paint;
-   }
+    private static
+    Paint configurePaint(Resources resources, int dimenResource)
+    {
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setTextSize(resources.getDimension(dimenResource));
+        return paint;
+    }
 
-   @Override
-   public
-   void onDraw(Canvas canvas)
-   {
-      Resources resources = getResources();
-      DisplayMetrics metrics = resources.getDisplayMetrics();
+    @Override
+    public
+    boolean hasOverlappingRendering()
+    {
+        return false;
+    }
+
+    @Override
+    public
+    void onDraw(Canvas canvas)
+    {
+        Resources resources = getResources();
+        DisplayMetrics metrics = resources.getDisplayMetrics();
 
       /* If our paints have been cleared from memory, remake them. */
-      if(null == m_paints[0])
-      {
-         initPaints(resources);
-      }
+        if(null == m_paints[0])
+        {
+            initPaints(resources);
+        }
 
       /* Padding top. */
-      float width = getWidth();
+        float width = getWidth();
 
-      int hPadding = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16.0F, metrics));
-      int paddingStart = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8.0F, metrics));
+        int hPadding = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16.0F, metrics));
+        int paddingStart = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8.0F, metrics));
 
-      Paint paint = -1 == m_image ? m_paints[1] : m_paints[0];
-      long verticalPosition = Math.round(m_height / 2.0 - (paint.descent() + paint.ascent()) / 2.0);
+        Paint paint = -1 == m_image ? m_paints[1] : m_paints[0];
+        long verticalPosition = Math.round(m_height / 2.0 - (paint.descent() + paint.ascent()) / 2.0);
 
-      boolean rtl = Utilities.isTextRtl(m_text);
+        boolean rtl = Utilities.isTextRtl(m_text);
 
-      paint.setColor(isActivated() ? Color.WHITE : resources.getColor(R.color.text_navigation_main));
+        paint.setColor(isActivated() ? Color.WHITE : resources.getColor(R.color.text_navigation_main));
 
       /* Draw the count. */
-      if(-1 == m_image)
-      {
-         paint.setTextAlign(rtl ? Paint.Align.LEFT : Paint.Align.RIGHT);
-         canvas.drawText(m_count, rtl ? hPadding : width - hPadding, verticalPosition, paint);
-      }
+        if(-1 == m_image)
+        {
+            paint.setTextAlign(rtl ? Paint.Align.LEFT : Paint.Align.RIGHT);
+            canvas.drawText(m_count, rtl ? hPadding : width - hPadding, verticalPosition, paint);
+        }
 
-      paint.setTextAlign(rtl ? Paint.Align.RIGHT : Paint.Align.LEFT);
+        paint.setTextAlign(rtl ? Paint.Align.RIGHT : Paint.Align.LEFT);
 
       /* Draw the image. */
-      if(-1 != m_image)
-      {
-         Bitmap icon = isActivated() ? m_bitmaps_light[m_image] : m_bitmaps_dark[m_image];
-         int imageWidth = icon.getWidth();
-         int paddingTop = Constants.s_eightDp;
-         canvas.drawBitmap(icon, rtl ? width - paddingStart - imageWidth : paddingStart, Math.round(paddingTop), m_paints[0]);
-         hPadding = (paddingStart << 1) + imageWidth;
-      }
+        if(-1 != m_image)
+        {
+            Bitmap icon = isActivated() ? m_bitmaps_light[m_image] : m_bitmaps_dark[m_image];
+            int imageWidth = icon.getWidth();
+            int paddingTop = Constants.s_eightDp;
+            canvas.drawBitmap(icon, rtl ? width - paddingStart - imageWidth : paddingStart, Math.round(paddingTop), m_paints[0]);
+            hPadding = (paddingStart << 1) + imageWidth;
+        }
 
       /* Draw the main text. */
-      canvas.drawText(m_text, rtl ? width - hPadding : hPadding, verticalPosition, paint);
-   }
+        canvas.drawText(m_text, rtl ? width - hPadding : hPadding, verticalPosition, paint);
+    }
 
-   @Override
-   public
-   boolean hasOverlappingRendering()
-   {
-      return false;
-   }
-
-   @Override
-   protected
-   void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
-   {
-      setMeasuredDimension(widthMeasureSpec, m_height);
-   }
+    @Override
+    protected
+    void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
+    {
+        setMeasuredDimension(widthMeasureSpec, m_height);
+    }
 }

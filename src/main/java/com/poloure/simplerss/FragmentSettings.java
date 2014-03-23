@@ -28,47 +28,47 @@ import android.view.Window;
 public
 class FragmentSettings extends PreferenceFragment
 {
-   @Override
-   public
-   void onCreate(Bundle savedInstanceState)
-   {
-      super.onCreate(savedInstanceState);
-      addPreferencesFromResource(R.xml.preferences);
+    @Override
+    public
+    void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+        addPreferencesFromResource(R.xml.preferences);
 
-      for(CharSequence key : new String[]{"ONE", "TWO", "THREE"})
-      {
-         PreferenceScreen preferenceScreen = (PreferenceScreen) findPreference(key);
-         if(null != preferenceScreen)
-         {
-            preferenceScreen.setOnPreferenceClickListener(new preferenceClickListener(preferenceScreen));
-         }
-      }
-   }
+        for(CharSequence key : new String[]{"ONE", "TWO", "THREE"})
+        {
+            PreferenceScreen preferenceScreen = (PreferenceScreen) findPreference(key);
+            if(null != preferenceScreen)
+            {
+                preferenceScreen.setOnPreferenceClickListener(new preferenceClickListener(preferenceScreen));
+            }
+        }
+    }
 
-   class preferenceClickListener implements Preference.OnPreferenceClickListener
-   {
-      private final PreferenceScreen m_preferenceScreen;
+    class preferenceClickListener implements Preference.OnPreferenceClickListener
+    {
+        private final PreferenceScreen m_preferenceScreen;
 
-      public
-      preferenceClickListener(PreferenceScreen preferenceScreen)
-      {
-         m_preferenceScreen = preferenceScreen;
-      }
+        public
+        preferenceClickListener(PreferenceScreen preferenceScreen)
+        {
+            m_preferenceScreen = preferenceScreen;
+        }
 
-      @Override
-      public
-      boolean onPreferenceClick(Preference preference)
-      {
-         ActionBar actionBar = m_preferenceScreen.getDialog().getActionBar();
-         actionBar.setIcon(R.drawable.ic_action_settings);
-         actionBar.setTitle(m_preferenceScreen.getTitle());
+        @Override
+        public
+        boolean onPreferenceClick(Preference preference)
+        {
+            ActionBar actionBar = m_preferenceScreen.getDialog().getActionBar();
+            actionBar.setIcon(R.drawable.ic_action_settings);
+            actionBar.setTitle(m_preferenceScreen.getTitle());
 
-         Dialog dialog = m_preferenceScreen.getDialog();
-         Window window = dialog.getWindow();
-         View view = window.getDecorView().findViewById(android.R.id.content);
-         Constants.setTopOffset(getActivity(), view);
+            Dialog dialog = m_preferenceScreen.getDialog();
+            Window window = dialog.getWindow();
+            View view = window.getDecorView().findViewById(android.R.id.content);
+            Constants.setTopOffset(getActivity(), view);
 
-         return true;
-      }
-   }
+            return true;
+        }
+    }
 }

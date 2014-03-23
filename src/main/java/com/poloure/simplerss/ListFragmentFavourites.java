@@ -28,36 +28,36 @@ import android.widget.TextView;
 public
 class ListFragmentFavourites extends ListFragment
 {
-   @Override
-   public
-   void onListItemClick(ListView l, View v, int position, long id)
-   {
-      Utilities.showWebFragment(v);
-   }
+    @Override
+    public
+    View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+    {
+        View view = inflater.inflate(R.layout.list_view, container, false);
+        TextView emptyView = (TextView) view.findViewById(android.R.id.empty);
+        emptyView.setText(R.string.empty_favourites_list_view);
+        return view;
+    }
 
-   @Override
-   public
-   View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
-   {
-      View view = inflater.inflate(R.layout.list_view, container, false);
-      TextView emptyView = (TextView) view.findViewById(android.R.id.empty);
-      emptyView.setText(R.string.empty_favourites_list_view);
-      return view;
-   }
+    @Override
+    public
+    void onListItemClick(ListView l, View v, int position, long id)
+    {
+        Utilities.showWebFragment(v);
+    }
 
-   @Override
-   public
-   void onActivityCreated(Bundle savedInstanceState)
-   {
-      super.onActivityCreated(savedInstanceState);
+    @Override
+    public
+    void onActivityCreated(Bundle savedInstanceState)
+    {
+        super.onActivityCreated(savedInstanceState);
 
-      FeedsActivity activity = (FeedsActivity) getActivity();
-      ListView listView = getListView();
+        FeedsActivity activity = (FeedsActivity) getActivity();
+        ListView listView = getListView();
 
-      setListAdapter(new AdapterFavourites(activity));
+        setListAdapter(new AdapterFavourites(activity));
 
-      registerForContextMenu(listView);
-      listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
-      listView.setMultiChoiceModeListener(new MultiModeListener(listView, activity));
-   }
+        registerForContextMenu(listView);
+        listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
+        listView.setMultiChoiceModeListener(new MultiModeListener(listView, activity));
+    }
 }

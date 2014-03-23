@@ -16,43 +16,44 @@
 
 <resources>
 
-   <style name="Theme.FeedsActivity" parent="android:Theme.Holo.Light">
-      <item name="ptrHeaderStyle">@style/Widget.Custom.PtrHeader</item>
-      <item name="android:actionBarStyle">@style/Widget.FeedsActivity.ActionBar</item>
-   </style>
+    <style name="Theme.FeedsActivity" parent="android:Theme.Holo.Light">
+        <item name="ptrHeaderStyle">@style/Widget.Custom.PtrHeader</item>
+        <item name="android:actionBarStyle">@style/Widget.FeedsActivity.ActionBar</item>
+    </style>
 
-   <style name="Widget.Custom.PtrHeader" parent="android:Widget">
-      <item name="ptrProgressBarColor">#ff0089b7</item>
-      <item name="ptrHeaderTitleTextAppearance">@style/TextAppearance.Custom.PtrHeader.Title</item>
+    <style name="Widget.Custom.PtrHeader" parent="android:Widget">
+        <item name="ptrProgressBarColor">#ff0089b7</item>
+        <item name="ptrHeaderTitleTextAppearance">@style/TextAppearance.Custom.PtrHeader.Title
+        </item>
 
-      <!-- The strings to be displayed at the various states -->
-      <item name="ptrPullText">@string/pull_label</item>
-      <item name="ptrRefreshingText">@string/refreshing_text</item>
-   </style>
+        <!-- The strings to be displayed at the various states -->
+        <item name="ptrPullText">@string/pull_label</item>
+        <item name="ptrRefreshingText">@string/refreshing_text</item>
+    </style>
 
-   <style name="Widget.FeedsActivity.ActionBar" parent="android:Widget.Holo.Light.ActionBar">
-      <item name="android:background">@color/action_bar</item>
-      <item name="android:icon">@drawable/ic_action_labels</item>
-      <item name="android:title">@string/all_tag</item>
-      <item name="android:titleTextStyle">
-         @style/TextAppearance.FeedsActivity.Widget.ActionBar.Title
-      </item>
-      <item name="android:subtitleTextStyle">
-         @style/TextAppearance.FeedsActivity.Widget.ActionBar.SubTitle
-      </item>
-   </style>
+    <style name="Widget.FeedsActivity.ActionBar" parent="android:Widget.Holo.Light.ActionBar">
+        <item name="android:background">@color/action_bar</item>
+        <item name="android:icon">@drawable/ic_action_labels</item>
+        <item name="android:title">@string/all_tag</item>
+        <item name="android:titleTextStyle">
+            @style/TextAppearance.FeedsActivity.Widget.ActionBar.Title
+        </item>
+        <item name="android:subtitleTextStyle">
+            @style/TextAppearance.FeedsActivity.Widget.ActionBar.SubTitle
+        </item>
+    </style>
 
-   <style name="TextAppearance.Custom.PtrHeader.Title" parent="android:TextAppearance.Small">
-      <item name="android:textSize">16sp</item>
-      <item name="android:textColor">#ff0099cc</item>
-   </style>
+    <style name="TextAppearance.Custom.PtrHeader.Title" parent="android:TextAppearance.Small">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">#ff0099cc</item>
+    </style>
 
-   <style name="TextAppearance.FeedsActivity.Widget.ActionBar.Title" parent="android:TextAppearance.Holo.Widget.ActionBar.Title">
-      <item name="android:textColor">@color/item_title_color</item>
-   </style>
+    <style name="TextAppearance.FeedsActivity.Widget.ActionBar.Title" parent="android:TextAppearance.Holo.Widget.ActionBar.Title">
+        <item name="android:textColor">@color/item_title_color</item>
+    </style>
 
-   <style name="TextAppearance.FeedsActivity.Widget.ActionBar.SubTitle" parent="android:TextAppearance.Holo.Widget.ActionBar.Subtitle">
-      <item name="android:textColor">@color/item_description_color</item>
-   </style>
+    <style name="TextAppearance.FeedsActivity.Widget.ActionBar.SubTitle" parent="android:TextAppearance.Holo.Widget.ActionBar.Subtitle">
+        <item name="android:textColor">@color/item_description_color</item>
+    </style>
 
 </resources>
