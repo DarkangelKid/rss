@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="en">
+
+   <string-array name="navigation_titles">
+      <item>Favoris</item>
+      <item>Gérer</item>
+      <item>Paramètres</item>
+   </string-array>
+
+   <string-array name="refresh_interval_titles">
+      <item>30 minutes</item>
+      <item>1 heure</item>
+      <item>2 heures</item>
+      <item>4 heures</item>
+      <item>8 heures</item>
+      <item>12 heures</item>
+      <item>1 jour</item>
+   </string-array>
+
+   <string-array name="thumbnail_quality">
+      <item>Objectionable</item>
+      <item>Questionable</item>
+      <item>Acceptable</item>
+      <item>Notable</item>
+      <item>Comparable</item>
+      <item>Indistingable</item>
+      <item>Impeccable</item>
+   </string-array>
+
+   <string-array name="time_initials">
+      <item>a</item>
+      <item>j</item>
+      <item>h</item>
+      <item>m</item>
+   </string-array>
+
+</resources>

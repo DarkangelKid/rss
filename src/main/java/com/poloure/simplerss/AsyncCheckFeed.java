@@ -83,9 +83,11 @@ class AsyncCheckFeed extends AsyncTask<Void, Void, IndexItem>
       }
       catch(IOException ignored)
       {
+    	  // TODO
       }
       catch(XmlPullParserException ignored)
       {
+    	  // TODO
       }
       return isValid;
    }

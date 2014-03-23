@@ -91,8 +91,6 @@ class AdapterTags extends BaseAdapter
    {
       int viewType = getItemViewType(position);
 
-      boolean hasImg = TYPE_IMAGE == viewType || TYPE_IMAGE_SANS_DESCRIPTION == viewType;
-
       ViewFeedItem view = null != convertView ? (ViewFeedItem) convertView : new ViewFeedItem(m_context, viewType);
       FeedItem item = m_feedItems.get(position);
 
@@ -102,20 +100,15 @@ class AdapterTags extends BaseAdapter
       view.setBackgroundResource(isRead ? R.drawable.selector_transparent : R.drawable.selector_white);
 
       /* If the recycled view is the view we want, keep it. */
-      if(null != convertView)
-      {
-         if(item.m_time.equals(view.m_item.m_time))
-         {
-            return view;
-         }
-      }
+      if(convertView != null && item.m_time.equals(view.m_item.m_time))
+    	  return view;
 
       /* Set the information. */
       view.m_item = item;
-      view.m_hasImage = hasImg;
+      view.m_hasImage = TYPE_IMAGE == viewType || TYPE_IMAGE_SANS_DESCRIPTION == viewType;
 
       /* If the view was an image, load the image. */
-      if(hasImg)
+      if(view.m_hasImage)
       {
          view.setBitmap(null);
          view.setTag(item.m_time);

@@ -238,7 +238,8 @@ class ViewFeedItem extends View
          builder.deleteCharAt(builder.length() - 1);
          return builder.toString();
       }
-      else return "";
+      else
+    	  return "";
    }
 
    @Override
