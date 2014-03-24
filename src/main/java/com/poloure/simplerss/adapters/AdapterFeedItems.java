@@ -18,47 +18,24 @@ package com.poloure.simplerss.adapters;
 
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 
 import com.poloure.simplerss.AsyncLoadImage;
 import com.poloure.simplerss.FeedItem;
 import com.poloure.simplerss.FeedsActivity;
 import com.poloure.simplerss.ViewFeedItem;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.Map;
 
 public
-class AdapterFeedItems extends ArrayAdapter<FeedItem>
+class AdapterFeedItems extends LinkedMapAdapter<Long, FeedItem>
 {
-    /* We use indexOf on this Long List so it can not be a Set. */
-    public final List<Long> m_itemTimes = new ArrayList<Long>(0);
     private final FeedsActivity m_activity;
+
     public
-    AdapterFeedItems(FeedsActivity activity)
+    AdapterFeedItems(FeedsActivity activity, Map<Long, FeedItem> map)
     {
-        super(activity, android.R.id.list);
+        super(map);
         m_activity = activity;
-    }
-
-    public
-    Collection<FeedItem> getSet()
-    {
-        Collection<FeedItem> favourites = new LinkedHashSet<FeedItem>(getCount());
-        for(int i = 0; i < getCount(); i++)
-        {
-            favourites.add(getItem(i));
-        }
-        return favourites;
-    }
-
-    @Override
-    public
-    long getItemId(int position)
-    {
-        return position;
     }
 
     @Override
@@ -72,15 +49,15 @@ class AdapterFeedItems extends ArrayAdapter<FeedItem>
         ViewFeedItem view = recycled ? (ViewFeedItem) convertView : new ViewFeedItem(m_activity, type);
 
         // Apply the read effect.
-        if(!m_itemTimes.isEmpty())
+        // TODO if(!m_itemTimes.isEmpty())
         {
             boolean isRead = m_activity.isItemRead(item.m_time);
             view.setRead(isRead);
         }
-        else
+        /*else
         {
             view.setRead(false);
-        }
+        }*/
 
         // If the recycled view is the view we want, keep it.
         if(recycled && item.m_time.equals(view.m_item.m_time))

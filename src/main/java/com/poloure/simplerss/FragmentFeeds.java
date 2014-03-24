@@ -17,6 +17,7 @@
 package com.poloure.simplerss;
 
 import android.app.Fragment;
+import android.app.ListFragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
@@ -71,9 +72,14 @@ class FragmentFeeds extends Fragment
     static
     ListView getTagListView(int page)
     {
+        return getViewPagerFragment(page).getListView();
+    }
+
+    static
+    FragmentTag getViewPagerFragment(int page)
+    {
         String tag = "android:switcher:" + R.id.viewpager + ':' + page;
-        FragmentTag fragment = (FragmentTag) s_fragmentManager.findFragmentByTag(tag);
-        return fragment.getListView();
+        return  (FragmentTag) s_fragmentManager.findFragmentByTag(tag);
     }
 
     @Override

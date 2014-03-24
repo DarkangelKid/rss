@@ -24,12 +24,14 @@ import android.widget.ListView;
 import com.poloure.simplerss.AsyncManageAdapter;
 import com.poloure.simplerss.AsyncNavigationAdapter;
 import com.poloure.simplerss.AsyncNewTagAdapters;
+import com.poloure.simplerss.FeedItem;
 import com.poloure.simplerss.FeedsActivity;
 import com.poloure.simplerss.IndexItem;
 import com.poloure.simplerss.PagerAdapterTags;
 import com.poloure.simplerss.R;
 import com.poloure.simplerss.ServiceUpdate;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public
@@ -62,9 +64,12 @@ class MultiModeListenerManage extends MultiModeListener
     public
     void performActionOnItems(int actionItemClicked, List<Integer> checkedPositions)
     {
+        // Make a copy since we call m_index.get() and .remove() in a loop with absolute positions.
+        List<IndexItem> indexCopy = new ArrayList<IndexItem>(m_activity.m_index);
+
         for(int pos : checkedPositions)
         {
-            IndexItem indexItem = m_activity.m_index.get(pos);
+            IndexItem indexItem = indexCopy.get(pos);
 
             switch(actionItemClicked)
             {

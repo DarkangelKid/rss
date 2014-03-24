@@ -60,6 +60,8 @@ public
 class ServiceUpdate extends IntentService
 {
     public static final String BROADCAST_ACTION = "com.poloure.serviceupdate.handle";
+    public static final String ITEM_LIST = "-item_list.txt";
+    public static final String CONTENT_FILE = "-content.txt";
 
     private static
     class Tags
@@ -85,8 +87,6 @@ class ServiceUpdate extends IntentService
         static final Pattern LINE = Pattern.compile(NEWLINE);
     }
 
-    public static final String ITEM_LIST = "-item_list.txt";
-    public static final String CONTENT_FILE = "-content.txt";
     private static final String NEWLINE = System.getProperty("line.separator");
     private static final int MIN_IMAGE_WIDTH = 64;
     private static final float FAKE_WIDTH = Math.min(Resources.getSystem()
@@ -112,14 +112,14 @@ class ServiceUpdate extends IntentService
 
         int page = intent.getIntExtra(FragmentFeeds.EXTRA_PAGE_NAME, 0);
         ObjectIO reader = new ObjectIO(this, FeedsActivity.INDEX);
-        Iterable<IndexItem> indexItems = (List<IndexItem>) reader.readCollection(ArrayList.class);
+        Iterable<IndexItem> indexItems = (Iterable<IndexItem>) reader.read();
 
-      /* Get the tagList (from disk if it is empty). */
+        // Get the tagList (from disk if it is empty).
         List<String> tagList = PagerAdapterTags.getTagsFromIndex(this, indexItems);
 
         String tag = tagList.get(page);
 
-      /* Download and parse each feed in the index. */
+        // Download and parse each feed in the index.
         for(IndexItem indexItem : indexItems)
         {
             if(0 == page || Arrays.asList(indexItem.m_tags).contains(tag))
@@ -154,24 +154,27 @@ class ServiceUpdate extends IntentService
         String contentFile = uid + CONTENT_FILE;
         String longFile = uid + ITEM_LIST;
 
-      /* Load the previously saved items to a map. */
+        // Load the previously saved items to a map.
         ObjectIO longFileReader = new ObjectIO(this, longFile);
-        Collection<Long> longSet = longFileReader.readCollection(HashSet.class);
+        Collection<Long> longSet = (Collection<Long>) longFileReader.read();
 
         Map<Long, FeedItem> map = new TreeMap<Long, FeedItem>(Collections.reverseOrder());
 
         ObjectIO reader = new ObjectIO(this, contentFile);
-        Map<Long, FeedItem> tempMap = (Map<Long, FeedItem>) reader.readMap(TreeMap.class);
+        Map<Long, FeedItem> mapFromFile = (Map<Long, FeedItem>) reader.read();
 
-        map.putAll(tempMap);
+        if(null != mapFromFile)
+        {
+            map.putAll(mapFromFile);
+        }
 
-      /* ObjectIO a Map<Long, FeedItem> = TreeMap from file. */
+        // ObjectIO a Map<Long, FeedItem> = TreeMap from file.
         XmlPullParser parser = Utilities.createXmlParser(urlString);
         FeedItem feedItem = new FeedItem();
         Resources resources = getResources();
         float timeSpace = getResources().getDimension(R.dimen.reserved_time);
 
-      /* Skip everything in the xml file until we arrive at an 'entry' or 'item' open tag. */
+        // Skip everything in the xml file until we arrive at an 'entry' or 'item' open tag.
         int eventType;
         do
         {
@@ -225,7 +228,7 @@ class ServiceUpdate extends IntentService
             else if(XmlPullParser.END_TAG == eventType)
             {
                 String tag = parser.getName();
-                boolean newItem = !longSet.contains(feedItem.m_time);
+                boolean newItem = !map.containsKey(feedItem.m_time);
 
                 if(Tags.ENTRY.equals(tag) || Tags.ITEM.equals(tag) && newItem)
                 {
@@ -236,11 +239,11 @@ class ServiceUpdate extends IntentService
             eventType = parser.getEventType();
         }
 
-      /* We have finished forming the sets and we can save the new files to disk. */
+        // Write the map to file.
         ObjectIO out = new ObjectIO(this, contentFile);
         out.write(map);
 
-      /* Write the item list of longs. */
+        // Write the key set to file. Wrapped in a set because TreeMap#KeySet is not serializable.
         Set<Long> set = new HashSet<Long>(map.keySet());
         out.setNewFileName(longFile);
         out.write(set);

@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.animation.AlphaAnimation;
 
 import com.poloure.simplerss.adapters.AdapterFeedItems;
+import com.poloure.simplerss.adapters.LinkedMapAdapter;
 import com.poloure.simplerss.ui.ListViewFeeds;
 
 import java.util.ArrayList;
@@ -31,7 +32,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 public
@@ -83,12 +83,15 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
 
             // Load the data from file.
             ObjectIO reader = new ObjectIO(m_activity, indexItem.m_uid + ServiceUpdate.CONTENT_FILE);
-            Map<Long, FeedItem> tempMap = (Map<Long, FeedItem>) reader.readMap(TreeMap.class);
+            Map<Long, FeedItem> tempMap = (Map<Long, FeedItem>) reader.read();
 
             // Put the item in each map that the feed is tagged with.
-            for(int k : indices)
+            if(null != tempMap)
             {
-                maps[k].putAll(tempMap);
+                for(int k : indices)
+                {
+                    maps[k].putAll(tempMap);
+                }
             }
         }
         return maps;
@@ -105,36 +108,35 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
         for(int i = 0; pageCount > i; i++)
         {
             // Get the tag page and skip ListViews that are null.
-            ListViewFeeds listView = (ListViewFeeds) FragmentFeeds.getTagListView(i);
+            FragmentTag fragment = FragmentFeeds.getViewPagerFragment(i);
+            LinkedMapAdapter<Long, FeedItem> adapterTag = fragment.getListAdapter();
+            ListViewFeeds listView = fragment.getListView();
 
-            AdapterFeedItems adapterTag = listView.getAdapter();
-
-            boolean firstLoad = null == listView || 0 == listView.getCount();
-
-            // If there are items in the currently viewed page, save the position.
-            if(null != adapterTag)
+            if(null == adapterTag)
             {
-                long timeBefore = 0L;
+                fragment.setListAdapter(new AdapterFeedItems(m_activity, result[i]));
+                listView.setSelectionOldestUnread(m_activity.getReadItemTimes());
+            }
+            else
+            {
+                long topKeyBefore = 0L;
                 int top = 0;
+
+                // If there are items in the currently viewed page, save the position.
+                boolean firstLoad = null == listView || 0 == listView.getCount();
                 if(!firstLoad)
                 {
                     // Get the time of the top item.
                     int topVisibleItem = listView.getFirstVisiblePosition();
-                    timeBefore = adapterTag.getItem(topVisibleItem).m_time;
+                    topKeyBefore = adapterTag.getKey(topVisibleItem);
 
                     View v = listView.getChildAt(0);
                     top = null == v ? 0 : v.getTop();
                 }
 
                 // Update the feedItems in the adapter.
-                Collection<FeedItem> feedItems = result[i].values();
                 adapterTag.clear();
-                adapterTag.addAll(feedItems);
-
-                // Update the feedItem time set in the adapter.
-                Set<Long> feedTimes = result[i].keySet();
-                adapterTag.m_itemTimes.clear();
-                adapterTag.m_itemTimes.addAll(feedTimes);
+                adapterTag.putAll(result[i]);
 
                 // Now find the position of the item with the time timeBefore.
                 if(firstLoad)
@@ -143,7 +145,7 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
                 }
                 else
                 {
-                    int newPos = adapterTag.m_itemTimes.indexOf(timeBefore);
+                    int newPos = adapterTag.indexOf(topKeyBefore);
                     listView.setSelectionFromTop(newPos, top - listView.getPaddingTop());
                 }
             }

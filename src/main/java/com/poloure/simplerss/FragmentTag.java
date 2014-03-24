@@ -41,14 +41,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.poloure.simplerss.adapters.AdapterFeedItems;
+import com.poloure.simplerss.adapters.LinkedMapAdapter;
 import com.poloure.simplerss.asynctasks.AsyncTaskSaveImage;
 import com.poloure.simplerss.ui.ListViewFeeds;
 
+public
 class FragmentTag extends ListFragment
 {
     private static final String POSITION_KEY = "POSITION";
 
-    static
+    public static
     Fragment newInstance(int position)
     {
         Fragment fragment = new FragmentTag();
@@ -77,7 +79,6 @@ class FragmentTag extends ListFragment
         FeedsActivity activity = (FeedsActivity) getActivity();
         ListView listView = (ListView) view.findViewById(android.R.id.list);
 
-        setListAdapter(new AdapterFeedItems(activity));
         registerForContextMenu(listView);
 
         AsyncNewTagAdapters.update(activity);
@@ -88,6 +89,20 @@ class FragmentTag extends ListFragment
     void onListItemClick(ListView l, View v, int position, long id)
     {
         Utilities.showWebFragment((FeedsActivity) getActivity(), (ViewFeedItem) v);
+    }
+
+    @Override
+    public
+    ListViewFeeds getListView()
+    {
+        return (ListViewFeeds) super.getListView();
+    }
+
+    @Override
+    public
+    LinkedMapAdapter<Long, FeedItem>  getListAdapter()
+    {
+        return (LinkedMapAdapter<Long, FeedItem>) super.getListAdapter();
     }
 
     @Override
@@ -180,14 +195,14 @@ class FragmentTag extends ListFragment
     {
         AdapterFeedItems adapter = getFavouritesAdapter(activity);
 
-        // If this item was already a favourite.
-        if(adapter.getSet().contains(item))
+        if(adapter.containsValue(item))
         {
-            // TODO
+            // TODO item already favourited string.
+            //toast = Toast.makeText(activity, activity.getString(R.string.toast_added_feed), Toast.LENGTH_SHORT);
         }
         else
         {
-            adapter.add(item);
+            adapter.put((long) adapter.getCount(), item);
             Toast toast = Toast.makeText(activity, activity.getString(R.string.toast_added_feed, item.m_title), Toast.LENGTH_SHORT);
             toast.show();
         }

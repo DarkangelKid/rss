@@ -70,8 +70,8 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, String[][]>
         for(IndexItem indexItem : m_activity.m_index)
         {
             ObjectIO reader = new ObjectIO(m_activity, indexItem.m_uid + ServiceUpdate.ITEM_LIST);
-            Collection<Long> set = reader.readCollection(HashSet.class);
-            feedItems.add(set);
+            Collection<Long> set = (Collection<Long>) reader.read();
+            feedItems.add(null == set ? new HashSet<Long>(0) : set);
         }
 
         // Create a temporary collection we will .clear() each iteration of the next for loop.

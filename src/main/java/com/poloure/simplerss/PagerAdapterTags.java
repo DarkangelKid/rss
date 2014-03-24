@@ -47,16 +47,19 @@ class PagerAdapterTags extends FragmentPagerAdapter
     static
     List<String> getTagsFromIndex(Context context, Iterable<IndexItem> indexItems)
     {
-      /* Get the all tag from resources. */
+        // Get the all tag from resources.
         String allTag = context.getString(R.string.all_tag);
 
-      /* Make the allTag the first tag. */
+        // Make the allTag the first tag.
         Set<String> tagSet = Collections.synchronizedSet(new LinkedHashSet<String>(0));
         tagSet.add(allTag);
 
-        for(IndexItem indexItem : indexItems)
+        if(null != indexItems)
         {
-            tagSet.addAll(Arrays.asList(indexItem.m_tags));
+            for(IndexItem indexItem : indexItems)
+            {
+                tagSet.addAll(Arrays.asList(indexItem.m_tags));
+            }
         }
 
         return new ArrayList<String>(tagSet);

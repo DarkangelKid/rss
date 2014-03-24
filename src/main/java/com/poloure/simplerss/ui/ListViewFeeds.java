@@ -30,7 +30,9 @@ import com.poloure.simplerss.adapters.AdapterFeedItems;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public
 class ListViewFeeds extends ListView implements AbsListView.OnScrollListener
@@ -55,7 +57,7 @@ class ListViewFeeds extends ListView implements AbsListView.OnScrollListener
     void setSelectionOldestUnread(final Collection<Long> readItemTimes)
     {
         AdapterFeedItems listAdapter = getAdapter();
-        final int pos = getPositionOfLastItemOnlyInB(readItemTimes, listAdapter.m_itemTimes);
+        final int pos = getPositionOfLastItemOnlyInB(readItemTimes, listAdapter.getKeyList());
 
         // If all items are read, set the selection to 0, else the position.
         // Must be post because this function is called very early during making the ListView.

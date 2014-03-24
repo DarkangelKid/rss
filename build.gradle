@@ -41,4 +41,5 @@ dependencies {
     compile 'com.github.chrisbanes.actionbarpulltorefresh:library:+'
     compile 'com.android.support:support-v4:19.0.+'
     compile 'com.android.support:support-v13:19.0.+'
+    compile 'commons-collections:commons-collections:20040616'
 }

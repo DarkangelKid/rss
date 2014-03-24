@@ -106,7 +106,7 @@ class ObjectIO
         return count;
     }
 
-    private
+    public
     Object read()
     {
         try
@@ -139,79 +139,5 @@ class ObjectIO
             LOGGER.log(Level.SEVERE, "IOException while trying to read an object from file: " + e.getMessage());
         }
         return null;
-    }
-
-    Collection readCollection(Class c)
-    {
-        Collection collection = null;
-        try
-        {
-            collection = (Collection) c.getConstructor().newInstance();
-
-            Collection object = (Collection) read();
-            if(null != object)
-            {
-                collection.addAll(object);
-            }
-        }
-        catch(ClassCastException e)
-        {
-            e.printStackTrace();
-        }
-        catch(InstantiationException e)
-        {
-            e.printStackTrace();
-        }
-        catch(IllegalAccessException e)
-        {
-            e.printStackTrace();
-        }
-        catch(NoSuchMethodException e)
-        {
-            e.printStackTrace();
-        }
-        catch(InvocationTargetException e)
-        {
-            e.printStackTrace();
-        }
-
-        return collection;
-    }
-
-    Map readMap(Class c)
-    {
-        Map collection = null;
-        try
-        {
-            collection = (Map) c.getConstructor().newInstance();
-
-            Map object = (Map) read();
-            if(null != object)
-            {
-                collection.putAll(object);
-            }
-        }
-        catch(ClassCastException e)
-        {
-            e.printStackTrace();
-        }
-        catch(InstantiationException e)
-        {
-            e.printStackTrace();
-        }
-        catch(IllegalAccessException e)
-        {
-            e.printStackTrace();
-        }
-        catch(NoSuchMethodException e)
-        {
-            e.printStackTrace();
-        }
-        catch(InvocationTargetException e)
-        {
-            e.printStackTrace();
-        }
-
-        return collection;
     }
 }

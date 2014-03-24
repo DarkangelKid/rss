@@ -56,13 +56,14 @@ class MultiModeListenerFavourites extends MultiModeListener
     void performActionOnItems(int actionItemClicked, List<Integer> checkedPositions)
     {
         AdapterFeedItems adapter = (AdapterFeedItems) m_listView.getAdapter();
-        FeedItem[] items = adapter.getSet().toArray(new FeedItem[adapter.getCount()]);
+        List<Long> itemKeys = adapter.getKeyList();
 
         for(int pos : checkedPositions)
         {
             if(R.id.delete_favourite == actionItemClicked)
             {
-                adapter.remove(items[pos]);
+                long key = itemKeys.get(pos);
+                adapter.remove(key);
             }
         }
 

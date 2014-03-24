@@ -36,11 +36,14 @@ import android.view.Surface;
 
 import com.poloure.simplerss.adapters.AdapterFeedItems;
 
+import org.apache.commons.collections.map.LinkedMap;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static com.poloure.simplerss.Constants.*;
@@ -54,7 +57,7 @@ class FeedsActivity extends Activity
     private static final int ALARM_SERVICE_START = 1;
     private static final int ALARM_SERVICE_STOP = 0;
     private static final int MINUTE_VALUE = 60000;
-    private final Set<Long> mReadItemTimes = Collections.synchronizedSet(new HashSet<Long>(0));
+    private final Set<Long> mReadItemTimes = Collections.synchronizedSet(new HashSet<Long>());
     private final BroadcastReceiver m_broadcastReceiver = new BroadcastReceiver()
     {
         @Override
@@ -92,12 +95,21 @@ class FeedsActivity extends Activity
 
         // Load the index.
         ObjectIO indexReader = new ObjectIO(this, INDEX);
-        m_index = (List<IndexItem>) indexReader.readCollection(ArrayList.class);
+        m_index = (List<IndexItem>) indexReader.read();
+
+        if(null == m_index)
+        {
+            m_index = new ArrayList<IndexItem>();
+        }
 
         /* Load the read items to the tags Adapter. */
         ObjectIO readItemReader = new ObjectIO(this, READ_ITEMS);
-        Collection<Long> set = (HashSet<Long>) readItemReader.readCollection(HashSet.class);
-        mReadItemTimes.addAll(set);
+        Collection<Long> readItemsFromFile = (Collection<Long>) readItemReader.read();
+
+        if(null != readItemsFromFile)
+        {
+            mReadItemTimes.addAll(readItemsFromFile);
+        }
 
         s_fragmentDrawer.setUp(s_drawerLayout);
 
@@ -195,7 +207,7 @@ class FeedsActivity extends Activity
 
         // Write the favourites list to file.
         AdapterFeedItems adapter = FragmentTag.getFavouritesAdapter(this);
-        Collection<FeedItem> favourites = adapter.getSet();
+        LinkedMap favourites = adapter.getMap();
 
         out.setNewFileName(FAVOURITES);
         out.write(favourites);
