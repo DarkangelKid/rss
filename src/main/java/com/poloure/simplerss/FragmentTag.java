@@ -42,21 +42,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.poloure.simplerss.asynctasks.AsyncTaskSaveImage;
 import com.poloure.simplerss.ui.ListViewFeeds;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 class FragmentTag extends ListFragment
 {
-    private static final int LIST_VIEW_ID_BASE = 20000;
     private static final String POSITION_KEY = "POSITION";
 
     static
@@ -81,21 +71,13 @@ class FragmentTag extends ListFragment
 
     @Override
     public
-    void onListItemClick(ListView l, View v, int position, long id)
+    void onViewCreated(View view, Bundle savedInstanceState)
     {
-        Utilities.showWebFragment(v);
-    }
-
-    @Override
-    public
-    void onActivityCreated(Bundle savedInstanceState)
-    {
-        super.onActivityCreated(savedInstanceState);
-
-        ListView listView = getListView();
+        super.onViewCreated(view, savedInstanceState);
         final Activity activity = getActivity();
+        ListView listView = (ListView) view.findViewById(android.R.id.list);
 
-        listView.setId(LIST_VIEW_ID_BASE + getArguments().getInt(POSITION_KEY));
+        setListAdapter(new AdapterTags(activity));
         listView.setOnScrollListener(new AbsListView.OnScrollListener()
         {
             private static final int TOUCH = AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL;
@@ -141,9 +123,22 @@ class FragmentTag extends ListFragment
         });
 
         registerForContextMenu(listView);
-        setListAdapter(new AdapterTags(activity));
-        setHasOptionsMenu(true);
         AsyncNewTagAdapters.update((FeedsActivity) activity);
+    }
+
+    @Override
+    public
+    void onListItemClick(ListView l, View v, int position, long id)
+    {
+        Utilities.showWebFragment(v);
+    }
+
+    @Override
+    public
+    void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -155,7 +150,7 @@ class FragmentTag extends ListFragment
             ListViewFeeds listView = (ListViewFeeds) getListView();
             if(null != listView)
             {
-                listView.gotoLatestUnread(AdapterTags.READ_ITEM_TIMES);
+                listView.setSelectionOldestUnread(AdapterTags.READ_ITEM_TIMES);
             }
             return true;
         }
@@ -234,78 +229,12 @@ class FragmentTag extends ListFragment
     }
 
     private static
-    void downloadImage(final Activity activity, final String imageUrl, final String imageName)
+    void downloadImage(Activity activity, String imageUrl, String imageName)
     {
         if(null != imageUrl && !imageUrl.isEmpty())
         {
-            new AsyncTask<Void, Void, Boolean>()
-            {
-                @Override
-                public
-                Boolean doInBackground(Void... stuff)
-                {
-                    try
-                    {
-                        File pictureFolder = Utilities.getPicturesFolder(activity);
-                        File file = new File(pictureFolder, imageName);
-
-                        InputStream inputStream = new URL(imageUrl).openStream();
-                        BufferedInputStream in = new BufferedInputStream(inputStream);
-
-                        FileOutputStream fos = new FileOutputStream(file);
-                        BufferedOutputStream out = new BufferedOutputStream(fos);
-                        try
-                        {
-                            byte[] buf = new byte[1024];
-                            int offset;
-                            while(0 < (offset = in.read(buf)))
-                            {
-                                out.write(buf, 0, offset);
-                            }
-                        }
-                        finally
-                        {
-                            in.close();
-                            out.close();
-                        }
-                    }
-                    catch(MalformedURLException e)
-                    {
-                        e.printStackTrace();
-                        return false;
-                    }
-                    catch(FileNotFoundException e)
-                    {
-                        e.printStackTrace();
-                        return false;
-                    }
-                    catch(IOException e)
-                    {
-                        e.printStackTrace();
-                        return false;
-                    }
-                    return true;
-                }
-
-                @Override
-                public
-                void onPostExecute(Boolean result)
-                {
-                    if(result)
-                    {
-                        String appName = activity.getString(R.string.application_name);
-                        String success = activity.getString(R.string.image_downloaded_success, appName);
-                        Toast toast = Toast.makeText(activity, success, Toast.LENGTH_SHORT);
-                        toast.show();
-                    }
-                    else
-                    {
-                        String failed = activity.getString(R.string.image_downloaded_failed);
-                        Toast toast = Toast.makeText(activity, failed, Toast.LENGTH_SHORT);
-                        toast.show();
-                    }
-                }
-            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            AsyncTaskSaveImage task = new AsyncTaskSaveImage(activity, imageName, imageUrl);
+            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
     }
 

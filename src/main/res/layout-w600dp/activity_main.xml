@@ -59,7 +59,7 @@
 
         <fragment
             android:id="@+id/fragment_web"
-            android:name="android.webkit.WebViewFragment"
+            android:name="com.poloure.simplerss.fragments.FragmentWebView"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"/>

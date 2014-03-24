@@ -44,7 +44,8 @@ Code Style
 ===
 
 Use Allman indent style with four space indents (not tabs). No spaces after method names, and
-use right hand comparisons (to avoid x = 3 typos).
+use right hand comparisons (to avoid x = 3 typos). Use "//" for inline comments and "/* */" for
+block comments.
 
 
     while(3 == x)

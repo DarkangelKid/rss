@@ -17,9 +17,10 @@
 package com.poloure.simplerss;
 
 import android.content.Context;
+import android.support.v4.view.PagerAdapter;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.widget.ArrayAdapter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,7 +29,7 @@ import java.util.List;
 import java.util.Set;
 
 public
-class AdapterTags extends BaseAdapter
+class AdapterTags extends ArrayAdapter<FeedItem>
 {
     static final Set<Long> READ_ITEM_TIMES = Collections.synchronizedSet(new HashSet<Long>(0));
     static final int TYPE_PLAIN = 0;
@@ -38,27 +39,13 @@ class AdapterTags extends BaseAdapter
     static final float READ_OPACITY = 0.5F;
     /* We use indexOf on this Long List so it can not be a Set. */
     public final List<Long> m_itemTimes = new ArrayList<Long>(0);
-    final List<FeedItem> m_feedItems = new ArrayList<FeedItem>(0);
     private final Context m_context;
 
     public
     AdapterTags(Context context)
     {
+        super(context, android.R.id.list);
         m_context = context;
-    }
-
-    @Override
-    public
-    int getCount()
-    {
-        return m_feedItems.size();
-    }
-
-    @Override
-    public
-    Object getItem(int position)
-    {
-        return m_feedItems.get(position);
     }
 
     @Override
@@ -73,26 +60,26 @@ class AdapterTags extends BaseAdapter
     View getView(int position, View convertView, ViewGroup parent)
     {
         int viewType = getItemViewType(position);
+        FeedItem item = getItem(position);
 
         ViewFeedItem view = null != convertView ? (ViewFeedItem) convertView : new ViewFeedItem(m_context, viewType);
-        FeedItem item = m_feedItems.get(position);
 
-      /* Apply the read effect. */
+        // Apply the read effect.
         boolean isRead = READ_ITEM_TIMES.contains(item.m_time);
         view.setAlpha(isRead ? READ_OPACITY : 1.0F);
         view.setBackgroundResource(isRead ? R.drawable.selector_transparent : R.drawable.selector_white);
 
-      /* If the recycled view is the view we want, keep it. */
+        // If the recycled view is the view we want, keep it.
         if(null != convertView && item.m_time.equals(view.m_item.m_time))
         {
             return view;
         }
 
-      /* Set the information. */
+        // Set the information.
         view.m_item = item;
         view.m_hasImage = TYPE_IMAGE == viewType || TYPE_IMAGE_SANS_DESCRIPTION == viewType;
 
-      /* If the view was an image, load the image. */
+        // If the view was an image, load the image.
         if(view.m_hasImage)
         {
             view.setBitmap(null);
@@ -107,12 +94,18 @@ class AdapterTags extends BaseAdapter
     public
     int getItemViewType(int position)
     {
-        FeedItem feedItem = m_feedItems.get(position);
+        FeedItem item = getItem(position);
 
-        boolean isImage = !feedItem.m_imageLink.isEmpty();
-        boolean isDes = !feedItem.m_desLines[0].isEmpty();
+        boolean isDes = !item.m_desLines[0].isEmpty();
 
-        return isImage ? isDes ? TYPE_IMAGE : TYPE_IMAGE_SANS_DESCRIPTION : isDes ? TYPE_PLAIN : TYPE_PLAIN_SANS_DESCRIPTION;
+        if(item.m_imageLink.isEmpty())
+        {
+            return isDes ? TYPE_PLAIN : TYPE_PLAIN_SANS_DESCRIPTION;
+        }
+        else
+        {
+            return isDes ? TYPE_IMAGE : TYPE_IMAGE_SANS_DESCRIPTION;
+        }
     }
 
     @Override

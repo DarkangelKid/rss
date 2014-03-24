@@ -45,25 +45,52 @@ class ListViewFeeds extends ListView
      * @see com.poloure.simplerss.FeedItem
      */
     public
-    void gotoLatestUnread(final Collection<Long> readItemTimes)
+    void setSelectionOldestUnread(final Collection<Long> readItemTimes)
     {
         AdapterTags listAdapter = getAdapter();
+        final int pos = getPositionOfLastItemOnlyInB(readItemTimes, listAdapter.m_itemTimes);
 
-        // Create a List with all the item times in this ListView.
-        List<Long> times = new ArrayList<Long>(listAdapter.m_itemTimes);
+        // If all items are read, set the selection to 0, else the position.
+        // Must be post because this function is called very early during making the ListView.
+        clearFocus();
+        post(new Runnable() {
 
-        // Removes all the read item times from the list just made.
-        times.removeAll(readItemTimes);
+            @Override
+            public void run() {
 
+                setSelection(-1 == pos ? 0 : pos);
+            }
+        });
+    }
+
+    /**
+     * Finds the last item of B that is not in A.
+     *
+     * @param a Collection to remove all of its elements from b.
+     * @param b List that we want the last item of.
+     * @return -1 if B is a subset of A, else position in b of last member of B exclusive of A.
+     */
+    private
+    int getPositionOfLastItemOnlyInB(Collection<Long> a, List<Long> b)
+    {
+        // Create a copy of the B list.
+        List<Long> times = new ArrayList<Long>(b);
+
+        // Removes all the items from B that are in both collections.
+        times.removeAll(a);
+
+        // If B is a subset of A, return -1.
         if(times.isEmpty())
         {
-            setSelection(0);
+            return -1;
         }
-        else
-        {
-            int index = listAdapter.m_itemTimes.indexOf(times.get(times.size() - 1));
-            setSelection(index);
-        }
+
+        // Get the last item of the new List.
+        int last = times.size() - 1;
+        long l = times.get(last);
+
+        // Return the position of the last item of the new List in B.
+        return b.indexOf(l);
     }
 
     @Override

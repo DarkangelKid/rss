@@ -18,7 +18,6 @@ package com.poloure.simplerss;
 
 import android.app.Fragment;
 import android.app.FragmentTransaction;
-import android.content.Context;
 import android.os.Environment;
 import android.support.v4.text.TextDirectionHeuristicsCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -32,7 +31,6 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -61,47 +59,34 @@ class Utilities
     }
 
     static
-    File getPicturesFolder(Context context)
-    {
-        // Get the directory for the user's public pictures directory.
-        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), context
-                .getString(R.string.application_name));
-        if(!file.mkdirs())
-        {
-         /* TODO LOGGER can not create directory. */
-        }
-        return file;
-    }
-
-    static
     void showWebFragment(View view)
     {
         WebView webView = s_fragmentWeb.getWebView();
         webView.loadData(((ViewFeedItem) view).m_item.m_content, "text/html; charset=UTF-8", null);
 
-      /* Read the item. */
+        // Read the item.
         AdapterTags.READ_ITEM_TIMES.add(((ViewFeedItem) view).m_item.m_time);
         AsyncNavigationAdapter.run(s_activity);
 
-      /* Only apply read effect if it is not in the favourites fragment. */
+        // Apply read effect only if it is not in the favourites fragment.
         if(s_fragmentFeeds.isVisible())
         {
             view.setAlpha(AdapterTags.READ_OPACITY);
             view.setBackgroundResource(R.drawable.selector_transparent);
         }
 
-        if(!FeedsActivity.usingTwoPaneLayout())
+        if(!FeedsActivity.canFitTwoFragments())
         {
             switchToFragment(s_fragmentWeb, true);
             s_fragmentManager.executePendingTransactions();
 
-         /* Form the better url. */
+            // Form the better url.
             String url = ((ViewFeedItem) view).m_item.m_url;
             int index = url.indexOf('/');
             String urlWithoutHttp = url.substring(-1 == index ? 0 : index + 2);
             String urlWithoutWww = urlWithoutHttp.replace("www.", "");
 
-         /* Configure the actionbar. */
+            // Configure the actionbar.
             s_actionBar.setTitle(urlWithoutWww);
             s_actionBar.setSubtitle(null);
             s_actionBar.setIcon(R.drawable.ic_action_web_site);
@@ -156,7 +141,7 @@ class Utilities
         int listPosition = -10 == absolutePos ? s_viewPager.getCurrentItem() + headers : absolutePos;
         int viewPagerPos = -10 == absolutePos ? s_viewPager.getCurrentItem() : absolutePos - headers;
 
-      /* Check the drawer item. */
+        // Check the drawer item.
         String title = PagerAdapterTags.s_tagList.get(0);
         String subTitle = null;
         int imageRes = R.drawable.ic_action_labels;
@@ -179,7 +164,7 @@ class Utilities
             title = navTitles[2];
             imageRes = R.drawable.ic_action_settings;
         }
-        else/* if(s_fragmentFeeds.isVisible())*/
+        else
         {
             ArrayAdapter<String[]> adapter = (ArrayAdapter<String[]>) headerAdapter.getWrappedAdapter();
 
@@ -198,10 +183,10 @@ class Utilities
 
         list.setItemChecked(listPosition, true);
 
-      /* If we must change the view pager page. */
+        // If we must change the view pager page.
         if(0 <= viewPagerPos)
         {
-         /* Switch the view pager page if different. */
+            // Switch the view pager page if different.
             if(s_viewPager.getCurrentItem() != viewPagerPos)
             {
                 s_viewPager.setCurrentItem(viewPagerPos);

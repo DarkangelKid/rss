@@ -114,11 +114,11 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
             {
                 long timeBefore = 0L;
                 int top = 0;
-                if(!firstLoad && i == pager.getCurrentItem())
+                if(!firstLoad)
                 {
                     // Get the time of the top item.
                     int topVisibleItem = listView.getFirstVisiblePosition();
-                    timeBefore = adapterTag.m_feedItems.get(topVisibleItem).m_time;
+                    timeBefore = adapterTag.getItem(topVisibleItem).m_time;
 
                     View v = listView.getChildAt(0);
                     top = null == v ? 0 : v.getTop();
@@ -126,26 +126,24 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
 
                 // Update the feedItems in the adapter.
                 Collection<FeedItem> feedItems = result[i].values();
-                adapterTag.m_feedItems.clear();
-                adapterTag.m_feedItems.addAll(feedItems);
+                adapterTag.clear();
+                adapterTag.addAll(feedItems);
 
                 // Update the feedItem time set in the adapter.
                 Set<Long> feedTimes = result[i].keySet();
                 adapterTag.m_itemTimes.clear();
                 adapterTag.m_itemTimes.addAll(feedTimes);
 
-                // Notify the adapter that items have changed.
-                adapterTag.notifyDataSetChanged();
-
                 // Now find the position of the item with the time timeBefore.
-                int newPositionOfTop = adapterTag.m_itemTimes.indexOf(timeBefore);
-                if(-1 == newPositionOfTop)
+                if(firstLoad)
                 {
-                    listView.gotoLatestUnread(AdapterTags.READ_ITEM_TIMES);
+                    listView.getChildAt(0);
+                    listView.setSelectionOldestUnread(AdapterTags.READ_ITEM_TIMES);
                 }
                 else
                 {
-                    listView.setSelectionFromTop(newPositionOfTop, top - listView.getPaddingTop());
+                    int newPos = adapterTag.m_itemTimes.indexOf(timeBefore);
+                    listView.setSelectionFromTop(newPos, top - listView.getPaddingTop());
                 }
             }
             ((View) listView.getParent()).setVisibility(View.VISIBLE);

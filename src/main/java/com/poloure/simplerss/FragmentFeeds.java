@@ -23,8 +23,6 @@ import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
 import android.widget.ListView;
 
 import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
@@ -61,13 +59,6 @@ class FragmentFeeds extends Fragment
     private static final float PULL_DISTANCE = 0.5F;
 
     static
-    ListView getCurrentTagListView()
-    {
-        int currentPage = s_viewPager.getCurrentItem();
-        return getTagListView(currentPage);
-    }
-
-    static
     ListView getTagListView(int page)
     {
         String tag = "android:switcher:" + R.id.viewpager + ':' + page;
@@ -81,20 +72,27 @@ class FragmentFeeds extends Fragment
     {
         super.onCreateView(inflater, container, savedInstanceState);
 
+        FeedsActivity activity = (FeedsActivity) getActivity();
         PullToRefreshLayout layout = (PullToRefreshLayout) inflater.inflate(R.layout.viewpager, container, false);
 
+        // Find and configure the ViewPager.
         s_viewPager = (ViewPager) layout.findViewById(R.id.viewpager);
-
-        ActionBarPullToRefresh.from(getActivity())
-                .allChildrenArePullable()
-                .options(Options.create().scrollDistance(PULL_DISTANCE).build())
-                .useViewDelegate(ViewPager.class, new ViewPagerDelegate())
-                .listener(new RefreshListener((FeedsActivity) getActivity()))
-                .setup(layout);
-
-      /* Inflate and configure the ViewPager. */
         s_viewPager.setOffscreenPageLimit(128);
         s_viewPager.setOnPageChangeListener(new OnPageChangeListener());
+
+        // Create the Options object for the ActionBarPullToRefresh SetupWizard.
+        Options.Builder optionsBuilder = Options.create();
+        optionsBuilder.scrollDistance(PULL_DISTANCE);
+        Options options = optionsBuilder.build();
+
+        // Create the ActionBarPullToRefresh object using its SetupWizard.
+        ActionBarPullToRefresh.SetupWizard setup = ActionBarPullToRefresh.from(activity);
+        setup.allChildrenArePullable();
+        setup.options(options);
+        setup.useViewDelegate(ViewPager.class, new ViewPagerDelegate());
+        setup.listener(new RefreshListener(activity));
+        setup.setup(layout);
+
         return layout;
     }
 
@@ -106,12 +104,6 @@ class FragmentFeeds extends Fragment
 
         s_viewPager.setAdapter(new PagerAdapterTags(s_fragmentManager, s_activity, s_activity.m_index));
         Utilities.setTitlesAndDrawerAndPage(null, -10);
-
-        WebView webView = s_fragmentWeb.getWebView();
-        WebSettings settings = webView.getSettings();
-        settings.setBuiltInZoomControls(true);
-        settings.setDisplayZoomControls(false);
-        settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
     }
 
     static

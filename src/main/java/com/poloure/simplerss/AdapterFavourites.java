@@ -71,18 +71,19 @@ class AdapterFavourites extends BaseAdapter
         ViewFeedItem view = null != convertView ? (ViewFeedItem) convertView : new ViewFeedItem(m_context, viewType);
         FeedItem item = m_feedItems.toArray(new FeedItem[m_feedItems.size()])[position];
 
-        /* If the recycled view is the view we want, keep it. */
+        view.setAlpha(1.0F);
+        view.setBackgroundResource(R.drawable.selector_white);
+
+        // If the recycled view is the view we want, keep it.
         if(null != convertView && item.m_time.equals(view.m_item.m_time))
         {
             return view;
         }
 
-        view.setAlpha(1.0F);
-        view.setBackgroundResource(R.drawable.selector_white);
         view.m_item = item;
         view.m_hasImage = TYPE_IMAGE == viewType || TYPE_IMAGE_SANS_DESCRIPTION == viewType;
 
-        /* If the view was an image, load the image. */
+        // If the view was an image, load the image.
         if(view.m_hasImage)
         {
             view.setBitmap(null);

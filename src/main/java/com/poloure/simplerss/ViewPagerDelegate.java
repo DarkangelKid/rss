@@ -18,6 +18,7 @@ package com.poloure.simplerss;
 
 import android.view.View;
 import android.widget.AbsListView;
+import android.widget.ListView;
 
 import uk.co.senab.actionbarpulltorefresh.library.viewdelegates.ViewDelegate;
 
@@ -25,6 +26,13 @@ import static com.poloure.simplerss.Constants.*;
 
 class ViewPagerDelegate implements ViewDelegate
 {
+    static
+    ListView getCurrentTagListView()
+    {
+        int currentPage = s_viewPager.getCurrentItem();
+        return FragmentFeeds.getTagListView(currentPage);
+    }
+
     @Override
     public
     boolean isReadyForPull(View view, float x, float y)
@@ -34,7 +42,7 @@ class ViewPagerDelegate implements ViewDelegate
       /* First we check whether we're scrolled to the top of current page. */
         if(null != s_fragmentFeeds)
         {
-            AbsListView absListView = s_fragmentFeeds.getCurrentTagListView();
+            AbsListView absListView = getCurrentTagListView();
 
             if(0 == absListView.getCount())
             {

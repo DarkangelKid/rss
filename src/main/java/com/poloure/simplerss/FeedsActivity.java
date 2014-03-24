@@ -33,7 +33,6 @@ import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Surface;
-import android.webkit.WebView;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -61,8 +60,8 @@ class FeedsActivity extends Activity
             {
                 AsyncNewTagAdapters.update(s_activity);
 
-            /* Manage adapter is updated every time it is shown but in case the user switched to the
-            manage fragment mid refresh. */
+                // Manage adapter is updated every time it is shown but in case the user switched to the
+                // manage fragment mid refresh.
                 AsyncManageAdapter.run(s_activity);
                 AsyncNavigationAdapter.run(s_activity);
 
@@ -102,7 +101,7 @@ class FeedsActivity extends Activity
         if(null == savedInstanceState)
         {
             /* Create and hide the fragments that go inside the content frame. */
-            if(!usingTwoPaneLayout())
+            if(!canFitTwoFragments())
             {
                 hideFragments(s_fragmentWeb);
             }
@@ -112,14 +111,25 @@ class FeedsActivity extends Activity
         }
     }
 
+    /**
+     * Checks to see if the Activity is using (or should be using) a two pane fragment layout.
+     *
+     * @return true if the display is rotated horizontally and the activity is using the w600dp
+     * res folder for layout resources.
+     */
     static
-    boolean usingTwoPaneLayout()
+    boolean canFitTwoFragments()
     {
-        return 600 <= s_displayMetrics.widthPixels / s_displayMetrics.density && isHorizontal();
+        return 600 <= s_displayMetrics.widthPixels / s_displayMetrics.density && isDisplayHorizontal();
     }
 
+    /**
+     * Checks to see if the default Display in the WindowManager is rotated horizontally.
+     *
+     * @return true if the display is currently rotated horizontally, false otherwise.
+     */
     private static
-    boolean isHorizontal()
+    boolean isDisplayHorizontal()
     {
         Display display = s_windowManager.getDefaultDisplay();
         int rotation = display.getRotation();
@@ -143,7 +153,7 @@ class FeedsActivity extends Activity
         setServiceIntent(ALARM_SERVICE_STOP);
         registerReceiver(m_broadcastReceiver, new IntentFilter(ServiceUpdate.BROADCAST_ACTION));
 
-      /* Update the navigation adapter. This updates the subtitle and title. */
+        // Update the navigation adapter. This updates the subtitle and title.
         if(s_fragmentWeb.isHidden())
         {
             AsyncNavigationAdapter.run(this);
@@ -170,15 +180,15 @@ class FeedsActivity extends Activity
     {
         super.onStop();
 
-      /* Write the read items set to file. */
+        // Write the read items set to file.
         ObjectIO out = new ObjectIO(this, READ_ITEMS);
         out.write(AdapterTags.READ_ITEM_TIMES);
 
-      /* Write the index file to disk. */
+        // Write the index file to disk.
         out.setNewFileName(INDEX);
         out.write(m_index);
 
-      /* Write the favourites list to file. */
+        // Write the favourites list to file.
         out.setNewFileName(FAVOURITES);
         out.write(FragmentTag.getFavouritesAdapter(this).m_feedItems);
 
@@ -200,7 +210,7 @@ class FeedsActivity extends Activity
             hideFragments(s_fragmentWeb);
         }
 
-      /* Update the padding of the content view. */
+        // Update the padding of the content view.
         setTopOffset(this);
     }
 
@@ -208,7 +218,7 @@ class FeedsActivity extends Activity
     public
     void onBackPressed()
     {
-        if(s_fragmentWeb.isVisible() && !usingTwoPaneLayout())
+        if(s_fragmentWeb.isVisible() && !canFitTwoFragments())
         {
             super.onBackPressed();
 
@@ -218,10 +228,6 @@ class FeedsActivity extends Activity
             s_drawerToggle.setDrawerIndicatorEnabled(true);
             s_drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
             invalidateOptionsMenu();
-
-         /* Reset the WebView for the next item. */
-            WebView webView = s_fragmentWeb.getWebView();
-            webView.loadUrl("about:blank");
         }
         else
         {
@@ -229,7 +235,6 @@ class FeedsActivity extends Activity
         }
     }
 
-    /* TODO: Needs a method of checking if the service is running. */
     @Override
     public
     boolean onCreateOptionsMenu(Menu menu)
@@ -246,7 +251,7 @@ class FeedsActivity extends Activity
     public
     boolean onPrepareOptionsMenu(Menu menu)
     {
-        boolean web = s_fragmentWeb.isVisible() && !usingTwoPaneLayout();
+        boolean web = s_fragmentWeb.isVisible() && !canFitTwoFragments();
         boolean feed = s_fragmentFeeds.isVisible();
         boolean manage = s_fragmentManage.isVisible();
 
@@ -261,18 +266,13 @@ class FeedsActivity extends Activity
     public
     boolean onOptionsItemSelected(MenuItem item)
     {
-        if(android.R.id.home == item.getItemId() && s_fragmentWeb.isVisible())
-        {
-            onBackPressed();
-            return true;
-        }
         return s_drawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
     }
 
     private
     void setServiceIntent(int state)
     {
-      /* Load the ManageFeedsRefresh boolean value from settings. */
+        // Load the ManageFeedsRefresh boolean value from settings.
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
 
         if(!pref.getBoolean("refreshing_enabled", false) && ALARM_SERVICE_START == state)
@@ -280,13 +280,13 @@ class FeedsActivity extends Activity
             return;
         }
 
-      /* Create intent, turn into pending intent, and get the alarm manager. */
+        // Create intent, turn into pending intent, and get the alarm manager.
         Intent intent = new Intent(this, ServiceUpdate.class);
 
         PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, 0);
         AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
 
-      /* Depending on the state string, start or stop the service. */
+        // Depending on the state string, start or stop the service.
         if(ALARM_SERVICE_START == state)
         {
             String intervalString = pref.getString("refresh_interval", "120");
