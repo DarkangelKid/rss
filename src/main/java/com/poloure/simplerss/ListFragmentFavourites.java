@@ -26,6 +26,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.poloure.simplerss.adapters.AdapterFeedItems;
+import com.poloure.simplerss.listeners.MultiModeListener;
+import com.poloure.simplerss.listeners.MultiModeListenerFavourites;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -71,6 +73,6 @@ class ListFragmentFavourites extends ListFragment
 
         registerForContextMenu(listView);
         listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
-        listView.setMultiChoiceModeListener(new MultiModeListener(listView, activity));
+        listView.setMultiChoiceModeListener(new MultiModeListenerFavourites(listView, getResources()));
     }
 }

@@ -31,6 +31,7 @@ import java.util.Set;
 
 import static com.poloure.simplerss.Constants.*;
 
+public
 class PagerAdapterTags extends FragmentPagerAdapter
 {
     static List<String> s_tagList = new ArrayList<String>(0);
@@ -61,7 +62,7 @@ class PagerAdapterTags extends FragmentPagerAdapter
         return new ArrayList<String>(tagSet);
     }
 
-    static
+    public static
     void run(FeedsActivity activity)
     {
         s_tagList = getTagsFromIndex(activity, activity.m_index);

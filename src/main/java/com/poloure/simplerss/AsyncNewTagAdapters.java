@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+public
 class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[]>
 {
     private final FeedsActivity m_activity;
@@ -44,7 +45,7 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
         m_activity = activity;
     }
 
-    static
+    public static
     void update(FeedsActivity activity)
     {
         new AsyncNewTagAdapters(activity).executeOnExecutor(THREAD_POOL_EXECUTOR);

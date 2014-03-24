@@ -22,13 +22,8 @@
         android:showAsAction="ifRoom"
         android:title="@string/select_all"/>
     <item
-        android:id="@+id/delete_content"
-        android:icon="@drawable/ic_action_cut"
-        android:showAsAction="ifRoom"
-        android:title="@string/manage_item_clear_content"/>
-    <item
-        android:id="@+id/delete_feed"
+        android:id="@+id/delete_favourite"
         android:icon="@drawable/ic_action_discard"
         android:showAsAction="ifRoom"
-        android:title="@string/manage_item_delete"/>
+        android:title="@string/favourite_item_delete"/>
 </menu>

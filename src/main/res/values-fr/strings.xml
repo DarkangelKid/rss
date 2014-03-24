@@ -16,7 +16,7 @@
 
 <!-- For style guide: https://developer.android.com/design/style/writing.html -->
 
-<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="en">
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="fr">
 
     <string name="application_name">Simple Rss</string>
 
@@ -76,10 +76,22 @@
     <string name="toast_added_feed">Ajouté %s</string>
 
     <!-- Manage context action bar icon descriptions. -->
-    <string name="manage_select_all">Selectionner tout</string>
-    <string name="managed_selected">selectionné</string>
     <string name="manage_item_clear_content">Supprimer le contenu</string>
     <string name="manage_item_delete">Supprimer le flux</string>
+
+    <!-- TODO Favourite context action bar icon descriptions. -->
+    <string name="favourite_item_delete">Delete favourites</string>
+
+    <!-- TODO Manage and Favourites multi selected strings. -->
+    <string name="select_all">Selectionner tout</string>
+    <plurals name="items_selected">
+        <item quantity="zero">%s selectionné</item>
+        <item quantity="one">%s selected</item>
+        <item quantity="two">%s selected</item>
+        <item quantity="few">%s selected</item>
+        <item quantity="many">%s selected</item>
+        <item quantity="other">%s selected</item>
+    </plurals>
 
     <!-- Settings general strings. -->
     <string name="switch_off">Éteindre</string>
@@ -107,7 +119,7 @@
     <string name="clear_read_items_dialog_title">Effacer l\'historique lu</string>
     <string name="clear_read_items_dialog_summary">Êtes vous sur de vouloir effacer l\'historique lu ?</string>
 
-    <!-- Settings source code. -->
+    <!-- TODO Settings source code. -->
     <string name="source_code">Code source</string>
 
     <!-- Save image results -->

@@ -85,9 +85,8 @@ class ServiceUpdate extends IntentService
         static final Pattern LINE = Pattern.compile(NEWLINE);
     }
 
-    static final String ITEM_LIST = "-item_list.txt";
-    static final String CONTENT_FILE = "-content.txt";
-    static final String[] FEED_FILES = {ITEM_LIST, CONTENT_FILE};
+    public static final String ITEM_LIST = "-item_list.txt";
+    public static final String CONTENT_FILE = "-content.txt";
     private static final String NEWLINE = System.getProperty("line.separator");
     private static final int MIN_IMAGE_WIDTH = 64;
     private static final float FAKE_WIDTH = Math.min(Resources.getSystem()

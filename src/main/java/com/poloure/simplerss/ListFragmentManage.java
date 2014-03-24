@@ -17,6 +17,7 @@
 package com.poloure.simplerss;
 
 import android.app.ListFragment;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +25,9 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.poloure.simplerss.listeners.MultiModeListener;
+import com.poloure.simplerss.listeners.MultiModeListenerManage;
 
 public
 class ListFragmentManage extends ListFragment
@@ -52,7 +56,8 @@ class ListFragmentManage extends ListFragment
         super.onHiddenChanged(hidden);
         if(!hidden)
         {
-            AsyncManageAdapter.run((FeedsActivity) getActivity());
+            AsyncManageAdapter task = new AsyncManageAdapter((FeedsActivity) getActivity(), this);
+            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
     }
 
@@ -69,6 +74,6 @@ class ListFragmentManage extends ListFragment
 
         registerForContextMenu(listView);
         listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
-        listView.setMultiChoiceModeListener(new MultiModeListener(listView, activity));
+        listView.setMultiChoiceModeListener(new MultiModeListenerManage(listView, (FeedsActivity) getActivity()));
     }
 }

@@ -75,7 +75,7 @@ class FeedsActivity extends Activity
         }
     };
     boolean m_showMenuItems = true;
-    List<IndexItem> m_index;
+    public List<IndexItem> m_index;
 
     /* Called only when no remnants of the Activity exist. */
     @Override

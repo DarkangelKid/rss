@@ -76,10 +76,22 @@
     <string name="toast_added_feed">Added %s</string>
 
     <!-- Manage context action bar icon descriptions. -->
-    <string name="manage_select_all">Select all</string>
-    <string name="managed_selected">selected</string>
     <string name="manage_item_clear_content">Delete content</string>
     <string name="manage_item_delete">Delete feed</string>
+
+    <!-- Favourite context action bar icon descriptions. -->
+    <string name="favourite_item_delete">Delete favourites</string>
+
+    <!-- Manage and Favourites multi selected strings. -->
+    <string name="select_all">Select all</string>
+    <plurals name="items_selected">
+        <item quantity="zero">%s selected</item>
+        <item quantity="one">%s selected</item>
+        <item quantity="two">%s selected</item>
+        <item quantity="few">%s selected</item>
+        <item quantity="many">%s selected</item>
+        <item quantity="other">%s selected</item>
+    </plurals>
 
     <!-- Settings general strings. -->
     <string name="switch_off">Off</string>

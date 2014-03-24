@@ -21,14 +21,16 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
+public
 class IndexItem implements Serializable
 {
     private static final long serialVersionUID = 200L;
 
-    long m_uid;
-    String m_url;
-    String[] m_tags;
+    public long m_uid;
+    public String m_url;
+    public String[] m_tags;
 
+    public
     IndexItem(long id, String url, String... tags)
     {
         m_uid = id;

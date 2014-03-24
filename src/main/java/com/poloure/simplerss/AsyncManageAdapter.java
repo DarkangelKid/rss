@@ -16,7 +16,6 @@
 
 package com.poloure.simplerss;
 
-import android.app.FragmentManager;
 import android.app.ListFragment;
 import android.os.AsyncTask;
 
@@ -25,27 +24,33 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import static com.poloure.simplerss.Constants.*;
+
+public
 class AsyncManageAdapter extends AsyncTask<String, String[][], Void>
 {
     private final ListFragment m_listFragment;
     private final FeedsActivity m_activity;
 
-    private
+    public
     AsyncManageAdapter(FeedsActivity activity, ListFragment listFragment)
     {
         m_activity = activity;
         m_listFragment = listFragment;
     }
 
-    static
+    /**
+     * Run when you want to update the manage ListView.
+     *
+     * @param activity required for access to m_index.
+     */
+    public static
     void run(FeedsActivity activity)
     {
-        FragmentManager manager = activity.getFragmentManager();
-        ListFragment fragment = (ListFragment) manager.findFragmentById(R.id.fragment_manage);
-
-        if(null != fragment && fragment.isVisible())
+        // Only run when the manage fragment is visible since this runs onHiddenChanged(false).
+        if(null != s_fragmentManage && s_fragmentManage.isVisible())
         {
-            AsyncManageAdapter task = new AsyncManageAdapter(activity, fragment);
+            AsyncManageAdapter task = new AsyncManageAdapter(activity, s_fragmentManage);
             task.executeOnExecutor(THREAD_POOL_EXECUTOR);
         }
     }
@@ -54,14 +59,15 @@ class AsyncManageAdapter extends AsyncTask<String, String[][], Void>
     protected
     Void doInBackground(String... applicationFolder)
     {
-      /* ObjectIO the index file for names, urls, and tags. */
+        // ObjectIO the index file for names, urls, and tags.
         NumberFormat format = NumberFormat.getNumberInstance(Locale.getDefault());
         List<IndexItem> indexItems = m_activity.m_index;
+
         String[][] strings = new String[indexItems.size()][3];
 
         for(int i = 0; i < indexItems.size(); ++i)
         {
-         /* Append the url to the next line. */
+            // Append the url to the next line.
             IndexItem item = indexItems.get(i);
 
             ObjectIO reader = new ObjectIO(m_activity, item.m_uid + ServiceUpdate.ITEM_LIST);
