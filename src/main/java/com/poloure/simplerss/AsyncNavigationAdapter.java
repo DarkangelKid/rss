@@ -22,17 +22,20 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.WrapperListAdapter;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 
 public
 class AsyncNavigationAdapter extends AsyncTask<String, Void, String[][]>
 {
     private final FeedsActivity m_activity;
+    static final NumberFormat NUMBER_FORMAT = NumberFormat.getNumberInstance(Locale.getDefault());
 
     private
     AsyncNavigationAdapter(Activity activity)
@@ -93,7 +96,7 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, String[][]>
 
             int size = itemsInTag.size();
             navItems[i][0] = tag;
-            navItems[i][1] = 0 == size ? "" : Utilities.NUMBER_FORMAT.format(size);
+            navItems[i][1] = 0 == size ? "" : NUMBER_FORMAT.format(size);
             itemsInTag.clear();
         }
 

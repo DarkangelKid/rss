@@ -14,7 +14,7 @@
  *
  */
 
-package com.poloure.simplerss;
+package com.poloure.simplerss.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -23,14 +23,18 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-class AdapterManage extends ArrayAdapter<String[]>
+import com.poloure.simplerss.R;
+
+public
+class AdapterManageItems extends ArrayAdapter<String[]>
 {
     private final LayoutInflater m_inflater;
     private TextView m_count;
     private TextView m_url;
     private TextView m_tags;
 
-    AdapterManage(Context context)
+    public
+    AdapterManageItems(Context context)
     {
         super(context, android.R.id.list);
         m_inflater = LayoutInflater.from(context);

@@ -14,15 +14,19 @@
  *
  */
 
-package com.poloure.simplerss;
+package com.poloure.simplerss.adapters;
 
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 
+import com.poloure.simplerss.ViewNavItem;
+
+public
 class AdapterNavigationDrawer extends ArrayAdapter<String[]>
 {
+    public
     AdapterNavigationDrawer(Context context)
     {
         super(context, android.R.id.list);

@@ -18,9 +18,11 @@ package com.poloure.simplerss;
 
 import android.app.ListFragment;
 import android.os.AsyncTask;
+import android.widget.ArrayAdapter;
+
+import com.poloure.simplerss.adapters.AdapterManageItems;
 
 import java.text.NumberFormat;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -85,9 +87,9 @@ class AsyncManageAdapter extends AsyncTask<String, String[][], Void>
     protected
     void onProgressUpdate(String[][]... values)
     {
-        AdapterManage adapterManage = new AdapterManage(m_activity);
+        // Creating a new adapter seems to fix items not updating.
+        ArrayAdapter<String[]> adapterManage = new AdapterManageItems(m_activity);
         m_listFragment.setListAdapter(adapterManage);
-
-        adapterManage.addAll(Arrays.asList(values[0]));
+        adapterManage.addAll(values[0]);
     }
 }

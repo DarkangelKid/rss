@@ -41,8 +41,6 @@ import static com.poloure.simplerss.Constants.*;
 
 class Utilities
 {
-    static final NumberFormat NUMBER_FORMAT = NumberFormat.getNumberInstance(Locale.getDefault());
-
     static
     String formatTags(String... tags)
     {

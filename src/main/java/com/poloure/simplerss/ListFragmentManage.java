@@ -26,7 +26,7 @@ import android.widget.AbsListView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.poloure.simplerss.listeners.MultiModeListener;
+import com.poloure.simplerss.adapters.AdapterManageItems;
 import com.poloure.simplerss.listeners.MultiModeListenerManage;
 
 public
@@ -70,7 +70,7 @@ class ListFragmentManage extends ListFragment
         FeedsActivity activity = (FeedsActivity) getActivity();
         ListView listView = getListView();
 
-        setListAdapter(new AdapterManage(activity));
+        setListAdapter(new AdapterManageItems(activity));
 
         registerForContextMenu(listView);
         listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);

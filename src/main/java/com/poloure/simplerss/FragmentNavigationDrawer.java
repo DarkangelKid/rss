@@ -32,6 +32,8 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.poloure.simplerss.adapters.AdapterNavigationDrawer;
+
 import static com.poloure.simplerss.Constants.*;
 
 public

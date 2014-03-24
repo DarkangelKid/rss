@@ -27,6 +27,7 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
 
+public
 class ViewNavItem extends View
 {
     private static final Paint[] m_paints = new Paint[2];
@@ -36,10 +37,11 @@ class ViewNavItem extends View
             R.dimen.navigation_main, R.dimen.navigation_tag,
     };
     private final int m_height;
-    String m_text = "";
-    String m_count = "";
-    int m_image = -1;
+    public String m_text = "";
+    public String m_count = "";
+    public int m_image = -1;
 
+    public
     ViewNavItem(Context context)
     {
         super(context);
