@@ -22,6 +22,7 @@ import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 
+import com.poloure.simplerss.adapters.AdapterFeedItems;
 import com.poloure.simplerss.ui.ListViewFeeds;
 
 import java.util.ArrayList;
@@ -105,7 +106,7 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
             // Get the tag page and skip ListViews that are null.
             ListViewFeeds listView = (ListViewFeeds) FragmentFeeds.getTagListView(i);
 
-            AdapterTags adapterTag = listView.getAdapter();
+            AdapterFeedItems adapterTag = listView.getAdapter();
 
             boolean firstLoad = null == listView || 0 == listView.getCount();
 
@@ -137,8 +138,7 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
                 // Now find the position of the item with the time timeBefore.
                 if(firstLoad)
                 {
-                    listView.getChildAt(0);
-                    listView.setSelectionOldestUnread(AdapterTags.READ_ITEM_TIMES);
+                    listView.setSelectionOldestUnread(m_activity.getReadItemTimes());
                 }
                 else
                 {

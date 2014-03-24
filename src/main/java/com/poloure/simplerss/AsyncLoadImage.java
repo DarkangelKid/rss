@@ -27,6 +27,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 
+public
 class AsyncLoadImage extends AsyncTask<String, Void, Bitmap>
 {
     private final WeakReference<ViewFeedItem> m_view;
@@ -41,7 +42,7 @@ class AsyncLoadImage extends AsyncTask<String, Void, Bitmap>
         m_viewTag = viewTag;
     }
 
-    static
+    public static
     void newInstance(ViewFeedItem view, String imageName, long viewTag)
     {
         AsyncTask<String, Void, Bitmap> task = new AsyncLoadImage(view, viewTag);

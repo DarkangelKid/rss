@@ -44,7 +44,7 @@ class DialogEditFeed extends Dialog
     {
         Dialog dialog = new DialogEditFeed(activity, position);
 
-      /* Get the text resources and set the title of the dialog. */
+        // Get the text resources and set the title of the dialog.
         int title = -1 == position ? R.string.dialog_title_add : R.string.dialog_title_edit;
         dialog.setTitle(activity.getString(title));
 
@@ -58,19 +58,19 @@ class DialogEditFeed extends Dialog
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_edit_dialog);
 
-      /* Get the current tags. */
+        // Get the current tags.
         int tagListSize = PagerAdapterTags.s_tagList.size();
         String[] tags = PagerAdapterTags.s_tagList.toArray(new String[tagListSize]);
         int oneLine = android.R.layout.simple_dropdown_item_1line;
 
-      /* Configure the MultiAutoCompleteTextView. */
+        // Configure the MultiAutoCompleteTextView.
         MultiAutoCompleteTextView tagEdit = (MultiAutoCompleteTextView) findViewById(R.id.dialog_tags);
         tagEdit.setAdapter(new ArrayAdapter<String>(m_activity, oneLine, tags));
         tagEdit.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
 
         final IndexItem oldItem;
 
-      /* If this is an edit dialog, set the EditTexts and save the old information. */
+        // If this is an edit dialog, set the EditTexts and save the old information.
         if(-1 != m_pos)
         {
             oldItem = m_activity.m_index.get(m_pos);
@@ -88,17 +88,17 @@ class DialogEditFeed extends Dialog
         Button buttonNegative = (Button) findViewById(R.id.dialog_button_negative);
         final Button buttonPositive = (Button) findViewById(R.id.dialog_button_positive);
 
-      /* Set the click listeners. */
+        // Set the click listeners.
         buttonNegative.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public
             void onClick(View v)
             {
-            /* If the positive button says checking... */
+                // If the positive button says checking...
                 if(buttonPositive.getText().equals(m_activity.getString(R.string.dialog_checking)))
                 {
-               /* Cancel the Async task. */
+                    // Cancel the Async task.
                     if(null != m_task)
                     {
                         m_task.cancel(true);

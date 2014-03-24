@@ -55,6 +55,16 @@ class FragmentFeeds extends Fragment
         }
     }
 
+    private static
+    class OnPageChangeListener extends ViewPager.SimpleOnPageChangeListener
+    {
+        @Override
+        public
+        void onPageSelected(int position)
+        {
+            Utilities.setTitlesAndDrawerAndPage(null, -10);
+        }
+    }
     static final String EXTRA_PAGE_NAME = "GROUP_NUMBER";
     private static final float PULL_DISTANCE = 0.5F;
 
@@ -104,16 +114,5 @@ class FragmentFeeds extends Fragment
 
         s_viewPager.setAdapter(new PagerAdapterTags(s_fragmentManager, s_activity, s_activity.m_index));
         Utilities.setTitlesAndDrawerAndPage(null, -10);
-    }
-
-    static
-    class OnPageChangeListener extends ViewPager.SimpleOnPageChangeListener
-    {
-        @Override
-        public
-        void onPageSelected(int position)
-        {
-            Utilities.setTitlesAndDrawerAndPage(null, -10);
-        }
     }
 }

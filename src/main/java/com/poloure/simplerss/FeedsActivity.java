@@ -34,10 +34,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Surface;
 
+import com.poloure.simplerss.adapters.AdapterFeedItems;
+
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static com.poloure.simplerss.Constants.*;
 
@@ -50,6 +54,7 @@ class FeedsActivity extends Activity
     private static final int ALARM_SERVICE_START = 1;
     private static final int ALARM_SERVICE_STOP = 0;
     private static final int MINUTE_VALUE = 60000;
+    private final Set<Long> mReadItemTimes = Collections.synchronizedSet(new HashSet<Long>(0));
     private final BroadcastReceiver m_broadcastReceiver = new BroadcastReceiver()
     {
         @Override
@@ -85,14 +90,14 @@ class FeedsActivity extends Activity
 
         RssLogger.setup();
 
-        /* Load the index. */
+        // Load the index.
         ObjectIO indexReader = new ObjectIO(this, INDEX);
         m_index = (List<IndexItem>) indexReader.readCollection(ArrayList.class);
 
         /* Load the read items to the tags Adapter. */
         ObjectIO readItemReader = new ObjectIO(this, READ_ITEMS);
         Collection<Long> set = (HashSet<Long>) readItemReader.readCollection(HashSet.class);
-        AdapterTags.READ_ITEM_TIMES.addAll(set);
+        mReadItemTimes.addAll(set);
 
         s_fragmentDrawer.setUp(s_drawerLayout);
 
@@ -182,15 +187,18 @@ class FeedsActivity extends Activity
 
         // Write the read items set to file.
         ObjectIO out = new ObjectIO(this, READ_ITEMS);
-        out.write(AdapterTags.READ_ITEM_TIMES);
+        out.write(mReadItemTimes);
 
         // Write the index file to disk.
         out.setNewFileName(INDEX);
         out.write(m_index);
 
         // Write the favourites list to file.
+        AdapterFeedItems adapter = FragmentTag.getFavouritesAdapter(this);
+        Collection<FeedItem> favourites = adapter.getSet();
+
         out.setNewFileName(FAVOURITES);
-        out.write(FragmentTag.getFavouritesAdapter(this).m_feedItems);
+        out.write(favourites);
 
         setServiceIntent(ALARM_SERVICE_START);
     }
@@ -313,6 +321,36 @@ class FeedsActivity extends Activity
             }
         }
         return false;
+    }
+
+    /**
+     * Mark a FeedItem as read.
+     *
+     * @param itemTime to add to collection of read items.
+     */
+    public
+    void readItem(long itemTime)
+    {
+        mReadItemTimes.add(itemTime);
+    }
+
+    /**
+     * Checks if an item with this time is in the read collection.
+     *
+     * @param itemTime the time of the item to check
+     *
+     * @return true if there exists a FeedItem in the collection with this itemTime vaule.
+     */
+    public
+    boolean isItemRead(long itemTime)
+    {
+        return mReadItemTimes.contains(itemTime);
+    }
+
+    public
+    Collection<Long> getReadItemTimes()
+    {
+        return mReadItemTimes;
     }
 
     public

@@ -39,14 +39,14 @@ class DialogConfirm extends DialogPreference
     {
         if(DialogInterface.BUTTON_POSITIVE == which)
         {
-         /* Reset the read item collection in memory. */
-            AdapterTags.READ_ITEM_TIMES.clear();
+            // Reset the read item collection in memory.
+            m_activity.getReadItemTimes().clear();
             m_activity.deleteFile(FeedsActivity.READ_ITEMS);
 
-         /* We should then refresh the navigation drawer for the unread counts. */
+            // We should then refresh the navigation drawer for the unread counts.
             AsyncNavigationAdapter.run(m_activity);
 
-         /* TODO more efficient just to reload get views but invalidate is not working. */
+            // TODO more efficient just to reload get views but invalidate is not working.
             AsyncNewTagAdapters.update(m_activity);
         }
     }

@@ -24,6 +24,8 @@ import android.view.MenuItem;
 import android.widget.AbsListView;
 import android.widget.ListView;
 
+import com.poloure.simplerss.adapters.AdapterFeedItems;
+
 class MultiModeListener implements AbsListView.MultiChoiceModeListener
 {
     private final ListView m_listView;
@@ -93,13 +95,13 @@ class MultiModeListener implements AbsListView.MultiChoiceModeListener
             SparseBooleanArray checked = m_listView.getCheckedItemPositions();
 
             boolean favourite = Constants.s_fragmentFavourites.isVisible();
-            AdapterFavourites adapter = null;
+            AdapterFeedItems adapter = null;
             FeedItem[] items = null;
 
             if(favourite)
             {
-                adapter = (AdapterFavourites) m_listView.getAdapter();
-                items = adapter.m_feedItems.toArray(new FeedItem[adapter.m_feedItems.size()]);
+                adapter = (AdapterFeedItems) m_listView.getAdapter();
+                items = adapter.getSet().toArray(new FeedItem[adapter.getCount()]);
             }
 
             for(int i = 0; checked.size() > i; i++)
@@ -107,20 +109,21 @@ class MultiModeListener implements AbsListView.MultiChoiceModeListener
                 if(checked.valueAt(i))
                 {
                     int position = checked.keyAt(i);
-                    IndexItem indexItem = m_activity.m_index.get(position);
 
                     switch(itemId)
                     {
                         case R.id.delete_feed:
                             if(favourite)
                             {
-                                adapter.m_feedItems.remove(items[position]);
+                                adapter.remove(items[position]);
                                 break;
                             }
+                            IndexItem indexItem = m_activity.m_index.get(position);
                             m_activity.m_index.remove(indexItem);
                         case R.id.delete_content:
                             for(String file : ServiceUpdate.FEED_FILES)
                             {
+                                indexItem = m_activity.m_index.get(position);
                                 m_activity.deleteFile(indexItem.m_uid + file);
                             }
                     }

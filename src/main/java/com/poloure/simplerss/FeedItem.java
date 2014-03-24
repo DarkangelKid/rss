@@ -21,18 +21,19 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
+public
 class FeedItem implements Serializable
 {
     private static final long serialVersionUID = 3L;
 
-    String m_title = "";
-    String m_imageLink = "";
-    String m_imageName = "";
-    String m_urlTrimmed = "";
-    String m_url = "";
-    String m_content = "";
-    String[] m_desLines = {"", "", ""};
-    Long m_time = 0L;
+    public String m_title = "";
+    public String m_imageLink = "";
+    public String m_imageName = "";
+    public String m_urlTrimmed = "";
+    public String m_url = "";
+    public String m_content = "";
+    public String[] m_desLines = {"", "", ""};
+    public Long m_time = 0L;
 
     private
     void writeObject(ObjectOutputStream out) throws IOException

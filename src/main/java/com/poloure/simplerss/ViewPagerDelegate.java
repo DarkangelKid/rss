@@ -26,13 +26,6 @@ import static com.poloure.simplerss.Constants.*;
 
 class ViewPagerDelegate implements ViewDelegate
 {
-    static
-    ListView getCurrentTagListView()
-    {
-        int currentPage = s_viewPager.getCurrentItem();
-        return FragmentFeeds.getTagListView(currentPage);
-    }
-
     @Override
     public
     boolean isReadyForPull(View view, float x, float y)
@@ -67,6 +60,13 @@ class ViewPagerDelegate implements ViewDelegate
         }
 
         return ready;
+    }
+
+    static
+    ListView getCurrentTagListView()
+    {
+        int currentPage = s_viewPager.getCurrentItem();
+        return FragmentFeeds.getTagListView(currentPage);
     }
 }
 

@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
+public
 class AsyncNavigationAdapter extends AsyncTask<String, Void, String[][]>
 {
     private final FeedsActivity m_activity;
@@ -39,7 +40,7 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, String[][]>
         m_activity = (FeedsActivity) activity;
     }
 
-    static
+    public static
     void run(Activity activity)
     {
         AsyncTask<String, Void, String[][]> task = new AsyncNavigationAdapter(activity);
@@ -51,16 +52,16 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, String[][]>
     protected
     String[][] doInBackground(String... applicationFolder)
     {
-      /* Get the total number of tags and feeds that exist. */
+        // Get the total number of tags and feeds that exist.
         int tagTotal = PagerAdapterTags.s_tagList.size();
 
-      /* Make a NavItem for each tag we will display in the navigation drawer. */
+        // Make a NavItem for each tag we will display in the navigation drawer.
         String[][] navItems = new String[tagTotal][2];
 
-      /* Number of feeds. */
+        // Number of feeds. */
         int feedCount = m_activity.m_index.size();
 
-      /* This is a list of Sets each containing all of the feed's items. */
+        // This is a list of Sets each containing all of the feed's items.
         List<Collection<Long>> feedItems = new ArrayList<Collection<Long>>(feedCount);
 
         for(IndexItem indexItem : m_activity.m_index)
@@ -70,24 +71,25 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, String[][]>
             feedItems.add(set);
         }
 
-      /* Create a temporary collection we will .clear() each iteration of the next for loop. */
+        // Create a temporary collection we will .clear() each iteration of the next for loop.
         Collection<Long> itemsInTag = Collections.synchronizedCollection(new HashSet<Long>(0));
+        Collection<Long> readItemTimes = m_activity.getReadItemTimes();
 
-      /* For each tag excluding the all tag. */
+        // For each tag excluding the all tag.
         for(int i = 0; tagTotal > i; i++)
         {
             String tag = PagerAdapterTags.s_tagList.get(i);
 
-         /* For each feed, if the feed ∈ this tag, add the feed items to the tag collection. */
+            // For each feed, if the feed ∈ this tag, add the feed items to the tag collection.
             for(int j = 0; j < feedCount; j++)
             {
-            /* If the feed's index entry (tag1, tag2, etc) contains this tag or is the all tag. */
+                // If the feed's index entry (tag1, tag2, etc) contains this tag or is the all tag.
                 if(0 == i || Arrays.asList(m_activity.m_index.get(j).m_tags).contains(tag))
                 {
                     itemsInTag.addAll(feedItems.get(j));
                 }
             }
-            itemsInTag.removeAll(AdapterTags.READ_ITEM_TIMES);
+            itemsInTag.removeAll(readItemTimes);
 
             int size = itemsInTag.size();
             navItems[i][0] = tag;
@@ -102,16 +104,16 @@ class AsyncNavigationAdapter extends AsyncTask<String, Void, String[][]>
     protected
     void onPostExecute(String[][] result)
     {
-      /* Set the titles & counts arrays in this file and notify the adapter. */
+        // Set the titles & counts arrays in this file and notify the adapter.
         ListView navigationList = (ListView) m_activity.findViewById(R.id.fragment_navigation_drawer);
         WrapperListAdapter wrapperAdapter = (WrapperListAdapter) navigationList.getAdapter();
         ArrayAdapter<String[]> adapter = (ArrayAdapter<String[]>) wrapperAdapter.getWrappedAdapter();
 
-      /* Update the data in the adapter. */
+        // Update the data in the adapter.
         adapter.clear();
         adapter.addAll(result);
 
-      /* Update the subtitle. */
+        // Update the subtitle.
         if(Constants.s_fragmentFeeds.isVisible())
         {
             Utilities.setTitlesAndDrawerAndPage(null, -10);

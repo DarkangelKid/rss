@@ -21,7 +21,6 @@ import android.app.FragmentTransaction;
 import android.os.Environment;
 import android.support.v4.text.TextDirectionHeuristicsCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.view.View;
 import android.webkit.WebView;
 import android.widget.ArrayAdapter;
 import android.widget.HeaderViewListAdapter;
@@ -59,21 +58,17 @@ class Utilities
     }
 
     static
-    void showWebFragment(View view)
+    void showWebFragment(FeedsActivity activity, ViewFeedItem view)
     {
         WebView webView = s_fragmentWeb.getWebView();
-        webView.loadData(((ViewFeedItem) view).m_item.m_content, "text/html; charset=UTF-8", null);
+        webView.loadData(view.m_item.m_content, "text/html; charset=UTF-8", null);
 
         // Read the item.
-        AdapterTags.READ_ITEM_TIMES.add(((ViewFeedItem) view).m_item.m_time);
-        AsyncNavigationAdapter.run(s_activity);
+        activity.readItem(view.m_item.m_time);
+        AsyncNavigationAdapter.run(activity);
 
         // Apply read effect only if it is not in the favourites fragment.
-        if(s_fragmentFeeds.isVisible())
-        {
-            view.setAlpha(AdapterTags.READ_OPACITY);
-            view.setBackgroundResource(R.drawable.selector_transparent);
-        }
+        view.setRead(s_fragmentFeeds.isVisible());
 
         if(!FeedsActivity.canFitTwoFragments())
         {
@@ -81,7 +76,7 @@ class Utilities
             s_fragmentManager.executePendingTransactions();
 
             // Form the better url.
-            String url = ((ViewFeedItem) view).m_item.m_url;
+            String url = view.m_item.m_url;
             int index = url.indexOf('/');
             String urlWithoutHttp = url.substring(-1 == index ? 0 : index + 2);
             String urlWithoutWww = urlWithoutHttp.replace("www.", "");
@@ -93,7 +88,7 @@ class Utilities
             s_drawerToggle.setDrawerIndicatorEnabled(false);
             s_drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 
-            s_activity.invalidateOptionsMenu();
+            activity.invalidateOptionsMenu();
         }
     }
 

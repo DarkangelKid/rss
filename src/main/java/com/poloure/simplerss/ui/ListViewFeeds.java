@@ -18,21 +18,28 @@ package com.poloure.simplerss.ui;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.View;
+import android.widget.AbsListView;
+import android.widget.Adapter;
 import android.widget.ListView;
 
-import com.poloure.simplerss.AdapterTags;
+import com.poloure.simplerss.AsyncNavigationAdapter;
+import com.poloure.simplerss.FeedItem;
+import com.poloure.simplerss.FeedsActivity;
+import com.poloure.simplerss.adapters.AdapterFeedItems;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 public
-class ListViewFeeds extends ListView
+class ListViewFeeds extends ListView implements AbsListView.OnScrollListener
 {
     public
     ListViewFeeds(Context context, AttributeSet attributeSet)
     {
         super(context, attributeSet);
+        setOnScrollListener(this);
     }
 
     /**
@@ -47,20 +54,30 @@ class ListViewFeeds extends ListView
     public
     void setSelectionOldestUnread(final Collection<Long> readItemTimes)
     {
-        AdapterTags listAdapter = getAdapter();
+        AdapterFeedItems listAdapter = getAdapter();
         final int pos = getPositionOfLastItemOnlyInB(readItemTimes, listAdapter.m_itemTimes);
 
         // If all items are read, set the selection to 0, else the position.
         // Must be post because this function is called very early during making the ListView.
         clearFocus();
-        post(new Runnable() {
+        post(new Runnable()
+        {
 
             @Override
-            public void run() {
+            public
+            void run()
+            {
 
                 setSelection(-1 == pos ? 0 : pos);
             }
         });
+    }
+
+    @Override
+    public
+    AdapterFeedItems getAdapter()
+    {
+        return (AdapterFeedItems) super.getAdapter();
     }
 
     /**
@@ -68,9 +85,10 @@ class ListViewFeeds extends ListView
      *
      * @param a Collection to remove all of its elements from b.
      * @param b List that we want the last item of.
+     *
      * @return -1 if B is a subset of A, else position in b of last member of B exclusive of A.
      */
-    private
+    private static
     int getPositionOfLastItemOnlyInB(Collection<Long> a, List<Long> b)
     {
         // Create a copy of the B list.
@@ -95,8 +113,36 @@ class ListViewFeeds extends ListView
 
     @Override
     public
-    AdapterTags getAdapter()
+    void onScrollStateChanged(AbsListView view, int scrollState)
     {
-        return (AdapterTags) super.getAdapter();
+        FeedsActivity activity = (FeedsActivity) view.getContext();
+
+        if(SCROLL_STATE_TOUCH_SCROLL == scrollState || SCROLL_STATE_IDLE == scrollState)
+        {
+            Adapter adapter = view.getAdapter();
+            int first = view.getFirstVisiblePosition();
+            int last = view.getLastVisiblePosition();
+
+            for(int i = 0; last - first >= i; i++)
+            {
+                View viewItem = view.getChildAt(i);
+
+                if(null != viewItem && viewItem.isShown() && 0 <= viewItem.getTop())
+                {
+                    FeedItem item = (FeedItem) adapter.getItem(first + i);
+                    activity.readItem(item.m_time);
+                }
+            }
+        }
+        if(SCROLL_STATE_IDLE == scrollState)
+        {
+            AsyncNavigationAdapter.run(activity);
+        }
+    }
+
+    @Override
+    public
+    void onScroll(AbsListView v, int fir, int visible, int total)
+    {
     }
 }

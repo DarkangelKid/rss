@@ -25,6 +25,12 @@ import android.widget.AbsListView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.poloure.simplerss.adapters.AdapterFeedItems;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 public
 class ListFragmentFavourites extends ListFragment
 {
@@ -42,7 +48,7 @@ class ListFragmentFavourites extends ListFragment
     public
     void onListItemClick(ListView l, View v, int position, long id)
     {
-        Utilities.showWebFragment(v);
+        Utilities.showWebFragment((FeedsActivity) getActivity(), (ViewFeedItem) v);
     }
 
     @Override
@@ -54,7 +60,14 @@ class ListFragmentFavourites extends ListFragment
         FeedsActivity activity = (FeedsActivity) getActivity();
         ListView listView = getListView();
 
-        setListAdapter(new AdapterFavourites(activity));
+        // Read the favourites set to memory.
+        ObjectIO reader = new ObjectIO(activity, FeedsActivity.FAVOURITES);
+        Collection<FeedItem> set = (Set<FeedItem>) reader.readCollection(HashSet.class);
+
+        // Add the favourites to the adapter and set the ListView adapter.
+        AdapterFeedItems adapter = new AdapterFeedItems(activity);
+        adapter.addAll(set);
+        setListAdapter(adapter);
 
         registerForContextMenu(listView);
         listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);

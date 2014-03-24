@@ -86,7 +86,7 @@ class Constants
         return s_fragmentManager.findFragmentById(id);
     }
 
-    static
+    private static
     View findView(int id)
     {
         return s_activity.findViewById(id);

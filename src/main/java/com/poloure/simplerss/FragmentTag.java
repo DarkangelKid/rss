@@ -33,8 +33,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
@@ -42,6 +40,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.poloure.simplerss.adapters.AdapterFeedItems;
 import com.poloure.simplerss.asynctasks.AsyncTaskSaveImage;
 import com.poloure.simplerss.ui.ListViewFeeds;
 
@@ -74,63 +73,21 @@ class FragmentTag extends ListFragment
     void onViewCreated(View view, Bundle savedInstanceState)
     {
         super.onViewCreated(view, savedInstanceState);
-        final Activity activity = getActivity();
+
+        FeedsActivity activity = (FeedsActivity) getActivity();
         ListView listView = (ListView) view.findViewById(android.R.id.list);
 
-        setListAdapter(new AdapterTags(activity));
-        listView.setOnScrollListener(new AbsListView.OnScrollListener()
-        {
-            private static final int TOUCH = AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL;
-            private static final int IDLE = AbsListView.OnScrollListener.SCROLL_STATE_IDLE;
-
-            @Override
-            public
-            void onScrollStateChanged(AbsListView view, int scrollState)
-            {
-                if(TOUCH == scrollState || IDLE == scrollState)
-                {
-                    Adapter adapter = view.getAdapter();
-                    int first = view.getFirstVisiblePosition();
-                    int last = view.getLastVisiblePosition();
-
-                    for(int i = 0; last - first >= i; i++)
-                    {
-                        View viewItem = view.getChildAt(i);
-
-                        if(null != viewItem && viewItem.isShown() && 0 <= viewItem.getTop())
-                        {
-                            FeedItem item = (FeedItem) adapter.getItem(first + i);
-                            boolean existed = AdapterTags.READ_ITEM_TIMES.add(item.m_time);
-
-                            if(!existed)
-                            {
-                                //TODO -1 from the subtitle.
-                            }
-                        }
-                    }
-                }
-                if(IDLE == scrollState)
-                {
-                    AsyncNavigationAdapter.run(activity);
-                }
-            }
-
-            @Override
-            public
-            void onScroll(AbsListView v, int fir, int visible, int total)
-            {
-            }
-        });
-
+        setListAdapter(new AdapterFeedItems(activity));
         registerForContextMenu(listView);
-        AsyncNewTagAdapters.update((FeedsActivity) activity);
+
+        AsyncNewTagAdapters.update(activity);
     }
 
     @Override
     public
     void onListItemClick(ListView l, View v, int position, long id)
     {
-        Utilities.showWebFragment(v);
+        Utilities.showWebFragment((FeedsActivity) getActivity(), (ViewFeedItem) v);
     }
 
     @Override
@@ -150,7 +107,8 @@ class FragmentTag extends ListFragment
             ListViewFeeds listView = (ListViewFeeds) getListView();
             if(null != listView)
             {
-                listView.setSelectionOldestUnread(AdapterTags.READ_ITEM_TIMES);
+                FeedsActivity activity = (FeedsActivity) getActivity();
+                listView.setSelectionOldestUnread(activity.getReadItemTimes());
             }
             return true;
         }
@@ -220,12 +178,19 @@ class FragmentTag extends ListFragment
     private static
     void addToFavourites(Activity activity, FeedItem item)
     {
-        AdapterFavourites adapter = getFavouritesAdapter(activity);
-        adapter.m_feedItems.add(item);
-        adapter.notifyDataSetChanged();
+        AdapterFeedItems adapter = getFavouritesAdapter(activity);
 
-        Toast toast = Toast.makeText(activity, activity.getString(R.string.toast_added_feed, item.m_title), Toast.LENGTH_SHORT);
-        toast.show();
+        // If this item was already a favourite.
+        if(adapter.getSet().contains(item))
+        {
+            // TODO
+        }
+        else
+        {
+            adapter.add(item);
+            Toast toast = Toast.makeText(activity, activity.getString(R.string.toast_added_feed, item.m_title), Toast.LENGTH_SHORT);
+            toast.show();
+        }
     }
 
     private static
@@ -239,10 +204,10 @@ class FragmentTag extends ListFragment
     }
 
     static
-    AdapterFavourites getFavouritesAdapter(Activity activity)
+    AdapterFeedItems getFavouritesAdapter(Activity activity)
     {
         FragmentManager manager = activity.getFragmentManager();
         ListFragment fragment = (ListFragment) manager.findFragmentById(R.id.fragment_favourites);
-        return (AdapterFavourites) fragment.getListAdapter();
+        return (AdapterFeedItems) fragment.getListAdapter();
     }
 }

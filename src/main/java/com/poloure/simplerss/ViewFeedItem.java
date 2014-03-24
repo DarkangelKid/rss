@@ -32,9 +32,12 @@ import java.text.NumberFormat;
 import java.util.Locale;
 
 import static com.poloure.simplerss.Constants.*;
+import static com.poloure.simplerss.adapters.AdapterFeedItems.Type;
 
+public
 class ViewFeedItem extends View
 {
+    static final float READ_OPACITY = 0.5F;
     private static final Paint[] m_paints = new Paint[3];
     private static final int SCREEN = Resources.getSystem().getDisplayMetrics().widthPixels;
     private static final NumberFormat TIME_FORMAT = NumberFormat.getNumberInstance(Locale.getDefault());
@@ -46,11 +49,12 @@ class ViewFeedItem extends View
     };
     private final int m_height;
     private final String[] m_timeInitials;
+    public FeedItem m_item;
     boolean m_hasImage;
-    FeedItem m_item;
     private Bitmap m_image;
 
-    ViewFeedItem(Context context, int type)
+    public
+    ViewFeedItem(Context context, Type type)
     {
         super(context);
         Resources resources = context.getResources();
@@ -60,19 +64,21 @@ class ViewFeedItem extends View
         float desSize = resources.getDimension(R.dimen.item_description_size);
         float imageSize = resources.getDimension(R.dimen.max_image_height);
 
-      /* Calculate the size of the view. */
+        // Calculate the size of the view.
         float base = s_eightDp + titleSize * 2 + linkSize;
         switch(type)
         {
-            case AdapterTags.TYPE_PLAIN:
+            case PLAIN:
                 base += (float) (3.6 * desSize + getDp(4.0F));
-            case AdapterTags.TYPE_PLAIN_SANS_DESCRIPTION:
+            case PLAIN_SANS_DESCRIPTION:
                 base += getDp(4.0F);
+                m_hasImage = false;
                 break;
-            case AdapterTags.TYPE_IMAGE:
+            case IMAGE:
                 base += (float) (3.6 * desSize + getDp(20.0F));
-            case AdapterTags.TYPE_IMAGE_SANS_DESCRIPTION:
+            case IMAGE_SANS_DESCRIPTION:
                 base += imageSize;
+                m_hasImage = true;
         }
         m_height = Math.round(base);
 
@@ -111,6 +117,7 @@ class ViewFeedItem extends View
         return paint;
     }
 
+    public
     void setBitmap(Bitmap bitmap)
     {
         m_image = bitmap;
@@ -118,6 +125,14 @@ class ViewFeedItem extends View
         {
             invalidate();
         }
+    }
+
+    public
+    void setRead(boolean read)
+    {
+        setAlpha(read ? READ_OPACITY : 1.0F);
+        setBackgroundResource(read ? R.drawable.selector_transparent : R.drawable.selector_white);
+        invalidate();
     }
 
     @Override
@@ -197,7 +212,7 @@ class ViewFeedItem extends View
             boolean rtl = Utilities.isTextRtl(m_item.m_desLines[0]);
 
             m_paints[2].setTextAlign(rtl ? Paint.Align.RIGHT : Paint.Align.LEFT);
-            int horizontalPos = rtl ? SCREEN - Constants.s_eightDp : Constants.s_eightDp;
+            int horizontalPos = rtl ? SCREEN - s_eightDp : s_eightDp;
 
             for(String des : m_item.m_desLines)
             {
