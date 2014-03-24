@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.poloure.simplerss.AsyncLoadImage;
+import com.poloure.simplerss.Constants;
 import com.poloure.simplerss.FeedItem;
 import com.poloure.simplerss.FeedsActivity;
 import com.poloure.simplerss.ViewFeedItem;
@@ -49,15 +50,15 @@ class AdapterFeedItems extends LinkedMapAdapter<Long, FeedItem>
         ViewFeedItem view = recycled ? (ViewFeedItem) convertView : new ViewFeedItem(m_activity, type);
 
         // Apply the read effect.
-        // TODO if(!m_itemTimes.isEmpty())
+        if(Constants.s_fragmentFavourites.isHidden())
         {
             boolean isRead = m_activity.isItemRead(item.m_time);
             view.setRead(isRead);
         }
-        /*else
+        else
         {
             view.setRead(false);
-        }*/
+        }
 
         // If the recycled view is the view we want, keep it.
         if(recycled && item.m_time.equals(view.m_item.m_time))

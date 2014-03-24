@@ -36,6 +36,7 @@ import android.webkit.WebViewFragment;
 
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
 
+public
 class Constants
 {
     static FeedsActivity s_activity;
@@ -48,7 +49,7 @@ class Constants
 
     /* Fragments .*/
     static FragmentFeeds s_fragmentFeeds;
-    static ListFragmentFavourites s_fragmentFavourites;
+    public static ListFragmentFavourites s_fragmentFavourites;
     static ListFragmentManage s_fragmentManage;
     static FragmentSettings s_fragmentSettings;
     static WebViewFragment s_fragmentWeb;
