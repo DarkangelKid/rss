@@ -16,10 +16,14 @@
 
 package com.poloure.simplerss;
 
+import android.app.Dialog;
 import android.app.ListFragment;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -28,6 +32,7 @@ import android.widget.TextView;
 
 import com.poloure.simplerss.adapters.AdapterManageItems;
 import com.poloure.simplerss.listeners.MultiModeListenerManage;
+import com.poloure.simplerss.ui.ListViewFeeds;
 
 public
 class ListFragmentManage extends ListFragment
@@ -47,6 +52,36 @@ class ListFragmentManage extends ListFragment
     void onListItemClick(ListView l, View v, int position, long id)
     {
         DialogEditFeed.newInstance((FeedsActivity) getActivity(), position).show();
+    }
+
+    @Override
+    public
+    void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public
+    void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
+    {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_manage, menu);
+    }
+
+    @Override
+    public
+    boolean onOptionsItemSelected(MenuItem menuItem)
+    {
+        if(R.id.add_feed == menuItem.getItemId())
+        {
+            FeedsActivity activity = (FeedsActivity) getActivity();
+            Dialog dialog = DialogEditFeed.newInstance(activity, -1);
+            dialog.show();
+            return true;
+        }
+        return super.onOptionsItemSelected(menuItem);
     }
 
     @Override
@@ -74,6 +109,6 @@ class ListFragmentManage extends ListFragment
 
         registerForContextMenu(listView);
         listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
-        listView.setMultiChoiceModeListener(new MultiModeListenerManage(listView, (FeedsActivity) getActivity()));
+        listView.setMultiChoiceModeListener(new MultiModeListenerManage(listView, activity));
     }
 }

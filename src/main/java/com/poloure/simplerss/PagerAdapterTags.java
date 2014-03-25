@@ -77,7 +77,7 @@ class PagerAdapterTags extends FragmentPagerAdapter
     public
     Fragment getItem(int position)
     {
-        return FragmentTag.newInstance(position);
+        return ListFragmentTag.newInstance(position);
     }
 
     @Override

@@ -21,6 +21,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
@@ -76,10 +78,10 @@ class FragmentFeeds extends Fragment
     }
 
     static
-    FragmentTag getViewPagerFragment(int page)
+    ListFragmentTag getViewPagerFragment(int page)
     {
         String tag = "android:switcher:" + R.id.viewpager + ':' + page;
-        return (FragmentTag) s_fragmentManager.findFragmentByTag(tag);
+        return (ListFragmentTag) s_fragmentManager.findFragmentByTag(tag);
     }
 
     @Override
@@ -110,6 +112,22 @@ class FragmentFeeds extends Fragment
         setup.setup(layout);
 
         return layout;
+    }
+
+    @Override
+    public
+    void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public
+    void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
+    {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_feeds, menu);
     }
 
     @Override

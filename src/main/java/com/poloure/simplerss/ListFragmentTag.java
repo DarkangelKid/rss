@@ -17,6 +17,7 @@
 package com.poloure.simplerss;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.ListFragment;
@@ -29,6 +30,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -45,14 +47,14 @@ import com.poloure.simplerss.adapters.LinkedMapAdapter;
 import com.poloure.simplerss.asynctasks.AsyncTaskSaveImage;
 import com.poloure.simplerss.ui.ListViewFeeds;
 
-class FragmentTag extends ListFragment
+class ListFragmentTag extends ListFragment
 {
     private static final String POSITION_KEY = "POSITION";
 
     public static
     Fragment newInstance(int position)
     {
-        Fragment fragment = new FragmentTag();
+        Fragment fragment = new ListFragmentTag();
         Bundle bundle = new Bundle();
         bundle.putInt(POSITION_KEY, position);
         fragment.setArguments(bundle);
@@ -116,14 +118,21 @@ class FragmentTag extends ListFragment
     public
     boolean onOptionsItemSelected(MenuItem menuItem)
     {
+        FeedsActivity activity = (FeedsActivity) getActivity();
+
         if(R.id.jump_to_unread == menuItem.getItemId())
         {
             ListViewFeeds listView = getListView();
             if(null != listView)
             {
-                FeedsActivity activity = (FeedsActivity) getActivity();
                 listView.setSelectionOldestUnread(activity.getReadItemTimes());
             }
+            return true;
+        }
+        if(R.id.add_feed == menuItem.getItemId())
+        {
+            Dialog dialog = DialogEditFeed.newInstance(activity, -1);
+            dialog.show();
             return true;
         }
         return super.onOptionsItemSelected(menuItem);

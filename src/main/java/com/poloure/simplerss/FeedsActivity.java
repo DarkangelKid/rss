@@ -205,7 +205,7 @@ class FeedsActivity extends Activity
         out.write(m_index);
 
         // Write the favourites list to file.
-        AdapterFeedItems adapter = FragmentTag.getFavouritesAdapter(this);
+        AdapterFeedItems adapter = ListFragmentTag.getFavouritesAdapter(this);
         LinkedMap favourites = adapter.getMap();
 
         out.setNewFileName(FAVOURITES);
@@ -246,7 +246,6 @@ class FeedsActivity extends Activity
 
             s_drawerToggle.setDrawerIndicatorEnabled(true);
             s_drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-            invalidateOptionsMenu();
         }
         else
         {
@@ -256,36 +255,18 @@ class FeedsActivity extends Activity
 
     @Override
     public
-    boolean onCreateOptionsMenu(Menu menu)
+    boolean onOptionsItemSelected(MenuItem item)
     {
-        if(0 == menu.size())
-        {
-            getMenuInflater().inflate(R.menu.action_bar_menu, menu);
-        }
-
-        return super.onCreateOptionsMenu(menu);
+        return s_drawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
     }
 
     @Override
     public
     boolean onPrepareOptionsMenu(Menu menu)
     {
-        boolean web = s_fragmentWeb.isVisible() && !canFitTwoFragments();
-        boolean feed = s_fragmentFeeds.isVisible();
-        boolean manage = s_fragmentManage.isVisible();
-
-        menu.getItem(0).setVisible(!web).setEnabled(m_showMenuItems && (feed || manage));
-        menu.getItem(1).setVisible(!web).setEnabled(m_showMenuItems && feed);
-        menu.getItem(2).setVisible(web);
-
+        // If the navigation drawer is open, hide all menu items.
+        menu.setGroupVisible(R.id.hide_while_navigation, m_showMenuItems);
         return super.onPrepareOptionsMenu(menu);
-    }
-
-    @Override
-    public
-    boolean onOptionsItemSelected(MenuItem item)
-    {
-        return s_drawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
     }
 
     private
@@ -293,7 +274,6 @@ class FeedsActivity extends Activity
     {
         // Load the ManageFeedsRefresh boolean value from settings.
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-
         if(!pref.getBoolean("refreshing_enabled", false) && ALARM_SERVICE_START == state)
         {
             return;
@@ -362,11 +342,5 @@ class FeedsActivity extends Activity
     Collection<Long> getReadItemTimes()
     {
         return mReadItemTimes;
-    }
-
-    public
-    void onAddClick(MenuItem menuItem)
-    {
-        DialogEditFeed.newInstance(this, -1).show();
     }
 }

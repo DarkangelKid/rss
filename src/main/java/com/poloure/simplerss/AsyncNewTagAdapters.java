@@ -108,7 +108,7 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
         for(int i = 0; pageCount > i; i++)
         {
             // Get the tag page and skip ListViews that are null.
-            FragmentTag fragment = FragmentFeeds.getViewPagerFragment(i);
+            ListFragmentTag fragment = FragmentFeeds.getViewPagerFragment(i);
             LinkedMapAdapter<Long, FeedItem> adapterTag = fragment.getListAdapter();
             ListViewFeeds listView = fragment.getListView();
 
@@ -149,12 +149,15 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
                     listView.setSelectionFromTop(newPos, top - listView.getPaddingTop());
                 }
             }
-            ((View) listView.getParent()).setVisibility(View.VISIBLE);
         }
 
-        pager.setVisibility(View.VISIBLE);
-        AlphaAnimation animation = new AlphaAnimation(0.0F, 1.0F);
-        animation.setDuration(300);
-        pager.startAnimation(animation);
+        // If the pager is invisible, use a fade in animation.
+        if(View.VISIBLE != pager.getVisibility())
+        {
+            pager.setVisibility(View.VISIBLE);
+            AlphaAnimation animation = new AlphaAnimation(0.0F, 1.0F);
+            animation.setDuration(300);
+            pager.startAnimation(animation);
+        }
     }
 }

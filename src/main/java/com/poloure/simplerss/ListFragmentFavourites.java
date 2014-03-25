@@ -58,38 +58,48 @@ class ListFragmentFavourites extends ListFragment
     {
         super.onActivityCreated(savedInstanceState);
 
-        FeedsActivity activity = (FeedsActivity) getActivity();
         ListView listView = getListView();
 
-        // Read the favourites set to memory.
-        ObjectIO reader = new ObjectIO(activity, FeedsActivity.FAVOURITES);
-
-        Map<Long, FeedItem> map;
-
-        // This object used to be a LinkedHashSet<FeedItem>, if it still is, convert to a map.
-        try
-        {
-            map = (Map<Long, FeedItem>) reader.read();
-        }
-        catch(ClassCastException ignored)
-        {
-            // This is the old format. Convert to a Map.
-            Collection<FeedItem> set = (Collection<FeedItem>) reader.read();
-            FeedItem[] items = set.toArray(new FeedItem[set.size()]);
-
-            map = new LinkedHashMap<Long, FeedItem>(set.size());
-
-            for(int i = 0; i < items.length; i++)
-            {
-                map.put((long) i, items[i]);
-            }
-        }
-
-        // Add the favourites to the adapter and set the ListView adapter.
-        setListAdapter(new AdapterFeedItems(activity, map));
-
         registerForContextMenu(listView);
+        listView.post(new LoadFavourites());
         listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
         listView.setMultiChoiceModeListener(new MultiModeListenerFavourites(listView, getResources()));
+    }
+
+    private
+    class LoadFavourites implements Runnable
+    {
+        @Override
+        public
+        void run()
+        {
+            FeedsActivity activity = (FeedsActivity) getActivity();
+
+            // Read the favourites set to memory.
+            ObjectIO reader = new ObjectIO(activity, FeedsActivity.FAVOURITES);
+            Map<Long, FeedItem> map;
+
+            // This object used to be a LinkedHashSet<FeedItem>, if it still is, convert to a map.
+            try
+            {
+                map = (Map<Long, FeedItem>) reader.read();
+            }
+            catch(ClassCastException ignored)
+            {
+                // This is the old format. Convert to a Map.
+                Collection<FeedItem> set = (Collection<FeedItem>) reader.read();
+                FeedItem[] items = set.toArray(new FeedItem[set.size()]);
+
+                map = new LinkedHashMap<Long, FeedItem>(set.size());
+
+                for(int i = 0; i < items.length; i++)
+                {
+                    map.put((long) i, items[i]);
+                }
+            }
+
+            // Add the favourites to the adapter and set the ListView adapter.
+            setListAdapter(new AdapterFeedItems(activity, map));
+        }
     }
 }

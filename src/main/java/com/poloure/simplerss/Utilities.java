@@ -69,7 +69,6 @@ class Utilities
         if(!FeedsActivity.canFitTwoFragments())
         {
             switchToFragment(s_fragmentWeb, true);
-            s_fragmentManager.executePendingTransactions();
 
             // Form the better url.
             String url = view.m_item.m_url;
@@ -109,8 +108,13 @@ class Utilities
             if(addToBackStack)
             {
                 transaction.addToBackStack(null);
+
+                // Set the default transition for adding to the stack.
+                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
             }
             transaction.commit();
+            s_fragmentManager.executePendingTransactions();
+            fragment.getActivity().invalidateOptionsMenu();
         }
     }
 
@@ -122,7 +126,6 @@ class Utilities
         if(null != fragment)
         {
             switchToFragment(fragment, false);
-            s_fragmentManager.executePendingTransactions();
         }
 
         ListView list = s_fragmentDrawer.m_listView;
