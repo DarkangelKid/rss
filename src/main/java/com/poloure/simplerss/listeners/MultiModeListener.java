@@ -31,15 +31,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public abstract
+abstract
 class MultiModeListener implements AbsListView.MultiChoiceModeListener
 {
+    private static final NumberFormat NUMBER_FORMAT = NumberFormat.getNumberInstance(Locale.getDefault());
     final ListView m_listView;
     private final Resources m_resources;
     private int m_itemCount;
-    static final NumberFormat NUMBER_FORMAT = NumberFormat.getNumberInstance(Locale.getDefault());
 
-    public
     MultiModeListener(ListView listView, Resources resources)
     {
         m_listView = listView;
@@ -108,8 +107,7 @@ class MultiModeListener implements AbsListView.MultiChoiceModeListener
         return true;
     }
 
-    public
-    abstract
+    protected abstract
     void performActionOnItems(int itemId, List<Integer> checkedPositions);
 
     @Override

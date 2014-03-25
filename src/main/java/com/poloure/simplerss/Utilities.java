@@ -33,9 +33,7 @@ import org.xmlpull.v1.XmlPullParserFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.text.NumberFormat;
 import java.util.Arrays;
-import java.util.Locale;
 
 import static com.poloure.simplerss.Constants.*;
 

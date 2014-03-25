@@ -43,7 +43,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static com.poloure.simplerss.Constants.*;
@@ -77,8 +76,8 @@ class FeedsActivity extends Activity
             }
         }
     };
-    boolean m_showMenuItems = true;
     public List<IndexItem> m_index;
+    boolean m_showMenuItems = true;
 
     /* Called only when no remnants of the Activity exist. */
     @Override
@@ -93,7 +92,7 @@ class FeedsActivity extends Activity
 
         RssLogger.setup();
 
-        // Load the index.
+        // Load the index from file.
         ObjectIO indexReader = new ObjectIO(this, INDEX);
         m_index = (List<IndexItem>) indexReader.read();
 
@@ -102,7 +101,7 @@ class FeedsActivity extends Activity
             m_index = new ArrayList<IndexItem>();
         }
 
-        /* Load the read items to the tags Adapter. */
+        // Load the read items to the tags Adapter.
         ObjectIO readItemReader = new ObjectIO(this, READ_ITEMS);
         Collection<Long> readItemsFromFile = (Collection<Long>) readItemReader.read();
 
@@ -117,7 +116,7 @@ class FeedsActivity extends Activity
 
         if(null == savedInstanceState)
         {
-            /* Create and hide the fragments that go inside the content frame. */
+            // Create and hide the fragments that go inside the content frame.
             if(!canFitTwoFragments())
             {
                 hideFragments(s_fragmentWeb);

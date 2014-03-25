@@ -26,17 +26,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.poloure.simplerss.adapters.AdapterFeedItems;
-import com.poloure.simplerss.listeners.MultiModeListener;
 import com.poloure.simplerss.listeners.MultiModeListenerFavourites;
 
-import org.apache.commons.collections.map.LinkedMap;
-
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Set;
 
 public
 class ListFragmentFavourites extends ListFragment

@@ -17,7 +17,6 @@
 package com.poloure.simplerss;
 
 import android.app.Fragment;
-import android.app.ListFragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
@@ -66,6 +65,7 @@ class FragmentFeeds extends Fragment
             Utilities.setTitlesAndDrawerAndPage(null, -10);
         }
     }
+
     static final String EXTRA_PAGE_NAME = "GROUP_NUMBER";
     private static final float PULL_DISTANCE = 0.5F;
 
@@ -79,7 +79,7 @@ class FragmentFeeds extends Fragment
     FragmentTag getViewPagerFragment(int page)
     {
         String tag = "android:switcher:" + R.id.viewpager + ':' + page;
-        return  (FragmentTag) s_fragmentManager.findFragmentByTag(tag);
+        return (FragmentTag) s_fragmentManager.findFragmentByTag(tag);
     }
 
     @Override

@@ -29,7 +29,6 @@ class LinkedMapAdapter<K, V> extends BaseAdapter
 {
     private final LinkedMap m_map;
 
-    public
     LinkedMapAdapter(Map<K, V> map)
     {
         m_map = null == map ? new LinkedMap(1) : new LinkedMap(map);

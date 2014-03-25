@@ -58,11 +58,10 @@ class ViewPagerDelegate implements ViewDelegate
                 }
             }
         }
-
         return ready;
     }
 
-    static
+    private static
     ListView getCurrentTagListView()
     {
         int currentPage = s_viewPager.getCurrentItem();

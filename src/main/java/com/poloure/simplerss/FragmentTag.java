@@ -45,7 +45,6 @@ import com.poloure.simplerss.adapters.LinkedMapAdapter;
 import com.poloure.simplerss.asynctasks.AsyncTaskSaveImage;
 import com.poloure.simplerss.ui.ListViewFeeds;
 
-public
 class FragmentTag extends ListFragment
 {
     private static final String POSITION_KEY = "POSITION";
@@ -100,7 +99,7 @@ class FragmentTag extends ListFragment
 
     @Override
     public
-    LinkedMapAdapter<Long, FeedItem>  getListAdapter()
+    LinkedMapAdapter<Long, FeedItem> getListAdapter()
     {
         return (LinkedMapAdapter<Long, FeedItem>) super.getListAdapter();
     }
@@ -119,7 +118,7 @@ class FragmentTag extends ListFragment
     {
         if(R.id.jump_to_unread == menuItem.getItemId())
         {
-            ListViewFeeds listView = (ListViewFeeds) getListView();
+            ListViewFeeds listView = getListView();
             if(null != listView)
             {
                 FeedsActivity activity = (FeedsActivity) getActivity();

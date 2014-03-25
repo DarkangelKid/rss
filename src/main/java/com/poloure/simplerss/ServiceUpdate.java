@@ -34,7 +34,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.FileInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.text.ParseException;
@@ -139,7 +139,7 @@ class ServiceUpdate extends IntentService
             }
         }
 
-      /* Update the Activity. */
+        // Update the Activity.
         Intent broadcast = new Intent(BROADCAST_ACTION);
         broadcast.getIntExtra("PAGE_NUMBER", page);
         sendBroadcast(broadcast);
@@ -155,9 +155,6 @@ class ServiceUpdate extends IntentService
         String longFile = uid + ITEM_LIST;
 
         // Load the previously saved items to a map.
-        ObjectIO longFileReader = new ObjectIO(this, longFile);
-        Collection<Long> longSet = (Collection<Long>) longFileReader.read();
-
         Map<Long, FeedItem> map = new TreeMap<Long, FeedItem>(Collections.reverseOrder());
 
         ObjectIO reader = new ObjectIO(this, contentFile);
@@ -181,12 +178,12 @@ class ServiceUpdate extends IntentService
             parser.next();
             eventType = parser.getEventType();
         }
-      /* !(A && (B || C)) = (!A || !B) && (!A || !C). */
+        // !(A && (B || C)) = (!A || !B) && (!A || !C).
         while((XmlPullParser.START_TAG != eventType || !Tags.ENTRY.equals(parser.getName())) &&
                 (XmlPullParser.START_TAG != eventType || !Tags.ITEM.equals(parser.getName())) &&
                 XmlPullParser.END_DOCUMENT != eventType);
 
-      /* This is the main part that parses for each feed item/entry. */
+        // This is the main part that parses for each feed item/entry.
         while(XmlPullParser.END_DOCUMENT != eventType)
         {
             if(XmlPullParser.START_TAG == eventType)
@@ -271,7 +268,7 @@ class ServiceUpdate extends IntentService
     private static
     String fitToScreen(Resources resources, String content, int ind, float extra)
     {
-      /* ind == 0 is the title, ind == 1 is the link. */
+        // ind == 0 is the title, ind == 1 is the link.
         int size = 0 == ind ? R.dimen.item_title_size : R.dimen.item_link_size;
         int color = 0 == ind ? R.color.item_title_color : R.color.item_link_color;
 
@@ -289,13 +286,13 @@ class ServiceUpdate extends IntentService
         Time time = new Time();
         try
         {
-         /* <published> - It is an atom feed it will be one of four RFC3339 formats. */
+            // <published> - It is an atom feed it will be one of four RFC3339 formats.
             if(Tags.PUBLISHED.equals(tag))
             {
                 time.parse3339(content);
                 feedItem.m_time = time.toMillis(true);
             }
-         /* <pubDate> - It follows the rss 2.0 specification for rfc882. */
+            // <pubDate> - It follows the rss 2.0 specification for rfc882.
             else
             {
                 Calendar calendar = Calendar.getInstance();
@@ -331,10 +328,10 @@ class ServiceUpdate extends IntentService
 
             if(matcherHref.find())
             {
-            /* If we get here, we have an image to download and save. */
+                // If we get here, we have an image to download and save.
                 String imgLink = matcherHref.group(1);
 
-            /* Get rid of any apostrophes and quotation marks in the link. */
+                // Get rid of any apostrophes and quotation marks in the link.
                 imgLink = Patterns.APOSTROPHE.matcher(imgLink).replaceAll("");
                 imgLink = Patterns.QUOT.matcher(imgLink).replaceAll("");
 
@@ -354,7 +351,7 @@ class ServiceUpdate extends IntentService
 
         for(int x = 0; 3 > x; x++)
         {
-         /* Skip any empty lines. */
+            // Skip any empty lines.
             while(null != lines && j < lines.size() && lines.get(j).trim().isEmpty())
             {
                 j++;
@@ -374,7 +371,7 @@ class ServiceUpdate extends IntentService
             }
             else
             {
-            /* Break at the closest ' ' - 1 (some padding). */
+                // Break at the closest ' ' - 1 (some padding).
                 int space = currentLine.lastIndexOf(' ', index - 1);
 
             /* TODO if no space add a hyphen. */
@@ -382,7 +379,7 @@ class ServiceUpdate extends IntentService
 
                 feedItem.m_desLines[x] = currentLine.substring(0, index);
 
-            /* Add the remaining to the next line. */
+                // Add the remaining to the next line.
                 if(j + 1 < lines.size())
                 {
                     lines.set(j + 1, currentLine.substring(index) + lines.get(j + 1));
@@ -400,15 +397,15 @@ class ServiceUpdate extends IntentService
     private static
     void getThumbnail(FeedItem item, String imageLink, Context context)
     {
-      /* Find out if images are disabled. */
+        // Find out if images are disabled.
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         boolean imagesDisabled = !preferences.getBoolean("images_enabled", true);
 
-      /* Produce the thumbnail path. */
+        // Produce the thumbnail path.
         String imageFile = imageLink.substring(imageLink.lastIndexOf('/') + 1);
 
-      /* If the image exists then it has previously passed the MIN_IMAGE_WIDTH condition. */
-        if(imagesDisabled || fileExists(context, imageFile))
+        // If the image exists then it has previously passed the MIN_IMAGE_WIDTH condition.
+        if(imagesDisabled || new File(context.getFilesDir(), imageFile).exists())
         {
             item.m_imageLink = imageLink;
             item.m_imageName = imageFile;
@@ -423,7 +420,7 @@ class ServiceUpdate extends IntentService
             {
                 Bitmap bitmap = BitmapFactory.decodeStream(input);
 
-            /* If the image is smaller than we care about, do not save it. */
+                // If the image is smaller than we care about, do not save it.
                 if(MIN_IMAGE_WIDTH > bitmap.getWidth())
                 {
                     return;
@@ -438,16 +435,16 @@ class ServiceUpdate extends IntentService
                 float scale = bitmap.getWidth() / width;
                 int desiredHeight = Math.round(bitmap.getHeight() / scale);
 
-            /* Scale it to the screen width. */
+                // Scale it to the screen width.
                 bitmap = Bitmap.createScaledBitmap(bitmap, Math.round(width), desiredHeight, false);
 
-            /* Shrink it to VIEW_HEIGHT if that is more than the scaled height. */
+                // Shrink it to VIEW_HEIGHT if that is more than the scaled height.
                 int maxHeight = Math.round(context.getResources()
                         .getDimension(R.dimen.max_image_height));
                 int newHeight = Math.min(bitmap.getHeight(), maxHeight);
                 bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), newHeight);
 
-            /* Get the quality from settings. */
+                // Get the quality from settings.
                 String qualityString = preferences.getString("thumbnail_quality", "75");
                 int quality = Integer.parseInt(qualityString);
 
@@ -455,43 +452,13 @@ class ServiceUpdate extends IntentService
             }
             finally
             {
-                if(null != input)
-                {
-                    input.close();
-                }
-                if(null != out)
-                {
-                    out.close();
-                }
+                input.close();
+                out.close();
             }
         }
         catch(IOException e)
         {
             e.printStackTrace();
         }
-    }
-
-    private static
-    boolean fileExists(Context context, String fileName)
-    {
-        try
-        {
-            FileInputStream in = context.openFileInput(fileName);
-            try
-            {
-            }
-            finally
-            {
-                if(null != in)
-                {
-                    in.close();
-                }
-            }
-        }
-        catch(IOException ignored)
-        {
-            return false;
-        }
-        return true;
     }
 }

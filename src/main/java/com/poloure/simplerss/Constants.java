@@ -39,6 +39,7 @@ import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
 public
 class Constants
 {
+    public static ListFragmentFavourites s_fragmentFavourites;
     static FeedsActivity s_activity;
     static Resources s_resources;
     static DisplayMetrics s_displayMetrics;
@@ -46,10 +47,8 @@ class Constants
     static ActionBar s_actionBar;
     static WindowManager s_windowManager;
     static int s_eightDp;
-
     /* Fragments .*/
     static FragmentFeeds s_fragmentFeeds;
-    public static ListFragmentFavourites s_fragmentFavourites;
     static ListFragmentManage s_fragmentManage;
     static FragmentSettings s_fragmentSettings;
     static WebViewFragment s_fragmentWeb;

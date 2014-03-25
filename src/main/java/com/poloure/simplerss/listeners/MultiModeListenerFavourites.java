@@ -22,7 +22,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.widget.ListView;
 
-import com.poloure.simplerss.FeedItem;
 import com.poloure.simplerss.R;
 import com.poloure.simplerss.adapters.AdapterFeedItems;
 

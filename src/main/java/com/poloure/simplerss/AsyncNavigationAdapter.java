@@ -34,8 +34,8 @@ import java.util.Locale;
 public
 class AsyncNavigationAdapter extends AsyncTask<String, Void, String[][]>
 {
+    private static final NumberFormat NUMBER_FORMAT = NumberFormat.getNumberInstance(Locale.getDefault());
     private final FeedsActivity m_activity;
-    static final NumberFormat NUMBER_FORMAT = NumberFormat.getNumberInstance(Locale.getDefault());
 
     private
     AsyncNavigationAdapter(Activity activity)

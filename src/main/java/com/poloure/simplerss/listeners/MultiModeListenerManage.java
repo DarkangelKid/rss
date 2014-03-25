@@ -24,7 +24,6 @@ import android.widget.ListView;
 import com.poloure.simplerss.AsyncManageAdapter;
 import com.poloure.simplerss.AsyncNavigationAdapter;
 import com.poloure.simplerss.AsyncNewTagAdapters;
-import com.poloure.simplerss.FeedItem;
 import com.poloure.simplerss.FeedsActivity;
 import com.poloure.simplerss.IndexItem;
 import com.poloure.simplerss.PagerAdapterTags;

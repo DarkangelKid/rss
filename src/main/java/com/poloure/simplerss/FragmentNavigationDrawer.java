@@ -25,6 +25,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,52 +41,21 @@ public
 class FragmentNavigationDrawer extends Fragment
 {
     private static
-    class OnNavigationItemLongClick implements AdapterView.OnItemLongClickListener
-    {
-        OnNavigationItemLongClick()
-        {
-        }
-
-        @Override
-        public
-        boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id)
-        {
-         /* reorder tags. */
-            return true;
-        }
-    }
-
-    private static
     class OnNavigationItemClick implements AdapterView.OnItemClickListener
     {
         @Override
         public
         void onItemClick(AdapterView<?> parent, View view, int absolutePos, long id)
         {
-         /* Close the navigation drawer in all cases. */
+            // Close the navigation drawer in all cases.
             s_drawerLayout.closeDrawers();
 
-            Fragment fragment;
-
-            if(0 == absolutePos)
-            {
-                fragment = s_fragmentFavourites;
-            }
-            else if(1 == absolutePos)
-            {
-                fragment = s_fragmentManage;
-            }
-            else if(2 == absolutePos)
-            {
-                fragment = s_fragmentSettings;
-            }
-            else
-            {
-                fragment = s_fragmentFeeds;
-            }
-
-         /* If a tag was clicked, set the ViewPager position to that tag. */
-            Utilities.setTitlesAndDrawerAndPage(fragment, absolutePos);
+            // Decide which fragment to load for each header position.
+            Fragment[] fragments = {
+                    s_fragmentFavourites, s_fragmentManage, s_fragmentSettings, s_fragmentFeeds,
+            };
+            int position = fragments.length - 1 < absolutePos ? fragments.length - 1 : absolutePos;
+            Utilities.setTitlesAndDrawerAndPage(fragments[position], absolutePos);
         }
     }
 
@@ -110,7 +80,7 @@ class FragmentNavigationDrawer extends Fragment
     {
         super.onCreate(savedInstanceState);
 
-      /* Read the application preferences to see if the user knows the drawer exists. */
+        // Read the application preferences to see if the user knows the drawer exists.
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
         m_userLearnedDrawer = sp.getBoolean(PREF_USER_LEARNED_DRAWER, false);
     }
@@ -121,7 +91,6 @@ class FragmentNavigationDrawer extends Fragment
     {
         m_listView = (ListView) inflater.inflate(R.layout.navigation_drawer, container, false);
         m_listView.setOnItemClickListener(new OnNavigationItemClick());
-        m_listView.setOnItemLongClickListener(new OnNavigationItemLongClick());
         m_listView.setHeaderDividersEnabled(false);
 
         String[] navTitles = getResources().getStringArray(R.array.navigation_titles);
@@ -156,11 +125,8 @@ class FragmentNavigationDrawer extends Fragment
     {
         final FeedsActivity activity = (FeedsActivity) getActivity();
 
-        drawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
-
-      /* Set up the action bar. */
+        // Set up the action bar.
         ActionBar actionBar = activity.getActionBar();
-
         actionBar.setHomeButtonEnabled(true);
         actionBar.setDisplayHomeAsUpEnabled(true);
 
@@ -191,14 +157,14 @@ class FragmentNavigationDrawer extends Fragment
             }
         };
 
-      /* Open the drawer if the user has never opened it manually before. */
+        // Open the drawer if the user has never opened it manually before.
         if(!m_userLearnedDrawer)
         {
-         /* TODO */
-            //drawerLayout.openDrawer(R.id.navigation_drawer);
+            drawerLayout.openDrawer(Gravity.START);
         }
 
         drawerLayout.post(new SyncPost());
+        drawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
         drawerLayout.setDrawerListener(s_drawerToggle);
     }
 }

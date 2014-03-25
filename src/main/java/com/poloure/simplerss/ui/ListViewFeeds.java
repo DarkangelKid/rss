@@ -30,9 +30,7 @@ import com.poloure.simplerss.adapters.AdapterFeedItems;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 public
 class ListViewFeeds extends ListView implements AbsListView.OnScrollListener

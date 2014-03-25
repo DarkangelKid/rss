@@ -37,7 +37,7 @@ import static com.poloure.simplerss.adapters.AdapterFeedItems.Type;
 public
 class ViewFeedItem extends View
 {
-    static final float READ_OPACITY = 0.5F;
+    private static final float READ_OPACITY = 0.5F;
     private static final Paint[] m_paints = new Paint[3];
     private static final int SCREEN = Resources.getSystem().getDisplayMetrics().widthPixels;
     private static final NumberFormat TIME_FORMAT = NumberFormat.getNumberInstance(Locale.getDefault());
