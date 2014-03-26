@@ -46,23 +46,27 @@ class AdapterFeedItems extends LinkedMapAdapter<Long, FeedItem>
         Type type = Type.values()[getItemViewType(position)];
         FeedItem item = getItem(position);
         boolean recycled = null != convertView;
+        boolean hasImage = Type.IMAGE == type || Type.IMAGE_SANS_DESCRIPTION == type;
 
         ViewFeedItem view = recycled ? (ViewFeedItem) convertView : new ViewFeedItem(m_activity, type);
 
+        boolean isRead = m_activity.isItemRead(item.m_time);
+        boolean shouldInvalidate = view.m_isViewRead != isRead;
+
         // Apply the read effect.
-        if(Constants.s_fragmentFavourites.isHidden())
+        if(view.m_isViewRead != isRead || !recycled)
         {
-            boolean isRead = m_activity.isItemRead(item.m_time);
-            view.setRead(isRead);
-        }
-        else
-        {
-            view.setRead(false);
+            // If the favourites fragment is visible, set as false.
+            view.setRead(Constants.s_fragmentFavourites.isHidden() ? isRead : false);
         }
 
         // If the recycled view is the view we want, keep it.
         if(recycled && item.m_time.equals(view.m_item.m_time))
         {
+            if(shouldInvalidate)
+            {
+                view.invalidate();
+            }
             return view;
         }
 
@@ -70,7 +74,7 @@ class AdapterFeedItems extends LinkedMapAdapter<Long, FeedItem>
         view.m_item = item;
 
         // If the view was an image, load the image.
-        if(Type.IMAGE == type || Type.IMAGE_SANS_DESCRIPTION == type)
+        if(hasImage)
         {
             view.setBitmap(null);
             view.setTag(item.m_time);

@@ -135,8 +135,7 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
                 }
 
                 // Update the feedItems in the adapter.
-                adapterTag.clear();
-                adapterTag.putAll(result[i]);
+                adapterTag.replaceAll(result[i]);
 
                 // Now find the position of the item with the time timeBefore.
                 if(firstLoad)

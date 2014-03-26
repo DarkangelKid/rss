@@ -52,6 +52,7 @@ class ViewFeedItem extends View
     public FeedItem m_item;
     boolean m_hasImage;
     private Bitmap m_image;
+    public boolean m_isViewRead = false;
 
     public
     ViewFeedItem(Context context, Type type)
@@ -130,9 +131,9 @@ class ViewFeedItem extends View
     public
     void setRead(boolean read)
     {
+        m_isViewRead = read;
         setAlpha(read ? READ_OPACITY : 1.0F);
         setBackgroundResource(read ? R.drawable.selector_transparent : R.drawable.selector_white);
-        invalidate();
     }
 
     @Override

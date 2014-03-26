@@ -50,8 +50,9 @@ class LinkedMapAdapter<K, V> extends BaseAdapter
     }
 
     public
-    void putAll(Map<K, V> map)
+    void replaceAll(Map<K, V> map)
     {
+        m_map.clear();
         m_map.putAll(map);
         notifyDataSetChanged();
     }
@@ -66,13 +67,6 @@ class LinkedMapAdapter<K, V> extends BaseAdapter
     void remove(K key)
     {
         m_map.remove(key);
-        notifyDataSetChanged();
-    }
-
-    public
-    void clear()
-    {
-        m_map.clear();
         notifyDataSetChanged();
     }
 
