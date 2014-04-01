@@ -29,6 +29,7 @@ import android.preference.PreferenceManager;
 import android.text.format.Time;
 import android.util.DisplayMetrics;
 
+import org.apache.commons.collections.map.LinkedMap;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -44,6 +45,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -61,7 +63,6 @@ class ServiceUpdate extends IntentService
 {
     public static final String BROADCAST_ACTION = "com.poloure.serviceupdate.handle";
     public static final String ITEM_LIST = "-item_list.txt";
-    public static final String CONTENT_FILE = "-content.txt";
 
     private static
     class Tags
@@ -151,7 +152,19 @@ class ServiceUpdate extends IntentService
     private
     void parseFeed(CharSequence urlString, long uid) throws XmlPullParserException, IOException
     {
-        String contentFile = uid + CONTENT_FILE;
+        String contentFile = Long.toString(uid);
+
+        // If user is using old name for content file, convert it.
+        if(new File(getFilesDir(), contentFile + "-content.txt").exists())
+        {
+            ObjectIO reader = new ObjectIO(this, uid + "-content.txt");
+            Map<Long, FeedItem> tempMap = (Map<Long, FeedItem>) reader.read();
+            deleteFile(uid + "-content.txt");
+
+            ObjectIO writer = new ObjectIO(this, Long.toString(uid));
+            writer.write(tempMap);
+        }
+
         String longFile = uid + ITEM_LIST;
 
         // Load the previously saved items to a map.
@@ -236,12 +249,30 @@ class ServiceUpdate extends IntentService
             eventType = parser.getEventType();
         }
 
+        // Sort the Map by time.
+        List<Map.Entry<Long, FeedItem>> entries = new ArrayList<Map.Entry<Long, FeedItem>>(map.entrySet());
+
+        Collections.sort(entries, new Comparator<Map.Entry<Long, FeedItem>>()
+        {
+            @Override
+            public int compare(Map.Entry<Long, FeedItem> a, Map.Entry<Long, FeedItem> b)
+            {
+                return a.getKey().compareTo(b.getKey());
+            }
+        });
+        Map<Long, FeedItem> sortedMap = new LinkedMap();
+
+        for (Map.Entry<Long, FeedItem> entry : entries)
+        {
+            sortedMap.put(entry.getKey(), entry.getValue());
+        }
+
         // Write the map to file.
         ObjectIO out = new ObjectIO(this, contentFile);
-        out.write(map);
+        out.write(sortedMap);
 
         // Write the key set to file. Wrapped in a set because TreeMap#KeySet is not serializable.
-        Set<Long> set = new HashSet<Long>(map.keySet());
+        Set<Long> set = new HashSet<Long>(sortedMap.keySet());
         out.setNewFileName(longFile);
         out.write(set);
     }

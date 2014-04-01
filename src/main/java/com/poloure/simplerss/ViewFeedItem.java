@@ -40,7 +40,7 @@ class ViewFeedItem extends View
     private static final float READ_OPACITY = 0.5F;
     private static final Paint[] m_paints = new Paint[3];
     private static final int SCREEN = Resources.getSystem().getDisplayMetrics().widthPixels;
-    private static final NumberFormat TIME_FORMAT = NumberFormat.getNumberInstance(Locale.getDefault());
+    private static final NumberFormat LOCALE_FORMAT = NumberFormat.getNumberInstance(Locale.getDefault());
     private static final int[] FONT_COLORS = {
             R.color.item_title_color, R.color.item_link_color, R.color.item_description_color,
     };
@@ -53,6 +53,32 @@ class ViewFeedItem extends View
     boolean m_hasImage;
     private Bitmap m_image;
     public boolean m_isViewRead = false;
+
+    /**
+     * The number of units that will be shown for the time since published. '2d 3h 31m'
+     */
+    private static final int TIME_PRECISION = 2;
+
+    /**
+     * Divide a number in milliseconds by this to get your unit value.
+     */
+    private static final double[] DIVISION_IN_MS = {
+            31556952000.0,
+            86400000.0,
+            3600000.0,
+            60000.0,
+    };
+
+    /**
+     * The modulus to take of the unit divisions.
+     */
+    private static final int[] DIVISIONS_MODULUS = {
+            1,
+            365,
+            24,
+            60,
+    };
+
 
     public
     ViewFeedItem(Context context, Type type)
@@ -223,48 +249,42 @@ class ViewFeedItem extends View
         }
     }
 
+    /**
+     * Takes a millisecond epoch time and turns it into a readable string.
+     *
+     * @param time the epoch time in milliseconds that the item was published.
+     * @return a string of the format '1y 13d 3h 16m' with the number of units show dependant on
+     * ViewFeedItem.TIME_PRECISION.
+     */
     private
     String getTime(long time)
     {
         Long timeAgo = System.currentTimeMillis() - time;
 
-      /* Format the time. */
-        Long[] periods = {
-                timeAgo / 31556952000L,
-                timeAgo / 604800000 % 365,
-                timeAgo / 3600000 % 24,
-                timeAgo / 60000 % 60,
-        };
+        StringBuilder builder = new StringBuilder(32);
 
-        StringBuilder builder = new StringBuilder(48);
+        int i = 0;
+        int count = 0;
 
-      /* Display the two highest non zero values. */
-        int start = 0;
-        while(periods.length > start && 0L == periods[start])
+        while(i < DIVISION_IN_MS.length && TIME_PRECISION > count)
         {
-            start++;
-        }
-
-        int end = Math.min(start + 2, periods.length);
-
-        for(int i = start; end > i; i++)
-        {
-            if(0L != periods[i])
+            long period = Math.round(timeAgo / DIVISION_IN_MS[i] % DIVISIONS_MODULUS[i]);
+            if(0L != period)
             {
-                builder.append(TIME_FORMAT.format(periods[i]));
+                builder.append(LOCALE_FORMAT.format(period));
                 builder.append(m_timeInitials[i]);
                 builder.append(' ');
+                count++;
             }
+            i++;
         }
+
+        // If the length is nonzero, take the last ' ' off the end.
         if(0 < builder.length())
         {
             builder.deleteCharAt(builder.length() - 1);
-            return builder.toString();
         }
-        else
-        {
-            return "";
-        }
+        return builder.toString();
     }
 
     @Override

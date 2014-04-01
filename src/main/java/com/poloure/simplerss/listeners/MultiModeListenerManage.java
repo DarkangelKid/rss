@@ -76,7 +76,7 @@ class MultiModeListenerManage extends MultiModeListener
                     m_activity.m_index.remove(indexItem);
                 case R.id.delete_content:
                     m_activity.deleteFile(indexItem.m_uid + ServiceUpdate.ITEM_LIST);
-                    m_activity.deleteFile(indexItem.m_uid + ServiceUpdate.CONTENT_FILE);
+                    m_activity.deleteFile(Long.toString(indexItem.m_uid));
             }
         }
 

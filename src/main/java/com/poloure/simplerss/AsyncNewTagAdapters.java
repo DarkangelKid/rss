@@ -26,6 +26,7 @@ import com.poloure.simplerss.adapters.AdapterFeedItems;
 import com.poloure.simplerss.adapters.LinkedMapAdapter;
 import com.poloure.simplerss.ui.ListViewFeeds;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -63,34 +64,36 @@ class AsyncNewTagAdapters extends AsyncTask<Void, Void, TreeMap<Long, FeedItem>[
             maps[i] = new TreeMap<Long, FeedItem>(Collections.reverseOrder());
         }
 
-        Collection<Integer> indices = new ArrayList<Integer>(8);
-
         // For each feed.
         for(IndexItem indexItem : m_activity.m_index)
         {
             // Get a list of tags that this feed belongs to.
             List<String> feedsTags = Arrays.asList(indexItem.m_tags);
 
-            // Make an array of indices that these items will be added to in maps[index].
-            indices.clear();
-            for(int j = 0; tags.length > j; j++)
-            {
-                if(0 == j || feedsTags.contains(tags[j]))
-                {
-                    indices.add(j);
-                }
-            }
-
             // Load the data from file.
-            ObjectIO reader = new ObjectIO(m_activity, indexItem.m_uid + ServiceUpdate.CONTENT_FILE);
+            ObjectIO reader = new ObjectIO(m_activity, Long.toString(indexItem.m_uid));
             Map<Long, FeedItem> tempMap = (Map<Long, FeedItem>) reader.read();
+
+            // In case the user is still using the old -content.txt file name.
+            if(new File(m_activity.getFilesDir(), indexItem.m_uid + "-content.txt").exists())
+            {
+                reader = new ObjectIO(m_activity, indexItem.m_uid + "-content.txt");
+                tempMap = (Map<Long, FeedItem>) reader.read();
+                m_activity.deleteFile(indexItem.m_uid + "-content.txt");
+
+                ObjectIO writer = new ObjectIO(m_activity, Long.toString(indexItem.m_uid));
+                writer.write(tempMap);
+            }
 
             // Put the item in each map that the feed is tagged with.
             if(null != tempMap)
             {
-                for(int k : indices)
+                for(int j = 0; tags.length > j; j++)
                 {
-                    maps[k].putAll(tempMap);
+                    if(0 == j || feedsTags.contains(tags[j]))
+                    {
+                        maps[j].putAll(tempMap);
+                    }
                 }
             }
         }
