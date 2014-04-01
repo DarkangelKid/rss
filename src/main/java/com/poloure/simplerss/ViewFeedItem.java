@@ -63,22 +63,15 @@ class ViewFeedItem extends View
      * Divide a number in milliseconds by this to get your unit value.
      */
     private static final double[] DIVISION_IN_MS = {
-            31556952000.0,
-            86400000.0,
-            3600000.0,
-            60000.0,
+            31556952000.0, 86400000.0, 3600000.0, 60000.0,
     };
 
     /**
      * The modulus to take of the unit divisions.
      */
     private static final int[] DIVISIONS_MODULUS = {
-            1,
-            365,
-            24,
-            60,
+            1, 365, 24, 60,
     };
-
 
     public
     ViewFeedItem(Context context, Type type)
@@ -253,6 +246,7 @@ class ViewFeedItem extends View
      * Takes a millisecond epoch time and turns it into a readable string.
      *
      * @param time the epoch time in milliseconds that the item was published.
+     *
      * @return a string of the format '1y 13d 3h 16m' with the number of units show dependant on
      * ViewFeedItem.TIME_PRECISION.
      */

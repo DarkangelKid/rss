@@ -29,7 +29,6 @@ import android.preference.PreferenceManager;
 import android.text.format.Time;
 import android.util.DisplayMetrics;
 
-import org.apache.commons.collections.map.LinkedMap;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -43,9 +42,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -249,30 +246,12 @@ class ServiceUpdate extends IntentService
             eventType = parser.getEventType();
         }
 
-        // Sort the Map by time.
-        List<Map.Entry<Long, FeedItem>> entries = new ArrayList<Map.Entry<Long, FeedItem>>(map.entrySet());
-
-        Collections.sort(entries, new Comparator<Map.Entry<Long, FeedItem>>()
-        {
-            @Override
-            public int compare(Map.Entry<Long, FeedItem> a, Map.Entry<Long, FeedItem> b)
-            {
-                return a.getKey().compareTo(b.getKey());
-            }
-        });
-        Map<Long, FeedItem> sortedMap = new LinkedMap();
-
-        for (Map.Entry<Long, FeedItem> entry : entries)
-        {
-            sortedMap.put(entry.getKey(), entry.getValue());
-        }
-
         // Write the map to file.
         ObjectIO out = new ObjectIO(this, contentFile);
-        out.write(sortedMap);
+        out.write(map);
 
         // Write the key set to file. Wrapped in a set because TreeMap#KeySet is not serializable.
-        Set<Long> set = new HashSet<Long>(sortedMap.keySet());
+        Set<Long> set = new HashSet<Long>(map.keySet());
         out.setNewFileName(longFile);
         out.write(set);
     }
@@ -405,7 +384,7 @@ class ServiceUpdate extends IntentService
                 // Break at the closest ' ' - 1 (some padding).
                 int space = currentLine.lastIndexOf(' ', index - 1);
 
-            /* TODO if no space add a hyphen. */
+                // TODO if no space add a hyphen.
                 index = -1 == space ? index : space;
 
                 feedItem.m_desLines[x] = currentLine.substring(0, index);

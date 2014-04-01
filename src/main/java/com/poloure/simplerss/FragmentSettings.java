@@ -22,8 +22,6 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.Window;
 

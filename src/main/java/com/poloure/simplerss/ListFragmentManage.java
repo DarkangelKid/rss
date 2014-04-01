@@ -32,7 +32,6 @@ import android.widget.TextView;
 
 import com.poloure.simplerss.adapters.AdapterManageItems;
 import com.poloure.simplerss.listeners.MultiModeListenerManage;
-import com.poloure.simplerss.ui.ListViewFeeds;
 
 public
 class ListFragmentManage extends ListFragment
