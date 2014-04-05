@@ -175,10 +175,8 @@ class FeedsActivity extends Activity
             AsyncNavigationAdapter.run(this);
         }
 
-        if(!s_pullToRefreshLayout.isRefreshing() && isServiceRunning())
-        {
-            s_pullToRefreshLayout.setRefreshing(true);
-        }
+        // Update the state of the pullToRefresh progress bar.
+        s_pullToRefreshLayout.setRefreshing(isServiceRunning());
     }
 
     @Override
